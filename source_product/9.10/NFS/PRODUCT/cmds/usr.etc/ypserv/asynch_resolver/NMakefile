@@ -1,0 +1,105 @@
+/*
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/cmds/usr.etc/ypserv/asynch_resolver/RCS/NMakefile,v $
+# $Revision: 1.2.109.2 $	$Author: craig $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/05/25 11:46:03 $
+*/
+
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.lib/libmp sources.
+#
+#	Created By:	Mark Mackey
+#	Date:		7/22/93
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+OCFLAGS	= -O $(NMCFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS	= -g -DDEBUG 
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+CSOURCE	= herror.c nget_answer.c ngethostbyname.c nres_rcv.c nres_search.c \
+	nres_send.c rpc_as.c svc_run_as.c svc_run_named.c svc_udp.c
+
+OBJECTS = herror.o nget_answer.o ngethostbyname.o nres_rcv.o nres_search.o \
+	nres_send.o rpc_as.o svc_run_as.o svc_run_named.o svc_udp.o
+
+SDIR = $(SRCDIR:/^$/./)
+
+all:		build
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) libnres.a \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/libnres.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+build:		$(TARGET)
+
+install:;	$(INSTALL) $(TARGET)
+
+rinstall:	install ; $(RINSTALL) $(TARGET)
+
+libnres.a:	$(OBJECTS)
+	ar r $(TARGET) $(OBJECTS)
+	$(CHMOD) 664 $(TARGET)
+
+herror.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/herror.c 
+
+nget_answer.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nget_answer.c
+
+ngethostbyname.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/ngethostbyname.c 
+
+nres_rcv.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nres_rcv.c 
+
+nres_search.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nres_search.c 
+
+nres_send.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nres_send.c 
+
+rpc_as.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_as.c 
+
+svc_run_as.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_run_as.c
+
+svc_run_named.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_run_named.c
+
+svc_udp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_udp.c
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $(OBJECTS)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(TARGET) make?a*
+
+debug:		build
+
+

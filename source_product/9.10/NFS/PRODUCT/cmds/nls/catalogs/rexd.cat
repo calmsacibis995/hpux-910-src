@@ -1,0 +1,77 @@
+$ ==============
+$ rexd.c
+$ ==============
+$set 1
+1 rexd: svctcp_create: error\n
+2 rexd: service rpc register: error\n
+3 rexd: svctcp_create: error\n
+4 rexd: service rpc register: error\n
+5 rexd: select failed
+6 rexd: Select returned zero\n
+7 rexd: nullproc err
+8 rexd: reply failed\n
+9 rexd: mode reply failed
+10 rexd: window change reply failed
+11 rexd: signal reply failed
+12 rexd: reply failed\n
+13 No process to wait for!\n
+14 rexd: couldn't umount %s\n
+15 rexd: can't chdir to %s\n
+16 rexd: can't chdir to %s\n
+17 rexd: can't chdir to %s\n
+19 rexd: cannot allocate a pty\n
+20 rexd: can't fork\n
+24 rexd: connect
+25 %1$s@%2$s
+201 rexd: getpeername failed with errno = %d\n
+202 rmdir
+203 rexd: mountdir (%s) is not a directory\n
+204 rexd: mountdir (%s) is not a directory\n
+205 rexd: can't mount file system %1$s from host %2$s\n
+206 rexd: can't create pipe\n
+207 rexd: could not read from pipe
+208 rexd: could not read from pipe\n
+209 rexd: could not read from pipe
+210 rexd: could not read from pipe\n
+211 rexd: %s: Command not found\n
+212 rexd: %s: Command not found
+213 rexd: %s: Permission denied\n
+214 rexd: %s: Permission denied
+215 rexd: %s: Text file busy\n
+216 rexd: %s: Text file busy
+217 rexd: %s: Can't execute\n
+218 rexd: %s: Can't execute
+219 Initial directory is %s:%s%s
+220 rexd: attempt to  make temporary dir %s for mounting failed\n
+$ ==============
+$ unix_login.c
+$ ==============
+81 rexd: root execution not allowed\n
+82 rexd: User id %d not valid\n
+83 rexd: User id %d, denied access\n
+84 pty read
+85 socket read
+$ ==============
+$ mount_nfs.c
+$ ==============
+41 rexd: no host name in %s\n
+42 rexd: %s not in hosts database\n
+43 rexd: can not map port for %s\n
+44 rexd: %s not responding to port map request\n
+45 rexd: %s not responding to portmap request
+47 rexd: %s is not running a mount daemon\n
+48 rexd: %s not responding to mount request\n
+49 rexd: %s not responding to mount request
+51 rexd: %s not responding to mount request
+53 rexd: not in export list for %s\n
+54 rexd: %s OK\n
+57 rexd: %s not in hosts database\n
+58 rexd: warning on umount create (did not umount):
+60 rexd: warning umount (did not umount):
+62 rexd: can't get %s lock\r\n
+63 rexd: can't open %1$s or %2$s\r\n
+64 rexd: can not rename %1$s to %2$s\r\n
+69 %s
+70 rexd: unable to mount %1$s: %2$s\n
+71 rexd: failed to reach server at the address %s\n
+72 rexd: now trying %s\n

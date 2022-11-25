@@ -1,0 +1,43 @@
+
+        Command                         Action
+
+           |            Pipe current message to ...
+	   $		Force a resync of the current mailbox.
+           !            Shell escape
+           ?            This screen of information
+           +            Next page of headers
+           -            Previous page of headers
+           =            Set current message to 1
+           *            Set current message to last message
+           <n>          Set current message to n
+           /            Search from/subjects for pattern
+           //           Search entire message bodies for pattern
+           <            Scan current message for calendar entries
+
+           a            Alias, change to 'alias' mode 
+           b            Bounce (remail) current message
+           c            Change current mail file
+           d            Delete current message
+          ^D            Delete messages with specified pattern
+           f            Forward message to specified user
+           g            Group (all recipients) reply to message
+           h            Headers displayed with message
+           j            Move to next message
+           k            Move to previous message
+           l            Limit messages by specified criteria
+           m            Mail to arbitrary user(s)
+           n            Read next message
+           o            Change Elm options
+           p            print message
+           q            Quit - mail deleted, saved in mbox or left
+           r            Reply to current message
+           s            Save message to specified file
+           t            Tag/untag a message for further operations
+          ^T            Tag messages with specified pattern
+           u            Undelete current message
+          ^U            Undelete messages with specified pattern
+           x            Exit - don't record as read, don't save...
+
+          ^L            Rewrite screen.
+          <RETURN>      Read current message
+          ^Q, DEL       Exit - don't record as read, don't save...

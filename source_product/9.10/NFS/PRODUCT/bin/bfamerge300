@@ -1,0 +1,144 @@
+#! /bin/sh
+#	@(#)$Revision: 1.4.109.1 $	$Date: 91/11/19 13:53:15 $
+## name: mergeBFA
+## usage:
+##	mergeBFA [-d dir ] [-v] machine1 machine2 [machine3 ...]
+##
+## description:  mergeBFA uses bfamerge to merge all BFA databases on the
+##	machines specified into one set of databases.  
+##
+## options :
+##	-d : specifies target directory to place all databases.  
+##	The default is ./BFA.   The output directory should not exist.
+##	-v : verbose	
+##
+## assumptions: The BFA databases on all the machines must be in /BFA and 
+##	must be the same format.  
+##
+## example: 
+##	mergeBFA hpcnor hpcndv 
+##	will merge all databases in hpcnor:/BFA with all the databases in 
+##	hpcndv:/BFA into a directory BFA located in the current directory
+##
+OUTDIR=`pwd`/BFA
+BFAMERGE="$Nfs/bin/bfamerge"
+MACHINES=
+ARGS=0
+VERBOSE=0
+DATABASES=
+
+# routine to unmount and delete directories
+
+clean_up() {
+	for dir in $MACHINES
+	do	
+		if [ -d `pwd`/$dir ]; then
+			! umount `pwd`/$dir 2>/dev/null
+			rmdir $dir
+		fi
+	done
+	rmdir $OUTDIR 2>/dev/null
+}
+
+# process options
+	
+while [ $# -gt 0 ] ; do
+	case $1 in
+	-d) 	OUTDIR=$2
+		shift
+		;;
+	-v)	VERBOSE=1
+		;;
+         *) 	MACHINES="$MACHINES $1"
+		ARGS=`expr $ARGS + 1`
+		;;
+	esac
+	shift
+done
+
+if [ ! "$OUTDIR" -o $ARGS -lt 2 ]; then
+	echo usage: `basename $0` [-d dir] [-v] machine1 machine2 [machine3 ...]
+	exit 1
+fi
+
+if [ -d $OUTDIR -o -r $OUTDIR ]; then
+	echo error: output directory $OUTDIR already exists
+	echo delete $OUTDIR and try again
+	exit 1
+fi
+
+if [ $VERBOSE -eq 1 ]; then
+	BFAMERGE="$BFAMERGE -v "
+fi
+
+echo starting `basename $0` `date`
+
+mkdir $OUTDIR
+
+if [ $? -ne 0 ]; then
+	echo error: can not make directory $OUTDIR
+	exit 1
+fi
+
+# mount all machines:/BFA
+
+for dir in $MACHINES
+do
+	if [ -d $dir -o -r $dir ]; then
+		echo error: $dir already exists, umount $dir, them rm $dir
+                echo        and try again
+		exit 1
+	fi
+	mkdir $dir
+	if [ $? -ne 0 ]; then
+		echo error: could not create temporary directory - $dir
+		clean_up
+		exit 1
+	fi
+	! mount $dir:/BFA `pwd`/$dir
+	if [ $? -ne 0 ]; then
+		echo error: could not mount $dir:/BFA
+		echo can not complete `basename $0`
+		clean_up
+		exit 1
+	fi
+	if [ ! "$DATABASES" ]; then
+		DATABASES=`ls $dir`
+	fi
+done
+
+echo merging databases
+
+# merge databases
+
+for file in $DATABASES
+do
+	ARGS=
+	for dir in $MACHINES
+	do
+		if [ ! -r $dir/$file ]; then
+			echo error: /BFA/$file does not exist on $dir
+			echo /BFA databases are inconsistent
+			echo can not complete `basename $0`
+			clean_up
+			exit 1
+		fi
+		ARGS="$ARGS $dir/$file "
+	done
+
+	$BFAMERGE $ARGS -f $OUTDIR/$file
+
+	if [ $? -ne 0 ] ; then
+		echo error: bfamerge failed
+		clean_up
+		exit 1
+	fi
+done
+
+# clean up
+
+clean_up
+
+echo finished `basename $0` `date` - databases are in $OUTDIR
+exit 0
+

@@ -1,0 +1,19 @@
+#
+# Gated conf for exchanging routing information with NSFnet backbone
+#
+
+traceoptions internal external route snmp update ;
+
+autonomoussystem 283 ;
+
+rip quiet ;
+egp yes {
+	defaultmetric 64 ;
+	group asin 145 nogendefault {
+		neighbor 192.35.82.100 ;
+	} ;
+} ;
+
+static {
+	default gateway 192.35.82.100 pref 100;
+} ;

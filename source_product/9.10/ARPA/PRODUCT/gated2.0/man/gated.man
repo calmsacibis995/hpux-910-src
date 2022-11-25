@@ -1,0 +1,188 @@
+.\"
+.\" $Header: gated.man,v 1.1.109.8 92/03/25 16:02:34 ash Exp $
+.\"
+.TH gated 1M "Requires Optional \s-1ARPA\s0 Services Software"
+.SH NAME
+gated \- gateway routing daemon
+.SH SYNOPSIS
+.CI gated
+[
+.C \-c
+] [
+.C \-n
+] [
+.CR \-t\fR<trace_options>
+] [
+.CR \-f <config_file>
+] [trace_file]
+.SH DESCRIPTION
+.CI Gated
+is a routing daemon that handles
+the RIP, BGP, EGP, and HELLO routing protocols.  The
+.CI gated
+process can be configured to perform all routing protocols or any
+combination of the four.
+.ul 2
+Currently, the BGP protocol is available, but is not supported by
+Hewlett-Packard.
+.PP
+The command-line options are:
+.IP -c
+Specifies that the configuration file will be parsed for syntax errors
+and then gated will exit, if there were no errors, gated will leave a
+dump file in /usr/tmp/gated_dump.  Gated does not need to be run as
+the super user to use the -c option, but may not be able to read the
+kernel's routing table unless it is run as super user.  The -c option
+implies -tierk.
+.IP -n
+Specifies that gated will not modify the kernel's
+routing table.  This is used for testing gated
+configurations with actual routing data.
+.IP -t
+Specifies trace flags to be enabled on startup.
+If no flags are specified, "ier" is assumed.  No
+spaces are allowed between this option and it's
+arguments.
+.sp
+This option must be used to trace events that
+take place before the config file is parsed,
+such as determining the interface
+configuration and reading routes from the
+kernel.
+.sp
+The trace flags are:
+.RS
+.IP A
+all
+.PD 0
+.IP i
+internal
+.IP e
+external
+.IP k
+kernel
+.IP r
+route
+.IP m
+mark
+.IP t
+nostamp
+.IP P
+protocol
+.IP u
+update
+.IP R
+RIP
+.IP H
+hello
+.IP C
+icmp
+.IP p
+EGP
+.IP B
+BGP
+.PD
+.PP
+The trace options are explained in greater detail in
+.CR gated-config (4).
+.RE
+.IP -f
+Use an alternate config file.
+By default,
+.CI gated
+uses
+.IC /etc/gated.conf .
+.PP
+If on the command line a trace file is specified, or no trace
+flags are specified, gated detaches from the terminal
+and runs in the background.  If trace flags are
+specified without specifying a trace file, gated
+assumes that tracing is desired to the console and
+remains in the foreground.
+.SH "SIGNAL PROCESSING"
+.PP
+.CI Gated
+catches a the following signals and does special processing.
+.PD 1.5v
+.IP SIGHUP: 16
+Re-read configuration.
+.sp
+A SIGHUP causes gated to reread the configuration
+file.  Gated first performs a clean-up of all
+allocated policy structures.  All BGP and EGP peers
+are flagged for deletion and the configuration file is
+re-parsed. 
+.sp
+If the re-parse is successful, any BGP and EGP peers
+that are no longer in the configuration are shut down,
+and new peers are started.  Gated attempts to
+determine if changes to existing peers require a
+shutdown and restart.
+.sp
+It should also be possible to enable/disable any
+protocol without restarting gated.
+.IP SIGINT:
+Snap-shot of current state.
+.sp
+The current state of all gated tasks, timers,
+protocols and tables are written to
+/usr/tmp/gated_dump.
+.sp
+On systems supporting fork(), this is done by
+forking a subprocess to dump the table information so
+as not to impact gated's routing functions.  On
+systems where memory management does not support
+copy-on-write, this will cause the gated address space
+to be duplicated; this may be cause a noticeable impact
+on the system.  On system not supporting fork(), the
+main process immediately processes the dump, which may
+impact gated's routing functions.
+.IP SIGTERM:
+Graceful shutdown.
+.sp
+On receipt of a SIGTERM, gated attempts a graceful
+shutdown.  All tasks and protocols are asked to
+shutdown.  Most will terminate immediately, the
+exception being EGP peers which wait for confirmation.
+It may be necessary to repeat the SIGTERM once or
+twice if it this process takes too long.
+.sp
+All exterior routes (BGP and EGP) are removed from the
+kernel's routing table on receipt of a SIGTERM.
+Interior routes (all others) remain.  To terminate
+gated with the exterior routes intact, use SIGKILL or
+SIGQUIT (which causes a core dump).
+.IP SIGUSR1:
+Toggle tracing.
+.sp
+On receipt of a SIGUSR1, gated will close the trace
+file.  A subsequent SIGUSR1 will cause it to be
+reopened.  This will allow the file to be moved
+regularly.
+.sp
+It is not possible to use SIGUSR1 if a trace file has
+not been specified, or tracing is being performed to
+the console.
+.PD
+.SH AUTHORS
+Mark Fedor, PSI
+.br
+Jeffrey C Honig, Cornell University
+.SH SEE ALSO
+gated-config(4),
+arp(1m),
+ifconfig(1m),
+netstat(1m)
+.PP
+.PD 0
+.IP RFC\ 891 16
+DCN Local-Network Protocols (HELLO)
+.IP RFC\ 904
+Exterior Gateway Protocol Formal Specification
+.IP RFC\ 1058
+Routing Information Protocol
+.IP RFC\ 1163
+A Border Gateway Protocol (BGP)
+.IP RFC\ 1164
+Application of the Border Gateway Protocol in the Internet
+

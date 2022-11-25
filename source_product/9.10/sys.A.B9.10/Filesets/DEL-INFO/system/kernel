@@ -1,0 +1,203 @@
+-------------
+INTRODUCTION:
+-------------
+    This file contains up-to-date information on the status of the kernel
+    project.  It contains:
+	- regression test results
+	- stress test results
+	- announcements of new kernel functionality for the cycle
+	- kernel issues for the current release
+	- defect fixes
+	- miscellaneous
+
+    For each new integration cycle, this file will have a new section added
+    to the top of the file specifically for the cycle.  This will allow
+    partners to examine the kernel-specific information for all cycles.
+
+    If you have any questions about the kernel for 8.3, the primary contact
+    is Steve Platt, smp@fc.hp.com, 1-229-6244.
+
+================================================================================
+
+    FILE:       /system/kernel			RELEASE:	HP-UX 8.3
+    FILESET:	DEL-INFO			CYCLE:		E
+    PARTNER:	kernel				SYSTEMS:	300 and 700
+    DATE:	February 10th, 1992
+
+
+1.  Regression Test Results:
+----------------------------
+    Regression tests results for the four kernel test systems are:
+
+    a.  standalone 700 system         b. standalone 300 system     
+    -------------------------         ------------------------
+    cdrom:  42/0   dbsend:    7/0     cdrom:  36/6        dfs:    32/0
+    dfs:    32/0   dqt:       40/0    dqt:    40/0        fst:    101/1
+    fst:    102/0  func:      94/4    func:   53/4        hp-ux:  71/3
+    hp-ux:  62/2   scsi_new:  5/1
+
+    c.  heterogeneous 700 cluster     d.  homogeneous 300 cluster
+    -----------------------------     ---------------------------
+    dist:   48/5                      dist:   52/3
+
+2.  Stress test Results
+-----------------------
+    We are just starting up the stress tests for 8.3.  No results yet.
+
+3.  Current Problems
+--------------------
+    We are having some problems with certain 300 dfiles in 8.3.  Unless you
+    include all networking drivers (uipc, lan01, inet), the kernel link
+    will fail.  We are trying to get this defect resolved, but for the time
+    being, please include networking in your 300 dfile.
+
+4.  New functionality
+---------------------
+    No new functionality this cycle.
+
+5.  Defect Fixes
+----------------
+    The "failed kernel selftest" hang has been fixed.  It is in cycle E.
+    The problem with having to define dskless in your dfile is also fixed
+    in cycle E.
+
+6.  Kernel Build time
+---------------------
+    The kernel snapshot was taken at 8:00pm Wednesday, February 5th, 1992,
+    and the kernel KCS files were labeled with the symbolic tag "if3_gsE".  
+    The what string for the delivered kernel is:
+	B2352A HP-UX (A.08.30E) #1: Sun Feb 09 20:54:55 MST 1992
+    The uname command will return the following release field:
+	A.08.30E
+	
+
+================================================================================
+
+    FILE:       /system/kernel			RELEASE:	HP-UX 8.3
+    FILESET:	DEL-INFO			CYCLE:		C
+    PARTNER:	kernel				SYSTEMS:	300 and 700
+    DATE:	January 27th, 1991
+
+
+1.  Regression Test Results:
+----------------------------
+    Regression tests results for the four kernel test systems are:
+
+    a.  standalone 700 system         b. standalone 300 system     
+    -------------------------         ------------------------
+    cdrom:  42/0   dbsend:    7/0     cdrom:  36/6        dfs:    32/0
+    dfs:    32/0   dqt:       40/0    dqt:    40/0        fst:    101/1
+    fst:    102/0  func:      94/4    func:   54/3        hp-ux:  71/3
+    hp-ux:  64/0   scsi_new:  6/0
+
+    c.  heterogeneous 300 cluster     d.  homogeneous 300 cluster
+    -----------------------------     ---------------------------
+    dist:   44/9                      dist:   51/4
+
+2.  Stress test Results
+-----------------------
+    No official stress tests have been run at this time.
+
+3.  Current Problems
+--------------------
+    Our 300 regression test systems are experiencing intermittent hangs,
+    sometimes with the message "kernel failed self-test" printed to the
+    console.  We are looking into this problem.  No fix is anticipated for
+    at least a week.
+
+4.  New functionality
+---------------------
+    The 8.3 700 kernel supports the following ROM firmware revisions.
+
+      IODC:     2.1
+      PDC:      2.1 for 720/730, 1.0 for 750
+      STI:      8.02
+      Schite/Coyote 2/C2213A external disks:   C938 or C023 
+                                               (see note below for limitations)
+      Quantum 200:  508D, 526E, 528
+      Quantum 400:  526E, 528
+      Teac Floppy:  product id: "FC-1     HF   07"; rev level: "RV A"
+      CD-ROM:   333201 or 333301
+      Shark MO: CCP ROM 3.02 & DCP ROM 85
+      Jaws Autochanger: 4.76
+      Mongoose EISA adapter:    A3 or newer (For use with HPIB, A4 modified
+                                             or newer)
+      Python EISA HPIB card:    PP or newer
+      Wolverine:  B0209 or BW209
+      Coyote III:  B0209 or BW209
+      Micropolis:  HP26 or HP28 or greater
+
+     Schite ROM note (this is an old note): C938 does not support > 64k
+     block transfers thru raw device, but otherwise works fine. Symptom
+     if one tries 256k block size is a system hang.
+
+5.  Defect Fixes
+----------------
+    No new defect fixes have been made in this cycle.
+
+6.  Kernel Build time
+---------------------
+    The kernel snapshot was taken at 6:00pm Tuesday, January 21st, 1992,
+    and the kernel KCS files were labeled with the symbolic tag "if3_gsC".  
+    The what string for the delivered kernel is:
+        B2352A HP-UX (A.08.30C) #1: Tue Jan 21 18:52:29 MST 1992
+    The uname command will return the following release field:
+	A.08.30C
+	
+
+================================================================================
+
+    FILE:       /system/kernel			RELEASE:	HP-UX 8.3
+    FILESET:	DEL-INFO			CYCLE:		A
+    PARTNER:	kernel				SYSTEMS:	300 and 700
+    DATE:	January 9th, 1991
+
+
+1.  Regression Test Results:
+----------------------------
+    Regression tests were run for cycle A on the following four test
+    clusters, with the following results:
+
+    a.  standalone 700 system
+    -------------------------
+    cdrom:  42/0 	dbsend: 7/0
+    dfs:    32/0 	dqt:    40/0
+    fst:    102/0 	func:   93/5
+    hp-ux:  62/2 	scsi_new:       1/5
+
+    b.  heterogeneous 300 cluster
+    -----------------------------
+    dist:   35/18
+
+    c.  standalone 300 system
+    -------------------------
+    < no test results >
+
+    d.  homogeneous 300 cluster
+    ---------------------------
+    dist:   48/7
+
+2.  Stress test Results
+-----------------------
+    No official stress tests have been run at this time.
+
+3.  New functionality
+---------------------
+    In cycle A, we are shipping the fast symlink functionality.  This
+    change greatly reduces the amount of time required to create symbolic
+    links.  This technology was borrowed from OSF/1.
+
+4.  Defect Fixes
+----------------
+    There are a number of defect fixes that have been made since 8.07
+    MR'd.
+
+5.  Kernel Build time
+---------------------
+    The kernel snapshot was taken at 4:00pm Wednesday, January 8th, 1992,
+    and the kernel KCS files were labeled with the symbolic tag "if3_gsY".  
+    The what string for the delivered kernel is:
+	B2352A HP-UX (A.08.30Y) #1: Wed Jan 08 17:33:19 MST 1992
+    The uname command will return the following release field:
+	A.08.30Y
+	

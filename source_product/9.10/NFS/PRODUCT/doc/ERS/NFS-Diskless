@@ -1,0 +1,393 @@
+
+.\" #	   @(#)$Revision: 1.12.109.1 $	$Date: 91/11/19 14:26:04 $
+
+.\ Leave the first line of the file blank as the .TL and .AS
+.\ macros do not work otherwise.  Don't ask me why.
+.sp 7
+
+.ce 2
+.TL
+NFS / HP-UX Diskless
+Interactions and Test Scenarios
+
+
+
+
+
+
+
+
+.ce 7
+Dan Simula
+COLORADO NETWORKS DIVISION
+1-229-2223 
+hpfcla!d_simula
+
+Date: 02/03/87
+Version: 9.1
+
+
+.nr P 1
+.PH " 'NFS / HP-UX Diskless' "
+.PF " 'HP Internal Use Only' ' \\\\n(H1-\\\\nP'  "
+.SA 1
+.H 1 "Introduction"
+
+This paper examines the interdependencies of file and file system
+operations between NFS server/client nodes and diskless clusters.  
+Primarily, it focuses on four areas which have been identified 
+as representing the greatest potential for exhibiting anomalies.  
+The intent of this paper is not to define specific test cases, but 
+to simply supply a level of technical understanding sufficient to 
+formulate the test cases.
+
+
+.H 2 "Potential Testing Areas"
+.sp 1
+.nf
+    1) File system mounts (NFS vs diskless)
+
+    2) Single system view within a diskless cluster
+
+    3) Synchronization of cacheing
+
+    4) Guaranteed file consistency
+.fi
+
+
+
+.H 2 "Assumptions"
+.sp 1
+The following system capabilities and/or restrictions are assumed to 
+be valid (see also, appendix 1).
+
+    
+.nf
+    HP-UX Diskless Systems
+
+	o a diskless server can act as an NFS server or client.
+
+	o a diskless node can act as an NFS client.
+
+	o a diskless node cannot act as a diskless server.
+
+	o a diskless node cannot act as an NFS server.
+
+    NFS Systems
+
+	o any NFS server can be a client of itself (one level only).
+
+.fi
+.sp 2
+.H 2 "Key"
+.sp 1
+Throughout this paper, items preceded by a '+' are assumed to be 
+well understood and should function with little difficulty.  
+For the most part, '+' items relate to main-line functionality.
+Items preceded by a '-' are items that rely on functionality that 
+may not be well-defined or that are highly suspect in respect to 
+exhibiting problems.
+.bp
+.H 1 "File system mounts"
+
+This section addresses the various scenarios of mounting local and 
+remote file systems and propagating the mount information to the 
+appropriate nodes.
+
+When mounting a remote NFS file system, no state information is held
+on the server system.  The server does maintain a mount table of all
+presumed client systems that are accessing the server.  Since the mount
+table information may be invalid, the information is not used as
+state information.  The contents of the mount table that refer to
+NFS mounts are used for informational purposes only (see showmount(1)).
+
+In a diskless cluster, an attempt is made to maintain a single system 
+view of the file system.  When the diskless server or a diskless node
+does an NFS mount of a remote file system, the mount information and
+the file handle must be propagated to all nodes in the cluster.  This 
+action helps to ensure that the single system view of the file system 
+is maintained.
+
+The following areas and file system operations should be examined 
+closely when formulating test cases.
+
+
+.H 2 "Diskless node mounts a remote NFS file system"
+.sp 2
+.nf
+
+	+ Is mount operation successful?
+
+	+ Can diskless node perform remote file operations?
+
+	- Is mount information propagated throughout the cluster?
+
+	- When the remote file system is unmounted, is unmount 
+	  information propagated throughout the cluster?
+
+	- What happens if one diskless node attempts to unmount 
+	  the remote NFS file system while another node in the 
+	  cluster is accessing a file that resides in the remote 
+	  file system?
+
+	- What happens if one of the diskless nodes goes down or 
+	  is rebooted?  Is the diskless/NFS single-system state 
+	  restored?
+
+	- Does the information in the server's mount table 
+	  remain valid?
+.fi
+.sp 2
+.H 2 "Diskless node mounts an NFS file system served by the diskless server"
+.sp 2
+.nf
+	+ Can diskless node perform operations on NFS files?
+
+	- Can multiple nodes in the cluster mount the server's 
+	  file system on different mount points simultaneously?
+
+	- Can multiple diskless nodes simultaneously mount a 
+	  single remote file system on the diskless/NFS server?
+
+	- When the remote file system is unmounted, is unmount 
+	  information propagated throughout the cluster?
+
+	- What happens if one diskless node attempts to unmount 
+	  the remote NFS file system while another node in the 
+	  cluster is accessing a file that resides in the remote 
+	  file system?
+
+	- Do any of the diskless nodes "see" a circular file system?
+.fi
+.sp 2
+.H 2 "Generic system mounts a remote file system served by a diskless server"
+.sp 2
+.nf
+	+ Are NFS requests handled correctly by the diskless/NFS 
+	  server?
+
+	+ Each node in the cluster may not have a consistent view 
+	  of the remote files (behavior inherent to NFS).
+
+	- Are NFS reads/writes affected by the diskless synchronous 
+	  file access mode?
+.fi 
+.sp 2
+.H 1 "Single system view"
+.sp 2
+HP-UX diskless proposes a single system view of the file system, whether
+operating from the server system or from a diskless node.  This single
+system view should be maintained even during interactions with NFS.  
+These interactions may include NFS activities with a remote NFS system 
+(server/client) or with an NFS system (remote/client) that exists within 
+the cluster.
+
+The single system view is essentially guaranteed by assuring that the 
+other three areas addressed in this paper function as specified.   
+If issues arise that are not addressed by the other areas of this 
+paper, this section will be expanded to include those issues.
+
+.bp
+.H 1 "Synchronization of cacheing"
+
+File system cacheing introduces a number of problems that will need to
+be addressed.  The following points summarize the primary cacheing 
+activities that occur in a diskless-NFS environment.  For a detailed
+summary of NFS/diskless file cacheing refer to (Cacheing white-paper,
+dated 2/1x).
+
+.H 2 "NFS cacheing"
+.sp 1
+.H 3 "NFS server cacheing"
+.sp 2
+.nf
+	o The NFS server does NOT provide file cacheing.
+
+	o Since the file blocks associated with client write 
+	  requests constitute client state information, NFS 
+	  writes on the server are done synchronously.
+
+	o All cacheing on the NFS server-side is accomplished 
+	  by the local VFS (i.e., the UFS).  This cacheing 
+	  includes the normal read-ahead and write-behind 
+	  activities.
+
+	o Dirty cache blocks written to disk, as the result 
+	  of NFS writes, remain active in the cache and are 
+	  freed only if free cache blocks are requested.
+.sp 1
+.fi
+.H 3 "NFS client cacheing"
+.sp 2
+.nf
+	o The NFS client provides read-ahead and write-behind 
+	  cacheing.
+
+	o A kernel-level write on the client causes a synchronous 
+	  write of the NFS data on the server (whether the write 
+	  is synchronous or not - see async_daemon() and biod(1m)).
+
+	o A user-level write to an NFS file on the client may be 
+	  accomplished asynchronously by using the biod() daemon.
+	  The biod() simply queues up NFS requests to allow 
+	  asynchronous completion of I/O.
+.fi
+.sp 2
+.H 3 "HP-UX diskless cacheing"
+.sp 2
+.nf
+	o File cacheing in a diskless cluster is done by both 
+	  the diskless nodes and by the UFS on the diskless 
+	  server (i.e., normal file system cacheing).  
+
+	o If a node opens a file for writing and if another site 
+	  has the same file opened, then all nodes in the diskless 
+	  cluster must revert to a synchronous file access mode for 
+	  that specific file.
+
+	o When a file is closed and is no longer opened for writing 
+	  by any other node in the cluster, all nodes in the cluster 
+	  return to an asynchronous file access mode for that specific 
+	  file.
+
+	o Determining whether or not to be in synchronous or 
+	  asynchronous mode is done at file open/close time.  For 
+	  this reason, problems associated with NFS writes from a 
+	  remote system are introduced.  Specifically, since NFS writes 
+	  (or reads) do not require an open() to be performed on the 
+	  server side, the file contents may be inconsistent with a 
+	  diskless node's view of the file.  To solve this problem, 
+	  HP-UX diskless and HP-DUX systems will consider an NFS read 
+	  or write to involve an implicit open and close of the file.
+.sp 2
+.fi
+.H 2 "Testing Areas"
+
+Since NFS does not guarantee any consistency between distinct NFS
+clients, the typical configuration of one NFS server and multiple 
+NFS clients becomes a trivial test case.  However, when the distinct 
+NFS clients are members of a common diskless cluster,  the single
+system semantics of the diskless cluster require that file consistency
+be guaranteed.   In order to guarantee file consistency, an internal
+mechanism must inform all nodes within the cluster that file activity
+has taken place.
+
+The test case of an NFS server with multiple, distinct, NFS clients 
+is fully addressed by the connectivity section of the NFS system test 
+plan.
+
+
+.H 3 "Diskless cluster acting as an NFS client (scenarios #2 and #4)"
+.sp 2
+.nf
+
+	+ File consistency is not guaranteed since the NFS server 
+	  is stateless and has no way of communicating write 
+	  information to the appropriate clients.
+.fi
+.sp 2
+.H 3 "Diskless server acting as an NFS server to remote NFS client (scenario #1)"
+.sp 2
+.nf
+	+ Do writes from a diskless node become immediately visible 
+	  to a remote NFS client?
+
+	- Do NFS_writes from the remote NFS client become immediately 
+	  visible to the cluster's view of the file system. 
+
+	- Do cache blocks on the diskless nodes become invalidated 
+	  prior to the completion of an NFS_writes from the remote 
+	  NFS client?
+.fi
+.sp 2
+.H 3 "Diskless server acting as an NFS server to local NFS client (scenario #6)"
+.sp 2
+.nf
+	+ Do writes from a diskless node become immediately visible 
+	  to a cluster-local NFS client?
+
+	- Do NFS_writes from the cluster-local NFS client become 
+	  immediately visible to the cluster's view of the file system. 
+
+	- Do cache blocks on the diskless nodes become invalidated 
+	  prior to the completion of an NFS_writes from the cluster-
+	  local NFS client?
+.fi 
+.sp 2
+.bp
+.H 1 "Guaranteed file consistency"
+.sp 2
+In the context of NFS/HP-UX diskless interactions, file consistency is
+largely a function of file cacheing.  Currently no areas relating to
+file consistency have been identified that are not addressed by the
+cacheing section of this paper.
+.sp 1
+If areas are identified that are not addressed by the cacheing section,
+this section will be updated to include those areas.
+.sp 3
+.bp
+.nf
+Appendix: NFS - HP-UX Diskless Testing
+
+System configurations:
+
+
+Diskless Cluster A
+                                                          +-----+
++----------------------------------+                      |  8  |
+|                                  |                      |     v
+|          +-----------+           |       1          +----------------+
+|          | Diskless  |<----------+------------------|                |
+|          |  server   |           |       2          |      NFS       |
+|          |    /      |-----------+----------------->|  server/client |
+|          +-----------+           |       3          |                |
+|          /                       |       +----------|                |
+|       6 /                        |       |          +----------------+
+|        /                         |       |              ^
+| +----------+       +----------+  |       |              |
+| | diskless |------>| diskless |<-+-------+      4       |
+| |   node   |   5   |   node   |--+----------------------+
+| +----------+       +----------+  |
++------|---------------------------+
+       |
+Diskless Cluster B
+       |
++------+---------------------------+
+|      |   +-----------+           |
+|      |   | Diskless  |           |
+|   7  |   |  server   |           |  arrows specify direction
+|      v   +-----------+           |  of NFS mount
+| +----------/       \----------+  |
+| | diskless |       | diskless |  |
+| |   node   |       |   node   |  |
+| +----------+       +----------+  |
++----------------------------------+
+
+
+ Supported configurations:
+
+  1) Diskless server acting as an NFS server to a remote NFS client.
+
+  2) Diskless server acting as an NFS client.
+
+  4) Diskless node acting as an NFS client.
+
+  6) Diskless server acting as an NFS server to a local diskless node.
+
+  8) NFS server system acting as a client for itself.
+
+.bp
+
+Appendix: NFS - HP-UX Diskless Testing (cont'd)
+
+
+Disallowed:
+
+  3) Diskless node acting as an NFS server.
+
+  5) Diskless node acting as an NFS server to a local diskless node.
+
+  7) Diskless node in a remote cluster acting as a server for a 
+     diskless node in the local cluster.
+.fi
+.sp 3

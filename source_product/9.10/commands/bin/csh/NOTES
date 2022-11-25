@@ -1,0 +1,2174 @@
+.\"  To print this document:  troff notes
+.\"  The mmt macro file includes the mm macro file.
+.so /usr/lib/macros/mmt
+.fp 1 ZH        \" This is the standard (i.e. non-Bold/Italic) font position
+.fp 2 ZI        \" This is the Italic font position
+.fp 3 ZB        \" This is the Bold font position
+.fp 4 HP        \" This is the HP logo
+.fp 5 CW        \" This is a fixed font
+.\"  This prints the string defined in the '.PH' macro to be printed at the
+.\"  top of every page (the string gets put in the 't' register.
+.de TP
+.sp 2
+.tl \\*(}t
+.sp 2
+..
+.\"  Define strings for page headers and footers.  The '\s' changes font sizes;
+.\"  '\s0' resets the font size to its previous value.  The macros '.OF' and
+.\"  '.EF' are used to get the string printed on the top line of a two line
+.\"  footer.  This is necessary for older laserjets, which didn't print a
+.\"  page the same length as the new ones.  The '\f(' is used to change fonts
+.\"  to a 2-character name versus '\f' which will only change to a 1-character
+.\"  name.
+.PH "''\s8\f4AB\f1\s0'\s8Notes on csh\s0'"
+.OF "'\s9\*(DT\s0'\s9Company Confidential\s0'\s9Page \\\\nP\s0'"
+.EF "'\s9\*(DT\s0'\s9Company Confidential\s0'\s9Page \\\\nP\s0'"
+.\"  The '.tr' macro is used to translate a '~' into a space.  This is used in
+.\"  variable lists when more than one word is needed.  The '~' is used to
+.\"  separate the words, but on output it gets translated to a space and the
+.\"  phrase prints correctly.
+.tr~
+.TL 
+\f3Notes on csh\f1
+.AU ""
+.AF ""
+.MT 4
+.ds HF 3 3 2 2 2 2 2
+.ds HP 10 9 8 8 8 7 7
+.\"  These set up the system so that headings of level 7 or higher have line
+.\"  breaks after them (Hb), and that they have a vertical spacing of 1/2 v
+.\"  after them.
+.nr Hb 7
+.nr Hs 7
+.sp -10
+.H 1 "Command Execution."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllllll.
+Routine	calls	which calls	...
+_
+execute (sh.sem.c)	Dfix (sh.dol.c)	rscan (sh.glob.c)	eq (sh.misc.c)
+		blkfree (sh.misc.c)	xfree (sh.misc.c)
+		Dfix2 (sh.dol.c)	ginit (sh.glob.c)
+			unDredc (sh.dol.c)
+			copyblk (sh.misc.c)	calloc (sh.misc.c)	malloc (sh.misc.c)	sbrk (sh.misc.c)
+					error (sh.err.c)
+				blklen (sh.misc.c)
+				blkcpy (sh.misc.c)
+			Dword (sh.dol.c)	unDredc
+				error
+				any (sh.misc.c)
+				Gcat (sh.glob.c)	Strlen (sh.misc.c)
+					error
+					Strspl (sh.misc.c)
+				DgetC (sh.dol.c)	any
+					setDolp (sh.dol.c)
+					Dredc (sh.dol.c)
+					Dgetdol (sh.dol.c)	Dgetc
+						SetDolp
+						error
+						to_short (sh.misc.c)
+						Strcpy (sh.misc.c)
+						adrof (sh.set.c)
+						digit (sh.misc.c)
+						unDredc (sh.dol.c)
+						any
+						alnum (sh.misc.c)
+						to_char (sh.misc.c)
+						addla (sh.lex.c)
+						udvar (sh.misc.c)
+						blklen
+						putn (sh.set.c)
+						xfree
+						Dredc
+.TE
+.S 10
+.sp 1
+.H 2 "General Description."
+This discussion centers around the fact that \f2csh\f1 appears to interpret
+lines as they are read in, either from a shell script or from the keyboard.
+Because of this, constructs such as \f2if-then-else\f1 are interpreted on
+the fly.  In addition, some expansions are done on the variables in the
+constructs, specifically dollar (\f2$\f1) expansion.  This is done using the
+\f2Dfix ()\f1 routine.  What eventually happens with this is that if a
+variable is referenced using a dollar sign, the specific entry in the 
+variable array is retrieved (the \f2adrof ()\f1 call does this).  If this
+entry does not exist, the environment is searched and if the variable is not
+found there either an \f2undefined variable\f1 error occurs.
+.P
+This can be a problem in the case where some sort of decision is being 
+made regarding the existence of the variable.  For example, the following
+shell script fragment generates an \f2undefined variable\f1 error:
+.sp 1
+.in +5
+\f5
+.nf
+unset a
+if ( ${?a} == 0 ) then
+  echo UNSET
+else if ( $a == 1 ) then
+  echo SET 
+endif
+.fi
+\f1
+.in -5
+.sp 1
+What happens in this case is that the first \f2if\f1 determines that the
+variable is not set.  (The \f2${?a}\f1 returns a value of 0 to indicate
+that the variable is not set.)  This causes the \f2echo UNSET\f1 to be
+executed.  However, since \f2csh\f1 doesn't build parse trees, but rather
+interprets lines as it goes along, it next tries to interpret the \f2else\f1
+line.  Unfortunately, it tries to de-reference the \f2$a\f1 before entering
+the routine to execute the \f2else\f1.  This operation results in an error
+since the variable is not set.  
+.P
+One interesting thing about this is that \f2csh\f1 works on an entire line
+at a time, so the problem can be avoided if the \f2else\f1 line is broken
+into two lines as shown below:
+.sp 1
+.in +5
+\f5
+.nf
+unset a
+if ( ${?a} == 0 ) then
+  echo UNSET
+else 
+  if ( $a == 1 ) then
+    echo SET 
+  endif
+endif
+.fi
+\f1
+.in -5
+.sp 1
+In this case the \f2else\f1 routine is called, which it turns out really
+ends up doing nothing until the appropriate \f2endif\f1 lines are seen.
+.sp 1
+.H 1 "Command Argument Expansion."
+Argument expansion occurs before a command is exec'd, but after a child 
+process has been forked.  
+.sp 1
+.H 2 "Major Routines Called."
+All major routines except \f2doexec (sh.exec.c)\f1 are in \f2sh.glob.c\f1.
+.P
+.S 4
+.TS
+lllllllllll.
+Routine	calls	which calls	...
+_
+doexec (sh.exec.c)	glob (sh.glob.c)	collect (sh.glob.c)	acollect (sh.glob.c)	expand (sh.glob.c)	matchdir (sh.glob.c)	match (sh.glob.c)	amatch (sh.glob.c)	execbrc (sh.glob.c)
+								fnmatch (libc.a)
+					execbrc (sh.glob.c)	expand (sh.glob.c)
+						amatch
+.TE
+.S 10
+.sp 1
+.H 2 "General Description."
+A global array (\f2gargv\f1) of strings (\f2CHAR **\f1) is initialized to NULL.
+A counter into this string array (\f2gargc\f1) is set to 0.  As matches in 
+argument expansions are found, they are added to this array of strings.  The 
+routine \f2Gcat (sh.glob.c)\f1 is used to concatenate 2 strings and then add 
+the result to \f2gargv\f1.  After all the matches are collected, \f2copyblk\f1
+(sh.misc.c) is called to \f2calloc\f1 space for the strings and copy them into
+the new space.  The global array pointer gargv is reset to point to the new
+space, and this pointer is returned to the calling routine.
+.P
+It appears that an array of arguments is passed to \f2glob\f1, and the routine
+calls \f2collect\f1 on each string in the array.  The routine \f2expand\f1 is
+where the work actually begins.  The string is searched for the tilde character
+which is expanded to the home path.  The result is put into another 
+\f2CHAR **\f1 global, \f2gpath\f1.  The string is then checked for any globbing
+characters (asterisk, question mark, open square bracket, open curly brace, or
+backquote).
+If characters are not a glob character, then they are appended to \f2gpath\f1.
+If a glob character is seen, then the string and gpath are backed up to the
+first slash, or to the beginning of the string, whichever comes first.  If the
+glob character was an open curly brace, then \f2execbrc\f1 is called with the
+string (pointing to the beginning of the string, or one character past the
+slash) and a NULL string.  Otherwise, \f2matchdir\f1 is called with the string 
+pointing either to one character after the slash or the beginning of the string.
+.P
+The \f2matchdir\f1 routine opens the directory that \f2gpath\f1 references
+and loops through each directory entry, looking for matches with the file
+name and the pattern in the argument list.  It calls \f2match\f1 to do this.
+If \f2match\f1 returns non-zero, then a match has been found.  The file is
+stat'd, and if this works it is added to \f2gargv\f1 using \f2Gcat\f1.  If
+the file doesn't stat, it is appended with a \f2+\f1 and another stat is
+attempted (this assumes that the file could be a CDF).  If this stat works,
+the file is not added to \f2gargv\f1, but rather the loop checking all directory
+entries is continued.  If the stat fails, it the file is added to \f2gargv\f1.
+The net result of this is as follows.
+.BL
+.LI
+A match occurs because: 
+.BL
+.LI
+The file exists or 
+.LI 
+The CDF exists.
+.LE
+.LI
+But the stat of the original file fails because:
+.BL
+.LI
+The file was deleted since the time the directory was read, or 
+.LI
+There is no context in the CDF for the machine.
+.LE
+.P
+Note that the stat will still succeed even if the user does not have any
+permissions on the file.  The only thing necessary is for the user to have
+search permissions on the directory path to the file.
+.LI
+Next the file name with a plus is stat'd.
+.BL
+.LI
+If the stat works, then the file is a CDF and there was no context for the
+machine.  This information is not used.  Rather, the loop checking each 
+component in the directory is continued.  So if no other files matched, the 
+result would be a \f2No match\f1 error.
+.LI
+If the stat fails, this is because:
+.BL
+.LI
+The file is not a CDF, or 
+.LI
+The CDF was removed.
+.LE
+.P
+In either case, the original file name (without the plus) is added to 
+\f2gargv\f1.  The result will be a \f2<filename> not found\f1 error.
+.LE
+.LE
+.P
+The routine \f2match\f1 saves a pointer to the file name, and then calls
+\f2amatch\f1.
+.sp 1
+.H 3 "amatch"
+.P
+This routine first checks to see if the file name string is NULL and if the
+pattern character is NOT a glob character.  If all of these are TRUE, then
+a "no match" (0) is returned.  This check was added for CDF expansion, where
+\f2amatch\f1 may be called one last time when the file name is finished, but
+there may be a plus in the pattern.
+.P
+The routine \f2amatch\f1 loops through the file name and the pattern being
+matched.  The next characters in each string are saved at the beginning of the
+loop for comparison purposes, and then their respective pointers are 
+incremented to the next characters in the strings.  
+.P
+A switch is done on the pattern character.  
+.P
+.in +5
+If the pattern character is an open
+curly brace, then \f2execbrc\f1 is called with the pattern backed up one
+character (to point to the open curly brace) and the file name backed up one
+character (to point to whatever it was pointing at when this iteration of
+the loop started).  (See the discussion on \f2execbrc\f1 for details on what
+happens in this routine.)
+.P
+If an open square bracket is found, the characters in the square bracket are
+copied to another string, which is used in a call to fnmatch along with the
+file name.  During the scan for a closing bracket, if a plus is seen, a flag
+is set.
+.P
+.in +5
+\f3Nitty Gritty\f1
+.P
+\f2A match occurs:\f1
+.P
+If a 0 is returned from \f2fnmatch\f1, then a match occurred.  A global 
+character pointer is set to point to the first character in the string match
+by \f2fnmatch\f1.  The file name pointer is set to this same location.  The
+pattern pointer is set to the first character after the closing bracket and
+the overall loop is continued with the next characters in the file name and
+pattern strings.
+.P
+\f2No match occurs:\f1
+.P
+If a 1 is returned from \f2fnmatch\f1, then no match occurred.  This section
+was changed to add CDF support.  Previously, the pattern string was set to the
+first character after the closing square bracket and 0 was returned to the
+calling routine.  Now, if the plus flag is set, another call to \f2fnmatch\f1 
+is done, with a plus appended to the file name string.  If the plus flag is
+not set, the pattern pointer is set to the first character after the closing
+bracket and a 0 returned.
+.P
+If this causes a match to occur, the file is stat'd to see if it is a CDF.  If 
+so, the pattern pointer is set to the first character after the closing 
+bracket.  If the next character in the pattern is an asterisk, then the 
+asterisks are skipped and if the next character is NULL or a slash, then a real
+match occurred.  If the next character in the pattern is NULL or if there is a 
+NULL after the slash, the file name is appended onto \f2gpath\f1 and then added
+to \f2gargv\f1.  If the next character after the slash is not NULL, \f2gpath\f1
+is augmented by the file name and then \f2expand\f1 is called on the pattern.  
+In all the matching cases, 0 is returned to the calling routine so that when it
+finally returns to \f2matchdir\f1, the path won't be added to \f2gargv\f1 again.
+.P
+If the file was a CDF but the next character in the pattern wasn't a NULL or
+a slash or an asterisk, or if after the asterisks were skipped the next
+character was not a NULL or slash, then 0 is returned, indicating no match.  
+(The pattern pointer was already set to the first character after the closing 
+bracket.)
+.P
+If the file wasn't a CDF, the pattern pointer is set to the first character
+after the closing bracket and 0 is returned, indicating no match.
+.P
+If no match was reported by \f2fnmatch\f1, the pattern pointer is set to the
+first character after the closing bracket and 0 is returned, indicating no
+match.
+.P
+\f2An error occurs:\f1
+.P
+If an error is reported by either call to \f2fnmatch\f1, the globbing is 
+terminated via a call to \f2error\f1.
+.in -5
+.sp 1
+If an asterisk is found, a check is made to see if there are any more characters
+in the pattern.  If not, a match has been found and 1 is returned.  If the
+next character is a slash, the routine jumps to a point in the code that deals
+with a slash in the pattern.  
+.P
+.in +5
+\f3Nitty Gritty\f1
+.P
+If the next character in the pattern was not a 
+slash, then for each character in the file name, \f2amatch\f1 is called with 
+that character beginning the file name and the next character in the pattern.  
+(The pattern pointer was incremented at the beginning of the matching loop to
+point to this next character.) 
+.P
+If a match is found that returns a 1, then the loop is broken by returning a 1.
+.P
+If no match is reported (0 is returned), there might still have been a match 
+since the return value of 0 is used to prevent \f2matchdir\f1 from adding the 
+file name to \f2gargv\f1 again.  So the value of a global integer \f2globcnt\f1
+is checked after the call to \f2amatch\f1.  This global is incremented whenever
+the \f2gargv\f1 string array is augmented.  If the counter is different, then 
+the loop is broken and 0 is returned.  
+.P 
+Otherwise, all the characters in the file name are checked against the pattern.
+This loop allows the asterisk in the pattern to be used to match characters 
+until the next character in the pattern is matched.
+.P
+If all the characters in the file name are checked and the loop hasn't been
+broken by a return, \f2amatch\f1 is called once more and its return value
+is returned.  This was necessary since the file name might not have a plus
+on it, but there might still be a plus as the next character in the pattern.
+This would be a simple check except for the case where the pattern is
+something like \f3...{+}\f1.  Here, the next character in the pattern would 
+be an open curly brace, not a plus.  However, by calling \f2amatch\f1 again,
+the open curly brace causes a call to \f2execbrc\f1 that in turn causes a
+call to \f2amatch\f1 with the NULL file name, but the pattern has been expanded
+to a plus.  The case of a plus is then handled normally in \f2amatch\f1.
+.in -5
+.P
+If the next character in the pattern in a NULL, then if the character in the
+string is also a NULL there is a match.  Otherwise there isn't a match.
+.P
+If the next character is a question mark, then if there are no more characters
+in the file name there is no match.  Otherwise there might be, so the loop
+is continued.  Since the pattern and the file name were advanced at the 
+beginning of the loop this matches a single character.
+.P
+If the next character in the pattern is a slash, then if there are more
+characters in the file name no match has occurred.  Otherwise, the code 
+continues at the same place as that when a slash was in the pattern after
+an asterisk.  The file name is added to \f2gpath\f1, along with a slash and 
+this name is stat'd.  If there are no more characters in the pattern, then
+\f2gpath\f1 is added to \f2gargv\f1.  Otherwise, \f2expand\f1 is called again 
+with the pattern, which is now pointing to the first character after the slash.
+In either case, 0 is returned to the calling routine so that \f2matchdir\f1
+won't add the path to \f2gargv\f1 again.
+.P
+If the next character is something else, it is checked against the corresponding
+character in the file name.  If they match the loop is continued.
+.P
+If the next character is a plus sign it is first checked against the file name
+for a plus character.  If there is no match, but there are still characters in
+the file name then no match occurred.  However, if the next character in the
+pattern is a NULL, slash, or asterisk there might be a match.  If the next
+character in the pattern is an asterisk, then it is skipped.  If the character
+following the asterisks is not a NULL or slash, there is no match.  Otherwise
+the file name is appended with a plus sign and is stat'd.  If it exists the
+path is added to \f2gpath\f1.  If there are no more characters in the path
+then \f2gpath\f1 is added to \f2gargv\f1.  Otherwise a slash is added to
+\f2gpath\f1 and \f2expand\f1 is called again with the pattern, which is now
+pointing to the first character after the slash.  In either case, a 0 is
+returned so that \f2matchdir\f1 won't add the path to \f2gargv\f1 again.
+.in -5
+.sp 1
+.H 3 "execbrc"
+.P
+Now, if \f2execbrc\f1 was called from \f2expand\f1 because an open curly
+brace was the first glob character seen, the pattern used as an argument
+still has that brace in it since the pattern was backed up the first previous
+slash or the beginning of the pattern.  If \f2execbrc\f1 was called from 
+\f2amatch\f1 because an open curly brace was seen, then the pattern is pointing
+to the open curly brace.  The pattern is copied into \f2restbuf\f1 up to
+the open curly brace.  
+.P
+Then a pointer to the first character after the open 
+curly brace is set up for another loop that does a switch on each character
+in the string.  In the case of a simple example where the string was something
+like \f2file{1,2,3}\f1, \f2restbuf\f1 will contain \f2file\f1, and the pointer
+for this loop will be pointing to the \f21\f1.  
+.P
+.in +5
+\f3Nitty Gritty\f1
+.P
+If another open curly brace
+is seen in the string, then a curly brace level counter is incremented.  
+.P
+If a close curly brace is seen and the curly brace level counter is not zero 
+then the counter is decremented.
+.P
+If an open square bracket is seen, a bracket level counter is incremented and
+the string is searched for a closing square bracket.  If one is found, the
+bracket level is decremented and if it is 0 the loop searching for the closing
+bracket is broken.  If another open square bracket is seen the bracket level 
+is incremented and the loop searching for the closing bracket is continued.
+After the loop searching for the closing bracket is broken, if there are no 
+more characters then an error has occurred because there is a missing closing 
+bracket.  \f3This seems like a bug - there is only an error if the bracket level
+is not 0 and there are no more characters or if there are no more characters 
+and the bracket level is 0 then there is a missing closing curly brace.\f1
+.in -5
+.sp 1
+If, when a closing curly brace was seen the level was 0, the code jumps out
+of the loop feeding the switch statement.  At this point, which is also the
+code that will be executed when all the characters in the pattern have been
+checked, if the curly brace level is not 0 or there are no more characters
+an error has occurred due to a missing closing curly brace.  \f3This seems
+like a bug - there is only an error if the level is not 0 \f2and\f3 there are
+no more characters.\f1
+.P
+A pointer to the first character after the open curly brace is set, and the
+string is looped through again, performing a switch on each character.  
+.in +5
+.P
+\f3Nitty Gritty\f1
+.P
+If an open curly brace is seen, the curly brace level is incremented and the
+loop is continued.  
+.P
+If a closing curly brace is seen the level is decremented if it is not 0 and
+the loop is continued.  If it is 0, the routine jumps to a point in the code
+that deals with a comma or back quote.
+.P
+If a comma or a back quote is seen, if the curly brace level is not 0 the loop 
+is continued.  If it is 0, the code is at the point where it was jumped to if 
+a closing curly brace was seen and the curly brace level was 0.
+It looks like the items in the curly braces, minus the curly braces are appended
+onto \f2restbuf\f1.  If the string argument to \f2execbrc\f1 was NULL (as it
+was if an open curly brace was the first glob character seen from \f2expand\f1,
+then \f2expand\f1 is called on \f2restbuf\f1.  Otherwise, \f2amatch\f1 is called
+on the string and \f2restbuf\f1.  Since all this is in a for loop which is
+going through each character, each of the items in the curly braces separated
+by commas will be appended onto \f2restbuf\f1 and matched separately.
+.P
+If an open square bracket is seen, the same loop searching for a closing
+bracket is done as was done in the previous character checking loop at the
+beginning of the routine.
+.in -5
+.H 2 "Globbing Some, but not All Arguments."
+A defect was reported where if a file \f2mudd\f1 exists, and a file \f2foo\f1
+does not, if the command \f2ls mudd foo*\f1 is executed, then a \f2No match\f1
+error occurs.  However, the command \f2ls mudd* foo*\f1 works.  This appears to
+happen because the globbing routines, \f2glob ()\f1 in particular, assume that
+matches occur based on the global variable \f2globcnt\f1.  In the \f2glob ()\f1
+routine, if this variable is 0 after globbing, then the entire \f2gargv\f1
+array is freed and a 0 is returned to the calling routine.  In the case of the
+\f2ls\f1 command, this causes the \f2doexec ()\f1 routine to exit with an error.
+.P
+However, there is another global variable, \f2gargc\f1, which knows about the
+first element of the \f2gargv\f1 array (the file name which did exist).  The
+problem with using it is that the argument may be a real argument (such as 
+the name of a file) or it may be an option to the command, and there is no
+way to tell the difference.  For example, \f2ls -l foo*\f1 would result in
+an \f2ls -l\f1 command being executed if the command was allowed to continue
+even though the globbing failed.  This is obviously not the optimal behavior.
+.P
+It seems like the best thing to do would be to act like ksh and simply pass
+the string along to the command if globbing failed.  This would result in
+\f2ls -l foo*\f1, which would cause an \f2ls\f1 error.  Unfortunately this
+is a very radical change in the semantics of csh and so cannot be implemented
+without risk in the area of backwards compatibility.  For this reason the
+problem was left as originally found.  (Not, of course, before I made the
+change and another defect was submitted against the erroneous behavior 
+described above.)  For grins, I tried this on an SCO UN*X system, and it
+failed in the same way.
+.P
+The associated defect number is FSDlj07356.
+.sp 1
+.H 1 "CDF Recognition."
+.BL
+.LI
+If a complete file name is given, including the trailing plus, the CDF will
+be recognized.
+.LI
+If a file name is given that includes glob characters and the trailing plus
+is given, the CDF will be recognized providing the plus is the last character
+in the pattern or is followed by a slash or any number of asterisks which are
+followed by a slash or no more characters.
+.LI
+If there is no context for the machine in the CDF, and the file name given
+has an explicit plus as well as glob characters in it, the contents of the CDF 
+directory will be listed.  This is the same behavior as if the path name 
+(including the plus) is given without any glob characters.
+.LE
+.sp 1
+.H 1 "The Hash Table."
+The hash table is built whenever the PATH is changed.  It is used to locate
+a command if a fork takes place and several other special circumstances are
+met.  The number of hits and misses into the table is kept in the parent and 
+printed as a statistic for the user when the \f2hashstat\f1 command is run.
+.sp 1
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lll.
+Routine	calls	
+_
+main (sh.c)	dohash (sh.exec.c)	hash (sh.exec.c)
+dosetenv (sh.func.c)	dohash	hash
+doset (sh.set.c)	dohash	hash
+dolet (sh.set.c)	dohash	hash
+.TE
+.S 10
+.sp 1
+.H 2 "Hash Table Description."
+The hash table consists of 512 integers.  It is not built if there is no PATH
+variable.  In addition, only PATH components which begin with a slash and 
+which can be opened are considered.  Each component of the PATH has an 
+associated index variable which cycles from 0 to 7.  Every place that the
+hash table is used, the PATH components are considered in the same order, so
+their index values remain constant.  For example, if the PATH is
+.S 4
+\f2/usr/softbench/bin:$HOME/TOOLS/bin:.:/bin:/usr/bin:/usr/contrib/bin:/usr/local/bin:/etc:/usr/lib\f1 
+.S 10
+then the index values for each component of the PATH are as shown below.
+.P
+.TS
+ll.
+PATH component	Index value
+_
+/usr/softbench/bin	0
+$HOME/TOOLS/bin	1
+.	2
+/bin	3
+/usr/bin	4
+/usr/contrib/bin	5
+/usr/local/bin	6
+/etc	7
+/usr/lib	0
+.TE
+.P
+Now, another loop is done for each PATH component which begins with a slash
+and which can be opened.  The contents of the directory are read, and a hash
+function is called on the file name to generate an index into the hash table.
+The number 1 is left shifted by the directory index value, and OR'd into the
+hash table contents at this location.  When the hash table is used to locate
+a command, the reverse operation is applied; a 1 is left shifted by the 
+directory index value of the PATH component, and the result is AND'd with the
+hash table contents at the location indicated by running the hash function
+on the command name.  If the result is not 0 then a match has occurred.
+.P
+The hash function is a simple addition of all the characters in the string 
+passed to it.  If the result is negative, it is made positive.  Then the
+number is made to fit the size of the hash table by performing a \f2mod\f1
+on it using the hash table size.
+.P
+The hash function will certainly produce collisions if there are more than
+512 elements in a directory (/bin has 124 items, /usr/bin 400, and 
+/usr/local/bin 312 on our system).  In addition, collisions will certainly
+occur if two files contain the same characters, but in a different order.
+Other random collisions also seem to occur.  If collisions occur between
+files in different directories, then the value stored in their hash table
+location will reflect the different directories provided that the directories
+have different index values.  (Note that the probability of this grows smaller
+as the number of PATH components grows larger since the index cycles from 
+0-8.)  However, if the collision occurs between files in the same directory,
+the fact that a collision occurred is lost.
+.sp 1
+.ne 15
+.H 2 "Hash Table Use."
+The hash table is used in two places.  Their use is basically the same.  If the
+shell forks to execute a command, the following routines are called.
+.P
+.S 4
+.TS
+llllll.
+Routine	calls	which calls	...
+_
+execute (sh.sem.c)	doexec (sh.exec.c)	globone (sh.glob.c)	glob (sh.glob.c)
+		hash (sh.exec.c)
+		texec (sh.exec.c)
+	updateHashStats(sh.exec.c)	globone	glob
+		hash
+.TE
+.S 10
+.P
+If the shell will fork to execute the command, it calls \f2doexec\f1.  This
+routine in turn calls \f2globone\f1, which calls \f2glob\f1.  The \f2globone\f1
+routine looks for a single match.  If more than one occurs, it generates an
+error.  Otherwise, whether or not globbing actually occurred, it returns a 
+pointer to the command name string.  The \f2doexec\f1 routine looks for the
+slash character in the command name string and remembers this as well as 
+whether or not globbing occurred.
+.P
+The hash table is only accessed if there is one available and the PATH
+variable is not NULL.  If there is a hash table, the value associated with
+the command string is retrieved, after running the hash function on the
+command name (using \f2hash\f1).
+.P
+The main loop trying to execute the command loops through the components of 
+the PATH.  The components are checked for NULL at the end of the loop, so
+even if the PATH is NULL the loop will be executed once.  A directory index
+value from 0-7 is associated with each PATH component.  If the PATH component
+begins with a slash, and there was no globbing and no slash in the command
+name, and there is a hash table, then the hash value associated with the 
+command is tested for the appropriate directory bit.  If this test fails,
+the loop continues with the next PATH component and its index value.  Otherwise,
+something will be exec'd.
+.P
+If the PATH component begins with a dot or there is no PATH, then the command
+string is exec'd.  Otherwise the PATH component is pre-pended onto the command
+string and the result is exec'd.  Now before this "exec'ing" loop, a global
+\f2hits\f1 counter was incremented.  If the exec returns, then it was 
+unsuccessful, so a global \f2misses\f1 counter is incremented.  If the loop
+terminates, then nothing was ever exec'd, so the global \f2hits\f1 counter
+is decremented.  The problem here is that these counters are in the child
+process, so the parent never knows whether a hit or a miss occurred.
+.P
+For this reason, the \f2updateHashStats\f1 routine was added.  This routine
+is called before \f2doexec\f1, from \f2execute\f1 as soon as it is known that
+a fork will take place.  This routine is very similar to the hash-related
+code in \f2doexec\f1.
+.P
+If there is no hash table then the routine returns without updating anything.
+The same thing happens if there is no PATH.  The command name is checked for
+a slash, and the name is globbed by calling \f2globone\f1.  If globbing
+occurred, the routine returns without updating the \f2hits\f1 and \f2misses\f1
+counters.
+.P
+The routine then loops through all the PATH components, just like in 
+\f2doexec\f1, except that instead of exec'ing the command, a \f2stat\f1 is
+performed on it.  If the \f2stat\f1 is successful, the \f2hits\f1 counter is
+incremented.  If it fails, the \f2misses\f1 counter is incremented.  Once a
+hit occurs, the loop terminates and the routine returns.  Since all this is
+done in the parent process, these global variables really do reflect the
+operation of the hash table.  
+.sp 1
+.H 2 "Hashstat."
+This command causes the \f2hashstat (sh.exec.c)\f1 routine to be executed.
+This routine simply counts the total number of hits and misses, divides the
+number of hits by this number, and prints the number of hits, misses, and the
+calculated number (as a percentage).
+.sp 1
+.H 1 "Fork/Exec."
+Under some conditions, a command is not executed from the parent shell.  In
+this case a fork/exec takes place.  However, there is A LOT of stuff that
+happens in between the two.  This section attempts to summarize the actions.
+.sp 1
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllll.
+Routine	calls	which calls
+_
+execute (sh.sem.c)	pfork (sh.proc.c)
+	doexec (sh.exec.c)	texec (sh.exec.c)
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+.sp 1
+.H 3 "doexec"
+The routine \f2globone\f1 is used to glob the command name.  The routine then
+searches for a slash in the globbed result.  The existence fact of a slash
+and the occurrence of globbing (know via the global \f2gflag\f1) is remembered.
+The PATH variable is retrieved.  If there is no PATH and the first character
+of the command name is not a slash, an error occurs.
+.P
+Next, the argument list is scanned for glob characters (in 
+\f2rscan (sh.glob.c)\f1) and glob is called if \f2gflag\f1 is set in this
+routine.  The globbed command name is saved, along with the globbed argument
+list, in newly calloc'd space.  The entire block is then AND'd with 077777
+(octal).  This strips off the most significant bit of the 16 bit word.
+.P
+If there is no PATH or there was a slash in the command name or globbing
+occurred, the variable that points to the PATH components is set to NULL.
+Otherwise it is set to the PATH components.
+.P
+Next another variable is set up that contains the command name, pre-pended
+with a slash.  The command name is used to obtain a value from the hash table
+(as described above).  The global \f2hits\f1 counter is incremented, then a
+loop that goes through all the PATH components is begun.  The test for a NULL
+PATH component is at the bottom of the loop, so it always executes at least
+once.
+.P
+The PATH component is skipped as far as the hash table is concerned according
+to the description above.  If the component begins with a dot, or the PATH
+is NULL, the command is exec'd using the routine \f2texec\f1.  If this returns,
+the space used for the command name and argument are freed, and the next
+PATH component is tested.  If the component doesn't begin with a dot and there
+is a component, the component is pre-pended onto the command name that was
+pre-pended with a slash.  The resulting command is exec'd.  If this returns,
+the space used for the command name and argument are freed, and the next
+PATH component is tested.  Before the next component is tried, the global
+\f2misses\f1 counter is incremented.  If the PATH component loop terminates
+(nothing was successfully exec'd) then the global \f2hits\f1 counter is
+decremented and an error occurs.  Note that all the changing of the global
+\f2hits\f1 and \f2misses\f1 counters doesn't do anything since it all occurs
+in the child process.
+.sp 1
+.H 3 "texec"
+This routine first exec's the command name and argument list passed to it.
+If it returns, an error occurred, so it performs a switch on the \f2errno\f1.
+.P
+If the error was \f2ENOEXEC\f1, the shell attempts to find a shell alias,
+replace the command name with it, and re-exec.  If that returns it gives up
+and returns to the calling routine.
+.P
+If the error was \f2ENOMEM\f1, the \f2Perror\f1 routine is called.
+.P
+If the error was \f2ENOENT\f1 it returns to the calling routine.
+.P
+If the error was \f2EINVAL\f1 an error is printed and it returns to the
+calling routine.
+.P
+Any other error causes the error string to be saved and then it returns to
+the calling routine.
+.sp 1
+.H 1 "Child Errors."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+llllllll.
+Routine	calls	which calls	...
+_
+doexec (sh.exec.c)	pexerr (sh.exec.c)	bferr (sh.err.c)	flush (sh.print.c)
+			printf (pprintf.c)	putchar (sh.print.c)	flush
+			error (sh.err.c)	flush
+				printf
+				btoeof (sh.lex.c)
+				exit (sh.c)	_exit
+				setq (sh.set.c)
+				reset (longjmp - sh.h)
+texec (sh.exec.c)	Perror (sh.err.c)	error 
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+Errors occur in \f2doexec\f1 for two reasons.  The first is if there is no 
+PATH variable and the command does not begin with a slash.  The second is if
+the \f2while\f1 loop that attempts to execute the command finishes 
+unsuccessfully.  This can happen if the command isn't found or if certain
+errors are returned from \f2execv\f1 (everything \f2except\f1 ENOEXEC, ENOMEM, 
+and EINVAL).
+.P
+Errors occur in \f2texec\f1 if the exec fails.  In the case of an error value
+of ENOEXEC, the routine attempts to exec a different command.  If this fails,
+the routine falls through to a call to \f2Perror\f1.  If an error of ENOMEM
+occurs, \f2Perror\f1 is also called.  If an error of EINVAL occurs, \f2error\f1
+is called directly.  All other errors cause a return to the \f2doexec\f1
+routine for error handling.  However, for all errors except ENOENT, the
+errno string and the command path are saved for printing by the \f2bferr\f1
+routine.
+.P
+If \f2pexerr\f1 is called, it sets the path name of the command for printing
+by \f2bferr\f1.  In addition, if the global \f2exerr\f1 is set, it directs
+\f2bferr\f1 to direct \f2error\f1 to print an error message associated with 
+that error.  Otherwise the error message \f2"<commandName> Command not 
+found"\f1 is printed.
+.P
+The routine \f2bferr\f1 flushes the output streams, then prints the name
+of the command which had the error, then calls \f2error\f1 with its calling
+parameter.  An interesting item here is the use of the global \f2haderr\f1.
+This variable is set before the call to print the command name.  If this 
+variable is 1, then output is directed to the error stream.  If it is 0, 
+output is directed to the standard output stream.  This variable is actually
+used in the routine \f2flush\f1.  In addition, \f2flush\f1 seems to reset
+\f2haderr\f1 to 0, no matter how it came into the routine.
+.P
+The routine \f2error\f1 flushes output streams using \f2flush\f1.  It then
+sets the global variable \f2haderr\f1 to one.  If an argument was passed to
+it, this is printed, followed by a new line.  (If this was called from 
+\f2bferr\f1, the command name was printed there, and the message was passed
+on to \f2error\f1.  Next, the input is moved to the end of the buffer using
+\f2btoeof\f1.  If the global variable \f2child\f1 is true (it will be for any
+forked child), or the global variable \f2exiterr\f1 is true (it will be if
+csh was invoked with \f2-e\f1 or if the command to be executed was \f2exec\f1)
+then the routine will cause an exit to occur.  Before exiting however, another
+global \f2doneinp\f1 is set to true if input was not coming from a tty (as in
+the case of shell scripts).  This one is important since it causes the parent
+process to terminate if an error occurred in a shell script.  Previous to
+8.0, this worked fine since via \f2vfork\f1 the child could touch the parent
+data.  For 8.0, this information will be encoded in the exit value.
+.P
+If the child won't be exiting, it sets the status variable in the shell
+variable list to a one.  It then does a longjmp back to an environment set
+up by the parent.
+.sp 1
+.H 1 "Parent Reaction to Child Errors."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllllll.
+Routine	calls	which calls	...
+_
+pchild (sh.proc.c)	wait/wait3
+	flush (sh.print.c)
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+The routine \f2pchild\f1 is the CHLD signal handler.  When a CHLD signal comes
+in, this routine knows that a child has terminated so it does a \f2wait\f1.
+This should immediately return with information about the child which just
+terminated.  This routine sets various flags in the process structure for
+the child based upon termination status.  It also uses the global variables
+\f2child\f1 and \f2haderr\f1.  The \f2child\f1 variable is used in setting some
+flags for the process, and the \f2haderr\f1 variable is used to determine
+what unit should receive output.  (It is also used in the \f2flush\f1 routine.
+.P
+If the error occurred in a shell script, then both \f2haderr\f1 and 
+\f2doneinp\f1 are set.  However, \f2haderr\f1 seems to be reset to 0 by the
+time the parent process sees the CHLD signal.  This is because the parent
+in the 7.0 version that used \f2vfork\f1 had reset the \f2haderr\f1 variable
+after the child did an \f2exec\f1 or \f2exit\f1.  The main loop in \f2process\f1
+checks for both variables being true.  If \f2doneinp\f1 is true, the loop 
+breaks and execution returns to the \f2main\f1 routine.  There it performs a 
+normal exit.  This is responsible for the csh behavior of exiting the parent
+shell if an error occurs in a script.  This works fine on a 7.0 system, but
+with the new virtual memory implementation in 8.0 (copy on write) this did
+not work and the parent continued execution.  In addition, the parent apparently
+had not cleaned up entirely, and the script got VERY confused.  (Perhaps
+a solution would be to ensure that \f2haderr\f1 got propagated up where the
+\f2longjmp\f1 would occur.)  The 7.0 behavior will be retained by encoding
+the value of \f2doneinp\f1 in the return value from the child.  (This has
+been done; see the discussion below on \f2FORK vs VFORK\f1.)
+.P
+If \f2haderr\f1 is true, and the shell is not interactive, \f2doneinp\f1 is
+reset to 0 and a \f2longjmp\f1 occurs.  I was able to get this to happen when
+I executed a shell script that executed a built-in that had an error (for
+example, \f2jobs -z\f1).  If the shell is interactive, \f2haderr\f1 is reset
+to 0, all file descriptors except 0, 1, and 2 are closed, and the loop is
+simply continued.  I was able to get this to happen when I interactively 
+executed a built-in with an error (\f2jobs -z\f1 does the trick here too).
+.sp 1
+.H 1 "FORK vs VFORK."
+For release 8.0, the \f2fork\f1 and \f2vfork\f1 intrinsics are the same.  In
+addition, due to the new virtual memory system, they both do a copy on write.
+This means that the Berkeley semantics of \f2vfork\f1 which allowed a child to
+change data in the parent no longer work.  This section describes the problems
+that were found in csh due to this new operation.  Another thing to note about
+\f2vfork\f1 is that it ensured that the parent did not run again until the
+child did an \f2exec\f1 or an \f2exit\f1.  So any changes that the child made
+after the \f2vfork\f1 were overwritten by changes the parent made after the
+\f2vfork\f1.
+.sp 1
+.H 2 "Global Variables."
+For the most part, code reading was done in order to figure out which global
+variables the child process changes, and then where these are used (in the
+parent or in the child or both).
+.sp 1
+.H 3 "Child."
+.TS
+llll
+llcl
+clcl
+clcl
+ccll
+clcl
+ccll
+clcl.
+Variable	Defined in	Used in	Callable from child
+_
+child	auto_logout (sh.c)		no
+	main (sh.c)		no
+	exitstat (sh.c)		yes via backeval 
+		error (sh.err.c)	yes
+	calloc (sh.misc.c)		yes
+		pchild (sh.proc.c)	no
+	pfork (sh.proc.c)		yes
+.TE
+.P
+Routines on the parent side of the fork that define \f2child\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2child\f1 after
+routines on the child side of the fork may have set it are not a problem
+either since the parent reset \f2child\f1 to its previous value.
+Therefore the \f2child\f1 value does not need to be passed back to the parent.
+.sp 1
+.H 3 "doneinp."
+.TS
+llll
+llll
+clcl
+clcl
+clcl.
+Variable	Defined in	Used in	Callable from child
+_
+doneinp	process (sh.c)	process	no
+	error (sh.err.c)		yes
+	doeval (sh.func.c)		no
+	readc (sh.lex.c)		yes via backeval
+.TE
+.P
+Routines on the parent side of the fork that define \f2doneinp\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2doneinp\f1 after
+routines on the child side of the fork may have set it could have a problem.
+Therefore problems could occur if \f2process\f1 does not know that \f2error\f1
+or \f2readc\f1 changed \f2doneinp\f1.
+.P
+This problem is more fully discussed in the section \f2Parent Reaction to
+Child Errors\f1 above.  \f3The \f2doneinp\f3 variable needs to be encoded in 
+the \f2exit\f3 value for the \f2error\f1 routine.\f1  However, this is 
+complicated by the fact that vforked and forked children both use these 
+routines.  Since changes in forked children's variables would not affect the 
+parent anyway, the fact that this exit is from a child process must be passed 
+back to the parent \f3only if the child would have been the result of a 
+vfork\f1.
+.P
+In the case of \f2readc\f1 the problem is trickier.  Both definitions of
+\f2doneinp\f1 occur just before a \f2longjmp\f1.  It seems that this will
+restore some previous parent environment (stack only) but globals like 
+\f2doneinp\f1 are apparently retained.  \f3This could present a problem.\f1
+\f3In any case, there is no obvious way to pass this information back to the 
+parent.\f1
+.P
+\f3NOTE:  It seems as though backeval is only called from the parent due to
+no fork, or from a forked child.  The previous version that used \f2vfork\f3
+could not then do a \f2fork\f3, so all children that might do a subsequent 
+\f2fork\f3 did not use \f2vfork\f3 in the first place.  This means that the
+the fact that \f2doneinp\f3 cannot be passed back to the parent should not
+matter.\f1
+.sp 1
+.H 3 "haderr."
+.TS
+llll
+llcl
+clll
+clcl
+clcl
+clcl
+ccll
+clll
+ccll.
+Variable	Defined in	Used in	Callable from child
+_
+haderr	main (sh.c)		no
+	process (sh.c)	process	no
+	error (sh.err.c)		yes
+	bferr (sh.err.c)		yes
+	xechoit (sh.exec.c)		yes
+		alias (sh.parse.c)	no
+	flush (sh.print.c)	flush	yes via xechoit and putchar
+		pchild (sh.proc.c)	no
+.TE
+.P
+Routines on the parent side of the fork that define \f2haderr\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2haderr\f1 after
+routines on the child side of the fork may have set it are not a problem since
+\f2haderr\f1 is reset by the parent just after the \f2vfork\f1.
+.sp 1
+.H 3 "setintr."
+.TS
+llll
+clcl
+clcl
+ccll.
+Variable	Defined in	Used in	Callable from child
+_
+setintr	main (sh.c)		no
+	goodbye (sh.c)		no
+	pfork (sh.proc.c)		yes 
+		LOTS	yes/no
+.TE
+.P
+Routines on the parent side of the fork that define \f2setintr\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2setintr\f1 after
+routines on the child side of the fork may have set it are not a problem 
+since \f2setintr\f1 is reset by the parent after the \f2vfork\f1.
+.sp 1
+.H 3 "tpgrp."
+.TS
+llll
+llcl
+clcl
+ccll.
+Variable	Defined in	Used in	Callable from child
+_
+tpgrp	main (sh.c)		no
+	pfork (sh.proc.c)		yes
+		LOTS	yes/no
+.TE
+.P
+Routines on the parent side of the fork that define \f2tpgrp\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2tpgrp\f1 after
+routines on the child side of the fork may have set it are not a problem since
+\f2tpgrp\f1 is reset by the parent after the \f2vfork\f1.
+.sp 1
+.H 3 "wanttty."
+.TS
+llll
+llcl
+clll.
+Variable	Defined in	Used in	Callable from child
+_
+wanttty		pfork (sh.proc.c)	yes
+	execute (sh.sem.c)	execute	no
+.TE
+.P
+Since \f2wanttty\f1 is not set from the child side of the fork, there is no
+problem with this variable.
+.sp 1
+.H 3 "achanged/actions."
+.TS
+llll
+llcl
+clcl
+clll.
+Variable	Defined in	Used in	Callable from child
+_
+achanged	sigset (jobs.c)		yes
+	sigignore (jobs.c)		yes
+	sigrelse (jobs.c)	sigrelse	yes
+actions	sigset		yes
+		sigignore	yes
+		sigrelse	yes
+.TE
+.P
+The \f2sigrelse\f1 routine is called from both the parent and child.  It calls
+\f2sigset\f1, which is also called from both sides of the fork from other
+routines.  Similarly, \f2sigignore\f1 may also be called from both sides of
+the fork.
+.P
+It appears that the array \f2actions\f1 contains the names of the signal
+handlers currently installed.  Since this data is used in \f2sigrelse\f1 and
+\f2sigignore\f1, it should be current (it is only set in \f2setset\f1.)
+.P
+The values in the \f2achanged\f1 array are only set to one from \f2sigignore\f1.
+They appear to be used when a signal is going to be ignored but before it did
+have a signal handler other than SIG_IGN.  If this is the case, then on a
+\f2sigrelse\f1, the old signal handler is re-installed.  This is done via
+a call to \f2sigsys\f1, which is like \f2sigset\f1 except that it doesn't 
+clear the appropriate value of \f2achanged\f1.
+.P
+It seems as though since all this is occurring in the child, it should never
+affect the parent anyway.  The signal handlers are not shared even across a
+\f2vfork\f1, so any changing of the arrays to indicate changes in signal
+handlers is only valid for the process for which the handler was changed.
+Therefore, these variables should not be a problem.  (I also found a note in
+\f2jobs.c\f1 for \f2sigsys ()\f1 that says it is like \f2sigset ()\f1 except
+that it doesn't change the \f2actions\f1 or \f2achanged\f1 arrays and should
+only be called by a vforked child.)
+.sp1
+.H 3 "pcurrjob."
+.TS
+llll
+llll
+clll
+clll
+clll
+clll
+clcl
+ccll.
+Variable	Defined in	Used in	Callable from child
+_
+pcurrjob	palloc (sh.proc.c)	palloc	no
+	pflush (sh.proc.c)	pflush	no
+	pendjob (sh.proc.c)	pendjob	no
+	psavejob (sh.proc.c)	psavejob	yes via backeval and glob
+	pfork (sh.proc.c)	pfork	no
+	prestjob (sh.proc.c)		yes via backeval and glob
+		pwait (sh.proc.c)	no
+.TE
+.P
+Routines on the parent side of the fork that define \f2pcurrjob\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2pcurrjob\f1 after
+routines on the child side of the fork may have set it could have a problem.
+This can occur since both \f2psavejob\f1 and \f2prestjob\f1 reset 
+\f2pcurrjob\f1 and this can occur in the child process.
+.P
+The comment in the \f2psavejob\f1 code says:
+.nf
+  /*
+   * psavejob - temporarily save the current job on a one level stack
+   *      so another job can be created.  Used for  { } in exp6
+   *      and `` in globbing.
+   */
+.fi
+.P
+And the comment for \f2prestjob\f1 says:
+.nf
+  /*
+   * prestjob - opposite of psavejob.  This may be missed if we are interrupted
+   *	  somewhere, but pendjob cleans up anyway.
+   */
+.fi
+.P
+It seems like this could be a problem.  It could probably be tested with 
+something like: \f2echo `sleep 10`\f1, where \f2pcurrjob\f1 is checked at
+various locations.
+.P
+\f3NOTE:  It seems as though backeval is only called from the parent due to
+no fork, or from a forked child.  The previous version that used \f2vfork\f3
+could not then do a \f2fork\f3, so all children that might do a subsequent 
+\f2fork\f3 did not use \f2vfork\f3 in the first place.  This means that the
+the fact that \f2pcurrjob\f3 cannot be passed back to the parent should not
+matter.\f1
+.sp 1
+.H 3 "didfds."
+.TS
+llll
+llll
+clcl
+clcl
+ccll
+clcl
+ccll
+clll
+ccll
+ccll
+clll.
+Variable	Defined in	Used in	Callable from child
+_
+didfds	rechist (sh.c)	rechist	no
+	initdesc (sh.c)		no
+	error (sh.err.c)		yes
+		srcunit (sh.c)	no
+	donefds (sh.misc.c)		no
+		Perror (sh.err.c)	yes
+	execute (sh.sem.c)	execute	no
+		flush (sh.print.c)	yes
+		pchild (sh.proc.c)	no
+	doio (sh.sem.c)	doio	yes
+.TE
+.P
+Routines on the parent side of the fork that define \f2didfds\f1 are not a
+problem.  Routines on the parent side of the fork that use \f2didfds\f1 after
+routines on the child side of the fork may have set it are not a problem 
+since the parent resets \f2didfds\f1 after the \f2vfork\f1.
+.P
+The routine \f2srcunit\f1 is called from \f2main\f1, \f2goodbye\f1, and
+\f2dosource\f1.  The code in it checks \f2didfds\f1 and, if it is one, calls
+\f2donefds\f1 which closes file descriptors 0, 1, and 2 and sets \f2didfds\f1
+to 0.  If this routine is called from \f2goodbye\f1 then the program is about
+to exit anyway so there is no problem.  If it is called from \f2main\f1, no
+fork has occurred so again there is no problem.  If it is called from
+\f2dosource\f1 again there is no problem since this occurs if the built-in
+\f2source\f1 was seen, and no \f2vfork\f1 ever took place for built-ins.
+.P
+The routine \f2rechist\f1 does not present a problem since it is only called
+from \f2main\f1 (in which case no fork has taken place), or from \f2goodbye\f1
+in which case the program is about to exit anyway.
+.P
+The routine \f2Perror\f1 checks \f2didfds\f1 and, if it is 0, duplicates
+file descriptor 2.  It then calls \f2error\f1.  Note that \f2error\f1 sets
+\f2didfds\f1 to 0, so this is not a problem.
+.P
+The routine \f2flush\f1 uses \f2didfds\f1 in a \f2#define\f1 block which is
+not defined for HP-UX.  The variable is \f2LFLUSHO\f1.
+.P
+The routine \f2pchild\f1 uses \f2didfds\f1 to pick an output file descriptor
+and then to do a write and a flush.  Since the \f2error\f1 routine did not
+specifically close units 0, 1, and 2, the fact that they may be written to
+is probably OK.
+.P
+The routine \f2doio\f1 is not a problem since it is only called by \f2execute\f1
+just after the fork from the child side.
+.sp 1
+.H 2 "Code Changes for FORK/VFORK."
+This analysis shows that \f2doneinp\f1 needs to be passed back
+to the parent somehow if the child would have been the result of a vfork and
+it exited with an error, specifically from the \f2error\f1 routine.  Since
+both forked and vforked children can call this routine, it is necessary for 
+the routine to know whether it is being called from a forked or vforked child.
+.P
+This was accomplished by adding a global boolean \f2childVfork\f1 which is
+set in \f2execute\f1 after the fork.  If the variable containing the process
+id is 0, this variable is set to \f2FALSE\f1 (0), indicating that this is the
+parent process.  Otherwise, a check is done that was in the original code set
+apart by \f2#ifdef VFORK/#endif\f1.  This check determined whether a vfork or
+a regular fork would be done.  In the new code, this check determines whether
+\f2childVfork\f1 is set to \f2FALSE\f1 (0, indicating the child would have
+been the result of a fork) or \f2TRUE\f1 (1, indicating the child would have
+been the result of a vfork).
+.P
+The problem of how to get this information back to the parent is interesting.
+Note that it only occurs as the result of an error condition, when the command
+cannot be executed for some reason.  Also, it only occurs when the child would
+have been a vforked child, which was only the case for regular commands.  Any
+command that contained parentheses, backquotes, or built-ins went through the
+fork path anyway.  So it seems reasonable to assume that this condition is
+an exception, and that changes to deal with it should not hinder normal 
+execution.
+.P
+For these reasons, the use of interprocess communication was not chosen.  If
+communication via something like shared memory was used, the parent would have
+to incur quite a bit of overhead checking on each child process, most of
+which would have nothing to report.  The parent would have to be responsible
+for setting up the shared memory for each child, and cleaning it up as well
+once the information had been obtained.  This seems like unreasonable overhead.
+.P
+The alternative chosen was to pass this information back in the exit status
+of the child, from the \f2error\f1 routine.  Normally, the child would exit 
+with a status of 1.  The \f2error\f1 routine was changed so that if the process
+calling it would have been the result of a vfork and it wanted to set
+\f2doneinp\f1, then it sets the exit value to 1<<7.  Then it OR's
+in the original exit value of 1, before calling \f2exit\f1.  This will result in
+a child which would have been the result of a fork exiting with a value of 1,
+and a child which would have been the result of a vfork and which set
+\f2doneinp\f1 exiting with a value of 129.
+.P
+Next the child signal handler was modified.  The changes are just after the
+signal handler has determined that the process id of the terminated child is
+one that it cares about.  Code was added at this point to examine the exit
+value of the child process.  If the uppermost and the lowermost bits are set,
+then this indicates that a child that would have been the result of a vfork 
+exited with an error and set \f2doneinp\f1.  In this case \f2doneinp\f1 is set 
+to a 1.  All other cases do not cause a change in \f2doneinp\f1.  The only 
+problem that I can see with this is that if some child process exits with an 
+arbitrary value where the uppermost bits and the lowermost bit are set in the 
+exit status, this will cause the program to terminate.  (Note that if the 
+interprocess communication via shared memory were used then this would not be a
+problem.  However, it seems like this solution will not penalize the parent 
+shell as much as an interprocess communication solution.)  It also seems that
+if children return exit status values other than 0 they are indicating a 
+problem anyway, so terminating a shell script would not be unreasonable.  The 
+overall result is that some shell scripts may terminate under the 8.0 version 
+of csh whereas they didn't in previous versions.
+.P
+After \f2doneinp\f1 is set, the 16th bit in the actual status returned to the
+signal handier is cleared.  (The exit value is determined by right shifting 
+the status integer 8 positions, resulting in an 8-bit number.  To clear the
+real bit, the 16th bit of the status integer must be cleared.)  It is necessary
+to clear this bit because the status is stored in \f2CH_status\f1 and becomes
+the exit value of the entire shell if no other commands are executed that
+change this status value.  The result of not clearing this 16th bit is that
+the shell passes it back to its parent.  If the parent is also a \f2csh\f1, 
+then it sets \f2doneinp\f1 and terminates, again propagating the exit status.
+This propagation continues until the user is logged out.
+.P
+It is probably worthwhile to note that when this problem first surfaced (shell
+scripts not terminating on errors), it was found because the shell scripts 
+continued execution but the input to the shell became hopelessly confused.
+This seems to indicate that csh is not cleaning up input correctly in order
+to continue execution with the subsequent portions of the shell script.  It
+would probably be a major undertaking to figure out how to fix this.  So the
+alternative of figuring out how to make the scripts terminate on errors was
+chosen.
+.sp 1
+.H1 "Job Numbers."
+A defect was submitted against the use of job number 0.  The defect was that
+a message \f2BUG: process flushed twice\f1 is printed rather than the error
+message \f2%0: No such job.\f1  This one turned out to be in the routine
+\f2pfind ()\f1, which searches through the process table for the specified
+job number.  The problem is that the process table keeps a job number which
+is incremented as new jobs are added; for example \f2sleep 10&\f1 generates an
+entry with job number \f21\f1, \f2sleep 10&\f1 generates an entry with job
+number \f22\f1, etc.  The problem is that as a job finishes, the entry in the
+process table is invalidated, but the associated memory isn't freed right
+away.  The invalidation consists of setting the process id to 0 and the job
+number to 0.  The defect occurs since the \f2pfind ()\f1 routine searches
+for the first entry with a job number of 0 and finds a job that has already
+finished.  It returns this entry to the calling routines.  These routines
+in turn wait for the job (using the routine \f2pjwait ()\f1).  As a consequence
+of the wait (which finishes immediately since the job is already done), the
+process table is flushed again for this job by the routine \f2pflush ()\f1.
+However, the first check in this routine is for a process id of 0, which was
+set when the job was flushed the first time.  The routine then prints the
+\f2BUG: process flushed twice\f1 error message.
+.P
+The fix for this defect is to check for a job number of 0 in the \f2pfind ()\f1
+routine, then to print the error message \f2No such job\f1 at this point and
+not bother searching the process table.
+.P
+The associated defect number is FSDlj07349.
+.sp 1
+.H 1 "@ Built-in."
+If a shell script contains a line like '@ hours = -1' then the shell determines
+that the @ is a built-in and causes dolet () to be called.
+.sp 1
+.H 2 "Major Routines Called."
+.S 4
+.TS
+llllllllllll.
+Routine	calls	which calls	...
+_
+dolet (sh.set.c)	alnum (sh.misc.c)
+	getinx (sh.set.c)
+	savestr (sh.set.c)	calloc (sh.misc.c)
+	xset (sh.set.c)	exp (sh.exp.c)	exp[0-2] (sh.exp.c)	exp2[a-c] (sh.exp.c)	exp3 (sh.exp.c)	exp3a (sh.exp.c)	exp[4-6] (sh.exp.c)	globone (sh.glob.c)	savestr
+		exp	...	exp2c	xfree (sh.set.c)	cfree (sh.misc.c)	free (alloc.c)
+		putn (sh.set.c)	savestr
+	bferr (sh.err.c)
+	asx (sh.set.c)
+	set (sh.set.c)	calloc
+		savestr
+		set1 (sh.set.c)	setq (sh.set.c)	blkfree (sh.misc.c)	xfree (sh.set.c)
+	dohash (sh.exec.c)
+	xfree 
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+.sp 1
+.H 1 "Repeat Built-in."
+If a \f2repeat\f1 is seen in a command line, csh recognizes that this is a
+built-in, and \f2execute\f1 calls \f2func\f1 with \f2repeat\f1 as the function
+to execute.  This causes \f2dorepeat\f1 to be executed.
+.sp 1
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllll.
+Routine	calls	which calls	...
+_
+dorepeat (sh.func.c)	reexecute (sh.func.c)	execute (sh.sem.c)	pfork (sh.proc.c)	palloc (sh.proc.c)
+			pwait (sh.proc.c)	pjwait (sh.proc.c)
+			doexec (sh.exec.c)	texec (sh.exec.c)
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+This routine gets the number of times to execute the command and sits in a 
+\f2while\f1 loop till the command has been executed the proper number of times.
+The actions in the \f2while\f1 loop are to re-enable signal handling for 
+\f2SIGINT\f1, to call \f2reexecute\f1, and to decrement the loop counter.
+.P
+The \f2reexecute\f1 routine sets the command flags by OR'ing in FREDO and
+AND'ing in FSAVE.  It then calls \f2execute\f1.
+.P
+The \f2execute\f1 routine calls \f2pfork\f1 if the command to be executed is
+a regular command and then ends up waiting for the command to finish execution
+by calling \f2pwait\f1.  From \f2pfork\f1, the child process continues back to
+\f2execute\f1 and calls \f2doexec\f1 and then \f2texec\f1 to actually perform
+an \f2exec\f1 of the command.  The parent calls \f2palloc\f1 to fill in the
+csh process information about the command before returning to \f2execute\f1.
+.sp 1
+.ne 45
+.H 1 "Setenv Built-in."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllll.
+Routine	calls	which calls	...
+_
+dosetenv(sh.func.c)	setenv (sh.func.c)	blk_to_short (sh.misc.c)	calloc (sh.misc.c)
+			to_short (sh.misc.c)	
+			savestr (sh.set.c)	Strlen (sh.misc.c)
+				calloc
+				Strcpy (sh.misc.c)
+		Strspl (sh.misc.c)	calloc 
+			Strcpy
+			Strcat (sh.misc.c)
+		xfree (sh.set.c)	cfree (sh.misc.c)	free (alloc.c)
+		blkspl (sh.misc.c)	calloc
+			blklen (sh.misc.c)
+			blkcpy (sh.misc.c)
+			blkcat (sh.misc.c)	blkend (sh.misc.c)
+				blkcpy
+		scan (sh.glob.c)	trim (sh.glob.c)
+		blk_to_char (sh.misc.c)	blklen
+			calloc
+			to_char (sh.misc.c)
+			savebyte (sh.misc.c)	calloc
+				strcpy
+				strlen
+		blkfree (sh.misc.c)	xfree
+		setenv
+		to_short
+		to_char (sh.misc.c)
+	importpath (sh.c)	calloc
+		savestr
+		set1 (sh.set.c)	...
+	dohash (sh.exec.c)
+	xfree
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+This section begins by checking if the LANG variable has been changed.  If
+so, it calls \f2setlocale\f1.  It also checks to see if the variable is
+LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME.  In each of these
+conditions \f2setlocale\f1 is called.  The majority of the work occurs in
+\f2setenv\f1.
+.P
+The first time this routine is called, it copies the entire character version
+of the environment block (\f2environ\f1) to a block of shorts and stores them
+in \f2Environ\f1.  
+.P
+In all cases, the block (\f2environ\f1 for non-NLS and \f2Environ\f1 for NLS)
+is searched for the string name that is being defined.  If found, the 
+definition string is saved in a new string, along with the '=' character.
+Then the environment name is save along with these to form a string like:
+\f2<name>=<string>\f1.  Temporary memory that was used in creating all these
+strings is freed.  Then the \f2environ\f1 or \f2Environ\f1 pointer is set
+to point to this new string, and the entire old one is freed.  Finally, if
+the program is running in NLS mode, the entire short version of \f2Environ\f1
+is converted to characters and replaces the old \f2environ\f1 block.  Memory
+from the old block is freed.
+.P
+Now if the environment name wasn't found, a new string with just the name and
+'=' is created and is stored at the end of the \f2environ\f1 or \f2Environ\f1
+block.  Again, if NLS is being used, then the short version of the environment
+is copied to a character version for \f2environ\f1 and the old copy of 
+\f2environ\f1 is freed.  THEN, \f2setenv\f1 is called again.  The result of
+this second call is that the environment string is found and the new value
+replaces the non-existent old value.  This seems terribly redundant.  It 
+seems like since you had to add the new name in anyway, you could have just
+added the value at the same time.
+.P
+Previous versions of \f2csh\f1, like 7.0 and earlier, frequently created new
+copies of all these versions of \f2environ\f1 and \f2Environ\f1 without
+freeing the existing copies.  Several changes were made to the code to solve
+this problem.  This problem really exhibited itself with this simple shell
+script:
+.P
+.in +5
+\f5
+#!/bin/csh
+ps -lfp $$
+@ numLoops = 0
+while ($numLoops <= 200)
+  unsetenv tmp
+  setenv tmp 'abcdefg'
+  @ numLoops += 1
+end
+ps -lfp $$
+\f1
+.in -5
+.P
+This script simply sets and unsets an environment variable called \f2tmp\f1.
+A snapshot of the number of pages used is taken before and after the loop.
+The results of this script are outlined in the table below:
+.P
+.TS
+.center;
+ccc
+lll.
+HP-UX Release (what string)	Pages Before Loop	Pages After Loop
+_
+7.0 (64.41.1.1)	65	366
+8.0 (66.65)	63	63
+.TE
+.sp 1
+.H 1 "Unsetenv Built-in."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllllll.
+Routine	calls	which calls	...
+_
+dounsetenv (sh.func.c)	unsetenv (sh.func.c)	blk_to_short (sh.misc.c)	calloc (sh.misc.c)
+		blkfree (sh.misc.c)	xfree (sh.set.c)	cfree (sh.misc.c)
+				free (alloc.c)
+		blkspl (sh.misc.c)	calloc
+			blklen (sh.misc.c)
+			blkcpy (sh.misc.c)
+			blkcat (sh.misc.c)	blkend (sh.misc.c)
+				blkcpy
+		xfree
+		blk_to_char (sh.misc.c)	blklen
+			calloc
+			to_char (sh.misc.c)
+			savebyte (sh.misc.c)	calloc
+				strcpy
+				strlen
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+This section begins by checking if the LANG variable has been changed.  If
+so, it calls \f2setlocale\f1 with a NULL language.  It also checks to see if 
+the variable is LC_COLLATE, LC_CTYPE, LC_MONETARY, LC_NUMERIC, or LC_TIME.  In 
+each of these conditions \f2setlocale\f1 with a NULL language is called.  The 
+majority of the work occurs in \f2unsetenv\f1.
+.P
+This routine first copies the character version of the environment 
+(\f2environ\f1) to a short version, \2Environ\f1.  If a previous copy of 
+\f2Environ\f1 existed, it is freed.  Next the block is searched for the name
+of the variable being deleted.  Since the variables are always added at the
+end of the block (see \f2Setenv Built-in\f1, this could take awhile.  Once the
+name is found, a pointer to it is kept.  Then the block up to the pointer and
+from the entry just past the pointer to the end are used to create a new
+block of environment pointers.  This new block of pointers does not contain
+the pointer to the environment string that was 'deleted'.  Next the actual
+string pointed to by the unwanted pointer is freed, then the entire block of
+pointers that contained the unwanted pointer is deleted.  Finally, if NLS
+is being used, the entire short version of the environment, stored in 
+\f2Environ\f1, is copied into a character version for \f2environ\f1.  The 
+memory used by the old copy of \f2environ\f1 is then freed.
+.P
+Previous versions of \f2csh\f1, like 7.0 and earlier, frequently created new
+copies of all these versions of \f2environ\f1 and \f2Environ\f1 without
+freeing the existing copies.  Several changes were made to the code to solve
+this problem.  This problem is shown in the discussion above (\f2Setenv
+Built-in.\f1).
+.sp 1
+.H 1 "Sending SIGSTOP to a Repeat Loop."
+The setup and processing to start the loop are described in the \f2Repeat
+Built-in\f1 section.  This section describes the processing that occurs if
+the command being executed in the loop is stopped with a SIGSTOP.  This can
+most easily occur by typing [CNTRL][Z] in the window where the shell is
+running.  At this point the parent csh is most likely in the \f2pjwait\f1
+routine.
+.sp 1
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllll.
+Routine calls	which calls	...
+_
+pchild (sh.proc.c)	
+pjwait (sh.proc.c)	pintr1 (sh.c)	draino (sh.print.c)
+		error (sh.err.c)	btoeof (sh.lex.c)	wfree (sh.func.c)
+				bfree (sh.lex.c)
+			reset/longjmp	process (sh.c)
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+Apparently, a SIGSTOP sent causes a SIGCLD to be sent to the parent csh, which
+is waiting in \f2pjwait\f1.  This causes execution to jump to the signal
+handler, \f2pchild\f1.  In general, the process structure will have flags set
+that indicate that the process is running and in the foreground 
+(p_flags=PRUNNING(1)|PFOREGND(256)).  These flags are AND'd with 
+NOT(PRUNNING|PSTOPPED(2)|PREPORTED(4096).  If the process was stopped (the
+status number in the return value reported by the \f2wait\f1 indicates this)
+then the flags are OR'd with PSTOPPED.
+.P
+Next all the processes in the 'job' are checked and their flags OR'd together.
+If there is only one process in the 'job' then the process structure points
+to itself (the \f2p_friends\f1 link), otherwise this link points to the next
+process structure in the 'job'.  Eventually the process structures will point
+back to the first process in the 'job'.
+.P
+The original process structure flags are next AND'd with NOT(PFOREGND).  If
+all the flags from all the process structures in the 'job' do not contain 
+PRUNNING and PREPORTED, then the process structures are again checked and,
+if the PSTOPPED bit is set in the structure the PREPORTED bit is set also.
+The process leader structure is found by looping till the \f2p_leader\f1
+field is 1.  If the flags from all the process structures in the 'job' have
+the PSTOPPED bit set then the current process (\f2pcurrent\f1 is set to
+the process leader.  If this global was already set, and it wasn't set to the
+process leader then \f2pprevious\f1 is used to save the previous current
+process.
+.P
+If the flags from all the process structures in the 'job' had the PFOREGND
+bit set then nothing else is done and the routine continues by checking to
+see if another child has stopped (it does another \f2wait\f1).  If there are
+no more children that have signalled, then the routine exits.  In this case
+execution continues in \f2pjwait\f1.  If the flags did not have the PFOREGND
+bit set then some messages are printed and the routine again checks for more
+children that have signalled.
+.P
+Back in \f2pjwait\f1, the routine is in an infinite loop which constantly
+checks the flags of all the process structures in the 'job'.  As soon as the
+PRUNNING bit is turned off it breaks out of this loop.  If the flags have
+the PSIGNALED(16), PSTOPPED, or PTIME(64) bits set then a message about the
+process is printed. 
+.P
+Next, if the PSTOPPED bit or PINTERRUPTED(8192) bits are set and this is an
+interruptible shell (\f2setintr\f1 is not 0), and either \f2gointr\f1 is
+not set or it is set but not equal to a dash, then \f2pintr1\1 is called.
+In addition, if the PSTOPPED bit is not set, \f2pflush\f1 is called just
+before the call to \f2pintr1\f1.
+.P
+The main thing that \f2pintr1\f1 does is call \f2error\f1.  Now in this case
+no error has occurred, so most of \f2error\f1 doesn't do anything.  However,
+\f2error\f1 does call \f2btoeof\f1 which does an \f2lseek\f1 to the end of
+the input file and calls \f2wfree\f1 to free up any memory allocated to hold
+\f2whyle\f1 structures and \f2bfree\f1 to free any extra input buffer memory.
+Finally, \f2error\f1 does a \f2longjmp\f1 (via the macro \f2reset\f1).  It
+appears that this resets the program to the previous \f2setjmp\f1 (via the
+macro \f2setexit\f1) which is in the routine \f2process\f1.  The \f2process\f1
+routine resumes execution as if a command had just finished execution.  It 
+prints a prompt and then reads the next command.
+.P
+The net result of this is that the currently executing command still has a 
+process structure in the process linked list, but all of the other commands
+in the repeat loop have been forgotten.  Thus, if the \f2fg\f1 built-in is
+executed to continue the command just stopped, it will continue just the 
+single command from that one iteration of the \f2repeat\f1 loop and then
+terminate the 'job' normally.  No subsequent iterations will occur.
+.sp 1
+.H 1 "Ignoreeof and Multiple EOFs."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllllll.
+Routine	calls	which calls	...
+_
+doset (sh.set.c)	set (sh.set.c)	set1 (sh.set.c)	setq (sh.set.c)	adrof1 (sh.set.c)
+main (sh.c)	process (sh.c)	lex (sh.lex.c)	word (sh.lex.c)	getC (sh.lex.c)	readc (sh.lex.c)	bgetc (sh.lex.c)
+					getdol (sh.lex.c)	getC
+			getexcl (sh.lex.c)	getC
+				getsub (sh.lex.c)	getC
+				getsel (sh.lex.c)	getC
+				gethent (sh.lex.c)	getC
+			readc
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+When you type in \f2set ignoreeof\f1, the \f2doset\f1 routine is called.  It
+calls \f2set\f1, which calls \f2set1\f1.  This routine checks for globbing
+in the value (which is NULL) and then calls \f2setq\f1.  This routine uses
+\f2adrof1\f1 to search for the variable in the linked list of variables, whose
+head is in \f2shvhed\f1.  If the variable is not in the list already 
+(\f2adrof1\f1 returns NULL) then a new structure is created for it and the
+variable name put in the structure.  Finally the value (NULL) is added to the
+structure.
+.P
+The use of \f2ignoreeof\f1 is as follows.  In normal input mode, the program
+uses the \f2lex\f1 routine to get a command to execute.  This routine calls
+\f2word\f1 to get a word, which in turn calls \f2getC\f1 which calls \f2readc\f1
+which really calls \f2bgetc\f1 to get a character.  If the character is 
+\f2-1\f1, this indicates an EOF.  In this case, \f2readc\f1 performs checks
+to see if the tty is in canonical mode.  If not it sets the global 
+\f2doneinp\f1 to 1 and then does a \f2reset\f1 (longjmp).  This appears to
+go back to the beginning of the \f2process\f1 main loop.  In this loop, the
+value of \f2doneinp\f1 is checked, and if it is 1, the program terminates.  If 
+it is in canonical mode, the next check is for a static counter.  If the 
+counter is greater than 25, again \f2doneinp\f1 is set to 1 and a \f2reset\f1
+is done.  If the counter is OK, the program eventually checks the existence
+of the variable \f2ignoreeof\f1.  It does this by calling \f2adrof\f1, which
+in turn simply calls \f2adrof1\f1.  If \f2adrof1\f1 finds the variable name
+in the linked list it returns a pointer to it.  Thus, back in \f2readc\f1,
+\f2adrof\f1 will return a value that is not zero.  In this case a message is
+printed out that the EOF is being ignored.  This message is different if the
+shell is a login shell (\f2Use "logout" to logout.\f1) versus if it is not a 
+login shell (\f2Use "exit" to leave csh\f1).
+.P
+A problem was reported that typing lots of EOFs would eventually log you out.
+Given the global counter this is in fact the case.  However, the counter needs
+to remain so that csh will not loop forever in the case where a read returns
+and EOF (the end of shell scripts?).  The \f2readc\f1 routine did not 
+initialize the counter (\f2sincereal\f1), but it did reset it to 0 if the
+call to \f2bgetc\f1 returned something besides a -1.  However, there were
+many other places in \f2readc\f1 where a character (newline, space, -1, or
+the lookahead character) was returned without resetting the counter.  The
+code has been changed to reset the counter (\f2sincereal = 0\f1) just before
+every return from \f2readc\f1.
+.sp 1
+.H 1 "Backquote Evaluation."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+llllllllllll.
+Routine	calls	which calls	...
+_
+glob (sh.glob.c)	collect (sh.glob.c)	dobackp (sh.glob.c)	backeval (sh.glob.c)	lex (sh.lex.c)	word (sh.lex.c)	getC (sh.lex.c)	readc (sh.lex.c)	bgetc (sh.lex.c)
+process (sh.c)	lex
+execute (sh.sem.c)	doio (sh.sem.c)	Dfix1 (sh.dol.c)	Dfix2 (sh.dol.c)	Dword (sh.dol.c)
+.TE
+.S 10
+.sp 1
+.H 2 "Description."
+When a command is being read in, the \f2process\f1 routine calls \f2lex\f1 to
+do this.  A linked list of words in the command is built in \f2lex\f1.  Words
+are obtained by \f2word\f1 and are placed in structures.  The head of the 
+linked list is passed to \f2lex\f1.  The loop in \f2lex\f1 continues to get
+words until a word that consists of a newline is seen.
+.P
+The \f2word\f1 routine calls \f2getC\f1 to get characters to add to a string
+which will be returned to \f2lex\f1.  If a quoting character is seen, then
+\f2getC\f1 is called to find characters up to the matching quote character.  If
+a backslash is seen the next character is obtained using \f2getC\f1 and the 
+character is designated as being quoted by setting the highest order bit.
+Previously, if a backslashed newline was seen but it was inside backquotes,
+it was not turned into a quoted character.  This lead to the failure of csh
+to allow lines with backslashed newlines embedded inside backquotes.  This has
+been changed so that all backslashed newlines are turned into quote characters
+by OR'ing them with 077777.  
+.P
+The \f2getC\f1 routine calls \f2readc\f1 to get characters, which in turn
+calls \f2bgetc\f1 to get them out of the buffers.
+.P
+Once a command has been collected, it is processed using \f2execute\f1.  In
+the case of the backquoted string, this leads to the routines \f2dobackp\f1
+and \f2backeval\f1.  In \f2backeval\f1, a child process is forked.  The child
+connects its standard out and err to a pipe, which is read by the parent.  All
+other file descriptors are closed.  It then sets a global pointer to the string
+that was in backquotes, and calls \f2lex\f1 again.  This time, when the
+processing gets down to \f2readc\f1, it reads characters from the global 
+pointer string.  Part of the processing that \f2backeval\f1 did was to strip
+off the quote bit from all characters in the string.  In the case of the
+quoted newline, this turns it into a regular newline, which causes the input
+string to be terminated as soon as the newline is seen.  This routine was
+changed to leave quoted newlines alone.  Now, these get passed intact to the
+input string and then get processes again by \f2lex\f1 as quoted newlines.
+.P
+After the string has been read in, \f2execute\f1 eventually gets called to
+process it.  This in turn calls \f2doio\f1, ..., which calls \f2Dword\f1.  One
+of the things \f2Dword\f1 does is to turn quoted newlines into spaces.
+.P
+As part of investigating this area, all references to the quote bit (QUOTE)
+were traced.  The following information was discovered.
+.P
+.S 6
+.TS
+llll.
+Routine	Use
+_
+Dword (sh.dol.c)	used to set quote bit 
+	used to check for quoted newline
+	used to check for backquotes inside double quotes
+DgetC (sh.dol.c)	used to set quote bit
+Dgetdol (sh.dol.c)	used to check for quoted less than sign
+Dredc (sh.dol.c)	used to set quote bit
+heredoc (sh.dol.c)	used to set quote bit
+word (sh.lex.c)	used to set quote bit
+getC (sh.lex.c)	used to set quote bit
+getdol (sh.lex.c)	used to set quote bit 
+domod (sh.lex.c)	used to set quote bit
+execbrc (sh.glob.c)	used to check for quote bit
+backeval (sh.glob.c)	used to set quote bit
+echo (sh.func.c)	used to set quote bit
+printprompt (sh.c)	used to set quote bit
+putchar (sh.print.c)	used to check for quote bit 
+execute (sh.sem.c)	used to check for quote bit
+.TE
+.S 10
+.sp 1
+.ne 30
+.H 1 "if-then-else Construct."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+lllllllll.
+Routine	calls	which calls	...
+_
+doif (sh.func.c)	exp (sh.exp.c)	........ LOTS OF OTHER ROUTINES
+	lshift (sh.misc.c)
+	reexecute (sh.func.c)
+	donefds (sh.misc.c)
+	bferr (sh.err.c)
+	search (sh.func.c)	bseek (sh.lex.c)
+		srchx (sh.func.c)
+		lastchr (sh.misc.c)
+		Strlen (sh.misc.c)
+		Strcmp (sh.misc.c)
+		eq (sh.misc.c)
+		strip (sh.misc.c)
+		Dfix1 (sh.dol.c)
+		Gmatch (sh.glob.c)
+		xfree (sh.set.c)
+		getword (sh.func.c)	readc (sh.lex.c)
+			unreadc (sh.lex.c)
+			any (sh.misc.c)
+			bferr
+doelse (sh.func.c)	search
+.TE
+.S 10
+.sp 1
+.H 2 "General Description."
+It appears that the handling of \f2if-then-else\f1 constructs is not at all
+symmetric, which hinders the process of understanding how they work.  The
+following description may therefore not be complete.  I will discuss two
+examples, one where the \f2if-clause\f1 is TRUE, and one where it is FALSE.
+.sp 1
+.H 3 "A TRUE if-clause."
+The following example will be discussed.
+.in +5
+\f5
+.nf
+if (<TRUE>) then
+  <TRUE block of statements>
+else
+  <FALSE block of statements>
+.fi
+\f1
+.in -5
+.sp 1
+A command tree is built for each line.  There do not seem to be any connections
+between the trees, and the command trees have information on the right side.
+For each node in the tree, the routine \f2execute ()\f1 is called to execute
+it.  Depending on the outcome of the \f2if-clause\f1, trees may or may not
+be built for the \f2TRUE block\f1, \f2else-clause\f1, and \f2FALSE block\f1.
+Thus, in this simple case, we start with the following tree:
+.P
+.nf
+\f5
+         ROOT --> <if (<TRUE>) then>
+\f1
+.fi
+.P
+The \f2doif ()\f1 routine is called to execute the command.  The expression
+is then evaluated.  If it is TRUE, then \f2doif ()\f1 terminates.  This causes
+the next lines to have trees built for them, and to be executed in the 
+normal fashion.  Thus we next get the following tree; one for each line in
+the \f2TRUE block of statements\f1:
+.P
+.nf
+\f5
+         ROOT --> <TRUE block statement>
+\f1
+.fi
+.P
+Once these finish, we get the command with the \f2else\f1 in it.  This may 
+either be an \f2else\f1 on a line by itself, or an \f2else if\f1.  The tree
+is then:
+.P
+.nf
+\f5
+         ROOT --> <else>      \f3OR\f5        ROOT --> <else if (...) then>
+\f1
+.fi
+.P
+In either case, the \f2doelse ()\f1 routine is called, which simply calls
+\f2search ()\f1 with a \f2type\f1 of \f2ZELSE\f1 and a \f2level\f1 of 0.
+This routine in turn calls \f2getword ()\f1 to return the next word of the
+next line.  This line is part of the \f2<FALSE block of statements>\f1.
+.P
+If it is a regular command, then the default is taken regarding the first
+word, which is to go to the end of the line and then get the first word in
+the input line.  If the word is a construct keyword (for example, if the 
+\f2else\f1 was followed on the next line (or on the same line) with another
+\f2if-then\f1 line), then the \f2level\f1 may be incremented (as in the case 
+of another \f2if\f1) or decremented (as in the case of an \f2endif\f1). 
+.P
+But the point is that all executable commands are read and not executed.  
+The routine \f2search ()\f1 terminates when the level becomes a negative 
+number, or the input runs out.  The former occurs when enough \f2endif\f1 
+commands have been seen, and the latter causes an error to occur.  
+.P
+When the routine finally finishes, control is passed back up to the main 
+routine which gets another line to execute (if there is one).
+.sp 1
+.ne 10
+.H 3 "A FALSE if-clause."
+The following example will be discussed.
+.in +5
+\f5
+.nf
+if (<FALSE>) then
+  <TRUE block of statements>
+else
+  <FALSE block of statements>
+.fi
+\f1
+.in -5
+.sp 1
+In this case, the \f2doif ()\f1 routine determines (using \f2exp ()\f1 routine
+and all of its associated subroutines) that the \f2if-clause\f1 is FALSE.  
+In this case it calls \f2search ()\f1 directly with a \f2type\f1 of \f2ZIF\f1
+and a \f2level\f1 of 0.  This will end up "eating" lines in the \f2TRUE block
+of statements\f1 just like it did for the \f2FALSE block of statements\f1 in
+the previous example.  This will terminate when the \f2else\f1 is seen. 
+In this case case, since the \f2type\f1 was \f2ZIF\f1 and the \f2level\f1 was 
+0, the routine will simply return.  (Note that if the \f2level\f1 isn't 0, the
+routine loop simply goes to the next line and continues processing it.)  
+.P
+When the routine terminates, the rest of the line hasn't been read, so if the
+line was of the form \f2 else if (..) then\f1, the \f2if\f1 part is still in 
+the input and will be processed as the next command.  (That is, a tree will be 
+built for it, and this will be executed with the \f2execute ()\f1 routine.)
+.P
+The \f2FALSE block of statements\f1 is then executed as normal commands,
+complete with trees being built and executed with the \f2execute ()\f1 routine
+for each line of the \f2FALSE block of statements\f1 (as in the case of the 
+\f2TRUE block of statements\f1 in the example above).
+.P
+An interesting side effect of this is that no \f2endif\f1 statement is 
+necessary since each statement is now being executed from its tree, and all
+the routine associated with \f2endif\f1 does is to return.  Note however,
+that in the case of the TRUE \f2if-clause\f1 an appropriate number of
+\f2endif\f1 statements were necessary to get past the \f2else\f1 and its
+associated block of statements.
+.sp 1
+.H 3 "Further Observations."
+This whole thing is even more interesting when you try it from the keyboard.
+But it makes sense (in a distorted way I guess) when you think about how it
+works.
+.sp 1
+.in +5
+.nf
+\f5
+% set a=1
+% if ($a == 1) then
+%
+\f1
+.fi
+.in -5
+.sp 1
+In this case, the \f2if-clause\f1 sees a TRUE expression and the \f2doif ()\f1
+routine terminates, leaving the rest of the commands in the TRUE block to 
+be executed in the normal fashion.  Continuing:
+.sp 1
+.in +5
+.nf
+\f5
+% date
+Tue Sep 25 16:47:00 MDT 1990
+% else
+? echo bad
+? endif
+%
+\f1
+.fi
+.in -5
+.sp 1
+This sort of makes sense, since commands are executed up to the \f2else\f1,
+which causes the routine \f2doelse ()\f1 to be executed, which in turn calls
+\f2search ()\f1.  This basically ignores command lines until a closing
+\f2endif\f1 is seen, at which point we go back to entering commands normally.
+(the question mark seems to be the secondary prompt for csh).
+.P
+Now the FALSE version:
+.sp 1
+.in +5
+.nf
+\f5
+% set a=0
+% if ($a == 1) then
+?
+\f1
+.fi
+.in -5
+.sp 1
+This time we get the secondary prompt with the TRUE block of statements, which
+are being ignored by \f2search ()\f1 which is called from \f2doif ()\f1.
+Continuing:
+.sp 1
+.in +5
+.nf
+\f5
+? date
+? else
+% %
+\f1
+.fi
+.in -5
+.sp 1
+This time, once the \f2else\f1 is seen, the block of commands following it
+are to be executed as regular commands.  I think the extra primary prompt
+comes from the fact that the rest of the line containing the \f2else\f1
+hasn't been processed.  (Sure enough, if the line was:
+.sp 1
+.in +5
+.nf
+\f5
+? else if ($a == 0) then
+% 
+\f1
+.fi
+.in -5
+.sp 1
+only one prompt is printed.)  Continuing:
+.sp 1
+.in +5
+.nf
+\f5
+% % date
+Tue Sep 25 16:58:08 MDT 1990
+% endif
+%
+\f1
+.fi
+.in -5
+.sp 1
+Note that there is no way to tell the difference between the end of the
+\f2else\f1 block of statements and the rest of the commands typed in; the
+closing \f2endif\f1 is not necessary.
+.sp 1
+.H 1 "The Order of Getting Ready to Execute a Command."
+.H 2 "Major Routines Called."
+.S 4
+.TS
+llllllllll.
+Routine	calls	which calls	...
+_
+process (sh.c)	lex (sh.lex.c)	word (sh.lex.c)	getC (sh.lex.c)	getexcl (sh.lex.c)	getsub (sh.lex.c)	dosub (sh.lex.c)	subword (sh.lex.c)	domod (sh.lex.c)
+.TE
+.S 10
+.sp 1
+.H 2 "General Description."
+In the case of history substitution combined with modifiers, the modification
+appears to take place during the lexical processing.  It will thus take
+place on the original command line.  If dollar-sign variable substitution
+is requested, this takes place after the actual command execution is begun,
+in the \f2execute ()\f1 routine.  This can cause problems if the user assumes
+that history and modification really occur on the command after all 
+variables have been substituted.  For example:
+.sp 1
+.in +5
+\f5
+.nf
+set variable=prefix.suffix
+echo $variable
+!!:e
+.fi
+\f1
+.in -5
+.sp 1
+Here the history retrieves the original string \f2echo $variable\f1.  The
+program then attempts to extract the suffix (this is the operation of the
+\f2e\f1 modifier) from the string \f2echo\f1 and then the string 
+\f2$variable\f1.  In both cases this fails, so a lexicographical error is
+noted.  Once back in the \f2process ()\f1 routine, a check is made for
+such errors, and the error is printed, before the \f2execute ()\f1 routine
+(which is where the dollar-sign variable substitution takes place) is
+called.  Since the error occurred, a new command sequence is begun.
+.sp 1
+.H 1 "Piped Jobs and Process Group/Terminal Groups."
+.H 2 "General Description."
+FSDlj08802 and another related defect and a hot site are due to race 
+conditions in csh when piped jobs are started.  When a pipe cranks up, 
+\f2execute()\f1 is called recursively (once for a pipe, then for a command...).
+When the first command in the pipe is seen, it is forked by the parent.  In
+\f2pfork()\f1, since there is no current job, the process group is set to 
+the child's PID, and the terminal process group is set to this process group.
+Meanwhile, in the child process, it is spinning until its process group
+is not the parent PID.  Then it takes off.  (It seems like there is still a
+race condition here; if the child takes off and does output to the terminal
+before the parent resets the terminal process group to that of the child then
+the child could be stopped on tty output.)
+.P
+Then the parent goes back into execute and, since the PIPOU flag is set (output
+from this job goes to a pipe), it continues with the next child in the pipe.
+This time in \f2pfork()\f1, there is a current job (the first child), so the
+parent attempts to set the second child's process group to that of the
+current job.  If this fails (as it will if the first child has finished in
+the meantime), the process group is simply set to the PID of the second child.
+But the terminal process group is still set to the now invalid process group
+of the first child.  So the second child gets stopped on tty output when it
+tries to write to the tty.  This problem was fixed in \f2pfork()\f1, by adding
+a test after the attempt to set the second child's process group to that of the
+current job fails.  This test compares the terminal process group to the 
+process group of the first child (which was saved when the current job process
+group was obtained).  If they are the same, then the terminal process group
+is reset to the process group of the second child, which is the new current job.
+.P
+Back in the parent, this continues until a command is started which does not
+have the PIPOU flag set (i.e. the last command in the pipe).  In this case
+the parent goes to \f2pwait()\f1, which goes to \f2pjwait()\f1, which loops
+until a SIGCLD is seen.  So effectively the parent doesn't wait until all the
+commands in the pipe are started.  However, in the \f2pfork()\f1 routine, it
+releases SIGCLD just before it returns from that routine.  So the parent can
+be interrupted at just about any time due to some child in the pipe finishing,
+potentially before all the commands in the pipe are started.  Unfortunately,
+SIGCLD is also released in other places (such as in the glob routine (!)) so 
+we can't just rely on the parent waiting after all the commands are started in
+order to fix this race condition.  (In fact, this was the approach taken for
+ksh to fix this race condition; don't wait for any job in the pipe till all the
+jobs are started. In csh, since the wait is in the SIGCLD interrupt routine,
+there is no way to do this same thing unless we can guarantee that csh won't
+receive any SIGCLD signals until all the children in the pipe are started.)
+.sp 1
+.H 1 "SIGINT with Shell Scripts and Programs."
+.H 2 "General Description."
+A problem came up where a shell script called a program that was written to
+ignore SIGINT.  However, when SIGINT got sent, the csh running the script
+died.  When the interactive csh spins off a new csh to execute the script,
+the new csh gets put into a new process group.  All commands in the shell 
+script get put in that same process group.  The intermediate shell that is
+executing the shell script has all of its signals set to SIG_DFL.  This can
+only be changed by using the \f2onintr\f1 command in the shell script.
+.P
+If a SIGINT signal is sent to the process group (\f2kill -2 -PROC_GRP\f1), then 
+the intermediate shell executing the script commands terminates since that is
+the default for SIGINT.  
+.P
+The only way around this problem is to put an \f2onintr -\f1 into the shell
+script.  This will allow the intermediate shell to ignore any SIGINT signals
+it sees, then any programs executed in that script can also ignore them and
+the behavior is as expected.  Note that SIGINT seems to be the only signal
+that can be ignored, so the intermediate shell can still get killed if it
+receives any signals whose default action is to cause the process to terminate.
+.sp 1
+.H 1 "Validations."
+The csh validations are all called from \f2prog\f1.  This is a Bourne shell
+script which directly executes other shell scripts.  Most of these shell scripts
+execute /bin/csh with an argument of a test script.  Two of them are csh scripts
+that contain tests.  Two of them create 8 and 16 bit tests, then execute 
+/bin/csh with these tests as arguments.  The others perform miscellaneous 
+actions.  These are summarized in the table below.
+.S 6
+.TS 
+ll.
+prog invocation	action
+_
+\./1.breakcont	/bin/csh 1.testprog
+\./2.case	/bin/csh 2.testprog
+\./3.comsequ	/bin/csh 3.testprog
+\./4.comsubs	/bin/csh 4.testprog
+\./5.fnamesubs	/bin/csh 5.testprog
+\./6.for	/bin/csh 6.testprog
+\./7.gorepeat	/bin/csh 7.testprog
+\./9.if	/bin/csh 9.testprog
+\./10.iordn	/bin/csh 10.testprog
+\./11.nice	/bin/csh 11.testprog
+\./12.path	/bin/csh 12.testprog
+\./13.psubs	/bin/csh 13.testprog
+\./14.sp.cd	/bin/csh 14.testprog
+\./15.sp.eval	/bin/csh 15.testprog
+\./16.sp.ex	/bin/csh 16.testprog
+\./18.sp.kill	/bin/csh 18.testprog
+\./20.sp.notify	/bin/csh 20.testprog
+\./21.sp.ppdir	/bin/csh 21.testprog
+\./22.sp.shift	/bin/csh 22.testprog
+\./23.sp.source	/bin/csh 23.testprog
+\./24.sp.umask	/bin/csh 24.testprog
+\./25.sp.wait	/bin/csh 25.testprog
+\./26.vars	/bin/csh 26.testprog
+\./27.while	/bin/csh 27.testprog
+\./30.misc	/bin/csh 30.testprog
+\./8.history	cat 8.testprog[1-2] | /bin/csh -i -e
+\./17.sp.jobs	/bin/csh 17.testprog >output; sed output
+\./19.tst	C program; set SIGHUP to SIG_DFL; /bin/csh 19.sp.nohup
+\./28.eight	convert tests to 8 bit; csh <tests>
+\./29.sixteen	LANG=japanese; convert tests to 8 bit; csh <tests>
+\./31.cdf	./31.test
+\./32.cdf	csh script; CDF pattern matching tests
+\./33.cdf	csh script; regular expression pattern matching tests
+.TE
+.S 10
+.sp 1
+.H 2 "28.eight"
+The tests and results files are converted to 8 bit by \f228.to8\f1.  They are
+placed in the same file, appended with \f2.8\f1.  So, for example, \f228.dir\f1
+becomes \f228.dir.8\f1.
+.S 6
+.TS
+lllll.
+tests converted to 8 bit	results files	num temp files	num removed	additional tests called
+_
+28.alias		2	1
+28.arg		2	2
+28.comsub		3	3
+28.dir		2	2
+28.evex	prog	4	4
+28.flow	28.f1.mast	5	5
+28.fnamesub	28.fn.mast[1-5]	17	17
+28.glob		7	7
+28.hist		2	2	28.hist.[1-2]
+28.hist.1	28.hist.mast	4	4
+28.hist.2		11	11
+28.iored		2	2
+28.minusc	prog	2	2
+28.set		0	0
+28.shift	tmp	1	1
+28.source		2	2
+28.util	28.util.mast	1	1	28.util.[1-2]
+28.util.1		5	5
+28.util.2		5	5
+28.var	tmp	1	1
+.TE
+.S 10
+.sp 1
+.H 2 "EUC/UJIS Tests."
+The tests for extended characters are in scripts whose names begin with
+\f234\f1.  They are built just like the 8-bit and 16-bit character tests; by
+converting the regular characters to larger sizes and creating new files whose
+names are appended with \f2.8\f1.  Files similar to those listed above in the
+discussion of the \f228.eight\f1 are used for these tests.
+.\"  This outputs a table of contents.  The string is used to print at the top
+.\"  of the page.  
+.SK 
+.TC 1 1 2 0 ""

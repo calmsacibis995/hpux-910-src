@@ -1,0 +1,11 @@
+## FacetTerm  vt320mode8  COMMON  description file  09/01/89
+#    VT300 8-Bit mode switchable to VT300 7-Bit and VT100 modes.
+#    !!! IMPORTANT NOTE !!!
+#    Set Terminal to:   XON/XOFF
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt320mode8.FC,v 70.1 92/03/09 16:56:16 ssa Exp $
+xon_xoff
+##--- CONTROL 8 bit ---##
+terminal_mode_default=1
+### vt300-8-bit=\E[63"p  multinational=\E[?42l G2_in_GR=\E} auto_wrap=\E[?7h
+enter_ca_mode=\E[63"p\E[?42l\E}\E[?7h

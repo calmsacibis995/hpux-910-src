@@ -1,0 +1,358 @@
+.H 1 "NFS and the Art of Symbolic Links (Mike Shipley)"
+NFS and symbolic links function differently than RFA and symbolic
+links.  Symbolic links with root relative pathnames with NFS are
+relative to the client root.  With RFA, they are relative to the
+server's root.
+Part of this testing will cover the differences.  I want
+to use NFS to set up remote symbolic links and then use NFS to access
+files through the links.  This will kill two birds with one set
+of tests.  The names of files that I will use are just to be used
+in a symbolic sense and not literally.  They do not take into 
+consideration the needs of the scaffold or of any additions needed
+to achieve the name space independence that concurrent tests require.
+
+.H 2  "Creating and Utilizing Symbolic Links over NFS"
+.nf
+RESPONSIBLE ENGINEER: Steve Booth
+DEPENDENCIES: A kernel from SSO supporting symbolic links
+ISSUES:
+.fi
+
+.sp 2
+.H 3 "Normal creation and access"
+.sp 1
+Mount the remote node (BLAH) on the directory /mnt.
+Create three symbolic links on BLAH.  This will test when NFS is
+used to access through a symbolic link, where will the access
+actually be made.  NFS should access relative to the client node (RFA
+will access relative to the server node).
+.nf
+    mount BLAH:/ /mnt
+
+    (ln -s   will create a symbolic link)
+    make a symbolic link named /mnt/tmp/a_sym_ln1 
+    containing  "/mnt/tmp/file1"
+    make a symbolic link named /mnt/tmp/a_sym_ln2 
+    containing  "/tmp/file2"
+    make a symbolic link named /mnt/tmp/a_sym_ln3 
+    containing  "file3"
+    make a symbolic link named /tmp/a_sym_ln_loc
+    containing /mnt/tmp/file1
+
+    write "REMOTE file1" in /mnt/tmp/file1.
+    write "LOCAL file2" in /tmp/file2.
+    write "REMOTE file3" in /mnt/tmp/file3
+    write "LOCAL file3" in /tmp/file3
+
+    cd /tmp
+    read /mnt/tmp/a_sym_ln1, expect "REMOTE file1"
+    read /mnt/tmp/a_sym_ln2, expect "LOCAL file2"
+    read /mnt/tmp/a_sym_ln3, expect "LOCAL file3"
+    read /tmp/a_sym_ln_loc, expect "REMOTE file1"
+
+    cd /mnt/tmp
+    read a_sym_ln1, expect "REMOTE file1"
+    read a_sym_ln2, expect "LOCAL file2"
+    read a_sym_ln3, expect "REMOTE file3"
+    read /tmp/a_sym_ln_loc, expect "REMOTE file1"
+    
+    write "REMOTE file1 through symlink" in a_sym_ln1
+    write "LOCAL file2 through symlink in a_sym_ln2
+    write "REMOTE file3 through symlink" in a_sym_ln3
+    cd /tmp
+    read /mnt/tmp/file1, expect "REMOTE file1 through symlink"
+    read /tmp/file2, expect "LOCAL file2 through symlink"
+    read /mnt/tmp/file3, expect "REMOTE file3 through symlink"
+
+    rm /tmp/file* /mnt/tmp/file* /tmp/a_sym_ln* /mnt/tmp/a_sym_ln*
+
+.fi
+
+.nf
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    0.5  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See above
+.fi
+
+.sp 2
+.H 3 "ll through symbolic link with NFS"
+.sp 1
+Create a directory on the remote machine with files in it.  Do an "ll"
+command through a symbolic link and an "ll" through NFS and compare
+the results (the -L option allows ls -l to work through a symbolic link).
+.nf
+    mount BLAH:/ /mnt
+    cd /tmp
+    ln -s /mnt/tmp/dir a_sym_ln1  
+    mkdir /mnt/tmp/dir
+    for i in a b c d e f g h i j k l m n o p q r s t u v w x y z 
+    do
+       touch /mnt/tmp/dir/$i
+    done
+    ls -l -L a_sym_ln1 >temp1
+    ls -l -L /mnt/tmp/dir >temp2
+    cmp temp1 temp2
+    rmdir -r /mnt/tmp/dir
+    rm a_sym_ln1
+.fi
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: The temp1 and temp2 files should be the same
+.fi
+
+
+.sp 2
+.H 3 "Reading symbolic links with NFS"
+.sp 1
+Create symbolic links containing path names of varying lengths and
+read back their contents using the readlink() system call.
+WARNING: The information returned by readlink() is NOT null 
+terminated.
+.nf
+
+    mount BLAH:/ /mnt
+    (ln -s   will create a symbolic link)
+    make a symbolic link named /mnt/tmp/a_sym_ln1 
+    containing  "/mnt/tmp/file1"
+    do a readlink() on /mnt/tmp/a_sym_ln1,
+      expect "/mnt/tmp/file1"
+
+    make a symbolic link named /mnt/tmp/a_sym_ln2 
+    containing  "/tmp/file2"
+    do a readlink() on /mnt/tmp/a_sym_ln2,
+      expect "/tmp/file2"
+
+    make a symbolic link named /mnt/tmp/a_sym_ln3 
+    containing  "file3"
+    do a readlink() on /mnt/tmp/a_sym_ln3,
+      expect "file3"
+
+    For the next tests, use a C program that calls
+    the symlink() system call to create the symbolic links
+
+    make a symbolic link named /mnt/tmp/a_sym_ln4
+    containing "/"  (just one character)
+    do a readlink() on /mnt/tmp/a_sym_ln4
+      expect "/"
+
+    make a symbolic link named /mnt/tmp/a_sym_ln5 to
+    contain 1023 characters.
+    do a readlink() on /mnt/tmp/a_sym_ln5,
+      expect the 1023 characters.
+
+    make a symbolic link named /mnt/tmp/a_sym_ln7 to
+    contain 1024 characters.  This should fail to work,
+    with errno=ENAMETOOLONG.  
+
+    make a symbolic link named /mnt/tmp/a_sym_ln7 to
+    contain 1025 characters.  This should fail to work,
+    with errno=ENAMETOOLONG.  
+    
+    make a symbolic link named /mnt/tmp/a_sym_ln8 to
+    contain the NULL string,
+    do a readlink() on /mnt/tmp/a_sym_ln8,
+      expect the NULL.
+
+.fi
+
+.nf
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See each test case
+.fi
+
+.sp 2
+.H 3 "Testing for the ELOOP error"
+.sp 1
+When parsing a pathname, eventually the number of symbolic links
+encountered can get to be so large, that an error is returned
+and that error is ELOOP(returned in errno).  So this test is to
+see if that number(whatever it is) is the same when parsing pathnames
+locally and over NFS.
+.nf
+ 
+    mount BLAH:/  /mnt
+
+    cd /tmp
+    ln -s /etc/passwd a_sym_ln0
+    open_a_file a_sym_ln0   [This is a C program that returns 0 
+                             if it is able to open the file passed
+                             in as an argument or returns the errno
+                             value if unable to open the file]
+    ret=$?
+    cnt=0
+    while ($ret == 0)
+    do
+       cnt2=$cnt+1      [use expr to do this]
+       ln -s a_sym_ln$cnt a_sym_ln$cnt2
+       open_a_file a_sym_ln$cnt2
+       ret=$?
+       cnt=$cnt2
+    done
+    rm a_sym_ln*
+    if ($ret != ELOOP)
+       then exit(ERROR:  ELOOP expected and $ret was returned)
+    fi
+
+    ln -s /mnt/etc/passwd /mnt/tmp/a_sym_ln0
+    open_a_file /mnt/tmp/a_sym_ln0   
+    ret_nfs=$?
+    cnt_nfs=0
+    while ($ret_nfs == 0)
+    do
+       cnt2_nfs=$cnt_nfs+1      [use expr to do this]
+       ln -s /mnt/tmp/a_sym_ln$cnt_nfs /mnt/tmp/a_sym_ln$cnt2_nfs
+       open_a_file /mnt/tmp/a_sym_ln$cnt2_nfs
+       ret_nfs=$?
+       cnt_nfs=$cnt_nfs2
+    done
+    rm /mnt/tmp/a_sym_ln*
+    if ($ret_nfs != ELOOP)
+       then exit(ERROR:  ELOOP expected and $ret was returned)
+    fi
+
+    if ($ret != $ret_nfs)
+        then exit(ERROR:  Number of links parsed locally was $ret
+                          Number of links parsed with NFS was $ret_nfs)
+        else exit(ELOOP test passes)
+    fi
+
+.fi
+
+.nf
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: ELOOP test passes
+.fi
+
+.sp 2
+.H 3 "Recursive symbolic links with NFS"
+.sp 1
+Create a symbolic link file (through a mount point) to itself.
+Then access the link.  Create a 2-way indirection, with a local file
+linked to a remote file which is linked to the local file.  Try to
+access either of the links.  Create a 3-way indirection, and try to
+access any one of the 3 links.
+.nf
+
+    mount BLAH:/  /mnt
+
+    ln -s /mnt/tmp/a_sym_ln1 /mnt/tmp/a_sym_ln1
+    open_a_file /mnt/tmp/a_sym_ln1
+    ret=$?
+    rm /mnt/tmp/a_sym_ln1
+
+    ln -s /tmp/a_sym_ln1  /mnt/tmp/a_sym_ln2
+    ln -s /mnt/tmp/a_sym_ln2  /tmp/a_sym_ln1
+    open_a_file  /mnt/tmp/a_sym_ln2
+    ret=$?
+    rm /tmp/a_sym_ln1 /mnt/tmp/a_sym_ln2
+
+    ln -s /mnt/tmp/a_sym_ln1 /tmp/a_sym_ln2
+    ln -s /tmp/a_sym_ln2 /mnt/tmp/a_sym_ln3
+    ln -s /mnt/tmp/a_sym_ln3 /mnt/tmp/a_sym_ln1
+    open_a_file /tmp/a_sym_ln2
+    ret=$?
+    rm /tmp/a_sym_ln1 /tmp/a_sym_ln2 /mnt/tmp/a_sym_ln3
+.fi
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: The open_a_file program should return with a value
+                 of ELOOP in all cases.
+.fi
+
+
+.sp 2
+.H 3 "Symbolic Links and CDF's Part 1"
+.sp 1
+The following tests look at symbolic links and CDF's.
+
+To make a CDF, do the following two steps.  I will treat these two
+steps as a script called mkcdf whenever I want to create a CDF.
+.nf
+
+mkcdf would look like this:
+mkdir      $1
+chmod u+s  $1
+
+.fi
+Repeat the first series of tests for symbolic links, except use
+a CDF symbolic link.
+
+Mount the remote node (BLAH) on the directory /mnt.
+Create three CDF symbolic links on BLAH.  This will test when NFS is
+used to access through a symbolic link, where will the access
+actually be made.  NFS should access relative to the client node. 
+.nf
+    mount BLAH:/ /mnt
+
+    (ln -s   will create a symbolic link)
+    mkcdf  /mnt/tmp/a_sym_ln1
+    ln -s  /mnt/tmp/file1  /mnt/tmp/a_sym_ln1 
+    mkcdf /mnt/tmp/a_sym_ln2 
+    ln -s  /tmp/file2  /mnt/tmp/a_sym_ln2 
+    mkcdf /mnt/tmp/a_sym_ln3 
+    ln -s file3  /mnt/tmp/a_sym_ln3 
+    mkcdf /tmp/a_sym_ln_loc
+    ln -s /mnt/tmp/file1 /tmp/a_sym_ln_loc
+
+    write "REMOTE file1" in /mnt/tmp/file1.
+    write "LOCAL file2" in /tmp/file2.
+    write "REMOTE file3" in /mnt/tmp/file3
+    write "LOCAL file3" in /tmp/file3
+
+    cd /tmp
+    read /mnt/tmp/a_sym_ln1, expect "REMOTE file1"
+    read /mnt/tmp/a_sym_ln2, expect "LOCAL file2"
+    read /mnt/tmp/a_sym_ln3, expect "LOCAL file3"
+    read /tmp/a_sym_ln_loc, expect "REMOTE file1"
+
+    cd /mnt/tmp
+    read a_sym_ln1, expect "REMOTE file1"
+    read a_sym_ln2, expect "LOCAL file2"
+    read a_sym_ln3, expect "REMOTE file3"
+    read /tmp/a_sym_ln_loc, expect "REMOTE file1"
+    
+    write "REMOTE file1 through symlink" in a_sym_ln1
+    write "LOCAL file2 through symlink in a_sym_ln2
+    write "REMOTE file3 through symlink" in a_sym_ln3
+    cd /tmp
+    read /mnt/tmp/file1, expect "REMOTE file1 through symlink"
+    read /tmp/file2, expect "LOCAL file2 through symlink"
+    read /mnt/tmp/file3, expect "REMOTE file3 through symlink"
+
+    rm /tmp/file* /mnt/tmp/file* /tmp/a_sym_ln* /mnt/tmp/a_sym_ln*
+
+.fi
+
+.nf
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    0.5  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See above
+.fi
+
+
+
+.nf
+
+.fi
+.sp 1
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+See the "# RESULT" lines in the script
+.fi
+

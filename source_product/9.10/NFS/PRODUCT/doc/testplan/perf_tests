@@ -1,0 +1,363 @@
+.H 1 "Performance Testplan (George Feinberg)"
+
+.DS
+The  major  objectives  in  testing  performance  of the NFS
+software are the following:
+
+	1.  Provide valid data that allow the  comparison of
+	    the  performance  of  different  NFS clients and
+	    servers.
+
+	2.  Identify  limiting factors in NFS performance on
+	    HP-UX and possibly other systems.
+.DE
+.DS
+Some general  considerations  in testing  performance of NFS
+systems are the following:
+
+	1.  Eliminate system-dependent variables (e.g.  disc
+	    access time and compiler speed).
+
+	2.  Write  tests  that are  easily  portable  to any
+	    Unix-like    environment   (e.g.   HP-UX,   Sun,
+	    BSD4.x).
+.DE
+
+Because  performance  tests will  produce different  results
+(e.g. timings) from one execution to the next,  they will be
+given the suffix ".it"  (interactive tests) in the scaffold.
+The tests will be driven by shell scripts and/or C programs,
+however (i.e. automated), and are given a TYPE OF TEST label
+of "Performance" in this chapter.
+
+The elimination of system  dependencies, such as disc access
+time, is difficult, if not impossible when  considering  the
+comparison of different  vendors' systems.  What is proposed
+is that  systems are compared  based on  "typical"  customer
+configurations.  An example is comparing an HP 9000, sold
+with typical memory and disc, with a Sun  Microsystems  3/260
+with its typical memory and disc  configuration, each with a
+similar  amount of space  used.  An attempt  will be made to
+obtain  and   compare   systems   that  are  as  similar  in
+price/performance as possible.
+
+Tests written should use the standard C programming language
+or shell  scripts.  C programs  that use functions  that are
+different  on  HP-UX  and  Sun or  BSD  systems  should  use
+conditional  compilation  flags  to  make  the  code  easily
+portable.
+
+This plan  includes  more than the "MUST"  objectives.  With
+each test is an  indication of its  priority,  must or want.
+The must  objectives are needed to evaluate the  performance
+with respect to the product objectives.  The want objectives
+are  useful  to  performance   characterization   if  it  is
+necessary.
+
+The test perform time estimates included in this plan do not
+include time to gather the necessary  equipment  together to
+perform the tests.
+
+In order to  compare  clients  and  servers  of all  systems
+tested, the  following  matrix  should be tested (MUST boxes
+contain 'X'):
+
+.DS
+		HP	HP	Sun	Sun
+    client -->  330     350     3/160   3/260
+    server
+    ------      ---     ---     -----   -----
+              |      |       |        |
+    HP 330    |  X   |       |        | 
+    ------      ---     ---     -----   -----
+              |      |       |        | 
+    HP 350    |      |  X    |        | 
+    ------      ---     ---     -----   -----
+              |      |       |        | 
+    Sun 3/160 |      |       |   X    | 
+    ------      ---     ---     -----   -----
+              |      |       |        | 
+    Sun 3/260 |      |       |        |   X
+    ------      ---     ---     -----   -----
+.DE
+
+This matrix will result in all systems  tested  against each
+of the others as both clients and servers.
+
+This matrix should be updated as performance  information on
+other HP computers (e.g., Series 8x0) is defined and needed.
+.fi
+
+.H 2  "File access tests"
+
+The tests in this section will determine the  performance of
+data transfers that access remote files.
+
+.DS
+RESPONSIBLE ENGINEER: George Feinberg
+DEPENDENCIES:
+ISSUES:
+
+    1.  Weighting  of test  results.
+
+	If  systems  vary in  performance  from one  area to
+	another, the relative  importance  of the areas must
+	be   determined.  This  can  be  based  on  relative
+	frequency of use of the area tested. 
+
+    2.  Availability of faster disc interface.
+	
+	In the time  before  the  release  of NFS a new disc
+	interface will be made  available,  called SCSI.  It
+	is  supposed to be faster than HP-IB and may need to
+	be evaluated.
+
+.DE
+
+.sp 2
+.H 3 "File transfer (MUST)"
+.sp 1
+
+Test the performance of data transfer from file to file over
+NFS.
+
+Transfers   must  be  measured   from   client->server   and
+server->client,  with  and  without  the biod  running.  A C
+program  that times the  transfer  and is capable of varying
+the  read/write  block size  should be  sufficient  for this
+test.
+
+Files of various sizes must be used.
+.DS
+IMPLEMENT TIME: .5 days
+PERFORM TIME: .25 days/case.
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  File  transfer rates in bytes/second (read
+		  and write).
+.DE
+
+.sp 2
+.H 3 "Exec of remote files (MUST)"
+.sp 1
+
+Test the performance of the system call, exec(2).
+
+This  test  is  different  from  file  transfer  in  that it
+transfers  data from disc to memory, not disc.  It also will
+request data in large amounts, not in stdio buffer sizes.
+
+The test should be a C program that times multiple exec's of
+remote files.  Different  files should be used to change the
+size and eliminate cacheing from the test.
+.DS
+IMPLEMENT TIME: 1 day
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  File exec  times in  bytes/second (similar 
+		  to read).
+.DE
+
+.sp 2
+.H 3 "Read and write of remote files using stdio BUFSIZ (MUST)"
+.sp 1
+
+Test   the    performance   of    remote-disc->memory    and
+memory->remote-disc  data transfers  using the stdio library
+functions (fopen(3), fread(3), fwrite(3)).
+
+This  test is  different  from the exec test in that it will
+use BUFSIZ read and write  requests.  It is  different  from
+the file  transfer  tests in that it does not use the  local
+disc.
+
+The test can be a C program that has a large local buffer to
+read  into and write out of.  It will use the stdio  library
+functions, fopen(3), fread(3), and fwrite(3), as many of the
+HP-UX commands do.
+
+.DS
+IMPLEMENT TIME: .5 days
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Memory<->remote-disc data  transfer  rates
+		  in bytes/second.  
+.DE
+
+.sp 2
+.H 3 "Random file access (WANT)"
+.sp 1
+
+Test the read/write  performance when accessing remote files
+in a random  manner.  This will  disable the  advantages  of
+read-ahead and cacheing.
+
+This  test  can be  almost  identical  to  the  above  stdio
+read/write  test,  except  that it will  not  read or  write
+sequentially,  but  will  inject  fseek(3)  calls  into  the
+read/writes.
+
+.DS
+IMPLEMENT TIME: .75 days
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Memory<->remote-disc  data  transfer rates
+		  in bytes/second.
+.DE
+
+.H 2  "Performance Testing - s800 Release 2.0"
+
+Performance testing for the 2.0 release of s800 consisted of
+two types of testing, the running of benchmarks on systems
+located on an isolated LAN and the inclusion of automated tests
+on the scaffold.
+
+The benchmark tests on the isolated LAN measured transfer
+rates for remote file to local memory and local memory to 
+remote file. The two nodes were running a standard HP-UX
+system.  Root was the only local user and there were no remote
+users.  The remote system had two designated disc partitions,
+one for the HP-UX system and one scratch partition (no more
+than 50% full) for reading and writing a file.
+
+The benchmark tests were run at IND and were not a regular 
+part of the regression testing which is the main subject of
+this document.  Details on test procedure, benchmarks run,
+and results can be found in "File Access Performance Across
+the Network File System" by Sanjay Uppal (IND) and Leonard
+McCrigler (SPL).
+
+The automated tests which were incorporated into the scaffold
+measured file to file transfer rates as well as the transfer
+rates between memory and files as with the benchmark tests.
+In running these there is no attempt to isolate the systems 
+or control the level of simultaneous activity. The pass or
+fail status of a test run is determined by whether the 
+transfer rate falls within a specified range.  The objective
+is to flag any significant 
+.B change
+in performance.
+.sp 2
+.H 2  "Yellow Pages performance tests"
+
+The tests in this section will determine the  performance of
+data accesses that use the Yellow Pages services.
+
+The only  MUST  objective  is that  the  time to  perform  a
+"login" be no  greater  than the same time on an  equivalent
+Sun system.  Since login is  interactive,  this test must be
+the equivalent of the login function, not an actual login.
+
+The  functions  to be tested to  characterize  Yellow  Pages
+performance (WANT) include yp_match,  yp_first, yp_next, and
+yp_all.
+
+.DS
+RESPONSIBLE ENGINEER: George Feinberg
+DEPENDENCIES:
+ISSUES:
+
+    The database files used in all of the Yellow Pages tests
+    must be  identical  to eliminate  variation  due to file
+    size.
+
+    At least three  different  file sizes  should be used to
+    determine the effect of file size on performance.
+
+    At least three  different  sized key  strings  should be
+    used to determine its effect on lookup performance.
+
+    If the Yellow Pages client implements any cacheing, this
+    must be considered in the testing strategy.
+
+.DE
+
+.sp 2
+.H 3 "Login performance (MUST)"
+.sp 1
+
+Test the performance of login function, or its equivalent.
+
+The login  program  interactively  obtains  a user  name and
+password  combination,  and then  performs  a lookup  in the
+file,  /etc/passwd,  to find a matching entry.  The password
+file  entries are  obtained  one at a time, via the  library
+function,  getpwent().  This  implies  that if the  password
+entry  desired is on a remote  system, the Yellow Pages will
+be used for each line obtained until a match is found.
+
+It is  suggested  that  to  test  the  performance  of  this
+functionality, a  username/password  combination be obtained
+from a command line or file by a C program that will perform
+the  matching  function  of the login  command.  The program
+should call the getpwent()  function to obtain password file
+entries.  This  program  should be run with  remote  passord
+files of  varying  sizes  with the key  strings  in  various
+places  within the file, and also with no matching key.  The
+lookup time  should be  calculated  and be the output of the
+program.
+
+.DS
+IMPLEMENT TIME: 1 day
+PERFORM TIME: .5 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Average lookup  times  in  seconds for all 
+		  key sizes and files sizes used.
+.DE
+
+.sp 2
+.H 3 "Yp_match performance (WANT)"
+.sp 1
+
+Test the  performance  of the  library  function,  yp_match,
+which will attempt to match a key string with information in
+a remote database file.
+
+A C program which times multiple yp_match calls with various
+files and key string sizes is sufficient for this test.
+
+.DS
+IMPLEMENT TIME: .75 days
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Average lookup time in seconds for all key
+		  sizes and files sizes used.
+.DE
+
+.sp 2
+.H 3 "Yp_first, yp_next performance (WANT)"
+.sp 1
+
+Test the performance of the library functions,  yp_first and
+yp_next,  which will access a remote  database one line at a
+time.
+
+A C program  which  times  multiple  reads of entire  remote
+database  files  using  the  yp_first  and  yp_next  library
+functions is sufficient for this test.
+
+.DS
+IMPLEMENT TIME: .75 days
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Average file read times  in  bytes/seconds
+		  for all file sizes used.
+.DE
+
+.sp 2
+.H 3 "Yp_all performance (WANT)"
+.sp 1
+
+Test the performance of the library function,  yp_all, which
+will read a remote database file in one operation.
+
+A C program  which  times  multiple  reads of entire  remote
+database files using the yp_all  function is sufficient  for
+this test.
+
+.DS
+IMPLEMENT TIME: .75 days
+PERFORM TIME: .25 days/case
+TYPE OF TEST:  Performance
+EXPECTED OUTPUT:  Average file  read times in  bytes/seconds
+		  for all file sizes used.
+.DE

@@ -1,0 +1,56 @@
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	. building nightly/weekly development systems for group distributions
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. coordinate with partners since it is mainly based on interrupts
+#	. time spent doing schedule estimates
+#
+#	Update history: 02/13/87
+#	                03/05/87
+#	                03/13/87
+#	                04/02/87
+
+NAME: George Feinberg
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+8	2	10	Test		Module testing NFS (kernel code) 
+11	7	18	Dev		Characterize and tune NFS performance
+					(part of it)
+.5	1.5	2	Doc		first documentation review
+Checkpoint
+0	1	1	Dev		Implementation of installation process
+0	1	1	Dev		Port NFS-specific system calls
+0	1	1	Dev		Provide new NFS-specific system calls 
+0	3	3	Coord		Track kernel modifications 
+0	2	2	Tool		Dev env support/maintenance
+0	1	1	Tool		Learning tools 
+0	2	2	Tech		SE class review/edit
+0	2	2	Doc		second documentation review
+0	1	1	Doc		third documentation review
+0	2	2	A/B		support of Alpha/Beta and B.O. sites
+0	2	2	SSIT		SSIT activities
+0	1	1	Test		Release final bits to SSIT   
+0	4	4	FTO		Vacation
+0	5	5	Test		Sym link test(RFA and discless interact)
+0	4	4 	Test		add debug and trace code
+0	0	1	Metr		QA metrics??????
+0	0	0.5	Iss		system calls
+0	0	0.5	Iss		object code compatibility
+1	0	1	Dev		Def/doc of install/config process
+1	0	2 	Mkt		RFA/NFS meeting (migration path to NFS)
+.5	0	2	Dev		NFS/RFA/DUX/A-B interactions (umount)
+5	0	2   	Dev		Provide RFA Requestor support 
+.5	0	1	Doc		providing technical information	
+1	0	1   	Dev		Provide RFA Server support
+5	0	5	Mkt		Participation at Uniforum
+2	0	2 	Test		Test opt. conf. capabilities of kernel
+5	0	5	Test		Module testing NFS (SWAT team)
+5	0	5 	Sup		Administer multi-user "home" system
+4.5	0	4	Dev		Provide opt. kernel configurability
+Checkpoint Completed Tasks

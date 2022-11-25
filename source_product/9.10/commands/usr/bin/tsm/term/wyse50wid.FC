@@ -1,0 +1,7 @@
+## FACET/TERM  wyse50wid  description file  06/20/88
+## @(#) $Header: wyse50wid.FC,v 66.2 90/09/20 12:56:58 kb Exp $
+columns_wide=132
+columns_wide_on=\E`;
+columns_wide_off=\E`:
+### NO columns_wide_clears_screen
+### NO parm_mode_val-COLSWIDE-00000000=

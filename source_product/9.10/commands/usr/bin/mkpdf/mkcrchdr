@@ -1,0 +1,20 @@
+#!/bin/sh
+# $Revision: 66.1 $
+
+HEADER=mem_crc.h
+TMP=bc.out
+
+bc <<-EOF |
+    m=2^32
+    obase = 16
+    for (x=0 ; x<256 ; x++) (x^32 + x^7 + x^5 + x^3 + x^2 + x + 1) % m
+    quit
+EOF
+awk 'BEGIN {printf "static unsigned long crctab[] = {" }
+    {
+	if (n!=0) printf ", "
+	if (!(n%4)) printf "\n\t"
+	printf "0x%-8s", $1
+	n++
+    }
+    END {if (n) printf "\n" ; printf "\t};\n"}' > $HEADER

@@ -1,0 +1,10 @@
+#!/bin/ksh
+#
+exitval=0
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+exit $exitval

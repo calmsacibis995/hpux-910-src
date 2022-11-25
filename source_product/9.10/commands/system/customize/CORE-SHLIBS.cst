@@ -1,0 +1,6 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+# CORE-SHLIBS customization is done by the UX-CORE customize.
+
+exit 0

@@ -1,0 +1,40 @@
+{   if ( substr($1,1,1) == "#" )
+	{ print ; next }
+}
+
+{
+    system = $1
+    time = $2
+    type = $3
+    class = $4
+    phone = $5
+    protocol = " "
+
+    login = $6
+
+    for ( i = 7; i <= NF; i++ )
+    {
+	login = login " " $i
+    }
+}
+
+time ~ /\,/	{ if ( split(time, parts, "," ) != 2 )
+		      { printf "# Bad time specifier - %s\n", 0 ; next }
+		  else
+		      { time = parts[1] ";" parts[2] }
+		}
+
+phone ~ /\//	{ if ( split(phone, parts, "/" ) != 2 )
+		      { printf "# Bad protocol specifier - %s\n", 0 ; next }
+		  else
+		      { protocol = parts[1] ; phone = parts[2] }
+		}
+
+$type ~ /ACU/  { type = "ACU" }
+$type !~ /ACU/ { type = system ; phone = "-" }
+
+{ if ( protocol == " " )
+    printf "%s %s %s %s %s %s\n", system, time, type, class, phone, login
+  else
+    printf "%s %s %s,%s %s %s %s\n", system, time, type, protocol, class, phone, login
+}

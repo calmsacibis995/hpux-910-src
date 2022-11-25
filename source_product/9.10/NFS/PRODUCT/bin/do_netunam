@@ -1,0 +1,74 @@
+#!/bin/sh
+##	@(#)do_netunam	$Revision: 1.15.109.1 $	$Date: 91/11/19 13:54:30 $
+#	do_netunam	--	establish an RFA connection
+# Written by Darren D. Smith for NFS project
+# NOTE: $nfs=$Nfs for overnight script
+#
+# "do_netunam" looks up the target machine in the naccess files and
+# verifies that the values given will work, then echos an appropriate
+# command to be executed.
+#
+# Typical usage:
+#
+# if val=`do_netunam hpcndhf`
+# then
+#  	eval $val
+# else
+#	echo "netunam failed..." >&2
+#	exit 1
+# fi
+##
+
+# TARGET is the name of the machine to access...
+TARGET=$1
+
+# NOTE: must be able to read $HOME/naccess which should be in the format of:
+# hostname account passwd
+NACCESS=$HOME/naccess
+if [ ! -f $NACCESS ]
+then
+	#NOTE: hardwired default, ughh...
+	NACCESS=/users/nfsmgr/naccess
+	if [ ! -f $NACCESS ]
+	then
+	    echo "$0\: $NACCESS does not exist, dont know $TARGET's passwd" >&2
+	    exit 1
+	fi
+fi
+
+# Get the account name and passwd for hpcndhf:
+tmpfile=/tmp/do_netunam$$
+/bin/grep $TARGET $NACCESS >$tmpfile
+status=$?
+if [ $status -ne 0 ]
+then
+	echo "$0\: $NACCESS does not contain an account for $TARGET" >&2
+	rm $tmpfile
+	exit 1
+fi
+
+read machine account passwd <$tmpfile
+
+if [ "$machine" != "$TARGET" ]
+then
+    echo "$0\: grep $NACCESS for $TARGET did not produce a correct value" >&2
+    echo "tmpfile is:" >&2
+    cat $tmpfile >&2
+    rm $tmpfile
+    exit 1
+fi
+
+rm -f $tmpfile
+
+netunam /net/$TARGET ${account}:${passwd}
+status=$?
+if [ $status != 0 ]
+then
+	echo "$0\: netunam to $TARGET failed, account=$account" >&2
+	exit 1
+fi
+
+# everything worked.... AMAZING!
+/bin/echo "netunam /net/$TARGET ${account}:${passwd}"
+
+exit 0

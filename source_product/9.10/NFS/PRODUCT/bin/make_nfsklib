@@ -1,0 +1,220 @@
+#!/bin/sh
+##	@(#)$Revision: 1.29.109.1 $	$Date: 91/11/19 13:56:46 $
+#	make_nfsklib	--	make NFS kernel library file(s)
+# Written by Darren D. Smith for NFS project
+##
+PATH=$Nfs/bin:/bin:/usr/bin:.
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+umask 022
+
+KERNELDIR=$nfs/kernel/300
+SCCSKERNELDIR=$Nfs/rcs/kernel/300
+
+NFSDIR=$KERNELDIR/NFS
+NFSQADIR=$KERNELDIR/NFS.QA
+SCCSNFSDIR=$SCCSKERNELDIR/NFS
+
+SAVEDIR=$nfs/SAVEDIR/kernel/300
+NFSSAVEDIR=$SAVEDIR/NFS
+
+# Check to see if a QA version of libnfs.a is wanted.  In that case, we
+# do the work in kernel/300/NFS.QA instead of kernel/300/NFS, and we don't
+# do things like rebuild nfs_vers.c, or save backup copies.
+
+WORKDIR=$NFSDIR
+QAON=false
+SAVE=true
+LIBNFS=libnfs.a
+while [ $# -gt 0 ] 
+do
+	case $1 in
+
+	-qa )	WORKDIR=$NFSQADIR
+		QAON=true
+		SAVE=false
+		LIBNFS=libnfs.qa
+		shift
+		;;
+	* )
+		echo "Usage; $0 [-qa]"
+		exit 1
+		;;
+	esac
+done
+
+# NOTE: Assume that latest versions of kmake and makefile have been gotten
+# into NFSDIR directory by get_kernel script before this point.
+
+if [ ! -d $KERNELDIR ]
+then
+	echo "ERROR: $KERNELDIR does not exist, don't know where kernel is!" >&2
+	echo `date "+%y.%m.%d %T"` $0 $nfs abort
+	exit 1
+fi
+
+if [ ! -d $SAVEDIR ]
+then
+	echo "WARNING: $SAVEDIR does not exist, don't have a place to save to!"
+	SAVE=false
+fi
+
+if [ ! -d $NFSSAVEDIR -a "$SAVE" = "true" ]
+then
+	mkdir $NFSSAVEDIR
+fi
+
+
+cd $KERNELDIR
+
+# if doesn't exist, then create and get kmake and makefile
+if [ ! -d $WORKDIR ]
+then
+	echo `date "+%y.%m.%d %T"` $0 create $WORKDIR
+	mkdir $WORKDIR	#assume only need to fill in final path.
+	echo
+fi
+cd $WORKDIR
+
+if [ ! -f kmake ]
+then
+	echo `date "+%y.%m.%d %T"` $0 Co $SCCSNFSDIR/kmake,v
+	Co $SCCSNFSDIR/kmake,v
+	echo
+fi
+
+if [ ! -x kmake ]
+then
+	chmod +rx kmake
+fi
+
+
+if [ ! -f makefile ]
+then
+	echo `date "+%y.%m.%d %T"` $0 Co $SCCSNFSDIR/makefile,v
+	Co $SCCSNFSDIR/makefile,v
+	echo
+fi
+
+# Make sure we're not building a QA version by accident.  (This was taken
+# from the overnight build on hpcndhf. dds
+
+if [ "$QAON" = "false" ] ; then
+    /bin/mv -f makefile makefile.tmp
+    /bin/sed -e 's/\$(DEBUGONLY)//' -e 's/-DNS_QA//' \
+		 -e 's/^\(..*\)meas_drivr\.o/\1/' makefile.tmp > makefile	
+fi
+
+# Now update the version information to reflect this nights build...
+# Basically, we "get -e" nfs_vers.c, delete the old information,
+# use Prs to get the new information, and then delta it back.
+# We only do this for the production version, not the QAON version.
+
+DELETELINE='/* DO NOT DELETE THIS LINE */'
+
+if [ "$QAON" = "false" ] ; then
+    echo `date "+%y.%m.%d %T"` $0 Co $SCCSKERNELDIR/nfs/nfs_vers.c,v
+    Co -l $SCCSKERNELDIR/nfs/nfs_vers.c,v
+    echo
+    sed -e "$DELETELINE,\$d" nfs_vers.c >nfs_vers.new.c
+    mv -f nfs_vers.new.c nfs_vers.c
+
+    echo "$DELETELINE" >>nfs_vers.c
+    echo '\nchar nfs_vers[] = "@(#)NFS/300 '`date +%m/%d/%y`' (6.5)";\n' >>nfs_vers.c
+    echo '\nchar *nfs_versions[] = {' >>nfs_vers.c
+
+    for F in $SCCSKERNELDIR/nfs/*,v $SCCSKERNELDIR/rpc/*,v
+    do
+	REV=`Rlog -h $F | grep \^head | awk '{ print $2 }'`
+	DATE=`Rlog -r$REV $F | grep \^date | awk '{ print $2 }'`
+	MODULE=`Rlog -h $F | grep "Working file:" | awk '{ print $6 }'`
+	echo "\t\"$DATE\t$REV\t$MODULE\"," >>nfs_vers.c
+    done
+
+    echo '\t0\n};' >>nfs_vers.c
+
+    echo `date "+%y.%m.%d %T"` $0 Ci $SCCSKERNELDIR/nfs/nfs_vers.c,v
+    Ci $SCCSKERNELDIR/nfs/nfs_vers.c,v <<EOF
+    Automatic nightly update
+EOF
+    echo
+    Co $SCCSKERNELDIR/nfs/nfs_vers.c,v
+fi
+
+
+# Get the names of the .o files and add the library to it
+echo `date "+%y.%m.%d %T"` $0 begin build
+FILES=`vmake nfsobjs`
+FILES="$FILES $LIBNFS"
+
+# SAVE the files elsewhere if possible, otherwise clean everything
+if $SAVE
+then
+	mv -f $FILES $NFSSAVEDIR
+else	
+	rm -f $FILES
+fi
+
+# DO the make
+kmake configlibsnfs
+if [ $QAON = "true" -a -f libnfs.a ] ; then
+	mv libnfs.a libnfs.qa
+fi
+
+# If anything didn't get built, restore last nights stuff.
+NOTOK=false
+for F in $FILES
+do
+	if [ ! -f $F ]
+	then
+		echo "ERROR: $F didn't get created!"
+		NOTOK=true
+	fi
+done
+
+if $NOTOK
+then
+    if $SAVE
+    then
+	cd $NFSSAVEDIR
+	echo "RESTORING files from $NFSSAVEDIR"
+	mv -f $FILES $WORKDIR
+    else
+	echo "CAN'T RESTORE BECAUSE THERE WASN'T A SAVE DIRECTORY!"
+    fi
+fi
+
+# In any case, don't leave files in the SAVEDIR
+if $SAVE
+then
+	cd $NFSSAVEDIR
+	rm -f $FILES
+fi
+
+# Now copy our kernel archive to the other machines that want it
+
+OTHERBUILDS="hpcndhf hpfcls hpfcde"
+
+for REMOTE in $OTHERBUILDS
+do
+	if val=`do_netunam $REMOTE`
+	then
+		eval $val
+		echo `date "+%y.%m.%d %T"` $0 cp $LIBNFS /net/$REMOTE/tmp
+		if [ "$REMOTE" = hpcndhf ] ; then
+			CPPATH=/net/$REMOTE/source/tmp/libs/$LIBNFS
+		else
+			CPPATH=/net/$REMOTE/tmp/$LIBNFS
+		fi
+		cp $WORKDIR/$LIBNFS $CPPATH
+		if [ ! -f $CPPATH ]
+		then
+			echo "WARNING: cp to $REMOTE didn't work!"
+		fi
+	else
+		echo "WARNING: couldn't contact $REMOTE to distribute file!"
+	fi
+done
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

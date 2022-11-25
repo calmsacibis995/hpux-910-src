@@ -1,0 +1,267 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.vs 20
+.ft 3
+.ce 
+NFS/RPC and the LIBC Name Space Cleanup
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:29:12 $
+$Revision: 1.1.109.1 $
+.ps 10
+.vs 12
+.sp 9
+.ad
+This document describes the changes made to the NFS RPC/YP/NET LIBC code
+for the ANSI-C name space cleanup.  It is not intended to be a comprehensive
+description of the name space pollution problem.  Rather, it is intended as
+a primer for those who will be working on the NFS LIBC code.
+.na
+.PH "'NFS/RPC and the LIBC Name Space Cleanup'"
+.bp
+.H 1 "Introduction -- What is Name Space Cleanup?"
+Name space pollution refers to the problem of system creators (e.g. HP)
+putting library functions into libc.a that have names that conflict with
+those used by the application.  For example, the printf() function is
+commonly called in programs.  Our libc implementation of printf() might
+reference some other function, say foo(), that it expects to behave a
+certain way.  However, the application program may have its own function
+called foo(), that it expects to behave differently.  We now have a
+name conflict between the two that must be resolved somehow.
+.sp
+To handle this, ANSI and POSIX have defined reserved name spaces for
+implementors and applications writers.  In particular, implementors are
+reserved those names defined by the standard in question, and names beginning
+with an underscore, '_', with all other names being reserved for applications.
+Thus, because of our desire to conform to these standards, we must "clean up"
+our name space for libc.  Strictly speaking, we would only need to do this
+for functions that could be called by functions in the ANSI or POSIX
+standards.  However, in order to allow for various possible future standards
+and make implementations consistent, we have decided to as much as possible
+change to having an underscore in front of all externally visible names.
+In addition, this rule applies to variable declarations as well as functions,
+with some special cases for variables (discussed below).  This process of
+changing our libc sources to be ANSI-C/POSIX conforming is referred to as
+"name space cleanup".
+.H 1 "Secondary Definitions"
+One of the first problems we run into is how to deal with backwards
+compatibility.  If we just change function names to have an underscore,
+then virtually every program would have to be modified to reference the
+new names (a monumental task!).  Yet, we want to allow users to define their
+own functions with the old names without conflict.  We handle this with the
+use of a secondary definition.
+.H 2 "Function definitions"
+A secondary definition defines another name by which an identifier (either
+function or variable) will be known.  However, unlike the primary
+definition, if there is a name conflict it will be discarded.  A 
+secondary definition is defined via a special command to the compiler.
+For example, a function in libc that used to be called "foo" would now
+look like:
+.nf
+
+#pragma _HP_SECONDARY_DEF _foo foo
+_foo()
+{
+}
+
+.fi
+This says that the function "_foo" is also known as "foo".  However, if the
+application program has its own function called "foo", it takes precedence
+and there is no name conflict.  If the application references "foo" expecting
+it from libc, it is still found.  This neatly solves the problem of backward
+compatibility while still providing the name space cleanup.  Note that this
+only needs to be done for functions whose names are externally visible.  That
+is, functions declared as "static" in a file do not need this.
+.H 2 "Variables"
+The identifier rules for standard name spaces apply to variable names as
+well as functions, and secondary definitions are created the same way.   
+However, there is an extra restriction for variables:  secondary definitions
+can only be applied to global variables that are initialized.  This is
+caused by some restrictions in the C compiler that aren't worth going into
+here.  This also has some side-effects that ARE worth discussing here.
+.sp
+The first implication is that obvious, that global variable declarations
+may need to be changed to initialize variables.  For example, a
+declaration that used to look like:
+.nf
+
+int foo;
+
+.fi
+would now look like:
+.nf
+
+#pragma _HP_SECONDARY_DEF _foo foo;
+int _foo = 0;
+
+.fi
+This is fairly straight forward for the intrinsic types (e.g. integers,
+chars, etc.), but it may take a little work to figure out the proper
+"incantation" for individual cases.
+.sp
+A second implication of this is more subtle.  When you change a variable
+from not being initialized to being initialized, you change it from being
+in the "COMMON" segment to being in the "DATA" segment of the linked
+executable.  When a variable is the in "DATA" segment, then references
+to that variable cause not only the variable to be loaded, but also any
+other functions or variables defined in the same ".o" file to be loaded.
+Since these functions may in turn generate other external references, you
+may find that you are loading a lot more than you should be.  For example,
+consider the definition above, only we now have a function also in the file:
+.nf
+
+#pragma _HP_SECONDARY_DEF _foo foo;
+int _foo = 0;
+
+int _func()
+{
+	printf("Hi");
+}
+
+.fi
+If the application referenced "foo" as an external, then it would also get
+the function "_func()" loaded into the executable, even if no functions in
+the file were directly referenced.  Since _func() references
+printf(), the printf() function (and anything it references) would also
+be loaded!  Given the size of printf(), this can be a very undesirable
+side-effect (understatement!).  One way to handle this is to create a
+new file used just for declaring and initializing such variables.  The
+file "rpc_data.c" was created in the libc RPC code for just such a purpose.
+.sp
+However, this is not always necessary.  If it doesn't make sense for the
+variable to be referenced unless the function is also called, then it
+is OK for the variable to remain in the same file.  If the variable could
+be referenced without any references to the functions, then the variable
+should be moved to a different file.  For example, in the RPC code the
+variable "svc_fdset" is very closely tied to the function "svc_run()", and
+should not be used if "svc_run()" is not also called.  In this case it is
+OK for "svc_fdset" to remain in the same file.  On the other hand, the
+variable "rpc_createerr" was defined in clnt_perr.c, along with several
+functions for printing the meaning of different error codes.  In this case
+not only does it make sense for a program to reference "rpc_createerr" without
+calling any of the functions, but we actually had several applications that
+did so.  Thus, "rpc_createerr" was moved to "rpc_data.c" for declaration
+and initialization.
+.H 1 "External References and #define statements"
+Changing the names of our libc functions to have an underscore in front
+solves the name space pollution problem, but creates another one.  Namely,
+if a libc function references another function in libc, we need to be sure
+it gets the correct one.  For example, if the function "_func()" referenced
+above were in libc, we would want to be sure that it got the correct version
+of printf(), even if the user's application provided its own version of 
+printf().  This means that anywhere we reference "printf()" in our libc
+code, we would need to change it to reference _printf().  If we just
+changed all references this way it would create be a lot of work to say
+the least!  Also, it makes the code harder to read and maintain.  However,
+we can avoid a lot of this through the use of #define statements.
+.H 2 "Use of #define statements"
+Instead of changing every use of printf() in a given ".c" file, we use
+a "#define" statement at the top of the file.  In this case it would look
+like:
+.nf
+
+#define		printf		_printf()
+
+.fi
+at the top of the file.  This offers several advantages.  First, by changing
+it in one spot we change it for the whole file.  Second, it handles the case
+where functions are declared in header files (assuming we do the #define's
+before we include any header files).  Third, by declaring all these in one
+spot it makes it easy to see which variables and functions need special
+handling in this file.  Finally, it makes it easier to read and maintain the
+code.  If we need to compare to older versions, or new versions of ported
+code, we don't end up with EVERY line different just because there is
+an extra underscore on that line.
+.H 2 "Functions in the same file"
+The above scheme works great when the function being used is actually
+declared in another file, but what about what it is declared in the
+same file?  In that case, we still do use the #define statement above
+to provide consistency with other functions.  However, we make note
+of the fact that it is declared in this file:
+.nf
+
+#define		printf		_printf()	/* In this file */
+
+.fi
+This flags the fact that there will be a secondary definition for _printf()
+in this ".c" file.  (NOTE: The above comment was used in all of the NFS
+libc changes, but was not used in other libc code.)
+In addition, we need to change the secondary definition to look like:
+.nf
+
+#undef printf
+#pragma _HP_SECONDARY_DEF _printf printf
+#define printf _printf
+
+printf()
+{
+}
+
+.fi
+This allows us to always use the #define statements at the top of the program
+and minimizes the amount of changes that would show up in a "diff(1)" of
+two versions of the source.
+.H 1 "The Template"
+Finally, we can put all this information together into a basic template
+that shows how things should be defined:
+.nf
+
+#ifdef _NAMESPACE_CLEAN
+
+#define foo 	_foo		/* In this file */
+#define printf 	_printf
+
+#ifdef _ANSIC_CLEAN
+#define malloc	_malloc
+#define free 	_free
+#endif _ANSIC_CLEAN
+
+#endif _NAMESPACE_CLEAN
+
+/* #include statements go here */
+
+#ifdef _NAMESPACE_CLEAN
+#undef foo
+#pragma _HP_SECONDARY_DEF _foo foo
+#define foo _foo
+#endif
+
+foo()
+{
+	printf("HELLO WORLD\n");
+}
+
+.fi
+There are a couple of things to notice here.  First, the use of the
+"#ifdef _NAMESPACE_CLEAN".  This ifdef is used consistently throughout
+the code to denote changes made for name space cleanup.  This gives the
+builders of libc the ability to change the name space of libc should
+the need arise.  Second, notice the special "#ifdef _ANSIC_CLEAN" around
+the malloc and free defines.  The malloc() function is a special case, 
+since some programs exist that define their own malloc and expect the libc
+functions to use it.  For now, the malloc() and free() functions will behave
+the same as others, but the special define is used to allow the libc build
+people control over the behavior.
+.H 1 "Conclusion"
+In conclusion, we can see that while there are many issues involved in
+name space clean up of libc, the use of the standard template and format
+makes it fairly easy to apply to most cases.  The main pitfall to watch
+out for is the initialization of global variables, that may need to be moved
+to a separate file.  However, are many subtleties not discussed in this
+document.  If you need more information, you should contact the compiler
+group and/or the commands group.  In it generally understood that the
+commands group will monitor the state of libc, and will watch for cases
+where a new function gets defined that should have an underscore in front
+of it.  However, it is still the responsibility of our group to make sure
+the code is correct and name space clean.

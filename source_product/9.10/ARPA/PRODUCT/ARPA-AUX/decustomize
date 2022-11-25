@@ -1,0 +1,32 @@
+#!/bin/ksh
+# Decustomize script for DTC Device File Access - DDFA  (ARPA-AUX)
+# by Charlie Cho
+#
+# Date: 05/20/92
+#
+# HP-UX 9.0
+#
+
+function kill_ocd
+ {
+   set "`ps -ef | grep ocd | grep -v grep | awk '{print $2}'`"
+   if test "$1"
+   then
+      kill -15 $1
+   fi
+ }
+
+
+kill_ocd
+
+if [ -d /etc/ddfa ] 
+then 
+   rm -rf /etc/ddfa
+fi
+
+if [ -d /etc/newconfig/ddfa ] 
+then 
+   rm -rf /etc/newconfig/ddfa ]
+fi
+
+rmfn -l ARPA-AUX

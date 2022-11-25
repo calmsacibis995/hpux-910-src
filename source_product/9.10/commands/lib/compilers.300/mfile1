@@ -1,0 +1,644 @@
+/* DOND_ID @(#)mfile1           70.5 93/11/10 */
+/*    SCCS    REV(64.3);       DATE(92/04/03        14:22:13) */
+/* KLEENIX_ID @(#)mfile1	64.3 92/02/26 */
+/* file mfile1 */
+
+# include "macdefs"
+# include "manifest"
+
+#ifdef IRIF
+# ifdef HAIL
+#   ifndef __DATE__ /* use __DATE__ because Domain defines __STDC__ in pre-ANSI compilers */
+#	define __options(x) #options x
+#   endif
+#	include "spos.h"
+#	include "hailhooks.h"
+# else /* not HAIL */
+#       define ir_block_begin( blevel )
+#       define ir_block_end( blevel )
+#       define ir_complete_array( a,b,c,d )
+#       define ir_declare_label( a,b,c )
+#       define ir_declare_tag( a )
+#	define ir_declare_typedef( p )
+#       define ir_gen_code(status)    
+#       define ir_initdecl_enumty( a )
+#       define ir_linesync(line,file)  
+#       define ir_newline(line)  
+#       define ir_reference_tag( a ) 
+#       define ir_termdecl_enumty( a )
+#	define ir_promote_extern(s1,s2)
+#	define ir_declare_parameter(sp,x)
+# endif /* not HAIL */
+#	define prtree( p ) ( ir_eval( p ) )
+#	define deflab( l ) ( ir_label( l ) )
+#	define branch( l ) ( ir_jump( l ) )
+	char irif_string_buf[ SZ_IR_MAX_BUFLEN + 1 ];
+#endif /*IRIF */
+
+/*	storage classes  */
+# define SNULL 0
+# define AUTO 1
+# define EXTERN 2
+# define STATIC 3
+# define REGISTER 4
+# define EXTDEF 5
+# define CLABEL 6	/* previously known as "LABEL" but that conflicts */
+# define ULABEL 7
+# define MOS 8
+# define PARAM 9
+# define STNAME 10
+# define MOU 11
+# define UNAME 12
+# define TYPEDEF 13
+# define ENAME 15
+# define MOE 16
+# define WEXTERN 17  /* 'wild card' EXTERN - matches any storage class */
+# define USTATIC 18
+	/* field size is ORed in */
+# define FIELD 0100
+# define FLDSIZ 077
+
+/*	location counters */
+# define PROG 0
+# define DATA 1
+# define ADATA 2
+# define STRNG 3
+# define ISTRNG 4
+# define GNTT 5
+# define BSS 6
+# define LNTT 7
+
+/* symbol table sflags */
+# define SMOS 01
+# define SNAMEREF 02		/* set to indicate this name was referenced */
+# define SDBGREQD 04		/* set to indicate debug infomation is */
+				/* required for this name */
+# define SSET 010
+# define SREF 020		/* used by cxref */
+# define STAG 040
+# define SLAB 0100
+# define SDUMMY 0200		/* placeholder for block extern declaration */
+# define SNONAME 0400
+# define SWEXTERN 01000		/* wild card 'extern': will match storage class
+                                 * of any subsequent declaration - e.g.,
+	                         * a function used without prior declaration */
+# define SFARGID  02000		/* old style id in function name list */
+# define SPARAM   04000		/* new ANSI style function prototype param */
+# define SELLIPSIS 010000
+# define SFDEF 020000		/* set in PHEAD when this is actual function
+				 * definition rather than just a declaration.*/
+				/* ?? useful to set it in FTN symbol too? */
+# define SINITIALIZED 040000	/* set when a global symbol table
+				 * entry is initialized
+				 */	
+# define SBEXTERN_SCOPE 0100000	/* set when a block scope extern is being 
+				 * promoted to file scope. This was needed
+				 * to pass C Perennial testing in 11/15/93 */
+
+#ifdef IRIF
+# define SFLTCVT 0200000	/* function parameter converted from FLOAT */
+#endif /* IRIF */
+
+/* symbol table checkflags */
+# define SHIDDEN	01
+# define SHIDES		02
+
+
+	/* alignment of initialized quantities */
+# ifndef AL_INIT
+#	define	AL_INIT ALINT
+# endif
+
+# ifdef DEBUGGING
+	extern char *scnames();
+
+	extern flag bdebug;
+	extern flag ddebug;
+	extern flag xdebug;
+	extern flag edebug;
+	extern flag tdebug;
+#  ifdef XPRINT
+	extern flag treedebug;
+#  endif
+	extern flag idebug;
+# endif  /* DEBUGGING */
+
+#ifndef LINT_TRY
+extern FILE *outfile;	/* declared in code.c */
+extern char *addtreeasciz();
+#endif
+extern char	*lastac;	/* ptr to next free char in asciz */
+extern char	*asciz;	/* dynamically allocated asciz table for symbols */
+
+extern flag cdbflag;	/* set to 1 if -g option specified */
+extern flag echoflag;	/* set to 1 if echoing input lines */
+extern flag dollarflag;	/* set to 1 if allowing $ in ids   */
+extern flag nls;	/* set to 1 if nls enabled */
+extern flag o2flag;	/* level 2 optimization */
+
+# ifdef HPCDB
+  extern flag cdbflag;	/* set to 1 if -g option specified */
+  extern unsigned long *atype_dntt;
+
+/* Currently one word is reserved for cdb-info in the symtab entries.
+ * The interpretation of this word depends on the storage class of
+ * the symtab entry.
+ */
+#include "cdbsyms.h"
+typedef union cdb_symtab_info  CDB_SYMTAB_INFO;
+union  cdb_symtab_info
+  {
+  int  label_slt;	 /* save sltindex where LABEL defined */
+  struct {
+	short extvar_isdefined;  /* set to tell if an EXTERN was defined in
+			  	  * the current file.  Needed because global,
+			  	  * unitialized vars are marked as EXTERN
+			  	  * rather than as EXTDEF. */
+	short buildname;         /* set if 'buildtree( NAME ,, )' called
+	                          * for this entry */
+  } info;
+
+  int  word;		 /* generic access -- clear the word on allocation
+			  * of a symtab entry, etc. */
+  CCOM_DNTTPTR dntt;     /* pointer to dntt table entry for this symbol */
+  };
+
+# endif /* HPCDB */
+
+extern ptr ckalloc();
+
+
+/* structures and types defining the symbol table */
+/*
+ * The symbol table is organized as an array of "symtab" structures.
+ * The symtab structures are linked in two ways: by hash value and
+ * by lexical level.
+ * The symbol "lookup" procedure defines a hash function.  The symtab
+ * entries for all symbols that hash to the same value are kept on a
+ * circular doubly linked list via the "shash_link_forw" and "shash_link_back"
+ * fields in the "symtab" structure.
+ * The hash table is an array of headers to these doubly linked lists.
+ *
+ * **** NOTE **** shash_link_forw, and shash_link_back MUST be the
+ * first two words in the symtab structure, so that the corresponding
+ * fields in the "hastab" structure definition "line-up".  This
+ * allows for efficient insert/delete algorithms.
+ *
+ * The "slev_link" field is used to link all symbols with the same
+ * lexical level (slevel).  This aids symbol removal at the end of a
+ * lexical scope.
+ *
+ * The algorithms for maintaining the symbol table are defined in file
+ * pftn.c
+ */
+
+typedef struct symtab * SYMLINK;
+# define NULL_SYMLINK  (SYMLINK) 0
+
+struct symtab {
+	SYMLINK shash_link_forw;	/* forward link to next entry with same hash value */
+	SYMLINK shash_link_back;
+	char *sname;	    /* ptr into asciz table for name (0 terminated) */
+	TWORD stype;        /* type word */
+	TWORD sattrib;      /* type attributes */
+	char sclass;        /* storage class */
+	char slevel;        /* scope level */
+#ifdef IRIF
+	int sflags;         /* flags for set, use, mos, etc. */
+#else /* not IRIF */
+	short sflags;       /* flags for set, use, mos, etc. */
+#endif /* IRIF */
+#ifdef CHECKST
+	short checkflags;   /* flags for checking symbol table; hidden, hide */
+#endif
+	int offset;         /* offset or value */
+	short dimoff;       /* offset into the dimension table */
+	short sizoff;       /* offset into the size table */
+	short suse;         /* line number of last use of the variable */
+#ifdef IRIF
+#ifdef HAIL
+	spos_$source_position_p source_position;
+			    /* set when symbol is entered in symtab */
+	void *hail_info;    /* used to hold hail information about symbols.
+			     *    for typedefs == st_$type_mark_p
+			     *    for fields   == st_$record_field_p
+			     *    for functions== st_$block_p
+			     *    for labels   == il_$label_p
+			     *    for other variables==st_$variable_p
+			     * Eventually this can take the place of
+			     * sprivate.ptr in the union.  Right now
+			     * sprivate.ptr is used by cail. */
+#endif
+	union {             /* for IL, not FE, use */
+		void *ptr;
+		int word;
+	} sprivate;	
+#endif
+# if defined(HPCDB) || defined(APEX)
+# ifdef SA
+        unsigned int xt_table_index;
+# endif /* SA */	
+# ifdef IRIF
+	unsigned symbolic_id;
+# endif /* IRIF */
+# ifndef APEX
+	CDB_SYMTAB_INFO  cdb_info;	/* misc. info for cdb support */
+# endif
+        struct symtab *typedefsym;      /* pointer to corresponding typedef */
+        int vt_file;                    /* vt index of file at definition */
+# endif /* HPCDB */
+	SYMLINK slev_link;	/* used to chain symbol table entries with
+				 * the same slevel.
+				 */
+	};
+
+struct hashtab {
+	SYMLINK shash_link_forw;
+	SYMLINK shash_link_back;
+};
+
+/* NOPREF must be defined for use in first pass tree machine */
+# define NOPREF 020000  /* no preference for register assignment */
+
+
+#if  !defined(ONEPASS) && defined(FORT)
+union ndu {
+	struct {
+		short op;
+		TWORD type,tattrib;
+		int cdim, csiz;
+		flag flagfill;
+		}alloc; /* allocation node */
+	struct {
+		short op;
+		TWORD type,tattrib;
+		int cdim, csiz;
+		}fn; /* front node */
+	struct {
+		short op;
+		TWORD type,tattrib;
+		int cdim, csiz;
+		flag fpaside;
+		/* flag onebit; */
+		NODE *left;
+		NODE * right;
+#ifdef ANSI
+		unsigned not_lvalue:1;	/* true if not lvalue */
+#endif /*ANSI*/
+		}in; /* interior node */
+	
+	struct {
+		/* this structure is the same as above,
+		   but is used when a value, rather than
+		   address, is kept in +left */
+		short op;
+		TWORD type,tattrib;
+		int cdim, csiz;
+		flag fpaside;
+		/* flag onebit; */
+		CONSZ lval;
+		int rval;
+		}tn; /* terminal node */
+	
+	struct {
+		/* this structure is used when a floating point constant
+		   is being computed */
+		short op;
+		TWORD type,tattrib;
+		int cdim, csiz;
+		double dval;
+		}fpn; /* floating point node */
+
+# ifdef ANSI
+	struct {
+		/* this structure is used when a floating point constant
+		   is being computed */
+		short op;
+		TWORD type, tattrib;
+		int cdim, csiz;
+		QUAD qval;
+		} qfpn; /* quad precision floating point node */
+# endif /* ANSI */
+
+	};
+								   
+# endif /* !ONEPASS && FORT */
+
+struct sw {		/* structure defining vals for switch and case stmts */
+	CONSZ sval;	/* value of particular case constant */
+	int slab;	/* signed because -1 means no label */
+	TWORD stype;	/* type of switch variable */
+	};
+
+extern struct sw *swtab;
+extern struct sw *swp;
+extern int swx;
+
+#ifndef IRIF
+
+/* the following structure is used to describe the monadic 68881 fcns */
+/* which may be inlined (+O3).                                        */
+
+struct builtin {
+	char *name;    /* name of routine, e.g. _BUILTIN_sin */
+	char *n881;    /* name of 68881 routine, e.g. fsin */
+	char *nlcd;    /* name of LCD routine, e.g. _sin */
+/* #ifdef FORTY  - this is not in an ifdef because of the static declaration */
+	char *forty;   /* name of 68040 emulation routine */
+
+	TWORD rtyp;    /* type of result, e.g. DOUBLE */
+	TWORD frtyp;   /* result type with flts as flts option,e.g. FLOAT*/
+	TWORD ftyp;    /* type of function, e.g. PTR FTN DOUBLE */
+	TWORD fftyp;   /* func type with flts as flts, e.g. PTR FTN FLOAT*/
+	flag  enabled; /* is function is enabled for inlineing*/
+};
+
+#endif /* not IRIF */
+
+extern int ftnno;		/* function number */
+extern int blevel;		/* blocking level */
+extern int instruct, stwart;
+
+#ifdef ANSI
+extern int typeseen;		/* flag used in conjunction with typedefs */
+extern int typedefseen;	        /* ditto */
+#endif /*ANSI*/
+
+extern int type_signed;		/* flag used for signed bitfields */
+extern flag signed_bitfields;   /* 1=bitfields are signed, 0=bitfields are unsigned */
+
+extern int nullif;		/* warn about 'if ();' */
+#define IFOK 0
+#define NULLSTMT 1
+
+extern flag inlineflag;
+
+extern int lineno;
+#ifdef CXREF
+extern int id_lineno;
+extern short nerrors;		/* number of errors in this file */
+#endif
+#ifdef NEWC0SUPPORT
+#ifndef ONEPASS
+extern int c0flag;
+extern int c0forceflag;
+#endif /* ONEPASS */
+#endif /* NEWC0SUPPORT */
+
+# ifndef YYMAXDEPTH
+#	define YYMAXDEPTH	1000	/* yacc stack size */
+# endif /* YYMAXDEPTH */
+
+typedef union {
+	int intval;
+	NODE * nodep;
+	struct symtab *symp;
+	} YYSTYPE;
+extern YYSTYPE yylval;
+
+extern CONSZ lastcon;
+extern double dcon;
+
+#ifdef ANSI
+extern QUAD qcon;
+#endif /* ANSI */
+
+extern char curclass;
+extern flag brkflag;
+extern flag unionflag;
+extern volatile flag double_to_float;
+extern volatile flag constant_folding;
+extern volatile flag fcon_to_icon;
+extern char ftitle[];
+extern struct symtab *stab_blk;
+extern struct hashtab stab_hashtab[];
+extern SYMLINK stab_lev_head[];
+extern SYMLINK stab_freelist;
+extern int stab_nextfree;
+extern struct symtab *curftn;
+extern int curdim;
+extern int *dimtab;
+extern int *paramstk;
+extern int paramno;
+extern int autooff, argoff, strucoff;
+#ifdef ANSI
+extern int last_enum_const;
+#endif /*ANSI*/
+extern int regvar;
+extern int typ_initialize;
+extern int was_class_set;
+extern int fdregvar;
+extern int minrvar;
+extern int minrfvar;
+extern int minrdvar;
+extern char yytext[];
+
+extern flag is_initializer;
+
+extern flag reached;
+# ifdef LINT_TRY
+extern int reachflg;
+extern flag sflag;
+#ifdef APEX
+extern int style_flag;
+extern int fileflag;
+extern int domain_extensions;
+#endif
+# endif /* LINT_TRY */
+
+extern OFFSZ inoff;
+
+/*	tunnel to buildtree for name id's */
+
+extern struct symtab *idname;
+
+extern NODE *node;
+extern NODE *lastfree;
+
+#ifdef ANSI
+extern flag ansiflag;
+#endif
+extern flag cflag;
+extern flag hflag;
+extern flag pflag;
+
+/* various labels */
+extern int brklab;	/* jump to here if "break" is executed */
+extern int contlab;	/* jump to here if "continue" is executed */
+
+#ifdef IRIF
+extern int swlab;       /* label for case table */
+#endif /* IRIF */
+
+extern int flostat;
+extern int retlab;	/* jump to here if "return" is executed */
+extern unsigned int svfdefaultlab;	/* safe exit label for falling out the 
+					 end of a structure valued function. */
+
+extern flag apollo_align;  /* indicates APOLLO_WORD, APOLLO_NATURAL */
+                           /* variants of S300, HP_COMMON           */
+extern short align_like;  /* ALIGNS300,ALIGNS500,ALIGNS800,ALIGNCOMMON,ALIGNNOPAD */
+
+#ifndef IRIF
+extern unsigned int al_char[], al_short[], al_int[], al_long[], al_point[];
+extern unsigned int al_float[], al_double[], al_longdouble[], al_struct[];
+#endif /* not IRIF */
+
+extern int ccoptlevel; /* optimization level from cc line 1, 2 or 3 */
+extern int optlevel;   /* derived optimization level from pragma's and cc */
+extern int retstat;
+extern int *asavbc, *psavbc;
+
+/*	flags used in structures/unions */
+
+# define SEENAME 01
+# define INSTRUCT 02
+# define INUNION 04
+# define FUNNYNAME 010
+# define TAGNAME 020
+
+/*	flags used in the (elementary) flow analysis ... */
+
+# define FBRK 02
+# define FCONT 04
+# define FDEF 010
+# define FLOOP 020
+
+/*	flags used for return status */
+
+# define RETVAL 1
+# define NRETVAL 2
+
+/*	used to mark a constant with no name field */
+
+# define NONAME 040000
+# define HAVENAME 040001
+
+	/* mark an offset which is undefined */
+
+# define NOOFFSET (0xffffffff)
+
+/*	declarations of various functions */
+extern struct symtab *lookup();
+extern NODE
+	*buildtree(),
+	*bdty(),
+# ifdef DEBUGGING
+	*mkty(),
+# endif	/* DEBUGGING */
+	*rstruct(),
+	*dclstruct(),
+	*getstr(),
+	*tymerge(),
+	*stref(),
+	*offcon(),
+	*convert(),
+	*pconvert(),
+	*oconvert(),
+	*ptmatch(),
+	*tymatch(),
+	*makety(),
+	*doszof(),
+	*talloc(),
+	*optim(),
+#ifdef IRIF
+	*do_optim(),
+#endif /* IRIF */
+	*t1copy(),
+	*clocal();
+
+OFFSZ	tsize(),
+	psize();
+
+NODE	*types(), *ntattrib(), *pattrib();
+
+
+double atof();
+
+char *exname();
+
+# ifndef CHECKST
+# define checkst(x)
+# endif
+
+# ifndef CHARCAST
+/* to make character constants into character connstants */
+/* this is a macro to defend against cross-compilers, etc. */
+# define CHARCAST(x) (char)(x)
+# endif
+
+# ifdef DEBUGGING
+#	define MKTY(t, d, s)	mkty(t, d, s)
+# else	/* DEBUGGING */
+#	define MKTY(t, d, s)	block(TYPE, NIL, NIL, t, d, s)
+# endif	/* DEBUGGING */
+# define MKCL(c)		block(CLASS,(NODE *)c,NIL,0,0,0)
+# define MKTYPDF(t,d,s)         block(TYPE_DEF, NIL, NIL,t, d, s)
+# ifdef ANSI
+extern NODE * proto_head[];	/* one per blevel */
+extern long curclass_save[];	/* one per blevel */
+extern long instruct_save[];    /* one per blevel */
+extern void unscope_parameter_list();
+extern void rescope_parameter_list();
+extern SYMLINK slevel_head();
+extern SYMLINK make_snoname();
+extern NODE * make_proto_header();
+extern void free_proto_header();
+extern SYMLINK next_param();
+extern int inproto;
+extern NODE * copy_prototype();
+
+# define FDECL_NULL 0
+# define FDECL_OLD 1
+# define FDECL_NEW 2
+extern char fdecl_style;
+# endif	 /* ANSI */
+
+# ifndef ANSI
+# define inproto 0
+# endif
+
+/* bits in return code from iscompat */
+# define ICTYPE    01        /* types incompatible */
+# define ICQUAL    02        /* qualifiers (attribute) incompatible */
+# define ICSTR     04        /* structure/union types incompatible */
+# define ICARY     010       /* arrays have incompatible members */
+# define ICARYSIZE 020       /* arrays have different sizes */
+# define ICPTR     040       /* pointers point to incompatible types */
+# define ICPTRQ    0100      /* objects pointer to have incompatible quals */
+# define ICFTN     0200      /* functions have incompatible return types */
+# define ICFTNPARG 0400      /* prototypes disagree on # of args */
+# define ICFTNPELI 01000     /* prototypes disagree on use of elipses */
+# define ICFTNPPAR 02000     /* prototypes have incompatible arguments */
+# define ICFTNDARG 04000     /* prototype and old style decl disagree on # of
+                                args */
+# define ICFTNDELI 010000    /* not allowed to use ellipses in combination of 
+                                old style definition */
+# define ICFTNDPAR 020000    /* prototype and old style definition have
+                                incompatible parameters */
+# define ICFTNXELI 040000    /* prototype use of ... isn't compatible with
+                                empty function list */
+# define ICFTNXPAR 0100000   /* prototype parameters must be compatible with
+                                default widening rules */
+#ifdef LIPINSKI
+struct nalias { char *internal,*external; struct nalias *nxt; };
+#endif
+
+# ifdef YYCOVERAGE
+/* variables used in coverage instrumentation of grammar */
+extern int record_reductions;
+extern int yy_rtable[];
+extern char *yy_rfile;
+# endif /* YYCOVERAGE */
+
+#ifdef HPCDB
+extern flag in_comp_unit;
+extern flag Allflag;
+# ifdef SA
+extern flag saflag;
+# endif
+#endif
+
+#ifdef SILENT_ANSI_CHANGE
+flag silent_changes;
+#endif /* SILENT_ANSI_CHANGE */

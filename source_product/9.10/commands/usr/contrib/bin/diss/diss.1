@@ -1,0 +1,67 @@
+.\" $Revision: 70.2 $
+.TH diss 1 "" "Series 300/400 Only" 
+.ds )H Hewlett-Packard Company
+.SH NAME
+diss \- ascii dump of MC680x0 object-file segments 
+.SH SYNOPSIS
+.B diss
+.RI [ \|options\| ]
+.I file
+.SH DESCRIPTION
+.I diss
+dumps out any or all segments of an MC680x0 object file
+(see <a.out.h>) in human-readable form.
+.PP
+The following options allow selection of specific sections to
+dump:
+.RS
+.TP 8
+.B \-a 
+Print all sections (default).
+.TP 
+.B \-d
+Print the data segment (in hexadecimal bytes).
+.TP
+.B \-h
+Print the a.out header (post-7.0 format).
+.TP
+.B \-m
+Print the pascal/modcal "interface" segment.
+.TP
+.B \-r
+Print the text and data relocation commands.
+.TP
+.B \-s
+Print the linker symbol table.
+.TP
+.B \-t
+Print the text segment (in hexadecimal bytes).
+.TP
+.B \-x
+Print the extension headers.  Extensive information is given for
+shared-library (_dl_header) extension headers.
+.TP
+.B \-R
+Same as
+.B \-r
+with the associated symbol shown by name.
+.RE
+.SH WARNINGS
+.I Diss 
+primarily understands the a.out format introduced with the
+7.40 Languages release.  Earlier formats are not compatible in all
+respects (i.e.  some of the above options may produce no output or
+garbage).
+.PP
+The symbolic-debug tables (produced with the
+.B \-g
+compiler option) or their extension header
+cannot be dumped with
+.IR diss(1) ;
+use
+.I dsymtab(1)
+instead.
+.SH AUTHOR
+Diss was developed by HP.
+.SH SEE ALSO
+a.out_300(4).

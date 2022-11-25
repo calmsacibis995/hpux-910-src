@@ -1,0 +1,208 @@
+#!/bin/sh
+##	@(#)get_kernel	$Revision: 1.23.109.1 $	$Date: 91/11/19 13:54:59 $
+#	get_kernel	--	get the latest kernel sources
+# Written by Darren D. Smith (dds)
+#
+# This script is written specifically to get the
+# latest kernel sources (all of them), and do some
+# special massaging.
+# NOTE: we don't blow away all the old stuff becuase
+# a network connection might not be up, which would
+# cause us problems.
+# NOTE2: For the moment we will remove the saved files if
+# we got a good one.  This is because the lack of disk space
+# problems.  It should be left around.   To change it so that
+# files will be left around, change the value below.
+#
+# UPDATE:  Changed to be able to update just the header files, and just
+# to a given revision level.
+##
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+LEAVEAROUND=false
+ 
+#  PRINT = "" means print the rcs get info
+#  PRINT = "-q" means DONT print the rcs get info
+PRINT=""
+
+# The header revision level?? Anyway the source level to get for SSO.
+#HDRDL=-r63
+HDRDL="S300/6_5D"
+
+# GFLAGS = the flags to get.  The revision is hardwired for the
+# moment until I can figure out a better way to do it
+GFLAGS="$PRINT"
+
+# HEADERS_ONLY means only get header files, not everything.  This is
+# useful for building a set of files with a given header revision.
+HEADERS_ONLY=false
+
+# NOTE: in overnight script $nfs=$Nfs
+KERNELDIR=kernel/300
+TARGETDIR=$nfs/$KERNELDIR
+
+while [ $# -gt 1 ] 
+do
+	case $1 in
+
+	-h | -header)
+		HEADERS_ONLY=true
+		HDRDL=$2
+		shift 2;;
+
+	-*) echo "usage: $0 [-h header_level] [targetdir]"
+	    exit 1;;
+
+	*)  TARGETDIR=$1
+	    shift 1;;
+	esac
+done
+
+# SCCS=the root of the directory that has the rcs kernel stuff
+# TARGETDIR = where to install it, default is the global directory
+SCCS=$Nfs/rcs/$KERNELDIR
+
+# SAVEDIR is where to save the files at in case the Co fails.
+SAVEDIR=$nfs/SAVEDIR/$KERNELDIR
+
+/bin/echo
+/bin/echo "$SCCS    ===>    $TARGETDIR"
+/bin/echo
+
+#whereami allows path relative installs
+whereami=`pwd`
+umask 022
+WORKDIRS="`ls $SCCS`"
+
+# Make sure that the SAVEDIR directory exits
+cd /
+for D in `/bin/echo $SAVEDIR | /bin/sed 's#/# #g'`
+do
+   if [ ! -d $D ]
+   then
+      /bin/mkdir $D
+      /bin/chmod 775 $D
+   fi
+   cd $D
+done
+
+cd $whereami
+
+# BUILD NEW WORKING FILES FROM RCS
+for DIR in `cd $SCCS; /bin/find $WORKDIRS -type d -print`
+do
+
+   # MAKE SAVE DIRECTORIES AS NEEDED
+   cd $SAVEDIR
+   for D in `/bin/echo $DIR | /bin/sed 's#/# #g'`
+   do
+      if [ ! -d $D ]
+      then
+	/bin/mkdir $D
+	/bin/chmod 775 $D
+      fi
+      cd $D
+   done
+	
+   # MAKE WORKING DIRECTORIES AS NEEDED
+   cd $whereami
+   cd $TARGETDIR
+   for D in `/bin/echo $DIR | /bin/sed 's#/# #g'`
+   do
+      if [ ! -d $D ]
+      then
+         /bin/mkdir $D
+	 /bin/chmod 775 $D
+      fi
+      cd $D
+   done
+
+   # GET THE WORKING FILES FROM RCS,
+   # USING THE VERSION THAT KNOWS ABOUT REMOTE SOURCE ACCESS
+   # UNFORTUNATELY, IT DOESN'T UNDERSTAND ABOUT DIRECTORIES, SO WE HAVE
+   # TO DO IT A FILE AT A TIME.  THIS SHOULD BE THE SAME AS:
+   # 	 $Nfs/bin/Co $Nfs/rcs/kernel/300/$DIR
+   # NOTE: Force errors to standard output so that they are in order with
+   # the file names.
+   # Get tricky if we only want header files.
+   if $HEADERS_ONLY
+   then
+	FILES="`ls $SCCS/$DIR | grep .h,v`"
+   else
+	FILES="`ls $SCCS/$DIR`"
+   fi
+   if [ -n "$FILES" ]
+   then
+	for FILE in $FILES
+ 	do
+	    SAVED=false;
+            F=`expr $FILE : "\(.*\),v"`
+	    if [ "$F" = "0" -o "$F" = "" ]
+	    then
+		/bin/echo "WARNING: $SCCS/$DIR contains a non-rcs file: $FILE"
+		continue
+	    fi
+	    /bin/echo "$DIR/$F"
+	    if [ -f $F ]
+	    then
+		    mv -f $F $SAVEDIR/$DIR/$F
+		    SAVED=true
+	    fi
+	    if expr $F : "\(.*\).h" >/dev/null 2>&1
+	    then
+		$Nfs/bin/Co -r$HDRDL $SCCS/$DIR/$FILE 2>&1
+		#
+		# Grossness.  Some headers are still in SCCS files.  If
+		# so, they barf -on a symbolic revision, so just get at
+		# the top of the trunk
+		if [ ! -f $F ]
+		then
+		    echo "*** First try failed, try with no symbolic tag"
+		    $Nfs/bin/Co $SCCS/$DIR/$FILE 2>&1
+		fi
+	    else
+		$Nfs/bin/Co $GFLAGS $SCCS/$DIR/$FILE 2>&1
+	    fi
+	    if [ ! -f $F ]
+	    then
+		/bin/echo "ERROR: Co of $SCCS/$DIR/$FILE failed."
+		if $SAVED
+		then
+			/bin/echo "Restoring $F from $SAVEDIR/$DIR/$F"
+			# mv it back to preserver modification time.
+			mv -f $SAVEDIR/$DIR/$F $F
+			if $LEAVEAROUND
+			then
+				cp $F $SAVEDIR/$DIR/$F
+			fi
+		fi
+	    else
+		# Remove the old version if saved
+		if $SAVED
+		then
+			if $LEAVEAROUND
+			then
+				true	# do nothing
+			else
+				rm -f $SAVEDIR/$DIR/$F
+			fi
+		fi
+	    fi
+	done
+   fi
+done
+
+# Finally, a special hack for "kmake" to make sure it is
+# executable.
+KMAKE=$TARGETDIR/WOPR/kmake
+if [ ! -x $KMAKE ]
+then
+	if [ ! -f $KMAKE ]
+	then
+		cd $TARGETDIR/WOPR
+		Co $Nfs/rcs/$KERNELDIR/bin/kmake,v
+	fi
+	chmod +x $KMAKE
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

@@ -1,0 +1,33 @@
+#!/bin/sh
+#  $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lp/model/dumbplot,v $
+#  $Revision: 66.1 $
+#
+# lp interface for dumb plotter
+#
+
+copies=$4
+
+# Handle disable and cancel traps
+trap "trap 15;kill -15 0;exit 0" 15
+
+# The remaining arguments are files
+
+shift; shift; shift; shift; shift
+files="$*"
+
+# Plot the spooled files
+
+echo "IN;\n"
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "PG;\n"
+	done
+	i=`expr $i + 1`
+done
+
+exit 0

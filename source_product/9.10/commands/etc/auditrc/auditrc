@@ -1,0 +1,134 @@
+#! /bin/sh
+### DO NOT remove this and the following 4 lines
+  if [ -x /usr/sam/bin/sam_audit ] && /usr/sam/bin/sam_audit -x
+  then
+     exit 0
+  fi
+
+echo  /etc/auditrc: This file must be edited to activate audit subsystem 
+exit 1
+# Remove this line and the two above after editing the file as directed below.
+#!/bin/sh
+#script to start up the auditing subsystem
+
+#--------------------------------------------------------------
+# INSTRUCTIONS:
+# To activate and tune this script,  uncomment or copy-and-change
+# the "****EXAMPLE****" portions below:
+# Note:  Modify only the ****EXAMPLE**** portions.  The "Format"
+#        portions are provided as an aid in changing the ****EXAMPLE****s.
+#
+# Also, be sure this script is called by /etc/rc.  If your system predates
+# version 6.5 (was not newly installed then or later), an example can be
+# found in /etc/newconfig/rc.
+#--------------------------------------------------------------
+
+  if [ ! -x /usr/bin/audsys ]		#simple precautionary check
+  then
+	echo "Audit subsystem either not present or not fully installed.  Can't activate."
+	exit 1
+  fi
+
+  if [ -s /.secure/etc/audnames ]
+  then
+	:			#this does nothing, but needed by shell
+				#in case below is left as comment
+
+#--------------------------------------------------------------
+# TURN ON AUDITING:
+# To enable auditing, the following example MUST BE UNCOMMENTED.
+# The command "audsys -n" utilizes the audit log
+# names and sizes from the /.secure/etc/audnames file.  This file
+# is created on the very first execution of audsys (see "else"
+# part below).
+#--------------------------------------------------------------
+
+# ****EXAMPLE********************************************:  
+# ****Uncomment only, don't change.  (Note: MUST UNCOMMENT following line)
+
+#   	/usr/bin/audsys -n
+
+#----------------------------------------------------------------
+# INITIALIZE AUDIT SUBSYSTEM:
+# If /.secure/etc/audnames doesn't exist,  then this is the very 
+# first execution of audsys on this system and the log file names and 
+# sizes must be specified.  See manual entry on "audsys(1M)" for details.
+# Customize the arguments to audsys as follows:
+#   primary_file = name of file where audit records begin to be logged
+#           cafs = switch size (maximum size in kbytes for primary audit
+#                  log file)
+#    second_file = file audit system switches to when primary reaches 
+#                  switch size
+#           xafs = switch size of secondary file (maximum size in kbytes for 
+#	           secondary audit log file)
+#
+# Note:  If the system has any mounted volumes, you might want to put the
+# primary and secondary audit log files on different volumes to take maximum
+# advantage of audit file switching.
+#
+# Note:  For security, the path to the audit files must not be readable or
+# writable except by authorized users.
+#
+# Format:
+#	audsys -n -c primary_file -s cafs -x second_file -z xafs
+#----------------------------------------------------------------
+
+# ****EXAMPLE********************************************:
+# ****Uncomment/change following lines as appropriate  (the "else" is required)
+
+# else
+#	/usr/bin/audsys -n -c /.secure/etc/audfile1 -s 1000 -x /.secure/etc/audfile2 -z 1000
+
+#----------------------------------------------------------------
+
+  fi
+
+#----------------------------------------------------------------
+# SPECIFY EVENTS TO BE AUDITED: 
+# This MUST BE TUNED by the administrator.  If left as is, only 
+# events that deal with:
+#	1) changing discretionary access control (DAC), 
+# 	2) logging in, and 
+#	3) administering the system will be audited.
+# While these may be a reasonable defaults on some systems, only the
+# security officer/administrator can determine exactly what is needed.
+# See manual entry on "audevent(1M)" for specifics on how to tune.
+# WARNING:  If everything is turned on, the system may quickly run out
+#           of free disk space due to excessive audit logging.
+#----------------------------------------------------------------
+
+# ****EXAMPLE********************************************:
+# ****Uncomment and change  following line 
+
+# /usr/bin/audevent -P -F -e moddac -e login -e admin
+
+#-----------------------------------------------------------------
+# START AUDOMON DAEMON:
+# Customize the arguments to audomon as follows:
+# See manual entry on "audomon(1M)" for details
+#     fss = minimum percentage of free space left on an audit log file's
+#	    file-system before switching to the secondary audit log file
+#	    (which may reside on a separate volume/partition), 
+#           or before taking protective action if no file space is left.
+#	    (default: 20%)
+# sp_freq = minimum wakeup interval (in minutes), at which point
+#	    warning messages are generated on the console about 
+#	    switch points.  Switch points are the maximum log file
+#	    sizes and the percentage minimum free space specified.
+#   	    (default: 1  minute)
+# warning = percentage of audit file space used or minimum free space
+#	    used after which warning messages are sent to the console.
+#	    (default: 90 - warning messages are sent when the files 
+#	    are 90% full or available free space is 90% used)
+# Format:
+# 	audomon -p fss -t sp_freq -w warning 
+#-----------------------------------------------------------------
+
+# ****EXAMPLE********************************************: 
+# ****Uncomment and tune following lines.
+# ****NOTE: *Please* make sure that you uncomment the line containing
+# ****      the "trap" statement when you uncomment the "audomon" line,
+# ****      otherwise "audomon" will die.
+
+# trap '' 1		# ignore SIGHUP.
+# /etc/audomon -p 20 -t 1 -w 90 > /dev/console 2>&1  &

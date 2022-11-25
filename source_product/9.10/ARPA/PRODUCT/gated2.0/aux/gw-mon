@@ -1,0 +1,15 @@
+#! /bin/csh -f
+
+/bin/date
+echo " "
+echo "==========================================="
+echo " "
+awk -f changes.awk $*
+echo " "
+echo "==========================================="
+echo " "
+awk -f redirects.awk $*
+echo " "
+echo "==========================================="
+echo " "
+/bin/date

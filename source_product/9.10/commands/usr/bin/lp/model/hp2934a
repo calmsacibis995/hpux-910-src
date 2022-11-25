@@ -1,0 +1,219 @@
+#!/bin/sh
+# @(#) $Revision: 70.1 $
+
+# lp interface for hp2934a line printer
+#
+# Options recognized:
+#
+# Primary Symbol Set: (Default ROMAN8)
+#	r8 | -r8	Roman 8-bit Character Set
+#	k8 | -k8	Katakana 8-bit Character Set
+#
+# Print Pitch Selection: (Default 10 cpi)
+#	e | -e 		expanded print mode (5.00 cpi)
+#	10 | -10 	pica print mode (10.00 cpi)
+#	12 | -12	elite expanded print mode (12.00 cpi)
+#	c | -c		compressed print mode (16.36 cpi)
+#
+# Style and Stroke Weight (Default Upright Medium)
+#	i | -i | italic	use italic style
+#	b | -b | bold	use bold stroke weight
+#
+# Density Selection: (Default Draft)
+#	q | -q		correspondence high density print (40 cps)
+#
+# Output filtering: (Default Cooked)
+#	r | -r | raw	use raw mode for binary output to printer
+#
+# Other:
+#	nb | -nb	do not output banner page (to save paper)
+#
+# Default: normal print mode
+#
+
+# IMPORTANT  NOTICE:  this printer model has been  designed to handle both
+# text (cooked) and raw output.  Under normal  circumstances, the standard
+# output  is  redirected  to the  device  specified  by the -v  option  of
+# lpadmin.  The   /usr/spool/lp/member   directory  contains  files  which
+# describe  the  device  file  locations.  The raw  device  file  name  is
+# computed from the cooked device file name by adding a leading "r" to the
+# device  file name of the cooked  device.  IT IS ASSUMED  that the device
+# file names differs only by a leading r.
+
+# POSSIBLE  ENHANCEMENTS:  Other fonts may be available for this  printer.
+# These may add new type faces and pitches to the standard  character sets
+# or may add new character  sets.  In order to make effective use of them,
+# this  model  should  be  modified  with new  options  for the  "symbol",
+# "pitch", or "font" variables used below.
+
+# POSSIBLE  UPGRADE:  This model  provides some options  which may only be
+# supported with certain printer hardware  options.  There may be hardware
+# upgrades  available to support these options.  If these options are used
+# without the required  hardware, the result should be acceptable  even if
+# not exactly what was expected.
+
+# set up redirection of stderr
+log=/usr/spool/lp/log
+exec 2>>$log
+
+# Save the arguments to the model
+
+printer=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+
+# Test for the raw printer device file
+
+devicefile=/usr/spool/lp/member/`basename $0`
+cookeddevice=`cat $devicefile | line`
+rawdevice=`dirname $cookeddevice`/r`basename $cookeddevice`
+
+if [ ! -c $rawdevice ]
+then
+	disable -r"can't locate raw device file $rawdevice" $printer
+	exit 1
+fi
+
+# Handle disable and cancel traps.
+
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Determine which options have been invoked
+
+symbol="r8"
+pitch="p2"
+font="f1"
+italic="no"
+bold="no"
+density="d1"
+outputmode="cooked"
+banner="yes"
+
+for i in $5
+do
+	case "$i" in
+	-r8 | r8) # Roman8 Character set
+		symbol="r8";;
+	-k8 | k8) # Kana8 Character set
+		symbol="k8";;
+
+	-e | e) # expanded print (5.00 cpi)
+		pitch="p1";;
+	-10 | 10) # normal print (10.00 cpi)
+		pitch="p2";;
+	-12 | 12) # normal print (12.00 cpi)
+		pitch="p3";;
+	-c | c) # compressed print (16.36 cpi)
+		pitch="p4";;
+
+	-b | b | bold) # bold
+		bold="yes";;
+	-i | i | italic) # italic
+		italic="yes";;
+
+	-q | q) # courier high density (40 cps)
+		font="f2"; density="d3";;
+
+	-r | r | raw) # raw mode for binary output to printer
+		outputmode="raw";;
+
+	-nb | nb) # Do not print banner page
+		banner="";;
+	esac
+done
+
+
+# Assume that the rest of the arguments are files
+
+shift; shift; shift; shift; shift
+files="$*"
+
+# Print the standard header
+
+if [ -n "$banner" ]
+then
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "\014\r\c"
+	echo "$x\n$x\n$x\n$x\n"
+	banner `echo $user | tr [a-z] [A-Z]`
+	echo "\n"
+	user=`pwget -n $user | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $reqid    Printer: $printer\n"
+	date
+	echo "\n"
+	if [ -n "$title" ]
+	then
+		banner "$title" 
+	fi
+	echo "\014\r\c"
+fi
+
+# Print the spooled files
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		case "$symbol" in
+			r8)	echo "\033(8U\r\c";;
+			k8)	echo "\033(8K\r\c";;
+		esac
+
+		case "$font" in
+			f1)	echo "\033(s0T\033)s0T\r\c";;
+			f2)	echo "\033(s3T\033)s3T\r\c";;
+		esac
+
+		case "$pitch" in
+			p1)	echo "\033&k1S\r\c";;
+			p2)	echo "\033&k0S\r\c";;
+			p3)	echo "\033&k4S\r\c";;
+			p4)	echo "\033&k2S\r\c";;
+		esac
+
+		case "$italic" in
+			no)	echo "\033(s0S\033)s0S\r\c";;
+			yes)	echo "\033(s1S\033)s1S\r\c";;
+		esac
+
+		case "$bold" in
+			no)	echo "\033(s0B\033)s0B\r\c";;
+			yes)	echo "\033(s1B\033)s1B\r\c";;
+		esac
+
+		case "$density" in
+			d1)	echo "\033(s0Q\033)s0Q\r\c";;
+			d3)	echo "\033(s2Q\033)s2Q\r\c";;
+		esac
+
+		case $outputmode in
+			raw)		cat "$file" >$rawdevice 2>/tmp/raw$$
+					cat /tmp/raw$$
+					rm /tmp/raw$$
+					echo "\014\r\c";;
+			cooked)		cat "$file" 2>&1
+					echo "\014\r\c";;
+		esac
+		echo "\033E\r\c"	# hard reset -- between spool files
+		echo "\033(@\033)@\r\c"	# reset character sets to default
+		echo "\033(s0T\033)s0T\r\c"	# reset typefaces
+		echo "\033&k0S\r\c"	# reset pitches
+		echo "\033(s0S\033)s0S\r\c"	# reset styles
+		echo "\033(s0B\033)s0B\r\c"	# reset stroke weights
+		echo "\033(s0T\033(s0Q\r\c"	# reset densities
+		echo "\033&d@\r\c"	# disable auto-underline
+		echo "\033&l6D\r\c"	# reset printer to 6 lines per inch
+	done
+	i=`expr $i + 1`
+done
+
+exit 0

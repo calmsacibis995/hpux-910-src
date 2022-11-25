@@ -1,0 +1,113 @@
+#!/bin/sh
+##	@(#)setup	$Revision: 1.37.109.2 $	$Date: 91/12/18 16:03:26 $
+#	setup	--	sets up the NFS development environment
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH
+
+umask 022
+CMDS_DIRS="bin cmds include man doc system releases"
+KERN_DIRS="bin include kernel man doc test releases"
+WORK_DIRS="bin cmds include kernel man doc releases test system"
+NEW_DIRS="bin cmds include kernel man doc releases test system 3.2-4.3"
+
+# Warn if a nfs build is in progress
+if [ ! -w $Nfs/log/update ] ; then cat >&2 <<-EOF
+
+WARNING:  A $Nfs build is in  progress.
+This setup may not produce a consistent development  environment because
+the link files are changing.
+
+EOF
+fi
+
+echo `date "+%y.%m.%d %T"` $CMD $nfs begin
+
+# Create $Nfs/develop if it doesn't already exist
+DEVELOP=`dirname $nfs`
+if [ ! -d $DEVELOP ] ; then
+    if mkdir $DEVELOP ; then
+        chmod 770 $DEVELOP
+	chown nfsmgr $DEVELOP
+    else
+	echo "ERROR($0): Cannot create \"$DEVELOP\"" >&2
+	exit 1
+    fi
+fi
+
+# Create $nfs if it doesn't already exist
+if [ ! -d $nfs ] ; then
+    mkdir $nfs || exit 1
+fi
+cd $nfs
+
+# Create checkout and tmp directories if they don't already exist
+for DIR in checkout tmp
+do  if [ ! -d $DIR ] ; then
+	mkdir $DIR
+    fi
+done
+
+DIR="log"
+# Create log directory if it doesn't exist, and make a "setup" file there
+if [ ! -d $DIR ] ; then
+	mkdir $DIR
+	touch $DIR/setup
+	chmod 644 $DIR/setup
+fi
+
+##
+#	determine what directories to setup
+##
+if [ -w $nfs/log/setup ] ; then
+    CMD="setup"
+    DIRS="$WORK_DIRS"
+elif [ -w $nfs/log/setup_cmds ] ; then
+    CMD="setup_cmds"
+    DIRS="$CMDS_DIRS"
+elif [ -w $nfs/log/setup_kern ] ; then
+    CMD="setup_kern"
+    DIRS="$KERN_DIRS"
+elif [ -w $nfs/log/setup_3.2 ] ; then
+    CMD="setup_3.2"
+    DIRS="$NEW_DIRS"
+else
+    echo "ERROR($0): no $nfs/log/setup file exists, no setup done!"
+    exit 1
+fi
+
+echo	"setting up:	\c"
+
+# Link  $nfs/checkout over $nfs.  Checked out files must always be newer
+# than their corresponding $Nfs files so cpio doesn't blow them away later
+if [ -d checkout -a -s checkout ] ; then
+    echo " checkout\c"
+    cd checkout
+    find . -print -exec touch {} \; |
+    cpio -pdl .. 2>/dev/null
+fi
+
+# Link $nfs to $Nfs
+cd $Nfs
+
+for WORK in $DIRS ; do
+    echo " $WORK\c"
+    find $WORK -print | cpio -pdl $nfs 2>/dev/null
+done
+echo "\n"
+
+# Now see if they have any specific commands they want executed.  Basically,
+# we assume that if the file is executable, it is a shell script that they
+# want executed.  An example would be one to cd $nfs/cmds and execute
+# the MAKE command.
+
+if [ -x $nfs/log/special ] ; then
+    echo date "+%y.%m.%d %T $CMD executing $nfs/log/special:"
+    echo
+    cd $nfs
+    $nfs/log/special
+fi
+
+echo `date "+%y.%m.%d %T"` $CMD $nfs end

@@ -1,0 +1,24 @@
+#!/bin/sh
+##	@(#)Make_cmd	$Revision: 1.20.109.1 $	$Date: 91/11/19 13:52:18 $
+#	Make_cmd	--	make all the commands
+# Written for NFS project by Cristina Mahon
+# This scripts makes all the commands in the development environment.
+# It first makes the libraries.
+# $nfs is set to $Nfs by the overnight script.
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs begin
+
+#DIRS=`find $nfs/cmds/usr.lib $nfs/cmds/bin $nfs/cmds/etc $nfs/cmds/ucb $nfs/cmds/usr.bin $nfs/cmds/usr.etc -name Makefile -print | grep -v 800`
+
+# Don't build s800 commands -- there is a separate script for that.
+# Don't build the routines under libc since we are getting them through
+# the SSO libc.  The things to be build are specified under the variable
+# PRODUCT for the s300s in $Nfs/bin/MAKE.
+
+cd $nfs/cmds
+$nfs/bin/MAKE $*
+touch $nfs/log/transfer
+
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs end

@@ -1,0 +1,406 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'NFS and ACLs"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.vs 20
+.ft 3
+.ce
+NFS and ACLs
+.sp 2
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:28:34 $
+$Revision: 1.2.109.1 $
+.sp 3
+.ce 1
+Authors: Cristina Mahon and Mike Shipley
+.ps 10
+.vs 12
+.sp 6
+.ad
+In this paper we describe the interactions between Network File System (NFS) 
+and Access Control Lists (ACLs) as they are currently designed, as well as 
+propose possible solutions for NFS and ACLs coexistence.
+.sp
+ACLs are a mechanism  to provide greater access control to files by adding
+greater granularity to the individual user/group mechanism.  ACLs can be
+permissive or restrictive, for example, a specific user can be
+granted or denied access to a file beyond the file's base mode bits.
+This introduces the concept of ACL mode bits which are a superset of the base 
+mode bits that will be discussed later on this paper.
+.sp
+ACLs are being added to HP-UX as the preferred method of supporting 
+Discretionary Access Control (DAC).  While some form of DAC is required 
+by the NCSC Trusted Computer System Evaluation Criteria (TCSEC) at
+Class C1, ACLs or equivalent capability are not required until Class B3.
+The current UNIX DAC already suffices for Class C1 and with some extra 
+documentation could probably reach Class C2.  For more details on the issues 
+and alternatives considered for the design of ACLs, please refer to the paper 
+"Adding Access Control Lists to Unix" by Alan Silverstein, Bill McMahon and 
+Greg Nuss.
+.sp
+Since the design of ACLs calls for specific changes to the HP-UX file system,
+into which NFS and other networking applications are closely intertwined, ACLs
+have the potential of greatly affecting those networking applications.
+.na
+.bp
+.H 1 "NFS protocol"
+.sp
+.ad
+An NFS connection occurs between a server and a client system.  It is a 
+stateless connection by nature, in the sense that the server system does
+not keep track of what the client system is doing.  This helps in the 
+recovery of the client system if a server crashes.
+.sp
+The current NFS protocol (version 2) performs access checking by having
+the server send access information to the client (when the client
+performs an operation like open() or access() for example).  The client then 
+checks to see whether access is allowed.  For operations like read() and 
+write() the server checks whether the client can perform the operation.
+.sp
+The interaction between NFS and ACLs arises because the NFS
+protocol only allows for nine access mode bits to be passed back between the 
+server and the client for access checking.  In the UNIX implementation of NFS, 
+those nine bits are the base mode bits for the file being accessed.  
+.sp
+With the introduction of ACLs, the base mode bits of a file are no longer
+enough to determine whether a user can access that file.  With NFS,
+since access checking is performed on the client based on the bits returned
+by the server, while the checking for all other operations is performed on
+the server, situations like the following can arise.
+.BL
+.LI
+A user can be allowed to access a file based only on the base mode bits 
+returned by the server, but then have a read or write denied because of
+an ACL restriction.  
+.LI
+A user can be disallowed access to a file, based on the base mode bits,
+that he could otherwise have had access to on the local system because of ACLs.
+.LE
+.sp
+Both of these situations produce results that are confusing and
+might not be easily tracked down to their cause (the combination of
+base mode bits and ACLs).
+.na
+.sp 3
+.H 1 "Solutions for NFS/ACLs interaction problems"
+.sp
+.ad
+In this section we list the most relevant solutions to the problems listed in
+the previous section, as well as indicate what
+the NFS group's preferred short and long term solutions are.  The first
+solution involves postponing ACLs until the 4.0/7.0 releases, while the
+other ones deal with the choices NFS will have when ACLs are implemented.
+.na
+.sp 2
+.H 2 "Postpone ACLs until 4.0/7.0"
+.ad
+.sp
+This is our preferred solution for the time frame of the 6.5 release.  We 
+listed the reasons for our preference below:
+.BL
+.LI
+Compressed release schedule and lack of resources for the 6.5 release:
+.DL
+.LI
+Since ACLs are not required for C2 security and C2 security is the only 
+level of security committed to for the 6.5 release we should weight the
+costs of implementing and supporting ACLs against implementing other features 
+that might be more urgently needed.
+.LE
+.LI
+Maintain s300 and s800 compatibility:
+.DL
+.LI
+NFS code is shared between Series 300 and Series 800.  Any changes that
+are made to one system that are not available on the other system until
+much later, constitute exceptions that we try to minimize both for the 
+customers and the development team's benefit.  By having major differences
+in the code we incur the overhead of maintaining different branches and
+run into code sharing problems with the NFS groups in IND/UKL (Cupertino).
+.LE
+.LI
+Apollo's Access Control List offering to the OSF:
+.DL
+.LI
+An Access Control List Specification is part of the list of initial software 
+technology Apollo offered the OSF for consideration.  This is something
+that we will have to take into account when implementing ACLs on HP-UX.  We 
+have some concerns about whether there is enough time to investigate how our 
+proposed ACL implementation matches with Apollo's and implement ACLs in
+the 6.5 release time frame.
+.LE
+.LI
+Future revision of the NFS protocol:
+.DL
+.LI
+Another concern that we have is how our implementation of ACLs will match
+with other industry implementations and how it will fit into the new
+revision of the NFS protocol (revision 3) that Sun is working on now.  
+Another one of the solutions we suggest examines describes in more detail 
+what we currently know about the revision 3 of the NFS protocol.
+.LE
+.sp
+If we don't implement ACLs now we might miss an opportunity for a leadership
+position in the marketplace.  However, we feel that implementing them for 
+release 6.5 raises enough concerns that that decision should be carefully
+evaluated.  The next few options deal with how NFS and ACLs, once implemented,
+might interact and take into account the possibility of ACLs being implemented
+for the 6.5 release.
+.na
+.sp 2
+.H 2 "Don't do anything in NFS to support ACLs"
+.ad
+.sp
+This solution requires NFS documentation and training to change to reflect
+possible problems users can see.
+.BL
+.LI
+Advantages:
+.BL
+.LI
+No effort required to modify the NFS code.
+.LI
+Maintains compatibility with Sun's current and future protocols.
+.LE
+.LI
+Disadvantages:
+.BL
+.LI
+Programs that used to work might start failing over NFS
+since permissions for open()/stat()/access() may not agree with 
+permissions for read()/write(), etc.
+These programs are not only programs running from an HP system
+to another HP system, but also programs running from a non-HP
+system to an HP system (the HP system serving as a server).
+We might have control over some of the programs running on an HP 
+system, but we certainly don't have control over the programs
+running on a non-HP system.
+.LI
+The failures described above will be non-intuitive.
+.LI
+Describing the type of failures that could be seen would not
+be an easy task in the documentation since those failures can take
+very different forms.
+.LI
+Could very likely result in statements like: "HP is broken",
+since the same program would work to non-HP systems.
+.LE
+.LE
+.sp
+We don't think this is the right solution because of the high risk
+of breaking current programs and making HP seem different in
+a negative way when it comes to existing applications.
+.na
+.sp 2
+.H 2 "Modify protocol for HP to HP solution"
+.ad
+.sp
+This solution requires us to modify the NFS protocol to add 
+an "HP-HP only" hack.  
+.BL
+.LI
+Advantages:
+.BL
+.LI
+Would allow HP systems to understand and deal with ACLs.
+.LE
+.LI
+Disadvantages:
+.BL
+.LI
+We would modify a protocol we do not own.
+.LI
+Partial solution since it is an HP only solution and non-HP clients to an 
+HP server would still see the same problems.
+.LI
+Would cause problems for future maintainability and compatibility
+with future NFS protocol changes.
+.LI
+Not trivial in technical terms since the current protocol does not
+allow for more than the nine base mode bits.
+.LI
+It would be a hack.
+.LE
+.LE
+.sp
+Considering all the disadvantages of this solution and its minor
+advantages we consider this solution the least reasonable one.
+.na
+.sp 2
+.na
+.H 2 "NFS server returns effective access rights"
+.ad
+.sp
+Since ACLs carry more information than the base mode bits that have
+existed so far in HP-UX, the base mode bits now represent either a subset 
+or a summary of the access allowed to a file.  In this section we
+describe ways that NFS can transmit a summary of the allowed access for
+a file on the server system to the client system.
+This solution can be implemented in two ways.  
+.na
+.sp 2
+.H 3 "Change to NFS server"
+.ad
+.sp
+In the first solution, the mode bits returned by the stat() call are a subset 
+of the users's effective permissions.  This would require a change to the NFS 
+server code to interpret the mode bits and ACLs on a file and send the client 
+the modified mode bits (the users's effective access mode bits).  
+.BL
+.LI
+Advantages:
+.BL
+.LI
+HP server solution so HP and non-HP NFS clients have the same 
+view of the world.
+.LI
+By not changing the protocol, it maintains compatibility with Sun's current 
+and future protocols.
+.LI
+Minor changes to NFS code.
+.LE
+.LI
+Disadvantages:
+.BL
+.LI
+Different behavior on local versus remote files.  For example,
+programs running locally or over NFS would obtain different results
+even when operating on the same file.
+.LI
+As a separate issue from NFS, but related to portability, a program
+that uses the mode bits to determine whether it has access to a file will 
+have to be modified to understand ACLs on an HP system.
+.LE
+.LE
+.sp
+This solution will be acceptable in terms of NFS but we don't think it
+is the best solution for all HP, third parties and customer applications
+that currently run on HP-UX.  To be able to take advantage of ACLs, any
+of those applications that rely on the base mode bits for a file 
+indicating whether that file can be accessed by the user, through calls
+like stat(), will now need to be modified to understand ACLs also.
+The addition of ACLs to the system is no longer as transparent and backwards
+compatible as possible, but rather requires changes to current applications.
+Third parties and customers might have to special case portions of their
+code so it can correctly operate on HP systems versus other vendors' systems.
+.na
+.sp 2
+.H 3 "HP-UX kernel returns effective mode bits"
+.ad
+.sp
+The second solution involves having the HP-UX kernel return
+the effective mode bits in calls like stat() (a "summary").  In the case
+of stat() the proposed solution would be to have the current st_mode field 
+in the stat structure return "effective" access mode bits, that is 
+mode bits that have been modified by the ACL information to reflect the
+true access permissions for the user making the call.  A new version
+of the stat() call, that needs to be created for POSIX anyway, would have an 
+extra field that would return the base mode bits, i.e., the mode bits that 
+chmod() changes.
+.BL
+.LI
+Advantages:
+.BL
+.LI
+HP solution so HP and non-HP NFS clients have the same 
+view of the world.
+.LI
+By not changing the protocol, it maintains compatibility with Sun's current 
+and future protocols.
+.LI
+Same behavior on local and remote files.
+.LI
+No change to the NFS code, or other applications that currently
+use stat to determine their access rights to a file.
+.LE
+.LI
+Disadvantages:
+.BL
+.LI
+Modifies the currently favored ACL design.
+.LE
+.LE
+.sp
+This is our preferred solution, for when ACLs are implemented, because it 
+is backwards compatible.  We feel that to introduce ACLs, and require 
+applications to change to conform to them, will be an undue burden to 
+application programmers both inside, but specially, outside HP.  An 
+interesting point to note is the fact that POSIX specifies that chmod() 
+behavior with respect to security features like ACL will maintain backwards 
+compatibility.  However, POSIX currently does not specify something similar 
+for stat(), possibly because of the tradeoff between returning a subset
+versus a summary of the user's effective rights.
+.na
+.sp 2
+.H 2 "Work with Sun to modify protocol"
+.ad
+.sp
+This solution involves modifying the NFS protocol for all NFS vendors to pass 
+information about extended attributes like ACLs and to perform the access
+check on the server side.  The next revision of NFS' protocol is version 3.  
+.BL
+.LI
+Advantages:
+.BL
+.LI
+If access check is performed by the server, the server system can 
+better enforce its own security mechanism without creating "quirks"
+like the ones described in this paper.
+.LI
+Our implementation of NFS would remain industry compatible and we
+would be able to do what we want at the same time.
+.LE
+.LI
+Disadvantages:
+.BL
+.LI
+There isn't enough time until release 6.5 to have this protocol available.
+.LE
+.LE
+.sp
+The new version of the protocol document from Sun Microsystems for the NFS 
+protocol version 3 includes both access checking by
+the server system and a mechanism to pass extended attributes between
+cooperating clients and servers.  That mechanism could be used by HP 
+to pass information like ACLs.  We feel this option is a good one to
+pursue in the future to make sure that Sun's NFS extensions meet our
+needs.
+.na
+.sp 2
+.H 1 "Remaining issues and concerns"
+.sp
+.ad
+From our point of view, the main issue left open is whether release 6.5
+is the right time to implement ACLs or if they should be postponed 
+until the 4.0/7.0 release.
+.sp
+Next, we need to decide whether stat should return base mode bits or
+the user's effective access mode bits on the st_mode field.  The current
+proposal of having stat return the base mode bits would require a lot
+of changes to several networking products in addition to NFS, for example, 
+RFA, rcp and sendmail to mention a few.  Another system call that would
+affect us is access().  We need to know in more detail how access() would
+be affected by ACLs.  If ACLs are implemented in release
+6.5, this is a decision that has to be made immediately so as not to impact 
+the release 6.5 schedule.
+.sp
+This issue is just a subset of a larger problem.  Due to the large 
+effect ACLs can have on the filesystem it is important, in our opinion,
+for their design to receive a larger review than it has so far.  Partner 
+divisions that have products that rely on the current behavior of calls like 
+stat() and access() to determine whether they can access a file or do other 
+operations to it should be given a chance to review the proposed ACL design.
+.sp 2
+.TC 2 2 4 0 "NFS and ACLs" "TABLE OF CONTENTS"

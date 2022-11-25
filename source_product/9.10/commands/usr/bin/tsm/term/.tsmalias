@@ -1,0 +1,448 @@
+#######################################################################
+## @(#) $Header: .tsmalias,v 70.2 92/04/07 12:02:22 ssa Exp $
+#######################################################################
+# Alias file
+# Format is:
+#	1. Terminal descripton file which does not exist.
+#	   ( Should have extension .fi .fc, etc. )
+#	2. One or more spaces and/or tabs.
+#	3. New filename to be used instead.
+#
+# Lines which begin with a # are treated as comments
+#######################################################################
+### AT&T 4410
+4410.fi			att4410.fi
+4410W.fi		Att4410.fi
+### AT&T 605
+605.fi			att605.fi
+605W.fi			Att605.fi
+#			att605nopc.fi
+#			att605pc.fi
+### AT&T 610
+610.fi			att610.fi
+610W.fi			Att610.fi
+### AT&T 615
+615.fi			att605.fi
+att615.fi		att605.fi
+### System 5.3.2 console
+#			AT386-at-C.fi
+#			AT386-at-M.fi
+#			AT386-at.fi
+#			AT386-ix-C.fi
+#			AT386-ix-M.fi
+#			AT386-ix.fi
+### Altos 3
+#			altos3.fi
+#			Altos3.fi
+### Altos V
+#			altos5.fi
+#			altos5k2.fi
+#			Altos5k2.fi
+#			altos5kv.fi
+#			Altos5kv.fi
+### Basic 4
+#			basic4.fi
+### SCO console
+#			ansi.sco.fi
+### SCO color console
+#			ansic.fi
+### CIT 50+ in ansi mode
+#			cit101.fi
+#			Cit101.fi
+### Tandy dt100
+#			dt100.fi
+#			Dt100.fi
+### DCS EM4010 emulator
+#			Em4010.fi
+### Esprit in VT100 mode
+#			es3vt100.fi
+#			Es3vt100.fi
+#			es3vt100-2.fi
+#			Es3vt100-2.fi
+### Esprit in VT200 mode
+#			es3vt200.fi
+#			Es3vt200.fi
+#			es3vt200-2.fi
+#			Es3vt200-2.fi
+### Esprit in WYSE 50 mode
+#			es3wy50.fi
+#			Es3wy50.fi
+#			es3wy50-2.fi
+#			Es3wy50-2.fi
+###
+#			facet.fi
+#			facetpc.fi
+### Esprit 3 mode of pcvision
+#			esprit3.fi
+### facet emulation of color dec vt220,
+#			facetvt220.fi
+#			facvt220np.fi
+#			facvt220npc.fi
+### Freedom
+f100.fi			f1.fi
+fredom100.fi		f1.fi
+f110.fi			f1.fi
+fredom110.fi		f1.fi
+f200.fi			f1.fi
+fredom200.fi		f1.fi
+### IBM 3151-31
+ibm3151.fi		3151.fi
+#			3151-24.fi
+#			3151-25.fi
+### Hazeltine
+#			h1500.fi
+### IBM 3164
+ibm3164.fi		3164.fi
+### PS2 AIX console
+#			ibm.fi
+### Kimtron
+#			kt22ix.fi
+### Kimtron
+#			kt7ix.fi
+### Micro Vitec micro-colour graphics 3101
+#			m3101.fi
+#			mcg3101.fi
+### Micro Vitec micro-colour graphics 3220
+#			m3220.fi
+#			m3320.fi
+#			m3320w.fi
+### NCR 4940
+#			4940addsvp.fi
+#			4940Addsvp.fi
+#			4940wy50.fi
+#			4940Wy50.fi
+### NCR 4970
+4970.fi			ncr4970.fi
+4970-1.fi		ncr4970-1.fi
+4970-7.fi		ncr4970-7.fi
+4970-8.fi		ncr4970-8.fi
+4970W-1.fi		Ncr4970-1.fi
+4970W-7.fi		Ncr4970-7.fi
+4970W-8.fi		Ncr4970-8.fi
+### NCR
+7900+.fi		ncr7900+.fi
+### NCR
+7930.fi			ncr7930.fi
+###
+#			pcterm.fi
+### Unisys PCU
+#			pcu.fi
+### Prime
+#			pt200.fi
+pt200-merge.fi		pt200.fi
+#			pt250-merge.fi
+#			pt250-wp.fi
+#			pt250.fi
+#			pt250c-merg.fi
+### QUME
+#			qvt101+.fi
+#			qvt101.fi
+### QUME
+#			qvt102.fi
+### QUME
+#			qvt119.fi
+#			Qvt119.fi
+#			Qvt119s.fi
+#			qvt119wy50.fi
+#			Qvt119wy50.fi
+### QUME
+#			qvtpct.fi
+### PC6300
+#			s4.fi
+### Unisys svt1210
+#			svt1210.fi
+#			Svt1210.fi
+### Unisys svt1220
+#			svt1220.fi
+#			svt1220-1.fi
+#			Svt1220-1.fi
+#			svt1220-7.fi
+#			Svt1220-7.fi
+#			svt1220-8.fi
+#			Svt1220-8.fi
+### Motorola tm228 tm3180 tm3220 TM3180 & TM3220,
+#			tm228.fi
+#			tm228-1.fi
+#			Tm228-1.fi
+#			tm228-7.fi
+#			Tm228-7.fi
+#			tm228-8.fi
+#			Tm228-8.fi
+### Motorola
+#			tm229.fi
+#			tm229-1.fi
+#			Tm229-1.fi
+#			tm229-7.fi
+#			Tm229-7.fi
+#			tm229-8.fi
+#			Tm229-8.fi
+### Televideo
+#			tvi920.fi
+#			tvi925.fi
+#			tvi950-4.fi
+#			tvi950.fi
+#			tvi955-2.fi
+#			tvi955.fi
+### 
+#			twist.fi
+### Visual
+vi603.fi		Vi603.fi
+#			Vi603-1.fi
+#			Vi603-2.fi
+#			Vi603-6.fi
+### Unisys UVT 1224
+#			uvt1224.fi
+#			uvt1224-1.fi
+#			Uvt1224-1.fi
+#			uvt1224-7.fi
+#			Uvt1224-7.fi
+#			uvt1224-8.fi
+#			Uvt1224-8.fi
+### DEC VT 100
+#			vt100.fi
+#			Vt100.fi
+### DEC VT 220
+#			vt220.fi
+#			vt220-1.fi
+#			Vt220-1.fi
+#			vt220-7.fi
+#			Vt220-7.fi
+#			vt220-8.fi
+#			Vt220-8.fi
+### DEC VT 220 with Swedish character set
+#			vt220sw7-m.fi
+### DEC VT 240
+#			vt240.fi
+#			Vt240.fi
+### DEC VT 52
+#			vt52.fi
+### Viewpoint 60
+viewpoint		vwpt.fi
+### WYSE 150
+wyse150.fi		wy150.fi
+#			Wy150-24.fi		80/132	24		2 pages
+#			wy150-2425.fi		80	24/25		3 pages
+#			Wy150-2425.fi		80/132	24/25
+#			wy150-2524.fi		80	25/24		3 pages
+#			Wy150-2524.fi		80/132	25/24
+#			Wy150-2443.fi		80/132	24/25/42/43
+### WYSE 160
+wyse160.fi		wy160.fi
+#			wy160-2425.fi		80	24/25		2 pages
+#			wy160-2425.fi		80/132	24/25		2 pages
+#			wy160-2524.fi		80	25/24		2 pages
+#			wy160-2524.fi		80/132	25/24		2 pages
+#			# other sizes same as wy60
+### WYSE 30
+wyse30.fi		wy30.fi
+#			Wy30.fi
+### WYSE 50
+wyse50.fi		wy50.fi
+Wyse50.fi		Wy50.fi
+#			wy50copy.fi
+### WYSE 50 in ADDS viewpoint mode
+#			wy50addsvp.fi
+### WYSE 60
+wyse60.fi		wy60.fi
+#			Wy60-24.fi		80/132	24		2 pages
+#			wy60-2425.fi		80	24/25		3 pages
+#			Wy60-2425.fi		80/132	24/25
+#			wy60-2524.fi		80	25/24		3 pages
+#			Wy60-2524.fi		80/132	25/24
+#			Wy60-2443.fi		80/132	24/25/42/43
+### WYSE 60 with VPIX support
+#			wy60-25pc.fi		80	25/25pc		3 pages
+### WYSE 60 in ADDS viewpoint mode
+#			wy60addsvp.fi
+### WYSE 60 in VT100 mode
+#			wy60vt100.fi
+#			Wy60vt100.fi
+### WYSE 60 in WYSE 50 mode
+#			wy60wy50.fi
+#			Wy60wy50.fi
+### WYSE 75
+wyse75.fi		wy75.fi
+Wyse75.fi		Wy75.fi
+### WYSE 100
+wyse100.fi		wy100.fi
+### WYSE 150
+wy150.fi		wy60.fi
+wyse150.fi		wy60.fi
+### WYSE 350
+wyse350.fi		wy350.fi
+Wyse350.fi		Wy350.fi
+### WYSE 370
+wyse370.fi		wy370.fi
+wyse370-bb.fi		wy370.fi
+#			wy370-2425.fi
+#			Wy370-2425.fi
+#			wy370-2524.fi
+#			Wy370-2524.fi
+#			Wy370-2451.fi
+####################### HP TERMINALS ##################################
+## 2392|2392a|2392A|hp2392|hp2392a|hp2392A|hp 2392/2622 series,
+2392.fi		hp2392.fi
+2392a.fi	hp2392.fi
+2392A.fi	hp2392.fi
+hp2392a.fi	hp2392.fi
+hp2392A.fi	hp2392.fi
+## 2393|2393a|2393A|hp2393|hp2393a|hp2393A|hp 2393 black & white graphics term,
+2393.fi		hp2393.fi
+2393a.fi	hp2393.fi
+2393A.fi	hp2393.fi
+hp2393a.fi	hp2393.fi
+hp2393A.fi	hp2393.fi
+## 2397|2397a|2397A|hp2397|hp2397a|hp2397A|hp 2397 color graphics terminal,
+2397.fi		hp2397.fi
+2397a.fi	hp2397.fi
+2397A.fi	hp2397.fi
+hp2397a.fi	hp2397.fi
+hp2397A.fi	hp2397.fi
+## 2621|2621a|2621A|hp2621|hp2621a|hp2621A|hp2621-fl|2621-fl|hp 2621,
+2621.fi		hp2621.fi
+2621a.fi	hp2621.fi
+2621A.fi	hp2621.fi
+hp2621a.fi	hp2621.fi
+hp2621A.fi	hp2621.fi
+hp2621-fl.fi	hp2621.fi
+2621-fl.fi	hp2621.fi
+## 2622|hp2622|2622a|hp2622a|2622p|hp2622p|hp 262x series,
+2622.fi		hp2622.fi
+2622a.fi	hp2622.fi
+2622A.fi	hp2622.fi
+hp2622a.fi	hp2622.fi
+hp2622A.fi	hp2622.fi
+2622p.fi	hp2622.fi
+2622P.fi	hp2622.fi
+hp2622p.fi	hp2622.fi
+hp2622P.fi	hp2622.fi
+## 2382|hp2382|2382a|hp2382a,
+2382.fi		hp2622.fi
+2382a.fi	hp2622.fi
+2382A.fi	hp2622.fi
+hp2382.fi	hp2622.fi
+hp2382a.fi	hp2622.fi
+hp2382A.fi	hp2622.fi
+## 2623|hp2623|2623a|hp2623a|2623p|hp2623p|hp 262x series,
+2623.fi		hp2623.fi
+2623a.fi	hp2623.fi
+2623A.fi	hp2623.fi
+hp2623a.fi	hp2623.fi
+hp2623A.fi	hp2623.fi
+2623p.fi	hp2623.fi
+2623P.fi	hp2623.fi
+hp2623p.fi	hp2623.fi
+hp2623P.fi	hp2623.fi
+## 2624|hp2624|2624a|hp2624a|2624p|hp2624p|hp 262x series,
+2624.fi		hp2624.fi
+2624a.fi	hp2624.fi
+2624A.fi	hp2624.fi
+hp2624a.fi	hp2624.fi
+hp2624A.fi	hp2624.fi
+2624p.fi	hp2624.fi
+2624P.fi	hp2624.fi
+hp2624p.fi	hp2624.fi
+hp2624P.fi	hp2624.fi
+## 2626|hp2626a|hp2626p|hp2626|2626a|2626p|2626A|2626P|hp 2626,
+2626.fi		hp2626.fi
+2626a.fi	hp2626.fi
+2626A.fi	hp2626.fi
+hp2626a.fi	hp2626.fi
+hp2626A.fi	hp2626.fi
+2626p.fi	hp2626.fi
+2626P.fi	hp2626.fi
+hp2626p.fi	hp2626.fi
+hp2626P.fi	hp2626.fi
+## 2627|hp2627|2627a|hp2627a|2627p|hp2627p|hp 262x series,
+2627.fi		hp2627.fi
+2627a.fi	hp2627.fi
+2627A.fi	hp2627.fi
+hp2627a.fi	hp2627.fi
+hp2627A.fi	hp2627.fi
+2627p.fi	hp2627.fi
+2627P.fi	hp2627.fi
+hp2627p.fi	hp2627.fi
+hp2627P.fi	hp2627.fi
+## c1003|c1003a|c1003g|1003|1003a|1003g|700-41,
+70041.fi	hp70041.fi
+70041a.fi	hp70041.fi
+70041A.fi	hp70041.fi
+70041a.fi	hp70041.fi
+70041A.fi	hp70041.fi
+700-41.fi	hp70041.fi
+700-41a.fi	hp70041.fi
+700-41A.fi	hp70041.fi
+hp700-41.fi	hp70041.fi
+hp700-41a.fi	hp70041.fi
+hp700-41A.fi	hp70041.fi
+c1003.fi	hp70041.fi
+c1003a.fi	hp70041.fi
+c1003g.fi	hp70041.fi
+1003.fi		hp70041.fi
+1003a.fi	hp70041.fi
+1003g.fi	hp70041.fi
+# 70092-w|70092a-w|70092A-w|hp 7009x/239x series (132 columns),
+70092-w.fi	hp70092-w.fi
+70092a-w.fi	hp70092-w.fi
+70092A-w.fi	hp70092-w.fi
+hp70092a-w.fi	hp70092-w.fi
+hp70092A-w.fi	hp70092-w.fi
+700-92-w.fi	hp70092-w.fi
+700-92a-w.fi	hp70092-w.fi
+700-92A-w.fi	hp70092-w.fi
+hp700-92-w.fi	hp70092-w.fi
+hp700-92a-w.fi	hp70092-w.fi
+hp700-92A-w.fi	hp70092-w.fi
+## 70092|70092a|70092A|70096|hp70096|hp 7009x/239x series,
+70092.fi	hp70092.fi
+70092a.fi	hp70092.fi
+70092A.fi	hp70092.fi
+hp70092a.fi	hp70092.fi
+hp70092A.fi	hp70092.fi
+700-92.fi	hp70092.fi
+700-92a.fi	hp70092.fi
+700-92A.fi	hp70092.fi
+hp700-92.fi	hp70092.fi
+hp700-92a.fi	hp70092.fi
+hp700-92A.fi	hp70092.fi
+70096.fi	hp70092.fi
+700-96.fi	hp70092.fi
+hp70096.fi	hp70092.fi
+hp700-96.fi	hp70092.fi
+# 70094-w|70094a-w|70094A-w|hp 7009x/239x series (132 columns),
+70094-w.fi	hp70094-w.fi
+70094a-w.fi	hp70094-w.fi
+70094A-w.fi	hp70094-w.fi
+hp70094a-w.fi	hp70094-w.fi
+hp70094A-w.fi	hp70094-w.fi
+700-94-w.fi	hp70094-w.fi
+700-94a-w.fi	hp70094-w.fi
+700-94A-w.fi	hp70094-w.fi
+hp700-94-w.fi	hp70094-w.fi
+hp700-94a-w.fi	hp70094-w.fi
+hp700-94A-w.fi	hp70094-w.fi
+# 70094|70094a|70094A||70098|hp70098|hp 7009x/239x series,
+70094.fi	hp70094.fi
+70094a.fi	hp70094.fi
+70094A.fi	hp70094.fi
+hp70094a.fi	hp70094.fi
+hp70094A.fi	hp70094.fi
+700-94.fi	hp70094.fi
+700-94a.fi	hp70094.fi
+700-94A.fi	hp70094.fi
+hp700-94.fi	hp70094.fi
+hp700-94a.fi	hp70094.fi
+hp700-94A.fi	hp70094.fi
+70098.fi	hp70094.fi
+700-98.fi	hp70094.fi
+hp70098.fi	hp70094.fi
+hp700-98.fi	hp70094.fi
+## 300h|hp300h|hp 300,
+300h.fi		hp300h.fi
+## 300l|hp300l|98542|98542a|hp98542|hp98542a|hp 300l,
+300l.fi		hp300l.fi
+98542.fi	hp300l.fi
+98542a.fi	hp300l.fi
+hp98542.fi	hp300l.fi
+hp98542a.fi	hp300l.fi
+#######################################################################

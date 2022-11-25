@@ -1,0 +1,2300 @@
+# @(#) $Revision: 72.8 $
+##################################################################
+#								 #
+#	   disktab:  Data Base and Informational File		 #
+#	       for both HP-IB (CS/80, Amigo) and SCSI discs	 #
+#		      For use with:  newfs			 #
+#								 #
+#	---> For the Series 200 / 300 / 400 AND 700 ONLY <---	 #
+#								 #
+##################################################################
+#								 #
+# PRELIMINARY:							 #
+#	     All discs, including fixed (hard) discs and all	 #
+#	     removable media, must be formatted before they can	 #
+#	     be used.  Formatting is the process of preparing	 #
+#	     a new disc to receive information and assuring	 #
+#	     media integrity.					 #
+#								 #
+#	     To format an HP-UX disc,  use the HP-UX command:	 #
+#		       %  mediainit				 #
+#								 #
+#	IMPORTANT: Some discs require an interleave different	 #
+#	     than one (1).  This file contains information to	 #
+#	     help you make the correct choice.	An improper	 #
+#	     interleave could have a dramatic impact on		 #
+#	     performance.					 #
+#								 #
+#								 #
+# GENERAL:   Disktab is a simple database which describes disc	 #
+#	     geometries and disc section characteristics.	 #
+#	     Entries consist of a number of fields, separated	 #
+#	     by ':'.  The first entry for each disc gives the	 #
+#	     name(s) which are known for the disc, separated	 #
+#	     by '|' characters.	 The next field is informational #
+#	     and is unused by newfs.  Sectors are of size	 #
+#	     DEV_BSIZE = 1024 bytes.				 #
+#								 #
+#	     The entries in this file are used as input to newfs #
+#	     E.g. to make a file system for an HP7945:		 #
+#								 #
+#		   % newfs  /dev/rdsk/r7945  hp7945		 #
+#								 #
+#	     Most discs have some space reserved for the swap	 #
+#	     area.  For instance, 10 MBytes is reserved in the	 #
+#	     above example.  The amount of disc space required	 #
+#	     by a user may be different from the default amount, #
+#	     and you may wish to specify your own parameters.	 #
+#	     See the section below on creating your own disktab	 #
+#	     entry.						 #
+#								 #
+#	     NOTE:  On the Series 700 the boot area is taken	 #
+#	     from swap space.  If you are making the device	 #
+#	     bootable, you should be aware that there will	 #
+#	     actually be less swap available on the device than	 #
+#	     expected.  As a result of this dependency, all	 #
+#	     entries in this file which were formerly referred to#
+#	     as "reserved for swap" are now referred to as	 #
+#	     "reserved for swap & boot".  The "*_noswap" entries #
+#	     have likewise been changed to "*_noreserve" to 	 #
+#	     reflect the fact that "reserved" area refers to	 #
+#	     swap and boot.					 #
+#								 #
+#	     An entry for most discs is also provided that does	 #
+#	     not reserve any space for swap or boot (the 	 #
+#	     "noreserve" suffix).  The file system uses the	 #
+#	     entire disc.  Remember -- HP-UX REQUIRES a minimum  #
+#	     of 2 MBytes of swap.				 #
+#								 #
+#	     Most disk drives provide optimal file system	 #
+#	     throughput with the default 4 ms value for rotdelay.#
+#	     Exceptions are noted in the individual disktab 	 #
+#	     entries.  Use tunefs(1M) or the file system 	 #
+#	     parameter screen of the install process to change.	 #
+#								 #
+##################################################################
+#  DISK GEOMETRY AND PARTITION LAYOUT TABLES.			 #
+#  Key:								 #
+#	(Leading field is name -- can be any string)		 #
+#	ty	 Information about the disk (informational only) #
+#	ns	 number of 1k sectors/track			 #
+#	nt	 number of tracks/cylinder			 #
+#	nc	 number of cylinders/disk			 #
+#	s0	 size of file system in 1k blocks		 #
+#	b0	 block size in bytes				 #
+#			 (only 8192 or 4096 supported)		 #
+#	f0	 fragment sizes in bytes			 #
+#		      (1K, 2K, or 4K are supported)		 #
+#	se	 #bytes/physical sector	    (informational only) #
+#	rm	 rpm (rotational speed of platters)		 #
+##################################################################
+# EXPLANATION:							 #
+#	  s0 = ns * nt * nc					 #
+#	  Sectors not allocated to the file system will be	 #
+#	  used in the swap area.  If no swap is required,  s0	 #
+#	  represents the actual amount of disc space available	 #
+#	  on the disc.	In general, any space reserved for swap	 #
+#	  must be in increments of 2 megabytes	i.e.  swap will	 #
+#	  be utilized in multiples of:				 #
+#	      2 * 1024 * 1024  ( = 2,097,152 bytes )		 #
+#								 #
+#	  This guideline should suffice for almost all users.	 #
+#	  If you anticipate creating processes that will have a	 #
+#	  heap space larger than 116 MBytes,  you will need to	 #
+#	  create a swap space that is a multiple of DMMAX.	 #
+#	  (See System Parameters - Table D.1 in the HP-UX System #
+#	  Administrators Manual.)				 #
+#								 #
+##################################################################
+#								 #
+# GENERAL GUIDELINES (and HINTS) for CREATING NEW ENTRIES:	 #
+#	- How much swap is required				 #
+#	- Swap must be reserved in multiples of 2 megabytes	 #
+#	- The O/S needs some swap to run			 #
+#	- An attempt to make ns a multiple of b0 will		 #
+#	  enhance performance.	At a minimum, attempt to	 #
+#	  make it a multiple of the fragment size (f0).		 #
+#	- diskinfo(1m) is a useful utility for determining	 #
+#	  the parameters necessary to make disctab entries.	 #
+#								 #
+#	An entry should have a unique name, and conform		 #
+#	approximately to the following skeleton:		 #
+#								 #
+#	 hpXXXX:\						 #
+#		:how much swap:ns#X:nt#X:nc#X:\			 #
+#		:s0#X:b0#8192:f0#1024:\				 #
+#		:se#X:rm#X:					 #
+#								 #
+#	where you will need to fill in values for 'X'.	b0 is	 #
+#	almost always 8192, and f0 is 1024, although you can	 #
+#	change this also.					 #
+#								 #
+#	ns#X  must be in multiples of 1k.  We must sometimes	 #
+#	then "fudge" the numbers.  Example: A gray microfloppy	 #
+#	formatted with format option 2 has this geometry:	 #
+#	   - 512 bytes/sector					 #
+#	   -   9 sectors/track					 #
+#	   -  77 tracks/surface					 #
+#	   -   2 surfaces					 #
+#								 #
+#	We have to fool option 2, instead of 9 sectors of 512	 #
+#	bytes with 2 heads, we specified 9 sectors of 1K with	 #
+#	1 head (ns# REQUIRES 1K).  Here is our entry:		 #
+#								 #
+#	hp9122_F2:\						 #
+#	:format option 2:ns#9:nt#1:nc#77:\			 #
+#	:s0#693:b0#8192:f0#1024:\				 #
+#	:se#512:rm#600:						 #
+#								 #
+#	-> When Possible - Start with an existing entry <-	 #
+#								 #
+##################################################################
+# Example of 'mknod' commands					 #
+#	SHARED controller units:				 #
+#	hp7946 at bus address 3 and select code 14 (hex 'e')	 #
+#	(The disk and tape both share the same controller.	 #
+#	 The disk is at unit 0, while the tape is at unit 1)	 #
+#								 #
+#	mknod /dev/dsk/7946  b 0 0x0e0300  /* hard disc */	 #
+#			     ^ represents block device		 #
+#								 #
+#	mknod /dev/rdsk/r7946 c 4 0x0e0300  /* hard disc */	 #
+#			      ^ represents character device	 #
+#								 #
+#	mknod /dev/rct/rct c 4 0x0e0310	  /* cartridge tape */	 #
+#			     ^ 0,4 are for CS/80 or SS/80 discs	 #
+#								 #
+#	mknod /dev/ct/ct  b 0 0x0e0310	/* cartridge tape */	 #
+#								 #
+#	hp9133L at bus address 0 and on the Internal HP-IB	 #
+#	The 9133L has a disk at unit 0 and a 3.5" microfloppy	 #
+#		    at unit 1					 #
+#	mknod /dev/dsk/9133    b 0 0x070000  /* hard disc */	 #
+#	mknod /dev/rdsk/r9133  c 0 0x070000			 #
+#	mknod /dev/dsk/md      b 0 0x070010 /* 3.5" microdisc */ #
+#	mknod /dev/rdsk/rmd    c 4 0x070010			 #
+#								 #
+#	SEPARATE controller units				 #
+#	Be careful: the 7912/4 drives come in two flavors:	 #
+#	separate controllers, or shared controllers.  This	 #
+#	example is for *separate* controllers.			 #
+#	hp7914 disc at bus address 0 and select code 14		 #
+#	hp7914 cartridge tape at bus address 1 and		 #
+#		select code 14					 #
+#	mknod /dev/dsk/7914   b 0 0x0e0000  /* hard disc */	 #
+#	mknod /dev/rdsk/r7914 c 4 0x0e0000			 #
+#	mknod /dev/rct c 4 0x0e0100  /* cartridge tape */	 #
+#	mknod /dev/ct  b 0 0x0e0100				 #
+#								 #
+# Example of 'mknod' commands for SCSI discs			 #
+#	HP7959S at bus address 2 and select code 14		 #
+#	mknod /dev/dsk/7959S  b 7 0x0e0200			 #
+#				^ major number for SCSI block	 #
+#								 #
+#	mknod /dev/rdsk/r7959S c 47 0x0e0200			 #
+#				  ^ SCSI character device	 #
+#								 #
+# Example of 'mknod' commands for AMIGO discs			 #
+#	hp7925 at bus address 7 and select code 14		 #
+#	mknod /dev/dsk/7925  b 2 0x0e0700			 #
+#			       ^ major number for Amigo block	 #
+#								 #
+#	mknod /dev/rdsk/r7925 c 11 0x0e0700			 #
+#				 ^ Amigo character device	 #
+#								 #
+# Comments & Notes						 #
+#	Remember that /dev/root (or /dev/dsk/0s0) is SPECIAL.	 #
+#	To make this node type:					 #
+#	      mknod /dev/root b 0xff 0xffffff			 #
+#	When you LIST this device using "ls -l" , the operating	 #
+#	system "magically" fills in the correct values.		 #
+#								 #
+# Notice how the minor number scheme is identical between all	 #
+# interfaces.  Only the major numbers differ.  The purpose of	 #
+# the major number is to "index" into the appropriate driver.	 #
+#								 #
+##################################################################
+#
+# 7907A Disc Drive: a 41 Mbyte (20.5 MByte fixed / 20.5 MByte
+# removable cartridge) CS/80 disc drive;
+# CS/80 Command Set
+# Interleave 1
+# Notes: Root file system must be on fixed cartridge
+#	 if the 7907A is the sole system disc.
+#	 Recommendation is to have swap only on fixed disc,
+#	 and format removable media for "no swap"
+hp7907:\
+	:8 MB reserved for swap & boot:ns#16:nt#2:nc#371:\
+	:s0#11872:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7907_noreserve|hp7907_noswap:\
+	:no swap or boot:ns#16:nt#2:nc#627:\
+	:s0#20064:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+######################################################
+# A 16.6 MByte fixed (winchester) disc and 1/4" 88140
+# shared controller cartridge tape drive;
+# CS/80 Command Set
+# Interleave 1
+hp7908:\
+	:2 MB reserved for swap & boot:ns#8:nt#5:nc#352:\
+	:s0#14080:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7908_noreserve|hp7908_noswap:\
+	:no swap or boot:ns#8:nt#5:nc#404:\
+	:s0#16160:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+########################################################################
+# A 28.1 MByte fixed (winchester) disc and 1/4" 88140 cartridge tape drive;
+# CS/80 Command Set
+# Interleave 1
+# Notes: Accessing the cartridge tape unit on shared controllers (7911/2/4):
+#	 The disc and the tape will be at the same bus address;
+#	 the disc is at unit 0, while the tape is at unit 1.
+#	 When a separate controller is used for the tape, the disc
+#	 and tape will have distinct bus addresses.
+hp7911:\
+	:6 MB reserved for swap & boot:ns#16:nt#3:nc#444:\
+	:s0#21312:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7911_noreserve|hp7911_noswap:\
+	:no swap or boot:ns#16:nt#3:nc#572:\
+	:s0#27456:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+########################################################################
+# A 65.6 MByte fixed (winchester) disc and 1/4" 88140 cartridge tape drive;
+# CS/80 Command Set
+# Interleave 1
+hp7912:\
+	:12 MB reserved for swap & boot:ns#16:nt#7:nc#462:\
+	:s0#51744:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7912_noreserve|hp7912_noswap:\
+	:no swap or boot:ns#16:nt#7:nc#572:\
+	:s0#64064:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+########################################################################
+# A 132.1 MByte fixed (winchester) disc and 1/4" 88140 cartridge tape drive;
+# (The 7914CT uses the 9144A cartridge tape unit.)
+# CS/80 Command Set
+# Interleave 1
+hp7914:\
+	:20 MB reserved for swap & boot:ns#16:nt#7:nc#969:\
+	:s0#108528:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7914_30MB:\
+	:30 MB reserved for swap & boot:ns#16:nt#7:nc#877:\
+	:s0#98224:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7914_noreserve|hp7914_noswap:\
+	:no swap or boot:ns#16:nt#7:nc#1152:\
+	:s0#129024:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+############################################################
+#  The 7933H and 7935H are high-performance 404 MByte discs.
+#  The 7935H has removable media
+#  CS/80 Command Set
+#  Interleave 1
+#  Notes:  The size of the media is identical for both discs,
+#	   hence the disctab entries are the same.
+hp7933|hp7935:\
+	:40 MB reserved for swap & boot:ns#23:nt#13:nc#1184:\
+	:s0#354016:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+hp7933_50MB|hp7935_50MB:\
+	:50 MB reserved for swap & boot:ns#23:nt#13:nc#1149:\
+	:s0#343551:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+hp7933_noreserve|hp7933_noswap|hp7935_noreserve|hp7935_noswap:\
+	:no swap or boot:ns#23:nt#13:nc#1321:\
+	:s0#394979:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+##################################################################
+# The HP7936H and HP7937H are high-performance, high capacity discs.
+# The 7936/37XP are untested on Series 300 HP-UX.
+# CS/80 Command Set
+# Interleave 1
+#
+# HP 7936 Specification Summary:
+#	 HP7936	 has  307.7 MBytes
+#	 256 Bytes/sector;
+#	 123 Sectors/track;   7	 Heads;	  1396 Cylinders
+#	 Total:	 1,201,956 256byte sectors
+#
+hp7936:\
+	:32 MBytes reserved for swap & boot:ns#25:nt#7:nc#1528:\
+	:s0#267400:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7936_46MB:\
+	:46 MBytes reserved for swap & boot:ns#25:nt#7:nc#1446:\
+	:s0#253050:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7936_noreserve|hp7936_noswap:\
+	:no swap or boot:ns#25:nt#7:nc#1716:\
+	:s0#300300:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+# HP 7937 Specification Summary:
+#	 HP7937	 has  571.4 MBytes
+#	 256 Bytes/sector;
+#	 123 Sectors/track;   13  Heads;   1396 Cylinders
+#	 Total:	 2,232,204 256byte sectors
+#
+# The 7937S (SCSI) drive share the same geometry as the HP-IB drive,
+# thus we can use the same entry described below.
+#
+hp7937|hp7937S|HP_7937S:\
+	:48 MBytes reserved for swap & boot:ns#25:nt#16:nc#1272:\
+	:s0#508800:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7937_64MB|hp7937S_64MB:\
+	:64 MBytes reserved for swap & boot:ns#25:nt#16:nc#1231:\
+	:s0#492400:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7937_80MB|hp7937S_80MB:\
+	:80 MBytes reserved for swap & boot:ns#25:nt#16:nc#1190:\
+	:s0#476000:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7937_96MB|hp7937S_96MB:\
+	:96 MBytes reserved for swap & boot:ns#25:nt#16:nc#1149:\
+	:s0#459600:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7937_noreserve|hp7937_noswap|hp7937S_noreserve|hp7937S_noswap:\
+	:no swap or boot:ns#25:nt#16:nc#1395:\
+	:s0#558000:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+##############################################################
+# The 7941A and 7942A are 23.8 MByte discs.  The 7942A has a
+# built-in 9144 shared controller cartridge tape drive.
+# CS/80 Command Set
+# Interleave 1
+# Notes: The sizes of the 7941 and 7942 are identical, hence the
+#	 entries are the same.
+#	 Both the disc drive and tape are at the same bus address.
+#	 The disc is at unit 0, the tape is at unit 1.
+#	 The minor number for the device file will reflect this difference.
+hp7941|hp7942:\
+	:4 MB reserved for swap & boot:ns#8:nt#3:nc#797:\
+	:s0#19128:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7941_noreserve|hp7941_noswap|hp7942_noreserve|hp7942_noswap:\
+	:no swap or boot:ns#8:nt#3:nc#968:\
+	:s0#23232:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#
+# The 7945A and 7946A are 55.5 MByte discs.  The 7946A has a
+# built-in 9144 shared controller cartridge tape drive.
+# CS/80 Command Set
+# Interleave 1
+# Notes: The sizes of the 7945 and 7946 are identical, hence the
+#	 entries are the same.
+#	 Both the disc drive and tape are at the same bus address.
+#	 The disc is at unit 0, the tape is at unit 1.
+hp7945|hp7946:\
+	:10 MB reserved for swap & boot:ns#8:nt#7:nc#785:\
+	:s0#43960:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7945_16MB|hp7946_16MB:\
+	:16 MB reserved for swap & boot:ns#8:nt#7:nc#675:\
+	:s0#37800:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7945_noreserve|hp7945_noswap|hp7946_noreserve|hp7946_noswap:\
+	:no swap or boot:ns#8:nt#7:nc#968:\
+	:s0#54208:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+############################################################
+# HP7957A and HP7958A are medium performance, fixed discs
+# Interleave 1
+#
+# HP7957 has 81.7 MBytes
+#	256 Bytes/sector
+#	63 sectors/track;  5 heads (small);  1013 cylinders;
+#	Total:	79773.75 1K sectors
+hp7957:\
+	:12 MBytes reserved for swap & boot:ns#11:nt#7:nc#876:\
+	:s0#67452:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7957_20MB:\
+	:20 MBytes reserved for swap & boot:ns#11:nt#7:nc#770:\
+	:s0#59290:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7957_noreserve|hp7957_noswap:\
+	:no swap or boot:ns#11:nt#7:nc#1036:\
+	:s0#79772:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+# HP7958 has 130.7 MBytes
+#	256 Bytes/sector
+#	63 sectors/track;  8 heads (small);  1013 cylinders;
+#	Total:	127638 1K sectors
+hp7958:\
+	:20 MBytes reserved for swap & boot:ns#21:nt#6:nc#850:\
+	:s0#107100:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7958_30MB:\
+	:30 MBytes reserved for swap & boot:ns#21:nt#6:nc#769:\
+	:s0#96894:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7958_noreserve|hp7958_noswap:\
+	:no swap or boot:ns#21:nt#6:nc#1013:\
+	:s0#127638:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+################################################################
+# HP7957B, HP7958, and HP7959B are a family of high performance,
+# high capacity fixed discs.
+# The same disc/controller assemblies are also available in the
+# multi-mechanism 7961B, 7962B and 7963B discs, and as add-on
+# mechanisms (97960-series) to any 7960-series disc.
+# Interleave 1
+#
+# HP7957B has 82 MBytes
+#	  256 Bytes/sector
+#	  63 sectors/track;  4 heads;  1269 cylinders;
+hp7957B|hp7961B|hp79571:\
+	:12 MBytes reserved for swap & boot:ns#9:nt#7:nc#1073:\
+	:s0#67599:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7957B_20MB:\
+	:20 MBytes reserved for swap & boot:ns#9:nt#7:nc#943:\
+	:s0#59409:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7957B_noreserve|hp7957B_noswap:\
+	:no swap or boot:ns#9:nt#7:nc#1269:\
+	:s0#79947:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+# HP7958B has 152 MBytes
+#	256 Bytes/sector
+#	63 sectors/track;  6 heads;  1572 cylinders;
+#	Total:	148554 1K sectors
+hp7958B|hp7962B|hp79581|hp97962B:\
+	:24 MBytes reserved for swap & boot:ns#21:nt#9:nc#655:\
+	:s0#123795:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7958B_32MB:\
+	:32 MBytes reserved for swap & boot:ns#21:nt#9:nc#612:\
+	:s0#115668:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7958B_42MB:\
+	:42 MBytes reserved for swap & boot:ns#21:nt#9:nc#558:\
+	:s0#105462:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7958B_noreserve|hp7958B_noswap|hp97962B_noreserve|hp97962B_noswap:\
+	:no swap or boot:ns#21:nt#9:nc#786:\
+	:s0#148554:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+# HP7959B has 304 MBytes
+#	256 Bytes/sector
+#	63 sectors/track;  12 heads;  1572 cylinders;
+#	Total:	297108 1K sectors
+hp7959|hp7959B|hp7963B|hp97963B|hp79591:\
+	:42 MBytes reserved for swap & boot:ns#21:nt#9:nc#1344:\
+	:s0#254016:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7959B_50MB:\
+	:50 MBytes reserved for swap & boot:ns#21:nt#9:nc#1301:\
+	:s0#245889:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7959B_32MB:\
+	:32 MBytes reserved for swap & boot:ns#21:nt#9:nc#1398:\
+	:s0#264222:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7959B_noreserve|hp7959B_noswap|hp97963B_noreserve|hp97963B_noswap:\
+	:no swap or boot:ns#21:nt#9:nc#1572:\
+	:s0#297108:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+# HP2200A has 335 MBytes
+#	  256 Bytes/sector
+#	  113 sectors/track;  8 heads;	1449 cylinders;
+#	Total: 327474 1k sectors
+hp2200A|hp335H|hp2200|hp22000:\
+	:42 MBytes reserved for swap & boot:ns#113:nt#2:nc#1258:\
+	:s0#284308:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2200A_32MB|hp335H_32MB|hp22000_32MB:\
+	:32 MBytes reserved for swap & boot:ns#113:nt#2:nc#1304:\
+	:s0#294704:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2200A_64MB|hp335H_64MB|hp22000_64MB:\
+	:64 MBytes reserved for swap & boot:ns#113:nt#2:nc#1159:\
+	:s0#261934:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2200A_noreserve|hp2200A_noswap|hp335H_noreserve|hp335H_noswap:\
+	:no swap or boot:ns#113:nt#2:nc#1449:\
+	:s0#327474:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp22000_noreserve|hp22000_noswap:\
+	:no swap or boot:ns#113:nt#2:nc#1449:\
+	:s0#327474:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+# HP2203A has 671 MBytes
+#	  256 Bytes/sector
+#	  113 sectors/track;  16 heads;	 1449 cylinders;
+#	Total: 654948 1K sectors
+hp2203A|hp670H|hp2203|hp22030:\
+	:64 MBytes reserved for swap & boot:ns#113:nt#4:nc#1304:\
+	:s0#589408:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2203A_96MB|hp670H_96MB|hp22030_96MB:\
+	:96 MBytes reserved for swap & boot:ns#113:nt#4:nc#1231:\
+	:s0#556412:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2203A_42MB|hp670H_42MB|hp22030_42MB:\
+	:42 MBytes reserved for swap & boot:ns#113:nt#4:nc#1353:\
+	:s0#611556:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp2203A_noreserve|hp2203A_noswap|hp670H_noreserve|hp670H_noswap:\
+	:no swap or boot:ns#113:nt#4:nc#1449:\
+	:s0#654948:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+hp22030_noreserve|hp22030_noswap:\
+	:no swap or boot:ns#113:nt#4:nc#1449:\
+	:s0#654948:b0#8192:f0#1024:\
+	:se#256:rm#4002:
+###############################################
+# The HP2212A is a SCSI Coyote II
+# Total formatted capacity: 331 Mbytes
+#	  512 Bytes/sector
+#	  56 sectors/track;  8 heads;  1447 cylinders;
+#	Total: 324128 1k sectors
+hp2212A|HP_2212A|hp330S|hp97544S|HP_97544S:\
+	:42 MBytes reserved for swap and boot:ns#28:nt#8:nc#1256:\
+	:s0#281344:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2212A_32MB|hp2212A_32MB|hp330S_32MB:\
+	:32 MBytes reserved for swap and boot:ns#28:nt#8:nc#1302:\
+	:s0#291648:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2212A_64MB|hp2212A_64MB|hp330S_64MB:\
+	:64 MBytes reserved for swap and boot:ns#28:nt#8:nc#1157:\
+	:s0#259168:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2212A_126MB|hp2212A_126MB|hp330S_126MB:\
+        :126 MBytes reserved for swap and boot:ns#28:nt#8:nc#871:\
+        :s0#195104:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+HP_2212A_noswap|hp2212A_noreserve|hp2212A_noswap|hp330S_noreserve|hp330S_noswap:\
+	:no swap or boot:ns#28:nt#8:nc#1447:\
+	:s0#324128:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+###############################################
+# The HP2213A is a SCSI Coyote II
+# Total formatted capacity:  663 Mbytes
+#	  512 Bytes/sector
+#	  56 sectors/track;  16 heads;	1447 cylinders;
+#	Total: 648256 1k sectors
+HP_2213A|hp2213A|hp660S|hp97548S|HP_97548S|hp2213A_64MB|HP_2213A_64MB:\
+	:64 MBytes reserved for swap & boot:ns#28:nt#16:nc#1302:\
+	:s0#583296:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2213A_300MB|hp2213A_300MB|hp660S_300MB:\
+        :300 MBbytes reserved for swap & boot:ns#28:nt#16:nc#763:\
+        :s0#341824:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+HP_2213A_96MB|hp2213A_96MB|hp660S_96MB:\
+	:96 MBytes reserved for swap & boot:ns#28:nt#16:nc#1229:\
+	:s0#550592:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2213A_42MB|hp2213A_42MB|hp660S_42MB:\
+	:42 MBytes reserved for swap & boot:ns#28:nt#16:nc#1351:\
+	:s0#605248:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2213A_noreserve|hp2213A_noreserve|HP_2213A_noswap|hp2213A_noswap|hp660S_noreserve|hp660S_noswap:\
+	:no swap or boot:ns#28:nt#16:nc#1447:\
+	:s0#648256:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2213A_120MB|hp2213A_120MB|hp660S_120MB:\
+	:120 MBytes reserved for swap & boot:ns#28:nt#16:nc#1173:\
+	:s0#525504:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+HP_2213A_150MB|hp2213A_150MB|hp660S_150MB:\
+	:150 MBytes reserved for swap & boot:ns#28:nt#16:nc#1104:\
+	:s0#494592:b0#8192:f0#1024:\
+	:se#512:rm#4002:
+############################################################################
+# A word about microfloppies ...					   #
+# There are three (3) types of microfloppies available.			   #
+# They are color-coded for ease of use:					   #
+#	blue:  single-sided, standard-density (single-density)		   #
+#	gray:  double-sided, standard-density				   #
+#	black: double-sided, high-density     (double-density)		   #
+#									   #
+# "double-sided" means both sides of the microfloppy are used.		   #
+# "high-density" means twice the number of sectors per track.		   #
+#									   #
+# Always "mediainit" before first using any microfloppy.		   #
+# We recommend formatting ALL microfloppies with interleave 2.		   #
+# Example: (interleave = 2, format option = 3)				   #
+#	   # mediainit -i 2 -f 3 /dev/rdsk/9122				   #
+#									   #
+# In addition, there are six (6) format options available.  The format	   #
+# options specify the logical geometry of the disc.  See details below.	   #
+#									   #
+#	------------------------------------------------------------	   #
+#	Note that the same FORMAT OPTIONS are used for both standard	   #
+#	and high density.  The selection of standard- or high-		   #
+#	depends on the media type inserted (blue, gray, or black).	   #
+#	HD floppies will always format with twice the capacity of	   #
+#	single-density media.						   #
+#	HD media should ONLY be used in 9122C drives (such as 9153C	   #
+#	drives.	 I.e. DO NOT use in 9122D or 9122S drives.)		   #
+#	------------------------------------------------------------	   #
+#									   #
+#	Format options 0, 1, 4 format the diskette with 256 byte sectors   #
+#	Format option  2  formats the diskette with 512 byte sectors	   #
+#	Format option  3  formats the diskette with 1024 byte sectors	   #
+#	Format option  16 (sometimes called "IBM" style) uses 512 byte	   #
+#			   sectors					   #
+#	  ** note: the "IBM"-style format (option 16) is supported on	   #
+#		   9153A (serial number prefix 2702A or higher),	   #
+#		   and all 9153B and 9153C drives.			   #
+# See below for more details.						   #
+#									   #
+############################################################################
+# A word about microfloppy disc drives ...				   #
+# The 9122 family of disc drives is a family of microfloppy units.	   #
+# They are available as standalone units, such as the 9122D dual mechanism #
+# drive, or integrated into disc drives, such as the 9133L or 9153 drives. #
+# Here is a convenient guide for matching drives with mechanisms:	   #
+# 9121 drives = blue diskettes only					   #
+# 9122 drives = blue or gray diskettes					   #
+# newer 9122 drives = blue, gray, or black diskettes (e.g. 9122C or 9153C) #
+#									   #
+# Note that the above color coding is for HP-supplied media only.	   #
+#									   #
+# 9122C/9153C drives can detect high density (black) discs via a sensor	   #
+# hole in the black media.  Earlier drives will treat black media as	   #
+# ordinary standard density, at a high error rate due to the higher	   #
+# coercivity required to record on high density media.			   #
+#									   #
+# No drive can detect single- vs double-sided media.  The selection of	   #
+# the correct format option is the operator's responsibility.		   #
+#									   #
+############################################################################
+# The 9122D and 9122S are 788 KByte 3.5" double-sided flexible disc drives.
+# The 9122D contains two (2) drives (at unit 0 and unit 1).
+# SS/80 Protocol
+# Interleave 2
+# Notes:  Before a 3.5" flexible disc is used, it must be formatted.
+#	  The format option determines the number of bytes/sector, and
+#	  the total size of the disc.  We recommend format option 3,
+#	  since it gives the maximum disc space per volume.
+#
+#	  USE GRAY DISKETTES ONLY !!	  USE GRAY DISKETTES ONLY !!
+#			  Format Option (GRAY)
+#	  Character	   0,1	    2	    3	    4	   16**
+#
+#	  capacity	  631K	  710K	  788K	  270K	  730K
+#	  bytes/sector	  256	  512	  1024	  256	  512
+#	  sectors/track	   16	   9	   5	   16	   9
+#	  sides		   2	   2	   2	   1	   2
+#	  cylinders	   77	   77	   77	   66	   80
+#
+#	  ** note: the "IBM"-style format (option 16) is supported on
+#		   9153A, 9153B, and 9153C drives.
+#
+#	  The configuration reference manual contains the remaining details
+#	  The flexible disc is too small to contain a swap area.
+############################################################################
+hp9122|hp9122_noreserve|hp9122_noswap|hp9122_F3_noreserve|hp9122_F3_noswap:\
+	:format option 3:ns#5:nt#2:nc#77:\
+	:s0#770:b0#8192:f0#1024:\
+	:se#1024:rm#600:
+hp9122_F0|hp9122_F0_noreserve|hp9122_F0_noswap:\
+	:format option 0,1:ns#4:nt#2:nc#77:\
+	:s0#616:b0#8192:f0#1024:\
+	:se#256:rm#600:
+hp9122_F1_noreserve|hp9122_F1_noswap:\
+	:format option 0,1:ns#4:nt#2:nc#77:\
+	:s0#616:b0#8192:f0#1024:\
+	:se#256:rm#600:
+#
+#	We have to fool option 2 ... instead of 9 sectors of 512 bytes with
+#	2 heads, we specified 9 sectors of 1K with 1 head (ns# REQUIRES 1K)
+hp9122_F2|hp9122_F2_noreserve|hp9122_F2_noswap:\
+	:format option 2:ns#9:nt#1:nc#77:\
+	:s0#693:b0#8192:f0#1024:\
+	:se#512:rm#600:
+hp9122_F4|hp9122_F4_noreserve|hp9122_F4_noswap:\
+	:format option 4:ns#4:nt#1:nc#66:\
+	:s0#264:b0#8192:f0#1024:\
+	:se#256:rm#600:
+###########################################################################
+# The 9122C is our nomenclature for the standard/high density 3.5"
+# flexible disc drive built into the 9153C product.  The 9122C supports
+# all 9121D/S and 9122D/S single- and double-sided standard density
+# (1 Mbyte) formats.  This section lists only the high (2 Mbyte) formats.
+#
+# SS/80 Protocol
+# Interleave 2
+#
+#	  Use ANY diskette you want.  The following options are for
+#	  the HD media (black diskettes).
+#	      (Put in a gray diskette, and the drive uses the ABOVE format
+#	       table; put in a black diskette, the drive uses the table
+#	       below.  You might imagine that the drive "knows" the color.)
+#
+#			  Format Option (BLACK)
+#	  Character	 0,1,4	    2	    3	   16
+#
+#	  capacity	 1.26M	 1.42M	 1.58M	 1.47M
+#	  bytes/sector	  256	  512	 1024	  512
+#	  sectors/track	   32	   18	   10	   18
+#	  sides		    2	    2	    2	    2
+#	  cylinders	   77	   77	   77	   80
+#
+hp9122C|hp9122C_noreserve|hp9122C_noswap:\
+	:format option 3:ns#10:nt#2:nc#77:\
+	:s0#1540:b0#8192:f0#1024:\
+	:se#1024:rm#300:
+hp9122C_F3_noreserve|hp9122C_F3_noswap:\
+	:format option 3:ns#10:nt#2:nc#77:\
+	:s0#1540:b0#8192:f0#1024:\
+	:se#1024:rm#300:
+###########################################################################
+# 3.5 inch flexible disk formats. These disktab entries are applicable to
+# all 3.5 inch floppy devices. The floppy density and mediainit format
+# option(s) which correspond to each disktab entry are specified in the
+# first field of each entry. See floppy(7) for additional information
+# about the media geometries of these floppy mediainit format options.
+#
+hp616|hp630:\
+	:low density; format options 1,4:ns#4:nt#2:nc#77:\
+	:s0#616:b0#8192:f0#1024:\
+	:se#256:rm#600:
+hp693|hp710:\
+	:low density; format option 2:ns#9:nt#1:nc#77:\
+	:s0#693:b0#8192:f0#1024:\
+	:se#512:rm#300:
+hp770|hp788:\
+	:low density; format option 3:ns#5:nt#2:nc#77:\
+	:s0#770:b0#8192:f0#1024:\
+	:se#1024:rm#600:
+ibm720:\
+	:low density; format option 16:ns#9:nt#1:nc#80:\
+	:s0#720:b0#8192:f0#1024:\
+	:se#512:rm#300:
+hp1232:\
+	:high density; format options 1,4:ns#8:nt#2:nc#77:\
+	:s0#1232:b0#8192:f0#1024:\
+	:se#256:rm#600:
+hp1386:\
+	:high density; format option 2:ns#9:nt#2:nc#77:\
+	:s0#1386:b0#8192:f0#1024:\
+	:se#512:rm#600:
+hp1540:\
+	:high density; format option 3:ns#10:nt#2:nc#77:\
+	:s0#1540:b0#8192:f0#1024:\
+	:se#1024:rm#600:
+ibm1440:\
+	:high density; format option 16:ns#9:nt#2:nc#80:\
+	:s0#1440:b0#8192:f0#1024:\
+	:se#512:rm#600:
+###########################################################################
+# 5.25 inch flexible disk formats. These disktab entries are applicable to
+# all 5.25 inch floppy devices. The floppy density and mediainit format
+# option(s) which correspond to each disktab entry are specified in the
+# first field of each entry. See floppy(7) for additional information
+# about the media geometries of these floppy mediainit format options.
+#
+ibm1200:\
+	:high density; format option 16:ns#15:nt#1:nc#80:\
+	:s0#1200:b0#8192:f0#1024:\
+	:s8#1200:b8#8192:f8#1024:\
+	:se#512:rm#600:
+#########################################################
+# GENERAL INFORMATION for the 9133, 9134 and 9153 Drives:
+# Important variables to consider:
+#     - Is your device formatted for the correct interleave?
+#	(See individual entries below.)
+#     - Is your configuration switch set properly?
+#     - Does your disc use 256 byte sectors, or 1024 byte sectors?
+#	(Use diskinfo(1m) to find out.)
+#     - Make sure you know the proper model number (e.g. 9133H is not
+#	the same as 9133L, the 9153A is not a 9153B is not a 9153C, etc)
+#	(Look at the label on the front (or rear) of your disc!)
+#
+# Each drive is supplied with a configuration switch (on the back panel)
+# that allows you to partition your fixed disc into multiple volumes.  The
+# individual volumes are accessed in HP-UX by specifying the appropriate
+# numbered volume (coded in the least significant byte of the minor number).
+# Do not confuse this switch with the bus address switch.  Entries are given
+# only for switch setting 0 or 1 (i.e. the entire disc is accessed as one
+# volume). Several configuration switches have special meanings -- check
+# your operators manual for details.  We give a detailed example in the
+# section for the 9153B disc drive.
+#
+##############################
+# The 9133D and 9134D are 16.6 MByte fixed discs using option 001.
+#			 (14.8 MBytes using 256 byte sectors)
+# The 9133D contains a shared controller 9122S (the 3.5" microfloppy).
+#	(Use hp9122 for formatting the microfloppy.)
+# SS/80 Protocol
+# Interleave:  consult following configuration matrix
+#
+#		   DMA	    no DMA
+#      Internal	    4	      6
+#      98625	    3	      5
+#
+# Notes:     The 9134D hard disc is identical to the 9133D disc.  Use the
+#	     corresponding entries listed below. The 3.5" flexible disc drive
+#	     on the 9133D is at unit 1 (the hard disc is at unit 0).
+# Important: The 9133D can be configured with Option 001 (1024 byte sectors)
+#	     or with 256 byte sectors.	The Option 001 is encouraged.
+#	     Make sure the appropriate entry below is used.
+# WARNING:   The 9133XV disk drive is UNSUPPORTED.  The following is
+#	     for informational purposes only.
+hp9133D|hp9134D:\
+	:2 MB reserved for swap & boot, option 001:ns#9:nt#6:nc#263:\
+	:s0#14202:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+hp9133D_noreserve|hp9133D_noswap|hp9134D_noreserve|hp9134D_noswap:\
+	:no swap or boot, option 001:ns#9:nt#6:nc#301:\
+	:s0#16254:b0#4096:f0#1024:\
+	:se#1024:rm#3600:
+#
+hp9133D_256|hp9134D_256:\
+	:2 MB reserved for swap & boot, 256 byte sectors:ns#8:nt#6:nc#259:\
+	:s0#12432:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9133D_256_noreserve|hp9133D_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#6:nc#302:\
+	:s0#14496:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9134D_256_noreserve|hp9134D_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#6:nc#302:\
+	:s0#14496:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+##############################
+# The 9133H and 9134H are 22.3 MByte fixed discs using option 001.
+#		       or 19.9 MBytes using 256 byte sectors.
+# The 9133H contains a shared controller 9122S (the 3.5" microfloppy).
+#	(Use hp9122 for formatting the microfloppy.)
+# SS/80 protocol
+# Interleave:  consult following configuration matrix
+#
+#		   DMA	    no DMA
+#      Internal	    4	      6
+#      98625	    3	      5
+#
+# Notes:     The 9134H hard disc is identical to the 9133H disc.  Use the
+#	     corresponding entries listed below. The 3.5" flexible disc drive
+#	     on the 9133H is at unit 1 (the hard disc is at unit 0).
+# Important: The 9133H can be configured with Option 001 (1024 byte sectors)
+#	     or with 256 byte sectors.	The Option 001 is encouraged.
+#	     Make sure the appropriate entry below is used.
+hp9133H|hp9134H:\
+	:4 MB reserved for swap & boot, option 001:ns#9:nt#4:nc#492:\
+	:s0#17712:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+hp9133H_noreserve|hp9133H_noswap|hp9134H_noreserve|hp9134H_noswap:\
+	:no swap or boot, option 001:ns#9:nt#4:nc#606:\
+	:s0#21816:b0#4096:f0#1024:\
+	:se#1024:rm#3600:
+hp9133H_256|hp9134H_256:\
+	:4 MB reserved for swap & boot, 256 byte sectors:ns#8:nt#4:nc#480:\
+	:s0#15360:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9133H_256_noreserve|hp9133H_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#4:nc#608:\
+	:s0#19456:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9134H_256_noreserve|hp9134H_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#4:nc#608:\
+	:s0#19456:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#######################################################
+# The 9133L and 9134L are 44.7 MByte fixed discs using option 001.
+#		       or 39.9 MByte discs using 256 byte sectors.
+# The 9133L contains a shared controller 9122S (the 3.5" microfloppy).
+#	(Use hp9122 for formatting the microfloppy.)
+# SS/80 protocol
+# Interleave:  consult following configuration matrix
+#
+#		   DMA	    no DMA
+#      Internal	    4	      6
+#      98625	    3	      5
+#
+# Notes:     The 9134L hard disc is identical to the 9133L disc.  Use the
+#	     corresponding entries listed below. The 3.5" flexible disc drive
+#	     on the 9133L is at unit 1 (the hard disc is at unit 0).
+# Important: The 9133L can be configured with Option 001 (1024 byte sectors)
+#	     or with 256 byte sectors.	The Option 001 is encouraged.
+#	     Make sure the appropriate entry below is used.
+hp9133L|hp9134L:\
+	:8 MB reserved for swap & boot, option 001:ns#9:nt#5:nc#788:\
+	:s0#35460:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+hp9133L_noreserve|hp9133L_noswap|hp9134L_noreserve|hp9134L_noswap:\
+	:no swap or boot, option 001:ns#9:nt#5:nc#971:\
+	:s0#43695:b0#4096:f0#1024:\
+	:se#1024:rm#3600:
+#
+hp9133L_256|hp9134L_256:\
+	:6 MB reserved for swap & boot, 256 byte sectors:ns#8:nt#5:nc#819:\
+	:s0#32760:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9133L_256_noreserve|hp9133L_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#5:nc#973:\
+	:s0#38920:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9134L_256_noreserve|hp9134L_256_noswap:\
+	:no swap or boot, 256 byte sectors:ns#8:nt#5:nc#973:\
+	:s0#38920:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+##############################################################
+# The 9153 family of drives contains three groups:	     #
+#	- 9153						     #
+#	- 9153A						     #
+#	- 9153B						     #
+#	- 9153C						     #
+# Refer to the appropriate section below.		     #
+##############################################################
+# The 9153 and 9153A is a 10 MByte winchester disc with a built-in 3.5"
+# double-sided 9122S flexible disc drive.
+#	(See the hp9122 discussion above for formatting the microfloppy.)
+# SS/80 Protocol
+# Interleave:  refer to following configuration matrix
+#
+#		   DMA	    NO DMA
+#      Internal	    2	      3
+#      98625	    1	      2
+#
+hp9153A:\
+	:2 MB reserved for swap & boot:ns#7:nt#2:nc#551:\
+	:s0#7714:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9153A_noreserve|hp9153A_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#698:\
+	:s0#9772:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#####################################################################
+# The 9153B is a 20 MByte winchester disc with a built-in 3.5" double-sided
+# 9122S flexible disc drive.
+#	(See the hp9122 discussion above for formatting the microfloppy.)
+# SS/80 Protocol
+#
+# Interleave 1 (always)
+#
+# The configuration switch setting on the reverse panel allows the user to
+# select several alternatives in formatting the disc.  Several different
+# size volumes are possible - which will require separate disktab entries.
+# We give an example below for one popular configuration:
+#
+# Configuration Switch Setting: 0
+#
+hp9153B:\
+	:4 MB reserved for swap & boot:ns#7:nt#2:nc#1257:\
+	:s0#17598:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9153B_noreserve|hp9153B_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#1404:\
+	:s0#19656:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#
+# Configuration Switch Setting #5
+#	Two volumes:  Vol 0:   (5 MBytes)
+#			    28 sectors/track (256 bytes/sector)
+#			     2 tracks/cylinder
+#			   351 cylinders
+#
+#		      Vol 1:   (15.1 MBytes)
+#			    28 sectors/track (256 bytes/sector)
+#			     2 tracks/cylinder
+#			  1053 cylinders
+#
+hp9153B_CS5_V0:\
+	:vol 0 (5 MB), NO swap or boot:ns#7:nt#2:nc#351:\
+	:s0#4914:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9153B_CS5_V1:\
+	:vol1 (15.1 MB), 2 MB reserved for swap & boot:ns#7:nt#2:nc#906:\
+	:s0#12684:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9153B_CS5_V1_noreserve|hp9153B_CS5_V1_noswap:\
+	:vol1 (15.1 MB), NO swap or boot:ns#7:nt#2:nc#1053:\
+	:s0#14742:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#####################################################################
+# The 9153C is a 10, 20 or 40 MByte winchester disc with an optional
+# built-in 3.5" double-sided  9122C flexible disc drive.
+# 9153C Options 010 and 011 specify a 10 Mbyte hard disc.
+# 9153C Options 020 and 021 specify a 20 Mbyte hard disc.
+# 9153C Options 040 and 041 specify a 40 Mbyte hard disc.
+# 9153C Options 011, 021 and 041 delete the 3.5" microfloppy unit.
+# (Note: There is no 9154C.)
+# The 10 and 20 Mb models may be upgraded to 30 and 40 Mbytes respectively,
+# by installing a 9153M 20Mb disc assembly.  This configuration is entered
+# here as "9153C#030", although no such option actually exists.
+# (See the hp9122 discussion above for formatting the microfloppy.)
+# SS/80 Protocol
+#
+# Interleave 1
+#
+# The configuration switch setting on the reverse panel allows the user
+# to select several alternatives in formatting the disc.  Several
+# different size volumes are possible - which will require separate
+# disktab entries. We give an example below for one popular configuration:
+#
+# Configuration Switch Setting: 0
+#
+hp9153C|hp91532|hp9153C#040|hp9153C#041:\
+	:8 MB reserved for swap & boot:ns#7:nt#2:nc#2222:\
+	:s0#31108:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#040_noreserve|hp9153C#040_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#2808:\
+	:s0#39312:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#041_noreserve|hp9153C#041_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#2808:\
+	:s0#39312:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#030|hp9153C#031:\
+	:6 MB reserved for swap & boot:ns#7:nt#2:nc#1665:\
+	:s0#23310:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#030_noreserve|hp9153C#030_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#2104:\
+	:s0#29456:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#031_noreserve|hp9153C#031_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#2104:\
+	:s0#29456:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#020|hp9153C#021:\
+	:4 MB reserved for swap & boot:ns#7:nt#2:nc#1111:\
+	:s0#15554:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#020_noreserve|hp9153C#020_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#1404:\
+	:s0#19656:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#021_noreserve|hp9153C#021_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#1404:\
+	:s0#19656:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#010_noreserve|hp9153C#010_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#698:\
+	:s0#9772:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#011_noreserve|hp9153C#011_noswap:\
+	:no swap or boot:ns#7:nt#2:nc#698:\
+	:s0#9772:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+#
+# Configuration Switch Setting #7
+#	Two volumes:  Vol 0:   (6 MBytes)
+#			    28 sectors/track (256 bytes/sector)
+#			     2 tracks/cylinder
+#			   420 cylinders
+#
+#		      Vol 1:   (34.2 MBytes)
+#			    28 sectors/track (256 bytes/sector)
+#			     2 tracks/cylinder
+#			  2388 cylinders
+#
+hp9153C#040_CS5_V0:|hp9153C#041_CS5_V0:\
+	:vol 0 (6 MB), NO swap or boot:ns#7:nt#2:nc#420:\
+	:s0#5880:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#040_CS5_V1:|hp9153C#040_CS5_V1:\
+	:vol1 (34.2 MB), 2 MB reserved for swap & boot:ns#7:nt#2:nc#1949:\
+	:s0#27286:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#040_CS5_V1_noreserve:|hp9153C#041_CS5_V1_noreserve:\
+	:vol1 (34.2 MB), NO swap or boot:ns#7:nt#2:nc#2388:\
+	:s0#33432:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+hp9153C#040_CS5_V1_noswap:|hp9153C#041_CS5_V1_noswap:\
+	:vol1 (34.2 MB), NO swap or boot:ns#7:nt#2:nc#2388:\
+	:s0#33432:b0#8192:f0#1024:\
+	:se#256:rm#3000:
+###########################################
+#					  #
+#	       AMIGO DISCS		  #
+#					  #
+###########################################
+hp7920:\
+	:10 MB reserved for swap & boot:ns#12:nt#5:nc#644:\
+	:s0#38640:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7920_noreserve|hp7920_noswap:\
+	:no swap or boot:ns#12:nt#5:nc#815:\
+	:s0#48900:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp7925:\
+	:18 MB reserved for swap & boot:ns#16:nt#9:nc#687:\
+	:s0#98928:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+hp7925_30MB:\
+	:30 MB reserved for swap & boot:ns#16:nt#9:nc#601:\
+	:s0#86544:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+hp7925_noreserve|hp7925_noswap:\
+	:no swap or boot:ns#16:nt#9:nc#815:\
+	:s0#117360:b0#8192:f0#1024:\
+	:se#256:rm#2700:
+###########################################################################
+# The 9121D and 9121S are 270 KByte 3.5" single-sided flexible disc drives.
+# The 9121D contains two (2) drives (at unit 0 and unit 1).
+# Amigo Protocol
+# Interleave 2
+# Notes:  Before a 3.5" flexible disc is used, it must be formatted.
+#
+hp9121|hp9121_noreserve|hp9121_noswap:\
+	:no swap or boot:ns#4:nt#1:nc#66:\
+	:s0#264:b0#8192:f0#1024:\
+	:se#256:rm#120:
+###############################################################
+# The hp9133A, hp9134A and hp9133A, hp9134B are 5 and 10 MByte
+# discs.  The 9133A and 9133B have built-in 3.5" single-sided
+# flexible disc drives.	 The 9134A and 9134B have the identical
+# hard disc characteristics to the hp9133A and hp9133B.
+# Amigo Protocol
+#
+# The 9133/4A comes in two formats - standard (4 units of 1.2 MBytes)
+# and option 010 (1 unit of 4.6 MBytes).  Using the standard format,
+# the units are addressed by referencing the appropriate bit in the
+# minor number.
+#
+hp9133A|hp9134A:\
+	:no swap or boot:ns#15:nt#1:nc#75:\
+	:s0#1125:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9133A_F010|hp9134A_F010:\
+	:no swap or boot:ns#31:nt#1:nc#152:\
+	:s0#4712:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+hp9133B|hp9134B:\
+	:no swap or boot:ns#31:nt#1:nc#305:\
+	:s0#9455:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#######################################################################
+# The 9133/4XV is a 15 MByte winchester disc (the 9133XV has a built-in
+# 3.5" single-sided flexible disc drive).
+# Amigo Protocol
+#
+hp9133XV|hp9134XV:\
+	:no swap or boot:ns#9:nt#5:nc#315:\
+	:s0#14175:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#######################################################
+# The 9895 is a 1.2 MByte 8" double-sided flexible disc
+# Amigo Protocol
+#
+hp9895:\
+	:no swap or boot:ns#15:nt#1:nc#75:\
+	:s0#1125:b0#8192:f0#1024:\
+	:se#256:rm#360:
+###############################################################
+# SCSI Discs						      #
+# The Discs described below this line use the SCSI interface  #
+# and the SCSI protocol for direct access disc drives.	SCSI  #
+# is an	 industry  standard  protocol that is used by a wide  #
+# variety of disc vendors.  The following section references  #
+# discs manufactured by HP and fully supported in HP systems. #
+# Related documentation can be found in:		      #
+#    * Small Computer System Interface:			      #
+#	  ANSI X3T9.2/82-2(Rev 17B)			      #
+#    * Common Command Set (CCS) of the Small Computer System  #
+#	  Interface (SCSI): ANSI X3T9.2/85-52 (Rev 4.B)	      #
+#    * HP Common SCSI Interface Specification		      #
+###############################################################
+# The HP 7957/8/9 Disc Drives are reliable,  low cost,	high  #
+# capacity and high performance mass storage devices.  These  #
+# 5.25" drives use 2, 3 or 6 platters.	There are 1643 data   #
+# tracks per surface, with 64 (256 byte) sectors per track.   #
+###############################################################
+# The HP7957S has 4 surfaces (2 platters)
+# Total formatted capacity: 107.7 MBytes
+HP7957S_noreserve|HP7957S_noswap:\
+	:No swap or boot:ns#16:nt#4:nc#1643:\
+	:s0#105152:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7957S_noreserve|hp7957S_noswap:\
+	:No swap or boot:ns#16:nt#4:nc#1643:\
+	:s0#105152:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7957S|HP_7957S:\
+	:16 MBytes reserved for swap & boot:ns#16:nt#4:nc#1387:\
+	:s0#88768:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7957S_24MB|HP7957S_24MB:\
+	:24 MBytes reserved for swap & boot:ns#16:nt#4:nc#1259:\
+	:s0#80576:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+###############################################
+# The HP7958S has 6 surfaces (3 platters)
+# Total formatted capacity: 161.5 MBytes
+hp7958S_noreserve|hp7958S_noswap|HP7958S_noreserve|HP7958S_noswap:\
+	:No swap or boot:ns#16:nt#6:nc#1643:\
+	:s0#157728:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7958S|HP_7958S:\
+	:24 MBytes reserved for swap & boot:ns#16:nt#6:nc#1387:\
+	:s0#133152:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7958S_32MB|HP7958S_32MB:\
+	:32 MBytes reserved for swap & boot:ns#16:nt#6:nc#1301:\
+	:s0#124896:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+###############################################
+# The HP7959S has 12 surfaces (6 platters)
+# Total formatted capacity: 323 MBytes
+hp7959S_noreserve|hp7959S_noswap|HP7959S_noreserve|HP7959S_noswap:\
+	:No swap or boot:ns#16:nt#12:nc#1643:\
+	:s0#315456:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7959S|HP_7959S:\
+	:42 MBytes reserved for swap & boot:ns#16:nt#12:nc#1419:\
+	:s0#272448:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+hp7959S_32MB|HP7959S_32MB:\
+	:32 MBytes reserved for swap & boot:ns#16:nt#12:nc#1472:\
+	:s0#282624:b0#8192:f0#1024:\
+	:se#256:rm#3350:
+###############################################
+# The HP Series 6300 model 650/A is a Magneto-optical
+# drive with 2 surfaces and uses the SCSI interface.
+# The mechanism can only access one surface at a time.
+# The media is removeable (5.25"), with an estimated
+# shelf life of 10 years. Media has a write-protect tab.
+# Two formats are available:
+#	 512  bytes/sector
+#	1024  bytes/sector
+# Total formatted capacity: 322.1 MBytes/surface  (644.2 MBytes both sides)
+# Physical Geometry for the 1024 bytes/sector media:
+#	Bytes / sector	  1024
+#	Sectors / track	  17
+#	Capacity	  314569 sectors
+#		       or 322.1 MBytes/surface	(644.2 MBytes both sides)
+#
+# Physical Geometry for the 512	 bytes/sector media:
+#	Bytes / sector	  512
+#	Capacity	  576999 sectors
+#		       or 295.4 MBytes/surface
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+hpS6300.650A|hpS6300.650A_noreserve|hpS6300.650A_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#2400:
+HPS6300.650A|HPS6300.650A_noreserve|HPS6300.650A_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#2400:
+HP_S6300.650A|HP_S6300.650A_noreserve|HP_S6300.650A_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#2400:
+hpS6300.650A_512|hpS6300.650A_512_noreserve|hpS6300.650A_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#2400:
+HPS6300.650A_512|HPS6300.650A_512_noreserve|HPS6300.650A_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#2400:
+HP_S6300.650A_512|HP_S6300.650A_512_noreserve|HP_S6300.650A_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#2400:
+#####################################################
+# It is not recommended to use the 650/A drive as the
+# root device.	For convenience an entry is provided
+# in case the user requires it for special situations.
+hpS6300.650A_32MB|HPS6300.650A_32MB|HP_S6300.650A_32MB:\
+	:32 MBytes reserved for swap & boot:ns#17:nt#12:nc#1381:\
+	:s0#281724:b0#8192:f0#1024:\
+	:se#1024:rm#2400:
+#####################################################
+# Rodime disk drive.
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+rodimeRO3000T_noreserve|RODIME_RO3000T_noreserve:\
+	:No swap or boot:ns#16:nt#9:nc#1424:\
+	:s0#205056:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+rodimeRO3000T_noswap|RODIME_RO3000T_noswap:\
+	:No swap or boot:ns#16:nt#9:nc#1424:\
+	:s0#205056:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+rodimeRO3000T|RODIME_RO3000T|rodimeRO3000T_32MB|RODIME_RO3000T_32MB:\
+	:32 Mbytes reserved for swap & boot:ns#16:nt#9:nc#1196:\
+	:s0#172224:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+rodimeRO3000T_44MB|RODIME_RO3000T_44MB:\
+	:44 Mbytes reserved for swap & boot:ns#16:nt#9:nc#1111:\
+	:s0#159984:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+rodimeRO3000T_50MB|RODIME_RO3000T_50MB:\
+	:50 Mbytes reserved for swap & boot:ns#16:nt#9:nc#1068:\
+	:s0#153792:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+rodimeRO3000T_64MB|RODIME_RO3000T_64MB:\
+        :64 MBbytes reserved for swap & boot:ns#16:nt#9:nc#968:\
+        :s0#139392:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Quantum 210MB 3.5in SCSI drive with ZBR
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = (average of 8 zones) 25 sectors/track
+# nt = 7 r/w heads ( 8th head servo surface )
+# nc = 1167 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+QUANTUM_PD210S_noreserve:\
+        :No swap or boot:ns#25:nt#7:nc#1167:\
+        :s0#204225:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD210S_noswap:\
+        :No swap or boot:ns#25:nt#7:nc#1167:\
+        :s0#204225:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD210S|QUANTUM_PD210S_36MB:\
+        :36 Mb reserved for swap & boot:ns#25:nt#7:nc#956:\
+        :s0#167300:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD210S_42MB:\
+        :42 Mb reserved for swap & boot:ns#25:nt#7:nc#921:\
+        :s0#161175:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD210S_50MB:\
+        :50 Mb reserved for swap & boot:ns#25:nt#7:nc#874:\
+        :s0#152950:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD210S_66MB:\
+        :66 Mb reserved for swap & boot:ns#25:nt#7:nc#781:\
+        :s0#136675:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Quantum 425 MB SCSI drive with ZBR
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = (average of 8 zones) 30 sectors/track
+# nt = 9 r/w heads ( 10th head servo surface )
+# nc = 1542 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+QUANTUM_PD425S_noreserve:\
+        :No swap or boot:ns#30:nt#9:nc#1527:\
+        :s0#412290:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S_noswap:\
+        :No swap or boot:ns#30:nt#9:nc#1527:\
+        :s0#412290:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S_40MB:\
+        :40 Mb reserved for swap & boot:ns#30:nt#9:nc#1376:\
+        :s0#371520:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S|QUANTUM_PD425S_50MB:\
+        :50 Mb reserved for swap & boot:ns#30:nt#9:nc#1338:\
+        :s0#361260:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S_70MB:\
+        :70 Mb reserved for swap & boot:ns#30:nt#9:nc#1262:\
+        :s0#340740:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S_90MB:\
+        :90 Mb reserved for swap & boot:ns#30:nt#9:nc#1184:\
+        :s0#319680:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+QUANTUM_PD425S_100MB:\
+        :100 Mb reserved for swap & boot:ns#30:nt#9:nc#1148:\
+        :s0#309960:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Micropolis 660 Mb SCSI Drive
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = 28 sectors/track
+# nt = 15 r/w heads ( 16th head servo surface )
+# nc = 1552 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+MICROP_1588T_noreserve|MICROP_1588T_noswap:\
+        :No swap or boot:ns#28:nt#15:nc#1552:\
+        :s0#651840:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588T_42MB:\
+        :42 Mb reserved for swap & boot:ns#28:nt#15:nc#1450:\
+        :s0#609000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588T|MICROP_1588T_64MB:\
+        :64 Mb reserved for swap & boot:ns#28:nt#15:nc#1396:\
+        :s0#586320:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588T_96MB:\
+        :96 Mb reserved for swap & boot:ns#28:nt#15:nc#1318:\
+        :s0#553560:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588T_120MB:\
+        :120 Mb reserved for swap & boot:ns#28:nt#15:nc#1259:\
+        :s0#528780:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588T_150MB:\
+        :150 Mb reserved for swap & boot:ns#28:nt#15:nc#1186:\
+        :s0#498120:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Micropolis 660 Mb SCSI Drive
+# Set rotdelay = 1 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = 28 sectors/track
+# nt = 15 r/w heads ( 16th head servo surface )
+# nc = 1552 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+MICROP_1588-15MB1047604_noreserve|MICROP_1588-15MB1047604_noswap:\
+        :No swap or boot:ns#28:nt#15:nc#1552:\
+        :s0#651840:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047604_42MB:\
+        :42 Mb reserved for swap & boot:ns#28:nt#15:nc#1450:\
+        :s0#609000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047604|MICROP_1588-15MB1047604_64MB:\
+        :64 Mb reserved for swap & boot:ns#28:nt#15:nc#1396:\
+        :s0#586320:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047604_96MB:\
+        :96 Mb reserved for swap & boot:ns#28:nt#15:nc#1318:\
+        :s0#553560:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047604_120MB:\
+        :120 Mb reserved for swap & boot:ns#28:nt#15:nc#1259:\
+        :s0#528780:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047604_150MB:\
+        :150 Mb reserved for swap & boot:ns#28:nt#15:nc#1186:\
+        :s0#498120:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Micropolis 660 Mb SCSI Drive (AOXC fw)
+# Set rotdelay = 1 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = 28 sectors/track
+# nt = 15 r/w heads ( 16th head servo surface )
+# nc = 1552 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+MICROP_1588-15MB1047602_noreserve|MICROP_1588-15MB1047602_noswap:\
+        :No swap or boot:ns#28:nt#15:nc#1552:\
+        :s0#651840:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047602_42MB:\
+        :42 Mb reserved for swap & boot:ns#28:nt#15:nc#1450:\
+        :s0#609000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047602|MICROP_1588-15MB1047602_64MB:\
+        :64 Mb reserved for swap & boot:ns#28:nt#15:nc#1396:\
+        :s0#586320:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047602_96MB:\
+        :96 Mb reserved for swap & boot:ns#28:nt#15:nc#1318:\
+        :s0#553560:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047602_120MB:\
+        :120 Mb reserved for swap & boot:ns#28:nt#15:nc#1259:\
+        :s0#528780:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047602_150MB:\
+        :150 Mb reserved for swap & boot:ns#28:nt#15:nc#1186:\
+        :s0#498120:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Micropolis 660 Mb SCSI Drive (AO0C fw)
+# Set rotdelay = 1 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = 28 sectors/track
+# nt = 15 r/w heads ( 16th head servo surface )
+# nc = 1552 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+MICROP_1588-15MB1047601_noreserve|MICROP_1588-15MB1047601_noswap:\
+        :No swap or boot:ns#28:nt#15:nc#1552:\
+        :s0#651840:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047601_42MB:\
+        :42 Mb reserved for swap & boot:ns#28:nt#15:nc#1450:\
+        :s0#609000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047601|MICROP_1588-15MB1047601_64MB:\
+        :64 Mb reserved for swap & boot:ns#28:nt#15:nc#1396:\
+        :s0#586320:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047601_96MB:\
+        :96 Mb reserved for swap & boot:ns#28:nt#15:nc#1318:\
+        :s0#553560:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047601_120MB:\
+        :120 Mb reserved for swap & boot:ns#28:nt#15:nc#1259:\
+        :s0#528780:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1588-15MB1047601_150MB:\
+        :150 Mb reserved for swap & boot:ns#28:nt#15:nc#1186:\
+        :s0#498120:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# Micropolis 1.4 Gb SCSI Drive
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+# ns = 44 sectors/track
+# nt = 15 r/w heads ( 16th head servo surface )
+# nc = 1986 total data cyl
+# s0 = total capacity / 1024
+# b0 f0 = 8K 1K file system
+# se = 512 byte sectors
+# rm = 3600 rpm
+#
+MICROP_1528_noreserve:\
+        :No swap or boot:ns#44:nt#15:nc#1986:\
+        :s0#1310760:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_noswap:\
+        :No swap or boot:ns#44:nt#15:nc#1986:\
+        :s0#1310760:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_42MB:\
+        :42 Mb reserved for swap & boot:ns#44:nt#15:nc#1920:\
+        :s0#1267200:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_64MB:\
+        :64 Mb reserved for swap & boot:ns#44:nt#15:nc#1886:\
+        :s0#1244760:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_96MB:\
+        :96 Mb reserved for swap & boot:ns#44:nt#15:nc#1837:\
+        :s0#1212420:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528|MICROP_1528_120MB:\
+        :120 Mb reserved for swap & boot:ns#44:nt#15:nc#1799:\
+        :s0#1187340:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_150MB:\
+        :150 Mb reserved for swap & boot:ns#44:nt#15:nc#1753:\
+        :s0#1156980:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_175MB:\
+        :175 Mb reserved for swap & boot:ns#44:nt#15:nc#1714:\
+        :s0#1131240:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_200MB:\
+        :200 Mb reserved for swap & boot:ns#44:nt#15:nc#1675:\
+        :s0#1105500:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_225MB:\
+        :225 Mb reserved for swap & boot:ns#44:nt#15:nc#1637:\
+        :s0#1080420:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_250MB:\
+        :250 Mb reserved for swap & boot:ns#44:nt#15:nc#1598:\
+        :s0#1054680:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MICROP_1528_300MB:\
+        :300 Mb reserved for swap & boot:ns#44:nt#15:nc#1520:\
+        :s0#1003200:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################################################
+# HP Wolverine 400 ZBR
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+# Notch 0: 444 (+10 reserved) cylinders at 72 sectors per track
+# Notch 1: 567 ( +9 reserved) cylinders at 60 sectors per track
+# Notch 2: 535 ( +9 reserved) cylinders at 48 sectors per track
+#
+hpC2235_noreserve|HP_C2235_noreserve:\
+        :No swap or boot:ns#30:nt#9:nc#1527:\
+        :s0#412290:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235_noswap|HP_C2235_noswap:\
+        :No swap or boot:ns#30:nt#9:nc#1527:\
+        :s0#412290:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235_40MB|HP_C2235_40MB:\
+        :40 MB swap:ns#30:nt#9:nc#1376:\
+        :s0#371520:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235|HP_C2235|hpC2235_50MB|HP_C2235_50MB:\
+        :50 MB swap:ns#30:nt#9:nc#1338:\
+        :s0#361260:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235_70MB|HP_C2235_70MB:\
+        :70 MB swap:ns#30:nt#9:nc#1262:\
+        :s0#340740:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235_90MB|HP_C2235_90MB:\
+        :90 MB swap:ns#30:nt#9:nc#1184:\
+        :s0#319680:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2235_100MB|HP_C2235_100MB:\
+        :100 MB swap:ns#30:nt#9:nc#1148:\
+        :s0#309960:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233_noreserve|HP_C2233_noreserve:\
+        :No swap or boot:ns#30:nt#5:nc#1360:\
+        :s0#204000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233_noswap|HP_C2233_noswap:\
+        :No swap or boot:ns#30:nt#5:nc#1360:\
+        :s0#204000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233|HP_C2233|hpC2233_36MB|HP_C2233_36MB:\
+        :36 MB swap:ns#30:nt#5:nc#1116:\
+        :s0#167400:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233_42MB|HP_C2233_42MB:\
+        :42 MB swap:ns#30:nt#5:nc#1076:\
+        :s0#161400:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233_50MB|HP_C2233_50MB:\
+        :50 MB swap:ns#30:nt#5:nc#1020:\
+        :s0#153000:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+hpC2233_66MB|HP_C2233_66MB:\
+        :66 MB swap:ns#30:nt#5:nc#911:\
+        :s0#136650:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+###############################################
+# HP Coyote III
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+hp97560_noreserve|HP_97560_noreserve:\
+        :No swap or boot:ns#36:nt#19:nc#1916:\
+        :s0#1310544:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_noswap|HP_97560_noswap:\
+        :No swap or boot:ns#36:nt#19:nc#1916:\
+        :s0#1310544:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_42MB|HP_97560_42MB:\
+        :42 MB swap:ns#36:nt#19:nc#1852:\
+        :s0#1266768:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_64MB|HP_97560_64MB:\
+        :64 MB swap:ns#36:nt#19:nc#1820:\
+        :s0#1244880:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_96MB|HP_97560_96MB:\
+        :96 MB swap:ns#36:nt#19:nc#1772:\
+        :s0#1212048:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560|HP_97560|hp97560_120MB|HP_97560_120MB:\
+        :120 MB swap:ns#36:nt#19:nc#1737:\
+        :s0#1188108:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_150MB|HP_97560_150MB:\
+        :150 MB swap:ns#36:nt#19:nc#1692:\
+        :s0#1157328:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_175MB|HP_97560_175MB:\
+        :175 MB swap:ns#36:nt#19:nc#1654:\
+        :s0#1131336:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_200MB|HP_97560_200MB:\
+        :200 MB swap:ns#36:nt#19:nc#1617:\
+        :s0#1106028:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_225MB|HP_97560_225MB:\
+        :225 MB swap:ns#36:nt#19:nc#1580:\
+        :s0#1080720:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_250MB|HP_97560_250MB:\
+        :250 MB swap:ns#36:nt#19:nc#1542:\
+        :s0#1054728:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97560_300MB|HP_97560_300MB:\
+        :300 MB swap:ns#36:nt#19:nc#1468:\
+        :s0#1004112:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_noreserve|HP_97556_noreserve:\
+        :No swap or boot:ns#36:nt#11:nc#1646:\
+        :s0#651816:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_noswap|HP_97556_noswap:\
+        :No swap or boot:ns#36:nt#11:nc#1646:\
+        :s0#651816:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_42MB|HP_97556_42MB:\
+        :42 MB swap:ns#36:nt#11:nc#1538:\
+        :s0#609048:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556|HP_97556|hp97556_64MB|HP_97556_64MB:\
+        :64 MB swap:ns#36:nt#11:nc#1480:\
+        :s0#586080:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_96MB|HP_97556_96MB:\
+        :96 MB swap:ns#36:nt#11:nc#1398:\
+        :s0#553608:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_120MB|HP_97556_120MB:\
+        :120 MB swap:ns#36:nt#11:nc#1335:\
+        :s0#528660:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+hp97556_150MB|HP_97556_150MB:\
+        :150 MB swap:ns#36:nt#11:nc#1258:\
+        :s0#498168:b0#8192:f0#1024:\
+        :se#512:rm#4002:
+################################################
+#Corsair disk: C1716C
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+hpC1716C|hpC1716C_noreserve|hpC1716C_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+HPC1716C|HPC1716C_noreserve|HPC1716C_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+HP_C1716C|HP_C1716C_noreserve|HP_C1716C_noswap:\
+	:No swap or boot:ns#17:nt#12:nc#1542:\
+	:s0#314568:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+hpC1716C_512|hpC1716C_512_noreserve|hpC1716C_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+HPC1716C_512|HPC1716C_512_noreserve|HPC1716C_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+HP_C1716C_512|HP_C1716C_512_noreserve|HP_C1716C_512_noswap:\
+	:No swap or boot:ns#31:nt#12:nc#775:\
+	:s0#288300:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+#####################################################
+# It is not recommended to use the C1716C drive as the
+# root device.	For convenience an entry is provided
+# in case the user requires it for special situations.
+hpC1716C_32MB|HPC1716C_32MB|HP_C1716C_32MB:\
+	:32 MBytes reserved for swap & boot:ns#17:nt#12:nc#1381:\
+	:s0#281724:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+###############################################
+# HP C2247
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+hpC2247_noswap|HP_C2247_noswap|hpC2247_noreserve|HP_C2247_noreserve:\
+        :No swap or boot:ns#38:nt#13:nc#2075:\
+        :s0#1025050:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_42MB|HP_C2247_42MB:\
+        :42 MB reserved for swap & boot:ns#38:nt#13:nc#1988:\
+        :s0#982072:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_64MB|HP_C2247_64MB:\
+        :64 MB reserved for swap & boot:ns#38:nt#13:nc#1943:\
+        :s0#959842:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247|HP_C2247|hpC2247_96MB|HP_C2247_96MB:\
+        :96 MB reserved for swap & boot:ns#38:nt#13:nc#1876:\
+        :s0#926744:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_120MB|HP_C2247_120MB:\
+        :120 MB reserved for swap & boot:ns#38:nt#13:nc#1826:\
+        :s0#902044:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_150MB|HP_C2247_150MB:\
+        :150 MB reserved for swap & boot:ns#38:nt#13:nc#1764:\
+        :s0#871416:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_200MB|HP_C2247_200MB:\
+        :200 MB reserved for swap & boot:ns#38:nt#13:nc#1661:\
+        :s0#820534:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC2247_300MB|HP_C2247_300MB:\
+        :300 MB reserved for swap & boot:ns#38:nt#13:nc#1453:\
+        :s0#717782:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+###############################################
+# MICROP 2112
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+MICROP_2112_noswap|MICROP_2112_noreserve:\
+        :No swap or boot:ns#38:nt#13:nc#2075:\
+        :s0#1025050:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_42MB:\
+        :42 MB reserved for swap & boot:ns#38:nt#13:nc#1988:\
+        :s0#982072:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_64MB:\
+        :64 MB reserved for swap & boot:ns#38:nt#13:nc#1943:\
+        :s0#959842:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_96MB|MICROP_2112:\
+        :96 MB reserved for swap & boot:ns#38:nt#13:nc#1876:\
+        :s0#926744:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_120MB:\
+        :120 MB reserved for swap & boot:ns#38:nt#13:nc#1826:\
+        :s0#902044:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_150MB:\
+        :150 MB reserved for swap & boot:ns#38:nt#13:nc#1764:\
+        :s0#871416:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_200MB:\
+        :200 MB reserved for swap & boot:ns#38:nt#13:nc#1661:\
+        :s0#820534:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_2112_300MB:\
+        :300 MB reserved for swap & boot:ns#38:nt#13:nc#1453:\
+        :s0#717782:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+###############################################
+# SEAGATE ST11200N
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+SEAGATE_ST11200N_noswap|SEAGATE_ST11200N_noreserve:\
+        :No swap or boot:ns#38:nt#13:nc#2075:\
+        :s0#1025050:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_42MB:\
+        :42 MB reserved for swap & boot:ns#38:nt#13:nc#1988:\
+        :s0#982072:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_64MB:\
+        :64 MB reserved for swap & boot:ns#38:nt#13:nc#1943:\
+        :s0#959842:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N|SEAGATE_ST11200N_96MB:\
+        :96 MB reserved for swap & boot:ns#38:nt#13:nc#1876:\
+        :s0#926744:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_120MB:\
+        :120 MB reserved for swap & boot:ns#38:nt#13:nc#1826:\
+        :s0#902044:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_150MB:\
+        :150 MB reserved for swap & boot:ns#38:nt#13:nc#1764:\
+        :s0#871416:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_200MB:\
+        :200 MB reserved for swap & boot:ns#38:nt#13:nc#1661:\
+        :s0#820534:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+SEAGATE_ST11200N_300MB:\
+        :300 MB reserved for swap & boot:ns#38:nt#13:nc#1453:\
+        :s0#717782:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+###############################################
+# HP C3010
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+hpC3010_noswap|HP_C3010_noswap|hpC3010_noreserve|HP_C3010_noreserve:\
+        :No swap or boot:ns#48:nt#19:nc#2144:\
+        :s0#1956086:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010_64MB|HP_C3010_64MB:\
+        :64 MB reserved for swap & boot:ns#48:nt#19:nc#2073:\
+        :s0#1890576:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010_96MB|HP_C3010_96MB:\
+        :96 MB reserved for swap & boot:ns#48:nt#19:nc#2037:\
+        :s0#1857744:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010_120MB|HP_C3010_120MB:\
+        :120 MB reserved for swap & boot:ns#48:nt#19:nc#2010:\
+        :s0#1833120:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010|HP_C3010|hpC3010_176MB|HP_C3010_176MB:\
+        :176 MB reserved for swap & boot:ns#48:nt#19:nc#1947:\
+        :s0#1775664:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010_250MB|HP_C3010_250MB:\
+        :250 MB reserved for swap & boot:ns#48:nt#19:nc#1864:\
+        :s0#1699968:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+hpC3010_376MB|HP_C3010_376MB:\
+        :376 MB reserved for swap & boot:ns#48:nt#19:nc#1723:\
+        :s0#1571376:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+###############################################
+# MICROP 1924
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+MICROP_1924_noswap|MICROP_1924_noreserve:\
+        :No swap or boot:ns#44:nt#19:nc#2336:\
+        :s0#1952896:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924_64MB:\
+        :64 MB reserved for swap & boot:ns#44:nt#19:nc#2256:\
+        :s0#1886016:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924_96MB:\
+        :96 MB reserved for swap & boot:ns#44:nt#19:nc#2218:\
+        :s0#1854248:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924_120MB:\
+        :120 MB reserved for swap & boot:ns#44:nt#19:nc#2189:\
+        :s0#1830004:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924|MICROP_1924_176MB:\
+        :176 MB reserved for swap & boot:ns#44:nt#19:nc#2120:\
+        :s0#1772320:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924_250MB:\
+        :250 MB reserved for swap & boot:ns#44:nt#19:nc#2030:\
+        :s0#1697080:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+MICROP_1924_376MB:\
+        :376 MB reserved for swap & boot:ns#44:nt#19:nc#1875:\
+        :s0#1567500:b0#8192:f0#1024:\
+        :se#512:rm#5400:
+###############################################################################
+# QUANT LPS525S
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+QUANTUM_LPS525S_noswap|QUANTUM_LPS525S_noreserve:\
+        :No swap or boot:ns#30:nt#9:nc#1895:\
+        :s0#511650:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS525S_40MB:\
+        :40 MB swap:ns#30:nt#9:nc#1743:\
+        :s0#470610:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS525S_50MB:\
+        :50 MB swap:ns#30:nt#9:nc#1705:\
+        :s0#460350:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS525S|QUANTUM_LPS525S_70MB:\
+        :70 MB swap:ns#30:nt#9:nc#1629:\
+        :s0#439830:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS525S_90MB:\
+        :90 MB swap:ns#30:nt#9:nc#1552:\
+        :s0#419040:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS525S_120MB:\
+        :120 MB swap:ns#30:nt#9:nc#1439:\
+        :s0#388530:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+###############################################################################
+# SEAGATE ST3600N
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+SEAGATE_ST3600N_noswap|SEAGATE_ST3600N_noreserve:\
+        :No swap or boot:ns#30:nt#9:nc#1895:\
+        :s0#511650:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+SEAGATE_ST3600N_40MB:\
+        :40 MB swap:ns#30:nt#9:nc#1743:\
+        :s0#470610:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+SEAGATE_ST3600N_50MB:\
+        :50 MB swap:ns#30:nt#9:nc#1705:\
+        :s0#460350:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+SEAGATE_ST3600N|SEAGATE_ST3600N_70MB:\
+        :70 MB swap:ns#30:nt#9:nc#1629:\
+        :s0#439830:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+SEAGATE_ST3600N_90MB:\
+        :90 MB swap:ns#30:nt#9:nc#1552:\
+        :s0#419040:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+SEAGATE_ST3600N_120MB:\
+        :120 MB swap:ns#30:nt#9:nc#1439:\
+        :s0#388530:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+###############################################################################
+# QUANTUM ELS127S
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+QUANTUM_ELS127S_noswap|QUANTUM_ELS127S_noreserve:\
+        :No swap or boot:ns#27:nt#3:nc#1536:\
+        :s0#124416:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+QUANTUM_ELS127S|QUANTUM_ELS127S_16MB:\
+        :16 MB swap:ns#27:nt#3:nc#1333:\
+        :s0#107973:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+QUANTUM_ELS127S_32MB:\
+        :32 MB swap:ns#27:nt#3:nc#1131:\
+        :s0#91611:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+QUANTUM_ELS127S_40MB:\
+        :40 MB swap:ns#27:nt#3:nc#1030:\
+        :s0#83430:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+QUANTUM_ELS127S_50MB:\
+        :50 MB swap:ns#27:nt#3:nc#903:\
+        :s0#73143:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+QUANTUM_ELS127S_60MB:\
+        :60 MB swap:ns#27:nt#3:nc#777:\
+        :s0#62937:b0#8192:f0#1024:\
+        :se#512:rm#3663:
+###############################################################################
+# QUANTUM LPS270S
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+QUANTUM_LPS270S_noswap|QUANTUM_LPS270S_noreserve:\
+        :No swap or boot:ns#48:nt#2:nc#2740:\
+        :s0#263040:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS270S|QUANTUM_LPS270S_32MB:\
+        :32 MB swap:ns#48:nt#2:nc#2398:\
+        :s0#230208:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS270S_40MB:\
+        :40 MB swap:ns#48:nt#2:nc#2313:\
+        :s0#222048:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS270S_60MB:\
+        :60 MB swap:ns#48:nt#2:nc#2100:\
+        :s0#201600:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_LPS270S_80MB:\
+        :80 MB swap:ns#48:nt#2:nc#1886:\
+        :s0#181056:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+###############################################
+# QUANTUM PD1050S
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+QUANTUM_PD1050S_noswap|QUANTUM_PD1050S_noreserve:\
+        :No swap or boot:ns#38:nt#13:nc#2075:\
+        :s0#1025050:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_42MB:\
+        :42 MB reserved for swap & boot:ns#38:nt#13:nc#1988:\
+        :s0#982072:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_64MB:\
+        :64 MB reserved for swap & boot:ns#38:nt#13:nc#1943:\
+        :s0#959842:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S|QUANTUM_PD1050S_96MB:\
+        :96 MB reserved for swap & boot:ns#38:nt#13:nc#1876:\
+        :s0#926744:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_120MB:\
+        :120 MB reserved for swap & boot:ns#38:nt#13:nc#1826:\
+        :s0#902044:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_150MB:\
+        :150 MB reserved for swap & boot:ns#38:nt#13:nc#1764:\
+        :s0#871416:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_200MB:\
+        :200 MB reserved for swap & boot:ns#38:nt#13:nc#1661:\
+        :s0#820534:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+QUANTUM_PD1050S_300MB:\
+        :300 MB reserved for swap & boot:ns#38:nt#13:nc#1453:\
+        :s0#717782:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+###############################################################################
+# HP C3324A
+# SEAGATE: ST31230N  (Equivalent Mechanism to HP Part)
+# Set rotdelay = 0 ms for optimal file system perf (see tunefs(1M))
+#
+HP_C3324A_noswap|HP_C3324A_noreserve|SEAGATE_ST31230N_noswap:\
+        :No swap or boot:ns#27:nt#10:nc#3799:\
+        :s0#1025730:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+HP_C3324A_40MB|SEAGATE_ST31230N_40MB:\
+        :40 MB Swap:ns#27:nt#10:nc#3648:\
+        :s0#984960:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+HP_C3324A_70MB|HP_C3324A|SEAGATE_ST31230N_70MB|SEAGATE_ST31230N:\
+        :70 MB Swap:ns#27:nt#10:nc#3539:\
+        :s0#955530:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+HP_C3324A_100MB|SEAGATE_ST31230N_100MB:\
+        :40 MB Swap:ns#27:nt#10:nc#3428:\
+        :s0#925560:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+HP_C3324A_140MB|SEAGATE_ST31230N_140MB:\
+        :40 MB Swap:ns#27:nt#10:nc#3280:\
+        :s0#885600:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+HP_C3324A_180MB|SEAGATE_ST31230N_180MB:\
+        :40 MB Swap:ns#27:nt#10:nc#3132:\
+        :s0#845640:b0#8192:f0#1024:\
+        :se#512:rm#4500:
+###############################################################################
+#									      #
+#    SCSI DISCS REFERENCED BELOW THIS POINT WILL NOT BE SUPPORTED ON	      #
+#    HP-UX SYSTEMS. THEY HAVE NOT BEEN TESTED AT ALL BY HEWLETT-PACKARD.      #
+#    THEY ARE PROVIDED HERE FOR CONVENIENCE AND REFERENCE ONLY.		      #
+#									      #
+###############################################################################
+###############################################
+# Conner Cp340
+CONNER_noreserve|CONNER_noswap:\
+	:no swap or boot:ns#13:nt#4:nc#752:\
+	:s0#39104:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+CONNER_Cp340_noreserve|CONNER_Cp340_noswap:\
+	:no swap or boot:ns#13:nt#4:nc#752:\
+	:s0#39104:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+CONNER|CONNER_Cp340:\
+	:8 MBytes reserved for swap & boot:ns#13:nt#4:nc#594:\
+	:s0#30888:b0#8192:f0#1024:\
+	:se#256:rm#3600:
+#####################################################
+# Maxtor disk drive.
+MAXTOR_LXT200_noreserve:\
+	:No swap or boot:ns#16:nt#9:nc#1360:\
+	:s0#195840:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+MAXTOR_LXT200_noswap:\
+	:No swap or boot:ns#16:nt#9:nc#1360:\
+	:s0#195840:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+MAXTOR_LXT200:\
+	:32 Mbytes reserved for swap & boot:ns#16:nt#9:nc#1132:\
+	:s0#163008:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+MAXTOR_LXT200_44MB:\
+	:44 Mbytes reserved for swap & boot:ns#16:nt#9:nc#1047:\
+	:s0#150768:b0#8192:f0#1024:\
+	:se#512:rm#3600:
+#####################################################
+# Maxtor Disk Drives. The following generated by P.Tenereillo,
+# Maxtor Corporation, San Jose, CA, July 9, 1992.
+# All of the following entries were tested at Maxtor on HP9000/720
+# running HP-UX 8.05. Best results obtained without using SAM.
+# Use:
+#       mediainit /dev/rdsk/IDs0                 # Recommended for new disks
+#       newfs /dev/rdsk/IDs0 MAXTOR_XXXX_XXXXXX  # Select from list below
+#       fsck -p /dev/rdsk/IDs0                   # Check new file system
+#       mkdir /Your_mount_path                   #
+#       mount /dev/dsk/IDs0 /Your_mount_path     #
+#       swapon -e -p 1 /dev/dsk/IDs0             # Skip if no swap on this disk
+#
+# Replace "ID" with the SCSI ID of the device (0-6).
+#
+# Also make appropriate entry in /etc/checklist file:
+#       /dev/dsk/Xs0 /Your_mount_path hfs rw,suid 0 1   # Mount when rebooted
+#       /dev/dsk/Xs0 /swap swap end,pri=1 0 0           # Secondary swap device
+#
+MAXTOR_XT-8760S_noswap:\
+        :No swap or boot:ns#27:nt#15:nc#1632:\
+        :s0#652050:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_XT-8760S_100MB|MAXTOR_XT-8760S:\
+        :100 Mbytes reserved for swap & boot:ns#27:nt#15:nc#1363:\
+        :s0#552015:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_XT-8760SH_noswap:\
+        :No swap or boot:ns#27:nt#15:nc#1632:\
+        :s0#652050:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_XT-8760SH_100MB|MAXTOR_XT-8760SH:\
+        :100 Mbytes reserved for swap & boot:ns#27:nt#15:nc#1363:\
+        :s0#552015:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_7213-SCSI_noswap:\
+        :No swap or boot:ns#31:nt#4:nc#1675:\
+        :s0#207700:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_7213-SCSI_64MB|MAXTOR_7213-SCSI:\
+        :64 Mbytes reserved for swap & boot:ns#31:nt#4:nc#1147:\
+        :s0#142228:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_LXT-340S_noswap:\
+        :No swap or boot:ns#31:nt#7:nc#1532:\
+        :s0#332444:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_LXT-340S_100MB|MAXTOR_LXT-340S:\
+        :100 Mbytes reserved for swap & boot:ns#31:nt#7:nc#1060:\
+        :s0#230020:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_LXT-535S_noswap:\
+        :No swap or boot:ns#31:nt#11:nc#1532:\
+        :s0#522412:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_LXT-535S_100MB|MAXTOR_LXT-535S:\
+        :100 Mbytes reserved for swap & boot:ns#31:nt#11:nc#1232:\
+        :s0#420112:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_P0-12S_noswap:\
+        :No swap or boot:ns#38:nt#15:nc#1791:\
+        :s0#1020870:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_P0-12S_64MB|MAXTOR_P0-12S:\
+        :64 Mbytes reserved for swap & boot:ns#38:nt#15:nc#1676:\
+        :s0#955320:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_P1-17S_noswap:\
+        :No swap or boot:ns#44:nt#19:nc#1756:\
+        :s0#1468016:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_P1-17S_100MB|MAXTOR_P1-17S:\
+        :100 Mbytes reserved for swap & boot:ns#44:nt#19:nc#1633:\
+        :s0#1365188:b0#8192:f0#1024:\
+        :se#512:rm#3600:
+MAXTOR_MXT-540SL_noswap:\
+        :No swap or boot:ns#31:nt#7:nc#2434:\
+        :s0#528178:b0#8192:f0#1024:\
+        :se#512:rm#6300:
+MAXTOR_MXT-540SL_100MB|MAXTOR_MXT-540SL:\
+        :100 Mbytes reserved for swap & boot:ns#31:nt#7:nc#1962:\
+        :s0#425754:b0#8192:f0#1024:\
+        :se#512:rm#6300:
+MAXTOR_MXT-1240S_noswap:\
+        :No swap or boot:ns#32:nt#15:nc#2524:\
+        :s0#1211520:b0#8192:f0#1024:\
+        :se#512:rm#6300:
+MAXTOR_MXT-1240S_100MB|MAXTOR_MXT-1240S:\
+        :100 Mbytes reserved for swap & boot:ns#32:nt#15:nc#2290:\
+        :s0#1099200:b0#8192:f0#1024:\
+        :se#512:rm#6300:
+###############################################
+#FUJITSU|M1053
+#   vendor:	FUJITSU
+#   product id: M1053
+#   rev level	0700
+#   Direct Access Device
+#   iso ecma ansi rmb dtq resv rdf
+#   0	 0    1	  0   0	  0    1
+#   logical block address: 287349
+#   bytes per block:	   1024
+FUJITSU_noreserve|FUJITSU_noswap:\
+	:no swap or boot:ns#35:nt#10:nc#821:\
+	:s0#287350:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+FUJITSU_M1053_noreserve|FUJITSU_M1053_noswap:\
+	:no swap or boot:ns#35:nt#10:nc#821:\
+	:s0#287350:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+FUJITSU|FUJITSU_M1053:\
+	:40 MByte reserved for swap & boot:ns#35:nt#10:nc#703:\
+	:s0#246050:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+###############################################
+#CDC WREN IV (product id: 94171-9)
+# type: direct access device
+# size: 300423168 bytes
+# bytes per sector: 512
+# blocks per disk: 586764
+# Conforms to SCSI I
+# response format: 1
+WREN_noreserve|WREN_noswap|WREN_IV_noreserve|WREN_IV_noswap:\
+	:No swap or boot:ns#18:nt#9:nc#1811:\
+	:s0#293382:b0#8192:f0#1024:\
+	:se#1024:rm#3600:
+WREN|WREN_IV:\
+	:40 MByte reserved for swap & boot:ns#18:nt#9:nc#1558:\
+	:s0#252396:b0#8192:f0#1024:\
+	:se#1024:rm#3600:

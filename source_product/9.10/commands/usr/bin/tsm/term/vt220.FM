@@ -1,0 +1,13 @@
+## Facet Menu Capabilities for a VT220  02/20/90
+## @(#) $Header: vt220.FM,v 66.2 90/09/20 12:51:12 kb Exp $
+##-menu-cap-ena_acs=\E)0
+##-menu-cap-enter_alt_charset_mode=^N
+##-menu-cap-exit_alt_charset_mode=^O
+##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~
+##-menu-cap-no_attr=\E[m
+##-menu-cap-shadow_attr=\E[m
+##-menu-cap-box_attr=\E[7m
+##-menu-cap-title_attr=\E[7m
+##-menu-cap-item_attr=\E[m
+##-menu-cap-highlight_attr=\E[7m
+##-menu-cap-highlight_blink_attr=\E[5;7m

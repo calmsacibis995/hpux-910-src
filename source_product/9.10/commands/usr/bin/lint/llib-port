@@ -1,0 +1,884 @@
+/* @(#) $Revision: 70.2 $      */
+/*LINTLIBRARY*/
+#include <stdio.h>
+/* EXIT(2) */
+void	exit(int s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+void	_exit(int s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* SIGNAL(2) */
+int (*	signal(s, a))() int (*a)(); { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+/* TIME(2) */
+long	time(long *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+/* UNLINK(2) */
+int	unlink(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+
+/* ABORT(3C) */
+	/*VARARGS0*/
+int	abort(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* ABS(3C) */
+int	abs(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+/* ASSERT(3X) */
+void	_assert(char *a, char *f, int n) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+}
+
+/* CONV(3C) */
+#undef _toupper
+#undef _tolower
+#undef toascii
+int	toupper(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+int	tolower(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+int	_toupper(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+int	_tolower(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+int	toascii(int i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (i); }
+
+/* CLOCK(3C) */
+#include <time.h>
+clock_t	clock(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1][5]
+	The clock(3C) call to report CPU time is portable to open systems.  
+
+	The clock(3X) call is an HP-UX specific call that returns the
+	current clock time in MPE format.  This call is part of libportnls.
+	It is not portable to open systems.  Use gmtime() or localtime() 
+	to replace the clock(3X) call.  See ctime(3C).  */
+
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+/* CRYPT(3C) */
+char *	crypt(char *k, char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,FIPS151_1,POSIX.2,OSF_AES,OSF1]
+	The crypt() call is part of the proposed X/Open XPG4 standard.
+	It is not portable to systems that have not implemented the
+	proposed standard at this time.  It may be added to them at 
+	a future date. */
+
+#endif  /* _APEX_SOURCE */
+ return (k); }
+
+void	setkey(char *k) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,FIPS151_1,POSIX.2,OSF_AES,OSF1]
+	The setkey() call is part of the proposed X/Open XPG4 standard.
+	It is not portable to systems that have not implemented the
+	proposed standard at this time.  It may be added to them at 
+	a future date.  See crypt(3C). */
+
+#endif  /* _APEX_SOURCE */
+}
+
+void	encrypt(char *b, int e) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,FIPS151_1,POSIX.2,OSF_AES,OSF1]
+	The encrypt() call is part of the proposed X/Open XPG4 standard.
+	It is not portable to systems that have not implemented the
+	proposed standard at this time.  It may be added to them at 
+	a future date.  See crypt(3C). */
+
+#endif  /* _APEX_SOURCE */
+}
+
+/* CTERMID(3S) */
+char *	ctermid(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* CTIME(3C) */
+char *	ctime(const time_t *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (""); }
+
+struct tm *	localtime(const time_t *c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ static struct tm x; return (&x); }
+
+struct tm *	gmtime(const time_t *c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ static struct tm x; return (&x); }
+
+char *	asctime(const struct tm *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (""); }
+
+void	tzset(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+long	timezone;
+int	daylight;
+char *	tzname[2];
+/* CTYPE(3C) */
+#undef isalpha
+#undef isupper
+#undef islower
+#undef isdigit
+#undef isxdigit
+#undef isalnum
+#undef isspace
+#undef ispunct
+#undef isprint
+#undef isgraph
+#undef iscntrl
+#undef isascii
+int	isalpha(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isupper(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	islower(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isdigit(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isxdigit(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isalnum(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isspace(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	ispunct(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isprint(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isgraph(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	iscntrl(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	isascii(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+char	_ctype[129];
+/* CUSERID(3S) */
+char *	cuserid(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* DRAND48(3C) */
+double	drand48(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0.0); }
+
+double	erand48(unsigned short x[3]) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0.0); }
+
+long	lrand48(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+long	nrand48(unsigned short x[3]) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+long	mrand48(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+long	jrand48(unsigned short x[3]) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+void	srand48(long s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+unsigned short *	seed48(unsigned short s[3]) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+void	lcong48(unsigned short p[7]) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* FCLOSE(3S) */
+int	fclose(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	fflush(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* FERROR(3S) */
+#undef feof
+#undef ferror
+#undef clearerr
+#undef fileno
+int	feof(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	ferror(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+void	clearerr(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+int	fileno(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* FOPEN(3S) */
+FILE *	fopen(const char *f, const char *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (stdin); }
+
+FILE *	freopen(const char *f, const char *t, FILE *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* FREAD(3S) */
+size_t	fread(void *b, size_t s, size_t n, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (n); }
+
+size_t	fwrite(const void *b, size_t s, size_t n, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (n); }
+
+/* FREXP(3C) */
+double	frexp(double x, int *e) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	ldexp(double v, int e) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (v); }
+
+double	modf(double v, double *i) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (v); }
+
+/* FSEEK(3S) */
+int	fseek(FILE *f, long o, int p) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (p); }
+
+long	ftell(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+void	rewind(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* GETC(3S) */
+#undef getc
+#undef getchar
+int	getc(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	getchar(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	fgetc(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	getw(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* GETOPT(3C) */
+int	getopt(int c, char **v, char *o) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.2,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+char *	optarg; 
+int	optind;
+int	opterr, optopt; /* undocumented */
+/* GETS(3S) */
+char *	gets(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+char *	fgets(char *s, int n, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* MALLOC(3C) */
+char *	malloc(unsigned s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (""); }
+
+void	free(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+char *	realloc(char *s, unsigned n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+char *	calloc(unsigned n, unsigned e) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (""); }
+
+/* MEMORY(3C) */
+char *	memccpy(char *a, char *b, int c, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	memchr(char *s, int c, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+int	memcmp(char *a, char *b, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (n); }
+
+char *	memcpy(char *a, char *b, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	memset(char *s, int c, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* POPEN(3S) */
+FILE *	popen(char *c, char *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.2,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (stdin); }
+
+int	pclose(FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.2,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* PRINTF(3S) */
+	/*VARARGS1 PRINTFLIKE1*/
+int	printf(const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+	/*VARARGS2 PRINTFLIKE2*/
+int	fprintf(FILE *f, const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+	/*VARARGS2 PRINTFLIKE2*/
+int	sprintf(char *p, const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* PUTC(3S) */
+#undef putc
+#undef putchar
+int	putc(int c, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	putchar(int c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	fputc(int c, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+int	putw(int w, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (w); }
+
+/* PUTS(3S) */
+int	puts(const char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	fputs(const char *s, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* QSORT(3C) */
+void	qsort(char *b, unsigned n, unsigned w, int (*c)()) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* RAND(3C) */
+void	srand(unsigned s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+int	rand(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* SCANF(3S) */
+	/*VARARGS1 SCANFLIKE1*/
+int	scanf(const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+	/*VARARGS2 SCANFLIKE2*/
+int	fscanf(FILE *f, const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+	/*VARARGS2 SCANFLIKE2*/
+int	sscanf(const char *p, const char *s, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* SETBUF(3S) */
+void	setbuf(FILE *f, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* SETJMP(3C) */
+#include <setjmp.h>
+int	setjmp(jmp_buf e) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+void	longjmp(jmp_buf e, int v) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+}
+
+/* SLEEP(3C) */
+unsigned	sleep(unsigned n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (n); }
+
+/* SSIGNAL(3C) */
+int (*	ssignal(s, a))() int (*a)(); { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The ssignal() call is an HP-UX specific signal handling
+	mechanism.  It is not portable to open systems.  Use
+	sigaction(2) or signal(2) .  */
+
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+int	gsignal(int s) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The gsignal() call is an HP-UX specific signal sending
+	mechanism.  It is not portable to open systems.  Use 
+	kill(2). */
+
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* STDIO(3S) */
+FILE	__iob[_NFILE];
+unsigned char *	_bufendtab[_NFILE];
+/* STRING(3C) */
+char *	strcat(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	strncat(char *a, char *b, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+int	strcmp(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	strncmp(char *a, char *b, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (n); }
+
+char *	strcpy(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	strncpy(char *a, char *b, int n) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+int	strlen(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+char *	strchr(char *a, char b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	strrchr(char *a, char b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+char *	strpbrk(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+int	strspn(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+int	strcspn(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+char *	strtok(char *a, char *b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (a); }
+
+/* STRTOD(3C) */
+double	strtod(char *s, char **t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0.0); }
+
+double	atof(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0.0); }
+
+/* STRTOL(3C) */
+long	strtol(char *s, char **t, int b) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+long	atol(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0L); }
+
+int	atoi(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* SYSTEM(3S) */
+int	system(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.2,XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+/* TMPNAM(3S) */
+char *	tmpnam(char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (s); }
+
+/* TTYNAME(3C) */
+char *	ttyname(int f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (""); }
+
+int	isatty(int f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (f); }
+
+/* UNGETC(3S) */
+int	ungetc(int c, FILE *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }
+
+
+/* UNDOCUMENTED -- declared in UNIX stdio.h, not really in the port lib */
+FILE *	fdopen(int f, char *t) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (stdin); }
+
+char *	tempnam(char *d, char *s) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (d); }
+
+FILE *	tmpfile(void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (stdin); }
+

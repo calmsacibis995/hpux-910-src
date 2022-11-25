@@ -1,0 +1,174 @@
+
+
+
+
+
+
+From:  Mike Shipley
+To:    Smurfuls
+Date:  June 17, 1988
+
+Subject:  Post-Mortem on the 6.2 NFS Project
+
+The  following is a report on the  post-mortem  that was done on the 6.2
+NFS  project.  Since the 6.2 project  lasted only a very short while, we
+did not feel it was  appropriate to spend the same amount of time on the
+post mortem as we spent on the 6.0 effort.  Therefore, this  post-mortem
+will reflect the smaller project time.
+
+Several  questions  were sent out to the members of the team  concerning
+what  went  well,  what  did not go so well,  what can we  emphasize  to
+continue to do things well and what can we change to improve things that
+did not go well.
+
+The following are ideas that were taken from the responses of the team.
+
+POSITIVE ASPECTS
+
+The most  consistent  theme  for what went  well was the  aspect  of our
+teamwork and communication with our partners within CND and outside CND.
+Since some of our partners are outside  Colorado,  this is not a trivial
+task.  A major part of 6.2 was  improvement of the  performance  of NFS.
+Since this was not  limited to NFS code, we had to rely on help from UKL
+and IND.  This help was in the area of performance  testing, analysis of
+bottlenecks  and  implementation  of  corrective   actions.  Four  major
+divisions were involved.
+
+Getting the equipment  necessary to do the performance  enhancements was
+another  thing  that  helped  in  the  6.2  project.  We  described  and
+justified our requirements to management and gave them a picture of what
+could be done and not done  depending on what  equipment we were able to
+receive.  Thus  management had better  information  when deciding how to
+distribute resources.
+
+NEGATIVE ASPECTS
+
+On the negative side of the project, there was the theme of spinning our
+wheels after the 6.0 release before  getting down to producing  positive
+results.  This  was  due  to  several  things,  holiday   interruptions,
+uncertainty  of what to put into 6.2,  resistance  to  changes  made for
+performance,  initial  lack  of  machines  and the  interruption  of the
+transition from Jeff to Dave for project management.
+
+Although we were able to get the necessary  equipment to do  performance
+tuning, it took quite an effort to get it.  After we did our changes for
+performance,  we found that it was VERY difficult to get the 800 program
+people  to  accept  the  changes.  We  spent  a lot of  time  convincing
+different layers of management  about the -async option.  This burned up
+time  and  also  lessened  the  togetherness  between  CND  and  UKL  in
+California.
+
+At the end of the  project,  there was a  request  for  metrics  for the
+Software  Metrics forms.  This information was not easily  available and
+therefore  what was presented may not have been as accurate as possible.
+
+ACTIONS TO CONTINUE POSITIVE PARTS
+
+As part of the post  mortem, are  recommendations  for actions to insure
+that  what  went  well  continues  to go well.  The first  action  is to
+continue  and improve our  relations  with the rest of HP.  This is very
+important  for the next  release  as the 300  kernel  people  will  have
+limited  resources to put on the 6.5 release so we must make the best of
+our use of them.  They  are not the  people  we have  dealt  with in the
+past, so we will need to focus on the interpersonal  aspects was well as
+the technical aspects.
+
+To help our  performance  efforts, we needed  additional  equipment.  We
+needed to help management  prioritize their resources, so in the future,
+we will need to be very  specific  and  formal  in our  presentation  of
+resource requirements.  We will also need to indicate what the cost will
+be if we  are  not  able  to get  access  to the  resources.  This  will
+directly  affect the YP  performance  improvements.  This also  needs to
+extend to resources not connected to machines such as travel  money.  We
+need to continue to make our needs knows as soon as possible.
+
+A big plus for 6.2 was the performance improvements we made.  We need to
+insure that our  performance  gains are not lost and to put  emphasis on
+improving  performance in other areas such as YP and important  commands
+(cp, ls).
+
+IMPROVEMENTS TO ATTACK A DEFICIENCY
+
+In the  area of  improving  a soft  spot  in our  project,  the  aspects
+surrounding  the -async  option  came up.  When we have a change  with a
+similar  degree  of  impact in the  future,  we need to  understand  the
+timetable of our  partners,  know who the correct  people are to contact
+and to make sure that we do not present  something in the light of "take
+it or  else".  Until  the 300  and 800 are  sync'ed  for  releases,  the
+timetable  aspect will be an area where care is needed.  We need to plan
+with the 800  people as to the best time to fold in  changes to the 800.
+Another  problem was the shuffle of the  decision  regarding  the -async
+option that was done by the 800 team.  First the project  manager,  then
+the section manager and finally the lab manager were involved.  To avoid
+this, we need to identify who will make the decision and to involve them
+as soon as possible.  To incorporate a team spirit, we need to work with
+the 800  engineers  to get them to buy into  changes  as opposed to just
+throwing  a change  at them.  With the  changes  going in with  the lock
+manager and the RPC library, we will have opportunities to practice this
+in the upcoming project.
+
+At the  release  of 6.2, it was found  that we did not  understand  well
+enough the data needed for the Software  Metrics forms.  We also did not
+have good  enough  information  to give to the QA  department  to aid in
+their  predictive  model's.  Jeff, being our SSIT  representative,  will
+need to get a handle on what is needed for the software  metrics and for
+QA.  Then  once he has the  handle,  he can beat the  rest of the  group
+around the head with it so that his job during SSIT is eased.
+
+These are the recommendations that have been offered by the 6.2 NFS team
+to work towards for the 6.5 project.  In addition to these, I would like
+to list some that we produced from the 6.0 TQC.  We need to address them
+to insure that we carry along the improvements from 6.0.
+
+
+1. List of people and areas of expertise for the different divisions
+   (sys admin included)
+
+2. Tools in place to measure BFA and performance by I to L and
+   equipment allocated
+
+	- 6.5: BFA and performance?
+	- 3.1: performance - done at IND - Chuck Morse will be contacting
+	       Craig Wassenberg to define needs
+	- 4.0: BFA - equipment has been requested (2 800s)
+	       (according to Mark somethings could be improved, but are
+		probably not worth the effort right now)
+	       performance - IND probably - no plan yet
+
+3. SWAT teams should continue
+
+	- 6.5: (Smurfuls ?)	 (Arsenal - ?)
+	- 3.1: Cristina  (Arsenal - ? )
+
+4. Development team should participate on the development of the
+   system test plan
+
+	- 6.5/3.1: We are providing the inputs to the testplan.
+		   Toni is in charge of folding those inputs into
+		   the testplan.
+ 
+5. Modify shared source so that there are not multiple versions of
+   RCS files
+    Avoid multiple copies of files that are used by different groups.
+    Identify one owner and have changes go through that person.
+	- UDL and UKL are working on changes to the shared source.
+	  I don't think they are going in that direction yet and
+	  it would require a major effort from us to modify the
+	  way the shared source works to deal with this.  It
+	  is something to be looked into. (??)
+
+7. Plan for freezes by code complete: when and how they occur
+   (duration, how development will continue, contingencies for
+    extensions, testing while code frozen and how builds will be done)
+
+
+8. Have code changes reviewed by another engineer to reduce defects
+    introduced.
+
+	- All the time or just towards the end?
+
+9. Formal code reviews
+
+	- 6.5/3.1(?): NFS 3.2 features
+
+	

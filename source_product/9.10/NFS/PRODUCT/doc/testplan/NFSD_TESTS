@@ -1,0 +1,148 @@
+.H 2  "Nfsd (Cristina Mahon)"
+
+.PP
+Nfsd handles client filesystem requests.  It is possible to start several 
+nfsd's in parallel.
+.PP
+The command line for nfsd is:
+.sp
+           nfsd [nservers]
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Run nfsd without being superuser"
+.sp 1
+.PP
+Verify that nfsd cannot be started if you are not the superuser. 
+You need to change the permissions for nfsd and then try running
+it without being super-user.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "You must be root to run nfsd"
+.fi
+.sp 2
+.H 3  "Test nfsd with extra arguments"
+.sp 1
+.PP
+Nfsd should only accept one argument.  This test invokes nfsd
+with more than one argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a negative argument"
+.sp 1
+.PP
+This test invokes nfsd with a negative number as an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with zero for an argument"
+.sp 1
+.PP
+This test invokes nfsd with an argument that is zero.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a non-numeric argument"
+.sp 1
+.PP
+This test invokes nfsd with an argument that is not a number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a large number for an argument"
+.sp 1
+.PP
+This test invokes nfsd with a very large number for an argument.
+The purpose of this test is to create a condition so that nfsd will be
+unable to fork.  The number to be used should be large enough to provoke 
+that problem.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "nfsd: fork"
+.fi
+.sp 2
+.H 3  "Start nfsd when another one already running"
+.sp 1
+.PP
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       The second nfsd should not start.
+       "nfsd: server already active"
+.fi
+.sp 2
+.H 3  "Test nfsd when portmap not running"
+.sp 1
+.PP
+Nfsd will not be able to register its port number with 
+portmap, but it should not fail badly.  The nfsd should
+continue to run since it uses a well known port.
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "Cannot register service: RPC_TIMED_OUT"     
+.fi
+.sp 2         
+.H 3  "Test nfsd without arguments"
+.sp 1
+.PP
+This test invokes nfsd without an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       one nfsd should start running.
+.fi
+.sp 2
+.H 3  "Kill nfsd with signal 15"
+.sp 1
+.PP
+This test kills nfsd with a "kill pid".
+Nfsd should be started again after this test so that other
+tests won't fail.  This test might be considered a destructive
+test and as such might not belong in the scaffold (especially during
+concurrent testing).
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       Nfsd should die cleanly.
+.fi
+.sp 2

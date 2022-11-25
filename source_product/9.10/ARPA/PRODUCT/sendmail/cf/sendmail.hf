@@ -1,0 +1,62 @@
+cpyr
+cpyr	Copyright (c) 1988 The Regents of the University of California.
+cpyr	Copyright (c) 1994 Hewlett-Packard Company.
+cpyr	
+cpyr	$Revision: 1.6.109.3 $	$Date: 94/11/18 11:37:27 $
+cpyr	
+smtp	Commands:
+smtp		HELO	EHLO	MAIL	RCPT	DATA	RSET	NOOP
+smtp		QUIT	HELP	VRFY	EXPN	VERB	ONEX	QUED
+smtp	For more info use "HELP topic".
+smtp	For local information contact postmaster at this site.
+smtp	To report bugs in this implementation contact your HP
+smtp	representative.  For suggestions for future enhancements,
+smtp	send e-mail to sendmail@hp.com .
+help	HELP [ topic ]
+help		The HELP command gives help info.
+helo	HELO hostname
+helo		Introduce yourself.  The value of hostname is the name
+helo		of the host from which your are sending.
+ehlo	EHLO hostname
+ehlo		Introduce yourself, and request extended SMTP mode.  The
+ehlo		value of hostname is the name of the host from which you
+ehlo		are sending.
+mail	MAIL FROM: <sender> [SIZE=size] [BODY=8BITMIME|7BIT]
+mail		Specifies the sender.  The value of <sender> should be
+mail		delimited by angle brackets as indicated.  The value of
+mail		size should be a decimal number indicating the number of
+mail		bytes in the message that is to be transmitted via an
+mail		ensuing DATA command.  Unless the BODY=8BITMIME parameter
+mail		is present, any data that is transmitted may have the 8th
+mail		(high) bit zeroed out.
+rcpt	RCPT TO: <recipient>
+rcpt		Specifies the recipient.  Can be used any number of times.
+rcpt		The value of <recipient> should be delimited by angle
+rcpt		brackets as indicated.
+data	DATA
+data		Following text is collected as the message.
+data		End with a single dot.
+rset	RSET
+rset		Resets the system.
+quit	QUIT
+quit		Exit sendmail (SMTP).
+vrfy	VRFY <recipient>
+vrfy		Verify an address.  If you want to see what it aliases
+vrfy		to, use EXPN instead.
+expn	EXPN <recipient>
+expn		Expand an address.  If the address indicates a mailing
+expn		list, return the contents of that list.
+noop	NOOP
+noop		Do nothing; used to test if I am still here.
+verb	VERB
+verb		Go into verbose mode.  This sends 0xy responses that are
+verb		are not RFC821 standard (but should be).  They are recognized
+verb		by humans and other sendmail implementations.
+onex	ONEX
+onex		Issue one transaction only.  This tells sendmail not to
+onex		fork a child process to handle the transaction, but to
+onex		handle it itself.
+qued	QUED
+qued		Set queued delivery mode.  This means that the mail will
+qued		not be delivered immediately, but will be put into a queue
+qued		to be delivered later.

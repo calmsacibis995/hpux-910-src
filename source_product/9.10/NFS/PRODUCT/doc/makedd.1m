@@ -1,0 +1,336 @@
+.\" @(#)makedd man:	2.1	[88/05/23  11:09:07]
+.TH MAKEDD 1M
+.ad b
+.SH NAME
+.nf
+makedd - make delivery directories for delivering bits to
+         SSIT
+.fi
+.SH SYNOPSIS
+.B \fImakedd\fR
+[ \fIsource_file_prefix\fR ]
+.SH DESCRIPTION
+The shell script, \fImakedd\fR, was written to perform much of the work required to
+provide bits to SSIT.
+It is assumed that you are familiar with \fIThe SSIT Delivery Process
+Document\fR.
+If not, please read it before running \fImakedd\fR.
+.sp
+The \fImakedd\fR script will
+.RS
+.TP
+-
+create the delivery directory structures, including:
+.RS
+.TP
+-
+the /<GENERIC PRODUCT NAME>, \fI/RELEASE\fR and \fI/products\fR
+directories
+.TP
+-
+all of the needed subdirectories under each of these directories
+.RE
+.TP
+-
+create the fileset lists
+.TP
+-
+create each fileset's \fIrevlist\fR
+.TP
+-
+correctly modify the \fIdir\fR variable in the \fIship.rel\fR file and
+create the \fIship.data\fR file
+.TP
+-
+set the permission bits, owner and group of each automatically created
+file and directory
+.TP
+-
+put the products' files into the delivery directory structure, and
+.RS
+.TP
+-
+set the permission bits, owner and group of each file (as determined by you -
+see the \fBFILES\fR section for how to do this)
+.TP
+-
+format (as per the \fIman\fR(1) command) and/or \fIcompress\fR(1) manual pages
+prior to storing them in the delivery directory structure
+.TP
+-
+\fIstrip\fR(1) executable files and \fIunifdef\fR(1) header files
+.RE
+.RE
+.P
+\fBNOTE\fR: you must be root when running \fImakedd\fR, because it
+creates directories under /.
+.P
+You must modify the \fImakedd\fR script directly to give values to several
+variables prior to running \fImakedd\fR.
+Those variables and their descriptions are as follows.
+.TP
+.B DESC_FILE
+The name of the file that contains the descriptions of files to be delivered.
+(The contents of this file are described in the \fBFILES\fR section.)
+If you leave this undefined, \fImakedd\fR will prompt you for the name of the
+descriptions file.
+.TP
+.B GENERIC_PRODUCT_NAME
+The name given the GENERIC PRODUCT NAME directory (see \fIThe SSIT Delivery
+Process Document\fR).
+The value of \fBGENERIC_PRODUCT_NAME\fR must always be defined.
+.TP
+.B PROD_DIRS
+The names of directories that are owned by any product in
+$\fBDESC_FILE\fR.
+(A directory owned by a product would not exist on a customer's
+system if that product did not exist on the system.)
+\fBNOTE\fR: each directory name must be a full pathname beginning with
+a single '/'.
+If there are no such directories, \fBPROD_DIRS\fR must be null, i.e.,
+\fBPROD_DIRS\fR="".
+.TP
+.B SSIT_DELIV_TOOL_DIR
+This is the full pathname of the directory where the \fIship.rel\fR file
+resides.
+It is expected to be the directory that contains the delivery tools provided
+by SSIT, e.g., \fINCAprep\fR, \fInotify\fR, etc.
+The value of \fISSIT_DELIV_TOOL_DIR\fR must always be defined.
+.TP
+.B UNIFDEF
+The utility (with desired options specified) that unifdefs source files,
+particularly header files.
+If no files are unifdefed (as determined by the contents of $\fBDESC_FILE\fR),
+the \fBUNIFDEF\fR definition is unimportant.
+.P
+.SS Options
+.TP
+.I source_file_prefix
+When provided, this argument is used to prefix each source (local) file in
+the descriptions file, $\fBDESC_FILE\fR, to determine where it
+actually resides.
+For example, if \fIsource_file_prefix\fR is set to "/nfs/working" and a line
+in $\fBDESC_FILE\fR looks like
+.sp
+.I "	bin/source_file     /bin/delivered_file"
+.sp
+the file \fI/nfs/working/bin/source_file\fR contains the local bits.
+See the \fBFILES\fR section for information on the contents of the
+descriptions file.
+.br
+.ne 6V
+.SH WARNINGS
+\fIMakedd\fR is not robust.
+If you make errors in your descriptions file (like having unpaired lines,
+maybe the result of a comment line not preceded by '#'), \fImakedd\fR will not
+detect this specifically, though errors are likely to occur as a consequence.
+However, once you get the descriptions file put together correctly, \fImakedd\fR
+provides you a turn-key process for creating the directory structure for
+delivering bits.
+.SH AUTHOR
+Dave Erickson, CND
+.SH FILES
+/tmp/SSIT*.*                     \fImakedd\fR work files
+.br
+$DESC_FILE                       file descriptions file
+.br
+$SSIT_DELIV_TOOL_DIR/ship.rel    the basic ship.rel file
+.P
+Generally, the descriptions file consists of 2 lines for each file you will
+deliver to SSIT.
+In addition, the descriptions file may contain blank lines and lines whose
+first character is a '#'.
+This allows you to place comments in the descriptions file.
+.P
+Line 1 of each pair of lines in the descriptions file contains:
+.RS
+.TP
+\ 
+<optional whitespace>
+.TP
+(1)
+The local bits pathname: the file that contains the executable code, man page,
+etc. that will be delivered.
+This should be either a full pathname or a pathname relative to
+\fImakedd\fR's optional \fIsource_file_prefix\fR argument.
+If you do not specify the \fIsource_file_prefix\fR argument, the local bits
+pathname should begin with a '/', or you must \fIcd\fR to the directory in
+which the files are rooted before running \fImakedd\fR.
+If you specify the \fIsource_file_prefix\fR argument, the local bits
+pathname may begin with a '/'.
+.TP
+\ 
+<whitespace>
+.TP
+(2)
+The full pathname of where the bits will be installed on a customer's system.
+Note that any file that should NOT automatically overwrite an existing file,
+e.g., \fI/etc/passwd\fR, should be installed in \fI/etc/newconfig\fR/<file>.
+The \fIcustomize\fR shell script for that file's fileset should determine whether
+the file should be copied from \fI/etc/newconfig\fR to its proper place.
+.TP
+\ 
+<whitespace>
+.TP
+(3)
+\fBThis field is optional\fR.
+If it is present, it needs only to be non-blank.
+When present, field 3 indicates that the local bits (field 1) are to be
+copied directly to the file specified in field 2.
+This field is best used for the \fIupdate_info\fR file that is delivered to
+SSIT but is not installed directly on a user's system (see the example
+below for this use of field 3).
+If field 3 is present, line 1 should exist by itself, i.e., it should not
+be paired with another line.
+.sp
+It is recognized that the optional field 3 is a bit kludgey, but it allows
+you to automatically handle files that are \fBnot\fR actually delivered
+to customers but \fBare\fR delivered to SSIT.
+Using this option, you may reduce the amount of manual work that must be
+done to complete the process of constructing the delivery directories.
+.RE
+.P
+Line 2 must be present when field 3 of line 1 is blank.
+It must not be present when field 3 of line 1 is non-blank.
+Blank lines and comment lines cannot be placed between lines 1 and 2.
+Line 2 contains:
+.RS
+.TP
+\ 
+<optional whitespace>
+.TP
+(1)
+The permission bits (expressed in octal) of the file as it is to be
+installed on a customer's system.
+For example, you might specify a value like \fI544\fR (-r-xr--r--).
+.TP
+\ 
+<whitespace>
+.TP
+(2)
+The owner of the file as it is to be installed on a customer's system.
+For example, you might specify an owner like \fIroot\fR.
+.TP
+\ 
+<whitespace>
+.TP
+(3)
+The group of the file as it is to be installed on a customer's system.
+For example, you might specify a group like \fIother\fR.
+.TP
+\ 
+<whitespace>
+.TP
+(4)
+The name of the product in which the file is contained.
+For example, you might specify a name like \fI50969\fR.
+See \fIThe SSIT Delivery Process Document\fR for limitations on
+product names.
+Your descriptions file may contain any number of different product names.
+.TP
+\ 
+<whitespace>
+.TP
+(5)
+The name of the fileset in which the file is contained.
+For example, you might specify a name like \fINFS_CMDS\fR.
+See \fIThe SSIT Delivery Process Document\fR for limitations on
+fileset names.
+Your descriptions file may contain any number of different fileset names.
+.TP
+\ 
+<whitespace>
+.TP
+(6)
+Use the character 'y' or 'Y' if the local file is to be run through the
+\fIman\fR(1) command's formatting steps (before storing it in the SSIT
+directory structure), otherwise use a different character, like 'n' or 'N'.
+.TP
+\ 
+<whitespace>
+.TP
+(7)
+Use the character 'y' or 'Y' if the local file is to be compressed using
+\fIcompress\fR(1) (before storing it in the SSIT directory structure),
+otherwise use a different character, like 'n' or 'N'.
+Compression will be done after formatting, if \fIman\fR(1) formatting
+is to be done as specified by field 6.
+.TP
+\ 
+<whitespace>
+.TP
+(8)
+Use the character 'y' or 'Y' if the local file is to be stripped using
+\fIstrip\fR(1) (before storing it in the SSIT directory structure),
+otherwise use a different character, like 'n' or 'N'.
+.TP
+\ 
+<whitespace>
+.TP
+(9)
+Use the character 'y' or 'Y' if the local file is to be unifdefed using the
+tool named by the UNIFDEF variable of \fImakedd\fR (this is done before
+storing the file in the SSIT directory structure), otherwise use a different
+character, like 'n' or 'N'.
+.RE
+.bp
+Following is an example descriptions file.
+.sp
+.nf
+#  50969 is the product number given to NFS on a system 300.
+#
+#  The 50969 product contains the following filesets:
+#
+#       NFS_CMDS - commands and kernel segment
+#       NFS_INCL - include files
+#       NFS_MAN  - unformatted manuals
+#       NFS_MANC - formatted manuals
+#
+#    1st line of a pair:                             C
+#                                                    o     U
+#        Local                Installed           F  m     n
+#        Filename             Filename            o  p  S  i
+#                                                 r  r  t  f
+#    2nd line of a pair:                          m  e  r  d
+#                                                 a  s  i  e
+#  Perm  Owner  Group  Product  Fileset           t  s  p  f
+
+cmds/bin/domainname           /bin/domainname
+   555   root   other  50969    NFS_CMDS          n  n  y  n
+include/nfs/nfs.h             /usr/include/nfs/nfs.h
+   444   root   other  50969    NFS_INCL          n  n  n  y
+man/man1/rusers.1             /usr/man/cat1.Z/rusers.1
+   444   root   other  50969    NFS_MANC          y  y  n  n
+man/man1/ypwhich.1            /usr/man/man1.Z/ypwhich.1
+   444   root   other  50969    NFS_MAN           n  y  n  n
+
+system/s300/update_info       /products/50969/update_info  *
+
+system/NFS_CMDS/customize     /system/NFS_CMDS/customize
+   544   root   other  50969    NFS_CMDS          n  n  n  n
+system/NFS_CMDS/CDFcustomize  /system/NFS_CMDS/CDFcustomize
+   544   root   other  50969    NFS_CMDS          n  n  n  n
+system/NFS_MAN/customize      /system/NFS_MAN/customize
+   544   root   other  50969    NFS_MAN           n  n  n  n
+system/NFS_MANC/customize     /system/NFS_MANC/customize
+   544   root   other  50969    NFS_MANC          n  n  n  n
+.fi
+.bp
+As you can see, each of these files is part of the \fI50969\fR product.
+Each file is owned by \fIroot\fR and is in group \fIother\fR.
+Each file is placed into 1 of 4 filesets, and it is treated in
+different ways: formatted, compressed, stripped and/or unifdefed.
+Files that have none of these things done to them, e.g.,
+the \fIcustomize\fR scripts, are just copied.
+.P
+The \fIupdate_info\fR line has a 3rd non-blank field, so the file is just
+copied into place in the file specified by field 2.
+Note that the \fIupdate_info\fR line is not paired with another non-blank
+line, since its 3rd field \fIis\fR non-blank.
+.P
+See that each of the local filenames do not begin with a slash.
+For \fImakedd\fR to work successfully with this descriptions file, you would
+either have to specify the \fIsource_file_prefix\fR argument or \fIcd\fR to
+the directory in which the files are rooted before running \fImakedd\fR.
+.SH SEE ALSO
+The SSIT Delivery Process Document

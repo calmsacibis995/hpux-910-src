@@ -1,0 +1,245 @@
+.\"	@(#)Engineering Time Summary:	$Revision: 1.3.109.1 $	$Date: 91/11/19 14:30:28 $
+.\"
+.\"  This document synopsizes the engineering time spent (restricted to Jeff
+.\"  Lindberg's group) during the life of the NFS project.  The detailed
+.\"  numbers were gleaned from the reports that were used during a portion of
+.\"  the project.
+.\"
+.\"  This document is made printable by entering the following command:
+.\"
+.\"		nroff -cm filename > formatted_file
+.\"		lp -ogothic < formatted_file
+.\"
+.\"  Original author:  Dave Erickson
+.\"
+.tr ~
+.PH "''\fB-~NFS Services/300 Engineer Effort Summaries~-\fR''"
+.PF "''-~\\\\nP~-''"
+.nr Hc 1000
+.nf
+.ce
+\fBEffort Categories\fR
+.sp
+	A/B		--	Alpha/Beta sites
+	Coord		--	coordination
+	Dev		--	Development work
+	Doc		--	Documentation
+	FTO		--	FTO
+	Iss		--	Issues
+	Metr		--	Metrics
+	Mkt		--	Marketing
+	Other		--	Anything else (except overhead)
+	SSIT		--	SSIT work
+	Sup		--	Project support work
+	Tech		--	Tech support
+	Test		--	Testing effort
+	Tool		--	tool work
+	Train		--	Training
+.sp
+.ce
+\fBNote:  all values are in 8-hour days\fR
+.sp
+.sp 3
+.ce 3
+\fBJohn Dilley\fR
+
+Feb. 1 1987 through Sep. 21 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+DTS		0.5 (0.32%)	0.0 (0.00%)	0.5	0.0 (0.00%)
+Dev		27.7 (17.51%)	6.5 (34.21%)	34.2	29.0 (17.11%)
+Doc		25.7 (16.25%)	2.0 (10.53%)	27.7	32.0 (18.88%)
+FTO		10.0 (6.32%)	0.0 (0.00%)	10.0	10.0 (5.90%)
+Metr		0.5 (0.32%)	0.5 (2.63%)	1.0	2.0 (1.18%)
+New		10.0 (6.32%)	3.5 (18.42%)	13.5	0.0 (0.00%)
+SSIT		0.0 (0.00%)	0.0 (0.00%)	0.0	1.0 (0.59%)
+Sup		12.9 (8.15%)	1.0 (5.26%)	13.9	9.0 (5.31%)
+Tech		4.2 (2.69%)	0.0 (0.00%)	4.2	7.0 (4.13%)
+Test		58.2 (36.76%)	2.5 (13.16%)	60.7	77.5 (45.72%)
+Tool		1.5 (0.95%)	3.0 (15.79%)	4.5	2.0 (1.18%)
+Train		7.0 (4.42%)	0.0 (0.00%)	7.0	0.0 (0.00%)
+
+TOTALS   	158.2 (100.00%)	19.0 (100.00%)	177.2	169.5 (100.00%)
+.bp
+.ce 3
+\fBDave Erickson\fR
+
+Feb. 1 1987 through Oct. 12 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		5.0 (3.28%)	1.9 (10.86%)	6.9	4.0 (3.23%)
+Coord		1.7 (1.12%)	0.2 (1.14%)	1.9	0.0 (0.00%)
+Dev		34.1 (22.39%)	0.2 (1.14%)	34.3	18.5 (14.92%)
+Doc		34.5 (22.65%)	1.0 (5.71%)	35.5	24.0 (19.35%)
+FTO		10.0 (6.57%)	2.0 (11.43%)	12.0	6.0 (4.84%)
+Iss		1.8 (1.18%)	0.0 (0.00%)	1.8	0.0 (0.00%)
+SSIT		13.5 (8.86%)	3.3 (18.86%)	16.8	13.9 (11.21%)
+Sup		1.7 (1.12%)	0.0 (0.00%)	1.7	0.0 (0.00%)
+Tech		2.3 (1.51%)	0.2 (1.14%)	2.5	2.0 (1.61%)
+Test		33.5 (22.00%)	8.7 (49.71%)	42.2	48.5 (39.11%)
+Tool		1.2 (0.79%)	0.0 (0.00%)	1.2	3.0 (2.42%)
+Train		13.0 (8.54%)	0.0 (0.00%)	13.0	4.1 (3.31%)
+
+TOTALS   	152.3 (100.00%)	17.5 (100.00%)	169.8	124.0 (100.00%)
+.sp 3
+.ce 3
+\fBGeorge Feinberg\fR
+
+Feb. 1 1987 through Jun. 22 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		0.0 (0.00%)	2.0 (4.88%)	2.0	2.0 (2.25%)
+Coord		0.0 (0.00%)	3.0 (7.32%)	3.0	3.0 (3.37%)
+Dev		22.5 (46.39%)	10.0 (24.39%)	32.5	29.0 (32.58%)
+Doc		0.0 (0.00%)	3.0 (7.32%)	3.0	3.0 (3.37%)
+FTO		0.0 (0.00%)	4.0 (9.76%)	4.0	4.0 (4.49%)
+Iss		0.0 (0.00%)	0.0 (0.00%)	0.0	1.0 (1.12%)
+Metr		0.0 (0.00%)	0.0 (0.00%)	0.0	1.0 (1.12%)
+Mkt		6.0 (12.37%)	0.0 (0.00%)	6.0	7.0 (7.87%)
+SSIT		0.0 (0.00%)	2.0 (4.88%)	2.0	2.0 (2.25%)
+Sup		5.0 (10.31%)	0.0 (0.00%)	5.0	5.0 (5.62%)
+Tech		0.0 (0.00%)	2.0 (4.88%)	2.0	2.0 (2.25%)
+Test		15.0 (30.93%)	12.0 (29.27%)	27.0	27.0 (30.34%)
+Tool		0.0 (0.00%)	3.0 (7.32%)	3.0	3.0 (3.37%)
+
+TOTALS   	48.5 (100.00%)	41.0 (100.00%)	89.5	89.0 (100.00%)
+.bp
+.ce 3
+\fBMark Kepke\fR
+
+Feb. 1 1987 through Oct. 5 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+Dev		6.0 (8.00%)	0.0 (0.00%)	6.0	0.0 (0.00%)
+Metr		3.5 (4.67%)	0.0 (0.00%)	3.5	0.0 (0.00%)
+Other		4.0 (5.33%)	0.0 (0.00%)	4.0	7.0 (22.22%)
+Sup		11.5 (15.33%)	1.0 (100.00%)	12.5	3.0 (9.52%)
+Test		32.5 (43.33%)	0.0 (0.00%)	32.5	15.5 (49.21%)
+Tool		1.5 (2.00%)	0.0 (0.00%)	1.5	0.0 (0.00%)
+Train		16.0 (21.33%)	0.0 (0.00%)	16.0	6.0 (19.05%)
+
+TOTALS   	75.0 (100.00%)	1.0 (100.00%)	76.0	31.5 (100.00%)
+.sp 3
+.ce 3
+\fBCristina Mahon (300 only)\fR
+
+Feb. 1 1987 through Aug. 3 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		0.0 (0.00%)	0.0 (0.00%)	0.0	2.0 (2.48%)
+Coord		0.0 (0.00%)	0.0 (0.00%)	0.0	0.0 (0.00%)
+Dev		13.5 (20.74%)	0.0 (0.00%)	13.5	9.0 (11.15%)
+Doc		6.9 (10.60%)	0.0 (0.00%)	6.9	11.5 (14.25%)
+FTO		5.0 (7.68%)	0.0 (0.00%)	5.0	4.0 (4.96%)
+Iss		6.8 (10.45%)	0.0 (0.00%)	6.8	6.2 (7.68%)
+Metr		3.6 (5.53%)	0.0 (0.00%)	3.6	2.0 (2.48%)
+Sup		8.1 (12.44%)	0.0 (0.00%)	8.1	4.0 (4.96%)
+Tech		0.0 (0.00%)	0.0 (0.00%)	0.0	2.0 (2.48%)
+Test		6.4 (9.83%)	0.0 (0.00%)	6.4	26.0 (32.22%)
+Tool		12.3 (18.89%)	0.0 (0.00%)	12.3	14.0 (17.35%)
+Train		2.5 (3.84%)	0.0 (0.00%)	2.5	0.0 (0.00%)
+
+TOTALS   	65.1 (100.00%)	0.0 (100.00%)	65.1	80.7 (100.00%)
+.bp
+.ce 3
+\fBMike Shipley\fR
+
+Feb. 1 1987 through Aug. 25 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		0.0 (0.00%)	0.0 (0.00%)	0.0	2.0 (1.05%)
+Coord		2.0 (2.31%)	4.0 (6.69%)	6.0	7.0 (3.66%)
+Dev		39.2 (45.36%)	14.2 (23.75%)	53.4	49.5 (25.90%)
+Doc		15.0 (17.35%)	1.8 (3.01%)	16.8	18.0 (9.42%)
+FTO		0.0 (0.00%)	17.0 (28.43%)	17.0	17.0 (8.90%)
+Metr		4.3 (4.97%)	0.0 (0.00%)	4.3	4.0 (2.09%)
+Mkt		0.2 (0.23%)	0.0 (0.00%)	0.2	0.5 (0.26%)
+New		2.5 (2.89%)	3.5 (5.85%)	6.0	8.0 (4.19%)
+Other		7.8 (9.08%)	0.0 (0.00%)	7.8	5.0 (2.62%)
+Sup		1.7 (1.97%)	0.5 (0.84%)	2.2	6.0 (3.14%)
+Tech		0.2 (0.23%)	1.8 (3.01%)	2.0	4.0 (2.09%)
+Test		8.5 (9.83%)	15.0 (25.08%)	23.5	65.1 (34.07%)
+Tool		0.0 (0.00%)	2.0 (3.34%)	2.0	2.0 (1.05%)
+Train		5.0 (5.78%)	0.0 (0.00%)	5.0	3.0 (1.57%)
+
+TOTALS   	86.5 (100.00%)	59.8 (100.00%)	146.3	191.1 (100.00%)
+.sp 3
+.ce 3
+\fBDarren Smith\fR
+
+Feb. 1 1987 through Oct. 2 1987
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		0.0 (0.00%)	0.0 (0.00%)	0.0	2.0 (1.83%)
+Coord		1.0 (0.75%)	0.0 (0.00%)	1.0	3.0 (2.75%)
+Dev		46.5 (34.83%)	0.0 (0.00%)	46.5	13.0 (11.93%)
+Doc		15.8 (11.80%)	5.0 (29.24%)	20.8	4.5 (4.13%)
+FTO		9.0 (6.74%)	2.0 (11.70%)	11.0	4.0 (3.67%)
+Iss		0.2 (0.19%)	0.0 (0.00%)	0.2	2.0 (1.83%)
+Mkt		2.0 (1.50%)	0.0 (0.00%)	2.0	0.0 (0.00%)
+New		21.0 (15.73%)	0.0 (0.00%)	21.0	0.0 (0.00%)
+SSIT		0.0 (0.00%)	0.0 (0.00%)	0.0	0.0 (0.00%)
+Sup		5.5 (4.12%)	1.1 (6.43%)	6.6	10.0 (9.17%)
+Tech		1.0 (0.75%)	0.0 (0.00%)	1.0	1.0 (0.92%)
+Test		24.5 (18.35%)	9.0 (52.63%)	33.5	65.5 (60.09%)
+Tool		5.8 (4.31%)	0.0 (0.00%)	5.8	4.0 (3.67%)
+Train		1.2 (0.94%)	0.0 (0.00%)	1.2	0.0 (0.00%)
+
+TOTALS   	133.5 (100.00%)	17.1 (100.00%)	150.6	109.0 (100.00%)
+.bp
+.ce
+\fBTotals, all engineers\fR
+
+Categ.		Spent (%%)	Left (%%)	Sum	Orig (%%)
+
+A/B		5.0 (0.70%)	3.9 (2.51%)	8.9	12.0 (1.51%)
+Coord		4.7 (0.65%)	7.2 (4.63%)	11.9	13.0 (1.64%)
+DTS		0.5 (0.07%)	0.0 (0.00%)	0.5	0.0 (0.00%)
+Dev		189.5 (26.35%)	30.9 (19.88%)	220.4	148.0 (18.62%)
+Doc		97.9 (13.61%)	12.8 (8.24%)	110.7	93.0 (11.70%)
+FTO		34.0 (4.73%)	25.0 (16.09%)	59.0	45.0 (5.66%)
+Iss		8.8 (1.22%)	0.0 (0.00%)	8.8	9.2 (1.16%)
+Metr		11.9 (1.65%)	0.5 (0.32%)	12.4	9.0 (1.13%)
+Mkt		8.2 (1.14%)	0.0 (0.00%)	8.2	7.5 (0.94%)
+New		33.5 (4.66%)	7.0 (4.50%)	40.5	8.0 (1.01%)
+Other		11.8 (1.64%)	0.0 (0.00%)	11.8	12.0 (1.51%)
+SSIT		13.5 (1.88%)	5.3 (3.41%)	18.8	16.9 (2.13%)
+Sup		46.4 (6.45%)	3.6 (2.32%)	50.0	37.0 (4.66%)
+Tech		7.7 (1.07%)	4.0 (2.57%)	11.7	18.0 (2.26%)
+Test		178.6 (24.84%)	47.2 (30.37%)	225.8	325.1 (40.90%)
+Tool		22.3 (3.10%)	8.0 (5.15%)	30.3	28.0 (3.52%)
+Train		44.7 (6.22%)	0.0 (0.00%)	44.7	13.1 (1.65%)
+
+TOTALS   	719.1 (99.98%)	155.4 (99.99%)	874.5	794.8 (100.00%)
+.sp 3
+.fi
+Most of the above figures should be "taken with a grain of salt," since the
+times during which the engineers reported their figures differ, and these
+values are \fInot\fR normalized to account for it.
+.sp
+The figures that are of particular interest are those percentages
+in parentheses in the column labeled "Spent."
+Unlike the other figures, they \fIare\fR meaingful.
+These proportions may be used to estimate amounts of time on similar projects
+when the total time estimate is available.
+.bp
+.ce
+\fBOther Historical Data\fR
+.sp
+.ML . 6
+.LI
+Prior to the February 1 beginning of the time accounting seen above, the
+engineering time spent totalled 34 engineering months.
+This value includes the testing group's time, too.
+.LI
+Since QA complete, about 6.25 engineering months were spent in final wrap-up
+of the project.
+This value also includes time spent performing partner testing.
+.LE

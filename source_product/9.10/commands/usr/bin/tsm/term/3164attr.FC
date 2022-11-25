@@ -1,0 +1,7 @@
+## FacetTerm  3164attr  COMMON file 07/22/91
+##   IBM 3164 attributes
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: 3164attr.FC,v 70.1 92/03/09 16:49:40 ssa Exp $
+##--- ATTRIBUTES URBOI onmkji ---##
+ibm_attribute-IOBUR-kji-onm=\E4%3I1
+pass-load_alternate_character_command=\E =%100u12\E=

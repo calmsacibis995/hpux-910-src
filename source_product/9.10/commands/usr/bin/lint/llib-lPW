@@ -1,0 +1,551 @@
+/* llib-lPW generated for use by apex.  The libPW is the Programmer's
+   Workbench Library. */
+/*LINTLIBRARY*/
+
+#include <varargs.h>
+#include <stdio.h>
+
+/* The following functions are in the OSF Programmer's Reference manual
+   under the libPW entry
+*/
+int	any ( const char c, const char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The any() call determines whether a string contains a 
+	specified character.  It is part of the libPW library.
+	Use strchr().  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	anystr( const char *str1, const char *str2 )  { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The anystr() call determines the offset in a string of the
+	first character in another string that also occurs in the 
+	first string.   It is part of the libPW library.  Use
+	strpbrk().  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	balbrk ( const char *s, const char *o, const char *c, const char *e ) 
+		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The balbrk() call determines the offset in a string of the 
+	first character in another string that occurs outside of
+	a specified substring of the initial string.   It is part
+	of the libPW library.  This functionality is not portable
+	to open systems.  See strpbrk() in string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char	*cat ( char *dest, ... ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The cat() call concatenates multiple source stings and copies
+	them to a destination.  This call is part of the libPW library.
+	It is not portable to open systems.  To accomplish this task use 
+	strcpy() to copy the first string to the destination, followed 
+	by repeated calls to strcat() to add the remaining strings to 
+	the destination. See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return dest; }
+
+
+void	clean_up ( void ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The clean_up() call defaults the cleanup routine.  It is
+	part of the libPW library.  This functionality is not
+	portable to open systems.  */
+
+#endif  /* _APEX_SOURCE */
+}
+
+int	curdir ( char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The curdir() call returns the full path name of the current
+	directory.  It is part of the libPW library.  Use getcwd(). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char	*dname ( char *p ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dname() call determines which directory contains a file.  
+	It is part of the libPW library.  This functionality is not
+	portable to open systems.   */
+
+#endif  /* _APEX_SOURCE */
+ return p; }
+
+void	fatal ( const char *s ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The fatal() call is a general purpose error handler.  This 
+	call is part of the libPW library.  It is not portable to 
+	open systems.  */
+
+#endif  /* _APEX_SOURCE */
+}
+
+FILE	*fdfopen ( int fildes, int mode ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The fdfopen() call is essentially the same as the fdopen()
+	call.  The fdfopen() call is part of the libPW library.
+	Use fdopen().  See fopen(3S). */
+
+#endif  /* _APEX_SOURCE */
+ FILE *x; return x; }
+
+
+void	giveup ( int dump ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The giveup() call forces the program to dump core.  It is
+	part of the libPW library.  This functionality is not portable
+	to open systems. */
+
+#endif  /* _APEX_SOURCE */
+}
+
+int	imatch ( const char *pref, const char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The imatch() call determines if a string is an initial 
+	substring of another.  It is part of the libPW library.
+	Use strstr().  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+/* index def removed because of conflict with def in llib-lc */
+/*int	index ( const char *str1, const char *str2 ) { return 0; }*/
+
+
+int	lockit ( const char *lfile, unsigned count, unsigned pid ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The lockit() call creates a lock file.  It is part of
+	the libPW library.  Use creat() and fcntl(). */
+
+#endif  /* _APEX_SOURCE */
+return 0;}
+
+
+/* logname def removed because of conflict with llib-lc def. */
+/*char	*logname ( void	) { char *n; return n; } */
+
+
+/* move def removed because of conflict with llib-lc def. */
+/*void	move ( const char *str1, char *str2, unsigned n ) {}*/
+
+
+int	patoi ( const char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The patoi() call converts a string to an integer.  It is
+	part of the libPW call.  Use atoi().  See strtol(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+long	patol ( const char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The patol() call converts a string to a long.  It is part 
+	of the libPW call.  Use strtol(). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char	*repeat ( char *des, const char *str, int n ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The repeat() call copies a source string to a destination
+	string multiple times.  It is part of the libPW library.
+	Use strcpy() multiple times to get this functionality.
+	See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return des; }
+
+char	*repl ( char *str, char old, char new ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The repl() call replaces each occurrence of a character 
+	in a string with a new character.  It is part of the 
+	libPW library.  Multiple calls to strchr() could be used
+	to find all desired replacement characters.  They could
+	then be replaced by assignment statements.  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return str; }
+
+
+char	*satoi ( char *str, int *i ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The satoi() call converts a string to an integer.  It is
+	part of the libPW library.  Use atoi().  See strtol(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return str; }
+
+void	setsig ( void ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The setsig() call causes signals to be caught by the setsig1()
+	function.  These calls are part of the libPW library.  They
+	are not portable to open systems.  Use the signal handling
+	provided by the sigaction() call. */
+
+#endif  /* _APEX_SOURCE */
+}
+
+void	setsig1 ( int sig ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The setsig1() call is a general purpose signal handling 
+	routine.  It is part of the libPW library.  It is not
+	portable to open systems.  Use the signal handling
+	provided by the sigaction() call.  */
+
+#endif  /* _APEX_SOURCE */
+}
+
+char	*sname ( char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The sname() call returns a pointer to the file name of 
+	a full path name.  It is part of the libPW library.  Use
+	strrchr() to find the last '/' character in the path,
+	then increment the pointer returned by strrchr() by one 
+	to point to the first character in the file name.   See 
+	string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return str; }
+
+char	*strend ( char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The strend() call find the end of a string.  It is part of
+	the libPW library.  Use strlen().  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return str; }
+
+
+char	*substr ( const char *s, char *des, int origin, int len ){ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The substr() call copies a substring to a destination string
+	using an offset origin and length.  It is part of the libPW
+	library.  Use strncpy() starting at the offset origin.  See
+	string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return des; }
+
+char	*trnslat ( const char *s, const char *o, const char *n, char *des ) 
+		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The trnslat() call copies a string into a new string and 
+	replaces specified characters in the old string with specified
+	new characters in the destination string.  It is part of
+	the libPW library.   This functionality is not portable
+	to open systems. */
+
+#endif  /* _APEX_SOURCE */
+ return des; }
+
+int	unlockit ( const char *fname, unsigned pid ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The unlockit() call deletes a lock file.  This call is part
+	of the libPW library.  It is not portable to open systems. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char	*userdir ( const int uid ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The userdir() call gets the user's login directory.  This
+	call is part of the libPW library.  This information can 
+	be obtained in a portable manner by calling getpwnam().  
+	The getpwnam() call returns a password structure containing
+	the user's initial working directory.  See getpwent(3C). */
+
+#endif  /* _APEX_SOURCE */
+ char *x; return x; }
+
+int	userexit ( const int code ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The userexit() call provides a default user exit routine.
+	It is part of the libPW library.  This functionality is 
+	not portable to open systems.  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+char	*username ( int uid ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The username() call gets the user's login name.  It is part
+	of the libPW library.  Use cuserid() or getlogin(). */
+
+#endif  /* _APEX_SOURCE */
+ char *x; return x; }
+
+int	verify ( const char *s1, const char *s2 ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The verify() call determines the offset in a string of 
+	the first character that is also not in a second string.
+	This call is part of the libPW library.   The strspn() 
+	call provides similar functionality.  See string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ int x; return x; }
+
+int	xalloc ( unsigned size ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xalloc() call allocates memory.  It is part of the
+	libPW library.  Use malloc(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	xcreat ( const char *name, int mode ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xcreat() call creates a file.  It is part of the libPW 
+	library.  Use creat().  See creat(2). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void	xfree ( char *ptr ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xfree() call frees memory.  It is part of the libPW 
+	library.  Use free().  See malloc(3C). */
+
+#endif  /* _APEX_SOURCE */
+}
+
+
+void	xfreeall ( void ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xfreeall() call frees all memory.  This is part of the
+	libPW library.  This functionality is not portable to open
+	systems.  Use multiple calls to free().  See malloc(3C). */
+
+#endif  /* _APEX_SOURCE */
+}
+
+int	xlink ( const char *f1, const char *f2 ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xlink() call links two files.  It is part of the libPW
+	library.  Use link() or symlink(). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	xmsg ( const char *file, const char *func ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xmsg() call calls the fatal() function with an appropriate 
+	error message.  It is part of the libPW library.  This 
+	functionality is not portable to open systems.  See also 
+	perror(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	xopen ( const char *fname, int mode ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xopen() call opens a file.  It is part of the libPW 
+	library.  Use open(2) or fopen(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	xpipe ( const char *t ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xpipe() call creates a pipe.  It is part of the libPW
+	library.  Use pipe(2). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+int	xunlink ( const char *fname ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xunlink() call removes a directory entry.  It is part
+	of the libPW library.  Use unlink(2). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	xwrite ( int fd, char *buffer, int n ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The xwrite() call writes an arbitrary number of  bytes to 
+	the file associated with a file descriptor from a buffer.
+	It is part of the libPW library.  Use write().  See also
+	fwrite(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char	*zero ( char *p, int n ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The zero() call zeros out an arbitrary number of bytes in 
+	memory.  It is part of the libPW library.  Use memset().  
+	See memory(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return p; }
+
+char	*zeropad ( char *str ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The zeropad() call replaces initial blanks in a string
+	with the character '0'.  It is part of the libPW library.
+	This functionality is not portable to open systems.  This
+	task can be accomplished by finding the number of leading
+	spaces with the strspn() call, and then using the memset()
+	call to write the correct number of leading '0' characters.  
+	See string(3C) and memory(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return str; }
+
+
+
+
+/* The functions below are in the hp libPW but are not mentioned in
+   the OSF Programmer's Reference Manual under the libPW man page.
+*/
+char	*abspath ( char *p ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return p; }
+
+char	*alloca ( unsigned size ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ char *x; return x; }
+
+char	*regcmp ( const char *s1, ... ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The regcmp() call is used to compile regular expressions.  
+	Use the functions described in regcomp(3X).  Those functions
+	are part of the proposed POSIX.2 standard and will have 
+	greater portability. */
+
+#endif  /* _APEX_SOURCE */
+ char *x; return x; }
+
+char	*regex ( char *addrc, char *addrl, ... ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The regex() call is used to execute regular expressions.  
+	Use the functions described in regcomp(3X).  Those functions
+	are part of the proposed POSIX.2 standard and will have 
+	greater portability. */
+
+#endif  /* _APEX_SOURCE */
+ return addrc; }
+
+
+
+/* rename is in libc, so we will not use this one. */
+/* int	rename ( char *old, char *new ) { return 0;} */
+
+
+
+/* The following are entry points in the hp libPW.a file that are not
+   externally documented.
+__advance
+__cclass
+__execute
+__getrnge
+__rpop
+__rpush
+__size
+__xpop
+__xpush
+canwritedir
+findir
+mylock
+onelock
+pop
+push
+*/

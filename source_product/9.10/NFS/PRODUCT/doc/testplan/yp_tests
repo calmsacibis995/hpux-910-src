@@ -1,0 +1,941 @@
+.SK
+.H 1 "Yellow Pages Functionality Tests (Jason Zions)"
+The tests in this chapter were designed to test the normal functioning and
+error-handling capabilities of the Yellow Pages (YP) software. Because of
+their nature, failure-recovery and destructive tests do not fit into the
+scaffold environment well and are discussed elsewhere.
+.P
+Test cases are based on the HP reference manual pages.
+.P
+RESPONSIBLE ENGINEER: Jason Zions
+.H 2 "YP Commands Tests"
+.P
+This section contains test outlines for the YP-specific commands, as enumerated
+in Appendix 1 of the NFS PRD. The tests are divided into two subsections based
+upon the need for superuser (root) privileges.
+.P
+Tests in this section for the YP servers, ypserv, ypbind and rpc.yppasswdd, are
+limited to initiation and run-time arguments. Their functionality is more
+thoroughly exercised in the "YP Library Tests" section (see below).
+.sp
+PERFORM TIME:    6.0  md
+.sp 2
+.H 3 "Normal user (non-root) tests"
+.sp 1
+Many of these tests are aimed at ensuring commands or options cannot be used
+by non-superusers. Most functional tests appear in the following subsection,
+"Superuser tests." Commands or functions which behave identically for
+superuser and normal user alike are tested in this subsection.
+.sp 2
+.H 4 "Command domainname"
+.sp 1
+.nf
+DEPENDENCIES: 
+ISSUES: 
+IMPLEMENT TIME:  0.1  md 
+.fi
+.sp
+.nf
+domainname  ->  correct domain name
+domainname bogus  ->  error: not superuser
+.fi
+.sp 2
+.H 4 "Command ypbind"
+.sp 1
+.nf
+DEPENDENCIES: 
+ISSUES: 
+IMPLEMENT TIME:  0.1  md 
+.fi
+.sp
+.nf
+/etc/ypbind  ->  error: not superuser
+.fi
+.sp 2
+.H 4 "Command ypcat"
+.sp 1
+.P
+Verifying the results of the
+.I ypcat
+command requires access to the ASCII source
+on the master server, and hence requires the masters /etc be available to
+the test node (via NFS, presumably). This source file is referred to below
+as
+.RI [ passwd_source ].
+.P
+Since the test node need not be bound to the master server, comparing
+ypcat output to the master source implies the YP system is in the steady
+state, i.e. all changes on the master have been propagated to any slave
+servers.
+.P
+The list of nicknames is compiled into the various yp commands. A file
+should exist containing a sorted list of nicknames; this file is referred
+to as
+.RI [ nicknames ].
+.P
+These tests use the diff and sort commands.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: Should the output from makedbm -u on the master's map be used
+as [map_source] rather than the ASCII source?
+.LI
+IMPLEMENT TIME:  0.5  md 
+.LE
+.sp
+.nf
+ypcat passwd > passwd; sort passwd > f1  ->  no errors
+sort [passwd_source] | diff f1 -  ->  <empty>
+ypcat passwd.byname | sort | diff f1 -  ->  <empty>
+ypcat passwd.byname | diff passwd -  ->  <empty>
+ypcat -d `domainname` passwd | diff passwd -  ->  <empty>
+ypcat -x | sort | diff [nicknames] -  ->  <empty>
+ypcat  ->  error: usage message (no map specified)
+ypcat bogusmapname  ->  error: no such map
+ypcat passwd.byname passwd.byuid  ->  error: usage message
+ypcat -d bogusdomain passwd  ->  error: no such domain
+ypcat -t passwd  ->  error: no such map
+ypcat -d 12345678901234567890123456789012345678901234567890123456789012345 
+passwd ->  error: YP domain name exceeds 64 characters
+ypcat -d -> error: usage message
+ypcat -y -> error: usage message 
+.fi
+.sp 2
+.H 4 "Command ypmatch"
+.sp 1
+.P
+The definitions of
+.RI [ passwd_source ]
+and
+.RI [ nicknames ]
+may be found in the section discussing
+.I ypcat
+(above).
+.P
+These tests require the following commands: whoami diff grep cat sort
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: The actual source for [passwd_source] is debatable; see ypcat.
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+ypmatch -x | sort | diff [nicknames] -  ->  <empty>
+grep `whoami` [passwd_source] > f1;
+    ypmatch passwd `whoami` | diff f1 -  ->  <empty>
+cat f1 f1 > f2;
+    ypmatch passwd `whoami` `whoami` | diff f2 -  ->  <empty>
+ypmatch passwd bogususer  ->  error: no such entry
+ypmatch -t passwd root  ->  error: no such map
+ypmatch -d bogusdomain passwd root  ->  error: no such domain
+.fi
+.sp
+To increase BFA coverage the following tests have been added:
+.sp
+.nf
+ypmatch -> usage message
+ypmatch -k key map -> should work
+ypmatch -d -> usage message
+ypmatch -d domain (where domain is longer than 64 characters) -> 
+  YP domain name exceeds 64 characters
+ypmatch key map (where map is longer than 64 characters) ->
+  mapname exceeds 64 characters
+.fi
+.sp 2
+.H 4 "Command yppasswd"
+.sp 1
+.P
+The password change is verified by reading the ASCII map source
+(/etc/passwd) on the MASTER before and after the test and comparing the 
+two entries.
+.P
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+yppasswd
+    wrongpwd
+    newpwd
+    newpwd  ->  error: incorrect password
+yppasswd
+    rightpwd
+    pwd1
+    pwd2  ->  error: new passwords don't match
+yppasswd `whoami`
+    rightpwd
+    rightpwd
+    rightpwd  ->  <empty>
+yppasswd root  ->  error: not owner (Check before pwd prompts?)
+yppasswd bogususer  ->  error: no such user (Check first?)
+.fi
+.sp
+The following tests have been added to increase BFA coverage:
+.sp
+.nf
+yppasswd as root
+yppasswd user without changing the password
+yppasswd and give it a bad password
+yppasswd for a user without a password and type short password
+yppasswd and use the following passwords:
+      . password without non-numeric characters
+      . password with a-z, A-Z and 0-9
+.fi
+.sp 2
+.H 4 "Command ypwhich"
+.sp
+.P
+The file
+.RI [ map-host_list ]
+contains a list of available maps and the
+corresponding host names of the master servers, in the format of output
+from "ypwhich -m".
+.P
+These tests use the following commands: ypget sort diff
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+ypget ypservers `ypwhich`  ->  <blank line?>
+ypwhich > f1; ypwhich `hostname` | diff - f1  ->  <empty>
+ypwhich -m | sort | diff -m [map-host_list]  ->  <empty>
+ypwhich -x | sort | diff - [nicknames]  ->  <empty>
+ypwhich -d bogusdomain  ->  error: no such domain
+ypwhich -t -m passwd  ->  error: no such map
+ypwhich -m bogusmap  ->  error: no such map
+ypwhich -t -> same result as ypwhich
+ypwhich -m -t -> same result as ypwhich
+ypwhich -m 12345678901234567890123456789012345678901234567890123456789012345
+-> error: ypwhich:  mapname exceeds 64 characters
+ypwhich -d 12345678901234567890123456789012345678901234567890123456789012345
+-> error: ypwhich:  YP domain name exceeds 64 characters
+ypwhich -d -> error: usage message
+ypwhich host host -> error: usage message
+ypwhich 12345678901234567890123456789012345678901234567890123456789012345
+-> error: ypwhich:  hostname exceeds 64 characters
+ypwhich -V1 -V2 -> error: usage message
+ypwhich host -m -> error: usage message
+ypwhich -y -> error: usage message
+ypwhich <Internet address> -> same result as ypwhich
+ypwhich 15.-1.-1.-1 -> error: ypwhich:  15.-1.-1.-1 was not found in 
+/etc/hosts or the YP hosts map
+ypwhich -V2 -> same result as ypwhich
+ypwhich -V1 -> same result as ypwhich
+ypwhich -V3 -> error: usage message
+ypwhich -m passwd -> same result as ypwhich
+.fi
+.sp 2
+.H 4 "Command makedbm"
+.sp
+.P
+Although
+.I makedbm
+is intended to be executable by root only (owner root, permission 500), there
+is nothing intrinsic to its operation requiring superuser powers.
+With this in mind,
+.I makedbm
+tests will be run by a normal user, with the goal of reducing the amount
+of work done by superuser (and hence dangerous) tests.
+.P
+.RI [ YP_list ]
+is a file containing the sorted list of the five special YP map keys
+that makedbm will create.
+.P
+Commands used: awk grep sort diff chmod cut
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+awk -F: '{print $1, $0}' /etc/passwd | sort > f1
+    /* Convert /etc/passwd to makedbm input form */
+makedbm -i InPuT -o OuT -d DoM f1 f2  ->  <empty>
+makedbm -u f2 | sort > f3;
+    grep -v YP_ f3 | diff - f1  ->  <empty>
+grep YP_ f3 | cut -d' ' -f1 | diff [YP_list]  ->  <empty>
+makedbm bogusfile f4  ->  error: no such file bogusfile
+chmod -w f2.*; makedbm f1 f2  ->  error: permission denied
+.fi
+.sp 2
+.H 4 "Command rpc.yppasswdd"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/usr/etc/rpc.yppasswdd /etc/yp/src/passwd  ->  error: not SU
+.fi
+The following tests have been added to increase BFA coverage:
+.sp
+.AL
+.LI
+rpc.yppasswdd -lc -> usage message
+.LI
+rpc.yppasswdd -l -> usage message
+.LI
+rpc.yppasswdd -l log_file -> usage message
+.LI
+rpc.yppasswdd -v -> usage message
+.LI
+rpc.yppasswdd passwd_file passwd_file -> usage message
+.LI
+rpc.yppasswdd /etc/passwd -l logfile: it does start it
+.LI
+Use pmap_conf with the "-p" option to call rpc.yppasswdd, program 100009,
+version 1, procedure 0 (NULL_PROC).
+.LE
+.sp 2
+.H 4 "Command ypmake"
+.sp
+.P
+Actually, there is no
+.I ypmake
+command as such, although there is a man page for one.
+This command is actually a makefile used to construct and,
+optionally, distribute new YP maps to slave servers.
+It is run only by the superuser on the master server. Some
+tests appear in the superuser test section below; others appear in the
+"Destructive YP Tests" chapter. None are executable by normal users.
+.sp 2
+.H 4 "Command ypinit"
+.sp 1
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/etc/ypinit -m  ->  error: not SU
+/etc/ypinit -s host  ->  error: not SU
+.fi
+.sp 2
+.H 4 "Command yppoll"
+.sp
+.P
+Only minimal functional tests are performed here. More complete tests
+may be found in the "Destructive YP Tests" chapter.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md 
+.LE
+.sp
+This test can be executed only on the master server.
+Using "makedbm -u", "ypwhich -m", and "domainname", construct the expected
+output from the command "yppoll passwd.byname" and compare this to the
+actual output.
+.sp
+.nf
+yppoll -h bogushost passwd  ->  error: no such host
+yppoll -d bogusdomain passwd  ->  error: no such domain
+yppoll bogusmap  ->  error: no such map
+yppoll -h <master IP address> passwd.byname -> same result as "yppoll 
+passwd.byname"
+yppoll -h 12345678901234567890123456789012345678901234567890123456789012345 
+-> error: yppoll:  hostname exceeds 64 characters
+yppoll -h -> error: usage message
+yppoll -d -> error: usage message
+yppoll -d 12345678901234567890123456789012345678901234567890123456789012345
+-> error: yppoll:  YP domain name exceeds 64 characters
+yppoll -y -> error: usage message
+yppoll 12345678901234567890123456789012345678901234567890123456789012345
+ -> error: yppoll:  mapname exceeds 64 characters
+yppoll bogusmap bogusmap -> error: usage message
+yppoll -h 1.2.3.4.5.6 passwd.byname -> error: yppoll:  1.2.3.4.5.6 was 
+not found in /etc/hosts or the YP hosts map
+.fi
+.sp 2
+.H 4 "Command yppush"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+yppush passwd.byname  ->  error: not SU
+.fi
+.sp 2
+.H 4 "Command ypset"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: Is this a superuser-only command?
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+ypset 254.254.254.254  ->  error: no such host
+ypset  ->  error: usage
+ypset -h bogushost `ypwhich`  ->  error: no such host
+ypset -d bogusdomain `ypwhich`  ->  error: no such domain
+.fi
+.sp 2
+.H 4 "Command ypxfr"
+.sp
+.P
+Commands used: diff sum
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md 
+.LE
+.sp
+.nf
+/* On slave server only */
+ypxfr passwd.byname  ->  <empty>
+sum /etc/yp/`domainname`/passwd.byname.* > f1;
+    ypxfr -f -h `hostname` passwd.byname  ->  <empty>;
+    sum /etc/yp/`domainname`/passwd.byname.* > f2;
+    diff f1 f2  ->  <empty>
+ypxfr -h `hostname` passwd.byname  ->  error: map not new
+ypxfr bogusmap  ->  error: no such map
+ypxfr -d bogusdomain passwd.byname  ->  error: no such domain
+ypxfr  ->  error: usage
+ypxfr -h bogushost passwd.byname  ->  error: no such host
+ypxfr -h nonserverhost passwd.byname  ->  error: host not server
+.fi
+.sp 2
+.H 4 "Command ypserv"
+.sp
+.P
+Ensures that 
+.I ypserv
+cannot be started by a non-super user. The important tests appear in the
+"Destructive YP Tests" chapter.
+.P
+To increase BFA coverage execute 
+.I ypserv 
+with the "-l", "-v" and "-l filename".
+.AL
+.LI
+ypserv -l 
+.sp
+output: error message
+.LI
+ypserv -v 
+.sp
+output: starts ypserv (still connected to terminal, so it
+should be started on the background)
+.LI
+ypserv -l filename
+.sp
+output: starts ypserv
+.LI
+Use pmap_conf with the "-p" option to call ypserv, program 100004,
+version 1, procedures 0 through 10 (10 hits the default case in ypserv's
+case statement).
+.LI
+Use pmap_conf with the "-p" option to call ypserv, program 100004,
+version 2, procedures 0 through 12 (12 hits the default case in ypserv's
+case statement).
+.LE
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/etc/ypserv  ->  error: not SU
+.fi
+.SK
+.H 3 "Superuser Tests"
+.sp
+.P
+See the previous subsection for tests which do not require superuser
+privileges.
+.sp 2
+.H 4 "Command ypbind"
+.sp
+.P
+Since these tests are run on a normally-operating system, it is assumed
+that a copy of /etc/bind is already running. Thus, all we test here is
+that the binder process will not allow multiple copies of itself running.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/etc/bind  ->  error: binder already running
+.fi
+.sp 2
+.H 4 "Command rpc.yppasswdd"
+.sp
+.P
+It is assumed that a copy of rpc.yppasswdd is already running on the master
+server for the passwd maps, and that the daemon is not running on any
+other host in the domain, server or client.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/* On the master server: */
+/usr/etc/rpc.yppasswdd /etc/yp/src/passwd  ->  error: already running
+/* On slave server and client */
+/usr/etc/rpc.yppasswdd /etc/yp/src/passwd  ->  error: not master server
+.fi
+.sp 2
+.H 4 "Command ypmake"
+.sp
+.P
+Because these tests are nondestructive, functionality is only partially
+tested here.
+The remaining tests are described in the "Destructive YP Tests" chapter.
+.P
+These tests assume the YP system is in steady-state, i.e. the source files
+from which the master maps are built have not been altered since the last
+time those master maps were made.
+.P
+Commands used: sort grep diff makedbm make
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md 
+.LE
+.sp
+.nf
+/* On master server only */
+cd /usr/etc/yp;
+    makedbm -u /etc/yp/`domainname`/passwd.byname
+	| sort | grep -v YP_ > f1;
+    make passwd.byname NOPUSH=1;
+    makedbm -u /etc/yp/`domainname`/passwd.byname
+	| sort | grep -v YP_ > f2;
+    diff f1 f2  ->  <empty>
+cd /usr/etc/yp; make passwd.byname  ->  <empty>
+cd /usr/etc/yp; make passwd.byname DOM=bogus  ->  error: no such directory
+cd /usr/etc/yp; make passwd.byname DIR=/bogus  ->  error: no such directory
+.sp 2
+.H 4 "Command yppush"
+.sp
+.P
+Since tests in this section are non-destructive, functional tests of
+.I yppush
+can be found in the "Destructive YP Tests" chapter. These tests merely
+check for normal operation and error handling.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+/usr/etc/yp/yppush passwd.byname  ->  <empty>
+.sp
+/* Using "ypcat ypservers", construct the expected output of
+   "yppush -v" and sort it */
+ypcat ypservers | awk -f magic.awk | sort > f1;
+    yppush -v passwd.byname | sort > f2;
+    diff f1 f2  ->  <empty>
+yppush -d bogusdomain passwd.byname  ->  error: no such domain
+yppush  ->  error: usage
+.sp 2
+.H 4 "Command ypset"
+.sp
+.P
+Only normal operation is tested here; full functional testing can be
+found in the "Destructive YP Tests" chapter.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+ypset `ypwhich`  ->  <empty>
+.sp 2
+.H 4 "Command ypserv"
+.sp
+.P
+The discussion under the
+.I ypbind
+command (above) applies here as well.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+/* On a master or slave server node */
+/usr/etc/ypserv  ->  error: already running
+.fi
+.SK
+.H 2 "YP Library Tests"
+.sp
+.P
+This section contains test outlines for the YP library routines, as
+enumerated in Appendix 1 of the NFS PRD.
+Although support for these routines is a non-objective (PRD, section 1.8),
+commands provided by HP (e.g. login, ps) use them.
+Testing of those commands
+should be considerably simplified by thoroughly testing the YP access
+routines they use.
+.P
+In addition, the routines, although unsupported, are documented; some
+customers will likely use them. Some cursory testing of the entry points
+not used by HP-provided software should be performed in the interests
+of increased customer satisfaction.
+.P
+Finally, proper testing of the ypbind and ypserv daemons can only be done
+through the use of these routines. These tests, besides testing the
+routines, also exercise the relevant daemons.
+.P
+There are many routines that use these YP functions.
+Some are supplied by ISO, who
+has assumed testing responsibilities for
+their YP functionality.
+Others are being written here, and tests for them are described below.
+We expect to eventually port any tests used by
+ISO to our test environment to allow centralized testing of YP functionality.
+.sp
+.H 3 "YP library routines"
+.sp
+PERFORM TIME:    4.0  md
+.sp 2
+.H 4 "Subroutine yp_bind()"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+yp_bind(good_domain) returns 0
+yp_bind((char *)NULL) returns YPERR_BADARGS
+yp_bind(65_byte_name) returns YPERR_BADARGS
+yp_bind("") returns YPERR_BADARGS
+yp_bind("bogusdomain") returns YPERR_DOMAIN
+.sp 2
+.H 4 "Subroutine yp_unbind()"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+.nf
+yp_bind(good_domain) returns 0 /* set up for valid unbind */
+yp_unbind(good_domain) returns 0
+yp_unbind(good_domain) returns ???????
+yp_unbind(65_byte_name) returns YPERR_BADARGS
+yp_unbind((char *)NULL) returns YPERR_BADARGS
+yp_unbind("") returns YPERR_BADARGS
+yp_unbind("bogusdomain") returns ???????
+.sp 2
+.H 4 "Subroutine yp_get_default_domain()"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+char *buf1;
+.sp
+yp_get_default_domain(&buf1) returns 0, buf1 points to a
+                             valid domainname
+yp_bind(buf1) returns 0 /* make sure you can bind with it */
+yp_get_default_domain((char **)NULL) returns YPERR_BADARGS
+.sp 2
+.H 4 "Subroutine yp_match()"
+.sp
+.P
+This test, and tests that follow, may depend on the existence of certain
+entries in certain YP maps, or the absence thereof. Keys like usernames
+and hostnames are obtained from the environment. Known bad keys will
+usually have the prefix "bogus". The default domain name is assumed to be
+valid, and it is assumed that this default is accessible, either through
+yp_get_default_domain or some other mechanism.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+.nf
+char *val;  int vallen;
+
+yp_match(domain, "passwd.byname", username, usernamelen,
+         &val, &vallen) returns 0; ensure username matches val.
+yp_match("bogusdomain", ....) returns YPERR_DOMAIN
+yp_match((char *)NULL, ...) returns YPERR_BADARGS
+yp_match(domain, "bogusmap", ...) returns YPERR_MAP
+yp_match(domain, (char *)NULL, ...) returns YPERR_BADARGS
+yp_match(domain, map, "bogususer", 9, ...) returns YPERR_KEY
+yp_match(domain, map, (char *)NULL, 0, ...) returns YPERR_BADARGS
+yp_match(domain, map, "", 0, ...) returns YPERR_KEY
+yp_match(domain, map, user, -1, ...) returns YPERR_BADARGS
+yp_match(domain, map, 65_byte_name, 65, ...) returns YPERR_BADARGS
+yp_match(domain, map, user, userlen, (char **)NULL, ...)
+	returns YPERR_BADARGS
+yp_match(domain, map, user, userlen, &val, (int *)NULL)
+	returns YPERR_BADARGS
+.sp 2
+.H 4 "Subroutines yp_first(), yp_next(), yp_all()"
+.sp
+.P
+The results of using yp_first() and yp_next() are compared against
+those obtained by yp_all(). If there's a discrepancy, the results
+need to be checked against the results of makedbm -u on the servers
+database.
+.P
+This test assumes the YP system is in steady state, i.e. servers are not
+failing, maps are not changing, server bindings remain the same.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md 
+.LE
+.AL 1 5 1
+.LI
+Use yp_first() and yp_next() to extract all the entries in the passwd.byname
+map. Save the results in file f1.
+.LI
+Use yp_all() to obtain all the entries in the passwd.byname map. Save the
+results in file f2.
+.LI
+Sort f1 and f2 and diff them; fail if there are any differences.
+.LI
+Use yp_all() again, this time saving the results in file f3.
+.LI
+Diff the
+.B unsorted
+f2 and f3; fail if there are any differences.
+.LI
+Call the routines with various combinations of bad arguments and ensure the
+correct error codes are returned.  Some of the bad arguments should be
+a NULL map, a NULL domain, a NULL inkey and a domainname that is longer
+than YPMAXDOMAIN (which is 64).
+.LI
+Verify correct operation of the various features of the
+.I foreach
+argument to yp_all().
+.LE
+.sp 2
+.H 4 "Subroutine yp_order()"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md 
+.LE
+.sp
+int order;
+.sp
+yp_order(domain, map, &order) returns 0; verify order is reasonable by
+running makedbm -u remotely on server, i.e.
+.c 1
+remsh `ypwhich` "makedbm -u map | grep YP_ORDER"
+should yield the same number.
+.sp
+.nf
+yp_order(baddomain, ...) returns YPERR_DOMAIN
+yp_order((char *)NULL, ...) returns YPERR_BADARGS
+etc.
+.fi
+.sp 2
+.H 4 "Subroutine yp_master()"
+.sp
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.1  md 
+.LE
+.sp
+char *master;
+.sp
+yp_master(good_domain, "ypservers", &master) returns 0;
+verify master is reasonable by
+running makedbm -u remotely on server, i.e.
+.ce 1
+remsh `ypwhich` "makedbm -u map | grep YP_MASTER"
+should yield the same host name.
+.sp
+Verify various combinations of bad or invalid arguments;
+should produce the correct error return values.
+Some of the invalid arguments are a NULL domain name and a NULL
+map name.
+.sp 2
+.H 3  "Get* routines used by the ARPA/Berkeley commands (Cristina Mahon)"
+.sp
+.PP
+The routines mentioned above are:
+.sp
+.nf
+	gethostent
+	gethostbyname
+	gethostbyaddr
+	getservent
+	getservbyname
+	getservport
+	getnetent
+	getnetbyaddr
+	getnetbyname
+	getprotoent
+	getprotobynumber
+	getprotobyname
+.fi
+.sp
+.PP
+This testplan does not intend to verify the full functionality 
+of these routines.  For that there are already tests that the group SMELTER
+will run on the modified versions of those routines without the Yellow
+Pages running. 
+The only additional tests necessary are to run the existing tests with
+the files /etc/services, /etc/networks, /etc/protocols and /etc/hosts
+as Yellow Pages databases.  To insure that the routines are reading
+the information from the correct place the files themselves should be removed
+from the system.
+.nf
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3  "Ypset tests"
+.sp
+.PP
+These tests produce usage messages.  They have been added to increase
+BFA coverage.
+.sp
+.nf
+ypset -h
+ypset with host name longer than 256 characters
+ypset -h hostname longer than 256 characters hostname
+ypset -d domainname longer than 64 characters
+ypset hostname hostname
+ypset -V3 hostname
+ypset 1.2.3.4.5.6
+ypset when YP not running
+.fi
+.sp 2
+.H 3  "Ypxfr tests"
+.sp
+.PP
+These tests produce usage messages.  They have been added to increase
+BFA coverage.
+.sp
+.nf
+Ran ypxfr when domainname not set.
+ypxfr -h master map (where master longer than 64 characters)
+ypxfr -h
+ypxfr -d domainname map (where domainname longer than 64 characters)
+ypxfr -d
+ypxfr -C
+ypxfr -y map (where -y is an option that doesn't exist)
+ypxfr mapname (where mapname is greater than 64 characters)
+ypxfr -h server when ypserv not running
+ypxfr map map
+ypxfr -h bogusname map
+ypxfr -h 1.2.3.4.5.6 map
+.fi
+.sp 2
+.H 3  "Yppush tests"
+.sp
+.PP
+These tests produce usage messages.  They have been added to increase
+BFA coverage.
+.sp
+.nf
+yppush -d domainname (where domainname is greater than 64 characters)
+yppush -d
+yppush -y (where y is an unknown option)
+yppush map map
+.fi
+

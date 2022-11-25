@@ -1,0 +1,43 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+exitval=0
+
+PATH=/bin:/usr/bin:/etc
+
+#
+# This fileset may be removed in the right circumstances:
+#
+#   o) /etc/clusterconf must not exist or be 0 size
+# or
+#   o) You must be on the rootserver
+#   o) All diskless nodes must be down
+#
+if [ "$2" = "check" ]; then
+    [ ! -s /etc/clusterconf -o ! -x /bin/cnodes ] && exit 0
+    case "`getcontext`" in
+    *localroot*)
+	[ "`cnodes`" = "`cnodes -m`" ] && exit 0
+	echo "ERROR:   The DISKLESS fileset may only be removed" >&2
+	echo "         when all diskless nodes have been halted." >&2
+	exit 1
+	;;
+    *)
+	echo "ERROR:   The DISKLESS fileset may only be removed" >&2
+	echo "         when on the rootserver." >&2
+	exit 1
+	;;
+    esac
+fi
+
+#
+# If /etc/clusterconf exists, we issue a warning that all of the
+# cnode specific files were NOT removed.
+#
+if [ -s /etc/clusterconf ]; then
+    echo "WARNING: Removing the DISKLESS fileset does not remove"
+    echo "         context dependent files for cnodes. Cnode specific"
+    echo "         files may still exist on your system."
+fi
+
+exit $exitval

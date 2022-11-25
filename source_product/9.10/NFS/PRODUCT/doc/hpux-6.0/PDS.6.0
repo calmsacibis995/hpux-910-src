@@ -1,0 +1,65 @@
+ ______________________________________________________________________________
+ |          ___         |                                                     |
+ |         /  /         | NFS Services/300 - PRODUCT DATA SHEET               |
+ | HEWLETT/hp/PACKARD   |                                                     |
+ |       /__/           | Network File System for Series 300                  |
+ |                      | Project Managers:  Jeff Lindberg and Dan Simula     |
+ |  Colorado Networks   |                                                     |
+ |      Division        | October 6, 1987                                     |
+ |____________________________________________________________________________|
+ 
+ DESCRIPTION
+
+ Provide Sun Microsystems' Network File System (NFS) on the HP9000 Series 300 
+ HP-UX system.  With NFS, heterogeneous systems on a common network can 
+ transparently share files.  Remote file access remains invisible to users.  
+ UNIX and non-UNIX systems can participate in an NFS network.
+
+ Two project groups in CND are directly responsible for NFS on the 300.  Dan
+ Simula manages the NFS testing group, and Jeff Lindberg manages the NFS 
+ development group.  Other groups in CND, SSO and ISO are providing key support
+ for NFS in the NS-ARPA and HP-UX products.  The NFS code is being ported from 
+ source code provided by Sun, in accordance with Sun's NFS licensing agreement.
+ ______________________________________________________________________________
+ 
+ MARKET CONTRIBUTION
+ 
+ The addition of NFS to HP-UX provides direct file access connectivity to
+ other vendors' engineering computers.  Sun has established NFS as an emerging 
+ industry standard, and its heterogeneous nature gives it an advantage over 
+ RFA and RFS.  With NFS, users can make more flexible and efficient use of 
+ disk space, and keep a single master copy of shared data.
+ ______________________________________________________________________________
+ 
+ KEY PROJECT "MUST" OBJECTIVES
+ 
+ Port Sun's NFS/3.0 to the Series 300 HP-UX system.  Capabilities include
+ mounting of remote file systems and accessing remote files across a LAN.
+ 
+ Also provide Yellow Pages (YP), a centrally administered, distributed data 
+ lookup service, and associated user commands.  
+ 
+ Provide the programmatic interface to Remote Procedure Call (RPC), 
+ External Data Representation (XDR) and YP library routines.
+ 
+ Attain performance equal to or better than 75 percent of Sun's NFS 
+ performance for equivalent hardware systems.
+ 
+ Connectivity with Sun's NFS, Wollongong's NFS (server only) running on a
+ VAX/VMS system, and Sun's PC-NFS (client only) on Vectra and IBM PC-AT.  
+ 
+ Connectivity via the following LAN/LAN gateways:  the RND "McBridge" bridge 
+ box, series 300 and 800 HP-UX IP gateways, and Sun IP gateway.
+ 
+ Release the series 300 HP-NFS concurrent with the 6.0 HP-UX release.
+ ______________________________________________________________________________
+ 
+ KEY CHECKPOINTS                   50%                     90%
+ Requirements Complete           11/10/86 (actual)       
+ ERS and Design Complete         2/24/87  (actual)       
+ Code Complete			 4/13/87  (actual)
+ Beta Site Release		 8/5/87   (actual)
+ QA Complete                     10/19/87 (actual)
+ Manufacturing Release           12/8/87  (actual)
+ Customer Shipments              12/24/87		 1/10/88
+ ______________________________________________________________________________

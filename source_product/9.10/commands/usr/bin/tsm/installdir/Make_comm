@@ -1,0 +1,128 @@
+# Makefile for install directory COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/10 13:47:15 ssa Exp $
+
+SHELL=		/bin/sh
+MACHDIR=	../$(MACH)
+FTINSTDIRFROMMACHDIR=      FTINST$(MACH_FILES_TOP_DIR)
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+FTINSTDIRBASE=	../$(MACH)/FTINST
+
+USR_FACET_DIR=	/usr/facet
+
+INSTALL_FACET_DIR=	$(FTINSTDIR)$(USR_FACET_DIR)
+REMOVE_FACET_DIR=	$(FTINSTDIR)$(USR_FACET_DIR)
+
+all:
+	@echo make $@  installdir for $(MACH) done - nothing to do
+
+install:	installtext installprog installown
+	@echo make install installdir for $(MACH) done
+
+install.hp:	installtext.hp installprog.hp installown.hp
+	@echo make install.hp installdir for $(MACH) done
+
+installtextcommon:
+	cd MACHINES_COMM; \
+	Cpioinstall ../$(MACHDIR)/FTINST_COMM - `find . -type f -print`
+	@echo make installtextcommon installdir for $(MACH) done
+
+installtext:	\
+		installtextmach \
+		installfacetname \
+		installmach \
+		installversion \
+		installneedgen \
+		installdirectory
+	touch LINST/LINST.$(MACH)
+	@echo make installtext installdir for $(MACH) done
+
+installdirectory:
+	Mkdir $(MACHDIR)
+	echo $(FTINSTDIRFROMMACHDIR) > $(MACHDIR)/DIR_installdir
+
+installtextdriver:	\
+		gen_install.facet \
+		gen_remove.facet \
+		installtextmach
+
+installtext.hp:	\
+		\
+		installtextmach \
+		\
+		installversion.hp
+	@echo make installtext.hp installdir for $(MACH) done
+
+
+installtexttrees:
+	for i in ALL_MACHINES $(TEXT_TREE_DIRS) ; \
+	do \
+		cd MACHINES_COMM/$$i; \
+		Cpioinstall ../../$(FTINSTDIR) - `find . -type f -print` ; \
+		cd ../.. ; \
+	done
+
+installtextmach:
+	find $(MACH) -type f -print | cpio -pmvd ../..
+
+installfacetname:
+	for i in $(MACH_FILES_TOP_DIR)$(USR_FACET_DIR) $(FACET_NAME_DIRS) ; \
+	do \
+		Cpioinstall $(FTINSTDIRBASE)$$i - facet.name ; \
+	done
+
+installmach:
+	cd MACHINES/$(MACH); \
+		Cpioinstall ../../$(FTINSTDIR)$(USR_FACET_DIR) - MACHINE
+
+installversion:
+	Cpioinstall $(FTINSTDIR)$(USR_FACET_DIR) - VERSION
+
+installversion.hp:
+	echo HPVERSION | cpio -pmv $(MACHDIR)
+	Cpioinstall $(FTINSTDIR)$(USR_FACET_DIR) - HPVERSION
+
+installneedgen:
+	touch NEEDGENTAPE
+	touch NEEDGENDISK51
+	touch NEEDGENDISK52
+	touch NEEDGENDISK31
+	touch NEEDGENDISK32
+	echo NEEDGENTAPE   | cpio -pmv $(MACHDIR)
+	echo NEEDGENDISK51 | cpio -pmv $(MACHDIR)
+	echo NEEDGENDISK52 | cpio -pmv $(MACHDIR)
+	echo NEEDGENDISK31 | cpio -pmv $(MACHDIR)
+	echo NEEDGENDISK32 | cpio -pmv $(MACHDIR)
+
+gen_install.facet:
+	Mkdir $(INSTALL_FACET_DIR)
+	PROCESSINFO=install.facet \
+		Process -o $(INSTALL_FACET_DIR)/install.facet $(MACH).in
+#	chown root         $(INSTALL_FACET_DIR)/install.facet
+#	chgrp    0         $(INSTALL_FACET_DIR)/install.facet
+#	chmod 544          $(INSTALL_FACET_DIR)/install.facet
+	ls -l              $(INSTALL_FACET_DIR)/install.facet
+
+gen_remove.facet:
+	Mkdir $(REMOVE_FACET_DIR)
+	PROCESSINFO=remove.facet \
+		Process -o $(REMOVE_FACET_DIR)/remove.facet $(MACH).in
+#	chown root         $(REMOVE_FACET_DIR)/remove.facet
+#	chgrp    0         $(REMOVE_FACET_DIR)/remove.facet
+#	chmod 544          $(REMOVE_FACET_DIR)/remove.facet
+	ls -l              $(REMOVE_FACET_DIR)/remove.facet
+
+installown:
+	@echo make installown  installdir for $(MACH) done - nothing to do
+
+installown.hp:
+	@echo make installown.hp  installdir for $(MACH) done - nothing to do
+
+installprog:
+	echo VERSION | cpio -pmvu $(MACHDIR)
+	@echo make installprog installdir for $(MACH) done
+
+installprog.hp:
+	@echo make installprog.hp installdir for $(MACH) done - nothing to do
+
+clean:
+	@echo make $@ installdir for $(MACH) done - nothing to do

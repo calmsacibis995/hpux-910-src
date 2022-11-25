@@ -1,0 +1,130 @@
+#!/bin/sh
+
+#	@(#)NFS_RUN customize script:	$Revision: 1.7.109.1 $	$Date: 91/11/19 14:46:55 $
+
+#=============================================================================
+#
+#  This is the customize script for the NFS_RUN fileset of the NFS Services 
+#  product on the series 300 and 800.
+#
+#  This script checks specific files which have been placed in etc/newconfig.
+#  Each file is moved to its "final resting place" if a file by that name
+#  does not already exist there.  If a file by that name DOES already exist,
+#  the file in etc/newconfig is left for the system administrator to contend
+#  with; he/she should refer to /etc/newconfig/README to determine the best
+#  way to handle such a file.
+#
+#  Old filesets are are removed
+#
+#  An old copy of vhe_u_mnt is removed from /etc/newconfig
+#
+#  On the 800, a flag is dropped in /etc/conf/gen/.regenrc to tell regen that 
+#  nfs has been loaded.
+#
+#  Author:	dae (original NFS_CMDS version)
+#  		dlr (modified for NFS_RUN in HP-UX 7.0)
+#
+#=============================================================================
+
+ARCH=$1
+shift
+PATH=/bin:/usr/bin:/etc
+
+if [ -d /etc/filesets+ ] ; then
+	FILESETS_DIR=/etc/filesets+/$ARCH
+else
+	FILESETS_DIR=/etc/filesets
+fi
+
+if [ -d /system+ ] ; then
+	SYSTEM_DIR=/system+/$ARCH
+else
+	SYSTEM_DIR=/system
+fi
+
+if [ -d /etc/newconfig+ ] ; then
+	NEWCONFIG_DIR=/etc/newconfig+/$ARCH
+else
+	NEWCONFIG_DIR=/etc/newconfig
+fi
+
+if [ -d /etc/conf+ ] ; then
+	CONF_DIR=/etc/conf+/$ARCH
+else
+	CONF_DIR=/etc/conf
+fi
+
+export PATH ARCH FILESETS_DIR SYSTEM_DIR NEWCONFIG_DIR CONF_DIR
+
+set --   etc/newconfig/netgroup		etc/netgroup			\
+	 etc/newconfig/netnfsrc		etc/netnfsrc			\
+	 etc/newconfig/netnfsrc2	etc/netnfsrc2			\
+	 etc/newconfig/rpc		etc/rpc				\
+	 etc/newconfig/vhe_list		etc/vhe_list			\
+	 etc/newconfig/vhe_mounter	usr/etc/vhe/vhe_mounter		\
+	 etc/newconfig/vhe_script	usr/etc/vhe/vhe_script		\
+	 etc/newconfig/ypinit		usr/etc/yp/ypinit		\
+	 etc/newconfig/yp_Makefile	usr/etc/yp/Makefile		\
+	 etc/newconfig/ypmake		usr/etc/yp/ypmake		\
+	 etc/newconfig/ypxfr_1perday	usr/etc/yp/ypxfr_1perday	\
+	 etc/newconfig/ypxfr_1perhour	usr/etc/yp/ypxfr_1perhour	\
+	 etc/newconfig/ypxfr_2perday	usr/etc/yp/ypxfr_2perday
+
+#==========
+#  Copy a default configurable file into place if it doesn't exist on the
+#  user's file system.
+#==========
+
+while [ $# -gt 0 ]; do
+	if [ ! -f $2 ]; then
+		cp $1 $2
+		if [ $? != 0 ]; then
+			echo "ERROR:   cannot cp $1 to $2" 1>&2
+			echo "         Perform this copy manually." 1>&2
+			echo 1>&2
+			EXIT_CODE=1
+		fi
+	fi
+	shift; shift
+done
+
+#==========
+#  Remove outdated filesets.
+#==========
+
+if [ -d $FILESETS_DIR/NFS_MANC ] ; then
+	/etc/sysrm NFS_MANC 2>/dev/null
+	rm -rf $SYSTEM_DIR/NFS_MANC
+fi
+
+if [ -d $FILESETS_DIR/VH50969A ] ; then
+	rm -rf $FILESETS_DIR/VH50969A
+	rm -rf $SYSTEM_DIR/VH50969A
+fi
+
+if [ -d $FILESETS_DIR/NFS_CMDS ] ; then
+	rm -rf $FILESETS_DIR/NFS_CMDS
+	rm -rf $SYSTEM_DIR/NFS_CMDS
+fi
+
+if [ -d $FILESETS_DIR/NFS ] ; then
+	rm -rf $FILESETS_DIR/NFS
+	rm -rf $SYSTEM_DIR/NFS
+fi
+
+
+#==========
+#  Remove an old version of vhe_u_mnt that could cause problems
+#==========
+rm -f $NEWCONFIG_DIR/vhe_u_mnt
+
+#==========
+#  On S800 only, drop a flag in /etc/conf/gen/.regenrc to tell regen that nfs
+#  has been loaded.
+#==========
+
+if [ "$ARCH" = "HP-PA" ] ; then
+	echo "-F" >> $CONF_DIR/gen/.regenrc
+fi	
+
+exit ${EXIT_CODE:-0}

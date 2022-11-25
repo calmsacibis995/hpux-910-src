@@ -1,0 +1,760 @@
+langname	"russian"
+langid	\d180
+
+hprevision	"$Revision: 70.2 $"
+comment_char	'#'
+escape_char	'\'
+##################################
+# Set up the LC_CTYPE category    
+
+LC_CTYPE
+
+upper	'A';'B';'C';'D';'E';'F';'G';'H';'I';'J';'K';'L'; \
+	'M';'N';'O';'P';'Q';'R';'S';'T';'U';'V';'W';'X'; \
+	'Y';'Z';\xa1;\xa2;\xa3;\xa4;\xa5;\xa6;\xa7;\xa8;\xa9;\xaa; \
+	\xab;\xac;\xae;\xaf;\xb0;\xb1;\xb2;\xb3;\xb4;\xb5;\xb6;\xb7; \
+	\xb8;\xb9;\xba;\xbb;\xbc;\xbd;\xbe;\xbf;\xc0;\xc1;\xc2;\xc3; \
+	\xc4;\xc5;\xc6;\xc7;\xc8;\xc9;\xca;\xcb;\xcc;\xcd;\xce;\xcf
+
+lower	'a';'b';'c';'d';'e';'f';'g';'h';'i';'j';'k';'l'; \
+	'm';'n';'o';'p';'q';'r';'s';'t';'u';'v';'w';'x'; \
+	'y';'z';\xd0;\xd1;\xd2;\xd3;\xd4;\xd5;\xd6;\xd7;\xd8;\xd9; \
+	\xda;\xdb;\xdc;\xdd;\xde;\xdf;\xe0;\xe1;\xe2;\xe3;\xe4;\xe5; \
+	\xe6;\xe7;\xe8;\xe9;\xea;\xeb;\xec;\xed;\xee;\xef;\xf1;\xf2; \
+	\xf3;\xf4;\xf5;\xf6;\xf7;\xf8;\xf9;\xfa;\xfb;\xfc;\xfe;\xff
+
+alpha	'A';'B';'C';'D';'E';'F';'G';'H';'I';'J';'K';'L'; \
+	'M';'N';'O';'P';'Q';'R';'S';'T';'U';'V';'W';'X'; \
+	'Y';'Z';'a';'b';'c';'d';'e';'f';'g';'h';'i';'j'; \
+	'k';'l';'m';'n';'o';'p';'q';'r';'s';'t';'u';'v'; \
+	'w';'x';'y';'z';\xa1;\xa2;\xa3;\xa4;\xa5;\xa6;\xa7;\xa8; \
+	\xa9;\xaa;\xab;\xac;\xae;\xaf;\xb0;\xb1;\xb2;\xb3;\xb4;\xb5; \
+	\xb6;\xb7;\xb8;\xb9;\xba;\xbb;\xbc;\xbd;\xbe;\xbf;\xc0;\xc1; \
+	\xc2;\xc3;\xc4;\xc5;\xc6;\xc7;\xc8;\xc9;\xca;\xcb;\xcc;\xcd; \
+	\xce;\xcf;\xd0;\xd1;\xd2;\xd3;\xd4;\xd5;\xd6;\xd7;\xd8;\xd9; \
+	\xda;\xdb;\xdc;\xdd;\xde;\xdf;\xe0;\xe1;\xe2;\xe3;\xe4;\xe5; \
+	\xe6;\xe7;\xe8;\xe9;\xea;\xeb;\xec;\xed;\xee;\xef;\xf1;\xf2; \
+	\xf3;\xf4;\xf5;\xf6;\xf7;\xf8;\xf9;\xfa;\xfb;\xfc;\xfe;\xff
+
+graph	'!';'"';'#';'$';'%';'&';''';'(';')';'*';'+';','; \
+	'-';'.';'/';'0';'1';'2';'3';'4';'5';'6';'7';'8'; \
+	'9';':';';';'<';'=';'>';'?';'@';'A';'B';'C';'D'; \
+	'E';'F';'G';'H';'I';'J';'K';'L';'M';'N';'O';'P'; \
+	'Q';'R';'S';'T';'U';'V';'W';'X';'Y';'Z';'[';'\'; \
+	']';'^';'_';'`';'a';'b';'c';'d';'e';'f';'g';'h'; \
+	'i';'j';'k';'l';'m';'n';'o';'p';'q';'r';'s';'t'; \
+	'u';'v';'w';'x';'y';'z';'{';'|';'}';'~';\xa0;\xa1; \
+	\xa2;\xa3;\xa4;\xa5;\xa6;\xa7;\xa8;\xa9;\xaa;\xab;\xac;\xad; \
+	\xae;\xaf;\xb0;\xb1;\xb2;\xb3;\xb4;\xb5;\xb6;\xb7;\xb8;\xb9; \
+	\xba;\xbb;\xbc;\xbd;\xbe;\xbf;\xc0;\xc1;\xc2;\xc3;\xc4;\xc5; \
+	\xc6;\xc7;\xc8;\xc9;\xca;\xcb;\xcc;\xcd;\xce;\xcf;\xd0;\xd1; \
+	\xd2;\xd3;\xd4;\xd5;\xd6;\xd7;\xd8;\xd9;\xda;\xdb;\xdc;\xdd; \
+	\xde;\xdf;\xe0;\xe1;\xe2;\xe3;\xe4;\xe5;\xe6;\xe7;\xe8;\xe9; \
+	\xea;\xeb;\xec;\xed;\xee;\xef;\xf0;\xf1;\xf2;\xf3;\xf4;\xf5; \
+	\xf6;\xf7;\xf8;\xf9;\xfa;\xfb;\xfc;\xfd;\xfe;\xff
+
+print	' ';'!';'"';'#';'$';'%';'&';''';'(';')';'*';'+'; \
+	',';'-';'.';'/';'0';'1';'2';'3';'4';'5';'6';'7'; \
+	'8';'9';':';';';'<';'=';'>';'?';'@';'A';'B';'C'; \
+	'D';'E';'F';'G';'H';'I';'J';'K';'L';'M';'N';'O'; \
+	'P';'Q';'R';'S';'T';'U';'V';'W';'X';'Y';'Z';'['; \
+	'\';']';'^';'_';'`';'a';'b';'c';'d';'e';'f';'g'; \
+	'h';'i';'j';'k';'l';'m';'n';'o';'p';'q';'r';'s'; \
+	't';'u';'v';'w';'x';'y';'z';'{';'|';'}';'~';\xa0; \
+	\xa1;\xa2;\xa3;\xa4;\xa5;\xa6;\xa7;\xa8;\xa9;\xaa;\xab;\xac; \
+	\xad;\xae;\xaf;\xb0;\xb1;\xb2;\xb3;\xb4;\xb5;\xb6;\xb7;\xb8; \
+	\xb9;\xba;\xbb;\xbc;\xbd;\xbe;\xbf;\xc0;\xc1;\xc2;\xc3;\xc4; \
+	\xc5;\xc6;\xc7;\xc8;\xc9;\xca;\xcb;\xcc;\xcd;\xce;\xcf;\xd0; \
+	\xd1;\xd2;\xd3;\xd4;\xd5;\xd6;\xd7;\xd8;\xd9;\xda;\xdb;\xdc; \
+	\xdd;\xde;\xdf;\xe0;\xe1;\xe2;\xe3;\xe4;\xe5;\xe6;\xe7;\xe8; \
+	\xe9;\xea;\xeb;\xec;\xed;\xee;\xef;\xf0;\xf1;\xf2;\xf3;\xf4; \
+	\xf5;\xf6;\xf7;\xf8;\xf9;\xfa;\xfb;\xfc;\xfd;\xfe;\xff
+
+digit	'0';'1';'2';'3';'4';'5';'6';'7';'8';'9'
+
+space	\x9;\xa;\xb;\xc;\xd;' '
+
+punct	'!';'"';'#';'$';'%';'&';''';'(';')';'*';'+';','; \
+	'-';'.';'/';':';';';'<';'=';'>';'?';'@';'[';'\'; \
+	']';'^';'_';'`';'{';'|';'}';'~';\xad;\xf0;\xfd
+
+cntrl	\x0;\x1;\x2;\x3;\x4;\x5;\x6;\x7;\x8;\x9;\xa;\xb; \
+	\xc;\xd;\xe;\xf;\x10;\x11;\x12;\x13;\x14;\x15;\x16;\x17; \
+	\x18;\x19;\x1a;\x1b;\x1c;\x1d;\x1e;\x1f;\x7f;\x80;\x81;\x82; \
+	\x83;\x84;\x85;\x86;\x87;\x88;\x89;\x8a;\x8b;\x8c;\x8d;\x8e; \
+	\x8f;\x90;\x91;\x92;\x93;\x94;\x95;\x96;\x97;\x98;\x99;\x9a; \
+	\x9b;\x9c;\x9d;\x9e;\x9f
+
+blank	\x9;' '
+
+xdigit	'0';'1';'2';'3';'4';'5';'6';'7';'8';'9';'A';'B'; \
+	'C';'D';'E';'F';'a';'b';'c';'d';'e';'f'
+
+toupper	('a','A');('b','B');('c','C');('d','D'); \
+	('e','E');('f','F');('g','G');('h','H'); \
+	('i','I');('j','J');('k','K');('l','L'); \
+	('m','M');('n','N');('o','O');('p','P'); \
+	('q','Q');('r','R');('s','S');('t','T'); \
+	('u','U');('v','V');('w','W');('x','X'); \
+	('y','Y');('z','Z');(\xd0,\xb0);(\xd1,\xb1); \
+	(\xd2,\xb2);(\xd3,\xb3);(\xd4,\xb4);(\xd5,\xb5); \
+	(\xd6,\xb6);(\xd7,\xb7);(\xd8,\xb8);(\xd9,\xb9); \
+	(\xda,\xba);(\xdb,\xbb);(\xdc,\xbc);(\xdd,\xbd); \
+	(\xde,\xbe);(\xdf,\xbf);(\xe0,\xc0);(\xe1,\xc1); \
+	(\xe2,\xc2);(\xe3,\xc3);(\xe4,\xc4);(\xe5,\xc5); \
+	(\xe6,\xc6);(\xe7,\xc7);(\xe8,\xc8);(\xe9,\xc9); \
+	(\xea,\xca);(\xeb,\xcb);(\xec,\xcc);(\xed,\xcd); \
+	(\xee,\xce);(\xef,\xcf);(\xf1,\xa1);(\xf2,\xa2); \
+	(\xf3,\xa3);(\xf4,\xa4);(\xf5,\xa5);(\xf6,\xa6); \
+	(\xf7,\xa7);(\xf8,\xa8);(\xf9,\xa9);(\xfa,\xaa); \
+	(\xfb,\xab);(\xfc,\xac);(\xfe,\xae);(\xff,\xaf)
+
+tolower	('A','a');('B','b');('C','c');('D','d'); \
+	('E','e');('F','f');('G','g');('H','h'); \
+	('I','i');('J','j');('K','k');('L','l'); \
+	('M','m');('N','n');('O','o');('P','p'); \
+	('Q','q');('R','r');('S','s');('T','t'); \
+	('U','u');('V','v');('W','w');('X','x'); \
+	('Y','y');('Z','z');(\xa1,\xf1);(\xa2,\xf2); \
+	(\xa3,\xf3);(\xa4,\xf4);(\xa5,\xf5);(\xa6,\xf6); \
+	(\xa7,\xf7);(\xa8,\xf8);(\xa9,\xf9);(\xaa,\xfa); \
+	(\xab,\xfb);(\xac,\xfc);(\xae,\xfe);(\xaf,\xff); \
+	(\xb0,\xd0);(\xb1,\xd1);(\xb2,\xd2);(\xb3,\xd3); \
+	(\xb4,\xd4);(\xb5,\xd5);(\xb6,\xd6);(\xb7,\xd7); \
+	(\xb8,\xd8);(\xb9,\xd9);(\xba,\xda);(\xbb,\xdb); \
+	(\xbc,\xdc);(\xbd,\xdd);(\xbe,\xde);(\xbf,\xdf); \
+	(\xc0,\xe0);(\xc1,\xe1);(\xc2,\xe2);(\xc3,\xe3); \
+	(\xc4,\xe4);(\xc5,\xe5);(\xc6,\xe6);(\xc7,\xe7); \
+	(\xc8,\xe8);(\xc9,\xe9);(\xca,\xea);(\xcb,\xeb); \
+	(\xcc,\xec);(\xcd,\xed);(\xce,\xee);(\xcf,\xef)
+
+bytes_char	"1"
+alt_punct	""
+code_scheme	""
+cswidth	""
+END LC_CTYPE
+
+
+##################################
+# Set up the LC_COLLATE category    
+
+LC_COLLATE
+modifier	"fold"
+
+
+order_start
+' '	' '
+\xa0	\xa0
+'-'	'-'
+\xad	\xad
+'''	'''
+'"'	'"'
+'.'	'.'
+'!'	'!'
+'?'	'?'
+','	','
+';'	';'
+':'	':'
+'('	'('
+')'	')'
+\xb0	\xb0;\xb0
+\xd0	\xb0;\xd0
+\xb1	\xb1;\xb1
+\xd1	\xb1;\xd1
+\xb2	\xb2;\xb2
+\xd2	\xb2;\xd2
+\xb3	\xb3;\xb3
+\xd3	\xb3;\xd3
+\xb4	\xb4;\xb4
+\xd4	\xb4;\xd4
+\xa2	\xa2;\xa2
+\xf2	\xa2;\xf2
+\xa3	\xa3;\xa3
+\xf3	\xa3;\xf3
+\xb5	\xb5;\xb5
+\xd5	\xb5;\xd5
+\xa1	\xa1;\xa1
+\xf1	\xa1;\xf1
+\xa4	\xa4;\xa4
+\xf4	\xa4;\xf4
+\xb6	\xb6;\xb6
+\xd6	\xb6;\xd6
+\xb7	\xb7;\xb7
+\xd7	\xb7;\xd7
+\xa5	\xa5;\xa5
+\xf5	\xa5;\xf5
+\xb8	\xb8;\xb8
+\xd8	\xb8;\xd8
+\xa6	\xa6;\xa6
+\xf6	\xa6;\xf6
+\xa7	\xa7;\xa7
+\xf7	\xa7;\xf7
+\xa8	\xa8;\xa8
+\xf8	\xa8;\xf8
+\xb9	\xb9;\xb9
+\xd9	\xb9;\xd9
+\xba	\xba;\xba
+\xda	\xba;\xda
+\xbb	\xbb;\xbb
+\xdb	\xbb;\xdb
+\xa9	\xa9;\xa9
+\xf9	\xa9;\xf9
+\xbc	\xbc;\xbc
+\xdc	\xbc;\xdc
+\xbd	\xbd;\xbd
+\xdd	\xbd;\xdd
+\xaa	\xaa;\xaa
+\xfa	\xaa;\xfa
+\xbe	\xbe;\xbe
+\xde	\xbe;\xde
+\xbf	\xbf;\xbf
+\xdf	\xbf;\xdf
+\xc0	\xc0;\xc0
+\xe0	\xc0;\xe0
+\xc1	\xc1;\xc1
+\xe1	\xc1;\xe1
+\xc2	\xc2;\xc2
+\xe2	\xc2;\xe2
+\xab	\xab;\xab
+\xfb	\xab;\xfb
+\xac	\xac;\xac
+\xfc	\xac;\xfc
+\xc3	\xc3;\xc3
+\xe3	\xc3;\xe3
+\xae	\xae;\xae
+\xfe	\xae;\xfe
+\xc4	\xc4;\xc4
+\xe4	\xc4;\xe4
+\xc5	\xc5;\xc5
+\xe5	\xc5;\xe5
+\xc6	\xc6;\xc6
+\xe6	\xc6;\xe6
+\xc7	\xc7;\xc7
+\xe7	\xc7;\xe7
+\xaf	\xaf;\xaf
+\xff	\xaf;\xff
+\xc8	\xc8;\xc8
+\xe8	\xc8;\xe8
+\xc9	\xc9;\xc9
+\xe9	\xc9;\xe9
+\xca	\xca;\xca
+\xea	\xca;\xea
+\xcb	\xcb;\xcb
+\xeb	\xcb;\xeb
+\xcc	\xcc;\xcc
+\xec	\xcc;\xec
+\xcd	\xcd;\xcd
+\xed	\xcd;\xed
+\xce	\xce;\xce
+\xee	\xce;\xee
+\xcf	\xcf;\xcf
+\xef	\xcf;\xef
+'0'	'0'
+'1'	'1'
+'2'	'2'
+'3'	'3'
+'4'	'4'
+'5'	'5'
+'6'	'6'
+'7'	'7'
+'8'	'8'
+'9'	'9'
+'A'	'A';'A'
+'a'	'A';'a'
+'B'	'B';'B'
+'b'	'B';'b'
+'C'	'C';'C'
+'c'	'C';'c'
+'D'	'D';'D'
+'d'	'D';'d'
+'E'	'E';'E'
+'e'	'E';'e'
+'F'	'F';'F'
+'f'	'F';'f'
+'G'	'G';'G'
+'g'	'G';'g'
+'H'	'H';'H'
+'h'	'H';'h'
+'I'	'I';'I'
+'i'	'I';'i'
+'J'	'J';'J'
+'j'	'J';'j'
+'K'	'K';'K'
+'k'	'K';'k'
+'L'	'L';'L'
+'l'	'L';'l'
+'M'	'M';'M'
+'m'	'M';'m'
+'N'	'N';'N'
+'n'	'N';'n'
+'O'	'O';'O'
+'o'	'O';'o'
+'P'	'P';'P'
+'p'	'P';'p'
+'Q'	'Q';'Q'
+'q'	'Q';'q'
+'R'	'R';'R'
+'r'	'R';'r'
+'S'	'S';'S'
+'s'	'S';'s'
+'T'	'T';'T'
+'t'	'T';'t'
+'U'	'U';'U'
+'u'	'U';'u'
+'V'	'V';'V'
+'v'	'V';'v'
+'W'	'W';'W'
+'w'	'W';'w'
+'X'	'X';'X'
+'x'	'X';'x'
+'Y'	'Y';'Y'
+'y'	'Y';'y'
+'Z'	'Z';'Z'
+'z'	'Z';'z'
+\xf0	\xf0
+'['	'['
+']'	']'
+'{'	'{'
+'}'	'}'
+'<'	'<'
+'>'	'>'
+'='	'='
+'+'	'+'
+'%'	'%'
+'*'	'*'
+'/'	'/'
+'\'	'\'
+'|'	'|'
+'@'	'@'
+'&'	'&'
+'#'	'#'
+'$'	'$'
+\xfd	\xfd
+'`'	'`'
+'^'	'^'
+'~'	'~'
+'_'	'_'
+\x0	\x0
+\x1	\x1
+\x2	\x2
+\x3	\x3
+\x4	\x4
+\x5	\x5
+\x6	\x6
+\x7	\x7
+\x8	\x8
+\x9	\x9
+\xa	\xa
+\xb	\xb
+\xc	\xc
+\xd	\xd
+\xe	\xe
+\xf	\xf
+\x10	\x10
+\x11	\x11
+\x12	\x12
+\x13	\x13
+\x14	\x14
+\x15	\x15
+\x16	\x16
+\x17	\x17
+\x18	\x18
+\x19	\x19
+\x1a	\x1a
+\x1b	\x1b
+\x1c	\x1c
+\x1d	\x1d
+\x1e	\x1e
+\x1f	\x1f
+\x80	\x80
+\x81	\x81
+\x82	\x82
+\x83	\x83
+\x84	\x84
+\x85	\x85
+\x86	\x86
+\x87	\x87
+\x88	\x88
+\x89	\x89
+\x8a	\x8a
+\x8b	\x8b
+\x8c	\x8c
+\x8d	\x8d
+\x8e	\x8e
+\x8f	\x8f
+\x90	\x90
+\x91	\x91
+\x92	\x92
+\x93	\x93
+\x94	\x94
+\x95	\x95
+\x96	\x96
+\x97	\x97
+\x98	\x98
+\x99	\x99
+\x9a	\x9a
+\x9b	\x9b
+\x9c	\x9c
+\x9d	\x9d
+\x9e	\x9e
+\x9f	\x9f
+\x7f	\x7f
+order_end
+
+modifier	"nofold"
+
+
+order_start
+' '	' '
+\xa0	\xa0
+'-'	'-'
+\xad	\xad
+'''	'''
+'"'	'"'
+'.'	'.'
+'!'	'!'
+'?'	'?'
+','	','
+';'	';'
+':'	':'
+'('	'('
+')'	')'
+\xb0	\xb0
+\xb1	\xb1
+\xb2	\xb2
+\xb3	\xb3
+\xb4	\xb4
+\xa2	\xa2
+\xa3	\xa3
+\xb5	\xb5
+\xa1	\xa1
+\xa4	\xa4
+\xb6	\xb6
+\xb7	\xb7
+\xa5	\xa5
+\xb8	\xb8
+\xa6	\xa6
+\xa7	\xa7
+\xa8	\xa8
+\xb9	\xb9
+\xba	\xba
+\xbb	\xbb
+\xa9	\xa9
+\xbc	\xbc
+\xbd	\xbd
+\xaa	\xaa
+\xbe	\xbe
+\xbf	\xbf
+\xc0	\xc0
+\xc1	\xc1
+\xc2	\xc2
+\xab	\xab
+\xac	\xac
+\xc3	\xc3
+\xae	\xae
+\xc4	\xc4
+\xc5	\xc5
+\xc6	\xc6
+\xc7	\xc7
+\xaf	\xaf
+\xc8	\xc8
+\xc9	\xc9
+\xca	\xca
+\xcb	\xcb
+\xcc	\xcc
+\xcd	\xcd
+\xce	\xce
+\xcf	\xcf
+\xd0	\xd0
+\xd1	\xd1
+\xd2	\xd2
+\xd3	\xd3
+\xd4	\xd4
+\xf2	\xf2
+\xf3	\xf3
+\xd5	\xd5
+\xf1	\xf1
+\xf4	\xf4
+\xd6	\xd6
+\xd7	\xd7
+\xf5	\xf5
+\xd8	\xd8
+\xf6	\xf6
+\xf7	\xf7
+\xf8	\xf8
+\xd9	\xd9
+\xda	\xda
+\xdb	\xdb
+\xf9	\xf9
+\xdc	\xdc
+\xdd	\xdd
+\xfa	\xfa
+\xde	\xde
+\xdf	\xdf
+\xe0	\xe0
+\xe1	\xe1
+\xe2	\xe2
+\xfb	\xfb
+\xfc	\xfc
+\xe3	\xe3
+\xfe	\xfe
+\xe4	\xe4
+\xe5	\xe5
+\xe6	\xe6
+\xe7	\xe7
+\xff	\xff
+\xe8	\xe8
+\xe9	\xe9
+\xea	\xea
+\xeb	\xeb
+\xec	\xec
+\xed	\xed
+\xee	\xee
+\xef	\xef
+'0'	'0'
+'1'	'1'
+'2'	'2'
+'3'	'3'
+'4'	'4'
+'5'	'5'
+'6'	'6'
+'7'	'7'
+'8'	'8'
+'9'	'9'
+'A'	'A'
+'B'	'B'
+'C'	'C'
+'D'	'D'
+'E'	'E'
+'F'	'F'
+'G'	'G'
+'H'	'H'
+'I'	'I'
+'J'	'J'
+'K'	'K'
+'L'	'L'
+'M'	'M'
+'N'	'N'
+'O'	'O'
+'P'	'P'
+'Q'	'Q'
+'R'	'R'
+'S'	'S'
+'T'	'T'
+'U'	'U'
+'V'	'V'
+'W'	'W'
+'X'	'X'
+'Y'	'Y'
+'Z'	'Z'
+'a'	'a'
+'b'	'b'
+'c'	'c'
+'d'	'd'
+'e'	'e'
+'f'	'f'
+'g'	'g'
+'h'	'h'
+'i'	'i'
+'j'	'j'
+'k'	'k'
+'l'	'l'
+'m'	'm'
+'n'	'n'
+'o'	'o'
+'p'	'p'
+'q'	'q'
+'r'	'r'
+'s'	's'
+'t'	't'
+'u'	'u'
+'v'	'v'
+'w'	'w'
+'x'	'x'
+'y'	'y'
+'z'	'z'
+\xf0	\xf0
+'['	'['
+']'	']'
+'{'	'{'
+'}'	'}'
+'<'	'<'
+'>'	'>'
+'='	'='
+'+'	'+'
+'%'	'%'
+'*'	'*'
+'/'	'/'
+'\'	'\'
+'|'	'|'
+'@'	'@'
+'&'	'&'
+'#'	'#'
+'$'	'$'
+\xfd	\xfd
+'`'	'`'
+'^'	'^'
+'~'	'~'
+'_'	'_'
+\x0	\x0
+\x1	\x1
+\x2	\x2
+\x3	\x3
+\x4	\x4
+\x5	\x5
+\x6	\x6
+\x7	\x7
+\x8	\x8
+\x9	\x9
+\xa	\xa
+\xb	\xb
+\xc	\xc
+\xd	\xd
+\xe	\xe
+\xf	\xf
+\x10	\x10
+\x11	\x11
+\x12	\x12
+\x13	\x13
+\x14	\x14
+\x15	\x15
+\x16	\x16
+\x17	\x17
+\x18	\x18
+\x19	\x19
+\x1a	\x1a
+\x1b	\x1b
+\x1c	\x1c
+\x1d	\x1d
+\x1e	\x1e
+\x1f	\x1f
+\x80	\x80
+\x81	\x81
+\x82	\x82
+\x83	\x83
+\x84	\x84
+\x85	\x85
+\x86	\x86
+\x87	\x87
+\x88	\x88
+\x89	\x89
+\x8a	\x8a
+\x8b	\x8b
+\x8c	\x8c
+\x8d	\x8d
+\x8e	\x8e
+\x8f	\x8f
+\x90	\x90
+\x91	\x91
+\x92	\x92
+\x93	\x93
+\x94	\x94
+\x95	\x95
+\x96	\x96
+\x97	\x97
+\x98	\x98
+\x99	\x99
+\x9a	\x9a
+\x9b	\x9b
+\x9c	\x9c
+\x9d	\x9d
+\x9e	\x9e
+\x9f	\x9f
+\x7f	\x7f
+order_end
+END LC_COLLATE
+
+
+##################################
+# Set up the LC_MONETARY category    
+
+LC_MONETARY
+int_curr_symbol	"SUR "
+currency_symbol	"\300\303\261."
+mon_decimal_point	"."
+mon_thousands_sep	" "
+mon_grouping	3;0
+positive_sign	""
+negative_sign	"-"
+int_frac_digits	"2"
+frac_digits	"2"
+p_cs_precedes	"0"
+p_sep_by_space	"1"
+n_cs_precedes	"0"
+n_sep_by_space	"1"
+p_sign_posn	"1"
+n_sign_posn	"1"
+crncystr	"+ \300\303\261."
+END LC_MONETARY
+
+
+##################################
+# Set up the LC_NUMERIC category    
+
+LC_NUMERIC
+decimal_point	"."
+thousands_sep	" "
+grouping	3;0
+alt_digit	""
+END LC_NUMERIC
+
+
+##################################
+# Set up the LC_TIME category    
+
+LC_TIME
+d_t_fmt	"%a, %.1d %b %Y %H:%M:%S"
+d_fmt	"%a, %.1d %b %Y"
+t_fmt	"%H:%M:%S"
+t_fmt_ampm	"%H:%M:%S"
+day	"\262\276\301\272\300\265\301\265\275\314\265";"\277\276\275\265\264\265\273\314\275\270\272"; \
+	"\262\302\276\300\275\270\272";"\301\300\265\264\260"; \
+	"\307\265\302\262\265\300\263";"\277\317\302\275\270\306\260"; \
+	"\301\303\261\261\276\302\260"
+abday	"\262\301";"\277\275"; \
+	"\262\302";"\301\300"; \
+	"\307\302";"\277\302"; \
+	"\301\261"
+mon	"\317\275\262\260\300\317";"\304\265\262\300\260\273\317"; \
+	"\274\260\300\302\260";"\260\277\300\265\273\317"; \
+	"\274\260\317";"\270\316\275\317"; \
+	"\270\316\273\317";"\260\262\263\303\301\302\260"; \
+	"\301\265\275\302\317\261\300\317";"\276\272\302\317\261\300\317"; \
+	"\275\276\317\261\300\317";"\264\265\272\260\261\300\317"
+abmon	"\317\275\262";"\304\265\262\300";\
+	"\274\260\300\302";"\260\277\300"; \
+	"\274\260\317";"\270\316\275\317"; \
+	"\270\316\273\317";"\260\262\263"; \
+	"\301\265\275\302";"\276\272\302"; \
+	"\275\276\317\261";"\264\265\272"
+am_pm	"";""
+year_unit	""
+mon_unit	""
+day_unit	""
+hour_unit	""
+min_unit	""
+sec_unit	""
+era_d_fmt	""
+END LC_TIME
+
+
+##################################
+# Set up the LC_MESSAGES category    
+
+LC_MESSAGES
+yesexpr	"YES"
+noexpr	"NO"
+yesstr	"YES"
+nostr	"NO"
+END LC_MESSAGES
+
+
+##################################
+# Set up the LC_ALL category    
+
+LC_ALL
+direction	""
+context	""
+END LC_ALL
+
+

@@ -1,0 +1,235 @@
+#! /bin/sh
+## name : lines
+##
+## description : counts the number of lines that have changed in the
+##	$Nfs development environment since the date on the command line.
+##
+## parameters : year, month, day, and optionally hour and second
+##
+
+# check arguments
+
+YY=${1:?'usage : lines YY MM DD [HH] [SS]'}
+MM=${2:?'usage : lines YY MM DD [HH] [SS]'}
+DD=${3:?'usage : lines YY MM DD [HH] [SS]'}
+HH=${4:-01}
+MIN=${5:-01}
+
+if [ $MM -lt 01 -o $MM -gt 12 ]; then
+	echo error: invalid month argument
+	exit 1
+fi
+
+if [ $DD -lt 01 -o $DD -gt 31 ]; then
+	echo error: invalid day argument
+	exit 1
+fi
+
+if [ `expr length $MM` -eq 1 ]; then
+	MM=0$MM
+fi
+if [ `expr length $DD` -eq 1 ]; then
+	DD=0$DD
+fi
+
+DATE=$YY$MM$DD$HH$MIN
+GDATE=$YY.$MM.$DD
+LOGFILE=/nfs/working/log/update
+SCCS=/nfs/working/sccs
+DASHES="-------------------------------------------------------------------------------"
+
+echo "          NFS MODULES THAT HAVE CHANGED SINCE $YY/$MM/$DD $HH:$MIN"
+echo
+
+# get all names of code that have changed since $GDATE from $LOGFILE
+
+echo "\$1 >= \"$GDATE\" {print \$4}" >tmp.awk
+
+grep "^[0-9]\{2\}[.][0-9]\{2\}[.][0-9]\{2\}" $LOGFILE | awk -f tmp.awk | sort -u >tmp.mod
+
+prs_files() {
+    COUNT=0
+    LINSERT=0
+    LDELETE=0
+    while [ -n "$1" ]
+    do
+	BASE=`basename $1`
+	SCCSFILE=`echo $1 | sed "s/$BASE/s.$BASE/g"`
+
+	if [ ! -r $SCCS/$SCCSFILE ]; then
+	    shift
+	    continue
+	fi
+
+	prs -l -c$DATE -d":I: :D: :P: :Li: :Ld:" $SCCS/$SCCSFILE >tmp.out 2>tmp.err
+
+	if [ -s tmp.err ]; then
+	    if [ "`grep 'format error' tmp.err`" ]; then
+		if [ "`grep '^%%' $SCCS/$SCCSFILE `" ]
+		then
+		    HOST=`awk '{ print $2 }' $SCCS/$SCCSFILE`
+		    FILE=`awk '{ print $3 }' $SCCS/$SCCSFILE`
+		    remsh $HOST "prs -l -c$DATE -d\":I: :D: :P: :Li: :Ld:\"" $FILE >tmp.out 2>tmp.err
+		fi
+	    fi
+	fi
+
+	if [ -s tmp.err ]; then
+	    echo $1 ERR ERROR ERROR | awk '{ printf("%-45s   %-4s   %-8s   %-8s\n", $1, $2, $3, $4); }'
+	    COUNT=`expr $COUNT + 1`
+	fi
+
+	if [ -s tmp.out ]; then
+	    VERS=`head -1 tmp.out | awk '{print $1}'`
+	    DAT=`head -1 tmp.out | awk '{print $2}'`
+	    PERSON=`head -1 tmp.out | awk '{print $3}'`
+
+	    echo $1 $VERS $DAT $PERSON | awk '{ printf("%-45s   %-4s   %-8s   %-8s\n", $1, $2, $3, $4); }'
+
+	    for lines in `cat tmp.out | awk '{print $4'}`
+	    do
+	    	LINSERT=`expr $LINSERT + $lines`
+	    done
+	    for lines in `cat tmp.out | awk '{print $5'}`
+	    do
+	    	LDELETE=`expr $LDELETE + $lines`
+	    done
+	
+	    COUNT=`expr $COUNT + 1`
+	fi
+
+	shift
+
+    done
+
+    echo
+    echo $COUNT files have changed, $LDELETE lines have been deleted, $LINSERT lines have been inserted
+    echo $DASHES
+    echo
+    TOTINSERT=`expr $TOTINSERT + $LINSERT`
+    TOTDELETE=`expr $TOTDELETE + $LDELETE`
+    TOTCOUNT=`expr $TOTCOUNT + $COUNT`
+}
+
+prs_type () {
+
+    TYPE=$1
+    TYPECINSERT=0
+    TYPECDELETE=0
+    TYPEHINSERT=0
+    TYPEHDELETE=0
+
+    FILES=`grep "^$TYPE" tmp.mod | grep "[.]c"`
+
+    if [ -n "$FILES" ]
+    then
+    	echo "$TYPE c files that have changed since $YY/$MM/$DD"
+    	echo
+
+    	prs_files $FILES
+    	TOTCINSERT=`expr $TOTCINSERT + $LINSERT`
+    	TOTCDELETE=`expr $TOTCDELETE + $LDELETE`
+	TYPECINSERT=$LINSERT
+	TYPECDELETE=$LDELETE
+    fi
+
+    FILES=`grep "^$TYPE" tmp.mod | grep "[.]h"`
+
+    if [ -n "$FILES" ]; then
+	echo "$TYPE header files that have changed since $YY/$MM/$DD"
+	echo
+    
+    	prs_files $FILES
+    	TOTHINSERT=`expr $TOTHINSERT + $LINSERT`
+    	TOTHDELETE=`expr $TOTHDELETE + $LDELETE`
+	TYPEHINSERT=$LINSERT
+	TYPEHDELETE=$LDELETE
+    fi
+
+    FILES=`grep "^$TYPE" tmp.mod | grep -v "[.]h" | grep -v "[.]c"` 
+
+    if [ -n "$FILES" ]; then
+    	echo "$TYPE misc files that have changed since $YY/$MM/$DD"
+    	echo
+
+    	prs_files $FILES
+    fi
+
+    grep -v "^$TYPE" tmp.mod > tmp.out
+    mv tmp.out tmp.mod
+}
+
+TOTINSERT=0
+TOTDELETE=0
+TOTCOUNT=0
+TOTCDELETE=0
+TOTCINSERT=0
+TOTHDELETE=0
+TOTHINSERT=0
+
+prs_type "bin"
+
+prs_type "cmds/libc"
+
+LIBCCINS=$TYPECINSERT
+LIBCCDEL=$TYPECDELETE
+LIBCHINS=$TYPEHINSERT
+LIBCHDEL=$TYPEHDELETE
+
+prs_type cmds
+
+CMDSCINS=$TYPECINSERT
+CMDSCDEL=$TYPECDELETE
+CMDSHINS=$TYPEHINSERT
+CMDSHDEL=$TYPEHDELETE
+
+prs_type doc
+
+prs_type include
+
+prs_type kernel
+
+KERNCINS=$TYPECINSERT
+KERNCDEL=$TYPECDELETE
+KERNHINS=$TYPEHINSERT
+KERNHDEL=$TYPEHDELETE
+
+prs_type man
+
+prs_type system
+
+prs_type test
+
+echo ""
+echo $DASHES
+echo "                              TOTALS"
+echo $DASHES
+echo ""
+echo "total inserted - $TOTINSERT "
+echo "total deleted  - $TOTDELETE "
+echo "total files changed - $TOTCOUNT"
+echo ""
+echo "total lines inserted in c files - $TOTCINSERT"
+echo "total lines deleted in c files  - $TOTCDELETE"
+echo ""
+echo "total lines inserted in h files - $TOTHINSERT"
+echo "total lines deleted in h files  - $TOTHDELETE"
+echo ""
+echo "total lines inserted in libc c files - $LIBCCINS"
+echo "total lines deleted in libc c files - $LIBCCDEL"
+echo "total lines inserted in libc h files - $LIBCHINS"
+echo "total lines deleted in libc h files - $LIBCHDEL"
+echo ""
+echo "total lines inserted in cmds c files - $CMDSCINS"
+echo "total lines deleted in cmds c files - $CMDSCDEL"
+echo "total lines inserted in cmds h files - $CMDSHINS"
+echo "total lines deleted in cmds h files - $CMDSHDEL"
+echo ""
+echo "total lines inserted in kernel c files - $KERNCINS"
+echo "total lines deleted in kernel c files - $KERNCDEL"
+echo "total lines inserted in kernel h files - $KERNHINS"
+echo "total lines deleted in kernel h files - $KERNHDEL"
+echo ""
+echo "\t\t" `date`
+rm -f tmp.mod tmp.awk tmp.err tmp.out
+exit

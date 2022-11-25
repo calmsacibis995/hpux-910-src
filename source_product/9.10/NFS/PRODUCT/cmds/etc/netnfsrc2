@@ -1,0 +1,102 @@
+#!/bin/sh
+##	@(#)netnfsrc2:	$Revision: 1.6.109.2 $	$Date: 92/01/31 15:25:40 $
+#
+# This file is called by netlinkrc if the file /etc/nfs.up has been
+# created by /etc/netnfsrc. The /etc/nfs.up is a flag created by 
+# /etc/netnfsrc only if NFS_CLIENT != 0. The purpose of this file is 
+# to do the unmounting of mounted file systems and mounting the ones 
+# specified in /etc/checklist AFTER inetd has been started by 
+# /etc/netlinkrc.
+##
+#
+##
+# Clean out the /etc/rmtab files on any system which this system may
+# have had remotely mounted.  Note that this is done only on standalone
+# systems and diskless root servers.
+##
+
+# save the return status of the first error
+returnstatus=0
+
+##
+#   set_return sets returnstatus to be the exit value
+#   of the previous command only if returnstatus is not
+#   already set
+#   This prevents it from being reset.
+##
+set_return () {
+
+save=$?
+
+if [ $returnstatus = 0 ] ; then
+   returnstatus=$save
+fi
+
+}
+
+	if [ -f /bin/getcontext ] ; then
+	    /bin/getcontext | /bin/grep localroot > /dev/null
+	    if [ $? -eq 0 ] ; then
+		/etc/umount -at nfs
+		set_return
+	    fi
+	else
+	    /etc/umount -at nfs
+	    set_return
+	fi
+
+##
+# mount the nfs file systems specified in /etc/checklist.
+##
+	echo "\tmounting remote NFS file systems ..."
+	/etc/mount -at nfs
+	set_return
+
+##
+# Start the automount daemon with the mount points specified in the
+# auto.master NIS map.  If NIS is not running or the auto.master map
+# is not available, automount will exit silently.  Note that this is
+# done only on standalone systems and diskless root servers.
+##
+
+	if [ -f /bin/getcontext ] ; then
+	    /bin/getcontext | /bin/grep localroot > /dev/null
+	    if [ $? -eq 0 ] ; then
+		if [ -f /usr/etc/automount ]; then
+		     echo "    starting up the Automount daemon" && echo "\t/usr/etc/automount"
+		    /usr/etc/automount 
+                    save=$?
+                    if [ $save = 3 ] ; then
+                      echo "\tNo Maps were specified " 
+                    else
+                       if [ $returnstatus = 0 ] ; then
+                          returnstatus=$save
+                       fi
+                    fi
+		fi
+	    fi
+	else
+		if [ -f /usr/etc/automount ]; then
+		     echo "    Starting up the Automount daemon" && \
+                     echo "\t/usr/etc/automount"
+		    /usr/etc/automount 
+                    save=$?
+                    if [ $save = 3 ] ; then
+                      echo "\t No Maps were specified " 
+                    else
+                       if [ $returnstatus = 0 ] ; then
+                          returnstatus=$save
+                       fi
+                    fi
+		fi
+	fi
+
+##
+# remove the flag file /etc/nfs.up
+##
+	/bin/rm -f /etc/nfs.up
+	set_return
+
+exit $returnstatus
+
+

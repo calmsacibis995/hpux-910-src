@@ -1,0 +1,86 @@
+#############################################################################
+### tsmuitext   
+### @(#) $Header: tsmuitext,v 70.1 92/06/11 19:41:02 ssa Exp $
+#############################################################################
+### Changing TSM User Interface text strings.
+### 
+###     Any of the text strings output to the terminal by tsm.ui such
+###     as prompts or user errors can be redefined.  An example of
+###     the use of this feature would be changing the language to something
+###     other than English.
+### 
+###     TSM will search along the following paths (in order) for this file name.
+###         ./.tsmtext/$LANG/
+###         ./.tsmtext/C/
+###         ./.tsmtext/
+###         $HOME/.tsmtext/$LANG/
+###         $HOME/.tsmtext/C/
+###         $HOME/.tsmtext/
+###         /usr/tsm/text/$LANG/
+###         /usr/tsm/text/C/
+###         /usr/tsm/text/
+###
+###     It is recommended that you copy this file to $HOME/.tsmtext/
+###     for customization.
+###
+###     If tsm has not been installed in the standard path, /usr/tsm,
+###     then set the environment variable, $TSMPATH to the location of
+###     tsm directory on your system.
+### 
+###     If this file exists, tsm.ui will read it
+###     looking for lines of the form:
+### 
+###             !text_string_name
+### 
+###     where the  "!"  must be in column 1, and the "text_string_name" 
+###     matches one of the names of the strings that can be redefined.
+### 
+###     Upon finding such a line, the contents of the next line that does
+###     not begin with a "#" replaces the default contents of the text
+###     string.
+### 
+###     For example, a file that contains the following:
+### 
+###             !must_run_on_window
+###             #Menu must run on a TSM window\n
+###             tsm.ui must be run with TSM\n
+### 
+###     will change the default message shown on the line starting with
+###     the '#' to the new contents shown on the line after it.
+### 
+###     The file "/usr/tsm/text/C/tsmuitext" contains all of the valid
+###     text string names and the default contents of the strings.
+### 
+###     The processor for these strings understands:
+### 
+###             \r      for carriage return
+###             \n      for line feed
+###             \s      for space
+###             \\      for backslash
+### 
+###     Since the terminal is in raw mode when some of these strings are
+###     output, you may see the combination "\r\n" used for going to the
+###     beginning of the next line. "\s" is used for trailing spaces to
+###     make them visible.
+#############################################################################
+
+# LOCALIZERS
+#   The items in this file are localized the same way as those in tsmtext.
+#   Refer to README_FIRST file for general descritption.
+
+!must_run_on_window
+# Menu must run on a TSM window\n
+Menœ muﬁ in einer TSM-Session laufen\n
+
+!first_menu_not_found
+# First menu file not found ... exiting\r\n
+Erste Menœdatei nicht gefunden ... Ende\r\n
+
+!menu_window_title
+# BE SURE TO INCLUDE LEADING '
+# 'TSM Menu\r
+'TSM-Menœ\r
+
+!window_selection_menu_title
+# Window Selection
+Sessionauswahl

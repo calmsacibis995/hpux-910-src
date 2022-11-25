@@ -1,0 +1,94 @@
+#!/bin/sh
+##	@(#)$Revision: 1.5.109.1 $	$Date: 91/11/19 13:53:45 $
+#	bfatrans	--	transfer BFA commands to some system
+##
+#	input:	name of system to transfer BFA commands to
+#	result:	copies /BFA/* databases to the remote host
+#	result:	copies BFA commands to their desired destinations
+##
+#	Note:	the user running this script must have remsh equivalence
+#		to root on the remote host, as it will remsh -l root and
+#		rcp to $HOST.root!
+#	Note:	the user running this script must have remsh equivalence
+#		to hpcndm, as it will remsh hpcndm and rcp from hpcndm.$USER
+#		to $HOST.root!. 
+#	Note:	the target machine should not be running any of the commands
+#		which are being copied over (except inetd).
+#	Note:	after this script runs, login to the remote host, kill
+#		the inetd, copy /tmp/inetd.bfa to /etc/inetd;
+#		then, "ln -f /hp-ux.bfa /hp-ux" and reboot.
+##
+
+if [ $# -lt 1 -o $# -gt 2 ] ; then
+    echo usage: `basename $0` hostname [-bfa]
+    exit 1
+else
+    HOST=$1
+    ROOT=root
+    BFAFLAG=${2:+.b}
+    MACH=${HOST}.${ROOT}
+    USER=`whoami`
+fi
+
+echo `date "+%y.%m.%d %T"` $0 started
+
+if remsh ${HOST} -l ${ROOT} /bin/echo Proceeding with transfer ; then
+	if [ 1 ] ; then
+	    remsh ${HOST} -l ${ROOT} mkdir /users/chm/BFA 2> /dev/null
+	    echo "rcp /users/chm/BFA/*.B ${MACH}:/users/chm/BFA & ..."
+	    rcp hpcndm.${USER}:/users/chm/BFA/\*.B ${MACH}:/users/chm/BFA &
+	fi
+else
+    echo ERROR: cannot transfer to ${HOST} as ${ROOT}
+    exit 1
+fi
+
+set -x
+
+rcp $nfs/cmds/bin/800/domainname${BFAFLAG} ${MACH}:/bin/domainname
+rcp $nfs/cmds/etc/800/biod${BFAFLAG} ${MACH}:/etc/biod
+rcp $nfs/cmds/etc/800/fsirand${BFAFLAG} ${MACH}:/etc/fsirand
+rcp $nfs/cmds/etc/800/nfsd${BFAFLAG} ${MACH}:/etc/nfsd
+rcp $nfs/cmds/etc/800/pcnfsd${BFAFLAG} ${MACH}:/etc/pcnfsd
+rcp $nfs/cmds/etc/800/portmap${BFAFLAG} ${MACH}:/etc/portmap
+rcp $nfs/cmds/etc/800/ypbind${BFAFLAG} ${MACH}:/etc/ypbind
+rcp $nfs/cmds/ucb/800/rup${BFAFLAG} ${MACH}:/usr/bin/rup
+rcp $nfs/cmds/ucb/800/rusers${BFAFLAG} ${MACH}:/usr/bin/rusers
+rcp $nfs/cmds/usr.bin/800/ypcat${BFAFLAG} ${MACH}:/usr/bin/ypcat
+rcp $nfs/cmds/usr.bin/800/ypmatch${BFAFLAG} ${MACH}:/usr/bin/ypmatch
+rcp $nfs/cmds/usr.bin/800/yppasswd${BFAFLAG} ${MACH}:/usr/bin/yppasswd
+rcp $nfs/cmds/usr.bin/800/ypwhich${BFAFLAG} ${MACH}:/usr/bin/ypwhich
+rcp $nfs/cmds/usr.etc/800/nfsstat${BFAFLAG} ${MACH}:/usr/etc/nfsstat
+rcp $nfs/cmds/usr.etc/800/rpc.mountd${BFAFLAG} ${MACH}:/usr/etc/rpc.mountd
+rcp $nfs/cmds/usr.etc/800/rpc.rstatd${BFAFLAG} ${MACH}:/usr/etc/rpc.rstatd
+rcp $nfs/cmds/usr.etc/800/rpc.rusersd${BFAFLAG} ${MACH}:/usr/etc/rpc.rusersd
+rcp $nfs/cmds/usr.etc/800/rpc.rwalld${BFAFLAG} ${MACH}:/usr/etc/rpc.rwalld
+rcp $nfs/cmds/usr.etc/800/rpc.sprayd${BFAFLAG} ${MACH}:/usr/etc/rpc.sprayd
+rcp $nfs/cmds/usr.etc/800/rpc.ypassd${BFAFLAG} ${MACH}:/usr/etc/rpc.yppasswdd
+rcp $nfs/cmds/usr.etc/800/rpcinfo${BFAFLAG} ${MACH}:/usr/etc/rpcinfo
+rcp $nfs/cmds/usr.etc/800/rwall${BFAFLAG} ${MACH}:/usr/etc/rwall
+rcp $nfs/cmds/usr.etc/800/showmount${BFAFLAG} ${MACH}:/usr/etc/showmount
+rcp $nfs/cmds/usr.etc/800/spray${BFAFLAG} ${MACH}:/usr/etc/spray
+rcp $nfs/cmds/usr.etc/yp/800/makedbm${BFAFLAG} ${MACH}:/usr/etc/yp/makedbm
+rcp $nfs/cmds/usr.etc/yp/800/stdhosts${BFAFLAG} ${MACH}:/usr/etc/yp/stdhosts
+rcp $nfs/cmds/usr.etc/yp/800/yppoll${BFAFLAG} ${MACH}:/usr/etc/yp/yppoll
+rcp $nfs/cmds/usr.etc/yp/800/yppush${BFAFLAG} ${MACH}:/usr/etc/yp/yppush
+rcp $nfs/cmds/usr.etc/yp/800/ypset${BFAFLAG} ${MACH}:/usr/etc/yp/ypset
+rcp $nfs/cmds/usr.etc/yp/800/ypxfr${BFAFLAG} ${MACH}:/usr/etc/yp/ypxfr
+rcp $nfs/cmds/usr.etc/ypserv/800/ypserv${BFAFLAG} ${MACH}:/usr/etc/ypserv
+rcp $nfs/cmds/usr.etc/ypserv/800/longfiles${BFAFLAG} ${MACH}:/usr/etc/yp/longfiles 
+
+if [ ${BFAFLAG} ] ; then
+    rcp $nfs/cmds/usr.etc/yp/revnetgroup/800/revnetgroup${BFAFLAG} ${MACH}:/usr/etc/yp/revnetgroup
+else
+    rcp $nfs/cmds/usr.etc/yp/revnetgroup/800/revnetgroup ${MACH}:/usr/etc/yp/revnetgroup
+fi
+
+rcp $nfs/cmds/usr.lib/librpcsvc/800/librpcsvc800b.a ${MACH}:/usr/lib/librpcsvc.a 
+
+rcp $nfs/cmds/libc/libc800b.a ${MACH}:/lib/libc.a
+
+# copy bfa lib to ${MACH}. Must run /tmp/bfalibmerg on ${MACH} to merg this 
+# library into libc
+rcp hpcndm.${USER}:/usr/lib/libbfa.a ${MACH}:/tmp/libbfa.a
+rcp $nfs/bin/bfalibmerg ${MACH}:/tmp/bfalibmerg

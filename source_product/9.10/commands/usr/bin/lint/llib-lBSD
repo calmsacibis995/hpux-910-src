@@ -1,0 +1,53 @@
+/* Non standard HP-UX lint library for libBSD */
+/*LINTLIBRARY*/
+/* Definitions for the BSD library */
+
+#include <sys/stdsyms.h>
+#ifndef __STDC__
+#	define __STDC__
+#endif
+
+/* Function prototypes */
+#include <signal.h> 
+
+char *getwd ( char *path_name ) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return path_name; }
+
+
+int killpg ( int pgrp, int sig ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The killpg() call is a 4.2 Berkeley Software Distribution 
+	compatibility call.  It is equivalent to kill(-pgrp, sig).
+	See kill(2) and getpgrp() (documented on the getpid(2) manual 
+	page). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+ 
+/* void (*signal ( int sig, void (*func)(int x)))(int y)  */
+/*{ return (void (*))0; } This has the same def in llib-lc, not needed here */
+
+
+int sigvec ( int a, const struct sigvec *b, struct sigvec *c )
+	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The sigvec() call is used to examine or change signal
+	action.  Use sigaction().  See bsdproc(2). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+/*This conflicts with libc def., int setpgrp(int pid, int pgrp){ return 0; } */
+
+ 
+/*This conflicts with libc def.,  int getpgrp ( int pid ) { return 0; } */
+

@@ -1,0 +1,206 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'How to Recreate the HP-UX 7.0 NFS release"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'How to Recreate the HP-UX 7.0 NFS release''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+HOW TO RECREATE THE HP-UX 7.0 NFS RELEASE
+S300/S800 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:33:18 $
+$Revision: 1.3.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Cristina Mahon
+Author: Dominic Ruffatto
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document describes how to restore the build environment,
+rebuild the product and contains an index of what
+is included on the tape provided to manufacturing.
+.na
+.H 1 "How to restore the build environment"
+.ad
+.sp
+To restore the build environment the following steps are
+necessary (perform them as superuser):
+.sp
+.AL
+.LI
+Retrieve the contents of the tape into an empty /build directory 
+on a 3.1 or 7.0 HP9000 Series 800 computer.  The tape was created by 
+using "cpio -o | compress | tcio -or <device>".  So, to restore from 
+the tape use:
+.sp
+\fBtcio -ivr <device> | uncompress | cpio -idmvu\fP 
+.sp
+.LI
+On a 6.5 or 7.0 HP9000 Series 300 computer, create the directories:
+/build and /build/S300.  
+.sp
+.LI
+Now NFS mount the /build/S300 directory from the Series 800 
+computer using the local /build/S300 directory as the mount 
+point.  So, for example, if your s300 is named hpcndbz and
+your s800 is named hpcndbt, execute the following command on
+hpcndbz:
+.sp
+\fBmount hpcndbt:/build/S300 /build/S300\fP
+.sp
+.LI
+On both your s300 and s800 computers, create an empty /source 
+directory.  In this directory create symbolic link named /source/NFS
+to the appropriate source portion of the directory structure.  That
+is, on your s300 execute:
+.sp
+\fBln -s /build/S300/7_0/source/NFS /source/NFS\fP
+.sp
+On your s800 execute:
+.sp
+\fBln -s /build/S800/7_0/source/NFS /source/NFS\fP
+.sp
+This is done because the NFS build will occur in a pseudo-root 
+using the chroot(1M) command.  This symbolic link will aid you 
+in maintaining a consistent path to the NFS source whether you
+are working under the root directory or the pseudo-root directory. 
+.LE
+.sp
+You are now set to rebuild the 7.0 NFS commands.
+.na
+.sp 2
+.H 1 "How to Remake the NFS commands"
+.sp
+.ad
+CND provides the NFS user level code.  Therefore this document 
+explains how to rebuild the user level code and not the kernel 
+code for the 7.0 release of the NFS product.
+.sp
+To simplify remaking the NFS commands setup your development environment
+as described in section 1 then complete the following steps.  Note: if
+you wish to create s300 bits perform these actions on the s300 computer.
+If you would rather build s800 bits, perform these actions on the s800
+computer.
+.sp
+.AL
+.LI
+If you want to rebuild all the NFS commands from the HP-UX 7.0 release,
+remove the executables that are built on
+the main directory.  That is done by executing /source/NFS/bin/MAKECMDS
+with the clobber option at the top directory of the cmds tree on your 
+build environment.
+.sp
+\fBcd /source/NFS/cmds\fP
+.sp
+\fB/source/NFS/bin/MAKECMDS clobber\fP
+.sp
+.LI
+At this point you are ready to rebuild all the commands.  To do that
+execute /source/NFS/bin/MAKECMDS without any options at the top directory 
+of the cmds tree on your development environment.  MAKE will execute a make 
+with the Makefile on the current directory.  That is why you should be at 
+the top of the cmds tree, so that all the commands are rebuilt.  
+.sp
+\fB/source/NFS/bin/MAKECMDS\fP
+.sp
+You might want to redirect the output of this command to a file so that
+you can examine it later.  This command will remake all the NFS commands
+and libraries.  If you wish to include the NET, RPC and YP library routines 
+that are part of libc.a (even though those are not shipped with NFS but with 
+HP-UX) you may use the -libc option to MAKECMDS.  The NFS 800 user level 
+commands will be under the 800 directories on the cmds tree.  Executing 
+/source/NFS/bin/MAKECMDS on any one of the 800 directories 
+will build the commands that need building on that directory.  The NFS 300
+user level commands are not found in a special 300 directory, but rather
+at the same level as the 800 directory.  This is an inconsistency that
+comes from the time when both s300 and s800 executables were built in the
+same location.
+.sp
+.LI
+At this point, it may be desirable to package up the product executables to
+be installed on an HP-UX 7.0 machine.  One may accomplish this using the
+makedd utility.  In the /source/NFS/bin directory execute the following 
+command:
+.sp
+\fBmakedd /build/S?00/7_0/source/NFS\fP
+.sp
+The "?" in S?00 should be substituted with "3" if you are packaging s300 
+executables, or with "8" if you are packaging s800 executables.  This command
+will gather all nfs executables (excluding the kernel and libc.a portions)
+in a pseudo-root named /build/S?00/7_0/source/NFS/bin/nfs_svc_?00/50969A.
+This makes packaging up the source much easier using tar, cpio and other
+archiving tools.
+.LE
+.na
+.sp 2
+.H 1 "Index of tape contents"
+.sp
+.ad
+The tape delivered to manufacturing for the NFS product released with 
+HP-UX 7.0 contains the following directories:
+.sp
+.BL
+.LI
+S?00/7_0/*:
+.sp
+Contains the 7.0 build environment.  That is, header files, libraries and
+tools used by all HP-UX products in order to build 7.0 executables.
+.LI
+s?00/7_0/source/NFS/bin: 
+.sp
+Contains the tools used by the build process.  
+.LI
+s?00/7_0/source/NFS/cmds:
+.sp
+Contains all the user level NFS commands and library routines. 
+.LI
+s?00/7_0/source/NFS/doc:
+.sp
+Contains the documents for the NFS project.  It contains the ERS, IRSs
+and other documents.  
+.LI
+s?00/7_0/source/NFS/include and S?00/7_0/usr/include:
+.sp
+Contains the header files used to build the NFS user level code.  The
+files under the rpc, rpcsvc and nfs directories, as well as dbm.h, are
+part of the NFS product (dbm.h is not shipped though).  All the other
+files were obtained from the UDL shared source and are the files that
+were used to build the released product.  
+.LI
+S?00/7_0/source/NFS/log:
+.sp
+Contains the log files resulting from the build process.  
+.LI
+S?00/7_0/source/NFS/man:
+.sp
+Contains the most up to date man pages for NFS product.  
+.LI
+S?00/7_0/source/NFS/system:
+.sp
+Contains the customize script and CDFinfo file for the NFS product.
+.LE
+.na
+.sp 2
+.TC 2 2 4 0 "EXTERNAL REQUIREMENTS SPECIFICATIONS DOCUMENT" "TABLE OF CONTENTS"

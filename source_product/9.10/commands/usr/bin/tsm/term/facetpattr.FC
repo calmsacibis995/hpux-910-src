@@ -1,0 +1,56 @@
+## FacetTerm  facetpattr COMMON  description file  06/20/91
+##    FACET/PC  in PC mode attributes.
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: facetpattr.FC,v 70.1 92/03/09 16:53:03 ssa Exp $
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     47521    ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA=\E[;%7MMm
+parm_attribute--URBDO-=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1;%s2m
+parm_attribute_out=\E[%s1;%s2;%s3m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+parm_attribute_val--URBDO=0
+parm_attribute_val-U-=4
+parm_attribute_val--U=24
+parm_attribute_val-R-ponmlkji--ponmlkji=7
+parm_attribute_val--R=27
+parm_attribute_val-B-=5
+parm_attribute_val--B=25
+parm_attribute_val-D-O=2
+parm_attribute_val-O-D=1
+parm_attribute_val--DO=22
+### parm_attribute_val-I-=number
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+parm_attribute_val-A-=12
+parm_attribute_val--A-=10
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode--URBDOponmlkji=\E[0m
+exit_attribute_mode--URBDOponmlkji=\E[m
+parm_attribute_val-...i-lkj.=30
+parm_attribute_val-..j.-lk.i=31
+parm_attribute_val-..ji-lk..=32
+parm_attribute_val-.k..-l.ji=33
+parm_attribute_val-.k.i-l.j.=34
+parm_attribute_val-.kj.-l..i=35
+parm_attribute_val-.kji-l...=36
+parm_attribute_val-l...-.jki=37
+parm_attribute_val-...m-pon.=40
+parm_attribute_val-..n.-po.m=41
+parm_attribute_val-..nm-po..=42
+parm_attribute_val-.o..-p.nm=43
+parm_attribute_val-.o.m-p.n.=44
+parm_attribute_val-.on.-p..m=45
+parm_attribute_val-.onm-p...=46
+parm_attribute_val-p...-.onm=47

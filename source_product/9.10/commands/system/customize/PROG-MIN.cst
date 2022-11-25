@@ -1,0 +1,16 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+#
+fileset=PROG-MIN
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+exit $exitval

@@ -1,0 +1,55 @@
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/yacc/make.osf,v $
+# $Revision: 70.4 $
+
+# Common makefile for yacc
+
+OFILES = y1.o y2.o y3.o y4.o ytables.o hpux_rel.o
+SOURCES = $(OFILES:.o=.c)
+
+FINDMSG = /usr/local/findmsg
+GENCAT  = /usr/local/gencat
+SORT    = /bin/sort 
+
+CCX=/paXdev/bin/cc
+
+CFLAGSX=-DNLS -DOSF -UPAXDEV
+CFLAGS=-UNLS -DOSF -DPAXDEV
+
+XAR=/usr/apollo/bin/xar
+
+default: all
+
+all: yacc yacc.X yaccpar yaccpar.X yacc.cat
+
+yacc.X:	$(SOURCES)
+	/bin/rm -f $(OFILES)
+	$(CC) $(CFLAGS) -A cpu,a88k -o yacc.a88kbin $(SOURCES)
+	$(LD) -A cpu,a88k yacc.a88kbin -o yacc.a88k
+	/bin/rm -f $(OFILES)
+	$(CC) $(CFLAGS) -A cpu,m68k -o yacc.m68kbin $(SOURCES)
+	$(LD) -A cpu,m68k yacc.m68kbin -o yacc.m68k
+	$(XAR) -cv yacc.X yacc.m68k yacc.a88k
+
+yacc:	$(SOURCE)
+	/bin/rm -f $(OFILES) yacc
+	$(CCX) $(CFLAGSX) $(LDFLAGS) $(IFLAG) -o $@ $(SOURCES)
+
+yaccpar: yaccpar.skel
+	-unifdef $(CFLAGS) < yaccpar.skel > yaccpar
+
+yaccpar.X: yaccpar.skel
+	-unifdef $(CFLAGS) < yaccpar.skel > yaccpar.X
+
+$(OFILES): dextern files
+
+clean:
+	   /bin/rm -f $(OFILES) yacc.msg
+
+clobber:   clean
+	   /bin/rm -f yacc yacc.X yaccpar.X yaccpar *88* *68* yacc.cat
+
+yacc.cat: yacc.msg
+	$(GENCAT) $@ yacc.msg
+
+yacc.msg:
+	$(FINDMSG) *.c | $(SORT) -n +0 -1 > $@

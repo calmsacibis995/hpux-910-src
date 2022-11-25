@@ -1,0 +1,41 @@
+#
+#   DEVVAX.TN.CORNELL.EDU GATED  initialization file:
+#
+
+traceoptions general kernel icmp egp protocol ;
+
+autonomoussystem 283 ;
+
+rip quiet {
+	trustedgateways 192.35.82.238 ;
+} ;
+
+egp yes {
+	group ASin 145 {
+		neighbor	192.35.82.100 ;
+	} ;
+} ;
+
+static {
+	default gateway 192.35.82.100 pref 100 ;
+} ;
+
+propagate proto egp as 145 {
+	proto rip gateway 192.35.82.238 {
+		announce 128.84 metric 2 ;
+		announce 128.253 metric 2 ;
+		announce 128.236 metric 2 ;
+	} ;
+	proto direct {
+		announce 192.35.82 metric 2 ;
+	} ;
+} ;
+
+propagate proto rip {
+	proto default {
+		announce 0.0.0.0 metric 1 ;
+	} ;
+	proto rip {
+		noannounce all ;
+	} ;
+} ;

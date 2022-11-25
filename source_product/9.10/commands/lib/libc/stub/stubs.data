@@ -1,0 +1,465 @@
+/*
+ * @(#) $Revision: 70.9.4.2 $
+ *
+ * stubs.data  -- Data file describing libc system call stubs
+ *
+ * Format:
+ *   name type parm1 [parm2 [parm3 [parm4]]]
+ *
+ * type can be:
+ *
+ *   assembly	   -- Assembly source, file found in s300 or s800
+ *		      directory (based on architecture of host)
+ *
+ *   syscall	   -- Normal system call, returns value or kernel
+ *		      sets return to 0 if successful.  Call can fail,
+ *                     in which case cerror() is called to set errno.
+ *
+ *   boolean	   -- Normal system call, returns 0 or -1, kernel
+ *                     doesnt set return value (so we set it based on
+ *                     some processor status bits).  Call can fail,
+ *		      in which case cerror() is called to set errno.
+ *
+ *   nofail	   -- Call cannot fail, kernel always sets return value
+ *		      to 0, cerror() is not called.
+ *
+ *   syscall2
+ *   boolean2
+ *   nofail2	   -- Like syscall, boolean and nofail, except that
+ *                     parm1 indicates the name of the system call to
+ *                     use (from syscall.h) instead of the routine name.
+ *
+ *   syscall_output -- Like syscall, but parm1 indicates the basename
+ *   		      of the output file instead of using the entry
+ *		      point name for the basename of the output.
+ *
+ * Additional paramters are passed as defines for the macro package
+ * and serve to modify the stub generation.  Current defines are:
+ *
+ *   NOSECDEF		-- Dont generate a secondary defintion for
+ *			   this entry point (only effective if
+ *			   _NAMESPACE_CLEAN is also defined).
+ *
+ *   DSECDEF		-- Add an extra "_" to the primary name.
+ *			   (only effective if _NAMESPACE_CLEAN is
+ *			   is also defined).
+ *
+ *   ABORT_AFTER_TRAP	-- Unique to s300 _exit, generate a "stop"
+ *			   instruction after the "trap &0".
+ *
+ *   NEVER_RETURNS	-- Unique to execve(), system call should never
+ *			   return, so if it does, unconditionally
+ *			   branch to cerror().
+ *
+ *   ALTERNATE_RET_REG	-- Indicates that the return value of the
+ *			   system call is in a different register
+ *			   than normal ('d1' for the 300, 'ret1' for
+ *			   the 800).
+ *			   This is used for ``overloaded'' system calls
+ *			   like getuid/geteuid, getgid/getegid and
+ *			   getpid/getppid which have only one routine
+ *			   in the kernel that returns both values.
+ */
+
+/*
+ *
+ * setpgrp2() and setpgid() are the same thing
+ */
+setpgrp2		alias_syscall	setpgid
+
+/*
+ * Stubs hand-written in assembly --
+ */
+fork			assembly
+pipe			assembly
+#ifdef __hp9000s300
+ptrace			assembly
+#else
+ptrace			syscall
+#endif
+/*
+ *    setsid(), setpgrp() and getpgrp()
+ */
+#ifdef __hp9000s300
+setpgrp			assembly
+#endif
+#ifdef __hp9000s800
+setpgrp			assembly
+getpgrp			assembly
+setsid			assembly
+#endif
+#ifdef __hp9000s300
+stime			assembly
+#else
+stime			syscall
+#endif
+#ifdef __hp9000s800
+_sigreturn		assembly	NOSECDEF DO_IENTRY
+#endif
+#ifdef __hp9000s300
+uname			assembly
+ustat			assembly
+#endif
+vfork			assembly
+
+/*
+ * These calls only return 0 or -1
+ */
+_utssys			boolean		NOSECDEF
+chdir			boolean
+chmod			boolean
+chown			boolean
+close			boolean
+exportfs		boolean
+fstat			boolean
+getpriority		boolean
+kill			boolean
+link			boolean
+mknod			boolean
+#ifdef __hp9000s800
+mount			assembly
+#else
+mount			boolean
+#endif
+pause			boolean
+#ifdef __hp9000s800
+reboot			assembly
+#else
+reboot			boolean
+#endif
+setgid			boolean
+setpriority		boolean
+setresgid		boolean
+setresuid		boolean
+setuid			boolean
+stat			boolean
+umount			boolean
+unlink			boolean
+
+/*
+ * These calls always succeed, so we dont call cerror()
+ */
+_exit			nofail		ABORT_AFTER_TRAP NOSECDEF
+alarm			nofail
+getegid			nofail2		getgid ALTERNATE_RET_REG
+geteuid			nofail2		getuid ALTERNATE_RET_REG
+getgid			nofail
+getpid			nofail
+getppid			nofail2		getpid ALTERNATE_RET_REG
+getuid			nofail
+profil			nofail
+sync			nofail
+
+/*
+ * Standard system calls
+ */
+_brk			syscall		NOSECDEF
+#ifdef NON_PROFILE
+/*
+ * Special entry point for the profiled version of libc.  This version
+ * of brk() isn't profiled so that mcrt0.o and gcrt0.o can allocated memory
+ * without skewing the statistics.
+ */
+_brk_noprof		syscall2	brk	NOSECDEF
+#endif
+#ifdef __hp9000s800
+_privgrp		syscall		NOSECDEF
+_sigvector		syscall		NOSECDEF
+#endif
+accept			syscall
+access			syscall
+acct			syscall
+async_daemon		syscall
+bind			syscall
+chroot			syscall
+connect			syscall
+creat			syscall
+dup			syscall
+dup2			syscall
+execve			syscall		NEVER_RETURNS
+fchdir			syscall
+fchmod			syscall
+fchown			syscall
+fcntl			syscall
+fpathconf		syscall
+fsctl			syscall
+fstatfs			syscall
+fsync			syscall
+ftime			syscall
+ftruncate		syscall
+getfh			syscall
+getgroups		syscall
+getitimer		syscall
+adjtime			syscall
+getrusage		syscall
+getnumfds		syscall
+getpeername		syscall
+getpgrp2		syscall
+getrlimit		syscall
+getsockname		syscall
+getsockopt		syscall
+gettimeofday		syscall
+gtty			syscall
+ioctl			syscall
+ki_call			syscall
+listen			syscall
+lockf			syscall
+lseek			syscall
+lstat			syscall
+mkdir			syscall
+mmap			syscall
+msgctl			syscall
+msgget			syscall
+msgrcv			syscall
+msgsnd			syscall
+munmap			syscall
+nfssvc			syscall
+nice			syscall
+open			syscall
+pathconf		syscall
+plock			syscall
+read			syscall
+readlink		syscall
+readv			syscall
+recv			syscall
+recvfrom		syscall
+recvmsg			syscall
+rename			syscall
+rmdir			syscall
+rtprio			syscall
+select			syscall
+semctl			syscall
+semget			syscall
+semop			syscall
+send			syscall
+sendmsg			syscall
+sendto			syscall
+setcore			syscall
+setgroups		syscall
+setitimer		syscall
+setrlimit		syscall
+setsockopt		syscall
+settimeofday		syscall
+shmat			syscall
+shmctl			syscall
+shmdt			syscall
+shmget			syscall
+shutdown		syscall
+sigaction		syscall
+sigblock		syscall		DSECDEF
+sigpause		syscall		DSECDEF
+sigpending		syscall
+sigprocmask		syscall
+sigsetmask		syscall		DSECDEF
+sigstack		syscall
+sigsuspend		syscall
+#ifdef __hp9000s300
+sigvector		syscall		DSECDEF
+#endif
+socket			syscall
+socketpair		syscall
+statfs			syscall
+stty			syscall
+swapfs			syscall
+swapon			syscall
+symlink			syscall
+#ifdef __hp9000s300
+syscall			syscall
+#endif
+#ifdef __hp9000s800
+__syscall		assembly	NOSECDEF
+#endif
+__sysconf		syscall		NOSECDEF
+time			syscall
+times			syscall
+truncate		syscall
+tsync			syscall
+_ulimit			syscall		NOSECDEF
+umask			syscall
+utime			syscall
+#ifdef __hp9000s800
+vfsmount		assembly
+#else
+vfsmount		syscall
+#endif
+vhangup			syscall
+#ifdef __hp9000s800
+wait			assembly
+#else
+wait			syscall
+#endif
+wait3			syscall
+waitpid			syscall
+write			syscall
+writev			syscall
+
+/*
+ * netIPC system calls
+ * contact Dave Richards or Sandy Flohr -- 01/17/90
+ */
+ipcconnect		syscall
+ipccontrol		syscall
+ipccreate		syscall
+ipcdest			syscall
+ipcgetnodename		syscall_output	ipcgetname
+ipclookup		syscall
+ipcname			syscall
+ipcnamerase		syscall
+ipcrecv			syscall
+ipcrecvcn		syscall
+ipcselect		syscall
+ipcsend			syscall
+ipcsetnodename		syscall_output	ipcsetname
+ipcshutdown		syscall
+
+/*
+ * Standard system calls with long names, we rename the output file
+ * so that it fits in 14 characters (ar(1) doesnt support longer
+ * names).
+ */
+#ifdef __hp9000s800
+_sigsetreturn		syscall_output	_sigsetrtn	NOSECDEF
+_sigsetstatemask	syscall_output	_sigssm		NOSECDEF
+#endif
+getdomainname		syscall_output	getdomain_nm
+getdirentries		syscall_output	getdirent
+setdomainname		syscall_output	setdomain_nm
+
+#ifdef __hp9000s800
+/*
+ * The following are unique to the series 800 (why?)
+ */
+bfactl			syscall
+cds			syscall
+cs			syscall
+exect			assembly
+gethostid		syscall
+sethostid		syscall
+#endif /* __hp9000s800 */
+
+#ifdef __hp9000s300
+/*
+ * The following is unique to the series 300.  cachectl() can be done
+ * in user space on an s800.
+ */
+cachectl		assembly
+#endif /* __hp9000s300 */
+
+#if defined(__hp9000s300) || defined(__hp9000s700)
+/*
+ * According to kernel folks, this routine has not yet been picked up by
+ * the s800 (no info as to whether [or when] it will be).
+ */
+poll			syscall
+
+/*
+ * Memory mapped file related system calls, not yet on the
+ * Series 800.
+ */
+madvise			syscall
+mprotect		syscall
+msync			syscall
+__msem_init		syscall		NOSECDEF
+msem_remove		syscall
+_msleep			syscall		NOSECDEF
+_mwakeup		syscall		NOSECDEF
+#endif /* defined(__hp9000s300) || defined(__hp9000s700) */
+
+/*
+ * The following entry points are conditionally created based on
+ * what features our OS will support
+ */
+
+#ifdef AUDIT
+/*
+ * Auditing specific system calls
+ */
+audctl			syscall
+audswitch		syscall
+audwrite		syscall
+getaudid		syscall
+getaudproc		syscall
+getevent		syscall
+setaudid		syscall
+setaudproc		syscall
+setevent		syscall
+#endif /* AUDIT */
+
+#ifdef ACLS
+/*
+ * ACL specific system calls
+ */
+fgetacl			syscall
+fsetacl			syscall
+getaccess		syscall
+getacl			syscall
+setacl			syscall
+#endif /* ACLS */
+
+#if defined(CNODE_DEV) && (defined(DUX) || defined(DISKLESS))
+/*
+ * mkrnod() -- used for cnode-specific device files
+ */
+mkrnod			boolean
+#endif /* CNODE_DEV && (DUX || DISKLESS) */
+
+#if defined(DUX) || defined(DISKLESS)
+/*
+ * Diskless specific system calls
+ *   cnodeid and cnodes have aliases (for historical reasons)
+ */
+cnodeid			syscall
+cnodes			syscall
+lsync			syscall
+getcontext		syscall
+#ifdef LOCAL_DISK
+/*
+ * Stuff for locally mounted disks.  Actually, these routines are
+ * to retrieve information from the kernel's internal mount table.
+ * This was added as part of the locally mounted disk project, but
+ * really could be seperated out to be a generic feature regardless
+ * of wether or not DISKLESS or DUX is defined.  For now, the
+ * kernel has these three features tied together.
+ */
+getmount_cnt		syscall
+getmount_entry		syscall_output	getmount_ent
+swapclients		syscall
+#endif /* LOCAL_DISK */
+#endif /* DUX || DISKLESS */
+
+#ifdef FSS
+/*
+ * Fair Share Scheduler
+ */
+fss			syscall
+#endif /* FSS */
+
+#ifdef PSTAT
+/*
+ * pstat interface
+ *   these all have different outupt names since the routine names
+ *   are so long.
+ */
+pstat			syscall
+#endif /* PSTAT */
+
+#ifdef __hp9000s800
+/*
+ * get_sysinfo() -- undocumented system call for sar(1M)
+ */
+get_sysinfo		syscall
+#endif /* __hp9000s800 */
+
+#ifdef QUOTA
+/*
+ * Disk quotas
+ */
+quotactl		syscall
+#endif /* QUOTA */
+
+#if defined(__hp9000s300) || defined(__hp9000s700)
+/*
+ * mcas() -- utility function used by msem_lock(2).
+ */
+mcas			assembly
+#endif

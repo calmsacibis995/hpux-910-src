@@ -1,0 +1,11 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_300/filesets.info/DISKLESS-BLD/RCS/customize,v $
+# $Revision: 1.2.62.3 $	$Author: kcs $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/09/17 20:44:45 $
+
+#! /bin/ksh -p
+#@(#) $Revision: 1.2.62.3 $
+
+# hp9000s300 DISKLESS-BLD customize script (does nothing).
+
+exit 0

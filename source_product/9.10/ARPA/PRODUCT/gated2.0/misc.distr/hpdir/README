@@ -1,0 +1,13 @@
+
+The files in the subdirectories of this directory are those that are
+distributed with the GateD 2.1 distribution from Cornell. They are included
+here for your use and reference.
+
+The aux/ subdirectory includes scripts for managing gated.
+These scripts are exactly like those found with the distribution from Cornell
+and thus are unusable without modification.
+
+The conf/ subdirectory includes various /etc/gated.conf files as found
+at some major NSFnet hubs.  Do not use any of them as they appear
+because they were designed to be used on specific machines in specific
+configurations.

@@ -1,0 +1,6 @@
+# @(#) $Revision: 70.1 $
+cluster:HPS300::SYSHPUX,SYSDEBUG,SYSBCKUP,SYSTEST:/hp-ux,/SYSDEBUG,/SYSBCKUP,/SYSTEST
+cluster:HPS700::/usr/lib/uxbootlf.700:/hp-ux
+cluster:HPS800::/usr/lib/uxbootlf:/hp-ux
+# install:HPS300::SYSINSTALL:/usr/lib/uxinstkern.300,/usr/lib/uxinstfs.300
+install:HPS700::/usr/lib/uxinstlf.700:/usr/lib/uxinstkern.700

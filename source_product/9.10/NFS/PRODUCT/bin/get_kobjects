@@ -1,0 +1,122 @@
+#!/bin/sh
+##	@(#)get_kobjects	$Revision: 1.22.109.1 $	$Date: 91/11/19 13:55:04 $
+#	get_kobjects	--	get kernel object files from cndhf
+# Written by Darren D. Smith for NFS project
+# NOTE: $nfs=$Nfs for overnight script
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+set +e		# don't hard exit on errors....
+
+# Script to grab the latest kernel object from hpcndhf into $nfs/kernel/300/WOPR
+# NOTE: if you want complete backups of everything, then change the 
+# definition below to "true"
+
+LEAVEAROUND=false
+
+# Establish contact with hpcndhf.
+
+if val=`do_netunam hpcndhf`
+then
+	eval $val
+else
+	echo "ERROR: could not establish contact with hpcndhf!"
+	exit 1
+fi
+
+
+# Now go to hpcndhf and wait for compile to complete.
+# NOTE: hardwired value of /source/sys/WOPR; would be better if more flexable.
+cd /net/hpcndhf/source/NET/sys/WOPR
+
+# Wait until "hp-ux" exists, which means that hpcndhf is at least starting
+# to load "hp-ux", and that we can start copying the objects.  
+# We also have a timeout which is hardwired for 5 a.m. so that we can
+# finish the rest of the overnight build before anyone comes in.
+# However, if this script is run interactively, exit to avoid waiting.
+
+FILE=hp-ux
+STOPHOUR=05	# hour to quit checking at
+OVERNIGHT=22	# hour that overnight script starts
+
+wait_for $FILE $OVERNIGHT $STOPHOUR
+
+if [ $? != 0 ]
+then
+    echo `date "+%y.%m.%d %T"` $0 $nfs abort
+    exit 1
+fi
+
+
+# Now can start copying files over.  Basically copy everything in this
+# directory, but save it first.
+
+echo `date "+%y.%m.%d %T"` $0 begin copying files over
+
+# Make sure the save directory exists..
+# SAVEDIR is where to save the files at in case the Get fails.
+WOPRDIR=kernel/300/WOPR
+SAVEDIR=$nfs/SAVEDIR/$WOPRDIR
+
+make_path $SAVEDIR
+if [ $? != 0 ]
+then
+	echo "WARNING: could not make savedir $SAVEDIR" >&2
+fi
+
+# Make sure target DIR exists
+TARGETDIR=$nfs/$WOPRDIR
+make_path $TARGETDIR
+if [ $? != 0 ]
+then
+	echo "ERROR: could not make targetdir $TARGETDIR" >&2
+	exit 1
+fi
+
+
+# NOTE: put results of "ls" into a file to aviod overrunning the shell's
+# internal buffer because of the large number of files.
+tmpfile=/tmp/kobjects$$
+trap "rm -f $tmpfile; exit 1" 1 2 3 15
+
+/bin/ls >$tmpfile
+while read FILE
+do
+    # Only Copy files over..
+    if [ ! -f $FILE ] ; then
+	continue
+    fi
+    SAVED=false;
+    /bin/echo "$TARGETDIR/$FILE"
+    if [ -f $TARGETDIR/$FILE ]
+    then
+	    mv -f $TARGETDIR/$FILE $SAVEDIR/$FILE
+	    SAVED=true
+    fi
+
+    cp $FILE $TARGETDIR
+    if [ ! -f $TARGETDIR/$FILE ]
+    then
+	/bin/echo "ERROR: cp of `pwd`/$FILE failed."
+	if $SAVED
+	then
+	    /bin/echo "Restoring $FILE from $SAVEDIR/$FILE"
+	    mv -f $SAVEDIR/$FILE $TARGETDIR/$FILE
+	    if $LEAVEAROUND
+	    then
+		cp $TARGETDIR/$FILE $SAVEDIR/$FILE
+	    fi
+	fi
+    else
+	if [ "$SAVED" = "true" -a "$LEAVEAROUND" = "false" ]
+	then
+		rm -f $SAVEDIR/$FILE
+	fi
+    fi
+
+done <$tmpfile
+rm $tmpfile
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

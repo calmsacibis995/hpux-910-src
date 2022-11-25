@@ -1,0 +1,39 @@
+$set 1
+1 rstatd: getsockname
+2 svc_rpc_udp_create: error\n
+3 svc_rpc_register: error\n
+4 svc_rpc_register: error\n
+5 svc_rpc_register: error\n
+6 svc_run should never return\n
+7 err: svc_rpc_send_results
+8 err: svc_rpc_send_results
+9 err: svc_rpc_send_results
+10 err: svc_sendreply
+11 err: svc_rpc_send_results
+12 can't seek in kmem\n
+13 can't read avenrun from kmem\n
+14 can't seek in kmem\n
+15 can't read boottime from kmem\n
+16 can't seek in kmem\n
+17 can't read sum from kmem\n
+18 can't seek in kmem\n
+19 can't read hz from kmem\n
+20 can't seek in kmem\n
+21 can't read cp_time from kmem\n
+22 can't seek in kmem\n
+23 can't seek in kmem\n
+24 can't read sum from kmem\n
+25 can't seek in kmem\n
+26 can't read dk_xfer from kmem\n
+27 can't seek in kmem\n
+28 can't read ifnet from kmem\n
+29 Variables missing from namelist\n
+30 can't open kmem\n
+31 can't seek in kmem\n
+32 can't read firstifnet from kmem\n
+33 can't seek in kmem\n
+34 can't read ifnet from kmem\n
+35 Variables missing from namelist\n
+36 can't seek in kmem\n
+37 can't read kmem\n
+38 pstat call failed\n

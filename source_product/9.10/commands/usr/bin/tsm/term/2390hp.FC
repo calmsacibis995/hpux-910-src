@@ -1,0 +1,546 @@
+## FacetTerm  2392/2393/2396/2397 COMMON description file 11/01/90
+#
+#     !!! IMPORTANT NOTE !!!
+#     Set Terminal to: EnqAck=YES (for transparent print)
+#
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2390hp.FC,v 70.1 92/03/09 15:49:05 ssa Exp $
+### NOT_IN_COMMON
+### xon_xoff
+### graphics_escape_control
+### graphics_escape_delete
+### columns=80
+### columns_wide=132
+### columns_wide_mode_on_default
+### columns_wide_on=
+### columns_wide_off=
+### columns_wide_clears_screen
+### columns_wide_mode_on_mode_bit-08000000
+### parm_mode_val-COLSWIDE-00000000=
+### lines=24
+### lines_scroll_memory-24-2400=192
+### scroll_refresh_start=
+### scroll_refresh_end=
+### scroll_refresh_no_scroll_last
+### NOT_IN_COMMON
+##--- MARGINS ---##
+### auto_left_margin
+### eat_newline_glitch
+### real_eat_newline_glitch
+### auto_wrap_on=
+auto_wrap_on-InhEolWrp_off=\E&s0C
+enter_ca_mode=\E&s0C
+### auto_wrap_off
+auto_wrap_off-InhEolWrp_on=\E&s1C
+### auto_wrap_mode_bit-04000000
+### parm_mode_val-AUTOWRAP-00000000=
+### set_margins=
+##--- CLEAR ---##
+### NOTE: write protect mode is supported for clear_screen_unprotected only
+### write_protect_on=
+### write_protect_off=
+### clear_screen_unprotected--=
+### clear_screen_unprotected_w_attr--=
+### clear_screen--P=
+### NOTE not_imp-cursor_home_up=\EH
+### NOTE clear_screen=\E&a0y0C\EJ
+clear_screen=\E&acR\EJ
+clear_screen=\Eh\E&a0y0X\EJ
+clear_screen=\Eh\E&a0y0C\EJ
+clear_screen=\Eh\EJ
+clear_screen=\EH\E&a0y0X\EJ
+clear_screen=\EH\E&a0y0C\EJ
+clear_screen=\EH\EH\EJ
+clear_screen=\EH\EJ
+### clr_eos=
+##### ix had pad of 40
+clr_eos=\EJ$<1>
+### out_clr_eos=
+### clr_eos_w_attr=
+### clr_eos_chars=
+### set_attr_eos=
+### clr_eos_chars_erasable-=
+### clear_all=
+### clear_all_chars_erasable-=
+### clr_eol=
+clr_eol=\EK
+### out_clr_eol=
+### clr_eol_w_attr=
+### clr_eol_chars=
+### set_attr_eol=
+### out_clr_eol_chars_erasable=
+### clr_bol=
+### out_clr_bol=
+### clr_bol_w_attr=
+### clr_bol_chars=
+### set_attr_bol=
+### clear_line=
+### out_clear_line=
+### clear_line_w_attr=
+### clear_line_chars=
+### set_attr_line=
+### erase_chars=
+### out_clr_memory_below=
+out_clr_memory_below=\EJ
+##--- CURSOR ---##
+### cursor_address=
+##### ix pad 10
+cursor_address=\E&a%p2%dc%p1%dR
+cursor_address=\E&a%p2%dx%p1%dY
+cursor_address=\E&a%p1%dy%p2%dX
+cursor_address=\E&a%p2%dc%p1%dY
+cursor_address=\E&a%p1%dy%p2%dC
+### cursor_address_wide=
+### cursor_address_wide_starts=number
+### cursor_report
+answer-..cursor_position=\E&a%p2%03dx%p1%03dY\r
+question-cursor_position=\E`
+pass_current=^Q
+### row_address=
+row_address=\E&a%p1%dY
+### column_address=
+column_address=\E&a%p1%dX
+column_address=\E&a%p1%dC
+column_address_parm_up_cursor=\E&a%p1%dc-%p2%dR
+column_address_parm_down_cursor=\E&a%p1%dc+%p2%dR
+### decode_type-0123456789;?=\E[
+### cursor_home=
+### cursor_up=
+cursor_up=\EA
+### cursor_up_at_home_wraps_ll
+cursor_up_at_home_wraps_ll
+### parm_up_cursor=
+parm_up_cursor=\E&a-%p1%dR
+### cursor_down=
+cursor_down=\EB
+################################# parm_down_cursor_scroll=\E[%i%p1%de
+### parm_down_cursor=
+parm_down_cursor=\E&a+%p1%dR
+### cursor_right=
+cursor_right=\EC
+### parm_right_cursor=
+parm_right_cursor=\E&a+%p1%dC
+### cursor_left=
+cursor_left=\ED
+### NOTE cursor_left=\b
+### parm_left_cursor=
+parm_left_cursor=\E&a-%p1%dC
+cursor_home_down=\EF
+##--- SCROLL ---##
+### change_scroll_region=
+### scroll_forward=
+scroll_forward=\ES
+### NOTE scroll_forward=\n
+### scroll_could_be_cursor_only
+### parm_index=
+### scroll_reverse=
+scroll_reverse=\ET
+### scroll_reverse_move_col0
+### parm_rindex=
+### save_cursor=
+### restore_cursor=
+### auto_scroll_on=
+### auto_scroll_off=
+### auto_scroll_off_wraps_top
+##--- INS/DEL ---##
+### insert_line=
+insert_line=\EL
+### out_insert_line=
+### insdel_line_move_col0
+insdel_line_move_col0
+### insert_line_needs_clear_glitch
+### insert_line_sets_attributes
+### parm_insert_line=
+### out_parm_insert_line=
+### delete_line=
+delete_line=\EM
+### parm_delete_line=
+### insert_character=
+##### ix pad 2
+### insert_padding=
+### parm_ich=
+### enter_insert_mode=
+enter_insert_mode=\EQ
+### exit_insert_mode=
+exit_insert_mode=\ER
+### insert_mode_on_mode_bit-02000000
+### parm_mode_val-INSERTON-00000000=
+### delete_character=
+delete_character=\EP
+### parm_delete_character=
+##--- ATTRIBUTES URBDOIPA ---##
+### attribute-U=
+### attribute--U=
+### attribute-R=
+### attribute-B=
+### attribute-D-O=
+### attribute-O-D=
+### attribute-I=
+### attribute-P=
+### attribute-A=
+### attribute--A=
+### attribute_next-A-=
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                              ---##
+hp_attribute-@=\E&d%p1%c
+hp_charset_norm=^O
+hp_charset_alt=^N
+hp_color=\E&v%p1%1dS
+### NOTE set_attributes=\E&d%?%p7%t%'s'%c%;%p1%p3%|%p6%|%{2}%*%p2%{4}%*%+%p4%+%p5%{8}%*%+%'@'%+%c%?%p9%t%'^N'%c%e%'^O'%c%;
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+### parm_attribute_out=\E[%s1;%s2m
+### parm_attribute_out=\E[%s1;%s2;%s3m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+### parm_attribute_val-R-=number
+### parm_attribute_val-B-=number
+### parm_attribute_val-D-O=number
+### parm_attribute_val-O-D=number
+### parm_attribute_val-I-=number
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##---                                   ---##
+### NOT_IN_COMMON
+### vt220 is ( )
+### select_character_set_noload
+### lock_shift_0=
+### single_shift_0=
+### select_character_set_0--=
+### select_character_set_0--=
+### lock_shift_1=
+### single_shift_1=
+### select_character_set_1--=
+### select_character_set_1--=
+### lock_shift_2=
+### single_shift_2=
+### select_character_set_2--=
+### select_character_set_2--=
+### lock_shift_3=
+### single_shift_3=
+### select_character_set_3--=
+### select_character_set_3--=
+### NOT_IN_COMMON
+##--- LINE ATTRIBUTES ---##
+### NOT_IN_COMMON
+### line_attribute_off=
+### line_attribute=
+### line_attribute=
+### NOT_IN_COMMON
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+#### cursor is actually only on 2397
+### cursor_on=
+cursor_on=\E*dQ
+### cursor_off=
+cursor_off=\E*dR
+### cursor_on_mode_bit-00800000
+### parm_mode_val-CURSORON-00000000=
+### cursor_type=
+### cursor_type=
+### cursor_type_turns_cursor_on
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+### enter_appl_keypad_mode=
+### exit_appl_keypad_mode=
+### appl_keypad_mode_on_mode_bit-00400000
+### parm_mode_val-APPKEYON-00000000=
+### enter_cursor_key_mode=
+### exit_cursor_key_mode=
+### cursor_key_mode_on_mode_bit-00200000
+### parm_mode_val-CURKEYON-00000000=
+########################### keypad_xmit is BOTH ###############
+### keypad_xmit=
+keypad_xmit=\E&s1A
+### keypad_local=
+keypad_local=\E&sA
+keypad_local=\E&s0A
+########################### keypad_xmit is BOTH ###############
+### keypad_xmit_mode_bit-00100000
+### parm_mode_val-KEYPADXM-00000000=
+##--- TABS ---##
+### clear_tab=
+clear_tab=\E2
+### clear_all_tabs=
+clear_all_tabs=\E3
+### set_tab=
+set_tab=\E1
+### back_tab=
+back_tab=\Ei
+### ASSUMED tab=\t
+##--- FUNCTION KEYS ---##
+#### BOTH #### use=2392keys.fc
+### function_key_clear=
+### function_key_clear_mode_yes=number
+### function_key_clear_mode_no=number
+### parm_pkey_key=
+### parm_pkey_key=
+### pkey_key=
+### out_pkey_key=
+### function_key_string_is_hex
+### function_key_string_is_ansi
+### function_key_string_is_escaped-chars=
+### function_key_includes_label
+### function_key_len_0_label_only
+### function_key-id-delim=
+### function_key-id-delim=
+### shift_function_key
+### function_key-id-delim=
+### function_key-id-delim=
+### NOTE key_f1=\Ep
+### NOTE key_f2=\Eq
+### NOTE key_f3=\Er
+### NOTE key_f4=\Es
+### NOTE key_f5=\Et
+### NOTE key_f6=\Eu
+### NOTE key_f7=\Ev
+### NOTE key_f8=\Ew
+##--- CURSOR KEYS ---##
+### key_home=
+key_home=\Eh
+### key_up=
+key_up=\EA
+### key_down=
+key_down=\EB
+### key_right=
+key_right=\EC
+### key_left=
+key_left=\ED
+### key_backspace=
+### ASSUMED key_backspace=\b
+### NOTE key_ic=\EQ
+### NOTE key_dc=\EP
+### NOTE key_il=\EL
+### NOTE key_dl=\EM
+### NOTE key_npage=\EU
+### NOTE key_ppage=\EV
+##--- PRINTER ---##
+#################################### \E&p works in both modes ##############
+### transparent_print_on=
+### NOTE bottom_line_print_on=\E&p13C
+### transparent_print_off=
+### NOTE print_off=\E&p11C
+### # TBD print_screen=
+pass_current-print_screen=\E0
+#### BOTH #### pass-transparent_print=\E&p%l1W%L1
+#### BOTH #### pass-transparent_print=\E&pW%256s1\n
+### out_transparent_print=
+### out_hp_transparent_print=
+out_hp_transparent_print=\E&p4d%p1%dW
+### hp_transparent_print_enq_ack
+hp_transparent_print_enq_ack
+##--- STATUS LINE ---##
+### status_off=
+### status_on=
+### status_off_clears_status_type
+### status_off_clears_status_line
+### status_type=
+### status_type=
+### status_type_turns_status_on
+### status_type_ruins_status_line
+### status_line=
+### status_line_turns_status_on
+### status_line_clears_status_line_labels
+### status_off_clears_status_line_labels
+### status_line_label=\Ez0%8s1\r
+### status_line_label=\Ez1%8s1\r
+### not_imp-other_labels=\Ez%p1%c%8s1\r
+### onstatus=
+### out_onstatus=
+### onstatus_clear=
+##--- MISC ---##
+### # ONLY IF PADDING carriage_return=\r$<20/>
+### ASSUMED carriage_return=\r
+### # ONLY IF NOT \n  new_line=
+### ASSUMED bell=^G
+##--- CONTROL_8_BIT ---##
+### control_8_bit
+### graphics_8_bit
+### input_8_bit
+### force_CS8
+### no_clear_ISTRIP
+### terminal_mode_default=number
+### terminal_mode_name-CG=
+### terminal_mode_select-0-RP=
+### out_terminal_mode_switch-0-RP=
+### out_terminal_mode_select=
+##--- PC_MODE ---##
+### pc_mode_on=
+### pc_mode_off=
+### pc_mode_kd_scancode_driver
+### out_pc_mode_on_1=
+### out_pc_mode_on_2=
+### out_pc_mode_on_3=
+### out_pc_mode_off_1=
+### out_pc_mode_off_2=
+### out_pc_mode_off_3=
+### pc_mode_se_on_switch_only
+### pc_mode_does_clear_screen
+### pc_mode_on_turns_auto_wrap_off
+### pc_mode_off_turns_auto_wrap_on
+### pc_mode_on_switch_page_number_0
+### pc_mode_off_switch_page_number_0
+### pc_auto_wrap_on=
+### pc_auto_wrap_off=
+### pc_cursor_on=
+### pc_cursor_off=
+### pc_cursor_type=
+### pc_cursor_type=
+##--- PASTE ---##
+### paste_eol-type=
+##--- GRAPH_MODE ---##
+### graph_mode_start=
+### graph_mode_clear=
+### out_graph_mode_clear=
+##--- MULTIPAGE ---##
+### pages=number
+### display_page_number=
+### parm_display_page_next=
+### parm_display_page_prev=
+### display_page_next=
+### display_page_prev=
+##--- SPLIT SCREEN ---##
+### NOTE: split_divider must be 77 char starting with blank
+### split_divider= qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+### split_divider= ,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,,
+### NOTE: split_divider_end must reverse split_divider_start to default
+### split_divider_start=
+### split_divider_start=^N
+### split_divider_end=
+### split_divider_end=^O
+### pc_split_divider= \315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315
+### pc_split_divider_start=
+### pc_split_divider_end=
+##--- INIT ---##
+### enter_ca_mode=
+## InhHndShk_on=\E&s1G  InhDC2_on=\E&s1H
+enter_ca_mode=\E&s1G\E&s1H
+### enter_ca_mode_pc=
+### enter_ca_mode_pc_2=
+### enter_ca_mode_2=
+### exit_ca_mode=
+### exit_ca_mode_pc=
+### exit_ca_mode_pc_2=
+### exit_ca_mode_2=
+##--- PARM_MODE ---##
+### parm_mode_on=\E[%10M?h
+### parm_mode_off=\E[%10M?l
+### parm_mode_private_propogates
+### mode-bits_on.-bits_off=
+### mode-00000000-00000001=\E[?18l
+### mode-00000001-00000000=\E[?18h
+### parm_mode_val-h.bitson-l.bitson=
+### parm_mode_val-00000001-00000000=?18
+### multi_mode-bitmask.-bitvalue=
+### multi_mode-0000000C-00000000=\E`6$<20>
+### multi_mode-0000000C-00000004=\E`A$<20>
+### multi_mode-0000000C-00000008=\E`7$<20>
+### ignore_mode_bit-80000000
+### parm_mode_val-80000000-IGNORE..=?10
+### pass_mode_bit-40000000
+### parm_mode_val-40000000-PASS....=?11
+### notimp_mode_bit-20000000
+### parm_mode_val-20000000-NOTIMP..=?12
+### ignore=
+### ignore_parm=
+### pass=
+##--- MODE ---##
+#################################### \E&w works in both modes ##############
+## 				screen_off=\E&w13F screen_on=\E&w12F
+mode-00000000-00000001=\E&w12F
+mode-00000001-00000000=\E&w13F
+##### NOT_USED memory_above
+##### NOT_USED memory_below
+##### NOT_USED move_insert_mode
+##### NOT_USED lines_of_memory=0
+##### NOT_USED magic_cookie_glitch=0
+##### NOT_USED if=/usr/lib/tabset/stdcrt
+##### NOT_USED ktbc=\E3
+##### NOT_USED kclr=\EJ
+##### NOT_USED kctab=\E2
+##### NOT_USED krmir=\ER
+##### NOT_USED key_eol=\EK
+##### NOT_USED key_eos=\EJ
+##### NOT_USED kll=\EF
+##### NOT_USED kind=\ES
+##### NOT_USED kri=\ET
+##### NOT_USED khts=\E1
+##### NOT_USED prtr_non=\E&p%p1%dW
+not_imp-set_left_margin...........=\E4
+not_imp-set_left_margin...........=\E5
+pass_current-...clear_all_margins.=\E9
+pass_current-...delay_one_second..=\E@
+not_imp-hard_reset................=\EE
+### cursor home down is cursor at left margin of bottom line and roll to
+###	bottom of display memory
+not_imp-cursor_left_margin........=\EG
+not_imp-tab_right.................=\EI
+pass_current-next_page............=\EU
+pass_current-prev_page............=\EV
+### format mode protects all fields not specifically designated unprotected
+not_imp-format_mode_on............=\EW
+pass_current-...format_mode_off...=\EX
+not_imp-start_unprotected_field...=\E[
+not_imp-end_protected_field.......=\E]
+not_imp-start_transmit_only_field.=\E{
+not_imp-display_functions_mode_on.=\EY
+pass_current-...display_functions_mode_off=\EZ
+pass_current-...primary_terminal_status_request.....=\E\^
+pass_current-...sense_cursor_position_absolute......=\Ea
+### work around for "tedi"
+pass_current-...unlock_keyboard...=\EH\Eb
+pass_current-...unlock_keyboard...=\Eb
+ignore-lock_keyboard..............=\Ec
+pass_current-...transmit_block....=\Ed
+pass_current-...moded_disconnect..=\Ef
+not_imp-soft_reset................=\Eg
+not_imp-display_user_key_menu.....=\Ej
+pass_current-...restore_normal_display....=\Ek
+not_imp-terminal_self_test........=\Ez
+pass_current-...secondary_terminal_status_request......=\E~
+not_imp-enable_the_send_cursor_position_mode...=\E&x1C
+not_imp-disable_the_send_cursor_position_mode..=\E&x0C
+### not_imp-absolute_cursor_address...=\E&a%p2%dc%p1%dR
+not_imp-absolute_cursor_address...=\E&a%p1%dr%p2%dC
+not_imp-relative_cursor_address...=\E&a+%p2%dc+%p1%dY
+not_imp-relative_cursor_address...=\E&a-%p2%dc+%p1%dY
+not_imp-relative_cursor_address...=\E&a+%p2%dc-%p1%dY
+not_imp-relative_cursor_address...=\E&a-%p2%dc-%p1%dY
+not_imp-absolute_cursor_address...=\E&a+%p2%dc+%p1%dR
+not_imp-absolute_cursor_address...=\E&a-%p2%dc+%p1%dR
+not_imp-absolute_cursor_address...=\E&a+%p2%dc-%p1%dR
+not_imp-absolute_cursor_address...=\E&a-%p2%dc-%p1%dR
+############################################################
+pass_current-enq..................=^E
+memory_lock=\El
+memory_unlock=\Em
+### out_screen_saver_start=
+out_screen_saver_start=\E&j@
+### out_screen_saver_end=
+############################################################
+pass_current-meta_roll_down=\E\ET
+## out_meta_roll_down=\ET
+pass_current-meta_roll_up=\E\ES
+## out_meta_roll_up=\ES
+pass_current-meta_cursor_home_down=\E\EF
+## in_meta_roll_cancel=\040^H
+############################################################
+############################################################

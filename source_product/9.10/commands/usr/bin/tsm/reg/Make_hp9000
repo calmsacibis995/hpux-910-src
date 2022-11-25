@@ -1,0 +1,21 @@
+# Makefile for register for HP 9000/300
+## @(#) $Header: Make_hp9000,v 70.1 92/03/09 15:39:13 ssa Exp $
+MACH=	hp9000
+MACH_CFLAGS= \
+		-DHPREV="`expr \`uname -r\` : '\(.\)'`" \
+		-DNO_CHECK_SERIAL \
+		-O
+
+.SUFFIXES:
+MAKE=	              MACH=$(MACH) \
+	       MACH_CFLAGS="$(MACH_CFLAGS)" \
+	MACH_FILES_TOP_DIR="" \
+	         MACH_LIBS="" \
+	        MACH_MODEL="" \
+			make -e -f Make_comm
+.DEFAULT:
+	@echo make $< register for $(MACH) done - nothing to do
+#		$(MAKE) $<
+all:
+	@echo make register for $(MACH) done - nothing to do
+#		$(MAKE)

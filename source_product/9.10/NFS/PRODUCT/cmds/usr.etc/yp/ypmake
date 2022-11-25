@@ -1,0 +1,440 @@
+#!/bin/sh
+
+# 	@(#)ypmake:	$Revision: 1.45.109.6 $	$Date: 93/10/25 14:47:02 $  
+
+#==============================================================================
+#									      |
+#	(c) Copyright 1987, 1988 Hewlett-Packard Co.			      |
+#	(c) Copyright 1986, Sun Microsystems. Inc.			      |
+#									      |
+#  This is the ypmake shell script.  It is used to create the Network Information Service    |
+#  (NIS) maps (databases) on a master server from their ASCII file	      |
+#  counterparts.  See the following reference pages for more information:     |
+#									      |
+#	domainname(1), ypcat(1), ypmatch(1), yppasswd(1), ypwhich(1),	      |
+#	makedbm(1M), vhe_mounter(1M), ypinit(1M), ypmake(1M),		      |
+#	yppasswdd(1M), yppoll(1M), yppush(1M), ypset(1M), ypxfr(1M),	      |
+#	vhe_list(4), ypfiles(4).					      |
+#									      |
+#  The exit values from this script are:				      |
+#									      |
+#	0:	Normal termination; no problems.			      |
+#	1:	One or more unrecognized arguments were passed.		      |
+#	2:	The NIS domain name is not set on this machine.		      |
+#	3:	The domain subdirectory does not exist or is not writable.    |
+#	4:	An error was encountered building at least one of the maps.   |
+#	5:	One or more maps' ASCII files don't exist or are unreadable.  |
+#									      |
+#==============================================================================
+
+
+#==========
+#  The finis function is used as an exit function, stating the condition
+#  of execution and setting the exit code.
+#==========
+
+finis() {
+	echo "\nypmake complete:  \c"
+	if [ -z "$EXIT_CODE" ]; then
+		echo "no \c"
+	fi
+	echo "errors encountered.\n"
+	exit ${EXIT_CODE:-0}
+}
+
+#==========
+#  The build function coordinates the building and pushing of a map; it
+#  calls the map-specific building function whose name is $MAP.
+#
+#  The arguments to build are:
+#	1:	The name of the ASCII file to build the map from.
+#	2-n:	The names of the maps to be pushed to slave NIS servers.
+#==========
+
+build() {
+	ASCII_FILE=$1; shift; MAPNAMES="$*"
+	if [ -r $ASCII_FILE ]; then
+		if [ -z "`find $MAPDIR/$MAP.time -newer $ASCII_FILE -print 2>/dev/null`" ]; then
+			echo "Building the $MAP map(s)... \c"
+			$MAP $ASCII_FILE
+			if [ $? -ne 0 ]; then
+				echo "ERROR (ypmake):  in $MAP build."
+				EXIT_CODE=4
+			else
+				touch $MAPDIR/$MAP.time
+				echo "$MAP build complete."
+				if [ -z "$NOPUSH" ]; then
+					echo "   Pushing the $MAP map(s):\c"
+					for MAPNAME in $MAPNAMES; do
+						echo "  $MAPNAME\c"
+						$NIS_DIR/yppush -d $DOM $MAPNAME -m 1 -t 80
+					done
+					echo ""
+				fi
+			fi
+		else
+			echo "The $MAP map(s) are up-to-date."
+		fi
+	else
+		echo "\nERROR (ypmake):  $ASCII_FILE doesn't exist or is not readable." >& 2
+		echo "                 The $MAP map(s) cannot be built." >& 2
+		EXIT_CODE=5
+	fi
+}
+
+#==========
+#  The following functions, whose names match the common names of the NIS map,
+#  perform the map-specific build processes.  The argument ($1) to each
+#  function is the full pathname of the ASCII file to build the map(s) from.
+#  A non-zero return is done if an error is detected.  Note that errors which
+#  occur in the first components of a pipe are not detected.
+#
+#  If you create a new, custom NIS map and want it to be distributed to the
+#  slave NIS servers, you should add a function in this area to build it.  Use
+#  a similar construct as is found here.
+#==========
+
+group() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=group.bygid
+		MAPNAME2=group.byname
+	else
+		MAPNAME1=group.bygi
+		MAPNAME2=group.byna
+	fi
+	awk 'BEGIN { FS=":"; OFS="\t"; } { print $3, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	awk 'BEGIN { FS=":"; OFS="\t"; } { print $1, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+hosts() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=hosts.byaddr
+		MAPNAME2=hosts.byname
+	else
+		MAPNAME1=hosts.byad
+		MAPNAME2=hosts.byna
+	fi
+	$NIS_DIR/stdhosts $1 | \
+		awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $1, $0 }' | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	sed -e "/^#/d" -e s/#.*$// $1 | $NIS_DIR/stdhosts | \
+		awk '{ for (i = 2; i <= NF; i++) print $i, $0 }' | \
+		$MAKEDBM -l - $MAPDIR/$MAPNAME2
+}
+
+netgroup() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=netgroup.byhost
+		MAPNAME2=netgroup.byuser
+	else
+		MAPNAME1=netgr.byho
+		MAPNAME2=netgr.byus
+	fi
+	grep -v "^[	 ]*#" $1 | grep -v "^[	 ]*$" | \
+		$MAKEDBM - $MAPDIR/netgroup
+	if [ $? -ne 0 ]; then return 1; fi
+	grep -v "^[	 ]*#" $1 | grep -v "^[	 ]*$" | \
+		$NIS_DIR/revnetgroup -h | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	grep -v "^[	 ]*#" $1 | grep -v "^[	 ]*$" | \
+		$NIS_DIR/revnetgroup -u | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+networks() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=networks.byaddr
+		MAPNAME2=networks.byname
+	else
+		MAPNAME1=netwk.byad
+		MAPNAME2=netwk.byna
+	fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $2, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	sed -e "/^#/d" -e s/#.*$// $1 | awk \
+		'{ print $1, $0; for (i = 3; i <= NF; i++) print $i,$0 }' | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+passwd() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=passwd.byname
+		MAPNAME2=passwd.byuid
+	else
+		MAPNAME1=passw.byna
+		MAPNAME2=passw.byui
+	fi
+		awk 'BEGIN { FS=":"; OFS="\t"; } /^[a-zA-Z0-9_]/ \
+		{ print $1, $0 }' $1 | $MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+		awk 'BEGIN { FS=":"; OFS="\t"; } /^[a-zA-Z0-9_]/ \
+		{ print $3, $0 }' $1 | $MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+protocols() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=protocols.byname
+		MAPNAME2=protocols.bynumber
+	else
+		MAPNAME1=proto.byna
+		MAPNAME2=proto.bynu
+	fi
+	sed -e "/^#/d" -e s/#.*$// $1 | awk \
+		'{ print $1,$0; for (i = 3; i <= NF; i++) print $i, $0 }' | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $2, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+rpc() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=rpc.bynumber
+		MAPNAME2=rpc.byna
+	else
+		MAPNAME1=rpc.bynu
+		MAPNAME2=rpc.byna
+	fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $2, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $1, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+services() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=services.byname
+		MAPNAME2=servi.bynp
+	else
+		MAPNAME1=servi.byna
+		MAPNAME2=servi.bynp
+	fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { print $2, $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME1
+	if [ $? -ne 0 ]; then return 1; fi
+	awk 'BEGIN { OFS="\t"; } $1 !~ /^#/ { split($2, xxx, "/"); print$1 "/" xxx[2], $0 }' $1 | \
+		$MAKEDBM - $MAPDIR/$MAPNAME2
+}
+
+aliases() {
+	if [ "$LONG_FILENAMES" = "TRUE" ]; then
+		MAPNAME1=mail.byaddr
+	else
+		MAPNAME1=mail.byad
+	fi
+        cp $ALIAS $MAPDIR/mail.aliases
+	/usr/lib/sendmail -bi -oA$MAPDIR/mail.aliases
+	$MKALIAS $MAPDIR/mail.aliases $MAPDIR/$MAPNAME1
+        rm $MAPDIR/mail.aliases
+	}
+
+vhe_list() {
+	grep -v "^[	 ]*#" $1 | grep -v "^[	 ]*$" | \
+		awk 'BEGIN { OFS="\t"; } { print NR, $0 }' | \
+		$MAKEDBM - $MAPDIR/vhe_list
+}
+
+#==========
+#  Check each of the arguments passed in for validity.  The patterns of the
+#  case statement are:
+#
+#     DIR=*)	The directory which contains the ASCII files from which the
+#		maps are to be constructed.  If not specified as an argument,
+#		DIR=/etc.
+#     DOM=*)	The NIS domain for which the maps are to be built.  If not
+#		specified as an argument, DOM=`domainname`.
+#     NOPUSH=*)	It is normally null.  If not null, the newly-built NIS maps
+#		are not pushed to the slave NIS servers.
+#     PWFILE=*)	This specifies the full pathname of the ASCII source file
+#		from which the passwd maps are to be built.  If not
+#		specified as an argument, PWFILE=$DIR/passwd.  Note that
+#		"passwd" must also be an argument for PWFILE to be meaningful.
+#     *=*)	An option was probably misspelled.
+#     x | y...)	The case lines of this form list the names by which given
+#		NIS maps are known.  The first name listed in each of the
+#		lines is the map's common name (generally, the name of the
+#		ASCII file from which the map is created, e.g., as "group"
+#		is to /etc/group).  The common name is also referred to as
+#		the map nickname, by some commands.  Multiple requests to
+#		build the same map are distilled to a single request.
+#     *)	A mapname was probably misspelled.
+#
+#  If you create a new, custom NIS map and want it to be distributed to the
+#  slave NIS servers, add a pattern to this case statement, so it will be added
+#  to the list of MAPS.  Use a similar construct as is found here.
+#==========
+
+for ARG in $*; do
+   case "$ARG" in 
+
+	DIR=* | DOM=* | NOPUSH=* | PWFILE=*)
+		eval $ARG;;
+
+	*=*)	echo "\nERROR (ypmake):  unknown option \"$ARG\"" >& 2
+		BADARG=TRUE;;
+
+	group | group.bygid | group.byname)
+		if [ `expr "$MAPS" : ".* group.*"` -eq 0 ]; then
+			MAPS="$MAPS group"
+		fi;;
+
+	hosts | hosts.byaddr | hosts.byname)
+		if [ `expr "$MAPS" : ".* hosts.*"` -eq 0 ]; then
+			MAPS="$MAPS hosts"
+		fi;;
+
+	netgroup | netgroup.byhost | netgroup.byuser)
+		if [ `expr "$MAPS" : ".* netgroup.*"` -eq 0 ]; then
+			MAPS="$MAPS netgroup"
+		fi;;
+
+	networks | networks.byaddr | networks.byname)
+		if [ `expr "$MAPS" : ".* networks.*"` -eq 0 ]; then
+			MAPS="$MAPS networks"
+		fi;;
+
+	passwd | passwd.byname | passwd.byuid)
+		if [ `expr "$MAPS" : ".* passwd.*"` -eq 0 ]; then
+			MAPS="$MAPS passwd"
+		fi;;
+
+	protocols | protocols.byname | protocols.bynumber)
+		if [ `expr "$MAPS" : ".* protocols.*"` -eq 0 ]; then
+			MAPS="$MAPS protocols"
+		fi;;
+
+	rpc | rpc.bynumber | rpc.byname)
+		if [ `expr "$MAPS" : ".* rpc.*"` -eq 0 ]; then
+			MAPS="$MAPS rpc"
+		fi;;
+
+	services | services.byname)
+		if [ `expr "$MAPS" : ".* services.*"` -eq 0 ]; then
+			MAPS="$MAPS services"
+		fi;;
+        aliases | mail.aliases | mail.byaddr)
+	     if [ `expr "$MAPS" : ".* mail.*"` -eq 0 ]; then
+			 MAPS="$MAPS aliases"
+		fi;;
+	vhe_list)
+		if [ `expr "$MAPS" : ".* vhe_list.*"` -eq 0 ]; then
+			MAPS="$MAPS vhe_list"
+		fi;;
+
+	*)	echo "\nERROR (ypmake):  unknown mapname \"$ARG\"" >& 2
+		BADARG=TRUE;;
+
+   esac
+done
+
+#==========
+#  If any bad arguments were encountered, do not continue.
+#==========
+
+if [ $BADARG ]; then
+	echo "\nUsage:  ypmake [DIR=source_dir] [DOM=domain_name] [NOPUSH=1] \\" >& 2
+	echo "               [PWFILE=passwd_file] [map ...]" >& 2
+	EXIT_CODE=1
+	finis
+fi
+
+#==========
+#  Set DOM to its default, if it has not been specified.  It it's null,
+#  the NIS domain name is not set; it must be, before ypmake can continue.
+#==========
+
+DOM=${DOM:-`domainname`}
+if [ -z "$DOM" ]; then
+	echo "\nERROR (ypmake):  the NIS domain name is not set on this machine." >& 2
+	echo "                 Aborting ypmake." >& 2
+	EXIT_CODE=2
+	finis
+fi
+
+#==========
+#  Set DIR and PWFILE to their defaults, if they have not been specified.
+#  If no maps were specified, check (and possibly build) them all.
+#
+#  NIS_DIR:	The directory which contains the directories whose names
+#		are domains; each, in turn, contains maps for the domain.
+#		NIS_DIR also contains the makedbm, revnetgroup, stdhosts and
+#		yppush commands.
+#  MAKEDBM:	The full pathname of the makedbm utility.
+#  MAPDIR:	The directory for the domain of interest.
+#==========
+ALIAS=/usr/lib/aliases
+DIR=${DIR:-/etc}
+PWFILE=${PWFILE:-$DIR/passwd}
+MAPS=${MAPS:-'passwd group hosts networks rpc services protocols netgroup aliases vhe_list'}
+NIS_DIR=/usr/etc/yp
+MAKEDBM=$NIS_DIR/makedbm
+MAPDIR=$NIS_DIR/$DOM
+MKALIAS=$NIS_DIR/mkalias
+
+#==========
+#  If the domain directory does not exist or is not writable, stop.
+#==========
+
+if [ ! -d $MAPDIR -o ! -w $MAPDIR ]; then
+	echo "\nERROR (ypmake):  \"$MAPDIR\"," >& 2
+	echo "                 the domain directory, does not exist or is not writable." >& 2
+	echo "                 Aborting ypmake." >& 2
+	EXIT_CODE=3
+	finis
+fi
+
+#==========
+#  When /usr/etc/yp is in a file system which permits file names longer than 14
+#  characters, the LONG_FILENAMES variable is set to TRUE.  This causes the
+#  standard NIS maps to be built with their full names, not abbreviated names.
+#==========
+
+if `$NIS_DIR/longfiles`; then
+	LONG_FILENAMES=TRUE
+else	
+	LONG_FILENAMES=FALSE
+fi
+
+#==========
+#  For each of the maps to be made, do the appropriate work.
+#
+#  If you create a new, custom NIS map and want it to be distributed to the
+#  slave NIS servers, add a pattern to this case statement.  Use a similar
+#  construct as is found here.
+#==========
+
+echo "\nFor NIS domain $DOM:\n"
+for MAP in $MAPS; do
+   case $MAP in
+
+	group)		build $DIR/group group.bygid group.byname;;
+
+	hosts)		build $DIR/hosts hosts.byaddr hosts.byname;;
+
+	netgroup)	build $DIR/netgroup netgroup netgroup.byhost netgroup.byuser;;
+
+	networks)	build $DIR/networks networks.byaddr networks.byname;;
+
+	passwd)		build $PWFILE passwd.byname passwd.byuid;;
+
+	protocols)	build $DIR/protocols protocols.byname protocols.bynumber;;
+
+	rpc)		build $DIR/rpc rpc.bynumber rpc.byname;;
+
+	services)	build $DIR/services services.byname servi.bynp;;
+
+	aliases)	build $ALIAS mail.byaddr mail.aliases;;
+
+	vhe_list)	build $DIR/vhe_list vhe_list;;
+
+   esac
+done
+
+finis

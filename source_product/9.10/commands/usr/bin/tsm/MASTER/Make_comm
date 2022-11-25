@@ -1,0 +1,27 @@
+# Master Makefile  - COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/10 13:44:07 ssa Exp $
+MAKEFILE=	Make_$(MACH)
+
+.SUFFIXES:
+
+.DEFAULT:
+	cd ../CMD;               $(MAKE) -f $(MAKEFILE) $<
+	cd ../uif;               $(MAKE) -f $(MAKEFILE) $<
+	cd ../facet;             $(MAKE) -f $(MAKEFILE) $<
+	cd ../facetterm;         $(MAKE) -f $(MAKEFILE) $<
+	cd ../term;              $(MAKE) -f $(MAKEFILE) $<
+	cd ../reg;               $(MAKE) -f $(MAKEFILE) $<
+	cd ../installdir;        $(MAKE) -f $(MAKEFILE) $<
+	cd ../tixer;             $(MAKE) -f $(MAKEFILE) $<
+	@echo master make $< for $(MACH) done
+
+all:
+	cd ../CMD;               $(MAKE) -f $(MAKEFILE)
+	cd ../uif;               $(MAKE) -f $(MAKEFILE)
+	cd ../facet;             $(MAKE) -f $(MAKEFILE)
+	cd ../facetterm;         $(MAKE) -f $(MAKEFILE)
+	cd ../term;              $(MAKE) -f $(MAKEFILE)
+	cd ../reg;               $(MAKE) -f $(MAKEFILE)
+	cd ../installdir;        $(MAKE) -f $(MAKEFILE)
+	cd ../tixer;             $(MAKE) -f $(MAKEFILE)
+	@echo master make all for $(MACH) done

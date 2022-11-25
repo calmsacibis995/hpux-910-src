@@ -1,0 +1,17 @@
+:
+# @(#) $Header: Maketape_hp,v 66.2 90/09/20 12:24:00 kb Exp $
+echo ============================
+cat MACHINE
+cat VERSION
+echo ============================
+set -e
+echo "cd FTINST"
+cd FTINST
+pwd
+echo "FOR USE ON HP: load tape to be WRITTEN TO and press return: \c"
+read x
+echo "find . -type f -print | cpio -ocv | tcio -o /dev/rct/c0d1"
+find . -type f -print | cpio -ocv | tcio -o /dev/rct/c0d1
+echo
+echo "tape complete - remove tape"
+echo

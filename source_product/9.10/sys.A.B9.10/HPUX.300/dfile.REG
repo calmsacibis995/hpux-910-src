@@ -1,0 +1,111 @@
+* $Source: /source/hpux_source/kernel/sys.SWT68K_300/REG.300/RCS/dfile.REG,v $
+* $Revision: 1.4.84.5 $	$Author: dkm $
+* $State: Exp $   	$Locker:  $
+* $Date: 94/02/07 11:32:42 $
+*
+* HPUX_ID:  @(#)dfile.full.lan	52.2		88/08/29
+* dfile.full.lan  Maximum Workstation with Networking
+*
+* This is a sample configuration description file (dfile). You can use this
+* file to create a new kernel using either config(1m) or reconfig(1m).
+* Lines that begin with an asterisk ("*") are comments; the system ignores 
+* all text following the asterisk.
+*
+* For a detailed description of the steps required to create a new kernel, 
+* refer to the AXE User's Manual or the System Administrator Manual.
+*
+* The /etc/reconfig program uses this file when the option to "Create a
+* fully loaded operating system" is chosen for a workstation that is not 
+* part of an HP-UX cluster.  Changes in this file will affect all future
+* workstation operating systems created with this option in reconfig.
+*
+* WARNING: If you want to create a dfile based on this file,  make a copy 
+* and make the desired changes in the copy.  You should not change this file.
+* This file will be overwritten each time you load the ACONFIG fileset 
+* (e.g., with a system update using /etc/update).  This will require you to
+* make the change every time you update the system.
+*
+*
+* DEVICE DRIVERS
+* disk drivers
+cs80
+scsi
+amigo
+* tape drivers
+tape
+stape
+* printer drivers
+printer
+* ciper
+* shared resource management driver
+srm
+* pseudo terminal drivers
+ptymas
+ptyslv
+* dil hpib driver (includes plotters)
+hpib
+* dil gpio driver
+gpio
+* remote job entry
+rje
+* HP 98286 DOS Coprocessor driver (see dos_mem_byte parameter)
+* dos
+* enable the trace(1) command
+strace
+* HP 98646 VME driver
+vme
+* HP 98577 VME expander
+vme2
+* Bi-directional parallel interface driver
+parallel
+* HP EISA driver
+eisa
+* HP diskless pseudo-driver
+dskless
+* Network File System (NFS) - remove the '*' from the nfs line to include.
+* /etc/reconfig will do this automatically when creating a fully loaded
+* operating system if /etc/conf/libnfs.a exists.
+nfs
+* Pseudo-entries to bring in the4.3-based networking initialization
+uipc
+nipc
+inet
+netman
+* CD File System (CDFS) - remove the '*' from the cdfs line to include.
+* /etc/reconfig will do this automatically when creating a fully loaded
+* operating system if /etc/conf/libcdrom.a exists.
+cdfs
+* Measurement System driver. Must be present for MS tools to work.
+meas_sys
+* Kernel Instruction Coverage Analyzer (aka. ica)
+*ica
+* Networking drivers (formerly: ieee802 & ethernet drivers)
+lla
+lan01
+ni
+netdiag1
+* nsdiag0
+*
+* CARDS
+* HP-IB interface
+98624
+* high-speed HP-IB interface
+98625
+* RS-232 serial interface
+98626
+* RS-232 datacomm interface
+98628
+* RS-232 multiplexer
+98642
+* DIO SCSI interface
+98658
+* Internal RS-232 serial interface
+apci
+* SCSI interface
+98265
+*
+* SWAP CONFIGURATION
+*
+* CONFIGURABLE PARAMETERS
+dskless_node 1
+server_node 1

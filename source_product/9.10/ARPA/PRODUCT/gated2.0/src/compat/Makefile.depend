@@ -1,0 +1,7 @@
+getdtablesize.o : getdtablesize.c 
+insque.o : insque.c 
+strcasecmp.o : strcasecmp.c 
+herrs.o : herrs.c 
+h_errno.o : h_errno.c 
+recvmsg.o : recvmsg.c ../include.h ../config.h ../defs.h ../inet.h \
+  ../rt_control.h ../if.h ../task.h ../rt_table.h ../trace.h 

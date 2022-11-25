@@ -1,0 +1,339 @@
+/* @(#) $Revision: 51.1 $ */   
+
+	1.0 INTRODUCTION
+
+	The justify command is a filter that formats data for
+	printers with Hebrew and Arabic fonts.  It is designed to be
+	used with the pr(1,UTIL) and the lp(1,UTIL) commands.
+	The features of this filter include:
+
+		1. left and right justification of print lines
+		2. translation of Arabic8 characters to printer fonts
+		   by using a context analysis routine
+		3. print lines of variable length
+
+	The following features are not scheduled for Release 2.0:
+
+		1. print lines of variable print pitch
+		2. rearrangement of on/off escapes sequences such as
+		   underline, bold, shift in - shift out
+		3. support of alternate character sets in addition to
+		   Latin and non-Latin characters
+		4. use with nroff/troff(1,UTIL).
+
+	The source code is made up of the following files:
+
+		1. justify.h
+		2. extern.h
+		3. global.c
+		4. main.c
+		5. line.c
+		6. dojust.c
+		7. context analysis files
+			a. arab_def.h
+			b. arab_fnt.c
+			c. arab_con.c
+			d. arab_fun.c
+			e. arab_shp.c
+
+	1.1 JUSTIFY.H
+
+	The general header file for the command contains constants,
+	typedefs and macros.
+
+	1.2 EXTERN.H
+
+	The header file includes external declarations for all global 
+	variables.
+
+	1.3 GLOBAL.C
+
+	The source file includes definitions and intializations for all
+	global variables.  Global variables start with a capital letter.
+	Most of these global variables are command line flags set by the
+	initialization routine and never changed.  The notable exception
+	here is "Len" the number of characters in the input buffer.
+	The length of each line is set by "get_line" but may be changed
+	during tab expansion by "expand".
+
+	1.4 MAIN.C
+
+	The source file includes the following routines:
+
+		1. main
+		2. start_up
+		3. do_file
+		4. empty
+
+	1.4.1 MAIN
+
+	The main program drives the command.  It defines 3 buffers for
+	input (buf1), output (buf2) and line wrap (buf3).  These are
+	local variables, so they live on the stack and do not take up
+	space in the object code.  The input and output buffers are
+	surrounded by filler arrays initialized to nulls.  This is
+	done for the context_analysis routine which needs 4 previous 
+	and 4 following characters to determine the shape of each
+	character.  With the filler arrays, the beginning input characters
+	are guaranteed to be preceded by Latin codes and the ending input
+	characters are guaranteed to be followed by Latin codes.
+
+	The main program logic is pretty self-evident.  After parsing the
+	command line, it opens, processes and closes each input file one
+	at a time being careful not to close stdin.  Note that if an input
+	file fails to open, an error message is issued and the next input
+	file is read.
+
+	1.4.2  START_UP
+
+	The start_up routine opens the message catalog and initializes
+	the wrap and fill buffers.
+
+	The routine also inspects the LANG environment variable
+	to determine the language of the file.	The language can not
+	be overridden from the command line.
+
+	The routine calls nl_init to initialize the environment table
+	and global variables.  Two globals are looked at: _nl_mode
+	and _nl_order.
+
+	The command line is parsed using getopts.  The following
+	information can be given on the command line:
+
+	     o 	 Font Escape Sequence: The escape sequence used	to
+		 select	Hebrew or Arabic fonts without the
+		 beginning escape character.  By default, the 
+		 following escape sequences are used:
+
+		    ESC(8H  selects Hebrew fonts.
+		    ESC(8V  selects Arabic fonts.
+
+	    o 	 Justification:	The option selects left	or right
+		 justification of print	lines.	The default is
+		 right justification.
+
+	    o 	 Leading-blanks: The option forces the replacement
+		 leading Ascii blanks by right-to-left blanks.
+		 The default is no leading blank replacement.
+
+	     o 	 New-line: The option signifies that new-line characters
+		 are not used to terminate print lines.  By default, 
+		 print lines are terminated by new-line characters.
+
+	     o 	 Mode: Indicates the mode of the file: Latin or
+		 non-Latin.  This overrides information	set up
+		 by the nl_init routine.  By default, non-Latin mode
+		 is assumed.
+
+	     o 	 Order:	Indicates the order of the file: keyboard
+		 or screen.  This overrides information	set up
+		 by the nl_init routine.  By default, keyboard order
+		 is assumed.
+
+	     o 	 Word wrap: The	option tells whether to	truncate or
+		 wrap print lines that do not fit the designated or
+		 default line length.  A wrap is done by default.
+
+	     o 	 Print Width : Maximum number of characters in
+		 the destination printer print line.  By default, an
+		 80 column print line is assumed.
+
+	     o 	 Wrap Margin : The print column where wrap or truncation
+		 takes place.  By default, a wrap margin at column 80
+		 is assumed.
+
+	     o 	 Tabs: This option causes the expansion	of input
+		 tabs.	Tab settings at every eighth position is
+		 assumed with an option	to override the	default.
+		 The tab character is assumed to be 0x09 unless	a
+		 non-digit character is	entered	as a command line
+		 option.  Tabs are always expanded.
+
+	     o 	 File Names: Optional input file names can be given
+	     	 on the command line.  The command reads the con-
+		 catenation of input files (or standard input if
+		 none are given).  You can use "--" to delimit the
+		 end of options.
+
+	Command line errors will cause an error message. 
+	Error messages can be localized through message catalogs.
+
+	The wrap margin can not exceed the print width.  If it does a
+	warning message is issued and the margin defaults to the width.
+
+	There must be a correspondence between mode and justification.
+	Only non-Latin mode files can be right justified in a meaningful
+	way.  Similarly, only Latin mode files can be safely left
+	justified.  If mode and justification do not match, then a
+	warning message is issued.
+
+	1.4.3  DO_FILE
+
+	The do_file routine contains the process logic of the program.
+	It first gets a line (get_line) from the input file.  If the
+	line is empty it prints it on the spot.  Since the line may
+	be a wrap from the previous line, the HaveWrap flag is set 
+	FALSE indicating you don't have to worry about a wrap the
+	next time thru.
+
+	If the line is not empty, it is right or left justified (justify).
+	Arabic is given special treatment for two reasons.  First,
+	Arabic fonts are assumed to be an entirely different character
+	set than Ascii.  Function shift() uses shift-in and shift-out
+	characters to designate Arabic and Ascii sub-strings.  Hebrew
+	printer fonts are assumed to have Ascii characters in the lower
+	128 of the set and Hebrew characters in the upper 128.  Second, 
+	Arabic characters can take on up to 4 shapes depending on their
+	context.  Function shapes() returns printer font shapes in the 
+	output buffer.  Function shift() MUST be called before function 
+	shapes() since shift() depends on the most significant bit being 
+	set for Arabic.  After the shapes() function, Arabic fonts may not
+	have the most significant bit set.
+
+	All lines are placed on stdout.
+
+	1.4.4  EMPTY
+
+	The function checks for empty lines using isgraph(LIBC).
+
+	1.5 LINE.C
+
+	The source file includes the following routines:
+
+		1. get_line
+		2  put_line
+		3. put_message
+
+	1.5.1 GET_LINE
+
+	The routine returns a TRUE if it successfully gets the next
+	line from one of two sources: the wrap buffer or the input file.
+	The length of the line is save in the global variable "Len".
+	The routine returns FALSE at EOF or if no characters are read.
+	The program will terminate if the number of characters read 
+	exceeds the length of the input buffer.  It is assumed that the
+	line terminates with a control character (a new line or form feed).
+	This last character is stripped from the line and saved for put_line.
+
+	1.5.2 PUT_LINE
+
+	The routine puts a print line into the output file.  The
+	primary font is selected using an ESC(8V for Arabic and
+	an ESC(8H for Hebrew.  When the language is Arabic,
+	Ascii is selected as the secondary character set 
+	(since Arabic fonts do not include Ascii).  The print buffer
+	is sent out next followed by the last character.  The
+	routine assumes all lines are terminated by a control code.
+
+	1.5.3 PUT_MESSAGE
+
+	The routine puts a message into the output file.  It gets the 
+	message from the static mess array defined right above it.
+	The catgets routine is used.  If the message is the result of
+	a fatal error, the routine terminates the program.
+
+	1.6 DOJUST.C
+
+	This source file does most of the work of the command.  
+	It includes the following routines:
+
+		1. justify
+		2. shift
+		3. shapes
+		4. expand
+
+	1.6.1 JUSTIFY
+
+	The routine does the actual flip or rotation.  Things are done
+	in this order:
+
+		1. replace Ascii leading blanks
+		2. convert to screen order
+		3. expand tabs
+		4. get number of right justification leading blanks
+		5. split opposite language string at wrap boundary
+		6. wrap or truncate line
+		7. do the left or right justification
+
+	The screen order conversion is done by strord().  It must be called
+	before tab expansion in order to delimit opposite language strings
+	correctly.  Tabs must be expanded to correctly calculate the
+	number of leading blanks.  This stuff is only done if we're not
+	handling a wrap from the previous line.  If we are handling a
+	wrap, the screen ordering and tab expansion should have been
+	done earlier.
+	
+	The number of blanks needed to right justify the line to the
+	wrap margin is found next.  If a wrap or truncation is needed,
+	the wrap boundary is checked for an opposite language string.
+	If an opposite language string is split at a wrap boundary,
+	it must be rearranged in keyboard order and then split.
+	When opposite language strings are wrapped, characters are
+	arranged the way they are read.  It looks like this:
+
+		some English words that wrap N9N8N7 N6N5 N4N3 N2N1
+		.n19n18n17n16 n15n14n13 n12n11n10 to the next line
+
+	When left justification is selected, no leading blanks are necessary.
+	When right justification is selected, three things happen.  First,
+	sufficient spaces are placed in the output buffer to right justify 
+	the margin.  Second, spaces are placed in the output buffer to 
+	right justify the line with respect to the margin.  Finally,
+	the line itself is flipped into the output buffer.
+
+	The spaces may be Ascii or non-Ascii.  Non-ascii spaces are used
+	only with Arabic and only when the character next to the leading
+	blanks is an Arabic character.  This is needed for proper context
+	analysis (space characters in Arabic may have a tail shape).
+	The print line is then copied starting from the end of the input
+	buffer.
+
+	1.6.2 SHIFT
+
+	The routine places shift-in characters before Latin strings and
+	shift-out characters before Non-Latin strings.  This is done
+	only for Arabic.  The NL_CHAR macro is used to make the distinction
+	between Latin and Non-Latin characters.  Buffer overflow is checked
+	before characters are placed in the output buffer.  Arabic8 is 
+	choosen as the primary character set and Roman8 is selected as
+	the secondary character set.
+
+	1.6.3 SHAPES
+
+	The routine places Arabic printer font shapes into the output buffer.
+	The shapes are returned by the context analysis routine.  Three
+	parameters are needed for context analysis: 
+
+		1. an array of character codes
+		2. an array of character fonts
+		3. and a flag.  
+	
+	The first parameter is the input buffer of Arabic8 codes.
+	The second parameter points to the start of the printer font
+	shape array.  The final parameter turns the context analysis
+	on or off.  For our purposes, it is always turned on.
+
+	The filler arrays (see main()) guarantee the previous characters
+	will not be garbage.  The first for loop in shapes() guarantees
+	the last characters will not be garbage.
+
+	1.6.4 EXPAND
+
+	The routine expands tabs to character positions k+1, 2*k+1,
+	3*k+1, ... where k is the tab stop.  Ascii characters are
+	always used to expand tabs.  The STORE macro is used to 
+	prevent output buffer overflow.
+
+	1.7 CONTEXT ANALYSIS FILES
+
+	The context analysis files are used to map character codes to 
+	printer font shapes.  These files include:
+
+		1. arab_def.h
+		2. arab_fnt.c
+		3. arab_con.c
+		4. arab_fun.c
+		5. arab_shp.c
+
+	Geneva is responsible for these routines.  They should be thought of
+	as a black box.

@@ -1,0 +1,2929 @@
+#!/bin/ksh 
+# @(#) $Revision: 72.7 $
+#
+# This script allows a user to interactively set the TZ (time zone) 
+# variable and the current system time and date.  This script is run
+# by the /etc/rc the first time the system boots up.  The system name
+# and the system Internet Protocol address are also entered.  The IP 
+# address is written to /etc/hosts. If BMS is installed on the system
+# the /usr/adm/inetd.sec file is configured to allow BMS services to
+# work on this machine.
+#
+# The script also detects whether the system is an S800 with Logical
+# Volume Manager (LVM) installed.  If so, then the user is allowed
+# to adjust the size of the system swap space.
+#
+# Finally, if no root password is set, then the user is allowed to set it.
+#
+# The data entered is written to the file /etc/src.sh in /bin/sh syntax.
+# The data entered is written to the file /etc/src.csh in /bin/csh syntax.
+# These files can be sourced by the respective shell to set the TZ variable.
+# 
+# This script can be run at a later time to alter the system name and IP
+# address by specifing the parameter "hostname" (ie /etc/set_parms hostname).
+#
+# This script can be run at a later time to alter the time zone and date/time
+# by specifing the parameter "time" (ie: /etc/set_parms time).
+#
+# This script can be run at a later time to alter the date/time
+# by specifing the parameter "time_only" (ie: /etc/set_parms time_only).
+# This mode of operation is used by the /etc/rc script to reset the system
+# time/date if desired.
+#
+# This script can be run at a later time to make the system a font client
+# (or change the font server name if it's already a font client) by 
+# specifying the parameter "font_client" (ie: /etc/set_parms font_client).
+#
+
+export PATH=/bin:/usr/bin
+
+############################################################################
+# CheckUsage()
+# CheckUsage verifies that the command-line option is valid.  If not,
+# prints a Usage: statement and exits.
+CheckUsage() {
+
+    case "$1" in
+    "hostname" | "time" | "time_only" | "font_client" | "lvm" ) return 0 ;;
+    esac
+
+    echo 'Usage: set_parms [<flag>]' 1>&2
+    echo 'where: <flag> can be "hostname" "time" "time_only" "font_client" ' 1>&2
+    exit 1
+}
+
+
+# Clear the screen - one way or another
+clear_screen() {
+
+    BRUTE_FORCE="\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+
+    clear 2> /dev/null || echo "$BRUTE_FORCE"
+}
+
+# Function halt() is called when the system is to be shut down.
+halt() {
+
+# HALTED_MSG is the string the kernel prints when its safe to cycle power.
+HALTED_MSG="Halted, you may now cycle power"
+
+    clear_screen
+    echo "$LINE
+
+The system will now shut down. 
+DO NOT turn off the power until you see the message:
+
+    $HALTED_MSG
+$LINE
+"
+    if [ $TEST -eq 0 ]
+    then
+	/etc/reboot -hq
+    else
+	echo "Your system would now shut down. But since you are"
+	echo "in test mode this will not happen.\n\n"
+	exit
+    fi 
+}
+
+
+YorN='\nPress [y] for yes or [n] for no, then press [Return] \c'
+
+AskYorN() {
+
+    while :
+    do
+        echo "$*"
+        echo "${YorN}"
+
+        read response
+
+	case $response in
+	[yY]*) return 0 ;;
+	[nN]*) return 1 ;;
+	esac
+
+	echo "\n\n\nYou need to answer [y] for yes or [n] for no.\n"
+	
+    done
+}
+
+ReturnToContinue() {
+    echo
+    echo "Press [Return] to continue...\c"
+    read junk
+}
+
+Retry() {
+    
+    echo
+    echo "$*"
+    echo "Press [Return] to try again...\c"
+    read junk
+
+}
+
+############################################################################
+#
+# This function informs the user they must know the system name, IP address,
+# and time zone before continuing.  If they don't know this info they can
+# abort this script and the bootup process or they can continue and use
+# the defaults.  This function is only run on the initial run after an
+# install.
+
+hello()
+{
+
+    clear_screen
+
+
+    if [ $INITIAL -eq 1 ]
+    then
+        TZ_MSG="\n      * Your time zone."
+    else
+        TZ_MSG=
+    fi
+
+    if [ "$NETWORK" = "YES" ]
+    then
+
+        echo "$LINE
+
+   Before you begin using this system, you need to obtain the 
+   following information from your local network administrator:
+
+      * Your system name (host name).
+
+      * Your internet protocol (IP) address.
+      $TZ_MSG
+
+    If you do not have this information, you may stop now and restart
+    your system once you have it.  
+$LINE
+" # end MSG
+
+    else # NETWORK != YES
+
+        echo "$LINE
+
+   Before you begin using this system, you need to provide the following
+   information:
+
+      * A name for your system (host name).
+      $TZ_MSG
+
+   NOTE: If you plan to eventually connect your system to a network,
+   you may want to check with your network administrator to obtain a
+   valid system name now, so you won't have to change it later.
+$LINE
+" # end MSG
+    fi
+
+    AskYorN "Do you wish to continue?" 
+
+    if [ $? -ne 0 ]
+    then
+	clear_screen
+	if [ $INITIAL -eq 1 ]
+        then
+	    halt
+	else  # INITIAL != 1
+	    echo "Not continuing, no changes made.\n\n"
+	    exit 
+	fi
+    fi  # User answered "no"
+}
+
+############################################################################
+#
+# This function verifies that the day entered is allowed for the month
+# and year entered.
+# ie Apr can not have 31 days
+# The variable DAY_OK is set to TRUE if the day is allowed, FALSE otherwise.
+
+check_day()
+{
+    DAY_OK=FALSE
+
+    case "$month" in
+    02 )
+
+        let LEAP="$year % 4"
+        if [ $LEAP -eq 0 ]
+        then	# leap year
+	    if [ $day -le 29 ]
+	    then
+	        DAY_OK=TRUE
+	    fi
+	else
+	    if [ $day -le 28 ]
+	    then
+		DAY_OK=TRUE
+	    fi
+	fi
+    ;; # FEBRUARY
+
+    04 | 06 | 09 | 11 )
+
+        if [ $day -le 30 ]
+	then
+	    DAY_OK=TRUE
+	fi
+    ;; # APR, JUN, SEPT, NOV
+
+    01 | 03 | 05 | 07 | 08 | 10 | 12 )
+
+        if [ $day -le 31 ]
+	then
+	    DAY_OK=TRUE
+	fi
+    ;; # JAN, MAR, MAY, JUL, AUG, OCT, DEC
+    esac
+}	
+
+ValidHostname() {
+
+	reason=""
+
+	case "$1" in
+
+	*[\/\&+=%*@!#$\;\|\(\)\{\}\<\>\?\^\ \	\.]* )
+
+	    reason="illegal character in system name."; 
+	    return 1
+	;;
+
+	[_A-Za-z] ) ;;
+	[_A-Za-z][_A-Za-z0-9-] ) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-]) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-]) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-] ) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-] ) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-] ) ;;
+	[_A-Za-z][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-][_A-Za-z0-9-] ) ;;
+    
+        [_A-Za-z]*)
+
+	    reason="too many characters"
+	    return 1
+	;;
+
+        *)
+
+	    reason="first character is not a letter."
+	    return 1
+	;;
+        esac
+
+	return 0
+}
+
+##########################################################################
+# ValidAddress()
+# Returns 0 for valid IP addresses, else returns 1 and puts description
+# of problem in variable $reason
+
+ValidAddress() {
+
+    reason=""
+    ##
+    # Make sure the IP address entered has the correct format "n.n.n.n".
+    # Insure all the elements are <= 255.
+    ##
+
+    result=`echo $1 | awk 'BEGIN  { stat="ok" }
+    $0 !~ /^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/  {stat = "bad"}
+                  END { print stat }'`
+   
+    if [ $result = "bad" ]
+    then
+       reason="wrong format IP address."
+       return 1
+    fi
+
+# Check if at least one section is greater than zero
+    result=`echo $1 | awk -F. ' BEGIN { stat="ok" }
+    
+    $1 == 0 && $2 == 0 && $3 == 0 && $4 == 0 {
+	stat="0.0.0.0 is a special-purpose address." }
+
+                           END { print stat }'`
+
+    if [ "$result" != "ok" ] 
+    then
+       reason="$result"
+       return 1
+    fi
+
+    result=`echo $1 | awk -F. ' BEGIN { stat="ok" }
+                           { for ( x=1; x< 5; x++ )
+                                 if ( $x > 255 ) {
+                                    stat="bad" 
+                                    break  }
+                           }
+                           END { print stat }'`
+
+    if [ $result = "bad" ] 
+    then
+       reason="element(s) of the address is greater than 255."
+       return 1
+    fi
+
+    return 0
+}
+
+##########################################################################
+# ValidDomain()
+# Returns 0 for valid domain names, and non-zero for invalid names.
+# Only checks for bogus characters in domain name.
+# Sets the variable reason with description when invalid.
+
+ValidDomain() {
+
+    reason=""
+
+    case "$1" in
+
+    *[\/\&+=%*@!#$\;\|\(\)\{\}\<\>\?\^\ \	]* )
+
+        reason="invalid character"
+	return 1
+
+    ;;
+
+    [a-zA-Z_]*)
+        return 0
+    ;;
+    *)
+        reason="first character not a letter"
+        return 1
+    ;;
+    esac
+
+}
+############################################################################
+#
+# This function reads the system name from the user and writes the data
+# to the /etc/src.sh file.
+#
+set_name()
+{
+
+    while :
+    do
+    clear_screen
+
+         echo "$LINE
+
+For the system to operate correctly , you must assign it a unique 
+system name.  The system name, or host name, must:
+
+   * Contain no more than 8 characters.
+
+   * Contain only letters, numbers, underscore (_), or dash (-).
+
+   * Start with a letter.
+
+NOTE: Uppercase letters are not recommended.
+
+If you do not yet have a system name, you may select the default name
+of 'unknown' by pressing [Return].
+$LINE
+" # end echo
+
+
+        echo "Enter the system name, then press [Return] \c" 
+        read node
+
+	if [ "$node" = "" ]
+	then
+	    node=unknown
+        fi
+
+
+	if ValidHostname "$node"
+	then
+
+        MSG="
+You have chosen $node as the name for this system.
+Is this correct?"
+	   
+	if AskYorN "$MSG"
+        then
+	    break
+	fi
+	else
+	    Retry "Invalid hostname: $reason"
+	    continue
+	fi
+
+    done  # while :
+
+    if [ $TEST -eq 0 ]
+    then
+	if [ -z "$SYSTEM_NAME" ]
+	then	# src.sh doesn't exist yet
+	    echo "SYSTEM_NAME=$node ; export SYSTEM_NAME" > /etc/src.sh
+	else		# src.sh already exists
+	    awk -v NAME="$node" '
+	        /SYSTEM_NAME/ {
+		    printf "SYSTEM_NAME=%s ; export SYSTEM_NAME\n", NAME
+	        }
+	        $0 !~ /SYSTEM_NAME/
+	    ' /etc/src.sh  >/tmp/tmp$$
+	    cp /tmp/tmp$$ /etc/src.sh
+	    rm /tmp/tmp$$
+	fi	
+    fi
+
+    SYSTEM_NAME=$node
+    export SYSTEM_NAME
+
+    if [ "$SYSTEM_NAME" != "unknown" ]
+    then
+        hostname $SYSTEM_NAME
+	ASK_REBOOT=1
+    fi
+
+}
+
+###################################################################
+# 
+# Enter time zones not listed.
+#
+other_zone()
+{
+
+    while :
+    do
+	clear_screen
+        echo "$LINE
+
+An unlisted time zone must consist of zero or more characters followed
+by a number (for example:  abc-3, xyz+10).  The number represents the
+number of hours your time is offset from Coordinated Universal Time (CTU),
+also known as Greenwich Mean Time (GMT) at zero degrees longitude.
+
+A positive number is the number of hours west of CTU; a negative number 
+is the number of hours east of CTU.  You may specify hours and minutes
+offset from CTU by separating the hours and minutes with a colon (:).
+For example: abc10:30 would be 10 hours 30 minutes west of CTU.
+$LINE
+" # end echo
+
+        echo "\nEnter the time zone for your location, then press [Return] \c"
+        read zone
+
+        case "$zone" in
+        *[0-9]*)  # OK
+	    break
+        ;;
+        *)
+	    
+	    Retry "The value entered doesn't contain the number of hours offset."
+	    continue
+        ;;
+        esac
+    done
+
+    Azone="$zone"
+}
+
+###################################################################
+#
+# This function sets the time zones for Europe
+#
+europe()
+{
+
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Greenwich Mean Time             |      6) Iceland
+     British Summer Time             |    
+                                     |   
+  2) Portuguese Winter Time          |      7) Turkey, Finland, Romania, Greece
+     Portuguese Summer Time          |         Bulgaria
+                                     |    
+  3) Western European Time           |      8) Western Russia (Moscow)
+     Western European DST            |    
+                                     |    
+  4) Middle European Time            |      9) Unlisted time zone
+     Middle European DST             |    
+                                     |     10) Previous menu
+  5) Mitteleuropaeishe Zeit          |   
+     Mitteleuropaeishe Sommerzeit    |   
+$LINE
+" 	# end echo
+
+    echo "Enter the number for your time zone (1-6), then press [Return] \c" 
+    read number
+
+    DONE=TRUE
+
+    case "$number" in 
+	1) zone=GMT0BST; Azone="Greenwich Mean Time, British Summer Time";; 
+	2) zone=PWT0PST; Azone="Portuguese Winter/Summer Time";; 
+	3) zone=WET0WETDST; Azone="Western European Time/Daylight Time";; 
+	4) zone=MET-1METDST; Azone="Middle European Time/Daylight Time";; 
+	5) zone=MEZ-1MESZ; Azone="Mitteleuropaeishe Zeit/Sommerzeit";; 
+	6) zone=IST1; Azone="Iceland time";; 
+	7) zone=EET-2; Azone="Turkey, Finland, Romania, Greece";;
+	8) zone=WST-3; Azone="Western Russia (Moscow)";; 
+	9) other_zone;;
+       10) DONE=FALSE;
+           break;;
+	*) Retry "Not a valid choice"
+	   continue;; 
+    esac
+
+    MSG="
+The time zone entered is $Azone.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        break
+    fi
+
+done
+
+}
+#############################################################################
+# 
+# This function sets the time for South American countries
+
+Samerica()
+{
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Argentina, Eastern Brazil 
+
+  2) Western Brazil, Bolivia, Chile
+
+  3) Venezuela, Guyana, Surinam
+
+  4) Peru, Ecuador, Columbia 
+
+  5) Unlisted time zone
+ 
+  6) Previous menu
+$LINE
+" 	# end echo
+
+    echo "Enter the number for your time zone (1-6), then press [Return] \c" 
+    read number
+
+    DONE=TRUE
+
+    case "$number" in 
+	1)	zone=SAT3; Azone="Argentina, Eastern Brazil";; 
+	2)	zone=SAT4; Azone="Western Brazil, Bolivia, Chile";; 
+	3)	zone=SAT4:30; Azone="Venezuela, Guyana, Surinam";; 
+	4)	zone=SAT5; Azone="Peru, Ecuador, Columbia" ;; 
+	5)	other_zone;;
+	6)	DONE=FALSE;	break;;
+	*)	Retry "Not a valid choice."
+		continue;; 
+    esac
+
+
+    MSG="
+The time zone entered is $Azone.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        break
+    fi
+
+done
+
+}
+
+#############################################################################
+# 
+# This function sets the time for the African continent
+
+africa()
+{
+
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Northwest Africa, Morocco, Mauritania, Mali
+
+  2) Algeria, West Central Africa, Chad, Angola, Congo
+
+  3) Egypt, Sudan, Zaire, Central Africa
+
+  4) Eastern Africa, Kenya, Ethiopia
+ 
+  5) Republic of South Africa
+
+  6) Unlisted time zone
+
+  7) Previous menu
+$LINE
+"	# end echo
+
+    echo "Enter the number for your time zone (1-7), then press [Return] \c"
+    read number
+
+
+    DONE=TRUE
+
+    case "$number" in 
+	1) zone=WAT0; Azone="Northwest Africa, Morocco, Mauritania, Mali";; 
+	2) zone=WAT-1
+	   Azone="Algeria, West Central Africa, Chad, Angola, Congo";; 
+	3) zone=CAT-2; Azone="Egypt, Sudan, Zaire, Central Africa";; 
+	4) zone=EAT-3; Azone="Eastern Africa, Kenya, Ethiopia";; 
+	5) zone=SAST-2SADT; Azone="Republic of South Africa";; 
+	6) other_zone;;
+	7) DONE=FALSE;	break;;
+	*) Retry "Not a valid choice."
+	   continue;; 
+    esac
+
+    MSG="
+The time zone entered is $Azone.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        break
+    fi
+
+done
+
+}
+
+#############################################################################
+# 
+# This function sets the time zone for the Asian continent
+
+asia()
+{
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Western Russia ( Moscow ), Saudi Arabia, Syria
+
+  2) India
+
+  3) Pakistan
+
+  4) Thailand
+
+  5) Singapore
+
+  6) Phillipines, Hong Kong, Eastern China, Taiwan
+
+  7) Japan
+
+  8) Unlisted time zone
+
+  9) Previous menu
+$LINE
+"	# end echo
+
+    echo "Enter the number for your time zone (1-9), then press [Return] \c"
+    read number
+
+    DONE=TRUE
+
+    case "$number" in 
+	1) zone=WAT-3; Azone="Western Russia ( Moscow ), Saudi Arabia, Syria";; 
+	2) zone=IST-5.5; Azone="India";; 
+	3) zone=PST-5; Azone="Pakistan";; 
+	4) zone=TST-7; Azone="Thailand";; 
+	5) zone=SST-7:30; Azone="Singapore";; 
+	6) zone=EAT-8; Azone=" Phillipines, Hong Kong, Eastern China, Taiwan";;
+	7) zone=JST-9; Azone="Japan";; 
+	8) other_zone;;
+	9) DONE=FALSE;	break;;
+	*) Retry "Not a valid choice."
+	   continue;; 
+    esac
+
+    MSG="
+The time zone entered is $Azone.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        break
+    fi
+
+done
+
+}
+
+#############################################################################
+# 
+# This function sets the time for the Australia and New Zealand
+
+australia()
+{
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Western Australia
+
+  2) Central Australia
+
+  3) Eastern Australia
+
+  4) New Zealand
+
+  5) Unlisted time zone 
+
+  6) Previous menu
+$LINE
+"	# end echo
+
+    echo "Enter the number for your time zone (1-6), then press [Return] \c"
+    read number
+
+    DONE=TRUE
+case "$number" in 
+	1)	zone=WST-8; Azone="Western Australia";; 
+	2)	zone=CST-9:30CDT; Azone="Central Australia";; 
+	3)	zone=EST-10EDT; Azone="Eastern Australia";; 
+	4)	zone=NZST-12NZDT; Azone="New Zealand";; 
+	5)	other_zone;;
+	6)	DONE=FALSE;		break;;
+	*)	Retry "Not a valid choice."
+		continue;; 
+esac
+
+echo "\nThe time zone entered is for $Azone."
+echo "Is this correct?"
+echo $YorN
+read response
+if [ "X$response" = "Xy" ] || [ "X$response" = "XY" ] ; then
+   break
+fi
+
+done
+
+}
+#############################################################################
+#
+#  This function interactively sets the time and date.
+#
+
+set_time()
+{
+
+    clear_screen
+
+    echo "$LINE
+
+This section enables you to set the system clock.
+$LINE
+"
+
+    MSG="The current system time is $(date)
+
+Is this correct?"
+AskYorN "$MSG"
+
+    if [ $? -eq 0 ]
+    then
+       return
+    fi
+
+    time_set
+
+}
+
+########################################################
+#
+# This function actually prompts the user for the time/date info.
+#
+time_set()
+{
+
+while : 		# loop until time is set correctly
+do
+
+# interactively set the time
+
+    clear_screen
+    echo "$LINE
+
+You will be prompted for the date and time.  Please enter all values
+numerically, for example January is 1.  The values in the parenthesis
+give the acceptable range of responses.
+$LINE
+"	# end echo
+
+# Enter the month
+    while :
+    do
+       echo "\nPlease enter the month (1-12), then press [Return] \c"
+       read month
+
+       case "$month" in
+          [1-9]) month=0$month ; break;;
+          1[0-2] | 0[1-9] ) break;;
+          *) echo "Value out of range.  Please try again.\n";;
+       esac
+    done
+
+# Read the day
+    while :
+    do
+       echo "\nPlease enter the day of the month (1-31), then press [Return] \c"
+       read day
+
+       case "$day" in
+          [1-9]) day=0$day ; break;;
+          [1-2][0-9] | 3[01] | 0[1-9] ) break;;
+          *) echo "Value out of range.  Please try again.\n";;
+       esac
+    done
+
+# Enter year
+    while :
+    do
+       echo "\nPlease enter the last two digits of the year (70-99), then press [Return] \c"; 
+       read year;
+
+       case "$year" in
+          [7-9][0-9])  break;;
+          *) echo "Value out of range.  Please try again.\n";;
+       esac
+    done
+
+    case "$month" in		# handle leading zero month entries
+	    01 )	text_month="Jan";;
+	    02 )	text_month="Feb";;
+	    03 )	text_month="Mar";;
+	    04 )	text_month="Apr";;
+	    05 )	text_month="May";;
+	    06 )	text_month="June";;
+	    07 )	text_month="July";;
+	    08 )	text_month="Aug";;
+	    09 )	text_month="Sep";;
+	    10)		text_month="Oct";;
+	    11)		text_month="Nov";;
+	    12)		text_month="Dec";;
+    esac
+
+    case "$day" in		# handle leading zero day entries
+	01) text_day=1;;
+	02) text_day=2;;
+	03) text_day=3;; 
+	04) text_day=4;;
+	05) text_day=5;;
+	06) text_day=6;;
+	07) text_day=7;;
+	08) text_day=8;;
+	09) text_day=9;;
+	*) text_day=$day;;
+    esac
+
+
+# Verify the day entered is valid for the month entered
+    check_day
+    if [ $DAY_OK != TRUE ] ; then
+	    echo "\n$text_month does not have $text_day days in it."
+	    echo "Please try again.\n\n"
+	    continue
+    fi
+
+
+# Enter the hour
+    while :
+    do
+       echo "\nPlease enter the hour (using 24 hour time) (0-23)"
+       echo "For example: For 10 in the morning enter 10,\c" 
+       echo " for 3 in the afternoon enter 15."
+       echo "Then press [Return] \c"
+       read hour;
+
+       case "$hour" in
+          [0-9]) hour=0$hour ; break;;
+          1[0-9] | 2[0-3] | 0[0-9] ) break;;
+          *) echo "Value out of range.  Please try again.\n";;
+       esac
+    done
+
+# read minute
+    while :
+    do
+       echo "\nPlease enter the minute (0-59), then press [Return] \c";
+       read minute;
+    
+       case "$minute" in
+          [0-9]) minute=0$minute ; break;;
+          [1-5][0-9] | 0[0-9] ) break;;
+          *) echo "Value out of range.  Please try again.\n";;
+       esac
+    done
+
+
+    MSG="
+You have entered: $text_month $text_day $hour:$minute:00 $TZ 19$year.
+This time will be used to reset the system clock.
+
+Is this value correct? "
+    AskYorN "$MSG"
+
+    if [ $? -eq 0 ]
+    then
+       if [ $TEST -eq 0 ]
+       then
+          echo "yes" | date $month$day$hour$minute$year >/dev/null
+       fi
+       echo "\nThe date and time have been set to: $(date)"
+       ReturnToContinue
+
+       break
+    fi
+
+done
+
+}
+
+
+########################################################################
+# 
+# Set time zone for North America
+
+Namerica()
+{
+
+while :
+do
+
+    clear_screen
+    echo "$LINE
+
+Select your time zone from the following list:
+
+  1) Newfoundland Standard/Daylight      |  7) Mountain Standard Only (Arizona) 
+                                         |
+  2) Atlantic Standard/Daylight          |  8) Pacific Standard/Daylight  
+                                         | 
+  3) Eastern Standard/Daylight           |  9) Yukon Standard/Daylight
+                                         | 
+  4) Eastern Standard (US:Indiana only)  | 10) Aleutian Standard/Daylight 
+     Central Daylight                    |
+                                         |     
+  5) Central Standard/Daylight           | 11) Hawaii Standard
+                                         | 
+  6) Mountain Standard/Daylight          | 12) Unlisted time zone  
+                                         | 
+                                         | 13) Previous menu
+$LINE
+"	# end echo
+
+    echo "Enter the number for your time zone (1-13), then press [Return] \c" 
+    read number
+
+    DONE=TRUE
+
+    case "$number" in 
+	1)  zone=NST3:30NDT; Azone="Newfoundland Standard/Daylight";; 
+	2)  zone=AST4ADT; Azone="Atlantic Standard/Daylight";; 
+	3)  zone=EST5EDT; Azone="Eastern Standard/Daylight";; 
+	4)  zone=EST5CDT
+            Azone="Eastern Standard/Central Daylight (US:Indiana only)";; 
+	5)  zone=CST6CDT; Azone="Central Standard/Daylight";; 
+	6)  zone=MST7MDT; Azone="Mountain Standard/Daylight";; 
+	7)  zone=MST7; Azone="Mountain Standard Only (Arizona)";;
+	8)  zone=PST8PDT; Azone="Pacific Standard/Daylight";;
+	9)  zone=YST8YDT; Azone="Yukon Standard/Daylight";;
+	10) zone=AST10ADT; Azone="Aleutian Standard/Daylight";;
+	11) zone=HST10; Azone="Hawaii Standard";;
+	12) other_zone;; 
+	13) DONE=FALSE
+      	    break;;	
+	*)  Retry "Not a valid choice."
+	    continue;; 
+    esac
+
+    MSG="
+The time zone entered is $Azone.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        break
+    fi
+
+done
+}
+
+##############################################################################
+#
+# This function verifies the time zone for Central America.
+#
+Camerica()
+{
+
+    DONE=FALSE
+    zone="CST6CDT"
+
+    MSG="
+The time zone for all of Central America has been entered.
+Is this correct?"
+
+    if AskYorN "$MSG"
+    then
+        DONE=TRUE
+    fi
+
+}
+
+##############################################################################
+#
+# This function will set the TZ (time zone) variable and will create two
+# scripts that set the TZ variable.  The scripts can be sourced by other
+# files to set the TZ variable.  This function will only run the first
+# time the system boots or at bootup after the /etc/src.sh file is
+# removed.
+# One script is compatible with ksh, and sh  syntax while the other uses 
+# csh syntax.
+#    ksh, sh syntax - /etc/src.sh
+#    csh syntax - /etc/src.csh
+#
+
+set_timezone()
+{
+
+DONE=FALSE
+while [ $DONE = FALSE ] 
+do
+    clear_screen
+    echo "$LINE
+
+The following procedure enables you to set the time zone.
+
+Select your location from the following list:
+
+  1) North America or Hawaii
+
+  2) Central America
+
+  3) South America
+
+  4) Europe
+
+  5) Africa
+
+  6) Asia
+
+  7) Australia, New Zealand
+$LINE
+" 	# end echo
+
+    echo "\nEnter the number for your location (1-7), then press [Return] \c"
+
+    read number
+
+    case "$number" in 
+	1)	Namerica;;
+	2)	Camerica;;
+	3)	Samerica;;
+	4)	europe;;
+	5)	africa;;
+	6)	asia;;	
+	7)	australia;;	
+	*) Retry "Not a valid choice."
+	   continue ;;
+    esac
+
+done
+
+ASK_REBOOT=1
+
+if [ $TEST -eq 0 ]
+then
+    CNT=$(grep -c TZ /etc/src.sh)
+    if [ $CNT -eq 0 ]
+    then # src.sh hasn't been set yet
+	echo "TZ=$zone ; export TZ" >>/etc/src.sh
+	chmod 555 /etc/src.sh
+	chgrp bin /etc/src.sh
+	chown bin /etc/src.sh
+    else # src.sh already existed, so edit TZ entry instead of append
+	awk -v ZONE="$zone" '
+	    /TZ/ {
+	        printf "TZ=%s ; export TZ\n", ZONE
+	    }
+	    $0 !~ /TZ/
+	' /etc/src.sh >/tmp/tmp$$
+	cp /tmp/tmp$$ /etc/src.sh
+	rm /tmp/tmp$$
+    fi
+
+    if [ ! -f /etc/src.csh ]
+    then
+	echo "setenv TZ $zone" >/etc/src.csh
+	chmod 555 /etc/src.csh
+	chgrp bin /etc/src.csh
+	chown bin /etc/src.csh
+    else
+	awk -v ZONE="$zone" '
+	    /TZ/ { 
+		printf "setenv TZ %s\n", ZONE }
+	    $0 !~ /TZ/
+	' /etc/src.csh >/tmp/tmp$$
+	cp /tmp/tmp$$ /etc/src.csh
+	rm /tmp/tmp$$
+    fi
+fi # TEST == 0
+
+TZ=$zone
+export TZ
+
+
+}
+
+
+
+#####################################################################
+#
+# Enter the Internet Protocol (IP) address.
+# 
+set_ip_addr() 
+{
+if [ "$SYSTEM_NAME"  != "unknown" -a "$NETWORK" = "YES" ]   
+# if name not known or we will not use on a network, use the loopback addr. 
+then
+
+
+while :
+do
+    clear_screen
+    echo "$LINE
+
+  If you wish networking to operate correctly, you must also assign the
+  system a unique Internet Protocol (IP) address.  The IP address must:
+
+     * Contain 4 numeric components.
+
+     * Have a period (.) separating each numeric component.
+
+     * Contain numbers between 0 and 255.
+
+     For example:  255.32.3.10
+
+  If you have not yet obtained an IP address from your local system
+  administrator, you may use the default address of 127.0.0.1 by
+  pressing [Return].
+$LINE
+" 	# end echo
+
+    echo "\nEnter your Internet Protocol address, then press [Return] \c"
+    read ipaddr
+
+    if [ "$ipaddr" = "" ] 
+    then
+       ipaddr=127.0.0.1
+    fi
+
+    if ValidAddress "$ipaddr"
+    then
+
+    MSG="
+You have chosen $ipaddr as the IP address for this system.
+Is this correct?"
+    AskYorN "$MSG"
+
+    if [ $? -eq 0 ]
+    then
+       break
+    fi
+    else
+	Retry "Invalid address: $reason"
+    fi
+done
+
+else
+   ipaddr="127.0.0.1"
+fi
+
+
+if [ $TEST -eq 0 ] ; then
+    EditHosts "$SYSTEM_NAME" "$ipaddr"
+fi
+
+}
+
+
+#####################################################################
+#
+# set_inetd()
+#
+# This function adds/edits entries for the BMS services mserve and spc in
+# inetd.sec file.  This insures VUE will work after an install.
+#
+
+set_inetd()
+{
+if [ $TEST -eq 0 ] ; then
+	SECFILE="/usr/adm/inetd.sec"
+else
+	SECFILE="/tmp/secfile$$"
+fi
+
+if [ ! -f $SECFILE ]
+then  # create the file since it doesn't exist.
+	if [ -f /etc/newconfig/inetd.sec ] 
+	then
+		cp /etc/newconfig/inetd.sec $SECFILE  
+
+		chmod 777 $SECFILE
+		echo "mserve 	allow	$SYSTEM_NAME" >> $SECFILE
+		echo "spc 	allow	$SYSTEM_NAME" >> $SECFILE
+	fi
+
+else  # Edit the security file to insure correct mserve and spc entries.
+	# SECFILE exists.
+	chmod 777 $SECFILE
+	if [ `grep -c mserve $SECFILE` -gt 0 ] ; then
+		awk '$1 == "mserve" {
+			if ( $2 == "allow" ) {
+				if ( NF == 2 ) { print $0 ; next }
+				for ( x=3; x <= NF; x++ ){
+					if ( $x == "'$SYSTEM_NAME'" ) { print $0; next }
+					}
+
+				print $0, "'$SYSTEM_NAME'" 
+				next 
+				}
+			
+			if ( $2 == "deny" ) {
+				if ( NF == 2 ) { print "mserve allow '$SYSTEM_NAME'" ; next }
+
+				for ( x=3 ; x <= NF ; x++ ) {
+					if ( $x == "'$SYSTEM_NAME'" ) {
+						$x =""
+						break
+						}
+					}
+				if (x == 3 && NF == 3) {print "mserve allow '$SYSTEM_NAME'" ; next }
+				else { print $0 ; next }
+				}
+
+			if ( $2 != "allow" && $2 != "deny" ) { print $1 ; next }
+			}
+	
+ 		$1 != "mserve" { print $0 }'  $SECFILE >/tmp/tmp$$   
+
+		cp /tmp/tmp$$ $SECFILE
+		rm /tmp/tmp$$
+	else
+		echo "mserve    allow   $SYSTEM_NAME" >> $SECFILE 		
+	fi
+
+
+	if [ `grep -c spc $SECFILE` -gt 0 ] ; then
+	awk '$1 == "spc" {
+			if ( $2 == "allow" ) {
+				if ( NF == 2 ) { print $0 ; next }
+				for ( x=3; x <= NF; x++ ){
+					if ( $x == "'$SYSTEM_NAME'" ) { print $0 ; next }
+					}
+
+				print $0, "'$SYSTEM_NAME'" 
+				next 
+				}
+			
+			if ( $2 == "deny" ) {
+				if ( NF == 2 ) { print "spc allow '$SYSTEM_NAME'" ; next }
+
+				for ( x=3 ; x <= NF ; x++ ) {
+					if ( $x == "'$SYSTEM_NAME'" ) {
+						$x = ""
+						break
+						}
+					}
+				if (x == 3 && NF == 3 ) { print "spc allow '$SYSTEM_NAME'" ; next }
+				else { print $0 ; next }
+				}
+			
+			if ( $2 != "allow" && $2 != "deny" )
+				{ print $1 ; next }
+			}
+
+
+		$1 != "spc" { print $0 }'  $SECFILE >/tmp/tmp$$
+		cp /tmp/tmp$$ $SECFILE
+		rm /tmp/tmp$$
+	else
+		echo "spc    allow   $SYSTEM_NAME" >> $SECFILE 
+	fi
+fi
+
+chgrp bin $SECFILE
+chmod 444 $SECFILE
+chown root $SECFILE
+
+}
+
+############################################################################
+#
+# root_passwd 
+#
+# This function enables the user to set the root password.
+#
+
+root_passwd() {
+
+	root_no_passwd=$(grep "^root::" /etc/passwd)
+
+	if [ "X$root_no_passwd" != "X" -o $TEST -ne 0 ]
+	then  # The password for root is not set
+	    
+	    clear_screen
+	    echo "$LINE
+
+This section enables you to set the \"root\" password for the system.
+
+The \"root\" account is used for system administration tasks.  To insure
+the security of the system, the root account should have a password.
+$LINE
+
+"
+	    while :
+	    do
+                MSG="Do you want to set the root password at this time?"
+	        AskYorN "$MSG"
+
+	        if [ $? -eq 0 ]
+	        then
+		    if [ $TEST -eq 0 ]
+		    then
+                        echo "\nSetting the password for root"
+		        passwd root
+			if [ $? -eq 0 ]
+			then
+			    break
+			fi
+		    else
+		        echo "Test mode - Would normally run 'passwd root' here"
+		        ReturnToContinue
+			break
+		    fi
+		else
+		    break
+	        fi
+	    done
+	fi
+
+}
+
+############################################################################
+#
+# finish
+#
+# This function merely informs the user this script has completed and
+# will continue the boot process.
+finish()
+{
+
+
+    if [ $INITIAL -eq 1 ]
+    then
+        clear_screen
+        if [ "$NETWORK" = "NO" ]
+        then
+	    echo "
+$LINE
+
+Congratulations!  Your system is now configured as a standalone system
+with the system name $SYSTEM_NAME!
+
+After you have obtained a network system name and network IP address
+from your network administrator, and connected this system to a network,
+type this command (you may want to note this for later reference):
+
+     /etc/set_parms hostname [Return]
+
+To fully utilize the capabilities of your system, you may have to
+perform some additional system configuration tasks using the HP-UX
+\"sam\" (System Administration Manager) command.  Consult your local
+administrator or the \"HP-UX System Administration Tasks\" manual for
+more information.
+
+The system will now complete its boot process, and allow you to login 
+as 'root'.
+
+$LINE
+"	# end echo
+
+        else # set up for networking
+	    echo "
+$LINE
+
+Congratulations!  Your system is now configured for networking, with
+system name $SYSTEM_NAME, and IP address $ipaddr!
+
+To fully utilize the capabilities of your system, you may have to
+perform some additional system configuration tasks using the HP-UX
+\"sam\" (System Administration Manager) command.  Consult your local
+administrator or the \"HP-UX System Administration Tasks\" manual for
+more information.
+
+The system will now complete its boot process, and allow you to login
+as 'root'.
+
+$LINE
+" # end echo
+	fi
+
+    else  # INITIAL != 1
+	if [ "$ASK_REBOOT" -eq 1 ]
+	then
+	    clear_screen
+	MSG="
+You must reboot the system to make your changes effective.
+
+Do you want to reboot now?"
+	
+	AskYorN "$MSG"
+
+	if [ $? -eq 0 ]
+	then
+	    halt
+	else
+	    echo "\n\nTo reboot the system type:"
+	    echo "\n       /etc/reboot -q [Return]\n\n"
+    		ReturnToContinue
+	fi
+    fi
+    fi
+
+
+}
+
+#####################################################################
+#
+# set_lvm()
+# Allow the user to tweak the size of the Logical Volume Manager
+# swap area when the system boots the first time.  This feature is
+# in place for Series 800 systems shipped with Instant Ignition
+# (eg. HP-UX pre-installed on the disk).
+
+
+set_lvm()
+{
+
+# The file LVM_CONFIG_DATA contains some important data passed in from
+# the Instant Ignition manufacturing process.
+if [ $TEST -eq 0 ]
+then
+    LVM_CONFIG_DATA=/etc/lvm_config_data
+else
+    LVM_CONFIG_DATA=./lvm_config_data
+fi
+
+if [ ! -r $LVM_CONFIG_DATA ]
+then
+	return 0
+fi
+
+# Source lvm_config
+. $LVM_CONFIG_DATA
+
+if [ $TEST -eq 0 ]
+then
+    rm -f $LVM_CONFIG_DATA
+fi
+
+# Did it set the variables we need?
+if [ -z "$ROOT_DEVICE" -o -z "$MAX_SIZE" ]
+then
+    # We cannot continue if these variables are not set.
+    return 0
+fi
+
+# Check for LVMEXTEND command
+LVEXTEND=/etc/lvextend
+
+if [ ! -x "$LVEXTEND" -a $TEST -eq 0 ]
+then
+    return 0
+fi
+
+# First, extract the size of main memory from dmesg and convert it to Mbytes.
+# Note the mbytes calculation is complicated by the fact that some systems
+# slightly under-report the real mem size.  Note that MEM_SIZE can also be
+# set via LVM_CONFIG_DATA.
+
+if [ -z "$MEM_SIZE" ]
+then
+    # Try to calculate MEM_SIZE from dmesg
+    MEM_SIZE=$(/etc/dmesg         |
+	      grep "real mem" |
+	       awk '{printf "%d\n", ( $NF - 1 ) / (1024 * 1024) + 1 ; exit}')
+
+    if [ -z "${MEM_SIZE}" ]
+    then
+	# Cannot determine memory size
+	return 0
+    fi
+fi
+
+# Swap might be split up across several disks, so MIN_SIZE is bounded
+# by the smallest reasonable amount needed to boot.  The Instant Ignition
+# system will come with this amount of swap configured.  Any change to
+# the amount of swap involves increasing the swap size with lvmextend.
+# MIN_SIZE can be specified in LVM_CONFIG_DATA.
+let MIN_SIZE=${MIN_SIZE:-32}
+
+# If the system has SMALL_MEM megabytes of physical memory or less,
+# then we allocate SMALL_PERCENT times RAM size for swap space.
+# If the system has LARGE_MEM or more, then we allocate LARGE_PERCENT.
+# For RAM sizes in between, we interpolate.
+
+let SMALL_MEM=-32
+let SMALL_PERCENT=200
+
+let LARGE_MEM=256
+let LARGE_PERCENT=140
+
+if [ $MEM_SIZE -lt $SMALL_MEM ]
+then
+    mem=$SMALL_MEM
+else
+    if [ $MEM_SIZE -lt $SMALL_MEM ]
+    then
+        mem=$LARGE_MEM
+    else
+        mem=$MEM_SIZE
+    fi
+fi
+
+let MEM_RANGE="$LARGE_MEM - $SMALL_MEM"
+let PERCENT_RANGE="$SMALL_PERCENT - $LARGE_PERCENT"
+
+# Interpolate (note ksh does integer math)
+let DEF_PERCENT="
+  $SMALL_PERCENT - 
+    ((($mem - $SMALL_MEM) * 100 /  $MEM_RANGE) * $PERCENT_RANGE / 100)"
+
+# Default size is DEF_PERCENT times MEM_SIZE, rounded to the nearest
+# whole megabyte.
+let DEF_SIZE="( $MEM_SIZE * $DEF_PERCENT  + 50) / 100"
+
+# We now have values for maximum, minimum and default swap size.
+# Do sanity checking and make sure MIN_SIZE <= DEF_SIZE <= MAX_SIZE
+
+if [ "$MIN_SIZE" -ge "$MAX_SIZE" ] # Yow, something is messed up.
+then
+    return 0
+fi
+
+if [ "$MAX_SIZE" -lt "$DEF_SIZE" ] # Big memory, small root disk...
+then
+    let DEF_SIZE="$MAX_SIZE"
+fi
+
+if [ "$MIN_SIZE" -gt "$DEF_SIZE" ] # This ought not to happen, but...
+then
+    let DEF_SIZE="$MIN_SIZE"
+fi
+
+while :
+do
+    clear_screen
+    echo "$LINE
+
+This section allows you to configure the size of the \"swap space\" on the
+root disk.  Swap space is a portion of the disk reserved for virtual memory.
+The size of the swap space can be adjusted to suit your requirements.
+
+As a rule-of-thumb, a system with ${MEM_SIZE} megabytes of physical memory should
+have ${DEF_SIZE} megabytes of swap space.  The minimum swap allowed is ${MIN_SIZE} megabytes,
+and the maximum is ${MAX_SIZE} megabytes.
+
+In the future if you need more swap space, you can make it a larger value.
+However this is the only opportunity to make swap smaller.
+
+Refer to the \"HP-UX System Adminitrator Manual\" for more information about
+selecting and adjusting the size of swap space, and for information about
+Logical Volume Manager.
+
+$LINE"
+
+    MSG="
+Do you want to use the default swap space size of ${DEF_SIZE} megabytes?"
+
+    AskYorN "$MSG"
+
+    if [ $? -eq 0 ]
+    then
+	SIZE=${DEF_SIZE}
+    else
+        while :
+	do
+	  while [ -z "$SIZE" ]
+	  do
+	    echo "
+
+The minimum space allowed is ${MIN_SIZE}, and the maximum is ${MAX_SIZE}.
+Enter the desired amount of swap space: \c"
+            
+	    read amount
+
+            valid=$(echo $amount | awk  '
+            $0 !~ /^[0-9][0-9]*$/  { print "bad" ; exit }
+            END { print "ok" }')
+
+	    case "$valid" in
+            "ok") : ok ;;
+            *)      Retry "You entered a non-numeric character."
+	            continue ;;
+            esac
+
+	    if [ "$amount" -lt "${MIN_SIZE}" ]
+	    then
+		Retry "The size of swap space must be at least $MIN_SIZE".
+                continue
+	    fi
+
+	    if [ "$amount" -gt ${MAX_SIZE} ]
+	    then
+		Retry "The size of swap space must be no larger than $MAX_SIZE".
+                continue
+	    fi
+
+	    SIZE=$amount
+
+	  done
+          MSG="
+Swap space will be set to $SIZE megabytes.
+Is this correct?"
+          AskYorN "$MSG"
+	  if [ $? -eq 0 ]
+	  then
+	      break
+          else
+              SIZE=
+	  fi
+	done
+    fi
+
+
+
+# Instant Ignition systems are configured with a MIN_SIZE swap partition.
+# If the user selected anything larger, then grow it.
+    STATUS=0
+
+    if [ $SIZE -gt $MIN_SIZE ]
+    then
+        if [ $TEST -eq 0 ]
+	then
+	    $LVEXTEND -L $SIZE $ROOT_DEVICE
+	    STATUS=$?
+	else
+	    echo TEST MODE ONLY: $LVEXTEND -L $SIZE $ROOT_DEVICE
+	fi
+    fi
+
+    if [ $STATUS -eq 0 ]
+    then
+        echo "Swap space was successfully set to $SIZE megabytes."
+    else
+        echo "The $LVEXTEND command FAILED!  Exit code = $STATUS"
+	echo "Unable to adjust swap space."
+    fi
+
+    ReturnToContinue
+    break
+done
+}
+
+
+#####################################################################
+#
+# Network_question
+# This function asks the user if he wants to connect the system to
+# a network.
+#
+network_question()
+{
+
+    clear_screen
+
+    echo "$LINE
+
+                       Welcome to HP-UX!
+
+Before using your system, you will need to answer a few questions.
+
+The first question is whether you plan to use this system on a network.
+
+Answer \"yes\" if you have connected the system to a network and are ready
+to link with a network.
+
+Answer \"no\" if you:
+
+     * Plan to set up this system as a standalone (no networking).
+
+     * Want to use the system now as a standalone and connect to a
+       network later.
+$LINE
+"
+
+MSG="Are you ready to link this system to a network?"
+
+    AskYorN "$MSG"
+
+    if [ $? -eq 0 ]
+    then
+        NETWORK="YES"
+    else
+        NETWORK="NO"
+    fi
+
+}
+
+################################################################################
+# CheckNetworkEtc()
+# Function checks if it is "safe" to set additional network parameters.
+# Returns non-zero if:
+#
+#  RESOLV_CONF has already been created.
+#  NETLINKRC or  NEW_NETLINKRC are not readable
+#  NETLINKRC and NEW_NETLINKRC are different
+#
+# Otherwise returns zero, indicating we can safely set network parameters.
+
+CheckNetworkEtc() {
+
+    # Has resolv.conf been created already?
+    if [ -f "$RESOLV_CONF" ]
+    then
+        return 1
+    fi
+
+    # netlinkrc readable?
+    if [ ! -r "$NETLINKRC" -o ! -r "$NEW_NETLINKRC" ]
+    then
+        return 1
+    fi
+
+    # Netlinkrc differs from newconfig version?
+    cmp $NETLINKRC $NEW_NETLINKRC > /dev/null
+
+    if [ $? -ne 0 ]
+    then
+        return 1
+    fi
+
+    return 0
+
+}
+
+################################################################################
+# AskNetworkEtc()
+# Queries user if he/she wants to edit additional networking parameters.
+
+AskNetworkEtc() {
+
+    RESOLV_CONF=/etc/resolv.conf
+    NETLINKRC=/etc/netlinkrc
+    NEW_NETLINKRC=/etc/newconfig/netlinkrc
+
+    if CheckNetworkEtc
+    then
+
+        clear_screen
+
+        echo "$LINE
+
+  You may configure some additional network parameters at this time:
+
+   * Subnetwork Mask
+
+   * Default Network Gateway
+
+   * Berkeley Internet Domain Name Server (BIND)
+
+  Your local network administrator can tell you which if any of these
+  parameters should be configured for your system, and provide you
+  the appropriate values.
+
+  If you do not have these values now, you can configure them later.
+$LINE"
+
+        MSG="
+Do you want to configure these additional network parameters?"
+
+        AskYorN "$MSG"
+        return $?
+    else
+        # CheckNetworkEtc failed.
+        return 1
+
+    fi
+
+}
+
+##########################################################################
+# ValidNetmask()
+# Make sure the Netmask entered has the correct format "n.n.n.n".
+# Insure all the elements are <= 255.
+
+ValidNetmask() {
+
+    echo "$1" | awk '
+      BEGIN  { retval=0
+               FS="." }
+
+      # Check format
+      $0 !~ /^[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*\.[0-9][0-9]*$/  {
+          retval=1
+          exit
+      }
+
+      # Check for octet > 255
+      { for ( x=1; x< 5; x++ )
+            if ( $x > 255 ) {
+                retval=2
+                exit
+            }
+      }
+      END {
+          exit (retval)
+      }'
+
+    retval=$?
+
+    case "$retval" in
+    0 ) reason="" ; return 0 ;;
+    1 ) reason="improper format" ; return 1 ;;
+    2 ) reason="octal value greater than 255" ; return 1 ;;
+    esac
+
+}
+
+################################################################################
+# DoNetworkEtc()
+# Gathers additional network parameters from the user and creates/modifies 
+# network configuration files as necessary.
+
+DoNetworkEtc() {
+
+
+    GetSubnetworkMask
+    GetGateway
+    GetBIND
+
+    if [ $TEST -eq 0 ]
+    then
+	ConfigureNetworkEtc
+    else
+	echo "Test mode: Not configuring network parameters:"
+        echo "NETMASK  = $NETMASK"
+        echo "ROUTE    = $ROUTE  "
+        echo "ROUTEIP  = $ROUTEIP"
+        echo "DOMAIN   = $DOMAIN "
+        echo "BIND     = $BIND   "
+        echo "BINDIP   = $BINDIP "
+    fi
+
+}
+
+
+##########################################################################
+# EditHosts()
+# Creates or edits the $HOSTS file.  Adds the hostname/address (specified
+# by the first two parameters) to the HOSTS file.
+
+EditHosts() {
+
+    HOSTS=/etc/hosts
+
+    if [ $# -ne 2 ]
+    then
+	Abort "Internal error.  $0 requires hostname and address arguments."
+    fi
+
+    name="$1"
+    addr="$2"
+
+    if [ ! -s $HOSTS ]
+    then
+	# File does not exist or is zero length.
+	# Create a hosts table.
+	# Typically one was copied from /etc/newconfig at install time.
+	echo "$addr	$name" > $HOSTS
+	chmod 644 $HOSTS
+    else
+	# Edit HOSTS.
+	awk -v "addr=$addr" -v "name=$name" '
+
+		BEGIN { TOP=1 ; DONE=0 }
+
+		# Pass through the initial comments
+		TOP == 1 && ( $1 ~ /^#/ || NF == 0 ) { print ; next }
+
+		# Might have changed the name or the address but not both.
+		# (If both changed, then the greps above would not have
+		# match anything...)  Find the old line with the old name
+		# or address and remove it.
+		
+		$1 == addr { next }
+
+		{ 
+		    i = 2 
+                    while ( i <= NF && $i !~ /^#/ ) {
+			if ( $i == name )
+			    next
+			i ++
+		    }
+                }
+
+		# Hit first non-comment.  Append new addr/name here.
+		TOP == 1 {
+		    TOP = 0 
+		    print
+		    printf "%s\t%s\n", addr, name
+		    DONE=1
+		    next
+		}
+
+		# Pass through other lines
+		{ print }
+
+		END {
+		    # Did we actually do it?
+		    if ( ! DONE )
+		        printf "%s\t%s\n", addr, name
+		}
+
+		# End of awk program
+		' $HOSTS >/tmp/tmp$$
+
+
+        if [ $? -ne 0 ]
+	then
+	    # awk bombed out
+	    return 1
+	fi
+
+	rm -f $HOSTS
+	mv /tmp/tmp$$ $HOSTS
+	rm -f /tmp/tmp$$
+
+        if [ $TEST -eq 0 ]
+        then
+	    chmod 444 $HOSTS
+	    chgrp bin $HOSTS
+	    chown bin $HOSTS
+        fi
+    fi
+}
+
+##########################################################################
+# ConfigureNetworkEtc()
+# Edits the netlinkrc file to insert configuration data, and creates
+# resolv.conf as appropriate.
+
+ConfigureNetworkEtc() {
+
+    NEW=$NETLINKRC.new
+
+    rm -f $NEW
+
+    DATE=$(date)
+
+
+    if [ -n "$NETMASK" -o -n "$ROUTE" ]
+    then
+
+	ASK_REBOOT=1
+
+        # If this system is the default gateway, then set hop count to zero.
+	if [ "$ipaddr" = "$ROUTEIP" ]
+	then
+	    HOPS=0
+	else
+	    HOPS=1
+	fi
+
+        awk -v IP=$ipaddr -v "MASK=$NETMASK" \
+		      -v "ROUTE=$ROUTE"  \
+		      -v "MYNAME=$MYNAME"  \
+		      -v "DATE=$DATE" \
+		      -v "HOPS=$HOPS" '
+
+        BEGIN {
+
+	    exitval=0
+
+            # netmask insertion point
+	    NETMASK1="case $NODENAME in"
+            NETMASK2="  *) /etc/ifconfig lan0 inet `hostname` up"
+
+            # route insertion point
+	    ROUTE1="case $NODENAME in"
+            ROUTE2="            *) # add route commands for specific nodes here"
+
+        }
+
+        # Insert comment after first line.
+        NR == 2 && length (MYNAME) > 0 {
+	    printf "## Configured using %s on %s\n", MYNAME, DATE
+        }
+
+        $0 == NETMASK1 {
+            NETMASK1_FOUND=NR
+        }
+
+        $0 == NETMASK2  && length (MASK) > 0 && length (IP) > 0{
+            if ( NR != (NETMASK1_FOUND + 1))
+	        # Uh oh, the NETMASK1 and NETMASK2 lines should have
+		# been adjacent.
+	        exitval=1
+
+	    # Insert code hunk at insertion point.
+            printf "  $ROOTSERVER)\n"
+            printf "        /etc/ifconfig lan0 inet `hostname` netmask %s up\n", MASK
+            printf "        STATUS=$?\n"
+            printf "        if [ ! $STATUS -eq 0 ]\n"
+            printf "        then\n"
+            printf "           net_init=1\n"
+            printf "        fi\n"
+            printf "        /etc/lanconfig lan0 ether\n"
+            printf "        STATUS=$?\n"
+            printf "        if [ ! $STATUS -eq 0 ]\n"
+            printf "        then\n"
+            printf "           net_init=1\n"
+            printf "        fi\n"
+            printf "	;;\n"
+        }
+
+        $0 == ROUTE1 {
+            ROUTE1_FOUND=NR
+        }
+
+        $0 == ROUTE2 && length (ROUTE) > 0 {
+	    if ( NR != (ROUTE1_FOUND + 1))
+	        exitval=1
+	    # Insert code hunk at insertion point.
+            printf "  $ROOTSERVER)\n"
+            printf "\t/etc/route add  default %s %s\n", ROUTE, HOPS
+            printf "\tSTATUS=$?\n"
+            printf "\tif [ ! $STATUS -eq 0 ]\n"
+            printf "\tthen\n"
+            printf "\t   net_init=1\n"
+            printf "\tfi\n"
+            printf "\t;;\n"
+        }
+
+        { print }
+
+        END {
+            exit (exitval)
+        }' $NETLINKRC > $NEW
+
+        if [ $? -eq 0 ]
+        then
+	    # Set appropriate mode owner group
+	    rm -f $NETLINKRC
+
+            chmod 544 $NEW
+            chgrp bin $NEW
+            chown bin $NEW
+
+	    mv $NEW $NETLINKRC
+        else
+	    echo "${0}: Edit of $1 FAILED.  Not replacing $1"
+	    return 1
+        fi
+        rm -f $NEW
+
+	# If the user specified a gateway (other than this system),
+	# then add it to $HOSTS
+	if [ -n "$ROUTE" -a -n "$ROUTEIP" -a "$ROUTEIP" != "$ADDRESS" ]
+	then
+	    EditHosts "$ROUTE" "$ROUTEIP"
+	fi
+
+    fi  # If NETMASK or ROUTE set
+
+    # Create RESOLV_CONF data file.
+    if [ -n "$DOMAIN" -a -n "$BIND" -a -n "$BINDIP" ]
+    then
+	echo "domain      $DOMAIN"                 > $RESOLV_CONF
+	echo "nameserver  $BINDIP   # $BIND"      >> $RESOLV_CONF
+
+	chmod 444 $RESOLV_CONF
+	chgrp bin $RESOLV_CONF
+	chown bin $RESOLV_CONF
+
+	# Add name server to $HOSTS
+	if [ "$BINDIP" != "$ADDRESS" ]
+	then
+	    EditHosts "$BIND" "$BINDIP"
+	fi
+    fi
+}
+
+
+################################################################################
+# GetSubnetworkMask()
+# Queries user for subnetwork mask and validates data.
+GetSubnetworkMask() {
+    while :
+    do
+        NETMASK=""
+	clear_screen
+        echo "$LINE
+
+  Additional Network Parameters: Subnetwork Mask
+
+  The subnetwork mask may be required if your network contains gateways.
+
+  If you have not yet obtained the proper subnetwork mask from your local
+  network administrator, you may use the default by pressing [Return].
+
+  Example subnetwork mask: 255.255.248.0
+
+$LINE
+"
+
+        echo "Enter the subnetwork mask, then press [Return] \c"
+        read NETMASK
+
+        if [ "X$NETMASK" != "X" ]
+        then
+            if ValidNetmask "$NETMASK"
+            then
+		MSG="
+You have chosen $NETMASK as the subnetwork mask for this system.
+Is this correct?"
+
+		if AskYorN "$MSG"
+		then
+		    break
+ 	        fi
+	    else
+		MSG="\
+The subnetwork mask \"$NETMASK\" is not valid: $reason.\n\
+The subnetwork mask must contain four numeric values between 0 and 255,\n\
+with periods (.) separating each numeric component.\n\
+"
+
+	        Retry "$MSG"
+	    fi
+        else
+            MSG="
+You have chosen to use the default netmask.
+Is this correct?"
+            if AskYorN "$MSG"
+            then
+                break
+            fi
+        fi
+    done
+}
+
+################################################################################
+# GetGateway()
+# Queries user for default network gateway and validates data.
+GetGateway() {
+
+    DONE=0
+    while [ $DONE -eq 0 ]
+    do
+        ROUTE=""
+        ROUTEIP=""
+
+	clear_screen
+        echo "$LINE
+
+  Additional Network Parameters: Default Gateway
+
+  In order to specify a default network gateway, you need to provide the
+  following information about the gateway:
+
+      * Gateway hostname
+
+      * Gateway network (IP) address
+
+$LINE
+"
+
+	if AskYorN "Do you wish to specify a gateway?"
+	then
+
+	    while :
+	    do
+                echo "\nEnter the gateway hostname, then press [Return] \c"
+                read ROUTE
+
+                if [ "X$ROUTE" != "X" ]
+                then
+                    if ValidHostname "$ROUTE"
+                    then
+ 	                break
+	            else
+	                Retry "Invalid hostname: $reason"
+		        continue
+	            fi
+                else
+		    MSG="You need to supply the hostname of the gateway."
+	            Retry "$MSG"
+		    continue
+                fi
+	    done
+
+	    while :
+	    do
+                echo "\nEnter the network (IP) address of $ROUTE, then press [Return] \c"
+                read ROUTEIP
+
+                if [ "X$ROUTEIP" != "X" ]
+                then
+                    if ValidAddress "$ROUTEIP"
+                    then
+			break
+	            else
+	                Retry "Invalid address: $reason"
+		        continue
+	            fi
+                else
+		    MSG="You need to supply the address of the gateway."
+	            Retry "$MSG"
+		    continue
+                fi
+	    done
+	    MSG="
+You have specified the following default network gateway:
+
+  Gateway Hostname:  $ROUTE
+  Gateway Address:   $ROUTEIP
+
+Is this correct?"
+
+	    if AskYorN "$MSG"
+	    then
+	        DONE=1
+	        break
+ 	    fi
+	else
+	    return 0
+	fi
+    done
+}
+
+################################################################################
+# GetBIND()
+# Queries user for BIND server and validates data.
+GetBIND() {
+
+
+    DONE=0
+    while [ $DONE -eq 0 ]
+    do
+        DOMAIN=""
+        BIND=""
+        BINDIP=""
+
+	clear_screen
+        echo "$LINE
+
+  Additional Network Parameters: Berkeley Internet Domain Name Server (BIND)
+
+  In order to specify a default BIND server, you need to provide the
+  following information:
+
+      * Local domain name
+
+      * BIND server hostname
+
+      * BIND server network (IP) address
+
+$LINE
+"
+
+	if AskYorN "Do you wish to specify a BIND server?"
+	then
+
+	    while :
+	    do
+                echo "\nEnter the local domain name, then press [Return] \c"
+                read DOMAIN
+
+                if [ "X$DOMAIN" != "X" ]
+                then
+                    if ValidDomain "$DOMAIN"
+                    then
+ 	                break
+	            else
+	                Retry "Invalid domain: $reason"
+		        continue
+	            fi
+                else
+		    MSG="You need to supply the local domain name."
+	            Retry "$MSG"
+		    continue
+                fi
+	    done
+
+	    while :
+	    do
+                echo "\nEnter the BIND server hostname, then press [Return] \c"
+                read BIND
+
+                if [ "X$BIND" != "X" ]
+                then
+                    if ValidHostname "$BIND"
+                    then
+ 	                break
+	            else
+	                Retry "Invalid hostname: $reason"
+		        continue
+	            fi
+                else
+		    MSG="You need to supply the hostname of the BIND server."
+	            Retry "$MSG"
+		    continue
+                fi
+	    done
+
+	    while :
+	    do
+                echo "\nEnter the network (IP) address of $BIND, then press [Return] \c"
+                read BINDIP
+
+                if [ "X$BINDIP" != "X" ]
+                then
+                    if ValidAddress "$BINDIP"
+                    then
+			break
+	            else
+	                Retry "Invalid address: $reason"
+		        continue
+	            fi
+                else
+		    MSG="You need to supply the address of the BIND server."
+	            Retry "$MSG"
+		    continue
+                fi
+	    done
+
+	    MSG="
+You have specified the following BIND server information:
+
+  Domain:                $DOMAIN
+  BIND Server:           $BIND
+  BIND Server Address:   $BINDIP
+
+Is this correct?"
+
+	    if AskYorN "$MSG"
+            then
+		DONE=1
+		break
+ 	    fi
+	else
+	    return 0
+	fi
+    done
+}
+
+################################################################################
+# CurrentNetmask()
+# Echos current netmask from ifconfig
+
+CurrentNetmask() {
+
+        /etc/ifconfig lan0 |
+        awk 'NR == 2 && $3 == "netmask" { print $4 }' |
+        awk '
+  function hex2dec(h) {
+
+    if (h == "0") return (0)
+    if (h == "1") return (1)
+    if (h == "2") return (2)
+    if (h == "3") return (3)
+    if (h == "4") return (4)
+    if (h == "5") return (5)
+    if (h == "6") return (6)
+    if (h == "7") return (7)
+    if (h == "8") return (8)
+    if (h == "9") return (9)
+    if (h == "a") return (10)
+    if (h == "b") return (11)
+    if (h == "c") return (12)
+    if (h == "d") return (13)
+    if (h == "e") return (14)
+    if (h == "f") return (15)
+
+  }
+
+  function octet(hh) {
+
+    conf= hex2dec(substr(hh,1,1)) * 16 + hex2dec(substr(hh,2,1))
+    return (conf)
+  }
+
+  function netmask(hhhhhhhh) {
+
+    printf "%d.%d.%d.%d\n", octet(substr($1,1,2)), \
+                            octet(substr($1,3,2)), \
+                            octet(substr($1,5,2)), \
+                            octet(substr($1,7,2))
+  }
+
+  $1 ~ /^[0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f][0-9a-f]$/ {
+
+    netmask($1)
+  }'
+}
+
+################################################################################
+# IsNetworkOK()
+# Sets the flag NET_OK to 1 if:
+#
+#  Hostname set to something other than "unknown"
+#  /etc/ifconfig is executable
+#  /etc/ifconfig reports back an IP address for lan0 other than loopback
+
+IsNetworkOK() {
+
+    if [ $(hostname) != "unknown" -a -x /etc/ifconfig ]
+    then
+        /etc/ifconfig lan0 |
+        awk '
+            BEGIN { exitval=0 }
+            NR == 2 && $2 != "127.0.0.1" { exitval=1 }
+            END { exit (exitval)}'
+    
+        NET_OK=$?
+    else
+        NET_OK=0
+    fi
+
+    return $NET_OK
+}
+
+###############################################################################
+#
+# ExtractHost
+# Pull the hostname from the font server path specification.  It looks
+# like "tcp/fonthost:7000".  Takes the path spec as its only argument.
+# Sed command essentially pulls out what's between the / and the :.
+
+ExtractHost()
+{
+    echo $1 | sed -n 's#^[^/]*/\([^:]*\):.*#\1#p'
+}
+
+
+
+#####################################################################
+#
+# do_font_client
+# This function asks the user if he would like this system to be a 
+# font client.  Certain pre-conditions must exist before the system
+# can be made into a font client.  If these conditions are not met
+# and this is the initial run of set_parms, the section is silently
+# skipped.  If these conditions are not met and the user requested
+# font_client, then try to narrow down the missing condition and
+# issue a helpful message.
+# If a font server is already set up (look for FONT_PATH_TAIL set
+# in /etc/src.sh which was sourced earlier), it can be changed.
+#
+do_font_client()
+{
+
+# Check all of the pre-conditions.  Diskless servers and clients are not
+# allowed to be made into font clients.  Although this may actually
+# work, it hasn't been tested and is probably not needed.  
+# Assume that networking is up (checked later).
+# Assume that having the X11-SERV fileset on the system is sufficient
+# indication of ability to be a font client.
+
+if [ -f /etc/clusterconf -o ! -x /system/IGNITION/mk_font_client -o \
+     "$NETWORK" = NO -o ! -d /system/X11-SERV ]
+then
+    if [ $INITIAL -eq 1 ]
+    then
+	return
+    else
+        clear_screen
+        echo "$LINE
+
+  This section normally allows you to set up the HP Visual User
+  Environment (VUE) as a font client in order to save disk space.
+  However, the following conditions exist for this system:"
+        echo
+
+        if [ -f /etc/clusterconf ]
+        then
+           echo "       - system is a diskless client or server"
+        fi
+        if [ ! -x /system/IGNITION/mk_font_client ]
+        then
+           echo "       - fileset IGNITION is not loaded"
+        fi
+        if [ ! -d /system/X11-SERV ]
+        then
+           echo "       - fileset X11-SERV is not loaded"
+        fi
+        if [ "$NETWORK" = NO ]
+        then
+           echo "       - this system is not configured for networking"
+        fi
+
+        echo "
+  so setting up the system as a font client is not possible at this time.
+
+  If you satisfy these conditions later, you can re-run this section by
+  typing the command:
+
+    /etc/set_parms font_client
+
+  (You may want to make a note of this for future reference.)
+$LINE"
+        ReturnToContinue
+        return
+    fi
+fi
+
+clear_screen
+
+## Determine if we're changing the font server, or setting one up,
+## or unable to set one up because networking isn't up.
+
+FONT_SERV_HOST=$(ExtractHost $FONT_PATH_TAIL)
+
+if [ "$FONT_SERV_HOST" ] # Font server already set up, do change routine.
+then
+    echo "$LINE
+
+  This system already appears to use '$FONT_SERV_HOST' as a font server.
+  This command will allow you to change it.
+$LINE"
+    ASK_LOOP1="Do you wish to change this system's font server?"
+    ASK_LOOPN="Do you still wish to change this system's font server?"
+    MFC_RESP_GOOD="\
+Your system's font server host name was successfully changed."
+    MFC_RESP_BAD="\
+Your system's font server host name was NOT successfully changed.
+Please correct any errors noted below and try running this program
+again by typing \"/etc/set_parms  font_client\""
+
+elif [ $NET_OK -ne 1 ]  # Networking not up, so leave after giving info...
+then
+    echo "$LINE
+
+  This section normally allows you to set up the HP Visual User
+  Environment (VUE) as a font client in order to save disk space.
+  However your networking is not configured, so setting up the
+  system as a font client is not possible at this time.
+
+  If you configure networking later, you can re-run this section by typing
+  the command:
+
+    /etc/set_parms font_client
+
+  (You may want to make a note of this for future reference.)
+$LINE"
+    ReturnToContinue
+    return
+
+else                    # This is a new font server set up.
+    echo "$LINE
+
+  This section allows you to set up the HP Visual User Environment (VUE)
+  as a font client, saving 8 megabytes or more of disk space.  Before
+  you can do this, two conditions must be true:
+
+    * You are NOT planning to later turn this system into a diskless
+      server.
+
+    * You have the name of an accessible font server.
+
+      (Note: on HP-UX Series 300 9.03 systems, you can set up a font server
+       by running the command "/system/IGNITION/mk_font_server")
+
+  Warning:  Turning the system into a font client will cause the X11 font
+  filesets on your system to automatically be removed.'
+$LINE"
+
+    ASK_LOOP1="\
+Do you wish to make this system a font client now?
+(You may answer no and re-run this later)"
+    ASK_LOOPN="\
+Do you still wish to make this system a font client?
+(You may answer no and re-run this later)"
+    MFC_RESP_GOOD="\
+Your system was successfully made into a font client."
+    MFC_RESP_BAD="\
+Your system was NOT successfully made into a font client.  Please
+correct any errors noted below and try running this program again
+by typing \"/etc/set_parms  font_client\""
+
+fi
+
+## Infinite loop to get font server name and set up font client.
+## Exited only if user wants out or is successful.
+
+ASK_MESG=$ASK_LOOP1
+
+while :
+do
+    AskYorN "\n$ASK_MESG"
+    if [ $? -ne 0 ]
+    then
+        if [ ! "$FONT_SERV_HOST" ]
+        then
+            echo "
+$LINE
+
+  If you want to configure this system as a font client in the future,
+  you may re-run this section at any time by typing the command:
+
+    /etc/set_parms  font_client
+
+  (You may want record this for future reference.)
+$LINE"
+            ReturnToContinue
+        fi
+        return
+    fi
+
+    ASK_MESG=$ASK_LOOPN
+
+    while :
+    do
+        echo "\nEnter the font server host name, followed by [Return]: \c"
+        read server_name
+        if ValidHostname $server_name
+        then
+	    if AskYorN "
+You have chosen '$server_name' as the name of the font server.
+Is this correct?"
+            then
+	        break
+	    fi
+        else
+            Retry "** Server name not valid: $reason"
+        fi
+    done
+    output=$(nslookup $server_name 2>&1)
+    if echo "$output" | grep -q "Name:"
+    then
+        # Ok, name apparently found.
+        break
+    elif echo "$output" | grep -q "/etc/hosts"
+    then
+        # Not ok, name not found and must be using /etc/hosts
+        echo "\n** The server name '$server_name' cannot be found in the"
+        echo "** hosts table."
+        while :
+        do
+            echo "\nPlease enter an IP address to be inserted into the"
+            echo "hosts table for this server, or just press [Return]"
+            echo "to skip this and start this section over: \c"
+            read server_ip_address
+            [ X$server_ip_address = X ] &&
+                break
+            if ValidAddress $server_ip_address
+            then
+	        if AskYorN "
+You have chosen $server_ip_address as the IP address of the font server.
+Is this correct?"
+                then
+	            break
+	        fi
+            else
+                Retry "** IP address not valid: $reason"
+            fi
+        done
+        [ X$server_ip_address = X ] &&
+            continue
+        EditHosts "$server_name" "$server_ip_address"
+        break
+    else 
+        # Not ok, name not found and must be using name server or NIS
+        echo "\n** The host name '$server_name' is not recognized by the"
+        echo "** name server."
+    fi
+done
+
+# Call mk_font_client
+echo "\nPlease wait - setting this system up as a font client..."
+output=$(/system/IGNITION/mk_font_client -r $server_name 2>&1)
+if [ $? -eq 0 ]
+then
+    ASK_REBOOT=1
+    echo "\n$MFC_RESP_GOOD"
+else
+    echo "\n$MFC_RESP_BAD"
+fi
+echo "\nOutput from the command /system/IGNITION/mk_font_client was:"
+echo "-------------------------------------------------------------------------------"
+echo "$output"
+echo "-------------------------------------------------------------------------------"
+ReturnToContinue
+}
+
+
+#####################################################################
+#
+# Main part of script.
+#
+# The TEST variable is used during testing.
+# TEST=0 is the normal mode of operation.
+# TEST=1 will not alter any system file.  (testing mode)
+
+LINE='_______________________________________________________________________________'
+
+TEST=${TEST:-0}
+
+# save arguments
+if [ $#  -eq 0 ]
+then
+   parm1="?"
+else
+   parm1=$1
+fi
+
+# set the tty erase key for graphics displays.
+stty erase ^h kill ^x echoe
+
+# Make sure that the TERM variable is set, so that "clear_screen" works.
+if [ -z "$TERM" ]
+then
+    eval $(ttytype -a -s -t hp)
+
+    if [ "$TERM" != "unknown" ]
+    then   # It is some sort of HP terminal
+        TERM=hp
+    else
+        eval $(ttytype -a -s)  # Try other term types
+    fi
+
+fi
+
+
+if [ $TEST -eq 0 ] ; then
+    ID=`id -u`
+    if [ $ID -ne 0 ] ; then
+	clear_screen
+        echo "\n\n\n\nThe set_parms script must be run as root.\n\n\n"
+	exit 1
+    fi
+fi
+
+if [ -r /etc/src.sh ] ; then
+    . /etc/src.sh
+fi
+
+# The NET_OK flag is used by font client and MPower to determine if
+# networking is fit for use.
+
+export NET_OK=0
+export ASK_REBOOT=0
+
+# If there are no command line arguments and /etc/src.sh does not exist, 
+# then assume we are doing a first-time configuration.
+
+if [ ! -f /etc/src.sh -a $# -eq 0 ] ; then
+
+    # When running the first time, do not permit user to interupt.
+    trap "" 1 2 3
+    INITIAL=1
+
+else
+    
+    CheckUsage $1
+
+    INITIAL=0
+    if IsNetworkOK
+    then 
+        NETMASK=$(CurrentNetmask)
+    fi
+
+fi
+
+
+# Run a localized set_parms, if any.  This file may exist on Instant Ignition
+# bundles.  It provides a Motif interface to all the "set_parms" questions
+# and functionally replaces set_parms.  If it succeeds, we simply exit.
+
+if [ -x /etc/set_parms.local ]
+then
+    export TEST INITIAL
+    /etc/set_parms.local $*
+
+    # If set_parms.local thinks it succeeded, then our job is done.
+    if [ $? -eq 0 ]
+    then
+	exit 0
+    fi
+fi
+
+if [ $INITIAL -eq 1 -o "X$parm1" = "Xhostname" ] ;then
+    network_question
+    hello
+    set_name
+    set_ip_addr
+
+    if [ \( "$SYSTEM_NAME" != "unknown" \) -a  \( -d /system/BMS \) ] 
+    then
+# Check for correct entries in the inetd.sec file if BMS is installed.
+        set_inetd
+    fi
+
+# Ask additional networking parameters.  This code leveraged from
+# set_parms.local enhancements made for Instant Ignition systems.
+    if [ "$SYSTEM_NAME" != "unknown" -a \
+         "$NETWORK" = "YES" -a \
+	 "$ADDRESS" != "127.0.0.1" ]
+    then
+	if AskNetworkEtc
+	then
+	    DoNetworkEtc
+	fi
+
+        # Go ahead and ifconfig...
+        if [ "$TEST" -eq 0 ]
+        then
+            if [ -n "$NETMASK" ]
+            then
+                /etc/ifconfig lan0 inet `hostname` netmask $NETMASK up
+            else
+                /etc/ifconfig lan0 inet `hostname` up
+            fi
+            IsNetworkOK
+        fi
+    fi
+fi
+
+# User wants to set the time/timezone only
+if [ $INITIAL -eq 1 -o "X$parm1" = "Xtime" ] 
+then
+    set_timezone
+    set_time
+fi
+
+# User wants to set the time/timezone only
+if [ $INITIAL -eq 0 -a "X$parm1" = "Xtime_only" ] 
+then
+    set_time
+fi
+
+if [ $INITIAL -eq 1 -o "X$parm1" = "Xlvm" ] 
+then
+    hp9000s800
+    if [ $? -eq 0 -o $TEST -ne 0 ]
+    then
+	set_lvm
+    fi
+fi
+
+# If requested or first time, check/do font_client operations.
+if [ $INITIAL -eq 1 -o "X$1" = "Xfont_client" ] 
+then
+    do_font_client
+fi
+
+if [ $INITIAL -eq 1 ] 
+then
+    root_passwd
+fi
+
+finish

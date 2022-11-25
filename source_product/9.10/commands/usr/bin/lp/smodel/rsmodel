@@ -1,0 +1,5 @@
+#!/bin/sh
+# /* @(#) $Revision: 66.1 $ */
+# This model is for remote status operation.
+
+/usr/lib/rlpstat $*

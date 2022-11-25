@@ -1,0 +1,486 @@
+.H 1  "VHE (Mike Shipley)"
+
+.PP
+This is a test plan for the Virtual Home Environment (VHE) product.
+VHE is a portion of the NFS product for the 300 and the 800 starting
+with releases 6.2 (S300) and 3.0 (S800).
+This plan is not divided into a black box and white box section as VHE only
+is comprised of shell scripts.  It will be divided to the testing
+to be done on specific scripts and then into a section dealing with
+the use of VHE as a whole.
+.sp
+.PP
+VHE is a means of configuring a group of machines that are networked together
+using NFS which will allow a user to login at any node and get the same view
+of his execution environment as he would if he had logged in at his own machine.
+.sp
+.PP
+VHE is tied directly to the NFS projects on the 300 and the 800.  Without
+NFS, VHE would not exist.
+
+.H 2 "Terms used in this Test Plan"
+.AL 
+.LI
+NFS Network File System.  A product offered on the Series 300 and 800
+that allows transparent file access between machines.
+.LI
+Login associated with node A.  Under VHE, each login will have its home
+directory on a specific node.  So having a login associated with a specific
+node just means that the home directory for that login is located on that
+specific node.
+.LI
+Grouping.  A term describing a group of nodes connected with VHE.
+.LE
+
+
+.H 2 "Revision History"
+.nf
+First Version.....................................Nov, 1987
+Second Version....................................Jan, 1988
+Third Version (Added Cristina Mahon's comments)...Feb, 1988
+.fi
+
+.H 2 "Specific Script Testing"
+.H 3 VHE_MOUNTER
+.AL
+.LI
+In the vhe_list, for a node A, have the "/users" file system listed before
+"/".  See the example under Improper Ordering to see how to create
+a bad vhe_list.
+
+.nf
+   Improper Ordering               Proper Ordering
+    B  /       /vhe/B               B  /       /vhe/B
+    A  /users  /vhe/A/users         A  /       /vhe/A
+    A  /       /vhe/A               A  /users  /vhe/A/users
+
+
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.20 hr)
+
+.fi
+Results:  Do a ypmake on the YP master.
+When vhe_mounter is run on node A and B, it will use the contents of
+vhe_list, but they will be sorted into the proper order.
+.LI
+In the vhe_list, for node A, have the pathname for the "mount point" be
+/vhe/A.  Have /vhe/A exist on node A and be a directory(it should be a
+symbolic link).  
+.nf
+
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.20 hr)
+
+.fi
+Results:  Do a ypmake on the YP master.
+The vhe_mounter script will give an error message 
+when run on node A saying /vhe/A is not a symbolic link.
+Nothing new should be mounted after executing vhe_mounter.
+.LI
+In the vhe_list, for node A, have the pathname for the "mount point" be
+/vhe/A.  Have /vhe/A exist on node B and not be a directory.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.20 hr)
+
+.fi
+Results:  Do a ypmake on the YP master.
+An error message should be given from 
+vhe_mounter when run on node B saying that /vhe/A is not a directory.
+Nothing new should be mounted after executing vhe_mounter.
+.LI
+In the vhe_list, for node A, have the pathname for the "mount point" be
+/vhe/afile/A.
+Have /vhe/afile exist on node B and be a regular file,
+but have /vhe/afile/A NOT exist on B.
+.nf
+
+    vhe_list
+    A  /       /vhe/afile/A
+    B  /       /vhe/B     
+
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.20 h)
+
+.fi
+Results:  Do a ypmake on the YP master.
+An error message should be given from 
+vhe_mounter when run on node B saying that /vhe/afile exists and 
+is not a directory.
+Nothing new should be mounted after executing vhe_mounter.
+.LI
+In the vhe_list, have all of the nodes and mount points correctly specified.
+For an example, see the following for 3 nodes (A, B, and C).  Nodes A and B
+will have just "/" mounted, while node C will have "/" and "/users" mounted
+(this is to simulate "/users" being on a separate file system.
+In reality, node C should have "/users" on
+a separate file system)
+To test a properly functioning vhe, each node must be using the same 
+/etc/passwd file over YP.
+For nodes B and C, the optional mount options will be used.
+
+.nf
+	      vhe_list
+	      A   /       /vhe/A
+	      B   /       /vhe/B    timeo=10,rsize=8192
+	      C   /       /vhe/C
+	      C   /users  /vhe/C/users  wsize=4096
+
+   Node  A              Node B              Node C
+
+   
+     IMPLEMENTATION: (1.5 hr)
+     EXECUTION:      (.3 hr)
+
+.fi
+Results:  Do a ypmake on the YP master.
+After vhe_mounter is run on nodes A, B and C,
+they will all be ready for vhe.  This can be tested by logging in on
+all three nodes with the same login id and being put into the same
+work environment.  
+To insure that the mount options were used, a check of /etc/mnttab
+should be done.  The fourth field in a line will be the mount options
+(if any were used).  So the entry for B and the second entry for C
+would look something like this:
+.nf
+
+	B:/ /vhe/B nfs timeo=10,rsize=8192 0 572028086
+	C:/users /vhe/C/users nfs wsize=4096 0 572028086
+
+.fi
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+.LI
+On node A, edit the vhe_mounter script such that it uses the background
+option for the mount command(comments in the script tell how to do this).
+Have node B be in the vhe_list and have B be not powered up.
+.nf
+   
+     IMPLEMENTATION: (1.5 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  Do a ypmake on the master YP server.
+On node A,
+execute the vhe_mounter script. Try to log in on node A using a login 
+associated with B.  It should fail.  Now powerup node B.  After B is
+up, try to login again on node A using the previous login.  It should work.
+The mounts in the background should wait until node B is ready
+to accept an NFS mount.  At this time, VHE should be ready.
+
+Restore vhe_mounter to its original state.
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+.LE
+.H 3 VHE_U_MNT
+For all of the tests involving vhe_u_mnt, the password file will have to
+be changed to allow "mounter" to be a valid login. 
+The password file is
+not shipped with an entry for "mounter".  The following entry needs to
+be added:
+.nf
+
+	mounter:6:1::/:/usr/etc/vhe/vhe_u_mnt
+
+.fi
+.AL
+.LI
+Have node B be in the vhe_list and have B be not powered up.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  Do a ypmake on the YP master server.  On node A,
+execute the vhe_mounter script. Try to log in on node A using a login 
+associated with B.  It should fail.  Now powerup node B.  After B is
+up, login on node A using the login of "mounter".  It should work.
+You will be asked for the name of the node you want mounted.  Give it B (for
+node B).  Now try to login on node A using the login associated with
+B.  It should work.
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+.LI
+Have node B be in the vhe_list and have B be not powered up.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  For both node A and node B, turn off Yellow Pages.  This
+is done by setting the domainname to "" and killing /etc/ypbind
+and /usr/etc/ypserv.  Edit the /etc/passwd files on A and B so that
+they both contain the login entry associated with node B.  Now make
+sure that both nodes A and B have the same contents in /etc/vhe_list.
+These are the tasks that must be done if VHE is run without YP.
+On node A,
+execute the vhe_mounter script. Try to log in on node A using a login 
+associated with B.  It should fail.  Now powerup node B.  After B is
+up, login on node A using the login of "mounter".  It should work.
+You will be asked for the name of the node you want mounted.  Give it B (for
+node B).  Now try to login on node A using the login associated with
+B.  It should work.
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+Reset domainname to be its original value and then start the killed
+yp processes.
+.LI
+Have node B NOT be in the vhe_list.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  Do a ypmake on the YP server.
+On node A,
+execute the vhe_mounter script. Try to log in on node A using a login 
+associated with B.  It should fail.  Now 
+login on node A using the login of "mounter".  It should work.
+You will be asked for the name of the node you want mounted.  Give it B (for
+node B).  You should get an error message stating:
+.nf
+
+  "There is no node of the name  B  on the list of nodes"
+  "available for mounting.  Please try again."
+.fi
+.LI
+Login using "mounter".  Give it various bogus replies.  These should
+include blank spaces, just a carriage return, hit break, type control D,
+type control C.  In all cases you should just get a prompt back.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.3 hr)
+
+.fi
+Results:  The script that "mounter" calls should always return without
+doing any mounts.
+.LI
+Create a vhe_list that has the following lines in it:
+.AL A
+.LI
+blank lines
+.LI
+comment lines (lines with the first character being "#").
+Have both a blank and non-blank character after the "#"
+.LI
+lines that have white spaces before the node name and in between fields
+.LE
+.nf
+   
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.3 hr)
+
+.fi
+Results:  The vhe_mounter script should work properly with comments in vhe_list.
+
+.LI
+After completing the above test, execute the test case again.
+
+.nf
+   
+     IMPLEMENTATION: (.2 hr)
+     EXECUTION:      (.2 hr)
+
+.fi
+Results:  Nothing should happen when vhe_mounter is rerun.  It is a no-op.
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+.LI
+Run vhe_mounter on node A using a vhe_list with the contents shown in
+Example 1 for this testcase.  It does not have node C in the list.
+On node A, try to login using a login associated
+with node C.  It should fail.
+Now replace vhe_list(on the YP master) with a version that includes
+node C in the grouping (Example 2)
+and then do a ypmake on the master YP server.  On node A, execute vhe_mounter.
+Now try to login on node A using a login associated with node C.
+It should succeed.
+
+.nf
+	      Example 1  vhe_list
+	      A   /       /vhe/A
+	      B   /       /vhe/B
+
+	      Example 2  vhe_list
+	      A   /       /vhe/A
+	      B   /       /vhe/B
+	      C   /       /vhe/C
+
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  The login using the "C login" will not work at first, but after
+the vhe_mounter is executed the second time, the login will work.
+Unmount the NFS mounts that were done by vhe_mounter on all of the nodes.
+.LE
+.H 3 VHE_ALTLOG
+For all of the tests involving vhe_altlog, the password file will have to
+be changed to allow "altlogin" to be a valid login.
+The password file is
+not shipped with an entry for "altlogin".  The following entry needs to
+be added:
+.nf
+
+	altlogin:6:1::/tmp:/usr/etc/vhe/vhe_altlog
+
+.fi
+.AL
+.LI
+The following tests are very similar and therefore will be grouped together.
+The tests are logining in using "altlogin".  This will cause a prompt of
+"Enter your login name:".  The tests are concerned with the different replies
+that can be given and what the system does in response.
+.AL A
+.LI
+Login using the id of "altlogin".  
+Give a valid login that needs no password.  Logout.  
+.LI
+Login using "altlogin".  Give a valid login that need
+a password.  Supply the valid password.   Logout.  
+.LI
+Login using "altlogin".  Give a valid login that need
+a password.  Supply an invalid password
+.LI
+Login again using "altlogin".  Give an invalid login
+and no password.
+.LI
+Login again using "altlogin".  Hit break instead of a valid login.
+.LI
+Login again using "altlogin".  Hit control D instead of a valid login.
+.LI
+Login again using "altlogin".  Hit control C instead of a valid login.
+.LI
+Login again using "altlogin".  Hit escape instead of a valid login.
+.LE
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+Results:
+  Login given                         Response
+
+   valid/no password                   Successful login
+   valid/password with good password   Successful login
+
+   valid/password with bad password    Unsuccessful login
+   invalid login with no password      Unsuccessful login
+   invalid login with password         Unsuccessful login
+   break                               Unsuccessful login
+   control D                           Unsuccessful login
+   control C                           Unsuccessful login
+   escape                              Unsuccessful login
+.fi
+
+.LE
+
+.H 2 "Installation Testing"
+After doing an installation of the VHE scripts, verify that the the scripts
+are in the proper location and have the correct ownership and file permissions.
+Currently this is what is correct:
+.nf
+
+The following files are located in /usr/etc/vhe.
+-r-xr-xr-x   1 root     other        305 Nov 15 12:00 vhe_altlog
+-r-x------   1 root     other       6048 Nov 15 12:00 vhe_mounter
+-r-sr-xr-x   1 root     other       1851 Nov 15 12:00 vhe_u_mnt
+-r-x------   1 root     other       1820 Nov 15 12:00 vhe_getlist
+
+.fi
+
+.H 2 "General Usage Testing"
+.AL
+.LI
+Have node A be in the vhe_list.  Execute vhe_mounter on node B.  Now
+stop node A so it cannot respond.  Login on node B using a login
+associated with node A.  It should not complete.  The test is to
+see if a break or interrupt will break out of the login process.
+
+.nf
+   
+     IMPLEMENTATION: (.5 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  Hopefully the interrupt will break out of the login
+process.
+.LI
+With nodes A and B powered up in a VHE grouping, login on A using a login
+associated with node B.  Edit a file (xyzzy) in the home directory.  Copy
+the file to "/tmp/xyzzy".  A copy of the file will be on node A.  Edit
+"/tmp/xyzzy".  Now copy "/tmp/xyzzy" to "./" (the home directory).  A 
+diff of "/tmp/xyzzy" and "./xyzzy" should show the files to be the same.
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  The edits and copies should all work without problem.
+.LI
+With nodes A and B powered up in a VHE grouping, login on B using a login
+associated with node A.  Now stop node A so it cannot respond.
+On node B, do an "ls"
+command.  This should not complete.  Try to interrupt the process.
+It should interrupt.  
+
+
+.nf
+   
+     IMPLEMENTATION: (1 hr)
+     EXECUTION:      (.5 hr)
+
+.fi
+Results:  See above.
+.LI
+Create a vhe_list of 15 nodes.  Get the 15 nodes using YP.  Do a ypmake
+on the master YP server.  Execute vhe_mounter on all of the 15 nodes.
+Have the nodes made up of 300's and 800's.
+This is not the limit of nodes for VHE, that would be determined by the
+number of NFS mounts that can be made.  
+
+.nf
+   
+     IMPLEMENTATION: (3 hrs)
+     EXECUTION:      (1 hr)
+
+.fi
+Results:  The logins should work from any node and succeed in putting the
+user into the proper home environment.  The test is done to make sure that
+VHE works with larger numbers of nodes.
+.LI
+With nodes A and B up in a VHE grouping, login on A using a login
+associated with node B.  Try to read mail.  This will not work
+directly.  The .login file for the B associated login will have
+to be changed.  This test is to determine what changes need to be made.
+Also to be studied are things that should be done in the .login
+file to make VHE better integrated into the work environment.
+Things like establishing a variable to be defined as the pathname
+of the virtual root.  For example for node A, the virtual root would
+be "/vhe/A".  Then this variable could be used in the .login script
+to make pathname go from being root relative to being virtual root
+relative.
+
+.nf
+   
+     IMPLEMENTATION: (4 hr)
+     EXECUTION:      (2 hr)
+
+.fi
+Results:  To be determined.
+.LE
+
+

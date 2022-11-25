@@ -1,0 +1,382 @@
+.\" $Header: monitor.1m,v 66.2 91/04/12 17:00:26 ssa Exp $
+.TH monitor 1M
+.ds )H Hewlett-Packard Company
+.SH NAME
+monitor \- display system performance statistics
+.sp
+.SH SYNOPSIS
+.B /usr/contrib/bin/monitor 
+[\fI-c cmd\fR] [\fI-d dur\fR] [\fI-i int\fR] [\fI-l lan\fR] [\fI-n kern\fR] 
+.br
+[\fI-r rev\fR] [\fI-s lp\fR] [\fIblock\fR] [\fIcsp\fR] [\fIdisc\fR] 
+[\fIdropped\fR] [\fIlan\fR] [\fImemory\fR] [\fImsg\fR] [\fIpage\fR]
+[\fIretries\fR] [\fIrtime\fR] [\fIswap\fR] [\fIsyscalls\fR] [\fIsystem\fR]
+[\fItime\fR] [\fIuser\fR]
+.sp
+.SH DESCRIPTION
+.I Monitor
+is a program that provides a means for observing consumption of
+.SM HP-UX
+system resources.
+It shows data in each major system area (processes, memory,
+.SM I/O,
+and networking).
+.I Monitor
+can be used to determine why the system is running slowly,
+or to tune an application by observing system behavior
+when the application is running, or to learn more about the
+behavior of the
+.SM HP-UX
+operating system.
+.PP
+.I Monitor 
+reads the file
+.B /etc/monitor_data 
+when starting up to retrieve symbol table data 
+information which it had previously read from
+.B /hp-ux
+and device file information obtained from the
+.B /dev
+directory.
+.I Monitor
+re-builds this file whenever the version number in that file doesn't match
+.I monitor 
+or if this file is older than 
+.B /hp-ux, 
+.B /dev 
+or 
+.B /dev/pty 
+files or directories.
+.PP
+There are numerous command-line options:
+.RS
+.TP 10
+.B  \-c cmd
+\fBcmd\fR is the initial screen character for interactive mode 
+(C, I, G, K, L, M, N, R, S, T, V.  default: main screen)
+.TP 10
+.B  \-d dur
+\fBdur\fR is the duration of time to run in number of iterations 
+(stdout mode only)
+.TP 10
+.B  \-i int
+\fBint\fR is the update interval in seconds (default: 1)
+.TP 10
+.B  \-l lan
+\fBlan\fR is the device for LAN statistics (default: /dev/ieee on 
+series 300 and /dev/lan0 on the series 800)
+.TP 10
+.B  \-n kern
+\fBkern\fR is the name of the kernel file (default: /hp-ux)
+.TP 10
+.B  \-r rev
+will not start N screen protocol if \fBrev\fR, the revision ID, doesn't match
+.TP 10
+.B  \-s lp
+\fBlp\fR is the device for lp spooling (default: NONE)
+.RE
+.sp
+.PP
+.I Monitor
+can be run in an interactive mode or in standard out mode by including 
+any combination of the following keywords in the invocation:
+.RS 
+.TP 10
+.B  block 
+File system block I/O requests - cache hits
+.TP 10
+.B  csp 
+Discless CSP requests (series 300 only)
+.TP 10
+.B  disc 
+Aggregate active disc utilization percentage
+.TP 10
+.B  dropped 
+Discless messages dropped due to resources (series 300 only)
+.TP 10
+.B  lan 
+LAN in/out packet count
+.TP 10
+.B  msg 
+Discless messages sent/received (series 300 only)
+.TP 10
+.B  memory 
+User memory utilization percentage
+.TP 10
+.B  page 
+VM page read/write requests
+.TP 10
+.B  retries 
+Discless message retries (series 300 only)
+.TP 10
+.B  rtime 
+Milliseconds since startup
+.TP 10
+.B  syscalls 
+System calls
+.TP 10
+.B  system 
+System CPU utilization percentage over the last second
+.TP 10
+.B  swap 
+Swap disc utilization percentage
+.TP 10
+.B  time 
+Time in HH:MM:SS format
+.TP 10
+.B  user 
+User CPU utilization percentage over the last second
+.RE
+.sp
+.PP
+There are eleven screens in the interactive mode.  Since there is a lot of 
+information to be displayed by the 
+.I monitor, 
+the data is broken down into 
+interactive screens listed in the main menu when
+you start up the 
+.I monitor.  
+Most data displayed is shown as a rate
+value (occurrences per second) over the last update interval.  There
+are some values that are also shown as cumulative counts since the
+system was started.  To enter a specific screen, simply press one
+of the following keys:
+.RS
+.TP 10
+.B  C - Configuration values / Drivers
+Shows configured kernel tunable parameters and drivers.
+.TP 10
+.B  I - I/O status
+Shows file system I/O and disc I/O activity.
+.TP 10
+.B  G - Global system status
+Shows overall system status and some miscellaneous statistics
+most notably in the area of swap space.
+.TP 10
+.B  K - Diskless status 
+Shows statistics on discless Cluster Server Processes (CSPs)
+and information on each active discless cnode.
+.TP 10
+.B  L - LAN status
+Shows statistics that are collected by the LAN card driver
+regarding packets transmitted and received.
+.TP 10
+.B  M - Message protocol status 
+Shows statistics collected by the discless protocol code
+regarding memory used, inbound/outbound activity, error
+statistics and counts of each unique inbound/outbound message.
+.TP 10
+.B  N - Networked status
+Shows all the statistics printed by the 
+.I monitor 
+in standard
+out mode collected from a user specified list of systems that
+are accessible via the remsh command.
+.TP 10
+.B  R - Remote uptime
+Shows the data collected by the rwhod process (normally printed
+by the ruptime command) regarding the status of all the systems
+on the LAN(s) connected to this system.
+.TP 10
+.B  S - Single process information
+Shows per process statistics for a specified process ID.
+.TP 10
+.B  T - Tasks running
+Shows process management statistics and statistics for all the
+processes running on the system (similar to ps).
+.TP 10
+.B  V - Virtual memory status
+Shows virtual memory management statistics plus information on
+context switches, trap calls, system calls, and device interrupts.
+.RE
+.sp
+.PP
+There are a number of other commands available while in any of the
+interactive screen by simply pressing the following keys:
+.RS
+.TP 5
+.B ? 
+Help information for the current screen.
+.TP 5
+.B  Q 
+Quit.  You may also exit 
+.I monitor 
+by typing BREAK.  The
+INTR (typically DEL) and EOF (typically CONTROL-D) can also
+be used.
+.TP 5
+.B X
+Return to the main menu.
+.TP 5
+.B ^L 
+The CONTROL-L key will re-write the screen if some other process
+has written to your terminal or window while running the 
+.I monitor.
+.TP 5
+.B !
+Invoke a shell.  When you exit, you will return to the 
+.I monitor.
+.TP 5
+.B  F 
+For screens with more data than will fit on a screen, the data is
+displayed in multiple screens.  See the current screen number and
+total number of screens in the upper right hand corner (e.g. "3 of
+5").  This key moves you forward one screen.  The "+" or SPACE key
+can also be used to move forward a screen.
+.TP 5
+.B  B
+Move backward a screen.  The "-" key can also be used.
+.TP 5
+.B  D 
+Dump the contents to hard copy.  Spools an image of the screen
+to the line printer spooler (/usr/bin/lp).  Use the "U" key
+(see below) to specify a destination device for the -d option to
+the lp command.  The default is none.
+.TP 5
+.B  H 
+Halt 
+.I monitor 
+updates.  The 
+.I monitor 
+will not change the contents of
+the screen until the user types "R" to resume.  The user may also
+type "D" to dump the screen or "Q" to exit.  All other keys are
+ignored.  In the upper right hand corner the string "HALTED" is
+displayed when the 
+.I monitor 
+has been halted.
+.TP 5
+.B  R 
+Resume from 
+.I monitor 
+halt ("H").
+.TP 5
+.B  P 
+Select a process for the S screen.  Type the process ID of the
+process you want to look at with the S (single process status)
+screen.  This key will change your mode to the S screen after
+you type the process ID.  It will not accept process ID 1 since
+the system does not collect statistics on the init process.
+.TP 5
+.B  U 
+Update configuration variables.  This allows one to change
+the following values: 
+.sp
+- Update interval (time between screen updates) (defaults to 1)
+.sp
+- Hardcopy device passed to /usr/bin/lp with the -d option (defaults to "lp").
+.sp
+The remaining values are only requested if they are relevant to
+the screen you are currently in (all are requested if you are
+in the main menu):
+.sp
+- Filtering criteria for displaying processes in the T screen:
+.br
+      A - All processes (default)
+.br
+      N - Processes using at least 1% (Non-zero) of the CPU
+.br
+      U - Processes owned by the specified user
+.sp
+- If the "U" filtering criteria is specified, the user name
+to match on is requested.
+.sp
+- Reverse the sorting order for the data on the K or R screen
+.sp
+- Sorting criteria for the R screen:
+.br
+      H - Sort by hostname (default)
+.br
+      L - Sort by load averages
+.br
+      T - Sort by uptime
+.br
+      U - Sort by usercount
+.sp
+- The device file for the LAN interface to display statistics
+for in the G and L screens.
+.sp
+- The list of hostnames for the systems to display statistics
+for in the N screen.  This defaults to the last set of hostnames
+specified or the list of active cnodes in the discless cluster
+that the system belongs (if clustered).
+.RE
+.sp
+.PP
+.I Monitor
+stores its help information in file
+.BR /usr/contrib/lib/monitor.help .
+Further information can be obtained by typing the command:
+.IP
+.B monitor
+.PP
+and typing
+.B ? 
+on any screen to get information on that specific screen.
+.PP
+.I Monitor 
+requires a minimum terminal or
+window size of 24 lines by 80 characters to run in the interactive mode.  
+If greater than 24 lines
+are available (indicated by the 
+.SM TERM 
+or 
+.SM LINES 
+environment
+variables), then the 
+.I monitor 
+will use the additional lines in
+multi-page screens where the data displayed exceeds 24 lines and the
+"F", "+", or " " keys are used to scroll forward and the "B" or "-"
+keys scroll backwards.
+.PP
+.I Monitor
+uses the
+.SM TERM
+environment variable to determine terminal characteristics,
+including Home Up and Clear Screen escape sequences.
+.I Monitor
+then updates the contents of the screen
+by positioning the cursor using carriage-return, line-feed,
+and tab characters, then updating changed characters
+in groups of eight characters beginning at each tab stop.
+Thus, it requires that tab stops be set every eight characters
+and that tab characters space over unchanged areas without changing the text.
+.I Monitor
+disables tab expansion to accomplish this.
+If running
+.I monitor
+from a remote terminal facility that does not pass the
+.SM TCSETA
+ioctl that
+.I monitor
+issues to turn off tab expansion, 
+.I monitor 
+screen updates may be incorrectly handled.  Commands such as
+.I cu
+and
+.I rlogin
+handle the
+.SM TSETA
+ioctl correctly.
+.sp
+.SH AUTHOR
+.I Monitor
+was developed by HP.
+.sp
+.SH FILES
+/etc/monitor_data
+.br
+/usr/contrib/lib/monitor.help
+.\"
+.\" index	\fImonitor\fR \- display system performance statistics 	 \fBmonitor(1M)\fR
+.\" index	display system performance statistics 	 \fBmonitor(1M)\fR
+.\" index	system performance statistics, display 	 \fBmonitor(1M)\fR
+.\" index	performance statistics, display system 	 \fBmonitor(1M)\fR
+.\" index	statistics, display system performance 	 \fBmonitor(1M)\fR
+.\"
+.\" toc	\fBmonitor(1M)\fR:\0\0\fImonitor\fR 	 display system performance statistics
+.\"
+.\" fileset_database monitor.1m ???-MAN
+
+

@@ -1,0 +1,125 @@
+# $Revision: 64.4 $ 
+#
+# Each caller type that appears in the Devices file (5th field)
+# should appear in this file except for the built in callers.
+# Each line consists of three parts:
+# - the name of the caller
+# - the translation table for the phone number to translate from
+#   the 801 codes (=-) to the code for the particular device
+# - a chat script (same format and meaning as the login scripts
+#   that appear in the Systems file.
+#
+# Meaning of some of the escape characters:
+# \p - pause (approximately 1/4-1/2 second delay)
+# \d - delay (2 seconds)
+# \D - phone number/token
+# \T - phone number with Dialcodes and character translation
+# \K - insert a BREAK
+# \E - turn on echo checking (for slow devices)
+# \e - turn off echo checking
+# \r - carriage return
+# \c - no new-line
+# \n - send new-line
+# \nnn - send octal number
+#
+# NOTE: blank lines and lines that begin with a <space>, <tab>, or # are ignored
+
+penril	=W-P	"" \d > Q\c : \d- > s\p9\c )-W\p\r\ds\p9\c-) y\c : \E\TP > 9\c OK
+ventel	=&-%	"" \r\p\r\c $ <K\T%%\r>\c ONLINE!
+vadic	=K-K	"" I IDLE \d\d\005\p HELLO D NUMBER? \T\r DIALING \d\d LINE  
+develcon ""	"" \pr\ps\c est:\007 \E\D\e \007
+micom	""	"" \s\c NAME? \D\r\c GO
+direct
+
+#  Rixon Intelligent Modem -- modem should be set up in the Rixon 
+#  mode and not the Hayes mode.
+#
+rixon	=&-%	"" \r\r\d $ s9\c )-W\r\ds9\c-) s\c : \T\r\c $ 9\c LINE
+
+#   Hayes Smartmodem -- modem should be set with the configuration
+#   switches as follows:
+#
+#       S1 - UP		S2 - UP		S3 - DOWN	S4 - UP
+#       S5 - UP		S6 - UP		S7 - ?		S8 - DOWN
+#
+hayes   =,-,    "" \dATZ\d\r OK\r \dAT\r\c OK\r \dATS7=45\r\c OK\r \EATDT\T\r\c CONNECT
+
+#   MultiTech 224E
+#	Initial setup: 	Factory Default settings 
+#			(dip switches and internal parameters)
+#	Use  "hayes" for dialer type
+
+#
+#   Vadic 3450 should be the same as vadic
+#
+vadic3450 =K-K	"" I IDLE \d\d\005\p HELLO D NUMBER? \T\r DIALING \d\d LINE  
+#
+#   Ventel 212 same as Ventel
+#
+ventel212  =&-%	"" \r\p\r\c $ <K\T%%\r>\c ONLINE!
+#
+#   HP 35141A
+#
+#   Configuration Switches:
+# *******************************************************************
+# *  HP35141A(phone,cua,speed)
+# *
+# * This routine implements the autodial sequence necessary for the
+# * HP35141A modem. Note this modem is similar to but not compatible
+# * with the Racal Vadic 3450. To utilize this routine the modem 
+# * MUST be configured as follows prior to attempting operation.
+# *
+# * CONFIGURATION OF THE MODEM (use t command to see current config)
+# *
+# *   01*2   STANDARD OPTN               02*1   ASYNCH/SYNCH
+# *   03*2   DATA RATE SEL      	 04*1   103 OPERATION
+# *   05*3   CHARACTER LEN               06*1   ORIG/ANS MODE
+# *   07*2   SLAVE CLOCK                 08*2   DTR CONTROL
+# *   09*2   ATT/UNATT DISC		 10*1   LOSS CXR DISC
+# *   11*1   REC SPACE DISC              12*2   SEND SPACE DIS
+# *   13*1   ABORT DIAC			 14*1   REMOT TST RESP
+# *   15*3   DSR CONTROL		 16*2   CXR CONTROL
+# *   17*1   AUTO LINKING		 18*3   ALB CONTROL
+# *   19*1   AUTO ANSWER          	 20*2   TERMINAL BELL
+# *   21*2   LOCAL COPY                  22*3   DIAL MODE
+# *   23*2   BLIND DIAL                  24*1   CALL PROGRESS
+# *   24*1   FAIL CALL SEL		 25*1   AUTO REDIAL
+# *
+# * 
+# ******************************************************************/
+hp35141A  =K-K	"" I IDLE \d\d\005\p HELLO D NUMBER? \T\r DIALING \d\d LINE  
+# hp92205A hayes compatible
+#
+hp92205A =,-,	"" \dAT\r\c OK\r \EATDT\T\r\c CONNECT
+#
+# hp37212A
+#
+# should be configured as follows
+#
+#  all internal switches s9 - s16 open
+#  computer mode, smart mode Bell 212A mode asynchronous, 10 bit data
+#  enable auto answer DTS/CTS/CD under RS232C interface line control
+#  DTR monitored by modem
+hp37212A =%-" "" \r\dZ\r\d\r<\r\d?\r H@@@@@ T\TK\r\d\d\d\d\d\d\d\d\d\d?\r BC T\r
+#
+# hp37212B
+hp37212B =%-" "" \r\dZ\r\d\r<\r\d?\r @@@@ \d\dS\TK\r\d\d\d\d\d\d\d\d\d\d\d\rC\rT\r\r
+#
+#
+# HP2334A interactive mode
+#
+hp2334Ai "" 	"" \r @-\d-@-\020-@ CLR\r @ \T\r\c COM \d\020\d\c @ set\s13:4\r ""
+#
+# HP2334A f protocol 
+#
+hp2334Af ""	"" \r @-\d-@-\020-@ CLR\r @ \T\r\c COM \d\020\d\c @ set\s1:0,2:0,3:0,4:2,5:1,6:5,7:8,8:0,9:0,12:1,13:0,14:0,15:0,16:0,17:0\r ""
+#
+# HP2334A g protocol 
+#
+hp2334Ag ""	"" \r @-\d-@-\020-@ CLR\r @ \T\r\c COM \d\020\d\c @ set\s1:0,2:0,3:0,4:0,5:0,6:5,7:8,8:0,9:0,12:0,13:0,14:0,15:0,16:0,17:0\r ""
+
+# Telebit trailblazer Plus
+tele1200	=W-,	"" A\pA\pA\pAT OK ATS50=2 OK \pATDT\T CONNECT
+tele2400	=W-,	"" A\pA\pA\pAT OK ATS50=3 OK \pATDT\T CONNECT
+telefast	=W-,	"" A\p\rAT\r\pAT\r OK ATS50=255 OK \pATDT\T CONNECT
+

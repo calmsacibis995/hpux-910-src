@@ -1,0 +1,31 @@
+## FacetTerm  vt220func  description file 06/08/89
+## program function key sequences for vt220 type terminals
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt220func.FC,v 70.1 92/03/09 16:07:29 ssa Exp $
+##--- FUNCTION KEYS ---##
+### function_key_clear=
+function_key_clear=\EP0;1|\E\\
+### function_key_clear_mode_yes=number
+function_key_clear_mode_yes=0
+### function_key_clear_mode_no=number
+function_key_clear_mode_no=1
+### parm_pkey_key=
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5;%p6%d/%s6;%p7%d/%s7;%p8%d/%s8;%p9%d/%s9;%pA%d/%sA\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5;%p6%d/%s6;%p7%d/%s7;%p8%d/%s8;%p9%d/%s9\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5;%p6%d/%s6;%p7%d/%s7;%p8%d/%s8\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5;%p6%d/%s6;%p7%d/%s7\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5;%p6%d/%s6\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4;%p5%d/%s5\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3;%p4%d/%s4\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2;%p3%d/%s3\E\\
+parm_pkey_key=\EP%pB%d;1|%p1%d/%s1;%p2%d/%s2\E\\
+### parm_pkey_key=
+### pkey_key=
+pkey_key=\EP%pB%d;1|%p1%d/%s1\E\\
+### out_pkey_key=
+### function_key_string_is_hex
+function_key_string_is_hex
+### function_key_string_is_ansi
+### function_key_string_is_escaped-chars=
+### function_key_includes_label
+### function_key_len_0_label_only

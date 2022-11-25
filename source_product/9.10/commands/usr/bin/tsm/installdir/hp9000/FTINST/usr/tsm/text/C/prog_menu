@@ -1,0 +1,61 @@
+############################################################################
+# TSM user customizable file: prog_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# @(#) $Header: prog_menu,v 66.10 91/01/04 13:35:57 jag Exp $
+
+pull_down_menu
+
+item_name=Shell
+item_selection=S
+item_type=program
+item_action=$SHELL
+
+item_name=Helpful softkey shell (keysh)
+item_selection=H
+item_type=program
+item_action=/usr/bin/keysh
+
+item_name=Mail (elm)
+item_selection=M
+item_type=program
+item_action=elm
+
+item_name=Editor (vi)...
+item_selection=E
+item_type=program
+item_action=vi $0
+dialog_box
+dialog_item_prompt File(s):
+dialog_item_var $0 60
+
+item_name=system Administration manager (SAM)
+item_selection=A
+item_type=program
+item_action=/usr/bin/sam
+
+item_name=Other programs...   $tsm_hot_keyr
+item_selection=O
+item_type=program
+item_action=$0
+new_window_title=$0
+dialog_box
+dialog_item_prompt Program:
+dialog_item_var $0 60

@@ -1,0 +1,121 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/automount sources
+#
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+SOURCE = nfs_prot.c nfs_server.c nfs_trace.c \
+	auto_main.c auto_look.c auto_proc.c auto_node.c \
+	auto_mount.c auto_all.c putenv.c strdup.c nfs_cast.c
+
+OBJECTS = nfs_prot.o nfs_server.o nfs_trace.o \
+	auto_main.o auto_look.o auto_proc.o auto_node.o \
+	auto_mount.o auto_all.o putenv.o strdup.o nfs_cast.o
+
+TARGETS = automount
+HDRS    = automount.h
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+RPCGEN = rpcgen
+
+automount:	$(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o automount $(OBJECTS) $(RPCSVC_LIB) $(LIBCA) $(LIBSEC) $(SECFLAGS)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+/*
+ *nfs_prot.c: nfs_prot.h nfs_prot.x
+ *	$(RPCGEN) -c $(SRCDIR)/nfs_prot.x -o $@
+
+ *nfs_prot.h: nfs_prot.x
+ *	$(RPCGEN) -h $(SRCDIR)/nfs_prot.x -o $@
+ */
+
+nfs_prot.c: $(SRCDIR)/nfs_prot.x
+
+auto_all.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_all.c
+
+auto_look.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_look.c
+
+auto_main.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_main.c
+
+auto_mount.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_mount.c
+
+auto_node.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_node.c
+
+auto_pr.o.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_pr.c
+
+auto_site.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auto_site.c
+
+nfs_cast.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nfs_cast.c
+
+nfs_prot.o: $(PRIV_LIB) $(SRCDIR)/nfs_prot.h
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nfs_prot.c
+
+nfs_server.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nfs_server.c
+
+nfs_trace.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/nfs_trace.c
+
+putenv.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/putenv.c
+
+strdup.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/strdup.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -hbax $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build
+

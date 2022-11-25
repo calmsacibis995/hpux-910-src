@@ -1,0 +1,5 @@
+/* @(#) $Revision: 27.1 $ */    
+extern	union	{
+	unsigned uns[26];
+	char	chr[26*(sizeof(unsigned)/sizeof(char))];
+	}  sufind;

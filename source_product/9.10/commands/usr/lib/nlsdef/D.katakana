@@ -1,0 +1,148 @@
+# @(#) $Revision: 70.1 $      
+
+langname	"katakana"
+langid		41
+
+hprevision	"$Revision: 70.1 $"
+
+###########################################################################
+# Set up the LC_ALL category
+
+LC_ALL
+yesstr		"yes"				# yes string
+nostr		"no"				# no string
+direction	""				# left-to-right orientation
+END_LC
+
+
+###########################################################################
+# Set up the LC_CTYPE category
+
+LC_CTYPE
+isupper		'A' - 'Z'			# true if an upper case char
+		166 - 223
+islower		'a' - 'z'			# true if a lower case char
+		166 - 223
+isdigit		'0' - '9'			# true if a digit
+isspace		' '		0x9 - 0xd	# true if a space
+ispunct		'!' - '/'	':' - '@' 	# true if a punctuation char
+		'[' - '`'	'{' - '~'
+		161 - 165
+iscntrl		0x0 - 0x1f	0x7f		# true if a control char
+		128 - 159	255
+isblank		' '				# true if a blank char
+isxdigit	'0' - '9'	'a' - 'f'	# true if a hex digit
+		'A' - 'F'
+
+ul		< 'A' 'a' >	< 'B' 'b' >	# < upper lower >
+		< 'C' 'c' > 	< 'D' 'd' >
+		< 'E' 'e' >	< 'F' 'f' >
+		< 'G' 'g' >	< 'H' 'h' >
+		<0x49 0x69>	<0x4a 0x6a>	# hex constants can be used
+		<0113 0153>	<0114 0154>	# octal constants can be used
+		< 77  109 >	< 78  110 >	# decimal constants can be used
+		< 'O' 'o' >	< 'P' 'p' >	# literal constants can be used
+		< 'Q' 'q' >	< 'R' 'r' >
+		< 'S' 's' >	< 'T' 't' >
+		< 'U' 'u' >	< 'V' 'v' >
+		< 'W' 'w' >	< 'X' 'x' >
+		< 'Y' 'y' >	< 'Z' 'z' >
+bytes_char	"1"
+alt_punct	""				# no alternative punctuation
+END_LC
+
+
+###########################################################################
+# Set up the LC_COLLATE category
+# Don't have to set up the collate table
+
+
+###########################################################################
+# Set up the LC_MONETARY category
+
+LC_MONETARY
+int_curr_symbol		"JPY "
+currency_symbol		"\\"
+p_cs_precedes		"1"
+p_sep_by_space		"0"
+n_cs_precedes		"1"
+n_sep_by_space		"0"
+mon_decimal_point	"."
+mon_thousands_sep	","
+mon_grouping		"\3"
+positive_sign		""
+p_sign_posn		"1"
+negative_sign		"-"
+n_sign_posn		"3"
+int_frac_digits		"2"
+frac_digits		"2"
+crncystr		"-\\"
+END_LC
+
+
+###########################################################################
+# Set up the LC_NUMERIC category
+
+LC_NUMERIC
+decimal_point	"."			# RADIXCHAR: radix character
+thousands_sep	","			# THOUSEP: thousands separator
+grouping	"\3"
+alt_digit	""			# no alternative digits
+END_LC
+
+
+###########################################################################
+# Set up the LC_TIME category
+
+LC_TIME
+d_t_fmt		"%Y\310\335 %m\266\336\302 %d\306\301 (%a), %H\274\336 %M\314\335 %S\313\336\256\263"					# date & time string
+d_fmt		"%Y\310\335 %m\266\336\302 %d\306\301 (%a)"
+t_fmt		"%H\274\336 %M\314\335 %S\313\336\256\263"
+day_1		"\306\301\326\263\313\336"	# weekday names
+day_2		"\271\336\302\326\263\313\336"
+day_3		"\266\326\263\313\336"
+day_4		"\275\262\326\263\313\336"
+day_5		"\323\270\326\263\313\336"
+day_6		"\267\335\326\263\313\336"
+day_7		"\304\336\326\263\313\336"
+abday_1		"\306\301"			# weekday abbreviations
+abday_2		"\271\336\302"
+abday_3		"\266"
+abday_4		"\275\262"
+abday_5		"\323\270"
+abday_6		"\267\335"
+abday_7		"\304\336"
+mon_1		"1\266\336\302"			# month names
+mon_2		"2\266\336\302"
+mon_3		"3\266\336\302"
+mon_4		"4\266\336\302"
+mon_5		"5\266\336\302"
+mon_6		"6\266\336\302"
+mon_7		"7\266\336\302"
+mon_8		"8\266\336\302"
+mon_9		"9\266\336\302"
+mon_10		"10\266\336\302"
+mon_11		"11\266\336\302"
+mon_12		"12\266\336\302"
+abmon_1		"1\266\336\302"				# month abbreviations
+abmon_2		"2\266\336\302"
+abmon_3		"3\266\336\302"
+abmon_4		"4\266\336\302"
+abmon_5		"5\266\336\302"
+abmon_6		"6\266\336\302"
+abmon_7		"7\266\336\302"
+abmon_8		"8\266\336\302"
+abmon_9		"9\266\336\302"
+abmon_10	"10\266\336\302"
+abmon_11	"11\266\336\302"
+abmon_12	"12\266\336\302"
+am_str		""				# AM string
+pm_str		""				# PM string
+year_unit	""				# the unit of year
+mon_unit	""				# the unit of month
+day_unit	""				# the unit of day
+hour_unit	""				# the unit of hour
+min_unit	""				# the unit of minute
+sec_unit	""				# the unit of second
+era_fmt		""				# era format
+END_LC

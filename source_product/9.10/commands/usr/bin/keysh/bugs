@@ -1,0 +1,352 @@
+static char rcsId[] =
+  "@(#) $Header: bugs,v 66.15 91/01/01 15:09:14 rpt Exp $";
+static char copyright[] =
+  "Copyright (c) HP, 1989";
+
+(1) minor change
+(2) significant change w/o architectural impacts
+(3) major change w/ architectural impacts
+
+
+===============================================================================
+
+general
+  (1) makefile forgets to #define KEYSHELL!!!
+  (1) why do I get "vi -r ..." mail which recovers file with "Keysh_config"
+  (1) run ksh88 tests on keysh???
+  (1) recalc header dependencies for makefile (old)
+  (1) need plan for beta testing (CSU, distrib thru notes, etc.)
+  (1) use assertions to get rid of all NULL-pointer checks!
+  (1) will ksh88 always set $PWD initially?
+  (1) can we get rid of realloc() #ifdef in ksh88?
+  (1) terminfo entries for other terminal types!
+  (1) can peter increase BRKMAX (in brkincr.h)
+  (1)+use cpp -A instead of cpp on builtins and softkeys files
+  (1)+performance -- meet i/l goal 5 sec startup on 350
+  (1)+lint code again!
+  (1)+run on s800 compiled with -z option
+  .....
+  (1) use keyboardChar's instead of ints?  rename keyboardChar to globalChar?
+  (1) should I block signals while not sleeping? (quick ctl-C's mess display)
+  (1) should I block signals while initializing? (saw core-dump...)
+  -----
+  (3) display softkeys dim (or underlined), treat as single char!
+
+architecture
+  .....
+  -----
+  (2) need more auto-start functions (e.g., pick LANG, dos-like set-up, etc.)
+  (3) need command nesting (for, ``, {}, etc.) -- hierarchical extent list
+  (2) help with pipes and redirections
+  (2) command statistics
+
+================================== tests ======================================
+
+tests
+  (1) display tests seem to be causing me to get "vi -r ..." mail --
+      cat -v /tmp/sh12703.1 == "Keysh_config exit ls| sort"
+  (1) tests for $KEYKSH set
+  (2) test all newly added functionality (features in this file!)
+  (1) get bfa up in some weak modules (e.g., emacs/vi) -- opportunities!
+  (1) define NDEBUG when testing...
+  edit:
+  (1) test "v" and <esc>"v" commands! (100% breadth -> FC())
+  (1) test PS2, etc.
+  (1) test interrupts and other special chars in all states
+  (1) test "\\" quoting, ^Q quoting, and ^V quoting
+  softkeys:
+  (1) ensure that every Translation() string works as expected (test by hand)
+  (1) verify softkey enable/disable counts by hand prior to any release!
+  .....
+  -----
+
+================================= engine routines =============================
+
+keyshell.c
+  (1)+if $LANG == "" then use "american"
+  .....
+  -----
+  (2) can't cope with '!' in PS1
+
+kshhooks.h
+  .....
+  -----
+
+global.c
+  .....
+  (1) set of functions for dealing with enable/disable counts
+  -----
+
+translate.y
+  .....
+  -----
+  (2)+shouldn't allocate all char-buffers for words -- use chunks as needed
+
+=============================== right branch ==================================
+
+intrinsics.c
+  (1)+"You have new mail" should not change because of a <Return>
+  (1)+two "kc undo"s in a row should put you back where you were
+  (1)+bug adding softkey with label of existing softkey -- should delete
+      label matches, too.
+  (1) document "nextRequired" stuff
+  (1)+kc restart default
+  (1)+kc flush
+  .....
+  (1) user name in status-line should indicate if uid/euid is diff from logname
+  (1) can we display insert/command mode etc. on status line?
+  (1) kc undo should read commands from "input" string rather than (ro) file
+  (1) search $HOME/.softkeys AND /usr/keysh/$LANG/softkeys by default!!!
+  (1) how about a "softkeys -k"-like command?
+  -----
+  (1) should we be able to delete invisibles/backups on per-file basis?
+  (3) need dynamic softkey lists computed @ run-time
+  (2) should I look for mail along MAILPATH as well as MAIL? (Use ksh?)
+
+config.c
+  (1)+make more strict; improve error messages
+  (1)+read help from softkeys file as needed
+  (1)+print out as many softkey errors as can find in file -- not just first
+  .....
+  -----
+  (2) should be able to share arbitrary sub-graphs in the softkey file
+  (1) might be nice to have a generic "required" msg
+
+================================ left branch ==================================
+
+extents.c
+  (1)+change sense of KEYMORE
+  (1)+add KEYMORE env var
+  (1)+IsError() shouldn't complain for missing disabled nextRequired softkeys 
+  .....
+  -----
+  (1) should search *all* children for required enable counts which aren't
+      in state (not just first)
+  (1) "Mail rec; hello" doesn't immediately yell an error...
+  (1) should FillTailExtent() check that disable *&* enable is satisfied?
+  (1) ignore insert-line/operate on intrinsic cmd?
+  (2) extents.c should use chunks
+
+word.c
+  .....
+  -----
+
+edit.c
+  (1) seem to be bugs with multi-line history commands (when interrupted?)
+  (1) some failed intrinsic commands don't get entered into history
+  (1) other wierd history interactions between keysh's
+  (1)+must update mark positions when inserting text into command-line!
+  (1)+"Keyshell restart" never entered into history
+  (1)+append/prepend kills to cut buffer???
+  (1)+delete-line shouldn't change etc n of n (only <Return>)
+  .....
+  -----
+  (1) ignore insert-line/operate on history recall command
+
+emacs.c
+  (1)+need to set mark in more cases -- see posix draft
+  (1)+<ESC>-d deletes space following words (and even extra "|" symbol!)
+  (1)+<ESC>-d also eats too little if sitting on "_" of "_hello"
+  (1)+<ESC>-n-<ESC>-d followed by CNTL-y doesn't yank everything back
+  (1)+<ESC>-c/u/l move cursor one too far
+  .....
+  (1) "esc-n-<cntl-K>" not as advertised in ksh (88 is different!) man page
+  -----
+  (2) keyboard macros not supported
+
+vi.c
+  (1) "#" when after overstrike mode overwrites first char in line
+  (1) saw vi mode misbehave on jodi's system
+  (1)+handle vi-forward/backwards in loops -- "." and "2i" now always ok
+  (1)+"2P" broken, ditto for "2t." and "2T."
+  (1)+"o" should leave you in command-mode
+  (1)+"2cw" broken
+  (1)+"p" leaves cursor one-off.
+  (1)+"2x" followed by "p" only yanks one
+  (1)+"U" isn't very useful -- usually deletes line
+  (1)+maybe implement real ksh "v" command?
+  .....
+  (1) "u" leaves cursor in funny places
+  (1) "|" motion command not implemented
+  -----
+  (2) keyboard macros not supported
+
+keyboard.c
+  (1)+allow "q" or "Q" to exit help gracefully
+  (1)+new help topics mechanism ("--Help-- (topics)")
+  (1)+read help from softkeys file as needed
+  (1)+topic help is broken for both selectors and Tab key...
+  (1)+don't restore tty parms with original tab3 setting (leafe off)
+  (1)+FAKEHELP is a mess -- should only work if --Help-- is visible...
+  (1)+get rid of --Help-- <Return> -- use sub-menu of topics instead
+  (1)+when clearing screen, set --etc-- back to "1 of n"
+  (1)+help and <insert-line> functionality avail from vi and emacs modes?
+  .....
+  -----
+  (2) low-level key mappings should be configurable
+
+display.c
+  (1) hilited strings over 80 chars are now broken...
+  (1) cu "~" commands get confused when <cr> or <lf> is not last char
+      displayed by keysh when updating a line...
+  (1) CENTER* strings should be defined in message.c
+  (1)+add KEYKSH compatibility mode
+  (1)+change "--Etc--" to "--More--"
+  (1)+serious optimization for command-line update on display!
+  (1)+talk to ken about clr_eos when switching from simulated to to tsm keys
+  (1)+"help" should be piped thru a pager
+  (1)+need help formatting language
+  (1)+<clear screen> while scrolled should just goto bottom and clear eos.
+  .....
+  (1) tabs not displayed visually (shift heuristic problem)
+  -----
+  (1) speed up ViewLine() right-shift with heuristic
+  (1) use horizontal cursor motion commands (are they generic?)
+
+message.c
+  (1)+rearrange messages, add error numbers to error messages
+  (1)+should print a warning when catopen() fails...
+  .....
+  -----
+
+================================= softkey data ================================
+
+keyshrc
+  (1)+ship help "on" -- reorg softkeys as in ~/demo
+  (1)+move Remove to be last softkey (check organization once help is enabled?)
+  .....
+  (1) what to do about name "Edit_file"?  should it say "vi"?
+  (1) what to do about name "Mail"?  should it say "elm"?
+  -----
+
+builtins.cpp
+  (1)+remove kc exit option
+  (1)+exchange "user_name" and "host_name" to reflect real order
+  (1)+get rid of initial copyright message
+  (1)+get rid of refs to "etceteras" -- use "--More--"
+  (1)+change "place" to "move"?
+  (1)+kc softkey add: backups invisibles <sftkey>
+  (1)+change with_label prompt
+  (1)+add "kc flush" command to rewrite the .keyshrc file
+  (1)+add "kc restart default" command to remove .keyshrc and then restart
+  .....
+  -----
+
+softkeys.cpp
+  (1) need mechanism to avoid replicating help!
+  (1) support cp(1) and mv(1) softkeys
+  (1) get rid of nm(1) softkey
+  (1) add "ll" and "lsf" command (like "ls", but no long_format option)
+  (1) go over entire file (check states, messages, dis-ens, etc.)
+  (1) should we have consistent story for when "-" can be used in cmd as stdin?
+  (1) ditto for when we require a file name which is really optional
+  (1)+tcio unload needs "-V" option (disable verification)
+  (1)+Set_file_attribs mode -- required msg too long (directory(s) -> dir(s))
+  (1)+"shar" should be command state only (not filter)
+  (1)+"Switch" should use entire path -- /usr/tsm/bin...
+  (1)+touch -c -- wrong option definition
+  (1)+make sure xd/od disable counts are of (deleted option quickly)
+  (1)+add (undocumented) "-b" option to bdf -- "with swapfs"...
+  (1)+more: change single_space to single_spaced
+  (1)+can we fix "find" and "grep" softkeys?
+  (1)+move cryptic ls options nearer to end of option list
+  (1)+new find softkey: find <dir> search_options (default ...) not ...
+  (1)+find initial prompt change
+  (1)+find: not_within -> before
+  (1)+"-o" option for sdiff?
+  (1)+create "Switch" tsm softkey
+  (1)+elm sk is dumb -- make like mailx
+  (1)+kill needs <job_id> option
+  (1)+add "who" command
+  (1)+get rid of "-o" option of sort
+  (1)+add "exit" softkey
+  (1)+tar needs "-o" (reading) option and "-p" option
+  (1)+add "-x" option to col(1) (no tabs in output)
+  (1)+can we come up with a usable mailx softkey (just options -- no rec/send)
+  (1)+ar "before"/"after" looks weird
+  (1)+"df" command?  "write" command?
+  (1)+nm "with obj file" might be better "print obj file"
+  .....
+  (1) disable "elm" softkey automatically when using tsm?
+  (2) should support rcs and sccs commands!
+  (1) rcp, etc. softkeys
+  -----
+
+keysh.1
+  (1) mention sharing .keyshrc files
+  (1) warn that softkey options cannot be mixed with HP-UX options
+  (1) document kc undo, kc undo behavior
+  (1) document KEYMORE and change sense
+  (1) get rid of refs to nm(1)
+  (1)+mention KEYPS1 and KEYKSH env vars
+  (1)+bug - "\n" in backup softkey barfs -- use "\r"
+  (1)+stress that prompt means required action, etc.
+  (1)+test all examples
+  (1)+document expected tsm configurations (Switch, backups, etc.)
+  (1)+mention KEYESC in warnings section (default 350 may be too long...)
+  (1)+mention that v/esc-v commands cannot be used on keyshell commands...
+  (1)+mention down-arrow history recall, "o" for vi, and "<esc>-v" for emacs
+  (1)+mention tab key functions (also cntl-L and more about the white keys)
+  (1)+mention insert-line function
+  (1)+comments on mark-up copy
+  (1)+mention extendability -- adding new commands, etc.
+  (1)+add "who" and "mailx" softkeys -- make sure list is up-to-date
+  (1)+$PAGER for help (bug -- limited number of env vars exported to $PAGER)
+  .....
+  -----
+
+softkeys.4
+  (1) ".in" and ".ti" help macro
+  (1) reword enable/disable counts
+  (1) get rid of refs to nm(1)
+  (1)+test all examples
+  (1)+comments on mark-up copy
+  (1)+add macro language for help
+  .....
+  -----
+
+================================ low level routines ===========================
+
+buffer.c
+  .....
+  -----
+
+chunk.c
+  .....
+  -----
+
+clist.c
+  .....
+  -----
+  (1) make more flexible for variable sizeof(c)
+  (1)+could be based on chunks (since finite number of clist's)
+  (2)+list should wrap around the body rather than always growing it
+
+hierarchy.c
+  .....
+  -----
+
+linklist.c
+  .....
+  -----
+
+message.c
+  .....
+  -----
+
+quote.c
+  (1) "from_file ~/file" seems broken in jodi's .keyshrc file
+  .....
+  -----
+
+select.c
+  .....
+  -----
+
+string2.c
+  .....
+  (1) StringVisual() should return # of chars processed
+  (1) StringVisual() needs to process tabs visually
+  -----
+
+===============================================================================

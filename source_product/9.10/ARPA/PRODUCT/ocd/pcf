@@ -1,0 +1,13 @@
+# @(#) $Revision: 1.1.109.3 $
+#
+telnet_mode:	enable
+timing_mark: 	enable
+telnet_timer:	120
+binary_mode:	disable
+open_tries:	1500
+open_timer:	30
+close_timer:	5
+status_request:	disable
+status_timer:	30
+eightbit:	disable
+tcp_nodelay:	enable

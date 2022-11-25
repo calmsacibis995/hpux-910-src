@@ -1,0 +1,67 @@
+#!/bin/sh
+##	@(#)$Revision: 1.1.109.1 $	$Date: 91/11/19 13:56:42 $
+#	make_mykern -- make all kernel files checked out by this person
+# Written by Darren D. Smith for NFS project
+##
+PATH=$Nfs/bin:/bin:/usr/bin:.
+export PATH
+echo `date "+%y.%m.%d %T"` `basename $0` begin
+
+umask 022
+
+KERNEL=kernel/300
+KERNELDIR=$nfs/kernel/300
+WOPRDIR=$KERNELDIR/WOPR
+RCSKERNELDIR=$Nfs/rcs/kernel/300
+RCSNFSDIR=$RCSKERNELDIR/NFS
+
+# NOTE: Assume that latest versions of kmake and makefile have been gotten
+# into NFSDIR directory by get_kernel script before this point.
+
+if [ ! -d $WOPRDIR ]
+then
+	echo "ERROR: $KERNELDIR does not exist, don't know where kernel is!" >&2
+	echo `date "+%y.%m.%d %T"` `basename $0` abort
+	exit 1
+fi
+
+cd $WOPRDIR
+
+if [ ! -f kmake ]
+then
+	echo `date "+%y.%m.%d %T"` `basename $0` Co $RCSNFSDIR/kmake,v
+	Co $RCSNFSDIR/kmake,v
+	echo
+fi
+
+if [ ! -x kmake ]
+then
+	chmod +rx kmake
+fi
+
+
+if [ ! -f makefile ]
+then
+	echo `date "+%y.%m.%d %T"` `baename $0` Co $RCSNFSDIR/makefile,v
+	Co $RCSNFSDIR/makefile,v
+	echo
+fi
+
+# Get the names of the .o files from the checkout directory
+#
+# First, find what in the checkout directory for the kernel, and
+# find only source files (those ending in .c or .s) and
+# strip off the "kernel/300/?" on the beginning.  Finally,
+# change the .c or .s into a .o.  E.g. kernel/300/nfs/nfs_vnops.c
+# becomes nfs_vnops.o
+
+FILES=`checked_out | grep kernel/300 | egrep '\.[cs]$' | \
+	sed -e 's/kernel\/300\/[^\/]*\///' | sed -e s/\..$/.o/`
+
+# Now make all the files
+echo
+echo kmake $FILES ld
+kmake $FILES ld
+
+echo
+echo `date "+%y.%m.%d %T"` $0 $nfs end

@@ -1,0 +1,59 @@
+#!/bin/sh
+#  $Revision: 66.2 $
+#
+# lp interface for Centronics plotters
+# Supported plotters on limited to the HP7550Plus/HP7550B and the
+# 7600 Series Electrostatic plotters when connected via Centronics
+#
+# Due to the fact that these plotters do not respond to output
+# requests, the functionality provided by the plotdvr filter
+# cannot be implemented on Centronics plotters.  As a result
+# of this, these plotters will only be supported in auto-sheetfeed,
+# un-attended operation mode.
+
+# WARNING:  This model is designed to plot a series of files on the
+# same sheet of paper.  Plot requests requiring paper changes should
+# be sent as individual requests, or each individual file must terminate
+# with a "PG;" instruction.
+
+# The only option recognized is the -n option for number of copies.
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+if [ -z "$LANG" ]
+then
+        LANG="C"
+        export LANG
+fi
+
+# All output is forced into raw mode by either the chosen driver
+# or the following call to slp.
+slp -r 2>/dev/null
+
+copies=$4
+
+# Handle disable and cancel traps
+trap "trap 15;kill -15 0;exit 0" 15
+
+# The remaining arguments are files
+
+shift; shift; shift; shift; shift
+files="$*"
+
+# Plot the spooled files
+
+echo "IN;\n"
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+	done
+	echo "PG;\n"
+	i=`expr $i + 1`
+done
+
+exit 0

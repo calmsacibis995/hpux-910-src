@@ -1,0 +1,100 @@
+#!/bin/sh
+##	@(#)install		$Revision: 1.15.109.1 $	$Date: 91/11/19 13:55:52 $
+#	install	--	Sun compatible version of the install script
+##
+#	Note: this is used by Sun Makefiles to install software; this
+#	version of the install script must be found FIRST in the $PATH
+#	before the HP version of install; they are NOT compatible!
+##
+#	Note: this version of install, running on hp-ux, will allow any
+#	user to install a piece of software with any mode, group and
+#	owner -- the default is 755,other,root.  Due to the semantics
+#	of chown on SysV, this will work!  A non-root user will not be
+#	able to set the setuid or sticky bit on a root binary, however.
+##
+PATH=/bin			# everything must be found in /bin!
+MODE=755			# target file's default mode bits
+USER=root			# target file's default owner
+GROUP=other			# target file's default group
+CP="mv"				# default copy program: moves it
+RM="rm -f"			# default remove program
+STRIP="touch"			# default strip program: doesn't strip
+CHMOD="chmod $MODE"		# how we set the target file's mode
+CHGRP="chgrp $GROUP"		# how we set the target file's group
+CHOWN="chown $USER"		# how we set the target file's owner
+NAME=`basename $0`		# invocation name of this script
+
+USAGE="Usage: $NAME [-s|-c|-m MODE|-o USER|-g GROUP] file target\n
+-s	strip the binary file after installing it\n
+-c	copy to the target file instead of moving\n
+-m	set file mode to MODE; default is $MODE\n
+-o	set file owner to USER (uid or user name); default is $USER\n
+-g	set file group to GROUP (gid or group name); default is $GROUP\n
+-l	execute ls -ls on the file after installing it\n
+"
+
+##
+#	use INSTALL_OPTS environment variable, but let command line override
+##
+ARGS="$INSTALL_OPTS $*"
+set -- $ARGS
+
+while true ; do
+    case $1 in
+	-s* )	STRIP="strip"
+		shift	1
+		;;
+	-c* )	CP="cp"
+		shift	1
+		;;
+	-m* )	CHMOD="chmod $2"
+		shift	2
+		;;
+	-o* )	CHOWN="chown $2"
+		shift	2
+		;;
+	-g* )	CHGRP="chgrp $2"
+		shift	2
+		;;
+	-l )	LL="ls -ls"
+		shift	1
+		;;
+	-* )	echo $USAGE
+		exit	1
+		;;
+	* )	break
+		;;
+    esac
+done
+
+if [ $# -ne 2 ] ; then
+    echo $USAGE; exit 1		# oops!
+else
+    SOURCE=$1			# set up the source file name
+    TARGET=$2			# and the target file name...
+fi
+
+if [ ! -f $SOURCE ] ; then
+    echo "$NAME: cant open $SOURCE"
+    echo $USAGE; exit 1
+fi
+
+if [ $SOURCE = $TARGET -o $TARGET = . ] ; then
+    echo "$NAME: cant move $SOURCE onto itself"
+    echo $USAGE; exit 1
+fi
+
+if [ -d $TARGET ] ; then	# target is a directory, but we need the
+    TARGET=$TARGET/$SOURCE	# full path name; give it the same name.
+fi
+
+$RM	$TARGET			# remove the target, just in case
+$CP	$SOURCE	$TARGET		# copy or move the file into place
+$STRIP	$TARGET			# optionally strip the file
+$CHMOD	$TARGET			# set the mode of the file
+$CHGRP	$TARGET			# set the group of the file
+$CHOWN	$TARGET			# set the owner -- must be done last
+
+if [ -n "$LL" ] ; then
+    $LL	$TARGET
+fi

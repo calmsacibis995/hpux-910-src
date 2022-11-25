@@ -1,0 +1,71 @@
+# FacetTerm  AT386com COMMON description file 08/14/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: AT386keys.FC,v 70.1 92/03/09 15:52:31 ssa Exp $
+function_key-00-'=\EOP
+function_key-01-'=\EOQ
+function_key-02-'=\EOR
+function_key-03-'=\EOS
+function_key-04-'=\EOT
+function_key-05-'=\EOU
+function_key-06-'=\EOV
+function_key-07-'=\EOW
+function_key-08-'=\EOX
+function_key-09-'=\EOY
+function_key-10-'=\EOZ
+function_key-11-'=\EOA
+shift_function_key
+function_key-12-'=\EOp
+function_key-13-'=\EOq
+function_key-14-'=\EOr
+function_key-15-'=\EOs
+function_key-16-'=\EOt
+function_key-17-'=\EOu
+function_key-18-'=\EOv
+function_key-19-'=\EOw
+function_key-20-'=\EOx
+function_key-21-'=\EOy
+function_key-22-'=\EOz
+function_key-23-'=\EOa
+## control F1-F12
+function_key-24-'=\EOP
+function_key-25-'=\EOQ
+function_key-26-'=\EOR
+function_key-27-'=\EOS
+function_key-28-'=\EOT
+function_key-29-'=\EOU
+function_key-30-'=\EOV
+function_key-31-'=\EOW
+function_key-32-'=\EOX
+function_key-33-'=\EOY
+function_key-34-'=\EOZ
+function_key-35-'=\EOA
+### control shift F1-F12
+### function_key-36-'=\EOp
+### function_key-37-'=\EOq
+### function_key-38-'=\EOr
+### function_key-39-'=\EOs
+### function_key-40-'=\EOt
+### function_key-41-'=\EOu
+### function_key-42-'=\EOv
+### function_key-43-'=\EOw
+### function_key-44-'=\EOx
+### function_key-45-'=\EOy
+### function_key-46-'=\EOz
+### function_key-47-'=\EOa
+### on number pad - 789-456+1230
+### function_key-48-'=\E[H
+### function_key-49-'=\E[A
+### function_key-50-'=\E[V
+### function_key-51-'=\E[S
+### function_key-52-'=\E[D
+### function_key-53-'=\E[G
+### function_key-54-'=\E[C
+### function_key-55-'=\E[T
+### function_key-56-'=\E[Y
+### function_key-57-'=\E[B
+### function_key-58-'=\E[U
+### function_key-59-'=\E[@
+### not on keyboard
+### function_key-60-'=\E[2
+### function_key-id-delim=
+### function_key-id-delim=

@@ -1,0 +1,133 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/RCS/source_prod,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:47:27 $
+
+                  How to generate an NFS source product
+                  -------------------------------------
+
+Notes:
+
+   These were the steps taken to generate the 8.07 NFS source product.
+Other and / or different steps may need to be taken for generating
+source products for other releases.
+
+   This process needs to be improved.  The following problems need to 
+be addressed:  
+
+  - The source product is not easy to produce.  It should be automated
+    for the most part.
+  - The source product is not easy to verify.  It should be as easy 
+    to verify as the regular NFS product.  We should also have high 
+    confidence in the source product once it has been verified.
+  - Generating the source product is not built into the source &
+    build environments.  For instance the existence of both Make
+    and NMakefiles is a pain.
+
+
+Steps for generating the source product...
+------------------------------------------
+
+1) Copy the build environment on to the machine that you will build
+   your source product on.  For this example, the 8.07 build environment
+   was copied to pansy:/mnt2/BE8.07
+
+2) Copy the NFS source and clean it up
+
+  - Copy $Nfs/cmds, $Nfs/include and $Nfs/src_prod/8.0/nfs/bin to
+
+      pansy:/mnt2/BE8.07/source/nfs/ bin,cmds,include
+
+  - Remove extra files
+
+      eg. NLS_mail, cmds/libc/rpc/tags and any other junk laying around
+
+  - Get rid of NMakefiles
+
+  - Remove people's names from the source.
+
+
+3) Update Makefiles
+
+  - Add Makefiles for any new modules (eg. automount)
+
+  - Check if Makefiles have changed since last time
+  
+    The source that was copied above should contain Makefiles that were
+    valid as of the last source product.  This should be verified.
+
+    Next, any changes that have been made to the corresponding NMakefiles
+    since the last release need to be incorporated in the Makefiles.  If
+    everyone changes updates the Makefiles everytime they modify the
+    NMakefiles, this step will not be necessary.
+
+    Remember to check in the Makefiles after they are debugged and working
+    correctly.  This will help the next person doing the source product.
+
+
+4) Update scripts copied from $Nfs/src_prod/8.0/nfs/bin
+
+  - rename MAKE.past_release to MAKE.current_release
+
+  - Update MAKECMDS (Should now invoke MAKE.current_release)
+    (May be more changes specified in the README files)
+
+
+5) Clean up the BE
+
+ - Strip the /etc/passwd file in the BE down to the minimum.  Especially
+   take out people's names and phone numbers from this.  See other 
+   source products in /source/nfs/working.old/src_prod (in the NFS 
+   development environment) for an example (or use /etc/passwd from the
+   other source products).
+
+
+6) Build the product 
+
+ - Resolve any problems with building it
+
+ - Verify that build is now working correctly
+
+ - Save MAKECMDS output and check for errors
+
+ - Do a find to make sure all the .o's have been cleaned up after a clobber
+
+ - Compare against object on /dcia1/8.07MR...
+
+ - Run executables to verify the are correct (preferably through scaffold)
+
+
+7) Update README files
+
+  - Update README and README.engr in the source directory of the BE. 
+    (ie <be_path>/source)
+
+
+8) Generate tapes
+
+  - tar cf - <dir>
+
+9) Archive the source product
+
+  - Copy the source product without the BE to /source/nfs/working.old/src_prod
+    (in the NFS development environment).
+
+10) Update this file!
+
+
+Problems encountered in generating 807 source product
+-----------------------------------------------------
+
+previous instructions (README) did not say to copy rstat.h to BE
+as it did for arpa/trace.h
+
+LIBC variable not defined in MAKE.8.0 -  This worked perfectly on
+the previous source product but needed to be defined to work on 8.07.
+This would not let me build *most* of NFS.
+
+Previous Makefiles were not checked in.
+
+Previous removal of peoples names was not kept around.
+
+cmds/Makefile -I  would not compile domainname.c. This worked
+perfectly on the previous source product.

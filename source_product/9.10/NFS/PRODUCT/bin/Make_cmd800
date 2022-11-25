@@ -1,0 +1,22 @@
+#!/bin/sh
+##	@(#)Make_cmd800	$Revision: 1.15.109.1 $	$Date: 91/11/19 13:52:22 $
+#	Make_cmd800	--	make the s800 commands
+# Written for NFS project by Cristina Mahon
+# This scripts makes all the commands for the 800 in the development 
+# environment.  It is invoked from an 800 but leaves the files on the 300.
+# It first makes the libraries.
+##
+
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# $Nfs is set by the script on the s800.  If $Nfs changes on the local
+# system that scripts needs to change.  That script is currently under
+# /user/chm/bin/init_make.  Also Make_cmd800 needs to be invoked with
+# an argument.  No argument will not produce the same effect as "all"
+# because of some problem in invoking Makefiles through the MAKE script.
+
+cd $Nfs/cmds
+
+$Nfs/bin/MAKE $*
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

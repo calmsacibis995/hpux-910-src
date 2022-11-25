@@ -1,0 +1,21 @@
+$set 1
+1 pcnfsd: invalid spool directory %s\n
+2 pcnfsd: couldn't open /dev/null\n
+3 pcnfsd: couldn't open log file '%s'\n
+4 pcnfsd: error: svc_run returned
+5 pcnfsd: spool file rename (%1$s->%2$s) failed.
+7 pcnfsd: exec lpr failed
+8 pcnfsd: fork failed
+9 fork
+10 fork
+11 Usage: pcnfsd [ -l log_file ] [ spool-dir ]\r\n
+12 pcnfsd: unable to create spool directory %s
+13 pcnfsd: needs to be executed with SEC_ALLOWDACACCESS SEC_WRITE_AUDIT, SEC_SETPROCIDENT and\n          SEC_ALLOWMACACCESS privileges\n
+14 pcnfsd: Not authorized for network subsystem:  Permission denied\n
+15 pcnfsd: passwords do not match for the user %s
+16 pcnfsd: account is disabled for the user %s
+17 pcnfsd: account has been retired for the user %s
+18 pcnfsd: account is valid for the user %s
+19 pcnfsd: couldn't create udp transport
+20 pcnfsd: couldn't register PCNFSDPROG
+21 pcnfsd: couldn't reply to rpc call

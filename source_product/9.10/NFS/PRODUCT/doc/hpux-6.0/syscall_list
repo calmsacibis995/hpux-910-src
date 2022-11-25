@@ -1,0 +1,213 @@
+In addition to the system calls that are being presented to TWG, there
+are also some additional errno values to be added because of NFS.  They
+are ESTALE EREMOTE.
+
+This is a list of system calls that need to be added to HP-UX
+to put NFS in HP-UX.
+
+NAME             USE                          WHO DOES| APPROVAL| STATUS
+
+async_daemon()   Used in biod                   CND fm| NSG     | RFCed
+fstatfs()        Not used in our NFS code  ***  SSO   | TWG     | RFCed
+getdirentries()  Used in library routines  ***  CND fm| TWG     | Voting by TWG
+getdomainname()  Used in a ton of places.  ***  CND fm| NSG     | Voting by TWG
+getfh()          Used in rpc.mountd             CND fm| NSG     | RFCed
+lstat()          Used in NFS protocol      ***  ISO   | TWG     | Approved
+nfssvc()         Used in nfsd                   CND fm| NSG     | RFCed
+readlink()       Used in NFS protocol      ***  ISO   | TWG     | Approved
+rename()         Used in NFS protocol      ***  ISO   | TWG     | Approved
+symlink()        Used in NFS protocol      ***  ISO   | TWG     | Approved
+setdomainname()  Used in domainname             CND fm| NSG     | Voting by TWG
+statfs()         Used in df                ***  SSO   | TWG     | RFCed
+vfsmount()       Used in mount             ***  CND fm| TWG&NSG | To be RFCed
+*** To always be part of the HP-UX kernel
+
+The function getdomainname() will still be part of the HP-UX kernel, but
+the setdomainname() function will only be shipped with the NFS product.
+This is due to requests from the 800 people.  We will ship the man page for
+getdomainname() and setdomainname() [it is one page] with the NFS product
+and therefore will not have it for TWG approval.
+
+This is a list a system calls that need changes to their man pages.
+
+NAME             WHO DOES| APPROVAL| STATUS
+
+read()           CND fm  | TWG     | Voting by TWG
+umount()         CND fm  | TWG     | Voting by TWG
+
+fstatfs() is not a MUST for us.  It would only be included to provide
+a more complete view to the user as a file system call like or 
+example chown or fchown.
+
+REMOVED: configstatus()   Used in configuration/initialization | TWG a MUST 
+
+-----------------------------------------------------------------------
+
+async_daemon()
+
+fstatfs(fd, buf)
+int fd;
+struct statfs *buf;
+
+getdirentries(fd, buf, count, basep)
+int fs;
+char*buf;
+unsigned count;
+long *basep;
+
+getdomainname(domainname, len)
+char *domainname;
+int len;
+
+getfh(fdes, fhp)    [The kernel routine name is nfs_getfh.]
+int	  fdes;
+fhandle_t *fhp;
+
+lstat(path, buf)
+char *path;
+struct stat *buf;
+
+nfssvc(sock)        [The kernel routine name is nfs_svc.]
+int sock;
+
+readlink(path, buf)
+char *path;
+char *buf;
+
+rename(from, to)
+char *from;
+char *to;
+
+symlink(path, link)
+char *path;
+char *link;
+
+setdomainname(domainname, len)
+char *domainname;
+u_int len;
+
+statfs(path, buf)
+char *path;
+struct statfs *buf;
+
+NAME CHANGED BY SSO from nfsmount:
+vfsmount(type, dir, flags, data)
+int type;
+char *dir;
+int flags;
+caddr_t data;
+
+
+
+REMOVED:
+configstatus()  Returns bit 0 on if nfs is present in kernel,
+		returns bit 1 on if TCP/IP is present in kernel,
+		0 otherwise.
+
+
+-------------------------------------------------------------------
+
+Instructions for putting a new system call into hp-ux
+Edit a file called init_sent.c.  It will probably be found in the
+sys directory of the kernel files.  It contains a table of system
+calls.  You need to do a forward declaration of the function
+name and the result type it will return.  Then in the actual
+table you need to add a line for each function.  The entry
+needs first to have the number of parameters the function
+requires and then the name of the function as it is known in the
+kernel.  This table is the means by which each function call gets
+its function number.  This is determined by the order in which
+the entry is found in the table.  Existing function calls must keep
+their numbers, so do not insert an entry in the middle of the list,
+but instead add to the end.
+
+See the example below.  This is part of the init_sent.c file with a
+new system intrinsic added with the name of newcall.
+
+
+/*
+ * System call switch table.
+ */
+         .
+         .
+         .
+int	pipe();
+int	umask();		/* XXX */
+         .
+         .
+int 	newcall()               /* Additional system call with x  */
+				/* parameters.                    */
+struct sysent sysent[] = {
+	0, nosys,			/*   0 = indir */
+	1, rexit,			/*   1 = exit */
+	0, fork,			/*   2 = fork */
+           .                                   .
+           .                                   .
+           .                                   .
+	0, pipe,			/*  42 = pipe */
+           .                                   .
+           .                                   .
+           .                                   .
+#ifdef	CSCDS
+	3, cs,				/* 227 = cs */
+	5, cds,				/* 228 = cds */
+#else      /* PLACE HOLDERS IF CSCDS IS NOT DEFINED */
+	0, nosys,			/* 227 = nosys */
+	0, nosys,			/* 228 = nosys */
+
+	x, newcall,                     /* 229 = newcall */
+#endif
+};
+int	nsysent = sizeof (sysent) / sizeof (sysent[0]);
+
+
+After the init_sent.c file is changed a library must be made
+that will connect the symbol "newcall" to the function number
+inside the kernel.  An assembly routine is used to do this
+as in the example below.  You will need to remember the function
+number from the table in init_sent.c and use it in the set 
+instruction.  When this library is linked with the program that
+has the new system call, the "newcall" symbol will be resolved
+to this routine.  This routine sets register 0 to 229 and then
+does a jump into the kernel.  The 229 is used by the kernel to
+then go to the proper function.  Upon return, any error conditions
+are handled.
+
+ # DUX_ID @(#)newcall.s	3.2 9/18/86
+ # C library -- newcall
+
+ # THIS IS JUST AN TEST TO SEE WHAT IT TAKES TO PUT IN A NEW SYSTEM CALL 
+		
+ # error = newcall(parameters...);
+		
+        set     NEWCALL,229
+	global	_newcall
+	global	__cerror
+		
+_newcall:		
+	mov.l	&NEWCALL,%d0
+	trap	&0
+	bcc.w	noerror
+	jmp	__cerror
+noerror:		
+	clr.l	%d0
+	rts	
+
+
+
+-----------------------------
+These two functions were found in the kernel and had SYSCALL's made
+with them to provide entry points into the kernel, but I could not
+find any place where they were used in code.  I cannot even find ANY
+documentation for exportfs.  So at this present time, I do not see
+any need to have them as system calls.
+
+adjtime(delta, olddelta)
+struct timeval *delta;
+struct timeval *olddelta;
+
+exportfs(dname, rootid, flags)
+char *dname;
+int rootid;
+int flags;
+

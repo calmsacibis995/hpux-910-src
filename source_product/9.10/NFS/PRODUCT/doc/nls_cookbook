@@ -1,0 +1,3169 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Localization Cookbook for the NFS project"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.ft 3
+.ce 2
+LOCALIZATION COOKBOOK
+FOR THE NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:29:20 $
+$Revision: 1.17.109.1 $
+.sp 3
+.ce 1
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document is designed to be a source of information for anyone providing 
+localization support for the NFS product.  It contains a brief description of 
+the level of localization of the NFS Services product.
+It also contains a list of all the messages that are part of the NFS message
+catalogs and their explanations.  That list is the most useful portion of
+the document for those that do not have direct access to the code, but are
+translating the message catalogs.
+.na
+.bp
+.H 1 "LOCALIZATION OVERVIEW"
+.sp 2
+.ad
+NFS provides a means of transparently sharing files among heterogeneous 
+systems on a common network.  Remote  file  access remains invisible to users.
+The manual pages and External Reference Specifications for NFS are available
+upon request.
+.sp
+According to the MUST objective described in the PRD for the NFS
+project we support the HP-15 Standard.  
+The following features of Native Language Support (NLS) are supported:
+.ML o
+.LI
+Filename support:
+.DL 
+.LI
+We support 8-bit filenames
+.LI
+We do not support all possible 16 bit filenames, since they are not fully
+supported by the HP-UX kernel.  However, some 16 bit filenames may
+work, depending on the characters making up the filename.
+Refer to the design limitations item for a more detailed explanation.
+.LE
+.LI
+Support for message catalogues:
+.sp
+All NFS user level commands have been changed to support
+message catalogs.  
+.LI
+Support for local customs:
+.sp
+We modified messages to support local customs
+like formats for numbers, dates, times, etc.
+.LI
+Support eight and sixteen bit characters:
+.sp
+NFS is able to send across the network eight and sixteen bit characters,
+according to the testing we have done.
+.LI
+HP-15 Standard design limitations:
+.sp
+.DL 
+.LI
+A  design  flaw  exists  in  the  current  HP-15  
+Standard.  The Standard  restricts  computer  systems  
+on the same  network  to support the same 16-bit  
+character  set.  The existing  uucp and LAN products 
+are in violation of this restriction.  There will be no
+attempt in this project to rectify the problem.
+.LI
+Full support for 16-bit filenames is not incorporated in the HP-UX
+kernel, but many 16-bit filenames will be correctly interpreted. 
+Problems occur if one of the 16-bit characters in the filename happens to have
+as a second byte the byte value equal to "/". In that case the HP-UX kernel 
+will not correctly interpret the 16-bit character because it will see the "/".
+Taiwanese is an example of a 2-byte language that defines "/" as the
+second of a 2-byte character.
+.LE
+.LE
+.sp 2
+However, we do have limitations in terms of what we type of localization work 
+we could do with the available tools.  Below is a list of the limitations for
+the NFS user level commands.  NFS commands not listed support
+8 and 16-bit characters, message catalogs, local customs, 8-bit
+filenames as needed.  16-bit filenames are supported to the extent
+that the underlying HP-UX kernel supports them.  A description of the NLS 
+capabilities is available under the International Support section of the brick 
+pages for each NFS command affected by NFS.
+.na
+.sp
+.nf
+Commands            Limitations
+.sp
+domainname      |  Domainname is limited on its choice of 16-bit domain
+                |  names by which 16-bit file names HP-UX can support.  
+                |  The reason behind this is that the domain name gets 
+                |  translated into a directory name used by YP to store
+                |  the YP database maps.
+                |
+yppasswd        |  Non-ascii characters are not allowed in /etc/passwd.
+                |  So even if yppasswd does not have any inherent 
+                |  problems with 8 or 16-bit characters, they cannot be
+                |  used for the password map.
+                |
+rpc.ypasswdd    |  Same comment as yppasswd.
+                |
+ypmake          |  This is a shell script, so it does not support 
+                |  message catalogs.  Right now there is no way defined
+                |  to provide the same sort of message catalog support 
+                |  for shell scripts.  Currently the shell scripts would
+                |  have to be modified by the end user or be different 
+                |  for different languages.
+                |
+ypxfr_2perda    |  Same comment as ypmake.
+ypxfr_1perda    |  Same comment as ypmake.
+ypxfr_1perh     |  Same comment as ypmake.
+vhe_altlog	|  Same comment as ypmake.
+vhe_getlist	|  Same comment as ypmake.
+vhe_mounter	|  Same comment as ypmake.
+                |
+pcnfsd          |  Pcnfsd does not support 8 or 16-bit characters.  It 
+                |  modifies the high 8th bit of some of the information
+                |  it receives for encryption purposes.  However, since 
+                |  PC-NFS is not an HP-UX product and we have no control 
+                |  over how 8 and 16-bit characters are sent to us from a 
+                |  PC, this is not considered to be a major problem.
+.sp
+.fi
+.sp 
+All the changes described above have been implemented.  The next step
+to localize NFS is to translate the message catalogs.  The next section
+describes all the error messages found in the NFS message catalogs.
+.na
+.bp
+.H 1 "MESSAGE DESCRIPTIONS"
+.sp 2
+.ad
+The NFS messages are grouped by message catalog, with the message
+catalog name in asterisks at the top of the group of messages.
+The explanation for each message is in the line following the message.
+.sp 2
+.nf
+************
+libc_nfs.cat
+************
+
+$set 1
+1 setrpcent: getdomainname system call missing\n
+	The getdomainname system call is not implemented in the kernel
+
+$set 2
+1 getnetgrent: getdomainname system call missing\n
+2 getnetgrent: Cycle detected in /etc/netgroup: %s.\n
+	/etc/netgroup contains a cyclic definition (recursive); illegal
+3 getnetgrent: syntax error in /etc/netgroup\n
+4 --- %s\n
+	The value returned from the last line searched (with the syntax
+	error).
+
+$set 3
+1 innetgr: getdomainname system call missing\r\n
+2 innetgr: recursive overflow\r\n
+	Recursive calls too deep -- overflow the available memory
+3 innetgr: netgroup %s called recursively\r\n
+	Recursive call to netgroup argument; this is an error
+4 innetgr: syntax error in /etc/netgroup\r\n
+5 innetgr: syntax error in /etc/netgroup\r\n
+6 innetgr: syntax error in /etc/netgroup\r\n
+
+$set 4
+1 authunix_create: out of memory\n
+	malloc() ran out of memory
+2 authunix_create: out of memory\n
+	malloc() ran out of memory
+3 authunix_create: out of memory\n
+	malloc() ran out of memory
+4 marshall_new_auth: Fatal marshalling problem
+	Could not XDR encode the authentication parameters
+5 authunix_create: cannot XDR authunix parameters\n
+	Could not XDR encode the authentication parameters
+
+$set 5
+1 %s: 
+	Printing the NLS version of the string passed in as a parameter.
+	This probably needs no translation.
+2 ; errno = %s
+	Printing the string describing the error associated with "errno"
+3 ; errno = %s
+	Printing the string describing the error associated with "errno"
+4 ; low version = %1$lu, high version = %2$lu
+	The low and high RPC version numbers allowed by the remote 
+	procedure.
+5 ; why = 
+	The reason why the RPC authentication failed
+6 AUTH_OK
+	Authentication passed
+7 AUTH_BOGUS_CREDENTIAL
+	Authentication failed due to improper credentials
+8 AUTH_REJECTED_CREDENTIAL
+	Authentication failed due to credentials rejected
+9 AUTH_BOGUS_VERIFIER
+	Authentication failed due to improper verifier; may need to 
+	refresh.
+10 AUTH_REJECTED_VERIFIER
+	Authentication failed due to rejected verifier; may need to 
+	refresh.
+11 AUTH_TOO_WEAK (remote error)
+	Authentication failed because they were insufficient (needs more)
+12 AUTH_INVALID_RESPONSE
+	Authentication failed because of a bad response (could not 
+	validate).
+13 AUTH_UNKNOWN_FAILURE
+	Authentication failed because of some unknown reason
+14 ; low version = %1$lu, high version = %2$lu
+	The low and high RPC version numbers allowed by the remote 
+	procedure.
+15 RPC_UNKNOWN_FAILURE; s1 = %1$lu, s2 = %2$lu
+	The RPC call failed for some unknown reason (numbers may be 
+	random).
+16 \n
+	Newline character.  Used for the formatting of the messages 
+	that are printed.
+17 RPC_SUCCESS
+	RPC succeeded; the rest are failures and reason is clear from 
+	symbol.
+18 RPC_CANT_ENCODE_ARGS
+19 RPC_CANT_DECODE_RESULTS
+20 RPC_CANT_SEND
+	System call (send) failed
+21 RPC_CANT_RECV
+	System call (recv) failed
+22 RPC_TIMED_OUT
+23 RPC_VERSION_MISMATCH
+	The RPC version was not two (2)
+24 RPC_AUTH_ERROR
+25 RPC_REMOTE_PROGRAM_UNAVAILABLE
+26 RPC_PROGRAM_MISMATCH
+27 RPC_UNKNOWN_PROCEDURE
+28 RPC_CANT_DECODE_ARGS
+29 RPC_UNKNOWNHOST
+30 RPC_PMAP_FAILURE
+	Could not contact the remote portmapper
+31 RPC_PROG_NOT_REGISTERED
+32 RPC_SYSTEM_ERROR
+	Some system call failed on the local or remote system
+33 %s: 
+	Printing the NLS version of the string passed in as a parameter.
+	This probably requires no translation.
+34  - 
+	Hyphen character
+35  - %s
+	Hyphen, system error string corresponding to an errno
+36 \n
+
+$set 6
+1 clnt_raw.c - Fatal header serialization error.
+	Could not XDR encode the RPC call header
+
+$set 7
+1 clnttcp_create: out of memory\n
+	malloc() ran out of memory
+2 clnttcp_create: out of memory\n
+	malloc() ran out of memory
+
+$set 8
+1 clntudp_create: out of memory\n
+	malloc() ran out of memory
+2 clntudp_create: out of memory\n
+	malloc() ran out of memory
+
+$set 9
+1 Cannot register service
+	The RPC service indicated has already been registered
+2 get_myaddress: socket
+	The socket system call failed to return a new socket
+3 get_myaddress: ioctl (get interface configuration)
+	Could not execute ioctl(SIOCGIFCONF) call
+4 get_myaddress: ioctl
+	Could not execute ioctl(SIOCGIFFLAGS) call
+5 socket
+	System call failed
+6 getsockname
+	System call failed
+
+$set 10
+1 pmap_getmaps rpc problem
+	The RPC call to the portmapper to dump the map failed form some 
+	reason.
+
+$set 11
+1 broadcast: ioctl (get interface configuration)
+	Could not execute ioctl(SIOCGIFCONF) call
+2 broadcast: ioctl (get interface flags)
+	Could not execute ioctl(SIOCGIFFLAGS) call
+3 Cannot create socket for broadcast rpc
+	socket() system call failed
+4 Cannot send broadcast packet
+	sendto() system call failed
+5 Broadcast select problem
+	select() system call failed, error printed using perror
+6 Cannot receive reply to broadcast
+	recvfrom() system call failed
+7 Broadcast deserialization problem
+	XDR decode returned a different transaction ID from the one sent
+
+$set 12
+2 svc.c: - Select failed
+	System call failed
+
+$set 13
+1 bad auth_len gid %1$d str %2$d auth %3$d\n
+	Something is wrong with the credentials being authenticated by 
+	server.
+
+$set 14
+1 can't reassign procedure number %ld\n
+	Trying to reassign procedure NULLPROC
+2 couldn't create an rpc server\n
+	svcudp_create() failed for some reason
+3 couldn't register prog %1$d vers %2$d\n
+	svc_register() failed for some reason
+4 registerrpc: out of memory\n
+	malloc() ran out of memory
+5 universal: could not sendreply\n
+	svc_sendreply() failed for some reason
+6 universal: trouble replying to prog %ld\n
+	svc_sendreply() failed for some reason
+7 never registered prog %ld\n
+	Requested program number was never registered
+8 never registered proc %ld\n
+	Requested procedure number was never registered
+9 can't register with a NULL XDR procedure\n
+	Not allowed to register a service using NULL for an xdrproc_t
+
+$set 15
+1 svctcp_create: udp socket creation problem
+	System call failed
+2 svctcp_create: cannot getsockname or listen
+	System call failed
+3 svctcp_create: out of memory\n
+	malloc() ran out of memory
+4 svctcp_create: out of memory\n
+	malloc() ran out of memory
+5 svc_tcp: makefd_xprt: out of memory\n
+	malloc() ran out of memory
+6 svc_tcp: makefd_xprt: out of memory\n
+	malloc() ran out of memory
+
+$set 16
+1 svcudp_create: socket creation problem
+	System call failed
+2 svcudp_create - cannot getsockname
+	System call failed
+3 svcudp_create: out of memory\n
+	malloc() ran out of memory
+4 svcudp_create: out of memory\n
+	malloc() ran out of memory
+5 svcudp_create: out of memory\n
+	malloc() ran out of memory
+
+$set 17
+1 xdr_bytes: out of memory\n
+	malloc() ran out of memory
+2 xdr_string: out of memory\n
+	malloc() ran out of memory
+
+$set 18
+1 xdr_array: out of memory\n
+	malloc() ran out of memory
+
+$set 19
+1 xdrrec_create: out of memory\n
+	malloc() ran out of memory
+2 xdrrec_create: out of memory\n
+	malloc() ran out of memory
+3 xdrrec_create: out of memory\n
+	malloc() ran out of memory
+
+$set 20
+1 xdr_reference: out of memory\n
+	malloc() ran out of memory
+
+$set 21
+1 yp_all:  TCP channel create failure
+	RPC call to create a TCP channel failed.
+2 yp_all:  RPC clnt_call (TCP) failure
+	Client RPC call (using TCP) failed.
+
+$set 22
+1 yp_bind:  load_dom_binding malloc failure\n
+	Malloc function call failure.
+
+$set 23
+1 YP operation succeeded
+	The YP operation did not fail.
+2 bad args to YP function
+	The argument(s) supplied to a YP function was (were) invalid.
+3 RPC failure on YP operation
+	An RPC call failed in a YP function.
+4 can't bind to a server that serves YP domain
+	No server for the specified YP domain could be located.
+5 no such map in server's YP domain
+	The specified YP map for the specified YP domain is not served by the
+	YP server.
+6 no such key in map
+	The specified key could not be found in the specified map.
+7 internal YP server or client error
+	An error occurred on either the YP server or the client.
+8 local resource allocation failure
+	The local machine was unable to allocate resources, usually a malloc()
+	failure.
+9 no more records in map
+	No more records are in the map, i.e., sequential retrieval of them has
+	exhausted them.
+10 can't communicate with portmap
+	The portmap(1M) daemon cannot be contacted (perhaps it is not
+	running).
+11 can't communicate with ypbind
+	The ypbind(1M) daemon cannot be contacted (perhaps it is not
+	running).
+12 can't communicate with ypserv
+	The ypserv(1M) daemon cannot be contacted (perhaps it is not
+	running).
+13 local YP domain name not set
+	The YP domain name has not been set on this machine using
+	domainname(1).
+14 YP map is defective
+	The specified YP map cannot be read because of an error in its
+	structure.
+15 YP client/server version mismatch
+	A YP client is asking for Version 2 capabilities from the server it
+	bound to, but that server is only a Version 1 server.
+16 unknown YP client error code
+	The argument passed to yperr_string was not one of the recognized YP
+	error codes.
+
+***********
+check_exit.cat
+***********
+
+$set 1
+1 %s: illegal option\n
+	An illegal option was given (-e and -n are only options)
+
+***********
+logging.cat
+***********
+
+$set 1
+? "%1$02d.%2$02d.%3$02d %4$02d:%5$02d:%6$02d  "
+	Year.Month.Day Hour:Minute:Second
+? "%1$-8.8s  pid=%2$-5d  %3$s%4$s"
+	Hostname Process_id invocation_name, followed by one of the 
+	following:
+3 \r\n
+	Carriage return, line feed. 
+4 \r
+	Carriage return only.
+
+***********
+pcnfsd.cat
+***********
+
+$set 1
+1 pcnfsd: invalid spool directory %s\n
+	The directory named is not valid (nonexistent or not a directory)
+2 pcnfsd: couldn't open /dev/null\n
+3 pcnfsd: couldn't open log file '%s'\n
+	Could not open the file the user passed in for logging
+4 pcnfsd: error: svc_run returned
+	The svc_run() function is never supposed to return ...
+5 pcnfsd: spool file rename (%1$s->%2$s) failed.
+	The rename of argument 1 to 2 failed for some reason
+7 pcnfsd: exec lpr failed
+	Could not exec the line printer spooler program
+8 pcnfsd: fork failed
+9 fork
+10 fork
+	The above three relate to the fork() system call failing
+11 Usage: pcnfsd [ -l log_file ] [ spool-dir ]\r\n
+12 pcnfsd: unable to create spool directory %s
+	Creation of the spool directory failed for some reason.
+
+***********
+rpc.mountd.cat
+***********
+
+$set 1
+1 mountd: getsockname
+	getsockname() system call failed
+2 couldn't create udp transport\n
+	socket() system call failed
+3 couldn't register MOUNTPROG
+	Could not register RPC program for some reason
+4 Error: svc_run shouldn't have returned\n
+5 couldn't reply to rpc call\n
+	svc_sendreply() to caller failed for some reason; fatal error
+6 couldn't reply to rpc call\n
+	svc_sendreply() to caller failed for some reason; fatal error
+7 mountd: open
+	System call failed
+8 mountd: getfh
+	System call failed
+9 mountd: stat
+	System call failed
+10 mountd: cannot mount a remote disk (trying to mount %d from %d)\n
+	Tried to mount the rootserver's disk from a cnode; illegal
+11 couldn't reply to rpc call\n
+	svc_sendreply() to caller failed for some reason; fatal error
+12 couldn't reply to rpc call\n
+	svc_sendreply() to caller failed for some reason; fatal error
+13 couldn't reply to rpc call\n
+	svc_sendreply() to caller failed for some reason; fatal error
+14 mountd: creat
+	System call failed
+15 mountd: fdopen
+	System call failed
+16 mountd: rename
+	System call failed
+17 mountd: stat failed 
+	System call failed
+18 mountd: can't parse '%s'\n
+	Parsing error in /etc/exports -- something wrong with the file
+19 mountd: can't stat 
+	System call failed
+20 mountd: %s bad file system root\n
+	The directory in /etc/exports is not the root of a file system
+21 Out of memory\n
+	malloc() ran out of memory
+22 mountd: NFS system call is not available.\n        Please configure NFS into your kernel.\n
+	NFS system call (svc_run) was not configured into the kernel.
+23 mountd: %s is not a directory\n
+24 mountd: %s is not a directory\n
+25 mountd: cannot stat %s
+	The above three calls indicate that the directory that is being
+	requested for the mount is either not a directory or does not 
+	exist (most likely reason that stat(2) can fail).
+26 Credential type not AUTH_UNIX
+	The request did not contain the correct type of RPC credentials.
+	Used in auditing failed requests.
+27 Remote port(%d) >= IPPORT_RESERVED
+	The UDP port of the mount command was not a reserved port (<1024).
+	Used in auditing failed requests.
+28 gethostbyname(%s) returned NULL
+	The hostname given by the remote system was not listed in the local
+	machines host database, thus gethostbyname() failed.
+	Used in auditing failed requests.
+29 Actual address (%s) != claimed address (%s)
+	The IP address from our data base does not match that of the packet.
+	Used in auditing failed requests.
+30 %s not in access list for %s
+	The remote host was not on the access list (in /etc/exports) for
+	the indicated directory, and thus was denied access.
+	Used in auditing failed requests.
+31 Exported %s to %s
+	The indicated directory was exported for mounting to the inidicated
+	host after passing all required validations.
+	Used in auditing.
+32 %s unmounted %s
+	The indicated host sent a notice that it was unmounting a directory.
+	Used in auditing.
+33 %s unmounted %s (unmountall)
+	The indicated host sent a broadcast notice that it was unmounting
+	everything, and that resulted in the indicated directory being 
+	unmounted.
+	Used in auditing.
+
+
+***********
+rpc.rstatd.cat
+***********
+
+$set 1
+1 rstatd: getsockname
+	System call failed
+2 svc_rpc_udp_create: error\n
+	svcudp_bufcreate() could not return a transport
+3 svc_rpc_register: error\n
+	svc_register() could not register rstat version RSTATVERS_ORIG
+4 svc_rpc_register: error\n
+	svc_register() could not register rstat version RSTATVERS_SWTCH
+5 svc_rpc_register: error\n
+	svc_register() could not register rstat version RSTATVERS_TIME
+6 svc_run should never return\n
+7 err: svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+8 err: svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+9 err: svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+10 err: svc_sendreply
+	svc_sendreply() to caller failed for some reason
+11 err: svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+12 can't seek in kmem\n
+	System call failed
+13 can't read avenrun from kmem\n
+	System call failed
+14 can't seek in kmem\n
+	System call failed
+15 can't read boottime from kmem\n
+	System call failed
+16 can't seek in kmem\n
+	System call failed
+17 can't read sum from kmem\n
+	System call failed
+18 can't seek in kmem\n
+	System call failed
+19 can't read hz from kmem\n
+	System call failed
+20 can't seek in kmem\n
+	System call failed
+21 can't read cp_time from kmem\n
+	System call failed
+22 can't seek in kmem\n
+	System call failed
+23 can't seek in kmem\n
+	System call failed
+24 can't read sum from kmem\n
+	System call failed
+25 can't seek in kmem\n
+	System call failed
+26 can't read dk_xfer from kmem\n
+	System call failed
+27 can't seek in kmem\n
+	System call failed
+28 can't read ifnet from kmem\n
+	System call failed
+29 Variables missing from namelist\n
+	Namelist of /hp-ux does not contain the right variables
+30 can't open kmem\n
+	System call failed
+31 can't seek in kmem\n
+	System call failed
+32 can't read firstifnet from kmem\n
+	System call failed
+33 can't seek in kmem\n
+	System call failed
+34 can't read ifnet from kmem\n
+	System call failed
+35 Variables missing from namelist\n
+	Namelist of /hp-ux does not contain the right variables
+36 can't seek in kmem\n
+	System call failed
+37 can't read kmem\n
+	System call failed
+
+***********
+rpc.ruserd.cat
+***********
+
+$set 1
+1 rusersd: getsockname
+	System call failed
+2 svc_rpc_udp_create: error\n
+	svcudp_create() failed to return a transport
+3 svc_rpc_register: error\n
+	svc_register could not register rusers version RUSERSVERS_ORIG
+4 svc_rpc_register: error\n
+	svc_register could not register rusers version RUSERSVERS_IDLE
+5 run_svc_rpc should never return\n
+6 err: rusersd
+	svc_sendreply() to caller failed for some reason
+7 svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+8 svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+9 svc_rpc_send_results
+	svc_sendreply() to caller failed for some reason
+
+***********
+rpc.rwalld.cat
+***********
+
+$set 1
+1 rwalld: getsockname
+	System call failed
+2 svc_rpc_udp_create: error\n
+	UDP transport creation failed
+3 svc_rpc_register: error\n
+	svc_register() failed
+4 Error: svc_run shouldn't have returned\n
+5 rwalld: svc_sendreply failed
+	svc_sendreply() failed for some reason
+6 rwalld: svc_sendreply failed
+	svc_sendreply() failed for some reason
+7 %s
+	The message being printed to the wall(1M) program!
+
+***********
+rpc.sprayd.cat
+***********
+
+$set 1
+1 sprayd: getsockname
+	System call failed
+2 %s: couldn't create RPC server\n
+	svcudp_create() failed to return a transport
+3 %s: couldn't register SPRAYPROG\n
+	svc_register() failed to register
+4 %s shouldn't reach this point\n
+	svc_run() returned, should never do that
+5 couldn't reply to RPC call\n
+	System call failed
+6 couldn't reply to RPC call\n
+	System call failed
+7 couldn't reply to RPC call\n
+	System call failed
+
+***********
+rpcinfo.cat
+***********
+
+$set 1
+2 \n
+	newline character
+3 program %1$d version %2$d is not available\n
+	The program,version pair requested is not registered with portmap
+4 program %1$d version %2$d ready and waiting\n
+	The program,version pair requested is registered with portmap
+5 %s: Unknown RPC service\n
+	The service named on the command line is not in the /etc/rpc map
+6 %s: Unknown host\n
+	Host name not found in the /etc/hosts map
+7 
+	A null string.
+8 program %1$d version %2$d is not available\n
+	The program,version pair requested is not registered with portmap
+9 \n
+10 program %1$d version %2$d is not available\n
+	The program,version pair requested is not registered with portmap
+11 program %1$d version %2$d ready and waiting\n
+	The program,version pair requested is registered with portmap
+12 %s: Unknown host\n
+13 rpcinfo: can't contact portmapper
+	Could not make RPC call to the portmapper
+14 rpcinfo: can't contact portmapper: 
+	Could not make RPC call to the portmapper
+15 \n
+16 No remote programs registered.\n
+	RPC dump of portmap data shows no programs are registered.
+17    program vers proto   port\n
+	Header for dump data: program, version, protocol, port number.
+18 %1$10ld%2$5ld
+	Program number, version number
+19 %6s
+	Protocol string, UDP
+20 udp
+	Protocol string, UDP
+21 %6s
+	Protocol string, TCP
+22 tcp
+	Protocol string, TCP
+23 %6ld
+	Protocol number, unknown
+24 %7ld
+	Port number
+25   %s\n
+	Port RPC service number from /etc/rpc map
+26 \n
+27 Usage: rpcinfo -u host prognum [versnum]\n
+28        rpcinfo -t host prognum [versnum]\n
+29        rpcinfo -p [host]\n
+	The usage message.
+
+***********
+rup.cat
+***********
+
+$set 1
+1 collecting responses... 
+	Collecting responses from UDP broadcast
+2 %*.*s: 
+	Host name returning rup information
+3 \n
+4 %*.*s: 
+	Host name returning rup information
+5 \n
+6 %*.*s  
+	Host name returning rup information
+7   up
+	Means "this host has been up for"
+8  %1$2d %2$s
+	Number of days, string "days" or "day"
+9 days,
+	String "days" -- has been up for more than one day
+10 day, 
+	String "day" -- has been up for only one day
+11          
+	Some (9) blank spaces
+12  %1$2d:%2$02d,
+	Hours:Minutes (of host up time)  
+13  %1$2d %2$s
+	Minutes, string "mins" or "min"
+14 mins,
+	String "mins" -- host up time has plural minutes
+15 min, 
+	String "day" -- host up time has singular minute
+16   load average:
+	Load average -- number of jobs in the run queue
+17 ,
+	A comma ...
+18  %.2f
+	Floating point load average to two decimal places
+19 \n
+20   0x%08.8x: 
+	The remote host address in hex; host is not in /etc/hosts map
+21 %*.*s
+	The remote host name string; host is in /etc/hosts map
+22 0x%08.8x
+	The remote host address in hex; host is not in /etc/hosts map
+23 %.*s
+	The remote host name string; host is in /etc/hosts map
+24 \n
+25 %12.12s  
+	The remote host name ...
+26 Usage: rup [-h] [-l] [-t] [host ...]\n
+
+***********
+rusers.cat
+***********
+
+$set 1
+1 collecting responses... 
+2 %*s: 
+	Remote host name
+3 \n
+4 %s: 
+	Remote host name
+5 \n
+6 rusers: unknown host name %s\n
+	Remote host name is not in the /etc/hosts map
+7 0x%08.8x
+	Remote host address in hex; host name is not in the /etc/hosts 
+	map.
+8 %.*s
+	Remote host name
+9 %-*.*s
+	Remote host name
+10  %.*s
+	Remote terminal device (from /etc/utmp)
+11 \n
+12 too many hosts on network\n
+13 0x%08.8x
+	Host address in hex
+14 %.*s
+	Host name
+15 \n
+16 %-*.*s
+	Host name
+17  %.*s
+	Remote tty name
+18 \n
+19 %-*.*s 
+	Host name
+20 :
+	Colon character only
+21 %-*.*s
+	Remote host name
+22   %.12s  
+	Length of time logged on
+23 
+	Null string
+24     ??
+	Question marks indicate idle time unknown
+25  (%.*s)
+	Host name from which user is remote logged on (never used on 
+	HP-UX).
+26 %3d:
+	Hours logged on
+27    :
+	Not logged on for more than one hour, print spaces for hour place
+28 %02d
+	Minutes logged on
+29 %12.12s: 
+	Machine name
+30 \t
+	Tab character
+31 \n
+32 Usage: rusers [-a] [-h] [-i] [-l] [-u] [host ...]\n
+
+***********
+rwall.cat
+***********
+
+$set 1
+1 broadcast message from %s!%s:  
+	String indicating rwall remote broadcast message is coming
+2 Message too long\n
+	Message longer than maximum allowable UDP packet will hold
+3 %s is unknown host\n
+	Host name specified not found in /etc/hosts map.
+4 Couldn't contact %s: 
+	Could not contact host name given
+5 \n
+6 Usage: rwall host .... [-n netgroup ....] [-h host ...]\n
+7 %s is unknown netgroup\n
+	Netgroup name not found in /etc/netgroup map
+
+***********
+showmount.cat
+***********
+
+$set 1
+1 showmount: gethostname
+	System call failed
+2 showmount: 
+	Invocation name of process
+3 \n
+4 %s:%s\n
+	Mount table entry, hostname:path
+5 %s\n
+	Mount table entry, path name
+6 %s\n
+	Mount table entry, host name
+7 showmount [-a] [-d] [-e] [host]\n
+	Usage message
+8 showmount: 
+9 \n
+10 export list for %s:\n
+	Introduce the following data as the export list for given host 
+	name.
+11 \tNo exported file systems\n
+	Indicates that no file systems are exported from the remote host
+12 %-20s
+	Mount list file system name
+13 \n                    
+14 everyone
+	Exported to everyone (no systems named after mount point)
+15 %s 
+	Not exported to everyone, name of group or groups follow
+16 \n
+
+***********
+spray.cat
+***********
+
+$set 1
+1 %s is unknown host name\n
+2 sending %1$d packets of lnth %2$d to %3$s ...
+	Indicates that spray is beginning
+3 SPRAYPROC_CLEAR 
+	An error occured when trying to call this procedure
+4 \n
+5 SPRAYPROC_GET 
+	An error occured when trying to call this procedure
+6 %s 
+	Host name from which error occured
+7 \n
+8 \n\t%1$d packets (%2$.3f%%) dropped by %3$s\n
+	Indicates the number of packets dropped, and the percentage of 
+	total.
+9 \n\tno packets dropped by %s\n
+	Indicates that no packets were dropped by the remote host
+10 \t%1$d packets/sec, %2$d bytes/sec\n
+	Total spray throughput in packets/second, bytes/second
+11 Usage: spray host [-c cnt] [-l lnth]\n
+12 0x%x
+	Host name printed in hex, not in /etc/hosts map
+13 \n
+	New line printed to stdout before an error message is printed.
+	Avoids having message 2 and the error message in the same line.
+14 \n
+	Same as above.
+
+***********
+fsirand.cat
+***********
+
+$set 1
+1 Usage: fsirand [-p] special\n
+	Usage message
+2 fsirand: Cannot open %s\n
+	Could not open device specified on command line
+3 fsirand: Seek to superblock failed\n
+	Could not seek to superblock on device
+4 fsirand: Read of superblock failed %d\n
+	Could not read superblock
+5 fsirand: Not a superblock\n
+        Device does not have a superblock in the correct position
+6 fsid: %x %x\n
+	File system id
+7 fsirand: lseek to %d failed\n
+	Could not seek to an address
+8 fsirand: premature EOF\n
+	Found a premature eof on device
+9 ino %1$d gen %2$x\n
+	Inode number followed by generation number
+10 fsirand: lseek to %d failed\n
+	Could not seek to an address
+11 fsirand: premature EOF\n
+	Found a premature eof on device
+12 fsirand: Seek to superblock failed\n
+	Could not seek to superblock on device
+13 fsirand: Write of superblock failed %d\n
+	Could not write to superblock	
+14 fsirand: Seek to alternative superblock failed\n
+	Could not seek to alternative superblock
+15 fsirand: Read of alternative superblock failed %1$d %2$d\n
+	Could not read alternative superblock
+16 fsirand: Not an alternative superblock\n
+        Device does not have an alternative superblock in the correct 
+	position.
+17 fsirand: Write of alternative superblock failed\n
+	Could not write to alternative superblock
+
+***********
+biod.cat
+***********
+
+$set 1
+1 %s: async_daemon 
+	The routine async_daemon() returned (it should never return)
+2 %s: cannot fork
+	Fork(2) failed in biod
+3 usage: %s [<count>] (count >= 1)\n
+	Usage clause for biod  
+4 biod: NFS system call is not available.\n      Please configure NFS into your kernel.\n
+	NFS system call (async_daemon) was not configured into the kernel.
+
+***********
+nfsd.cat
+***********
+
+$set 1
+1 You must be root to run %s\n
+	You must be root to run nfsd
+2 usage: %s [servers] (servers >= 1)\n
+	Usage clause for nfsd
+3 usage: %s [servers] (servers >= 1)\n
+	Usage clause for nfsd 
+4 nfsd: server already active\n
+	A nfsd server is already running
+5 nfsd: fork
+	Fork(2) failed in nfsd
+6 nfsd: NFS system call is not available.\n      Please configure NFS into your kernel.\n
+	NFS system call (nfssvc) was not configured into the kernel.
+
+***********
+nfsstat.cat
+***********
+
+$set 1
+1 nfsstat: Must be root for z flag\n
+	To run nfsstat -z, user must be root
+2 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+3 nfsstat: can't read rcstat from kmem\n
+	Can not read client side rpc statistics from /dev/kmem
+4 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+5 nfsstat: can't read clstat from kmem\n
+	Can not read client side nfs statistics from /dev/kmem
+6 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+7 nfsstat: can't read rsstat from kmem\n
+	Can not read server side rpc statistics from /dev/kmem
+8 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+9 nfsstat: can't read svstat from kmem\n
+	Can not read server side nfs statistics from /dev/kmem
+10 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+11 nfsstat: can't write rcstat to kmem\n
+	Can not write client side rpc statistics to /dev/kmem
+12 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+13 nfsstat: can't write clstat to kmem\n
+	Can not write client side nfs statistics to /dev/kmem
+14 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+15 nfsstat: can't write rsstat to kmem\n
+	Can not write server side rpc statistics to /dev/kmem
+16 nfsstat: can't seek in kmem\n
+	Lseek(2) in /dev/kmem failed
+17 nfsstat: can't write svstat to kmem\n
+	Can not write server side nfs statistics to /dev/kmem
+18 nfsstat: Variables missing from namelist\n
+	Variables missing from namelist - /hp-ux
+19 \nClient rpc:\n
+	Header for nfsstat client rpc output
+20 calls      badcalls   retrans    badxid     timeout    wait       newcred\n
+	Header for nfsstat client rpc output
+21 %-11d%-11d%-11d%-11d%-11d%-11d%-11d\n
+	Format for nfsstat client rpc output
+22 \nServer rpc:\n
+	Header for nfsstat server rpc output
+23 calls      badcalls   nullrecv   badlen     xdrcall\n
+	Header for nfsstat server rpc output
+24 %-11d%-11d%-11d%-11d%-11d\n
+	Format for nfsstat server rpc output
+43 \nClient nfs:\n
+	Header for nfsstat client nfs output
+44 calls      badcalls   nclget     nclsleep\n
+	Header for nfsstat client nfs output
+45 %-11d%-11d%-11d%-11d\n
+	Format for nfsstat client nfs output
+46 \nServer nfs:\n
+	Header for nfsstat server nfs output
+47 calls      badcalls\n
+	Header for nfsstat server nfs output
+48 %-11d%-11d\n
+        Format for nfsstat server nfs output
+49 %-11s
+	Format for nfsstat output
+50 \n
+	Format for nfsstat output
+51 %d %2d%% 
+	Format for nfsstat output
+52 %d 0%% 
+	Format for nfsstat output
+53 %-11s
+	Format for nfsstat output
+54 \n
+	Format for nfsstat output
+55 nfsstat [-cnrsz] [namelist]\n
+	Usage clause
+56 nfsstat: nlist
+	Nlist(3C) failed on /hp-ux
+
+***********
+portmap.cat
+***********
+
+$set 1
+1 portmap: fork
+	Fork(2) failed in portmap
+2 portmap cannot create socket
+	Socket(2) failed in portmap
+3 portmap cannot bind
+	Bind(2) failed in portmap
+4 portmap couldn't do udp_create\n
+	Svcudp_create(3C) failed in portmap
+5 portmap cannot create socket
+	Socket(2) failed in portmap
+6 portmap cannot bind
+	Bind(2) failed in portmap
+7 portmap couldn't do tcp_create\n
+	Svctcp_create(3C) failed in portmap
+8 run_svc returned unexpectedly\n
+	Svc_run(3C) returned unexpectedly
+
+
+***********
+ypbind.cat
+***********
+
+$set 1
+1 Fork failure
+	Unable to fork() a child (to become a daemon).
+2 Can't catch broadcast process exit signal
+	Signal() call to set up signal handler for SIGCLD failed.
+3 Can't create TCP service
+	RPC call to set up RPC server based on TCP failed.
+4 Can't register TCP service
+	RPC call to register RPC service based on TCP failed.
+5 Can't create UDP service
+	RPC call to set up RPC server based on UDP failed.
+6 Can't register UDP service
+	RPC call to register RPC service based on UDP failed.
+7 Can't register TCP service
+	RPC call to register RPC service based on TCP failed.
+8 Can't register UDP service
+	RPC call to register RPC service based on UDP failed.
+9 Bad fds bits in main loop select mask
+	File descriptor bits to select() are invalid.
+10 Invalid timeout in main loop select
+	Select() call timed out (this should never happen).
+11 Can't reply to RPC call
+	Reply to RPC client failed.
+12 Can't respond to RPC request
+	Reply to RPC client failed.
+13 ypbind_get_binding can't free args
+	Call to free space allocated by RPC system failed.
+14 Server for YP domain "%s" OK
+	YP server for specified domain (%s) located.
+15 Server not responding for YP domain "%s"; still trying
+	YP server for specified domain (%s) not located; still trying to locate.
+16 Broadcaster fork failure
+	Unable to fork() a child (to become a daemon).
+18 ypbind:  ypbind_send_setdom clntudp_create error
+	Failure to create an RPC client using UDP transport.
+19 Can't reply to RPC call
+	Reply to RPC client failed.
+20 ypbind:  ypbind_ping clntudp_create error
+	Failure to create an RPC client using UDP transport.
+21 You must be super-user to run %s\n
+	You must be super-user to execute ypbind (or whatever name used to
+	invoke this program [%s]).
+22 Usage:  %s [-l log_file]\n
+	Usage statement for ypbind (or whatever name used to invoke this
+	program [%s]).
+
+23 The log file "%s" cannot be opened.\n%s aborted.\n
+	The log file (%s -passed using the -l option) could not be opened;
+	ypbind (or whatever name used to invoke this program [%s]) is aborted.
+
+***********
+ypcat.cat
+***********
+
+$set 1
+1 ypcat:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+2 ypcat:  the YP domain name hasn't been set on this machine\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+3 ypcat:  can't bind to a YP server for domain %1$s.\n        Reason:  %2$s\n
+	Ypcat is unable to locate a YP server for the specified domain (%1$s).
+	The reason is printed as the second argument (%2$s).
+5 Use "%1$s" for map "%2$s"\n
+	This is printed when the user enters "ypcat -x."  This message is
+	printed once for each standard map; a nickname is printed as the first
+	argument (%1$s) and the standard mapname is printed as the second
+	argument (%1$s).
+6 %.*s 
+	Used to print a map key preceding its associated value.
+7 %.*s\n
+	Used to print each value in a map.
+8 ypcat:  %s\n
+	Used to print an error created by yperr_string() (%s)
+9 ypcat:  can't get the first record from the YP map.\n        Reason:  %s\n
+	The first record from the requested YP map cannot be retrieved.  The
+	reason for this failure is printed.
+10 %.*s 
+	Used to print a map key preceding its associated value.
+11 %.*s\n
+	Used to print each value in a map.
+12 ypcat:  can't get the next record from the YP map.\n        Reason:  %s\n
+	The next record from the requested YP map cannot be retrieved.  The
+	reason for this failure is printed.
+13 Usage:  ypcat [-k] [-t] [-d domain] mname\n        ypcat -x\n\nwhere   mname may be either a mapname or a map nickname\n        -k prints keys as well as values\n        -t inhibits map nickname translation\n        -x prints a list of map nicknames and their corresponding mapnames\n
+	Usage statement for ypcat.
+14 ypcat:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+
+***********
+ypmatch.cat
+***********
+
+$set 1
+1 ypmatch:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+2 ypmatch:  mapname exceeds %d characters\n
+	The YP mapname specified is longer than the maximum allowed (as
+	specified by %d).
+3 ypmatch:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+4 ypmatch:  the YP domain name hasn't been set on this machine\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+5 ypmatch:  can't match %1$s.\n          Reason:  %2$s\n
+	The YP server cannot find a match for the specified key (%1$s) in the
+	requested map.  The reason is given as %2$s.
+6 %s: 
+	Used to print a map key preceding its associated value.
+7 %.*s\n
+	Used to print each value in a map.
+8 Use "%1$s" for map "%2$s"\n
+	This is printed when the user enters "ypmatch -x."  This message is
+	printed once for each standard map; a nickname is printed as the first
+	argument (%1$s) and the standard mapname is printed as the second
+	argument (%1$s).
+9 Usage:  ypmatch [-k] [-t] [-d domain] key ...  mname\n        ypmatch -x\n\nwhere   mname may be either a mapname or a map nickname\n        -k prints keys as well as values\n        -t inhibits map nickname translation\n        -x prints a list of map nicknames and their corresponding mapnames\n
+	Usage statement for ypmatch.
+
+***********
+yppasswd.cat
+***********
+
+$set 1
+1 yppasswd:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+2 yppasswd:  can't get the master server from the YP passwd map\n
+	The hostname of the YP master server cannot be retrieved from the
+	passwd.byname map.
+3 yppasswd:  the YP passwd map master server, %s, is not\n           running the yppasswd daemon.  Cannot change the YP passwd.\n
+	The YP master server for the passwd.byname map is not running
+	/usr/etc/yppasswdd.  The YP passwd cannot be changed unless this
+	daemon is running on the YP master server.
+4 yppasswd:  the yppasswd daemon is not running on a privileged port\n
+	The yppasswd daemon, running on the YP passwd map master server, is
+	not executing on a privileged port, but it should be.
+5 \nCouldn't change the YP passwd.\n
+	The YP passwd could not be changed, for various reasons.
+6 \nCouldn't change the YP passwd.\n
+	The YP passwd could not be changed, for various reasons.
+7 The YP passwd has been changed on %s, the master YP passwd server.\n
+	The YP passwd has been successfully changed.
+8 yppasswd:  you don't have a login name in /etc/utmp.\n           Try entering "yppasswd user_name".\n
+	The user's login name was not in /etc/utmp; if the user is runnning
+	yppasswd from windows, this is expected.  By entering "ypppasswd
+	user_name", the user may change the YP passwd successfully.
+9 Changing YP password for %s...\n
+	Changing the YP password for user %s.
+10 Not in passwd file.\n
+	The specified user name was not found in the passwd file.
+11 Permission denied.\n
+	Only the super-user or the owner of the specified name may change the
+	YP password.
+12 Old YP password:
+	Enter the current YP password.
+13 New password:
+	Enter the new YP password.
+14 Password unchanged.\n
+	The YP password was not changed.
+15 Please use at least one non-numeric character.\n
+	Use at least one non-numeric character in the new YP password.
+16 Please use a longer password.\n
+	Use a longer password for the new YP password.
+17 Retype new password:
+	Re-enter the new YP password (for comparison to the first time it was
+	entered).
+18 Mismatch - password unchanged.\n
+	The first and second entries of the new YP passwd do not match, so the
+	current YP password is left unchanged.
+
+***********
+yppoll.cat
+***********
+
+$set 1
+1 yppoll:  hostname exceeds %d characters\n
+	The hostname (specified by the -h option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+2 yppoll:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+3 yppoll:  mapname exceeds %d characters\n
+	The YP mapname specified is longer than the maximum allowed (as
+	specified by %d).
+4 yppoll:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+5 yppoll:  the YP domain name hasn't been set on this machine\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+6 yppoll:  gethostname system call failed\n
+	The gethostname() system call was unsuccessful.
+7 yppoll:  %s was not found in /etc/hosts or the YP hosts map\n
+	The hostname (specified by the -h option on the command line) could
+	not be found in either the local /etc/hosts file or in the hosts map
+	(if this machine is a YP client).
+8 Can't create UDP connection to %s\n
+	Failed to create an RPC client connection to host "%s" using UDP
+	transport.
+9 Reason
+	The reason for the failure follows.
+10 Can't make YPPROC_ORDER call to ypserv at %s.\n\t
+	RPC client call to YPPROC_ORDER procedure to YP server on host "%s"
+	failed.
+11 Reason
+	The reason for the failure follows.
+12 Can't create V1 UDP connection to %s.\n\t
+	Failed to create an RPC client connection to host "%s" using UDP
+	transport and YP Version 1 protocol.
+13 Reason
+	The reason for the failure follows.
+14 Can't make YPPROC_POLL call to ypserv at %s.\n\t
+	RPC client call to YPPROC_POLL procedure to YP server on host "%s"
+	failed.
+15 yppoll
+	The reason for the failure follows "yppoll," the name of this command.
+16 Can't make YPPROC_MASTER call to ypserv at %s.\n\t
+	RPC client call to YPPROC_MASTER procedure to YP server on host "%s"
+	failed.
+17 Reason
+	The reason for the failure follows.
+18 Domain %s is supported.\n
+	YP domain "%s" is served by the map in question.
+19 Map %1$s has order number %2$d.\n
+	The map in question, "%1$s," has the specified order number ("%2$d").
+20 The master server is %s.\n
+	The hostname of the master server for the map in question is "%s."
+21 Domain %s is supported.\n
+	YP domain "%s" is served by the map in question.
+22 Map %1$s has order number %2$d.\n
+	The map in question, "%1$s," has the specified order number ("%2$d").
+23 Can't get master for map %1$s.\n\tReason:  %2$s\n
+	The hostname of the master server for the map in question, "%1$s,"
+	cannot be determined.  The reason follows as "%2$s."
+24 Domain %s is supported.\n
+	YP domain "%s" is served by the map in question.
+25 Can't get order number for map %1$s.\n\tReason:  %2$s\n
+	The order number of the master server for the map in question, "%1$s,"
+	cannot be determined.  The reason follows as "%2$s."
+26 The master server is %s.\n
+	The hostname of the master server for the map in question is "%s."
+27 Can't get any map parameter information.\n
+	Neither the master server name nor the order number can be determined
+	for the map in question.
+28 Can't get order number for map %1$s.\n\tReason:  %2$s\n
+	The order number of the master server for the map in question, "%1$s,"
+	cannot be determined.  The reason follows as "%2$s."
+29 Can't get master for map %1$s.\n\tReason:  %2$s\n
+	The hostname of the master server for the map in question, "%1$s,"
+	cannot be determined.  The reason follows as "%2$s."
+30 Ill-formed response returned from ypserv on host %s.\n
+	The response from the ypserv process on host "%s" was garbled.
+31 Domain %s is supported.\n
+	YP domain "%s" is served by the map in question.
+32 Map %1$s has order number %2$d.\n
+	The map in question, "%1$s," has the specified order number ("%2$d").
+33 The master server is %s.\n
+	The hostname of the master server for the map in question is "%s."
+34 Unknown master server.\n
+	The hostname of the master server for the map in question cannot be
+	determined.
+35 Map %s is not supported.\n
+	The specified map, "%s," is not provided by the YP server.
+36 Map %1$s does not exist at %2$s.\n
+	The specified map, "%s," is not provided by the YP server "%2$s."
+37 Domain %s is not supported.\n
+	The YP server does not support the specified YP domain, "%s."
+38 Can't get hostname\n
+	The gethostname() system call was unsuccessful.
+39 \n
+	Newline character.
+40 Couldn't get YP server %d\n
+	A YP server could not be found for the YPBIND_ERR value displayed (%d).
+41 Usage:  yppoll [-h host] [-d domain] mapname\n\n where   host is either a name or an internet address of the form ww.xx.yy.zz\n
+	Usage statement for yppoll.
+
+***********
+yppush.cat
+***********
+
+$set 1
+1 Internal error trying to talk to %s.
+	Received SSTAT_INIT message. %s is node name.
+2 %s has been called.
+	Received SSTAT_CALLED status.  %s is the node name.
+3 %s (v1 ypserv) sent an old-style request.
+	Received SSTAT_RESPONDED status. %s is the node name.
+4 yp server not registered at %s.
+	Received SSTAT_PROGNOTREG error. %s is the node name.
+5 RPC error to %s:  
+	Received SSTAT_RPC error. %s is the node name.
+6 Local resource allocation failure - can't talk to %s.
+	Received SSTAT_RSCRC error. %s is the node name.
+7 System error talking to %s:  
+	Received SSTAT_SYSTEM error. %s is the node name.
+8 Map successfully transferred.
+	Received YPPUSH_SUCC YP status.
+9 Transfer not done:  master's version isn't newer.
+	Received YPPUSH_AGE YP status.
+10 Failed - ypxfr can't find the map in the server's YP domain.
+	Received YPPUSH_NOMAP YP status.
+11 Failed - domain isn't supported.
+	Received YPPUSH_NODOM status.
+12 Failed - local resource allocation failure.
+	Received YPPUSH_RSRC status.
+13 Failed - ypxfr had an RPC failure
+	Received YPPUSH_RPC status.
+14 Failed - ypxfr couldn't get the map master's address.
+	Received YPPUSH_MADDR status.
+15 Failed - yp server or map format error.
+	Received YPPUSH_YPERR status.
+16 Failed - args to ypxfr were bad.
+	Received YPPUSH_BADARGS status.
+17 Failed - dbm operation on map failed.
+	Received YPPUSH_DBM status.
+18 Failed - file I/O operation on map failed
+	Received YPPUSH_FILE status.
+19 Failed - map version skew during transfer.
+	Received YPPUSH_SKEW status.
+20 Map successfully transferred, but ypxfr couldn't send Clear map to ypserv 
+	Received YPPUSH_CLEAR status.
+21 Failed - no local order number in map - use -f flag to ypxfr.
+	Received YPPUSH_FORCE status.
+22 Failed - ypxfr internal error.
+	Received YPPUSH_XFRERR status.
+23 Failed - Transfer request refused.
+	Received YPPUSH_REFUSED status.
+24 RPC success
+	Received RPC_SUCCESS.
+25 RPC Can't encode args
+	Received RPC_CANTENCODEARGS.
+26 RPC Can't decode results
+	Received RPC_CANTDECODERES.
+27 RPC Can't send
+	Received RPC_CANTSEND.
+28 RPC Can't recv
+	Received RPC_CANTRECV.
+29 YP server registered, but does not respond
+	Received RPC_TIMEDOUT.
+30 RPC version mismatch
+	Received RPC_VERSMISMATCH.
+31 RPC auth error
+	Received RPC_AUTHERROR.
+32 RPC remote program unavailable
+	Received RPC_PROGUNAVAIL.
+33 RPC program mismatch
+	Received RPC_PROGVERSMISMATCH.
+34 RPC unknown procedure
+	Received RPC_PROCUNAVAIL.
+35 RPC Can't decode args
+	Received RPC_CANTDECODEARGS.
+36 unknown host
+	Received RPC_UNKNOWNHOST.
+37 portmap failure (host is down?)
+	Received RPC_PMAPFAILURE
+38 RPC prog not registered
+	Received RPC_PROGNOTREGISTERED.
+39 RPC system error
+	Received RPC_SYSTEMERROR.
+41 Can't get domainname from system call.\n
+	The getdomainname() system call was unsuccessful.
+42 The domainname hasn't been set on this machine.\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+43 Finding YP servers:
+	Attempting to contact the following hosts that are supposed to be
+	slave YP servers.
+44 Can't find a yp server for domain %1$s.  Reason:  %2$s.\n
+	Cannot locate a YP server for the specified YP domain (%1$s); the
+	reason is given as "%2$s."
+45 Can't build server list from map "ypservers".  Reason:  %s.\n
+	Unable to retrieve all of the YP servers' names from the "ypservers"
+	map.  The reason is declared as "%s."
+46  %s
+	Argument for printing a YP server's name.
+47 \n
+	Newline character.
+48 Can't build server list from map "ypservers".  Reason:  %s.\n
+	Unable to retrieve all of the YP servers' names from the "ypservers"
+	map.  The reason is declared as "%s."
+49 \n
+	Newline character.
+50 yppush malloc failure
+	Malloc() failed in yppush.
+51 Can't get an address for server %s.\n
+	The internet address could not be found for slave YP server "%s."
+52 yppush gettimeofday failure
+	The gettimeofday() system call failed.
+53 Can't set up as a udp server.\n
+	RPC call to create an RPC service based on UDP failed.
+54 Can't set up transient callback server.\n
+	Could not register the callback server routine with portmap.
+55 main loop select
+	Main while loop select() call.
+56 Invalid timeout in main loop select.\n
+	Select() call timed out (this should never happen)
+57 No response from ypxfr on %s\n
+	The ypxfr process on the YP server "%s" did not respond to the yppush
+	request before yppush timed out.
+58 Can't reply to rpc call.\n
+	Reply to RPC client failed
+59 \n
+	Newline character.
+60 yppush: Bad server state value %d.\n
+	The state value returned by the ypserv process on the slave YP server
+	had an erroneous value "%d."
+61 Status received from ypxfr on %1$s:\n\t%2$s\n
+	The status of the ypxfr on slave YP server "%1$s" is printed as
+	"%2$s."
+62 yppush listener: Garbage transaction status value from ypxfr on %s.\n
+	The status of the ypxfr on slave YP server "%1$s" could not be
+	deciphered.
+63 Bad error code passed to rpcerr_msg: %d.\n
+	The rpcerr_msg() function received the following unknown error message
+	value (%d).
+64 Can't reply to rpc call.\n
+	Reply to RPC client failed
+65 Error talking to %s: 
+	Unable to communicate with the ypserv process on host "%s."
+66 \n
+	Newline character.
+67 V1 Error talking to %s: 
+	Unable to communicate with the ypserv process on host "%s," using YP
+	Version 1 protocol.
+68 \n
+	Newline character.
+69 Usage:  yppush [-d domain] [-v] mapname\n
+	Usage statement for yppush.
+70 yppush:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+
+***********
+ypserv.cat
+***********
+
+$set 1
+1 Bad fds bits in main loop select mask
+	File descriptor bits to select() are invalid
+2 Invalid timeout in main loop select
+	Select() call timed out (this should never happen)
+3 ypinit() fork failure
+	The ypinit() function did not perform a fork() successfully.
+4 Can't catch process exit signal
+	Signal() call to set up signal handler for SIGCLD failed.
+5 Can't create udp server
+	RPC call to set up RPC server based on UDP failed.
+6 Can't create tcp server
+	RPC call to set up RPC server based on TCP failed.
+7 Can't register V%d udp service
+	RPC call to register Version %d YP protocol RPC service based on
+	UDP failed.
+8 Can't register V%d tcp service
+	RPC call to register Version %d YP protocol RPC service based on
+	TCP failed.
+9 Can't register V%d udp service
+	RPC call to register Version %d YP protocol RPC service based on
+	UDP failed.
+10 Can't register V%d tcp service
+	RPC call to register Version %d YP protocol RPC service based on
+	TCP failed.
+11 YPPROC_NULL can't reply to rpc call
+	YPPROC_NULL procedure could not successfully respond to the RPC
+	client.
+12 YPPROC_CLEAR can't reply to rpc call
+	YPPROC_CLEAR procedure could not successfully respond to the RPC
+	client.
+13 YPOLDPROC_NULL can't reply to rpc call
+	YPOLDPROC_NULL procedure could not successfully respond to the RPC
+	client.
+14 Usage:  %s [-l log_file]\n
+	Usage statement for %s (ypserv).
+15 The log file "%s" cannot be opened.\n%s aborted.\n
+	The log file, as specified on the command line, could not be opened.
+	Ypserv (%s) is aborted.
+
+***********
+ypserv_map.cat
+***********
+
+$set 1
+1 Stat error on map file %s
+	An error occurred when performing a stat() on the YP map, named "%s." 
+2 Stat error on map file %s
+	An error occurred when performing a stat() on the YP map, named "%s." 
+3 The map pathname, "%-30s...", is too long:\r\nit should not exceed %d characters
+	The full pathname of the YP map, "%-30s," exceeds the limit of %d
+	characters.
+
+***********
+ypset.cat
+***********
+
+$set 1
+1 Sorry, can't get domainname back from system call.\n
+	The getdomainname() system call was unsuccessful.
+2 Sorry, the domainname hasn't been set on this machine.\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+3 ypset:  gethostname system call failed\n
+	The gethostname() system call was unsuccessful.
+4 Sorry, the hostname argument is bad.\n
+	The hostname, specified by the -h argument, is too long.
+5 ypset:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+6 Sorry, the server_to_use argument is bad.\n
+	The hostname of the YP server to which you want to bind is too long.
+7 Sorry, I got a garbage address for host %s back from the yellow pages.\n
+	The internet address returned from the hosts map for the host "%s"
+	was malformed.
+8 Sorry, I can't get an address for host %s from the yellow pages.\n
+	No entry exists for the specified host, "%s," in the YP hosts map.
+9 Sorry, I can't make use of the yellow pages.  I give  up.\n
+	Ypset is unable to bind to a server for the YP domain of choice.
+10 Sorry, I can't set up a udp connection to ypbind on host %s.\n
+	Failure to create an RPC client using UDP transport, connecting to the
+	ypbind process on host "%s."
+11 Sorry, I couldn't send my rpc message to ypbind on host %s.\n
+	Client RPC call (using UDP) to ypbind on host "%s" failed.
+12 Sorry, I couldn't send my rpc message to ypbind on host %s.\n
+	Client RPC call (using UDP) to ypbind on host "%s" failed.
+13 Usage:  ypset [-V1] [-h host] [-d domain] server_to_use\n\nwhere   host and server_to_use are either names or internet addresses of the\nform ww.xx.yy.zz\n
+	Usage message for ypset.
+
+***********
+ypsrv_proc.cat
+***********
+
+$set 1
+1 %s() fork failure
+	The specified function, "%s," was unable to do a fork() or vfork().
+2 %s() execl failure
+	The specified function, "%s," was unable to do an execl().
+3 %s() can't respond to rpc request
+	The specified function, "%s," was unable to respond to the RPC
+	request.
+4 %s() can't free args
+	The specified function, "%s," was unable to free space allocated by
+	the RPC system.
+
+***********
+ypwhich.cat
+***********
+
+$set 1
+1 ypwhich:  mapname exceeds %d characters\n
+	The YP mapname specified is longer than the maximum allowed (as
+	specified by %d).
+2 ypwhich:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+3 ypwhich:  hostname exceeds %d characters\n
+	The hostname (specified by the -h option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+4 ypwhich:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+5 ypwhich:  the YP domain name hasn't been set on this machine\n
+	The YP domain name has not been set on this machine using
+	domainname(1).
+6 ypwhich:  gethostname system call failed\n
+	The gethostname() system call was unsuccessful.
+7 ypwhich:  %s was not found in /etc/hosts or the YP hosts map\n
+	The specified host, "%s," could not be found in either /etc/hosts or
+	the YP hosts map.
+8 YP domain %s not bound.\n
+	No YP server is bound for the specified YP domain, "%s."
+9 YP domain %s not bound.\n
+	No YP server is bound for the specified YP domain, "%s."
+10 ypwhich:  clntudp_create error
+	Failure to create an RPC client using UDP transport.
+11 ypwhich:  can't talk to ypbind on %s.\n
+	An RPC client call to the ypbind process on the specified host, "%s,"
+	failed.
+12 ypwhich:  gethostname system call failed\n
+	The gethostname() system call was unsuccessful.
+13 \n
+	Newline character.
+14 0x%x\n
+	For printing the hostname's address in hex (this is done only if a
+	gethostbyaddr(hostname) call fails).
+15 %s\n
+	For printing the hostname of the YP server.
+16 ypwhich:  can't find the master of %1$s.\n          Reason:  %2$s\n
+	The master servero of map "%1$s" cannot be determined.  The reason is
+	given as "%$2."
+17 %s\n
+	For printing the hostname of the master YP server for a given YP map.
+18 Use "%1$s" for map "%2$s"\n
+	For printing the nickname ("%1$s") for each of the YP maps' full names
+	("%2$s").
+19 ypwhich:  can't bind to a YP server for domain %1$s.\n          Reason:  %2$s\n
+	A YP server for domain "%1$s" cannot be found; reason is given as
+	"%2$s."
+20 ypwhich:  can't get the first record from the YP map.\n          Reason:  %s\n
+	The first record from a YP map cannot be retrieved for the specified
+	reasons, "%s."
+21 ypwhich:  can't get the next record from the YP map.\n          Reason:  %s\n
+	The next record from a YP map cannot be retrieved for the specified
+	reasons, "%s."
+22 ypwhich:  can't get the list of maps
+	The list of YP map names served cannot be retrieved from the YP server.
+23 ypwhich:  can't get the list of maps.\n          Reason:  %s\n
+	The list of YP map names served cannot be retrieved from the YP server.
+	The reason for this failure is given as "%s."
+24 %s 
+	Used to print each YP mapname.
+25 ????????\n
+	Used to indicate that the master of the YP map cannot be determined.
+26 ypwhich:  can't find the master of %1$s.\n          Reason:  %2$s\n
+	The hostname of the master of map "%1$s" cannot be determined.  The
+	reason is given as "%2$s."
+27 %s\n
+	Used to print the hostname of the master of each YP map.
+28 Usage:  ypwhich [-d domain] [-V1 | -V2] [hostname]\n        ypwhich [-d domain] [-t] [-m [mname]]\n        ypwhich -x\n        ypwhich\n\nwhere   mname may be either a mapname or a map nickname\n        -t inhibits map nickname translation\n        -m lists the master server's name for one or all maps\n        -x prints a list of map nicknames and their corresponding maps\n
+	The usage statement for ypwhich.
+
+***********
+ypxfr.cat
+***********
+
+$set 1
+1 ypxfr:  getdomainname system call failed\n
+	The getdomainname() system call was unsuccessful.
+2 ypxfr:  YP domain name not set on this machine\n
+	The YP domain name has not been set using domainname(1).
+3 ypxfr:  can't get order number for map %s\n        from server at %s:  use the -f flag\n
+	The order number of the YP map "%s" at server "%s" cannot be
+	determined.  The recommendation is to use the -f option to ypxfr.
+4 ypxfr:  transferred map %1$s from %2$s (%3$d entries)\n
+	This is an informative message, saying that the map "%1$s" was
+	transferred from the YP server "%2$s," and it had "%3$d" entries (this
+	is a count of the records transferred).
+5 %19.19s: 
+	Used to print the time of day when logging an error message.
+6 ypxfr:  can't translate master name %s to an address\n
+	The hostname of the master ("%s") of the YP map cannot be converted to
+	an internet address.
+7 ypxfr:  bind_to_server clnt_call error
+	An RPC call used to test if the YP server is alive failed.
+8 ypxfr:  bind_to_server clntudp_create error
+	Failure to create an RPC client using UDP transport.
+9 
+	It's a NULL character.
+10 ypxfr:  can't get order number from ypserv at %1$s\n        reason:  %2$s\n
+	The order number of a YP map at server "%1$s" cannot be determined.
+	The reason is given as "%2$s."
+11 ypxfr(get_v1order) RPC call to %s failed
+	An RPC call to the host "%s" was unsuccessful.
+12 ypxfr:  can't get order number from ypserv at %1$s\n        reason:  %2$s\n
+	The order number of a YP map at server "%1$s" cannot be determined.
+	The reason is given as "%2$s."
+13 ypxfr:  get_v2order RPC call to %s failed
+	An RPC call to the host "%s" was unsuccessful.
+14 
+	It's a NULL character.
+15 ypxfr:  can't get master name from ypserv at %1$s\n        reason:  %2$s\n
+	The master's hostname of a YP map at server "%1$s" cannot be determined.
+	The reason is given as "%2$s."
+16 ypxfr(get_v1master_name) RPC call to %s failed
+	An RPC call to the host "%s" was unsuccessful.
+17 ypxfr:  can't get master name from ypserv at %1$s\n        reason:  %2$s\n
+	The master's hostname of a YP map at server "%1$s" cannot be determined.
+	The reason is given as "%2$s."
+18 ypxfr:  get_v2master_name RPC call to %s failed
+	An RPC call to the host "%s" was unsuccessful.
+19 
+	It's a NULL character.
+20 ypxfr:  can't get master of %1$s\n        reason:  %2$s\n
+	The master's hostname of a YP map, "%1$s," cannot be determined.
+	The reason is given as "%2$s."
+21 ypxfr:  the map pathname, "%1$s...",\n        exceeds %2$d characters\n
+	The full pathname of the map "%1$s" is too long (it is greater than
+	"%2$d" characters).
+22 ypxfr:  the name of the non-standard map, "%1$s",\n        should not exceed %2$d characters, if this machine is to be a YP server.\n
+	The name of the map "%1$s" should not be more than "%2$d" characters
+	in length.
+23 ypxfr:  map %1$s at %2$s is not more recent than local\n
+	The local YP map whose name is "%1$s" is newer or the same age as the
+	map stored on host "%2$s."
+24 ypxfr:  can't create temp map %s\n
+	A temporary map by the name "%s" cannot be created.
+25 ypxfr:  can't dbm init temp map %s\n
+	The temporary map, "%s," cannot be initialized by the dbminit function.
+26 ypxfr:  can't dbm close temp map %s\n
+	The temporary map, "%s," cannot be closed by the dbmclose function.
+27 ypxfr:  version skew at %1$s while transferring map %2$s\n
+	The version (order number) of the map changed on host "%1$s" during the
+	transfer of map "%2$s."
+28 ypxfr:  rename error:  couldn't mv %1$s to %2$s\n
+	The temporary map, "%1$s," could not be renamed to "%2$s."
+29 ypxfr:  rename error:  check that old %s is still intact\n
+	There was a problem with renaming a map - verify that the old map,
+	"%s," still exists and is OK.
+30 ypxfr:  rename error:  check that old %s is still intact\n
+	There was a problem with renaming a map - verify that the old map,
+	"%s," still exists and is OK.
+31 ypxfr:  can't mv %1$s to %2$s\n
+	Unable to rename one file, "%1$s," to another, "%2$s."
+32 ypxfr:  can't mv %1$s to %2$s\n
+	Unable to rename one file, "%1$s," to another, "%2$s."
+33 ypxfr:  can't recover from rename failure\n
+	The problems encountered from a rename failure were irreversible.
+35 ypxfr:  stat error on map file %s\n
+	A stat() system call on a YP map, "%s," failed.
+36 ypxfr:  error from ypserv on %1$s\n        ypall_callback = %2$s\n
+	The ypserv process on host "%1$s" encountered an error, explained as
+	"%2$s," while transferring the map.
+37 ypxfr:  count mismatch in dbm file %1$s:\n        old=%2$d, new=%3$d\n
+	The number of records differs between the new YP map, "%1$s," and the
+	old one.  The values are printed.
+38 ypxfr (mismatch) - TCP channel create failure
+	RPC call to create a TCP channel failed
+39 ypxfr (get_map/all) - RPC clnt_call (TCP) failure
+	Client RPC call (using TCP) failed
+40 ypxfr:  wrong version number!\n
+	The YP server "speaks" the old version 1 protocol, but cannot be used
+	by the count_mismatch function.
+41 ypxfr:  count mismatch after enumerating %1$s:\n        old=%2$d, new=%3$d\n
+	The number of records differs between the new YP map, "%1$s," and the
+	old one.  The values are printed.
+42 ypxfr (get_map) - TCP channel create failure
+	RPC call to create a TCP channel failed
+43 ypxfr (get_map/all) - RPC clnt_call (TCP) failure
+	Client RPC call (using TCP) failed
+44 ypxfr (get_map/first) - RPC clnt_call (TCP) failure
+	Client RPC call (using TCP) failed
+45 ypxfr:  error from ypserv on %1$s\n        get first = %2$s\n
+	The ypserv process on host "%1$s" encountered an error, explained as
+	"%2$s," while transferring the map.
+46 ypxfr:  can't do dbm store into temp map %s\n
+	A record could not be stored in the temporary YP map, "%s."
+47 ypxfr (get_map/next) - RPC clnt_call (TCP) failure
+	Client RPC call (using TCP) failed
+48 ypxfr:  error from ypserv on %1$s\n        get next = %2$d\n
+	The ypserv process on host "%1$s" encountered an error, explained as
+	"%2$s," while transferring the map.
+49 ypxfr:  error from ypserv on %1$s\n        ypall_callback = %2$s\n
+	The ypserv process on host "%1$s" encountered an error, explained as
+	"%2$s," while transferring the map.
+50 ypxfr:  duplicate key %1$s in map %2$s\n
+	A duplicate key ("%1$s") was encountered in the map ("%2$s") during
+	the transfer.
+51 ypxfr:  can't do dbm store into temp map %s\n
+	A record could not be stored in the temporary YP map, "%s."
+52 ypxfr:  key %1$s was not inserted into dbm file %2$s\n
+	The record whose key is "%1$s" was not successfully stored in the YP
+	map "%2$s."
+53 ypxfr:  can't do dbm store into temp map %s\n
+	A record could not be stored in the temporary YP map, "%s."
+54 ypxfr:  can't do dbm store into temp map %s\n
+	A record could not be stored in the temporary YP map, "%s."
+55 ypxfr:  gethostname system call failed\n
+	The gethostname() system call was unsuccessful.
+56 ypxfr:  can't send ypclear message to ypserv on local machine\n
+	An RPC client call, telling the local ypserv process to perform a
+	"clear current map," failed.
+57 ypxfr:  hostname exceeds %d characters\n
+	The hostname (specified by the -h option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+58 ypxfr:  YP domain name exceeds %d characters\n
+	The YP domain name (specified by the -d option on the command line) is
+	longer than the maximum allowed (as specified by %d).
+59 ypxfr:  mapname exceeds %d characters\n
+	The YP mapname specified is longer than the maximum allowed (as
+	specified by %d).
+60 Usage:  ypxfr [-h host] [-f] [-d domain] [-c] [-C tid prog ipaddr port] mapname\n\nwhere\thost is either a name or an internet address of the form ww.xx.yy.zz\n\t-f forces transfer even if the master's copy is not newer\n\t-c inhibits sending a "Clear map" message to the local ypserv\n\t-C is used by ypserv to pass callback information\n
+	The usage statement for ypxfr.
+
+***********
+dbm.cat
+***********
+
+$set 1
+1 Cannot open database %s\n
+	The database named "%s" cannot be opened for reading.
+2 Items not in pairs\n
+	A record retrieved from the database does not have a key-value pair
+	construct.
+3 Entry too big\n
+	The character length of the value of a record exceeds the maximum
+	permissible.
+4 Split not paired\n
+	An item that was split for storage in the database could not be made up
+	of paired entries.
+5 Bad delitem\n
+	The number of an item to be deleted is out of acceptable limits.
+6 Bad block\n
+	As the blocks of a dbm file are being checked, the number of a block
+	was determined to be out of acceptable limits.
+
+***********
+domainname.cat
+***********
+
+$set 1
+1 setdomainname
+	The name of the setdomainname() system call.
+2 %s\n
+	Used to print the name of the YP domain, as retrieved using
+	getdomainname().
+3 getdomainname
+	The name of the getdomainname() system call.
+4 domainname: NFS system call is not available.\n            Please configure NFS into your kernel.\n
+	NFS system call (setdomainname) was not configured into the kernel.
+
+***********
+makedbm.cat
+***********
+
+$set 1
+1 makedbm: can't open %s\n
+	Unable to open the input file "%s" for reading.
+2 makedbm: can't create %s\n
+	Can't open the file "%s" for writing.
+3 makedbm: can't create %s\n
+	Can't open the file "%s" for writing.
+4 makedbm: can't init %s\n
+	The temporary file, "%s," cannot be initialized by the dbminit function.
+5 makedbm: yikes!\n
+	An extremely rare message - an internal pointer has an inexplicable
+	value.
+6 problem storing %1$.*s %2$.*s\n
+	A particular key-value pair (as printed by the message) could not be
+	stored in the database.
+7 duplicate: %1$.*s %2$.*s\n
+	A duplicate key-value pair (as printed by the message) is already
+	stored in the database.
+8 makedbm: rename
+	The name of the rename() system call.
+9 makedbm: rename
+	The name of the rename() system call.
+10 makedbm: can't stat %s\n
+	A stat() call on the input file ("%s") failed.
+11 usage: makedbm -u file\n       makedbm [-i YP_INPUT_FILE] [-o YP_OUTPUT_NAME] [-d YP_DOMAIN_NAME] [-m YP_MASTER_NAME] infile outfile\n
+	The usage statement for makedbm.
+12 makedbm: problem storing %1$.*s %2$.*s\n
+	A particular key-value pair (as printed by the message) could not be
+	stored in the database.
+13 makedbm: couldn't init %s\n
+	The input file as specified with the -u option, "%s," cannot be
+	initialized by the dbminit function.
+14 YP_LAST_MODIFIED
+	This is a special key stored a part of each YP map whose value is the
+	order number.  THE NAME OF THIS KEY MUST NOT BE CHANGED!
+15 YP_INPUT_FILE
+	This is the key associated with the value provided by the -i option to
+	makedbm.
+16 YP_OUTPUT_NAME
+	This is the key associated with the value provided by the -o option to
+	makedbm.
+17 YP_DOMAIN_NAME
+	This is a special key stored a part of each YP map whose value is the
+	YP domain.  THE NAME OF THIS KEY MUST NOT BE CHANGED!
+18 YP_MASTER_NAME
+	This is a special key stored a part of each YP map whose value is the
+	master YP server's hostname.  THE NAME OF THIS KEY MUST NOT BE
+	CHANGED!
+19 makedbm: can't stat %s\n
+	Cannot stat the .dir database file.
+20 makedbm: can't stat %s\n
+	Cannot stat the .pag database file.
+21 makedbm: the outfile name, %s is too long\n
+	The name used to make the database files is too long.
+	For example, it exceeds 10 characters on a short filename
+	file system.
+22 makedbm: can't unlink temporary file %s\n
+	Couldn't remove the temporary file used by the program.
+
+***********
+revnetgroup.ca
+***********
+
+$set 1
+1 usage: %s -h (by host), %s -u (by user)\n
+	The usage statement for revnetgroup ("%s").
+2 Cycle detected in /etc/netgroup: %s.\n
+	A cycle (e.g., netgroup A contains netgroup B which contains netgroup
+	A) was detected in the input file.
+3 syntax error in /etc/netgroup\n
+	A syntax error was found in the input file.
+4 --- %s %s\n
+	The second part of the "syntax error" message - the group and value in
+	which the error occurred are printed.
+5 fatal error: %s\n
+	A message, "%s," describes a fatal error.  This message will never be
+	seen.
+
+***********
+rpc.ypassd.cat
+***********
+
+$set 1
+1 Usage:\t%s passwd_file [-l log_file] [-m [arg1 arg2 ...]]\n\n where\tpasswd_file is the full pathname of the ASCII passwd file from which\n \t   the passwd map is built\n \t-m specifies that after file is updated, ypmake should be run with\n \t   the optional arguments; all arguments after -m are passed to ypmake\n
+	The argument "%s" is the name by which this program was invoked.  The
+	usage statement for yppasswdd.
+2 %s:  can't write %s; it must be writable.\n
+	The first argument ("%s") is the name by which this program was
+	invoked.  The password file, "%s," cannot be opened for writing.
+3 %s:  can't bind to a privileged socket\n
+	The first argument ("%s") is the name by which this program was
+	invoked.  Yppasswd was unable to get a privileged port to listen on.
+4 %s:  couldn't create an RPC server\n
+	The first argument ("%s") is the name by which this program was
+	invoked.  RPC call to set up RPC server based on UDP failed.
+5 Couldn't register %s with portmap.\n\tIs portmap running?\n
+	The first argument ("%s") is the name by which this program was
+	invoked.  RPC call to set up RPC server failed.
+6 svc_run shouldn't have returned
+	The svc_run() RPC function returned but should not have.
+7 NULLPROC couldn't reply to RPC call
+	An RPC call to reply to the NULLPROC client request failed.
+8 No passwd for %s
+	There is no entry for user "%s" in the password source file.
+9 %s:  bad passwd
+	The password given for user "%s" does not match that found in the
+	password source file.
+10 Password file busy - try again
+	The password source file is currently being edited.
+11 Fdopen of %s failed
+	The lockfile, "%s," could not be fdopened for writing.
+12 Fopen of %s failed
+	The password source file, "%s," could not be fopened for reading.
+13 Couldn't reply to RPC call\n
+	The RPC call to respond to the client call issued by yppasswd failed.
+14 socket
+	The word "socket."
+15 Socket:  all ports in use
+	Yppasswd was unable to get a privileged port to listen on.
+16 The log file "%s" cannot be opened.\n%s aborted.\n
+	The log file (as specified by the -l option) could not be opened for
+	writing.  The second "%s" argument is the name by which this program
+	was invoked.
+17 %s:  can't read %s; it must be readable.\n
+	The first argument ("%s") is the name by which this program was
+	invoked.  The password file, "%s," cannot be opened for reading.
+18 Error opening %s:  errno = %d
+	The lockfile, "%s," could not be created for exclusive read/write.
+	The reason is described by the errno ("%d") value.
+19 Error renaming %s to %s:  errno = %d
+	The lockfile (first %s) could not be renamed to the password source
+	file name (second %s).  The reason is described by the errno ("%d")
+	value.
+20 Passwd for %s contains a colon or newline
+	The new password that the remote machine was attempting to add to
+	the /etc/passwd database contained a colon ':' or a newline.
+	Normally an attempted break of security.
+	Used with auditing.
+21 No passwd entry for %s
+	The name given to have its passwd changed did not have an
+	entry in /etc/passwd.
+	Used with auditing.
+22 Bad passwd for %s
+	The password given did not match the current password in /etc/passwd.
+	Used with auditing.
+23 New passwd for %s
+	A new password was inserted into /etc/password for the indicated name.
+
+
+***********
+stdhosts.cat
+***********
+
+$set 1
+1 stdhosts: can't open %s\n
+	Unable to open the input file, "%s" (the first argument to stdhosts).
+
+***********
+longfiles.cat
+***********
+
+$set 1
+1 Unable to determine filename length allowed in directory %s\n
+	The directory is /usr/etc/yp most of the time.  This message
+	means for example that the user did not have permission to
+	write to that directory.
+
+***********
+rpcgen.cat
+***********
+
+$set 1
+1 usage: %s [-u] infile\n
+2        %s [-c | -h | -l | -m | -u] [-o outfile] [infile]\n
+3        %s [-s udp|tcp]* [-o outfile] [-u] [infile]\n
+	This message is printed if anything is wrong with the syntax of
+	the rpcgen command line.
+
+4 %1$s: output would overwrite %2$s\n
+	If the name of the output file is the same as the input file, the
+	input file could get overwritten.  So this message is given instead
+	of doing the overwrite.
+
+5 %s: unable to open 
+	If rpcgen cannot open an output file, this message is printed.
+
+6 execl
+	This message is appended in front of the error message returned by 
+	perror when an execl call fails.  
+
+7 fork
+	This message is appended in front of the error message returned by 
+	perror when an fork call fails.  
+
+8 %s: 
+	The %s: is used to print the name of this command (rpcgen) in
+	an error message.
+
+21 definition keyword expected
+	In the text given to rpcgen, there was a word that was seen that
+	was not a keyword (const, struct, enum, union, typedef or program)
+	when such a keyword was expected.
+
+22 illegal result type
+	This message is printed if a program definition in the input file
+	to rpcgen is declared to return a result of type "opaque".
+
+23 illegal argument type
+	This message is printed if a program definition in the input file
+	to rpcgen is declared to accept an argument of type "opaque".
+
+24 no array-of-pointer declarations -- use typedef
+25 no array-of-pointer declarations -- use typedef
+	An array of pointers cannot be declared in rpcgen (int *ptrs[10]).
+	To get the desired result, one must declare a typedef of a pointer
+	type (typedef int * intptr) and then have an array of those
+	(intptr ptrs[10])
+
+26 array declaration expected
+	An object declared to be of type opaque must be an fixed or
+	variable-length array.
+
+27 variable-length array declaration expected
+	An object declared to be of type opaque must be an fixed or
+	variable-length array.
+
+28 voids allowed only inside union and program definitions
+	If the word "void" is seen in any context besides inside a union
+	or a program definition, this message is printed.
+
+29 expected type specifier
+	Declaring a data item in rpcgen is like declaring one in the C
+	language.  Rpcgen expects to see a data-type followed by the data-item.
+	(int x;).  If there is no data-type seen, (== x;), then this message
+	is printed.
+
+30 only simple declaration allowed in switch
+	An array is not allowed as the controling variable in the switch
+	portion of the union declaration.  If one is seen by rpcgen, this
+	message is printed.
+
+41 constant or identifier expected
+	In many places in rpcgen input, rpcgen will expect to see a constant.
+	For example, in a program declaration, the program needs to be given
+	a program number.  This is done with a constant.  This message is 
+	printed if it is missing.
+
+42 (NLS) illegal second byte in 16-bit character
+	Based on the language environment variable, the second byte
+	of a two-byte character was not a legal bit pattern for that language.
+
+43 illegal character in file: 
+	Some charater (such as a control character) was found in the
+	input to rpcgen which causes this message to be printed.
+
+44 (NLS) illegal second byte in 16-bit character
+	Based on the language environment variable, the second byte
+	of a two-byte character was a not legal bit pattern for that language.
+
+45 unterminated string constant
+	A string constant was missing a terminating quote character.
+
+46 illegal character constant
+47 illegal character constant
+48 illegal character constant
+49 illegal character constant
+50 illegal character constant
+51 illegal character constant
+	Rpcgen allows the use of character constants (\014) in its
+	input.  A badly form constant (\bad) was seen by rpcgen and
+	caused this message to be printed.
+
+52 preprocessor error
+        If during the execution of the C-preprocessor on the input source
+	to rpcgen an error happens, this message is printed.
+
+53 (NLS) illegal second byte in 16-bit character
+	Based on the language environment variable, the second byte
+	of a two-byte character was a not legal bit pattern for that language.
+
+54 preprocessor error
+        If during the execution of the C-preprocessor on the input source
+	to rpcgen an error happens, this message is printed.
+
+61 %1$s, line %2$d: 
+	This is the format of the error messages caused by syntax errors in
+	the input to rpcgen.  The %1$s is the name of the input file.
+	The %2$d is the number of the line in the input file that had
+	the syntax error.
+
+62 %s\n
+	This is the format string used to print out the text of an 
+	error message.
+
+63 too many files!\n
+	If rpcgen cannot open an output file because there are already too
+	many open files, this message is printed.
+
+64 expected '%s'
+65 expected '%s' or '%s'
+66 expected '%s', '%s' or '%s'
+	These three strings are related.  In the parsing of the input to
+	rpcgen, there will be situations where a certain input is expected.
+	If this proper input is not given, one of these messages is printed.
+	If there is only one type of input that is expected, the first
+	message is printed.  If the expected input could be one of two
+	cases, the second message is printed.  Finally the last message
+	is printed if the expected input could be one of three
+	cases.
+
+***********
+lockd.cat
+***********
+
+$set 1
+1 release_le: pre_le not free yet\n
+	Debug message - during the release of a le (lock entry) the 
+	pre-allocated le is also being freed.
+2 release_le: pre_fe not free yet\n
+	Debug message - during the release of a le (lock entry) the 
+	pre-allocated fe (file entry) is also being freed.
+3 malloc
+	String for log_perror call on malloc failure.
+11 %1$s:  len(%2$d) greater than max len(%3$d)\n
+	Last byte of lock is beyond the maximum length of a file.
+12 (%x), oh= 
+        Debug message - a lock is being printed, this is the object handle.
+13 , svr= %s, fh = 
+        Debug message - a lock is being printed, this is the server and file
+	handle.
+14 , op=%1$d, ranges= [%2$d, %3$d)\n
+        Debug message - a lock is being printed, this is the operation and
+	range of bytes.
+15 ***** granted reclocks *****\n
+        Debug message - the queues are being printed, this is the title for
+	the list of granted locks.
+16 ***** msg queue *****\n
+        Debug message - the queues are being printed, this is the title for
+	the list of remote request messages.
+17  (%x, 
+        Debug message - the queues are being printed, this is the formatting
+	for the remote request message id's.
+18  lstat =%d),
+        Debug message - the queues are being printed, this is the formatting
+	for the remote request message reply statuses.
+19  NULL),
+        Debug message - the queues are being printed, the remote request
+	message's reply status is NULL.
+20 \n
+        Debug message - the queues are being printed, this is the formatting
+	for the remote request messages.
+21 *****no entry in msg queue *****\n
+        Debug message - the queues are being printed, this indicates that the
+	queue for the remote request messages is empty.
+22 ***** blocked reclocks *****\n
+        Debug message - the queues are being printed, this is the title for
+	the list of blocked remote requests.
+23 ***** no blocked reclocks ****\n
+        Debug message - the queues are being printed, this indicates that the
+	queue for blocked remote requests is empty.
+24 ***** monitor queue on (%1$s, %2$d) *****\n
+        Debug message - the queues are being printed, this is the title for
+	the list of monitor entries.
+25 used_le=%1$d, used_fe=%2$d, used_me=%3$d\n
+        Debug message - the queues are being printed, this is the count for
+	lock entries, file entries, and monitor entries that are in use.
+26 lock granted\n
+	Status of this lock request is granted.
+27 lock denied\n
+	Status of this lock request is denied.
+28 lock denied_nolocks\n
+	Status of this lock request is denied because of ENOLCK on remote.
+29 lock blocked\n
+	Status of this lock request is blocked.
+30 lock denied_grace_period\n
+	Status of this lock request is denied because the remote is in its
+	grace period after initialization.
+31 %1$s: kill process (%2$d)\n
+	The specified process is being killed with a SIGLOST due to a lost lock.
+32 %s: cont_lock: remote and local lock tbl inconsistent\n
+	The lockd is exiting because the local and remote tables do not match.
+41 %1$s: (%2$x)pre_fe == NULL : ABORT in add_reclock\n
+	pre_fe should not be NULL at this point so give up.
+42 %1$s: add_reclock: insrtp = a = %2$x should not happen!!!\n
+	This is a warning that we are trying to add an existing lock.
+43 %1$s: (%2$x) pre_le is NULL : ABORT in delete_reclock\n
+	pre_le should not be NULL at this point so give up.
+44 %s: add_mon = -1 in delete, should not happen\n
+	add_mon returned an error on delete of a reclock.
+45 %s: impossible!\n
+        This is for a default case which can never be reached.
+46 %s: same blocking lock already exists\n
+	This blocking lock is already on the wait_q.  Should not happen.
+47 %1$s: wakeup(%2$x) cannot take place due to add_call malloc error\n
+	Due to a malloc error in add_call the lockd cannot wakeup a blocked
+	lock.
+48 %s: get_fe: out of fs_rlck entry\n
+	A malloc error in get_fe was returned to copy_fe.
+49 %1$s: obj_copy(a = %2$x, b = NULL), a\n
+	The source object passed to obj_copy was NULL.
+50 %1$s: unknown contact monitor (%2$d) : ABORT in contact_monitor\n
+	contact_monitor was called with an unkown function so give up.
+51 %1$s: contact_mon: problem with private data size (%2$d) to status monitor\n
+	The size of the priv_struct is greater than 16.
+52 %1$s: site %2$s not subscribe to status monitor service \n
+	Did not receive a valid reply from remote site.
+53 %s: lockd cannot contact local statd\n
+	An error occurred while sending a message to the local statd.
+54 %1$s: fcntl (wakeup): errno = %2$d!\n
+	wakeup routine received an error other than EACCES while checking with
+	the local kernel.
+63 %1$s: range[%2$d, %3$d] \n
+	This is the byte range to be locked.
+64 %s: during grace period, please retry later\n
+	The lockd is in its grace period and this is not a reclaim request so
+	ignore it.
+65 %1$s: accept reclaim request(%2$x)\n
+	The lockd is in its grace period and this is a reclaim request so
+	accept it.
+66 %s: req discard due status monitor problem\n
+	This request is being discarded because the lockd cannot talk to the 
+	statd.
+69 %1$s: msg reply(%2$d) to procedure(%3$d)\n
+	Debug message logging the procedure and its reply.
+70 %s: rpc.lockd killed upon request\n
+	lockd received a request to kill it so it is exiting.
+73 %1$s: range[%2$d, %3$d)\n
+	This is the byte range to be locked.
+74 %s: during grace period, please retry later\n
+	The lockd is in its grace period and this is not a reclaim request so
+	ignore it.
+75 %s: accept reclaim request\n
+	The lockd is in its grace period and this is a reclaim request so
+	accept it.
+76 %s: req discard due status monitor problem\n
+	This request is being discarded because the lockd cannot talk to the 
+	statd.
+78 %1$s: lm_timeout = %2$d secs, grace_period = %3$d secs, hashsize = %4$d\n
+	Debug message logging the lockd defaults.
+80 %s: in.lockd: fork failure : ABORT in main\n
+	The lockd could not fork its initial child.
+81 %s: cannot create tcp service.\n
+	The lockd failed on svctcp_create.
+82 %s: unable to register (NLM_PROG, NLM_VERS, tcp).\n
+	The lockd could not register.
+83 %s: cannot create udp service.\n
+	The lockd failed on svcudp_bufcreate.
+84 %s: unable to register (NLM_PROG, NLM_VERS, udp).\n
+	The lockd could not register.
+85 %s: cannot create udp service.\n
+	The lockd failed on svcudp_bufcreate.
+86 %s: unable to register (KLM_PROG, KLM_VERS, udp).\n
+	The lockd could not register.
+87 %s: cannot create tcp service.\n
+	The lockd failed on svctcp_create.
+88 %s: unable to register (KLM_PROG, KLM_VERS, tcp).\n
+	The lockd could not register.
+89 %s: cannot create tcp service.\n
+	The lockd failed on svctcp_create.
+90 %s: unable to register (KLM_PROG, KLM_VERS, tcp).\n
+	The lockd could not register.
+93 %s: svc_run returned\n
+	Error since svc_run should never return.
+94 signal handler: signal = %d\n
+	The lockd received the following unexpected signal and will exit.
+95 Usage: %s [ -t timeout] [ -g grace_period] [ -l logfile]\n
+	lockd usage message.
+101 \nalarm! enter xtimer:\n
+	xtimer routine entered on SIGALRM.
+102 **********end of grace period\n
+	The lockd grace period has expired.
+103 remove grace period msg (%x) from msg queue\n
+	This message received during the grace period is being dropped.  Client
+	should retransmit.
+104 xtimer retransmit: 
+	xtimer routine is retransmitting a message for which no reply has been
+	received.
+105 klm_msg = %x\n
+	xtimer routine is preparing to send a reply back to the last message
+	received (klm_msg).
+106 klm_msg == NULL\n
+	klm_msg is NULL which indicates no new requests since last timeout.
+107 xtimer reply to (%x): 
+	xtimer routine is preparing to send a reply back to the last message
+	received (klm_msg).
+111 \enter klm_msg_routine(proc =%1$d): op=%2$d, (%3$d, %4$d) by 
+	Logging procedure, operation, offset, and length of lock request from
+	local kernel.
+112 \n
+	Carriage return.
+113 retransmitted msg!\n
+	This is a retransmitted request.
+114 %1$s: *****warning:*******process issues request %2$x (proc = %3$d) before obtaining response for %4$x\n
+	The process issued a second lock request before receiving a reply to
+	its first request.
+115 retransmitted local block lock (%x)\n, nl
+	Debug message logging a retransmission for a blocked local lock.
+116 %1$s: unknown klm_reply proc(%2$d)\n
+	Default error logging for a reply to an unknown operation.
+117 klm_reply: stat=%d\n
+	Debug message logging the reply being passed back to the kernel.
+121 proc_nlm_test(%x) \n
+	Debug message logging the entry of procedure proc_nlm_test for a 
+	remote test request.
+122 enter proc_nlm_lock(%x) \n
+	Debug message logging the entry of procedure proc_nlm_lock for a 
+	remote lock request.
+123 enter proc_nlm_cancel(%x) \n
+	Debug message logging the entry of procedure proc_nlm_cancel for a 
+	remote cancel request.
+124 enter proc_nlm_unlock(%x) \n
+	Debug message logging the entry of procedure proc_nlm_unlock for a 
+	remote unlock request.
+125 enter proc_nlm_granted(%x)\n
+	Debug message logging the entry of procedure proc_nlm_granted for a 
+	remote granted request.
+126 enter proc_nlm_test_msg(%x)\n
+	Debug message logging the entry of procedure proc_nlm_test for a 
+	remote test request.
+127 enter proc_nlm_lock_msg(%x)\n
+	Debug message logging the entry of procedure proc_nlm_lock for a 
+	remote lock request.
+128 enter proc_nlm_cancel_msg(%x)\n
+	Debug message logging the entry of procedure proc_nlm_cancel for a 
+	remote cancel request.
+129 enter proc_nlm_unlock_msg(%x)\n
+	Debug message logging the entry of procedure proc_nlm_unlock for a 
+	remote unlock request.
+130 enter proc_nlm_granted_msg(%x)\n
+	Debug message logging the entry of procedure proc_nlm_granted for a 
+	remote granted request.
+131 %1$s: unknown nlm_reply proc vaule: %2$d\n
+	Error trying to reply with an unknown remote reply value.
+132 rpc nlm_reply %1$d: %2$d\n
+	Debug message logging the remote reply being returned.
+133 nlm_reply: (%1$s, %2$d), result = %3$d\n
+	Debug message logging the remote reply being returned for which
+	procedure and server.
+135 exit nlm_reply\n
+	Debug message logging the exit of procedure nlm_reply
+136 %s: inconsistent  lock reply exists, ignored \n
+	Ignore this remote reply because we already have a reply and they don't
+	match.
+137 inconsistent reply (%1$d, %2$d) exists for lock(%3$x)\n
+	Debug message logging the details of a remote reply that is being
+	ignored because we already have a reply and they don't match.
+138 nlm_res_routine(%x)\n
+	Debug message logging the entry of procedure nlm_res_routine.
+139 enter nlm_granted_res\n
+	Debug message logging the entry of procedure nlm_granted_res.
+140 %1$s: %2$d not supported in nlm_call\n
+	Error - trying to send an unknown remote request.
+141 nlm_call to (%1$s, %2$d) op=%3$d, (%4$d, %5$d); retran = %6$d, valid = %7$d\n
+	Debug message logging the details of a remote request that is about to
+	go out.
+143 enter call_back(%1$d, %2$d), op =%3$d\n
+	Debug message logging the entry of procedure call_back.
+144 nlm_call error: ABORT in call_back\n
+	Quit due to an error trying to grant a blocked lock to a remote client.
+151 %s: unable to free arguments\n
+	svc_freeargs returned an error.
+152 this is not for me(%1$d): %2$d\n
+	lockd received a crash notice that it does not care about.
+153 enter proc_lm_crash due to %s failure\n
+	Debug message logging the entry of procedure proc_lm_crash.
+154 crashed site is not my concern(%s)\n
+	lockd received a crash notice from a site that it does not care about.
+155 remove blocked lock (%x)\n
+	Since remote site crashed, lockd is removing this lock from its wait_q.
+156 this is not for me(%1$d): %2$d\n
+	lockd received a recovery notice that it does not care about.
+157 enter proc_lm_recovery due to %1$s state(%2$d)\n
+	Debug message logging the entry of procedure proc_lm_recovery.
+158 I have been declared as failed!!!\n
+	lockd is confused by a recovery notice from itself.
+159 recovered site is not my concern(%s)\n
+	lockd received a recovery notice from a site that it does not care
+	about.
+160 %1$s: blocked req (%2$x) cannot be found in msg queue\n
+	Since remote site crashed, lockd is removing this lock from its wait_q,
+	but the lock does not exist in its msg queue.  Should be in both.
+161 %1$s: reclaim requet (%2$x) cannot be sent and cannot be queued either!\n
+	Since remote site crashed, lockd tried to send a reclaim request but
+	the send failed and lockd got a malloc error trying to queue the
+	request.
+171 enter local_lock\n
+	Debug message logging the entry of procedure local_lock.
+172 %1$s: fcntl (local_lock) : errno = %2$d!\n
+	lockd received an unexpected error from the local kernel on lock.
+173 enter remote_lock\n
+	Debug message logging the entry of procedure remote_lock.
+174 %s: rpc not supported\n
+	Only message passing is supported right now.
+175 enter local_unlock\n
+	Debug message logging the entry of procedure local_unlock.
+176 %1$s: fcntl (local_unlock) : errno = %2$d!\n
+	lockd received an unexpected error from the local kernel on unlock.
+177 enter remote_unlock\n
+	Debug message logging the entry of procedure remote_unlock.
+178 %s: rpc not supported\n
+	Only message passing is supported right now.
+179 enter local_test\n
+	Debug message logging the entry of procedure local_test.
+180 lock blocked by %1$d, (%2$d, %3$d)\n
+	Debug message logging the details of a blocked lock request.
+181 %1$s: fcntl (local_test) : errno = %2$d!\n
+	lockd received an unexpected error from the local kernel on test.
+182 lock blocked by %1$d, (%2$d, %3$d)\n
+	Debug message logging the details of a blocked lock request.
+183 enter remote_test\n
+	Debug message logging the entry of procedure remote_test.
+184 %s: rpc not supported\n
+	Only message passing is supported right now.
+185 enter local_cancel(%x)\n
+	Debug message logging the entry of procedure local_cancel.
+186  local_cancel: dequeue(%x)\n
+	This request is being cancelled.
+187 enter remote_cancel(%x)\n
+	Debug message logging the entry of procedure remote_cancel.
+188 remove msg(%x) due to remote cancel\n
+	This request is being cancelled.
+189 %1$s: cancel request pre_le=%2$x pre_fe = %3$x\n
+	Debug message logging the values of pre_le and pre_fe for the cancelled
+	request.
+190 %s: rpc not supported\n
+	Only message passing is supported right now.
+191 enter local_granted\n
+	Debug message logging the entry of procedure local_granted.
+192 %s: lock_granted msg discarded due to lock tbl inconsistent (unlock reply may be lost!)\n
+	lockd received a granted msg for a lock that is already granted.
+193 %1$s: msg(%2$x) is deleted from msg queue because reply cannot be created due to malloc prob\n
+	lockd is dropping this msg because it cannot malloc enough memory to
+	reply.
+194 %s: msg no longer in msg_queue\n
+	lockd received a granted reply for a lock that it no longer wants.
+195 %s: local granted: rpc not supported\n
+	Only message passing is supported right now.
+196 %s: msg no longer in wait_queue, this may be a retransmitted msg\n
+	lockd received a granted reply for a lock that has already been
+	granted.
+197 enter cont_lock\n
+	Debug message logging the entry of procedure cont_lock.
+198 %s: cont_lock: remote and local lock tbl inconsistent\n
+	The remote lockd just granted a lock that is now blocked.  Therefore,
+	the local and remote tables do not match.
+199 %1$s: unknown lock return: %2$d\n
+	The remote lockd returned an unknown reply status.
+200 enter cont_unlock\n
+	Debug message logging the entry of procedure cont_unlock.
+201 %1$s: unkown rpc_unlock return: %2$d\n
+	The remote lockd returned an unknown reply status.
+202 enter cont_test\n
+	Debug message logging the entry of procedure cont_test.
+203 lock blocked by %1$d, (%2$d, %3$d)\n
+	Debug message logging the details of the blocked remote test request.
+204 %1$s: cont_test: unknown return: %2$d\n
+	The remote lockd returned an unknown reply status.
+205 enter cont_cancel\n
+	Debug message logging the entry of procedure cont_cancel.
+206 cont_cancel: msg must be removed from msg queue due to remote_cancel, now has to be put back\n
+	The local lockd tried to cancel a remote lock request but the remote
+	lockd has already granted to lock.  Therefore, the local lockd must
+	ignore the cancel.
+207 %s: cont_cancel: remote and local lock tbl inconsistent\n
+	The remote lockd just canceled a lock that is now granted.  Therefore,
+	the local and remote tables do not match.
+208 cont_cancel: dequeue(%x)\n
+	The local lockd is removing this canceled request from its msg_q.
+209 %s: cont_cancel cannot find blocked lock request in msg queue! \n
+	The local lockd was denied a cancel request which implies that the lock
+	has been granted, but it is not in the local queue.
+210 %s: remote and local lock tbl inconsistent\n
+	The local lockd was denied a cancel request that implies that the local
+	and remote lock tables do not match.
+211 %1$s: unexpected remote_cancel %2$d\n
+	The remote lockd returned an unknown reply status.
+212 enter cont_reclaim\n
+	Debug message logging the entry of procedure cont_reclaim.
+213 reclaim request(%x) is granted\n
+	Debug message logging the granted reclaim request.
+214 reclaim block request (%x) is granted!!!\n
+	Debug message logging the granting of a reclaim request for a blocked
+	lock.  This should not happen since the lockd does not attempt to
+	reclaim blocked requests.
+215 %s: reclaim blocked request already granted, impossible\n
+	Debug message logging the granting of a reclaim request for a blocked
+	lock.  This should not happen since the lockd does not attempt to
+	reclaim blocked requests plus this one is already granted.
+216 %1$s: reclaim lock(%2$x) fail!\n
+	The local lockd was denied for this reclaim request.
+217 reclaim block lock fail due to(%x)\n
+	The local lockd was denied for this reclaim request for this reason.
+218 %s: reclaim block lock has been granted with reclaim rejected as nolocks\n
+	The local lockd was denied for this reclaim request due to ENOLCK on
+	remote, but the lock is already granted.
+219 %1$s: reclaim lock(%2$x) fail!\n
+	The local lockd failed to reclaim this lock request because another
+	process locked the area first.
+220 %s: blocked reclaim request already granted locally, impossible\n
+	The local lockd failed to reclaim this lock request because another
+	process locked the area first, but the request has been granted on
+	the local lockd.
+221 %1$s: reclaim lock req(%2$x) is returned due to grace period, impossible\n
+	This request was denied because the remote is in its grace period.  
+	This does not make sense.
+222 %1$s: unknown cont_reclaim return: %2$d\n
+	The remote lockd returned an unknown reply status.
+231 %1$s: stat_mon: len(=%2$d) is greater than 16!\n
+	The length of the priv_struct is too big.
+232 %1$s: stat_mon proc(%2$d) not supported\n
+	stat_mon was called with an unknown function.
+233  request monitor:(svr=%1$s) mon_name=%2$s, my_name=%3$s, func =%4$d\n
+	Debug message logging the details of the site being monitored.
+234 timeout, retry contacting status monitor\n
+	lockd timed out while trying to contact statd.  It will retry.
+235 rpc.lockd: Cannot contact status monitor!\n
+	lockd timed out while trying to contact statd.  It retried the max
+	number of times.
+236 Error talking to statmon errno= %d\n
+	The lockd received an error other than RPC_TIMEDOUT.
+241 svcudp_create: socket creation problem
+	socket() call failed.
+242 svcudp_create - cannot getsockname
+	getsockname() call failed.
+243 svcudp_create: out of memory\n
+	malloc failure in svcudp_create.
+244 svcudp_create: out of memory\n
+	malloc failure in svcudp_create.
+245 svcudp_create: out of memory\n
+	malloc failure in svcudp_create.
+246 enablecache: cache already enabled
+	call was made to enable the cache, but already is enabled.
+247 enablecache: could not allocate cache
+	malloc failure in enablecache.
+248 enablecache: could not allocate enable
+	malloc failure in enablecache.
+249 enablecache: could not allocate cache fifo
+	malloc failure in enablecache.
+250 cache_set: victim not found
+	no match in cache.
+251 cache_set: victim alloc failed
+	malloc failure in cache_set.
+252 cache_set: could not allocate new rpc_buffer
+	malloc failure in cache_set.
+261 RPC_UNKNOWNHOST\n
+	gethostbyname() returned UNKNOWNHOST.
+262 clnttcp_create
+	RPC_PMAPFAILURE or RPC_SYSTEMERROR returned for clnttcp_create().
+263 call_tcp timeout, retry\n
+	lockd is retrying do to call_tcp timeout.
+271 add hash entry (%1$x), %2$s, %3$x, %4$x\n
+	Debug message logging the details of the entry being added to the hash.
+272 udp cannot send due to out of cache\n
+	malloc error trying to add to hash.
+273 (%1$x):[%2$s, %3$d, %4$d] is a new connection\n
+	lockd is trying a new connection
+274 (%1$x):[%2$s, %3$d, %4$d] is a timed out connection\n
+	lockd has a timed out connection.  Create new one.
+275 delete hash entry (%1$d), %2$s, %3$d, %4$d\n
+	Debug message logging the details of the entry being deleted from the
+	hash.
+276 socket() call failed
+	socket() call failed
+277 Failure in fcntl() to create new socket
+	fcntl() returned a descriptor less than zero.
+278 socket descriptor for link_sock = %d\n
+	Debug message logging the new socket descriptor.
+
+***********
+statd.cat
+***********
+
+1 unable to free arguments\n
+	svc_freeargs failure.
+2 Usage: rpc.statd [ -l logfile]\n
+	status monitor usage message.
+3 debug is on, create entry: %1$s, %2$s, %3$s\n
+	Debug message logging the fact that debug is turned on and the names
+	of the directories being created for use by statd.
+4 in.lockd: fork failure\n
+	Fatal error - fork failed.
+5 cannot create udp service.\n
+	svcudp_create failure - statd will exit.
+6 unable to register (SM_PROG, SM_VERS, udp).\n
+	svc_register failure - statd will exit.
+7 cannot create tcp service.\n
+	svctcp_create failure - statd will exit.
+8 unable to register (SM_PROG, SM_VERS, tcp).\n
+	svc_register failure - statd will exit.
+9 svc_run returned\n
+	Error since svc_run should never return.
+21 proc sm_stat: mon_name = %s\n
+	Debug message logging the entry of procedure sm_stat_1 and the name
+	of the node for which status was requested.
+22 proc sm_unmon_all: [%1$s, %2$d, %3$d, %4$d]\n
+	Debug message logging the entry of procedure sm_unmon_all_1 and the
+	name of the node, program, version, and proc to be unmonitored.
+23 proc sm_simu_crash\n
+	Debug message logging the entry of procedure sm_simu_crash_1.
+24 insert_mon: malloc
+	malloc error in insert_mon.
+25 add_mon(%1$x) %2$s (id=%3$d)\n
+	Debug message logging the new monitor entry and the name of the
+	node associated with the new monitor entry.
+26 delete_mon(%1$x): %2$s\n
+	Debug message logging the monitor entry and the name of the node
+	associated with the monitor entry to be deleted.
+27 statd_call_lockd: %1$s state = %2$d\n
+	Debug message - statd is calling lockd to notify lockd of the new
+	state for the given node.
+28 statd cannot contact local lockd on %s status change, give up!\n
+	Debug message - statd tried to notify lockd of a state change for some
+	node, but received an error other than RPC_TIMEDOUT.
+29 *****monitor_q = NULL\n
+	Debug message - monitor_q is empty.
+30 *****monitor_q: 
+	Debug message - header for monitor_q.  Entries will follow.
+31 (%x), 
+	Monitor entry.
+32 \n
+	New line.
+41 sm_notify: %1$s state =%2$d\n
+	Debug message logging the entry of procedure sm_notify and the name of
+	the node and its state.
+42 enter statd_init\n
+	Debug message logging the entry of procedure statd_init.
+44 fseek
+	String for log_perror - error on fseek.
+45 \n
+	New line.
+46 empty file\n
+	Debug message logging the fact that the state file on this node is
+	empty.
+47 fseek
+	String for log_perror - error on fseek.
+48 \n
+	New line.
+49 fsync
+	String for log_perror - error on fsync.
+50 \n
+	New line.
+51 local state = %d\n
+	Debug message logging the new local state.
+52 mkdir current
+	String for log_perror - error on mkdir of current statd directory.
+53 \n
+	New line.
+54 mkdir backup
+	String for log_perror - error on mkdir of backup statd directory.
+55 \n
+	New line.
+56 open current directory
+	String for log_perror - error on open of current statd directory.
+57 \n
+	New line.
+58 getdirentries
+	String for log_perror - error on reading current statd directory.
+59 \n
+	New line.
+60 rename
+	String for log_perror - error on renaming nodes from current directory
+	to backup directory.
+61 \n
+	New line.
+62 rename: %1$s to %2$s\n
+	Debug message logging the renaming of nodes from current directory
+	to backup directory.
+63 close current directory\n
+	String for log_perror - error on closing current statd directory.
+64 \n
+	New line.
+65 open backup directory
+	String for log_perror - error on open of backup statd directory.
+66 \n
+	New line.
+67 getdirentries
+	String for log_perror - error on reading backup statd directory.
+68 \n
+	New line.
+70 remove monitor entry %s\n
+	Debug message logging the fact that the given node is being romoved
+	from the backup directory.  This implies that statd on that node has
+	been notified of the new state of the local lockd.
+71 \n
+	New line.
+72 close current directory\n
+	String for log_perror - error on closing backup statd directory.
+73 \n
+	New line.
+74 statd_call_statd at %s\n
+	Debug message - the local statd is sending the new lockd state to the
+	statd on the given node.
+75 statd cannot talk to statd at %s\n
+	The local statd was sending the new lockd state to the statd on the
+	given node, but gave up due to an error other than RPC_TIMEDOUT.
+76 enter sm_try: recovery_q = %s\n
+	Debug message - the local statd is re-trying the notify for the remote
+	statd's.
+77 malloc
+	String for log_perror - error on malloc.
+78 \n
+	New line.
+79 create monitor entry %s\n
+	Debug message - a monitor entry is being created for the given node.
+80 open: \n
+	String for log_perror - error on open of new file in statd current
+	directory for monitor entry.
+81 \n
+	New line.
+82 %s is created\n
+	Debug message - a monitor entry has been created for the given node
+	in the statd current directory.
+83 close
+	String for log_perror - error on close of new file in statd current
+	directory for monitor entry.
+84 \n
+	New line.
+85 remove monitor entry %s\n
+	Debug message - a monitor entry is being removed for the given node.
+86 \n
+	New line.
+87 sm_crash clean up\n
+	Debug message - status monitor is cleaning up for simulated crash.
+
+
+***********
+on.cat
+***********
+===========
+Source File: on.c
+===========
+
+1 on (size): 
+	Could not set pty size on the server
+2 \r\n
+	Carriage return and newline
+3 on (signal): 
+	Could not propagate signal to remote process
+4 \r\n
+	Carriage return and newline
+5 Unknown option %s\n
+	An unknown option was specified on the command line
+6 Usage: on [-i|-n] [-d] host [command [argument] ... ]\n
+	Incorrect usage of the command occurred, correct usage is given
+7 on: unknown host %s\n
+	The host name (%s) was not found in the host database
+8 Got the host named %1$s (%2$s)\n
+	Output for debug mode. %1$s is the server host name and %2$s is
+	the address of the server
+9 on: cannot connect to server on %s\n
+	The host (%s) is down, unreachable on the network or not running
+        rexd.
+10 TCP RPC connection created\n
+	Output for debug mode. Connection made to server
+11 on: can't find . (%s)\n
+	A problem occurred trying to find the user's current working 
+	directory
+12 on: can't locate mount point for %1$s (%2$s)\n
+	A problem occurred trying to find the mount point for the user's
+	current working directory. %1$s is the current directory and 
+	%2$s is the subdirectory within the file system.
+13 on: current directory (%s) is remote via RFA.\n
+14     RFA directories not supported by on \n
+	The user's current working directory is being accessed
+	from a remote host via RFA, an HP proprietary networking product. 
+	Use of on from a directory accessed in this manner is not supported.
+15 wd host %1$s, fs %2$s, dir within %3$s\n
+	Output for debug mode. %1$s is the name of the host where the 
+	current working directory is physically mounted. %2$s is the 
+	file system which contain the current working directory. %3$s
+	is the current working directory relative to the file system 
+	name.
+16 on %s: 
+	Header of the message printed by clnt_perrno
+17 \n
+	Newline
+18 on %1$s: %2$s
+	Error message returned by the server. %1$s is the name of the 
+	server and %2$s is the error message returned.
+19 Client call was made\r\n
+	Output for debug mode. Indicates that client call succeeded to 
+	the server.
+20 on (modes) %s: 
+	Could not set the tty modes on the server. %s is the name of 
+	the server.
+
+21 \r\n
+	Carriage return and newline
+22 on (size) %s: 
+	Could not set pty size on the server
+23 \r\n
+	Carriage return and newline
+24 accept on stdout\r\n
+	Output for debug mode. Indicates that socket for stdout of the 
+	remote command is setup.
+25 accept on stderr\r\n
+	Output for debug mode. Indicates that socket for stderr of the 
+	remote command is setup.
+26 on: select
+	Select system call failed
+27 on: 
+	Header of the message printed by clnt_perrno
+28 \r\n
+	Carriage return and newline
+29 on: ioctl(TCSETAW)
+	ioctl call to reset the tty modes failed
+30 \r\n
+	Carriage return and newline
+31 on: accept
+	Accept call for socket to communicate with the server failed.
+32 on: socket
+	Socket call for socket to communicate with the server failed.
+33 on: standard input (stdin) is not a tty\n
+	The -i option was specified but the standard input for the 
+	command is not a tty.
+===========
+Source File: where.c
+===========
+
+41 unknown error
+	The value of errno does not have a message associated with it.
+43 mount table problem
+	A problem occurred trying to read the mount table.
+
+
+***********
+rexd.cat
+***********
+===========
+Source file: rexd.c
+===========
+
+1 rexd: svctcp_create: error\n
+	Could not create an rpc tcp server
+2 rexd: service rpc register: error\n
+	svc_register call failed
+3 rexd: svctcp_create: error\n
+	Could not create an rpc tcp server
+4 rexd: service rpc register: error\n
+	svc_register call failed
+5 rexd: select failed
+	Select call in main loop of rexd failed
+6 rexd: Select returned zero\n
+	Select call in main loop of rexd returned 0
+7 rexd: nullproc err
+	Sendreply call in NULLPROC of rexd failed
+8 rexd: reply failed\n
+	Sendreply call in server failed
+9 rexd: mode reply failed
+	Sendreply call in server failed
+10 rexd: window change reply failed
+	Sendreply call in server failed
+11 rexd: signal reply failed
+	Sendreply call in server failed
+12 rexd: reply failed\n
+	Sendreply call in server failed
+13 No process to wait for!\n
+	Rexd did not have a child process to wait for
+14 rexd: couldn't umount %s\n
+	Rexd could not umount(2) the file system %s
+15 rexd: can't chdir to %s\n
+	Rexd could not change directory to %s
+16 rexd: can't chdir to %s\n
+	Rexd could not change directory to %s
+17 rexd: can't chdir to %s\n
+	Rexd could not change directory to %s
+19 rexd: cannot allocate a pty\n
+	Rexd could not allocate a pty to use for the interactive command
+20 rexd: can't fork\n
+	fork system call failed
+24 rexd: connect
+	connect call on a socket to the client failed
+25 %1$s@%2$s
+	Command name printed by ps command. %1$s is the user name and 
+	%2$s is the client host name
+201 rexd: getpeername failed with errno = %d\n
+	getpeername failed with the errno %d
+202 rmdir
+	Rexd could not remove the temporary directory used as a mount point
+203 rexd: mountdir (%s) is not a directory\n
+	The path name %s does not specify a directory in the file system
+204 rexd: mountdir (%s) is not a directory\n
+	The path name %s does not specify a directory in the file system
+205 rexd: can't mount file system %1$s from host %2$s\n
+	Rexd could not mount the user's current working directory. %1$s is
+	the name of the file system and %2$s is the host where the file
+	system is physically attached.
+206 rexd: can't create pipe\n
+	Rexd could not create a pipe which is required to set the tty size
+207 rexd: could not read from pipe
+	Rexd could not read from pipe used to set the tty size
+208 rexd: could not read from pipe\n
+	Rexd could not read from pipe used to set the tty size
+209 rexd: could not read from pipe
+	Rexd could not read from pipe used to set the tty size
+210 rexd: could not read from pipe\n
+	Rexd could not read from pipe used to set the tty size
+211 rexd: %s: Command not found\n
+	The specified command was not found
+212 rexd: %s: Command not found
+	The specified command was not found
+213 rexd: %s: Permission denied\n
+	The user does not have execute permission for the specified 
+	command
+214 rexd: %s: Permission denied
+	The user does not have execute permission for the specified 
+	command
+215 rexd: %s: Text file busy\n
+	The executable file is currently open for writing
+216 rexd: %s: Text file busy
+	The executable file is currently open for writing
+217 rexd: %s: Can't execute\n
+	Rexd was unable to execute the specified command
+218 rexd: %s: Can't execute
+	Rexd was unable to execute the specified command
+219 Initial directory is %s:%s%s
+	The starting directory for the remote user, given in terms of
+	<hostname>:<file system name><directory within file system>.
+	Used for auditing for connections.
+===========
+Source file: unix_login.c
+===========
+
+81 rexd: root execution not allowed\n
+	Rexd does not allow root on a client to execute a command
+82 rexd: User id %d not valid\n
+	The user id %d sent by the client is not a valid user is on 
+	the server.
+83 rexd: User id %d, denied access\n
+	Rexd was started on the server with the -r option and the 
+	access restriction imposed by the -r option where not meet
+	for the user associated with user id %d in the server.
+84 pty read
+	An error occurred trying to read the pty associated with an
+	interactive command
+85 socket read
+	An error occurred trying to read command input from the client.
+
+===========
+Source file: mount_nfs.c
+===========
+
+$set 1
+41 rexd: no host name in %s\n
+	No host name is specified in the file system specification.
+42 rexd: %s not in hosts database\n
+	The host name %s was not found in the hosts database
+43 rexd: can not map port for %s\n
+	The host %s did not respond to the port map request enough times
+	that we gave up
+44 rexd: %s not responding to port map request\n
+	The host %s is not responding to the port map request
+45 rexd: %s not responding to portmap request
+	The host %s is not responding to the port map request
+47 rexd: %s is not running a mount daemon\n
+	The host %s is not running a mount daemon so rexd can not mount
+	the user's current working directory
+48 rexd: %s not responding to mount request\n
+	The host %s is not responding to the mount request
+49 rexd: %s not responding to mount request
+	The host %s is not responding to the mount request
+51 rexd: %s not responding to mount request
+	The host %s is not responding to the mount request
+53 rexd: not in export list for %s\n
+	The server is not in the export list for the file system %s
+54 rexd: %s OK\n
+	The host %s finally responded to either the portmap request of the 
+	mount request or both.
+57 rexd: %s not in hosts database\n
+	The host %s is not in the hosts database.
+58 rexd: warning on umount create (did not umount):
+	Rexd could not unmount the user's current working directory due 
+	to a failed clntudp_create call
+60 rexd: warning umount (did not umount):
+	Rexd could not unmount the user's current working directory.
+62 rexd: can't get %s lock\r\n
+	Rexd could not get the lock for the mount table.
+63 rexd: can't open %1$s or %2$s\r\n
+	Rexd could not rename the mount table (%1$s) to a temp file name
+	(%2$s).
+64 rexd: can not rename %1$s to %2$s\r\n
+	Rexd could not rename the temp file (%1$s) to the mount table 
+	(%2$s).
+69 %s
+	A string passed to the procedure errprintf.
+70 rexd: unable to mount %1$s: %2$s\n
+	Rexd was unable to mount the file system containing the user's
+	current working directory.
+
+.fi
+.TC 2 2 3 0 "TABLE OF CONTENTS"	\" Define format for table of contents

@@ -1,0 +1,31 @@
+$set 1
+1 ypwhich:  mapname exceeds %d characters\n
+2 ypwhich:  NIS domain name exceeds %d characters\n
+3 ypwhich:  hostname exceeds %d characters\n
+4 ypwhich:  getdomainname system call failed\n
+5 ypwhich:  the NIS domain name hasn't been set on this machine\n
+6 ypwhich:  gethostname system call failed\n
+7 ypwhich:  %s was not found in /etc/hosts or the NIS hosts map\n
+8 NIS domain %s not bound.\n
+9 NIS domain %s not bound.\n
+10 ypwhich:  clntudp_create error
+11 ypwhich:  can't talk to ypbind on %s.\n
+12 ypwhich:  gethostname system call failed\n
+13 \n
+14 0x%x\n
+15 %s\n
+16 ypwhich:  can't find the master of %1$s.\n          Reason:  %2$s\n
+17 %s\n
+18 Use "%1$s" for map "%2$s"\n
+19 ypwhich:  can't bind to an NIS server for domain %1$s.\n          Reason:  %2$s\n
+20 ypwhich:  can't get the first record from the NIS map.\n          Reason:  %s\n
+21 ypwhich:  can't get the next record from the NIS map.\n          Reason:  %s\n
+22 ypwhich:  can't get the list of maps
+23 ypwhich:  can't get the list of maps.\n          Reason:  %s\n
+24 %s 
+25 ????????\n
+26 ypwhich:  can't find the master of %1$s.\n          Reason:  %2$s\n
+27 %s\n
+28 Usage:  ypwhich [-d domain] [-V1 | -V2] [hostname]\n        ypwhich [-d domain] [-t] [-m [mname]]\n        ypwhich -x\n        ypwhich\n\nwhere   mname may be either a mapname or a map nickname\n        -t inhibits map nickname translation\n        -m lists the master server's name for one or all maps\n        -x prints a list of map nicknames and their corresponding maps\n
+29 ypwhich: can't reach host %1$s at address %2$s\n
+30 ypwhich: now trying %s\n

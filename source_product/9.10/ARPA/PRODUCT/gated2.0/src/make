@@ -1,0 +1,26 @@
+#!/bin/sh
+#
+#	$Header: make,v 1.1.109.4 92/02/28 15:58:55 ash Exp $
+#
+#	Run a make with the appropriate options.  If this fails some
+#	other paths may need to be tried
+#
+#	If Makefile.depend does not exist, a 'make depend' is done
+#	first.
+#
+
+DEPEND=Makefile.depend
+CONFIG=Makefile.config
+MAKEFILE=Makefile.gated
+
+for make in /usr/bin/make /bin/make; do
+	if [ -f ${make} ]; then
+		if [ ! -f ${DEPEND} ]; then
+			echo "Doing a make depend";
+			${make} -f ${CONFIG} -f ${MAKEFILE} depend
+		fi
+		exec ${make} -f ${CONFIG} -f ${MAKEFILE} -f ${DEPEND} ${1+"$@"}
+	fi
+done
+
+exit 1;

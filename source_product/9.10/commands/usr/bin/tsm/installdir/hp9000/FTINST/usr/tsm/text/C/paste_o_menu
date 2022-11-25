@@ -1,0 +1,54 @@
+############################################################################
+# TSM user customizable file: paste_o_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# paste options menu for TSM
+# @(#) $Header: paste_o_menu,v 66.5 90/11/21 17:30:19 jag Exp $
+
+pull_down_menu
+
+item_name=paste to Printer (uses .tsmprint) $tsm_hot_key>p
+item_selection=P
+item_type=ft_command
+item_action=>p
+
+item_name=paste to File - new...            $tsm_hot_key>f
+item_selection=F
+item_type=ft_command
+item_action=>f$0\r
+dialog_box
+dialog_item_prompt New file name:
+dialog_item_var $0 25
+
+item_name=paste to file - Append...         $tsm_hot_key>a
+item_selection=A
+item_type=ft_command
+item_action=>a$0\r
+dialog_box
+dialog_item_prompt Append to file name:
+dialog_item_var $0 25
+
+item_name=paste to file - Overwrite...      $tsm_hot_key>o
+item_selection=O
+item_type=ft_command
+item_action=>o$0\r
+dialog_box
+dialog_item_prompt Overwrite file name:
+dialog_item_var $0 25

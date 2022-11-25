@@ -1,0 +1,3 @@
+#!/bin/sh
+# remote version of disable
+remsh `cnodes -r` /usr/bin/disable $*

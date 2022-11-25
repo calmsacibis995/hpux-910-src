@@ -1,0 +1,5 @@
+-d /nfs
+-h hpfclc
+-r s300_7.0_gs
+-p nfs
+-m dlr@hpcndr

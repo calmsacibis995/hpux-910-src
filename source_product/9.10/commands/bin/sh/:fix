@@ -1,0 +1,11 @@
+# @(#) $Revision: 32.1 $       
+for i do
+	$CC -O -S -c -DNLS -DNLS16 $i.c
+	ed - <<\! $i.s 
+	g/^[ 	]*\.data/s/data/text/
+	w
+	q
+!
+	$AS -o $i.o $i.s
+	rm $i.s
+done

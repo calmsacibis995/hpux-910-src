@@ -1,0 +1,288 @@
+/* HPUX_ID       @(#)vme.dma.skel	1.1     88/04/13	*/
+
+#include <errno.h>
+#include <param.h>
+#include <buf.h>
+#include <dir.h>
+#include <signal.h>
+#include <timeout.h>	
+#include <hpibio.h>
+#include <uio.h>
+#include <skel.h>
+#include <ioctl.h>
+#include <param.h>
+#include <user.h>
+#include <vme2.h>
+
+/* global data structure declarations */
+
+struct skelregs *skel=(struct skelregs *) 0x791000;   /* board address */
+struct buf skelbuf;        /* io buffer */
+struct vme_dma_chain *skel_dma_chain; /* chain to hold list of dma transfers */
+struct vme_dma_chain *skel_chain_next; /* pointer to next transfer to be completed */
+
+skel_first_open=1;
+int skelopened;            /* handler has been opened */
+int skel_strategy();
+int skel_isr();
+
+#define SKELPRI 10                /* sleep priority */
+#define SKELIRQ  2                /* interrupt level */
+
+/*
+
+/*
+ * SKEL_OPEN
+ *      Perform initialization on first open.
+ *      Allow only one open at a time
+ */
+skel_init() { }
+
+skel_open(dev, flag) 
+dev_t dev;
+int flag;
+{
+
+int vec_num;
+
+	if (skel_first_open) {
+	/* This is the first call to open since boot.
+	   Complete power-up initialization		*/
+
+		skel_first_open = 0;
+		/* Initialize global data structures here */
+		skel_dma_chain = (struct vme_dma_chain *) vme_dma_init();
+		/* Initialize hardware here	*/
+
+		/* set up hardware vector address */
+		if ( (vec_num = set_vector(skel_isr) ) == -1)
+			panic("out of interrupt vectors");;
+		card_ptr->vector_number = vec_num;
+	}
+	/* The following implements exclusive open */
+	if (skelopened)
+		u.u_error = EACCES;
+	skelopened++;
+	return(0);
+}
+
+skel_close(dev) 
+dev_t dev;
+{
+	/* The following implements exclusive open of the device */
+	skelopened = 0;
+	return(0);
+}
+
+/*
+ * SKEL_READ
+ * Read up to cnt bytes of data from the device into buf. 
+ */
+
+skel_read(dev, uio) 
+dev_t dev;
+struct uio *uio;
+{
+	/* The read function is implemented through the strategy routine */
+	return(physio(skel_strategy, &skelbuf, dev, B_READ, minphys, uio) );
+}
+
+/*
+ * SKEL_WRITE
+ * Write cnt bytes of data from buf to the device.  
+ */
+
+skel_write(dev, uio)
+dev_t dev;
+struct uio *uio; 
+{
+	/* The write function is implemented through the strategy routine */
+	return(physio(skel_strategy, &skelbuf, dev, B_WRITE, minphys, uio) );
+}
+
+/* The dma_setup routine is responsible for setting up the
+ * card for a dma transaction.  
+ */
+skel_dma_setup(bp)
+
+struct buf *bp;
+{
+
+/* local variable declarations */
+
+	/* Reset card */
+
+	if (bp->b_flags & B_READ) {
+	/* Perform read specific card set up */
+	}
+
+ 	else {
+	/* Perform write specific card set up */
+	}
+
+/* set up dma address and transfer count */
+
+	card_ptr->dma_addr = (long) skel_chain_next->phys_addr;	
+	card_ptr->dma_count = skel_chain_next->count;			
+
+/* Advance to next transfer on dma chain (for next transfer) */
+	skel_chain_next++;
+}
+
+/* The dma_start routine is responsible for actually initiating
+ * the dma transfer on the card, after dma_setup has set the card
+ * up for the transaction.
+ */
+
+skel_dma_start(bp)
+
+struct buf *bp;
+
+{
+char  w_imr2;
+
+	/* start dma (ch1 first) */
+	if (bp->b_flags & B_READ) 
+		/* Do any read specific start-up here */
+	else	
+		/* Do any write specific start-up here */
+		
+
+	/* Enable interrupts, if not already enabled */
+	/* Start card doing dma transfer	*/
+
+	/* check for error in DMA initialization */
+ 	if(card indicates error condition) {
+		bp->b_error = EIO;
+		bp->b_flags = B_ERROR;
+		bp->b_resid = skel_dmaresid();
+		iodone(bp);
+		}
+}
+
+/*
+ * SKEL_STRATEGY routine:
+ * In a driver using DMA, the strategy routine is responsible
+ * for calling vme_dma_build_chain to set up the chain of DMA
+ * requests.  It then calls skel_dma_setup and skel_dma_start
+ * to set up and start the first of the DMA transfers.  The
+ * remaining transfers on the chain will be started from the
+ * skel_isr routine after the first transfer has completed and
+ * interrupted the system.  This arrangement insures that only
+ * one transfer is being initiated at one time.  When 
+ * skel_strategy returns to physio(), physio() calls iowait()
+ * waiting for I/O to complete.
+ */
+
+skel_strategy(bp) 
+struct buf *bp;
+{
+
+int      pri;
+register caddr_t dmaddr;
+short   cnt;
+
+	pri= spl4();
+
+	dmaddr = bp->b_un.b_addr;
+	cnt = bp->b_bcount;
+
+	vme_dma_build_chain(dmaddr, cnt, skel_dma_chain);
+	skel_chain_next = skel_dma_chain;
+	skel_dma_setup(bp);
+	skel_dma_start(bp);
+
+	splx(pri);
+}
+
+int skel_resid_cnt;
+
+skel_dmaresid() {
+
+	/* Calculate amount of dma transfer not completed */
+}
+/*
+ * SKEL_IOCTL
+ *      The ioctl routine is used to implement the remaining functions.
+ *      Since the functions require at most one argument the third
+ *      address is taken to be an argument passed by value.
+ *
+ */
+#define SKEL_IOCTL1   _IO(V,1)
+#define SKEL_IOCTL2   _IO(V,2)
+#define SKEL_IOCTL3   _IO(V,3)
+#define SKEL_IOCTL4   _IO(V,4)
+#define SKEL_IOCTL5   _IO(V,5)
+#define SKEL_IOCTL6   _IO(V,6)
+#define SKEL_IOCTL7  _IO(V,7)
+#define SKEL_IOCTL8   _IO(V,8)
+
+skel_ioctl(dev,code,v) {
+	switch(code) {
+		case SKEL_IOCTL1:
+			/* Call routine or insert code to implement first ioctl */
+			break;
+		case SKEL_IOCTL2:
+			/* Call routine or insert code to implement second ioctl */
+			break;
+		case SKEL_IOCTL3:
+			/* Call routine or insert code to implement third ioctl */
+			break;
+		case SKEL_IOCTL4:
+			/* Call routine or insert code to implement fourth ioctl */
+			break;
+		case SKEL_IOCTL5:
+			/* Call routine or insert code to implement fifth ioctl */
+			break;
+		case SKEL_IOCTL6:
+			/* Call routine or insert code to implement sixth ioctl */
+			break;
+		case SKEL_IOCTL7:
+			/* Call routine or insert code to implement seventh ioctl */
+			break;
+		case SKEL_IOCTL8:
+			/* Call routine or insert code to implement eighth ioctl */
+	}
+	return(0);
+}
+
+/* The dma_done routine is called by the skel_isr routine.
+ * It checks to see if we have done all of the dma transfers
+ * in the chain.  If we have, return true, if not, set up and 
+ * start the next transfer in the chain.  We have completed the 
+ * last transfer when the current DMA chain entry has a phys_addr
+ * equal to zero.
+ */
+
+skel_dma_done()
+{
+if (!skel_chain_next->phys_addr)
+	{
+	skelbuf.b_resid = skel_dma_resid();
+	return(1);
+	}
+else {
+	skel_dma_setup(&skelbuf);
+	skel_dma_start(&skelbuf);
+	skelbuf.b_resid = skel_dma_resid();
+	return(0);
+	}
+}
+
+/*
+ * SKEL_ISR
+ */
+int skel_isr() {
+	BEGIN_ISR;
+
+	 /* determine if board caused interrupt */
+
+	/* reset card here */
+	/* clear interrupt on card */
+
+	if (skel_dma_done())
+		iodone(&skelbuf);
+
+	END_ISR;
+}
+

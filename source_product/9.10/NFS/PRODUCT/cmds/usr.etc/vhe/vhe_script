@@ -1,0 +1,132 @@
+#! /bin/sh
+#
+# 	@(#)vhe_script:	$Revision: 1.25.109.2 $	$Date: 94/06/10 14:28:52 $
+#
+# (c) Copyright 1987 Hewlett-Packard Company
+#
+#  
+# This script is only called by the C program called vhe_u_mnt.  This
+# was done for security reasons.
+# This script will ask the user for the name of the node he would
+# like to have an attempt of a NFS mount made to.  It will then try
+# to do the mounts.  The script will look at the vhe_list file to
+# see what file systems are permitted to be mounted.  In other words
+# this script will only attempt a mount that vhe_mounter would have
+# tried but for some reason could not at an earlier time
+#
+# This is to prevent inheriting an IFS from a calling process.
+# It could cause a security problem.  I just reset it to be what
+# it should be.
+IFS=' 	
+'
+#
+# Make sure that the temp files cannot be read by anyone else
+umask 077
+TMP_DIR=/tmp/vhe.$$
+VHE_LIST=${TMP_DIR}/vhe_$$
+NEW_MNT=${TMP_DIR}/newmnt$$
+LOCK_FILE=${TMP_DIR}/lock$$
+#
+# Use variables for the command names to easy porting
+CAT=/bin/cat
+CUT=/usr/bin/cut
+ECHO=/bin/echo
+LS=/bin/ls
+MKDIR=/bin/mkdir
+MOUNT=/etc/mount
+RM=/bin/rm
+VHE_GETLIST=/usr/etc/vhe/vhe_getlist
+WC=/bin/wc
+
+# Check for undefined variables
+set -u
+
+# Set up trap handler so temp files will get removed
+trap "$RM -rf $TMP_DIR" 0
+trap "exit 1" 1 2 3 15 
+
+
+$ECHO "Enter the name of the node to mount: \c"
+read NEW_NODE
+if [ $NEW_NODE ]
+then :
+else exit 0
+fi
+
+# Create the temporary directory
+success=0
+while [ ${success} = "0" ]; do
+        ${RM} -fr ${TMP_DIR}
+        ${MKDIR} ${TMP_DIR}
+        > ${LOCK_FILE}
+
+        # Make sure the directory  has the right permissions and is owned
+        # correctly.
+        check=`${LS} -ld ${TMP_DIR} | ${CUT} -c1-19`
+        if [ "${check}" = "drwx------   2 root" ]; then
+                success=1
+        fi
+done
+
+# Make sure the temporary files don't already exist.  Keeps hackers from
+# creating links with them.
+
+$RM -rf $VHE_LIST $NEW_MNT
+
+# Make and zero out the $NEW_MNT file
+> $NEW_MNT
+
+# Get the contents of vhe_list 
+$VHE_GETLIST > $VHE_LIST 
+RET_VALUE=$?
+if [ $RET_VALUE != "0" ]
+then
+	# An error message is printed by $VHE_GETLIST
+	$ECHO "       vhe_u_mnt is unable to continue" >&2
+	exit 1
+fi
+
+exec 4< $VHE_LIST
+while read NEXT_NODE  FILE_SYS  MNTPT_DIR  MNT_OPTS LEFTOVER <&4
+do
+	if [ $NEW_NODE = $NEXT_NODE ]
+	then  $ECHO  $NEXT_NODE  $FILE_SYS $MNTPT_DIR $MNT_OPTS >> $NEW_MNT
+ 	fi
+done
+
+NUM_LINES=`$CAT $NEW_MNT | $WC -l `
+if [ $NUM_LINES = "0" ]
+then	$ECHO "There is no node of the name  $NEW_NODE  on the list of nodes" >&2
+	$ECHO "available for mounting.  Please try again." >&2
+	exit 1
+fi
+
+exec 3< $NEW_MNT
+while read NEXT_NODE FILE_SYS MNTPT_DIR MNT_OPTS LEFTOVER <&3
+do
+ 	OPTIONS=""
+	BACKGROUND_MOUNT=0
+	# If it is desired to have the mount attempts try for awhile until
+ 	# the server is ready for the mount, then set BACKGROUND_MOUNT
+	# to be some value besides 0.
+ 	#
+ 	# By increasing the value for retry, the mount will
+ 	# try longer in the background.
+ 	# If you use the background option, then do
+	# not use  bg and retry  options in the
+ 	# option's field in the $VHE_LIST file as the mount command will
+ 	# get duplicate options and return with an error.
+	if [ $BACKGROUND_MOUNT != "0" ]
+	then 	OPTIONS="-o bg,retry=333"
+	fi
+ 
+ 	if [ $MNT_OPTS ]
+ 	then if [ "$OPTIONS" ]
+ 	     then OPTIONS=${OPTIONS}","${MNT_OPTS}
+ 	     else OPTIONS="-o "${MNT_OPTS}
+ 	     fi
+ 	fi
+       	$MOUNT  $OPTIONS $NEXT_NODE:$FILE_SYS  $MNTPT_DIR 
+
+done
+

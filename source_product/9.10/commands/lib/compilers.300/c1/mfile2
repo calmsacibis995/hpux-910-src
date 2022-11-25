@@ -1,0 +1,598 @@
+/* file mfile2 */
+/* @(#) $Revision: 70.1 $ */
+/* KLEENIX_ID @(#)mfile2	16.1 90/11/05 */
+
+# include "macdefs"
+# include "manifest"
+
+/* OP descriptors */
+/* the ASG operator may be used on some of these */
+
+# define OPSIMP 010000    /* +, -, &, |, ^ */
+# define OPCOMM 010002  /* +, &, |, ^ */
+# define OPMUL 010004  /* *, / */
+# define OPDIV 010006 /* /, % */
+# define OPUNARY 010010  /* unary ops */
+# define OPLEAF 010012  /* leaves */
+# define OPANY 010014  /* any op... */
+# define OPLOG 010016 /* logical ops */
+# define OPFLOAT 010020 /* +, -, *, or / (for floats) */
+# define OPSHFT 010022  /* <<, >> */
+# define OPLTYPE 010024  /* leaf type nodes (e.g, NAME, ICON, etc. ) */
+
+# define PSL 20000
+
+typedef struct set SET;
+
+struct set
+	{
+	    unsigned int num;
+	    unsigned int data;
+            struct set *next;
+	};
+
+typedef struct hidden_vars HIDDENVARS;
+struct hidden_vars
+        {
+        ushort  nitems;         /* number of items in list */
+        ushort  var_index[1];   /* variable's index in the symbol table */
+	};
+
+
+/* NOTE: If this struct changes, be sure to make compensating changes in 
+   talloc().
+*/
+struct allo
+	{
+		unsigned opfiller;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		NODE *left;
+		NODE *right;
+		HIDDENVARS *hiddenvars;	/* CALL or UNARY CALL nodes only */
+		long   flagfiller;
+		unsigned stunused;
+	};
+union ndu {
+
+	struct allo allo;
+		
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		NODE *left;
+		NODE *right;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;	/* TRUE iff a COMMON subexpression */
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;	/* interrogated only at tree head */
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;	/* used to insert COMMON names in symtab */
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;		/* TRUE iff top of alternate entry pt.*/
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}in; /* interior node */
+		
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		CONSZ lval;
+		int rval;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}tn; /* terminal node */
+		
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		int lval;
+		int rval;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}atn; /* asciz terminal node */
+		
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		int label;  /* for use with branching */
+		int unused;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}bn; /* branch node */
+
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		int switch_flags;
+		struct cgu *ll;
+		int nlabs;
+		flag common_node:1;
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}cbn; /* computed goto branch node */
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		unsigned seq;
+		ushort usage;		/* usage count used for CSE costing */
+		ushort arrayrefno;
+		NODE *leftd;
+		NODE *rightd;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}ind; /* interior node ... dag */
+
+	struct {
+		uchar op;
+		uchar f881mask;
+		ushort intmask;
+		TTYPE type;
+		char * name;
+		ushort fpamask;
+		ushort stmtno;
+		NODE *left;
+		NODE *right;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;	/* TRUE iff a COMMON subexpression */
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag iv_found:1;	/* Used only in loops.c */
+		flag haseffects:1;	/* YES iff spawned by stmt that has
+					   side effects in rewrite_comops() */
+		flag lhsiref:1;
+		flag csefound:1;	/* interrogated only at tree head */
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;	/* used to insert COMMON names in symtab */
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;		/* TRUE iff top of alternate entry pt.*/
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		long source_lineno;
+		}nn; /* SEMICOLON, UNARY SEMICOLON node */
+
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char *name;
+		ushort defnumber;
+		ushort arrayrefno;
+		NODE *left;
+		NODE *right;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;	/* TRUE iff a COMMON subexpression */
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;	/* interrogated only at tree head */
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;	/* used to insert COMMON names in symtab */
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;		/* TRUE iff top of alternate entry pt.*/
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		flag no_arg_uses:1;	/* TRUE iff arg value not ref'd */
+		flag no_arg_defs:1;	/* TRUE iff arg value not def'd */
+		flag no_com_uses:1;	/* TRUE iff common/globals not ref'd */
+		flag no_com_defs:1;	/* TRUE iff common/globals not def'd */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		uchar stalign;
+		unsigned stsize:24;
+		}sin; /* interior node for structure */
+		
+	struct {
+		uchar op;
+		unsigned index:24;
+		TTYPE type;
+		char * name;
+		ushort defnumber;
+		ushort arrayrefno;
+		NODE *left;
+		NODE *right;
+		HIDDENVARS *hiddenvars;
+		flag common_node:1;	/* TRUE iff a COMMON subexpression */
+		flag invariant:1;
+		flag arrayref:1;
+		flag equivref:1;
+		flag dagobsolete:1;
+		flag temptarget:1;
+		flag lhsiref:1;
+		flag csefound:1;	/* interrogated only at tree head */
+		flag no_iconsts:1;	/* see misc.c for an explanation */
+		flag common_base:1;	/* used to insert COMMON names in symtab */
+		flag callref:1;		/* used in dag.c for CALL sequencing */
+		flag iv_checked:1;	/* used in strength reduction */
+		flag entry:1;		/* TRUE iff top of alternate entry pt.*/
+		flag arrayelem:1;
+		flag isload:1;
+		flag structref:1;
+		flag isptrindir:1;
+		flag arraybaseaddr:1;
+		flag isfpa881stmt:1;
+		flag isarrayform:1;
+		flag parm_types_matched:1;
+		flag comma_ss:1;	/* YES iff comma_subsumable (CSEs */
+		unsigned side_effects:4; /* tells whether args, common def'd or
+					  * used */
+		flag isc0temp:1;	/* TRUE iff OREG temp created by c0 */
+		flag safe_call:1;
+		flag cse_node_freeable:1;
+		unsigned fillflag:3;
+		unsigned stunused;
+		}fn; /* flags node */
+		
+	};
+
+/* Defines for "side_effects" ndu field */
+
+#define NO_DEFS 5
+#define NO_GLOBAL_REFS 3
+
+
+
+
+		
+	
+
+# ifdef DEBUGGING
+	extern FILE *debugp;
+# endif
+# ifdef COUNTING
+	extern FILE *countp;
+# endif COUNTING
+
+extern FILE *outfile;
+extern NODE *node;
+extern OFFSZ tmpoff;
+extern OFFSZ maxoff;
+extern OFFSZ baseoff;
+extern int ftnno;
+extern int lineno;
+extern char *rnames[];
+extern unsigned fwalk2_bitmask;
+extern unsigned fwalk2_clrmask;
+extern unsigned w_halt;
+extern flag fortran;	/* YES iff source code is for FORTRAN */
+extern flag flibflag;	/* YES iff float ops will be turned into lib calls */
+
+#define FFPA	1
+#define BFPA	2
+extern flag fpaflag;	/* FFPA, BFPA iff code gen for FPA (not 68881) */
+
+extern maxsymtsz;
+extern maxnodesz;
+extern maxbblsz;
+extern maxseqsz;
+
+extern int dope[];  	/* a vector containing operator characteristics */
+extern short nerrors;  	/* number of errors seen so far */
+extern char *opst[];  	/* a vector containing names for ops */
+
+extern char	*strcpy();
+extern char 	*xfop();		/* in c1.c */
+extern NODE 	*talloc();		/* in misc.c */
+extern NODE 	*optim();		/* in misc.c */
+extern NODE	*tcopy();		/* in misc.c */
+extern int 	eprint();		/* in misc.c */
+extern char 	*addtreeasciz();	/* in misc.c */
+extern char 	*addexternasciz();	/* in misc.c */
+extern int	ispow2();		/* in misc.c */
+extern int 	daginit();		/* in dag.c */
+extern void 	blockt();		/* in dag.c */
+extern void 	redundant();		/* in dag.c */
+extern void 	constprop();		/* in dag.c */
+extern void 	treeem();		/* in dag.c */
+extern void	oreg4();		/* in misc.c */
+extern flag 	same();			/* in dag.c */
+extern void 	p2pass();		/* in p2out.c */
+extern void 	prmaxlabblank();	/* in p2out.c */
+extern void 	prmaxlab();		/* in p2out.c */
+extern flag	hardops();		/* in misc.c */
+extern pointr	ckalloc();
+extern pointr	ckrealloc();
+extern NODE 	*bcon();
+extern NODE 	*block();
+
+
+
+
+
+# ifdef DEBUGGING
+	extern flag bdebug;	/* for blocks */
+	extern flag ddebug;	/* for DAGS */
+	extern flag edebug;
+	extern flag fdebug;	/* block numbering in intermediate file */
+	extern flag gdebug;	/* for global optimizations & sets */
+	extern flag ldebug;	/* for lblocks */
+	extern flag mdebug;
+	extern flag pdebug;	/* for p2pass debugging */
+	extern flag qcdebug;	/* (deadstore) constant propagation */
+	extern flag qddebug;	/* (deadstore) definetab and reaching defs */
+	extern flag qpdebug;	/* (deadstore) copy propagation */
+	extern flag qsdebug;	/* (deadstore) dead store */
+	extern flag qtdebug;	/* (deadstore) trees */
+	extern flag qudebug;	/* (deadstore) du blocks */
+	extern flag rddebug;	/* (reg) definetab and reaching defs */
+	extern flag rldebug;	/* (reg) live vars */
+	extern flag rodebug;	/* (reg) statement and register comments */
+	extern flag rrdebug;	/* (reg) region tree */
+	extern flag rRdebug;	/* (reg) register maps, registers */
+	extern flag rsdebug;	/* (reg) symbol table */
+	extern flag rtdebug;	/* (reg) trees */
+	extern flag rudebug;	/* (reg) du blocks */
+	extern flag rwdebug;	/* (reg) webs and loops */
+	extern flag sdebug;	/* for symbol table debugging */
+	extern flag xdebug;
+# endif
+
+extern flag dagdisable;		/* to disable dag optimizations */
+extern flag global_disable;	/* to disable global optimizations */
+extern flag master_global_disable;
+extern flag reg_disable;	/* to disable register allocation */
+
+# ifdef R2REGS
+union indexpacker
+{
+	int rval;
+	struct
+		{
+		unsigned char indexed:1;
+		unsigned char mode:4;
+		unsigned char  pad:3;
+		unsigned char addressreg:8;
+		unsigned char xreg:8;
+		unsigned char scale:8;
+		} i;
+};
+
+/* mode values */
+# define ADDIND 0	/* address reg indirect w/index (2.8.3.2) */
+# define MEMIND_POST 1 /* memory indirect post indexed  (2.8.4.1) */
+# define MEMIND_PRE  2 /* memory indirect pre indexed (2.8.4.2) */
+# define PCIND 3	/* PC indirect w/index (2.8.6.1) */
+# define PCMEM_POST 4 /* PC memory indirect post indexed (2.8.7.1) */
+# define PCMEM_PRE 5  /* PC memory indirect pre indexed (2.8.7.2) */
+
+# endif	/* R2REGS */
+
+# define FWALK2(np, func, bm) fwalk2_bitmask=bm; w_halt=0;fwalk2(np, func)
+# define FWALKC(np, func, bm) fwalk2_bitmask=bm; fwalk2_clrmask=~bm; w_halt=0;fwalkc(np, func)
+
+# ifdef DEBUGGING
+	extern ckfree();		/* misc.c */
+	extern print_settab();		/* misc.c */
+	extern void printinvs();	/* misc.c */
+#	define FREEIT(x) ckfree(x)
+
+#	   define FREESET(x) free_set(x)
+#	   define FREESET_N(x) free_set_n(x)
+# else
+#	define FREEIT(x) free(x)
+#	   define FREESET(x) free_set(x)
+#	   define FREESET_N(x) free_set_n(x)
+# endif DEBUGGING

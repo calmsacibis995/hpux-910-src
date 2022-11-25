@@ -1,0 +1,18 @@
+$set 1
+1 %s is unknown host name\n
+2 sending %1$d packets of lnth %2$d to %3$s ...
+3 SPRAYPROC_CLEAR 
+4 \n
+5 SPRAYPROC_GET 
+6 %s 
+7 \n
+8 \n\t%1$d packets (%2$.3f%%) dropped by %3$s\n
+9 \n\tno packets dropped by %s\n
+10 \t%1$d packets/sec, %2$d bytes/sec\n
+11 Usage: spray host [-c cnt] [-l lnth]\n
+12 0x%x
+13 \n
+14 \n
+15 spray: can't reach %1$s at address %2$s\n
+16 spray: now trying %s\n
+17 spray: malformed address %s\n

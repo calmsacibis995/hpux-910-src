@@ -1,0 +1,38 @@
+## FacetTerm Menu Capabilities for jterm terminal emulator 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: jterm.FM,v 70.1 92/03/09 16:52:32 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=^C%p1%'\s'%+%c%p2%'\s'%+%c
+##-menu-cap-clear_screen=^AH^Aj
+##-menu-cap-clr_eol=^AK
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=^AG
+##-menu-cap-exit_alt_charset_mode=^Ag
+##-menu-cap-acs_chars=``a1fxgqh0jYk?lZm@nEooppqDrrsstCu4vAwBx3yyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=^D0
+##-menu-cap-shadow_attr=^D0
+##-menu-cap-item_attr=^E71
+##-menu-cap-box_attr=^E31
+##-menu-cap-title_attr=^E?4
+##-menu-cap-highlight_attr=^E97
+##-menu-cap-highlight_blink_attr=^E9?
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^A8
+##-menu-cap-key_down=^A2
+##-menu-cap-key_right=^A6
+##-menu-cap-key_left=^A4
+##-menu-cap-key_home=^A7
+##-menu-cap-key_ignore=^Aa
+##-menu-cap-key_ignore=^Ab
+##-menu-cap-key_ignore=^Ac
+##-menu-cap-key_ignore=^Ad
+##-menu-cap-key_ignore=^Ae
+##-menu-cap-key_ignore=^Af
+##-menu-cap-key_ignore=^Ag
+##-menu-cap-key_ignore=^Ah
+##-menu-cap-key_ignore=^Ai
+##-menu-cap-key_ignore=^Aj
+##-menu-cap-key_ignore=^A3
+##-menu-cap-key_ignore=^A9

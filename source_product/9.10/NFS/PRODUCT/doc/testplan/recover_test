@@ -1,0 +1,266 @@
+
+.H 1 "NFS Recovery Tests (Jim Hunter)"
+.sp 1
+RESPONSIBLE ENGINEER: Jim Hunter
+.sp 2
+.H 2 "DISCUSSION"
+.sp 1
+.H 3 "Introduction"
+.sp 1
+The objective of the recoverability tests is to subject the NFS code to a
+series of scenarios that simulate a variety of failure modes possible
+in normal use.  These failure modes include:
+.BL 10
+.LI
+user code errors (invalid parameters, incorrect request sequencing,
+bad pointers, etc.) 
+.LI
+failed mount attempts, 
+.LI
+remote machine (server or client) failure, 
+.LI
+lost network data,
+.LI
+interrupts,
+.LI
+and non-fatal device errors.
+.LE
+.sp 1
+Inorder to quantify the error paths covered, these tests should be run at least
+once on a BFA kernel.  User code errors and failed mount attempts are handled in
+the NFS functional tests.  In addition, because of the complexity of the yellow
+page functionality, recoverability tests for yellow pages will be discussed in a
+separate section.
+.sp 2
+.H 3 "Scope of the tests"
+.sp 1
+The success or failure of the tests will be determined using the 
+criteria outlined below and if appropriate, an analysis of the end state of the
+system.
+.BL 10
+.LI
+The system should not crash or hang on account of user space or remote-node
+errors/failures.
+.LI
+The service integrity should be preserved.
+.LI
+The networking state of the involved nodes should be equivalent to the start
+state.
+.sp 2
+.H 3 "Implementation goals"
+.sp 1
+Because of the nature of these tests, it will NOT be a goal to automate or
+integrate these tests into the scaffold environment.
+.sp 2
+.H 3 "Dependencies"
+.sp 1
+.nf
+ISSUE: NerFS group must buy off on making the transmission error tool.
+.fi
+.sp 1
+Many of the tests will require a kernel-level mechanism to produce the desired
+error conditions.  This mechanism will have to be provided by the NerFS project
+group.  The example statement "every third" implies a random event,
+(e.g. 1 out of 3, randomly).  Development of the error-producing mechanism is
+NOT included in the time estimates that follow. 
+.sp 2
+.H 2 "Transmission errors"
+.sp 1
+The following test scenarios will depend on a mechanism to produce the following
+error conditions.
+.RL 10
+.LI
+Drop a user definable ratio of in-bound NFS packets (e.g. every third)
+.LI
+Drop a user definable ratio of out-bound NFS packets  (e.g. every third)
+.LI
+Simulate a remote machine dying by dropping all in-bound NFS packets
+.LI
+Simulate a local machine dying by dropping all out-bound NFS packets
+.LI
+Send duplicate NFS packets
+.LE
+.sp 2
+.H 3 "Data Loss/Corruption"
+.sp 1
+Verify that the NFS functional tests are implemented such that transmission
+errors that manifest themselves as data loss or data corruption are detected
+by the tests and reported.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.25 md
+.fi
+.sp 2
+.H 3 "Server failure"
+.sp 1
+Test NFS for proper reporting of transmission errors by causing a trigger on 
+a requester system to drop all future in-bound NFS packets and run one instance
+of the NFS functional tests on the requester system.  Note that this test will
+require a soft mount otherwise the commands will just hang.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Requester failure"
+.sp 1
+Test NFS for proper reporting of transmission errors by causing a trigger on 
+a requester system to drop all future out-bound packets and run one instance of
+the NFS functional tests on a requester system.
+must 
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Requester Lost Packets"
+.sp 1
+Test that the NFS network product handles transmission errors in a manner
+completely transparent to the user by dropping every third in-bound NFS
+packet on the requester node.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Server Lost Packets"
+.sp 1
+Test that the NFS network product handles transmission errors in a manner
+completely transparent to the user by dropping every third out-bound NFS
+packet on the requester node.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Duplicate Server Packets"
+.sp 1
+Test that the NFS network product handles transmission errors in a manner
+completely transparent to the user by duplicating every out-bound NFS packet
+on the server node.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Duplicate Requester Packets"
+.sp 1
+Test that the NFS network product handles transmission errors in a manner
+completely transparent to the user by duplicating every out-bound NFS packet
+on the requester node.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 2 "Power Failure"
+.sp 1
+Power failure or other major disruptions on an HP NFS (server) node shall
+affect other nodes on the LAN only to the extent that currently active NFS
+"connections" to that node are down and no further use of the node as a
+remote file system is possible.
+.sp 1
+.nf
+TEST CONFIGURATION
+ 
+      node A               node B
+     ---------   cp       ---------
+     |  9K   |----------->| Cert. |
+     |       | (A -> B)   |       |
+     ---------            ---------
+	|
+	|                  node C
+	|       cp        ---------
+	----------------->|  9K   |  (node to power down)
+           (C <- A)       ---------
+.fi
+.sp 2
+.H 3 "Client power failure"
+.sp 1
+Mount node B's file system on node A and node A's file system on node C.
+Then while copying a large block of data on node A (e.g., a cp of duration 
+greater than 1 minute) to node B and node C from node A, power down node C.
+Verify that the transfer between node A and node B is completed successfully and
+that the state of node A and B are correct.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Server power failure"
+.sp 1
+Hard mount node B's file system to node A.  Begin a transfer of a large block
+of data (e.g., a cp of duration greater than 1 minute) from node B to node A.
+(on node A) Power down node B for 1 minute then power node B back up.  Verify
+that the correct error messages are reported on node A and that the transfer is
+completed successfully.
+.sp
+.nf
+IMPLEMENT TIME:  0.25 md 
+PERFORM TIME:    0.5  md
+.sp 2
+.H 2 "Shut-down"
+.sp 1
+.nf
+TEST CONFIGURATION
+ 
+      node A               node B
+     ---------   cp       ---------
+     | 9K  1 |----------->| Cert. |
+     ---------            ---------
+	|
+	|                  node C
+	|       cp        ---------
+	----------------->| 9K  2 |  (node to kill daemons/processes on)
+	                  ---------
+.fi
+.sp 2
+.H 3 "Kill daemons/processes"
+.sp 1
+While copying a large block of data (e.g., a cp of duration greater than
+1 minute) between a server 9000 (node A) and a client certification node
+(node B), and between A and another client 9000 (node C), kill the appropriate
+daemons/processes on C.  Verify that the transfer to the certification
+node is completed successfully.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 2 "Disc failure"
+.sp 1
+.nf
+TEST CONFIGURATION
+ 
+      node A               node B
+     ---------   cp       ---------
+     | 9K  1 |----------->| Cert. |
+     ---------            ---------
+	|
+	|                  node C
+	|       cp        ---------
+	----------------->| 9K  2 |  (node to power disc down)
+	                  ---------
+.fi
+.sp 2
+.H 3 "Disc power failure"
+.sp 1
+While copying a large block of data (e.g., a cp of duration greater than
+1 minute) between a server 9000 (node A) and a client certification node
+(node B), and between A and another client 9000 (node C), power down the
+disc on C.  Verify that the transfer to the certification node is completed
+successfully.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md 
+PERFORM TIME:    0.25 md
+.fi

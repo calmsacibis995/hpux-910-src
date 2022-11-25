@@ -1,0 +1,27 @@
+## FacetTerm  4940adkeys COMMON  description file 10/18/89
+## Wyse 50 style function key programming for NCR 4940
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 4940wykeys.FC,v 70.1 92/03/09 15:51:26 ssa Exp $
+##--- FUNCTION KEYS ---##
+### ?? function_key_clear=
+### ?? function_key_clear_mode_yes=number
+### ?? function_key_clear_mode_no=number
+### ?? parm_pkey_key=
+### ?? parm_pkey_key=
+### pkey_key=\E%%%p1%c1n%s1^Y
+pkey_key=\Ez%p1%c%s1^?$<80/>
+### ?? function_key_string_is_hex
+### ?? function_key-id-delim=
+### ?? shift_function_key
+### ?? function_key-id-delim=
+### NO ## BY_HAND function_key-key_f0=
+function_key-@=^B1\r
+function_key-A=^B2\r
+function_key-B=^B3\r
+function_key-C=^B4\r
+function_key-D=^B5\r
+function_key-E=^B6\r
+function_key-F=^B7\r
+function_key-G=^B8\r
+function_key-H=^B9\r
+function_key-I=^B:\r

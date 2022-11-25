@@ -1,0 +1,38 @@
+## FacetTerm  q101+keys  description file 11/28/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: q101+keys.FC,v 70.1 92/03/09 16:49:16 ssa Exp $
+pkey_key=\E|%p1%c1%72s1^y
+pkey_key=\E|%p1%c0%72s1^y
+function_key-1-"=^A@\r
+function_key-2-"=^AA\r
+function_key-3-"=^AB\r
+function_key-4-"=^AC\r
+function_key-5-"=^AD\r
+function_key-6-"=^AE\r
+function_key-7-"=^AF\r
+function_key-8-"=^AG\r
+function_key-9-"=^AH\r
+function_key-:-"=^AI\r
+function_key-;-"=^AJ\r
+function_key-<-"=^AK\r
+function_key-61-"=^AL\r
+function_key->-"=^AM\r
+function_key-?-"=^AN\r
+function_key-@-"=^AO\r
+shift_function_key
+function_key-A-"=^A`\r
+function_key-B-"=^Aa\r
+function_key-C-"=^Ab\r
+function_key-D-"=^Ac\r
+function_key-E-"=^Ad\r
+function_key-F-"=^Ae\r
+function_key-G-"=^Af\r
+function_key-H-"=^Ag\r
+function_key-I-"=^Ah\r
+function_key-J-"=^Ai\r
+function_key-K-"=^Aj\r
+function_key-L-"=^Ak\r
+function_key-M-"=^Al\r
+function_key-N-"=^Am\r
+function_key-O-"=^An\r
+function_key-P-"=^Ao\r

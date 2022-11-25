@@ -1,0 +1,210 @@
+/* @(#) $Revision: 70.3 $       */
+/* LINTLIBRARY LLIB-LDBM */
+
+/*
+ * Note that tabs are carefully placed before procedure names so it's
+ * easy to extract them for consistency checking.
+ */
+
+/* The new-style definitions here assume __STDC__ */
+#include <sys/stdsyms.h>
+#ifndef __STDC__
+#define __STDC__
+#endif
+
+/* HP-UX entry points */
+/* =========================  HPUX ============================= */
+#ifdef _INCLUDE_HPUX_SOURCE
+
+#include <dbm.h>
+#include <ndbm.h>
+
+/* DBM(3X) */
+int	dbmclose (void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbmclose() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	dbminit (char *f) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbminit() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	delete (datum k) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The delete() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+datum	fetch (datum d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The fetch() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return d; }
+
+datum	firstkey (void) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The firstkey() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ datum d; return d; }
+
+datum	nextkey (datum d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The nextkey() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return d; }
+
+int	store (datum k, datum c) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The store() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See dbm(3X) and ndbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/* NDBM(3X) */
+#undef dbm_error
+#undef dbm_clearerr
+
+void	dbm_close (DBM *d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_close() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+int	dbm_clearerr (DBM *d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	dbm_delete (DBM *d, datum k) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_delete() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	dbm_error (DBM *d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_error() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+datum	dbm_fetch (DBM *d, datum k) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_fetch() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return k; }
+
+datum	dbm_firstkey (DBM *d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_firstkey() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ datum k; return k; }
+
+long	dbm_forder (DBM *d, datum k) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_forder() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ long l; return l; }
+
+datum	dbm_nextkey (DBM *d) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_nextkey() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+datum k; return k; }
+
+DBM *	dbm_open (const char *c, int n, int m) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_open() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ DBM d; return &d; }
+
+int	dbm_store (DBM *d, datum j, datum k, int r) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1] 
+	The dbm_store() call is part of a set of simple database access 
+	functions derived from the BSD system.   This set of functions 
+	is not portable to open systems.  See ndbm(3X) and dbm(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+#endif /* _INCLUDE_HPUX_SOURCE */

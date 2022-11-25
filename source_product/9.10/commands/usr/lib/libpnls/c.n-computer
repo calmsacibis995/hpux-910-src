@@ -1,0 +1,9 @@
+$set 1
+1 DDD, MMM dd, yyyy
+2 mm/dd/yy
+3 12:AMPM
+19 1
+26 3
+30 WWWWWWWWW, OOOOOOOOO dd, yyyy
+31 U.S. Dollars
+1003 DDD, MMM dd, yyyy,

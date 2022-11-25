@@ -1,0 +1,94 @@
+#!/bin/ksh
+# Customize script for DTC Device File Access - DDFA
+# by Charlie Cho
+#
+# Date: 05/20/92
+#
+# HP-UX 9.0
+#
+
+PATH=/bin:/usr/bin:/etc
+export PATH
+
+
+
+function kill_ocd
+ {
+   set "`ps -ef | grep ocd | grep -v grep | awk '{print $2}'`"
+   if test "$1" 
+   then 
+      kill -15 $1
+   fi
+ }
+
+#
+# Check to see if there are earlier versions of DDFA.  If so, then
+# kill all current ocd processes
+#
+
+if [ -f /usr/contrib/bin/ocd ] 
+then
+    kill_ocd
+fi
+
+if [ -f /etc/ocd ] 
+then
+    kill_ocd
+fi
+
+#
+# Remove DDFA 1.0, if it exists
+#
+# This script will not purge the config files dp and pcf in case
+# the user needs the information contained in those config files.
+#
+
+if [ -f /usr/contrib/bin/dpp ] 
+then
+    rm /usr/contrib/bin/dpp
+fi
+
+if [ -f /usr/contrib/bin/ocd ] 
+then
+    rm /usr/contrib/bin/ocd
+fi
+
+if [ -f /usr/contrib/bin/ocdebug ] 
+then
+    rm /usr/contrib/bin/ocdebug 
+fi
+
+#
+# Move config files from DDFA 1.0 version to /etc.
+#
+
+if [ -f /usr/contrib/bin/dp ] 
+then
+   if [ ! -f /etc/ddfa ] 
+   then
+      mkdir /etc/ddfa
+      mv -f /usr/contrib/bin/dp /etc/ddfa/dp.old
+      echo "Your old configuration file (dp) has been moved to /etc/ddfa/dp.old"
+   fi
+fi
+
+if [ -f /usr/contrib/bin/dp_file ] 
+then
+   if [ ! -f /etc/ddfa ]   
+   then
+      mkdir /etc/ddfa
+      mv -f /usr/contrib/bin/dp_file /etc/ddfa/dp_file.old
+      echo "Your old configuration file (dp_file) has been moved "
+      echo "to /etc/ddfa/dp_file.old"
+   fi
+fi
+
+if [ -f /usr/contrib/bin/pcf ] 
+then
+   if [ ! -f /etc/ddfa ] 
+   then
+      mkdir /etc/ddfa
+      mv -f /usr/contrib/bin/pcf /etc/ddfa/pcf.old
+      echo "Your old configuration file (pcf) has been moved to /etc/ddfa/pcf.old"
+   fi
+fi

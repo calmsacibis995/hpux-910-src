@@ -1,0 +1,33 @@
+#!/bin/ksh
+# @(#) $Revision: 66.5 $
+#
+fileset=DISKLESS
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $1
+
+#======
+# On the Series 300 and 400, the DISKLESS fileset contains default
+# client kernels for both 2 user and multi-user systems.  Since we
+# only need one set or the other, the unnecessary set of default
+# client kernels is deleted.
+#======
+if s300; then
+    if [ -d /system$CDF/02-USER ]; then
+	rm -f /etc/conf$CDF/cnode.cdfs.m  /etc/conf$CDF/cnode.cdnfs.m \
+	      /etc/conf$CDF/cnode.hp-ux.m /etc/conf$CDF/cnode.nfs.m
+    else
+	rm -f /etc/conf$CDF/cnode.cdfs.2  /etc/conf$CDF/cnode.cdnfs.2 \
+	      /etc/conf$CDF/cnode.hp-ux.2 /etc/conf$CDF/cnode.nfs.2
+    fi
+fi
+
+exit $exitval

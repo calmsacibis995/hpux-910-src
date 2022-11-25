@@ -1,0 +1,420 @@
+.SK
+.H 1 "YP Destructive Tests (Jason Zions)"
+.sp
+.VL 14 0 1
+.LI
+RESPONSIBLE ENGINEER: Jason Zions
+.LI
+DEPENDENCIES: Many tests require A/B networking services (mostly
+remsh).
+.LI
+PERFORM TIME:    6.0  md
+.LE
+.sp 2
+.H 2 "Description"
+.sp
+.P
+This chapter contains Yellow Pages (YP) tests which either modify the
+global YP database or compromise local or global YP behavior. In particular,
+several tests kill servers on other hosts.
+.P
+For this reason, the destructive tests
+can only be run on one host in a YP domain,
+and no other YP activity can be taking place
+elsewhere in the domain, while the tests are running.
+.P
+The tests expect to be running in a three-node configuration:
+.DS CB
+                +----------+
+         -------|          |-------
+        /       |  CLIENT  |       \e
+       /  ----->|__________|<-----  \e
+      /  /                        \e  \e
+     /  /                          \e  \e
+    V  /                            \e  V
++----------+                    +----------+
+|          |------------------->|          |
+|  MASTER  |                    |  SLAVE   |
+|__________|<-------------------|__________|
+.DE
+.VL 10 0 1
+.LI
+MASTER is the master YP server for all maps in the domain.
+.LI
+SLAVE is a slave YP server for the domain.
+.LI
+CLIENT is a non-serving host.
+.LE
+.P
+The tests do not require any host be served by any particular YP
+server. In particular, it is not required that MASTER or SLAVE serve
+themselves.
+.P
+Unless otherwise specified, each of the tests defined below should be
+executed on each of the three hosts in turn.
+.SK
+.H 2 "Normal user (non-root) tests"
+.sp
+.P
+These tests are designed to ensure proper functioning of
+YP commands runnable by normal users
+which alter any YP databases. Other functional tests can be found in
+the "Yellow Pages Tests" chapter.
+.sp 2
+.H 3 "Command yppasswd"
+.sp
+.P
+The test assumes rpc.yppasswdd is running on the master YP server for
+the passwd.* maps, and that the daemon forces a ypmake on the maps.
+It does not depend on that process performing a yppush,
+however; it directly examines the map on the master.
+The test user must have an entry in the YP password maps.
+.P
+The file
+.B magic.awk
+is an awk script which compares the password fields of two /etc/passwd
+entries and returns an error message if they are identical.
+.P
+Commands required: grep cat awk remsh/rsh whoami makedbm
+.VL 10 0 1
+.LI
+DEPENDENCIES: Requires remsh (or rsh on SUNs).
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md
+.LE
+.sp
+.nf
+MST=`ypwhich -m yppasswd.byname`;
+    remsh $MST "makedbm -u passwd.byname | grep `whoami`" > f1
+yppasswd
+    rightpwd
+    newpwd
+    newpwd  ->  <empty>
+sleep /* until master has remade passwd.* maps. */
+remsh $MST "makedbm -u passwd.byname | grep `whoami`" > f2
+cat f1 f2 | awk -f magic.awk  ->  <empty>
+yppasswd       /* Restore old password */
+    newpwd
+    rightpwd
+    rightpwd  ->  <empty>
+.SK
+.H 2 "Superuser Tests"
+.sp
+.P
+Tests in this section include:
+.AL 1 3 1
+.LI
+Server installation (ypinit).
+.LI
+Initialization and update of YP maps (ypmake).
+.LI
+YP map propagation (yppush, ypxfr).
+.LI
+YP configuration (ypset).
+.LI
+Proper behavior of the YP software under various
+failure modes (failure of ypserv, ypbind). 
+.LE
+.sp 2
+.H 3 "Server installation"
+.sp
+.P
+Installation of YP on a host involves destruction of any current YP maps
+stored there, followed by creation of new maps from existing source data
+(in the case of a new Master server) or from other YP servers (in the case
+of a new Slave server).
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.5  md
+.LE
+.sp
+.P
+ON MASTER: Run ypinit -m, answer 'y' to all questions. Add SLAVE to the list
+of servers. After the database has been built, unload all maps with
+makedbm -u and
+compare to the ASCII sources. Make sure YP_MASTER_NAME corresponds to MASTER,
+and make sure YP_LAST_MODIFIED is in the very recent past.
+.P
+ON SLAVE: Run ypinit -s MASTER. When the database have been built, unload
+all maps with makedbm -u, and compare to the ASCII source on MASTER. As in
+the MASTER case above, validate YP_MASTER_NAME and YP_LAST_MODIFIED.
+.P
+RELEASE S300/6.2, RELEASE S800/3.0, AND LATER: An enhancement makes it
+possible to run ypinit for a domain other than the current domain of the
+master or the slave.  Test cases below were added to insure proper
+functioning of ypinit with the additional (domain) argument.
+.P
+ON MASTER
+.sp
+.nf
+     ypinit                                -->  usage
+     ypinit -s -m                          -->  usage
+     ypinit -m arg2                        -->  usage
+     ypinit -s                             -->  usage
+     ypinit -m                             -->  success
+     ypinit -m DOM=somedom                 -->  success
+
+
+Via remsh on the SLAVE:
+
+     ypinit -s $MASTER                     -->  success
+     ypinit -s $MASTER DOM=bogus_domain    -->  error from ypxfr 
+
+       "Transferring group.bygid for domain bogus_domain 
+           from < $MASTER >...
+        ypxfr:  can't get order number for map group.bygid 
+           from ypserv at < $MASTER >
+        reason:  can't bind to a server that serves YP domain
+
+     ypinit -s $MASTER DOM=real_domain     -->  success
+.sp 2
+.H 3 "YP map update"
+.sp
+.P
+This test need only be run on the slave server.
+.P
+The file
+.B magic.awk
+is an awk script which compares two sets of 
+.I yppoll
+output. It displays an error message if the order numbers are not strictly
+increasing (i.e. second yppoll reflects a newer map) or if the master server
+has changed.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.3  md
+.LE
+.sp
+.nf
+yppoll -h SLAVE passwd.byname > f1;
+    remsh MASTER "cd /etc/yp;make passwd NOPUSH=1" > /dev/null
+    yppoll -h SLAVE passwd.byname > f2;
+    diff f1 f2  ->  <empty>
+yppoll -h SLAVE passwd.byname > f3;
+    remsh MASTER "cd /etc/yp;make passwd" > /dev/null
+    yppoll -h SLAVE passwd.byname > f4;
+    cat f3 f4 | awk -f magic.awk  ->  <empty>
+.sp 2
+.H 3 "YP map propagation"
+.sp
+.P
+The file
+.B magic.awk
+is an awk script which compares two sets of 
+.I yppoll
+output. It displays an error message if the order numbers are not strictly
+increasing (i.e. second yppoll reflects a newer map) or if the master server
+has changed.
+.P
+The file
+.RI [ expected_out ]
+contains the expected output from the yppush or ypxfr commands, depending
+on the test (see below).
+.VL 10 0 1
+.LI
+DEPENDENCIES: Requires remsh/rsh
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.3  md
+.LE
+.sp
+.nf
+ON MASTER:
+yppoll -h SLAVE > f1;
+    cd /etc/yp;make passwd NOPUSH=1;
+    yppush passwd > o1;
+    yppoll -h SLAVE > f2;
+    cat f1 f2 | awk -f magic.awk  ->  <empty>
+yppoll -h MASTER > f3; diff f2 f3  ->  <empty>
+diff o1 [expected_out]  ->  <empty>
+.sp
+ON SLAVE:
+yppoll -h SLAVE > f1;
+    remsh MASTER "cd /etc/yp;make passwd NOPUSH=1";
+    ypxfr passwd.byname > o1;
+    yppoll -h SLAVE > f2;
+    cat f1 f2 | awk -f magic.awk  ->  <empty>
+yppoll -h MASTER > f3; diff f2 f3  ->  <empty>
+diff o1 [expected_out]  ->  <empty>
+ls -l /etc/yp/`domainname`/passwd.byname.* > f4;
+    ypxfr -f passwd.byname > o2;
+    ls -l /etc/yp/`domainname`/passwd.byname.* > f5;
+    cat f4 f5 | awk -f newer.awk  ->  <empty>;
+diff o2 [expected_out]  ->  <empty>
+.sp 2
+.H 3 "YP configuration"
+.sp
+.P
+This test may be failure-prone due to the anomaly described on the ypset
+man page, i.e. "ypset host1" followed by "ypwhich" may return "host2" if
+host2 is less loaded than host1. This should not be a problem if the
+hosts involved in the test are relatively unloaded.
+.P
+The file
+.B magic.awk
+is an awk script which compares two sets of 
+.I yppoll
+output. It displays an error message if the order numbers are not strictly
+increasing (i.e. second yppoll reflects a newer map) or if the master server
+has changed.
+.VL 10 0 1
+.LI
+DEPENDENCIES: 
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  0.25 md
+.LE
+.sp
+.nf
+serv=`ypwhich`; case $serv
+  MASTER: ypset SLAVE;
+	  if [ `ypwhich` = MASTER ] echo Failed
+	  exit
+  SLAVE:  ypset MASTER;
+	  if [ `ypwhich` = SLAVE ] echo Failed
+	  exit
+esac  ->  <empty>
+.sp
+remsh MASTER "cd /etc/yp;make passwd NOPUSH=1";
+    ypset MASTER; yppoll passwd.byname > f1;
+    ypset SLAVE; yppoll passwd.byname > f2;
+    cat f2 f1 | awk -f magic.awk  ->  <empty>
+.sp
+ypset bogushost;
+    ypwhich | grep -v MASTER | grep -v SLAVE  ->  <empty>
+.sp 2
+.H 3 "Failure recovery"
+.sp
+.P
+.B KILL
+is a shell script which does a kill on the specified server daemon. It
+can be run remotely, and it accepts the same signal arguments as the
+.I kill
+command.
+.VL 10 0 1
+.LI
+DEPENDENCIES: Requires remsh/rsh
+.LI
+ISSUES: 
+.LI
+IMPLEMENT TIME:  1.0  md
+.LE
+.sp
+.nf
+KILL ypbind;
+    ypwhich  ->  Cannot bind: no bind daemon
+    /etc/ypbind  ->  <empty>
+    ypwhich  ->  Cannot bind: domain unbound
+    ypwhich | grep -v MASTER | grep -v SLAVE  ->  <empty>
+.sp
+ypset SLAVE; ypwhich  ->  SLAVE
+    remsh SLAVE KILL ypserv;
+    ypwhich  ->  MASTER
+    remsh SLAVE /etc/yp/ypserv /* restart server */
+    remsh MASTER KILL ypserv;
+    ypwhich  ->  SLAVE
+    remsh MASTER /etc/yp/ypserv /* restart server */
+.sp
+remsh MASTER KILL rpc.passwdd;
+    yppasswd  ->  error: no daemon
+    remsh MASTER /usr/etc/rpc.passwdd /* restart */
+.sp
+.fi
+.P
+KILL ypbind;
+.br
+Test all YP commands for correct detection of missing bind
+daemon. Reestablish ypbind daemon.
+.P
+remsh SLAVE KILL ypserv; remsh MASTER KILL ypserv;
+.br
+Test all YP commands
+for correct behavior and detection. Reestablish server daemons.
+.P
+To increase BFA coverage: 
+.br
+.AL
+.LI
+Bring portmap down, execute a YP command
+that requires ypbind to be contacted (e.g. ypwhich or ypcat), then bring 
+portmap back up.  This requires that inetd, ypbind and ypserv be also
+killed and brought back up.  Ypbind and ypserv have to be killed before
+portmap so they don't timeout trying to contact portmap.
+.LI
+Start ypserv with logging enabled and make a YP call for a domain that
+is not supported.  To make the YP call we can do:
+.nf
+ypset -d NOT_SUPP `hostname`
+ypcat -d NOT_SUPP passwd
+.fi
+.LI
+Start ypserv when portmap is down.
+.LE
+.sp 2
+.H 3 "Ypset tests"
+.sp
+These tests have been added to increase BFA coverage.
+.nf
+ypset <Internet Address>
+ypset -V1 hostname
+.fi
+.sp 2
+.H 3 "Ypxfr tests"
+.sp
+These tests have been added to increase BFA coverage.
+.AL
+.LI
+ypxfr -h <Internet address> map
+.LI
+Create a logfile that ypxfr can't access.
+Since ypxfr runs as root create the log file on a 
+directory mounted over NFS.
+.LI
+Create a non-standard map on a short filename filesystem and try to
+transfer it to a system with a long filename filesystem.
+.LI
+Transfer a map that has a .dir file but no .pag file.
+.LI
+Make /usr/etc/yp/domain an NFS mounted filesystem that is not
+writable by other.
+.LI
+Use a standard file as a .dir and .pag files for a YP map. 
+In other words, use non-dbm files for the .pag and .dir files.
+.LE
+
+.fi
+.sp 2
+.H 3 "Ypbind tests"
+.sp
+These tests have been added to increase BFA coverage.
+.nf
+Change ypbind permissions; execute ypbind as non-superuser.
+ypbind -l filename
+ypbind -v &
+ypbind -y (-y is an unkown option)
+ypbind when portmap is down.
+Kill ypserv we are bound to:
+     ypbind: server not responding
+Bring ypserv back up:
+     ypbind: server OK
+.fi
+.sp 2
+.H 3 "Yppush tests"
+.sp
+These tests have been added to increase BFA coverage.
+.nf
+yppush -d domain
+Add bogus host to ypservers list and do yppush.
+.fi

@@ -1,0 +1,16 @@
+;
+; This is an example of a caching only server's boot file.
+;
+; A caching only server is not a master for any domain.
+; As it looks up names, it caches the data so that subsequent
+; lookups can be answered locally.
+;
+; Since no site "owns" the network number 127.0.0, it is 
+; customary that each server has the mapping for 127.0.0.1 
+; to the name "localhost".
+
+directory	/etc/newconfig/bind	; running directory for named
+					; and directory for files
+
+primary		0.0.127.IN-ADDR.ARPA	db.127.0.0
+cache		.			db.cache

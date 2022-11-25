@@ -1,0 +1,292 @@
+#!/bin/sh
+# @(#) $Revision: 70.1 $
+
+# lp interface for the hp2686 Laserjet page printer
+#
+# Options recognized:
+
+# Primary Symbol Set: (Default Roman-8)
+#	r8 | -r8	Roman Extended Character Set
+#	k8 | -k8	Katakana Character Set
+
+# Print Pitch Selection: (Default 11 cpi)
+#	10 | -10	pica print mode (10.00 cpi)
+#	12 | -12	elite expanded print mode (12.00 cpi)
+#	c  | -c		compressed print mode (16.36 cpi)
+
+# Page orientation:  (Default portrait)
+#	portrait	portrait mode orientation.
+#	landscape	landscape mode orientation.
+
+# Output filtering: (Default Cooked)
+#	r  | raw	raw mode for plotting mode etc.
+#	i  | italics 	Translates backspace/underscore to italics
+#	n  | nroff	set up to properly print output from nroff
+#       pr              set up to properly print output from pr
+#	lnnn		set page length to nnn (only in cooked mode)
+
+# Font Selection: (Default Portrait/Roman-8/10cpi/Courier)
+#	l  | lp		lp mode 66 lines by 170 chars compressed landscape.
+#	l  | lp		lp mode 70 lines by 183 chars compressed landscape.
+
+# Paper control:  (Default Single sided feed from paper cassette.)
+#	m  | man	set up for manual sheet feed
+#	d  | double	do double sided copy.
+#	legal		manually feed legal size paper.
+#
+# Other:
+#       nb		do not output banner page (to save paper)
+#
+# Default: normal print mode
+# 
+
+# Definitions of functions used within this script
+
+do_banner()
+{
+	echo "\033(8U\033&l1O\033(s0p10h12v0s0b3T\c"
+
+	# Print the standard header
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "$x\n$x\n$x\n$x\n"
+	banner `echo $user | tr [a-z] [A-Z]`
+	echo "\n"
+	user=`pwget -n $user | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $reqid    Printer: `basename $0`\n"
+	date
+	echo "\n"
+	banner "$title" 
+	echo "\f\c"
+}
+
+# POSSIBLE  ENHANCEMENTS:  This model no longer reverses pages by default
+# (since a lot of people either use reversing trays, or have a Laserjet
+# 500 or Laserjet II. To turn reversing on, insert a '#' before the below
+# line and remove the '#' from the line after it.
+
+reverse=""     # Use this line if you don't want page reversing
+#reverse="yes" # Use this line if you do    want page reversing
+
+# POSSIBLE  ENHANCEMENTS:  This model  assumes  that the letter  size (8.5
+# inches by 11  inches)  paper  cartridge  is used with 66 lines per page.
+# The A4 size (210 millimeters by 297 millimeters)  paper cartridge may be
+# used with 70 lines per page.  This is done by finding  those lines which
+# indicate "70" lines,  uncommenting  them, and commenting out the line or
+# lines which are used for "66" lines.
+
+# POSSIBLE  ENHANCEMENTS:  Other fonts may be available for this  printer.
+# These may add new type faces and pitches to the standard  character sets
+# or may add new character  sets.  In order to make effective use of them,
+# this  model  should  be  modified  with new  options  for the  "symbol",
+# "pitch", or "font" variables used below.
+
+# POSSIBLE  UPGRADE:  This model  provides some options  which may only be
+# supported with certain printer hardware  options.  There may be hardware
+# upgrades  available to support these options.  If these options are used
+# without the required  hardware, the result should be acceptable  even if
+# not exactly what was expected.
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+# set up redirection of stderr
+log=/usr/spool/lp/log
+exec 2>>$log
+
+printer=`basename $0`
+
+# Set up RS-232 interface if this is a tty port
+if tty -s <&1
+then
+	stty raw 9600 -parenb cs8 ixon -istrip clocal <&1
+fi
+
+# Set printer for number copies requested
+reqid=$1
+user=$2
+title=$3
+copies=$4
+echo "\033&l1X\c"
+
+# Handle disable and cancel traps.
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Set up printer default modes
+echo "\033E\c"		# Reset Printer
+echo "\033)0B\c"	# Secondary character set Line Draw
+echo "\033&k2G\c"	# Set line termination mode.
+
+# Determine which options have been invoked
+
+symbol=""
+pitch=""
+font="default"
+outputmode="cooked"
+pagelen=""
+pagemode=""
+nroff=""
+italics=""
+orientation="portrait"
+banner="yes"
+
+for i in $5
+do
+	case "$i" in
+	-r8 | r8) # Roman8 Character set
+		symbol="r8";;
+
+	-k8 | k8) # Kana8 Character set
+		symbol="k8";;
+
+	-10 | 10) # normal print (10.00 cpi)
+		pitch="p2";;
+	-12 | 12) # normal print (12.00 cpi)
+		pitch="p3";;
+	-c | c) # compressed print (16.36 cpi)
+		pitch="p4";;
+
+	-landscape | landscape) #Select landscape mode
+		orientation="landscape";;
+
+	-portrait | portrait) #Select portrait mode
+		orientation="portrait";;
+
+	r | raw) # raw mode for binary output to printer
+		font="none"
+		outputmode="raw";;
+
+	i | italics) # underline mode - does not italicise underlines.
+		italics="-i";;
+
+	d | double) # set up for double sided copy.
+		outputmode="double";;
+
+	n | nroff)  # set up printer to properly print nroff output
+		font="nroff"
+		nroff="-n";;
+
+	pr | -pr)  #set up printer to properly print pr output
+		font="pr"
+		nroff="-p";;
+
+	nb | -nb) # Do not output banner page
+		banner="";;
+
+	l | lp)	# set up lp mode 170 chars X 66 lines
+#	l | lp)	# set up lp mode 183 chars X 70 lines
+		font="lp";;
+
+	legal) # manually feed legal size
+		pagemode="legal";;
+
+	l[0-9]*) #set the page length to nnn
+		pagelen="-$i";;
+
+	m | man) # set up printer for manual sheet feed
+		pagemode="man";
+	esac
+done
+
+# Assume that the rest of the arguments are files
+shift; shift; shift; shift; shift
+files="$*"
+
+# print the banner if no banner not specified and reversing is not specified
+if [ -n "$banner" -a -z "$reverse" ]
+then
+	do_banner
+	echo "\033E\c"		# Reset Printer
+	echo "\033&l0O\c"	# Portrait orientation
+	echo "\033)0B\c"	# Secondary character set Line Draw
+	echo "\033&k2G\c"	# Set line termination mode.
+fi
+
+# Print the spooled files
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		case "$font" in 
+			none);;
+
+			nroff)  pagelen="-l66";;
+#			nroff)  pagelen="-l70";;
+
+			lp)	echo "\033&l1O\c"           # Set Landscape mode
+				echo "\033(s16.7H\c"  	    # Primary char pitch
+				echo "\033)s16.7H\c" 	    # Sec char pitch
+				echo "\033&l66p5.7c2e66F\c" # Set 66 lines/page
+#				echo "\033&l70p5.22c3e70F\c"# Set 70 lines/page
+				echo "\033&a4L\c"	    # .4" Left Margin
+				pagelen=-l66;;
+#				pagelen=-l70;;
+
+			default)echo "\033&l66p2e7.6c66F\c"  # Set 66 lines/page
+#			default)echo "\033&l70p2e7.6c70F\c"  # Set 70 lines/page
+				echo "\033&a4L\c"	     # .4" Left Margin
+				echo "\033&k11H\c"	     # 10.9 chars/inch
+				pagelen=-l66;;
+#				pagelen=-l70;;
+		esac
+
+		case "$orientation" in
+			portrait)	echo "\033&l0O\c";;
+			landscape)	echo "\033&l1O\c";;
+		esac
+
+		case "$symbol" in
+			r8)	echo "\033(8U\c";;
+			k8)	echo "\033(8K\c";
+		esac
+
+		case "$pitch" in
+			p2)	echo "\033(s10H\033)s10H\c";;
+			p3)	echo "\033(s12H\033)s12H\c";;
+			p4)	echo "\033(s16.7H\033)s16.7H\c";
+		esac
+
+		case "$pagemode" in
+			man)	echo "\033&l2H\c";;
+			legal)	echo "\033&l2h84P\c";;
+		esac
+
+		if [ -n "$reverse" ]
+		then
+		    case $outputmode in
+			    raw)    cat $file 2>&1;;
+			    cooked) lprpp $italics $pagelen $nroff <$file 2>&1 |
+					    reverse $pagelen;;
+			    double) lprpp $italics $pagelen $nroff -o <$file 2>&1 |
+					    reverse $pagelen
+				    echo "\033&l2H\c"
+				    lprpp $italics $pagelen $nroff -e <$file 2>&1;;
+		    esac
+		else
+		    case $outputmode in
+			    raw)    cat $file 2>&1;;
+			    cooked) lprpp $italics $pagelen $nroff <$file 2>&1;;
+			    double) lprpp $italics $pagelen $nroff -o <$file 2>&1
+				    echo "\033&l2H\c"
+				    lprpp $italics $pagelen $nroff -e <$file 2>&1;;
+		    esac
+		fi
+		echo "\033E\c"		# Reset Printer
+		echo "\033)0B\c"	# Secondary character set Line Draw
+		echo "\033&k2G\c"	# Set line termination mode.
+	done
+	i=`expr $i + 1`
+done
+
+if [ -n "$banner" -a -n "$reverse" ]
+then
+	do_banner
+fi
+
+exit 0

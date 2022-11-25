@@ -1,0 +1,4 @@
+# @(#) $Revision: 27.1 $     
+g/\.rls/s//.ras/
+w
+q

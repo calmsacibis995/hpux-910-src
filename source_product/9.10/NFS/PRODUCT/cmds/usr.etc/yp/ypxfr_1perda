@@ -1,0 +1,17 @@
+#	   @(#)ypxfr_1perday:	$Revision: 1.20.109.1 $	$Date: 91/11/19 14:21:42 $  
+#
+#  (c) Copyright 1987, 1988 Hewlett-Packard Company
+#  (c) Copyright 1985 Sun Microsystems, Inc.  
+#
+#  ypxfr_1perday - Do daily Network Information Service map check/updates
+
+/usr/etc/yp/ypxfr group.bygid 
+/usr/etc/yp/ypxfr group.byname
+/usr/etc/yp/ypxfr networks.byaddr
+/usr/etc/yp/ypxfr networks.byname
+/usr/etc/yp/ypxfr protocols.byname
+/usr/etc/yp/ypxfr protocols.bynumber
+/usr/etc/yp/ypxfr rpc.bynumber
+/usr/etc/yp/ypxfr services.byname
+/usr/etc/yp/ypxfr ypservers
+/usr/etc/yp/ypxfr vhe_list

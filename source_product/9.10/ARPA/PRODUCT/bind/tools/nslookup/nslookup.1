@@ -1,0 +1,558 @@
+.TH nslookup 1
+.ds )H Hewlett-Packard Company
+.ds ]W HP-UX Release 9.0: August 1992
+.SH NAME
+nslookup \- query name servers interactively
+.SH SYNOPSIS
+.C nslookup
+.RI [ -option \0...]
+.I host-to-find
+.RI [ \|server\| ]
+.br
+.C nslookup
+.RI [ -option \0...]
+.RC [ -
+.RI [ \|server\| ]\|]
+.ad b
+.SH DESCRIPTION
+.C nslookup
+is a program to query Internet domain name servers. It has been extended to query
+alternate name servers such as
+.SM NIS
+and host tables as well for name and address resolution.
+.PP
+.C nslookup
+has two modes: interactive and non-interactive.
+Interactive mode allows the user to query a name server for information about
+various  hosts and domains, or print a list of hosts in the domain.
+Non-interactive mode is used to query a name server for information about one
+host or domain.
+.PP
+.C nslookup
+accesses alternate name services for name and address resolution based on
+the policy information obtained from the switch configuration
+file (see switch(4)). When using
+.SM NIS
+or the host table in either of the above modes, only name and
+address lookups are possible.
+.SH ARGUMENTS
+.PP
+Interactive mode is entered in the following cases:
+.RS
+.TP 2
+\(bu
+No arguments are given.
+.TP
+\(bu
+The first argument is a hyphen
+.RC ( - ).
+The optional second argument is a host name or Internet address of
+a name server.
+.RE
+.PP
+Non-interactive mode is used when the name of the host to be looked up
+is given as the first argument.
+The optional second argument is a host name or Internet address of a
+name server.
+.PP
+Options listed under the
+.C set
+command below can be specified in the \fB.nslookuprc\fR file in the
+user's home directory and must be listed one per line.
+Alternatively, these options may be specified on the command line by
+prefixing them with a \fIhyphen\fR and must precede other command line
+arguments.
+For example, to change the default query type to host information,
+and the initial timeout to 10 seconds, type:
+.IP
+.C "nslookup -query=hinfo -timeout=10"
+.PP
+The command line option \fB-swd[ebug]\fR may be used to debug syntactic
+errors in the switch configuration file.
+If set the switch module prints out a trace of the the scan and parse
+actions on the "hosts" entry (see \fIswitch\fR (4)) in the
+file /etc/nsswitch.conf during initialization.
+The default value is -noswdebug.
+.SS Interactive Commands
+Commands can be interrupted at any time by using the interrupt character.
+To exit, type a Ctrl-D
+.SM (EOF)
+or type
+.CR exit .
+To treat a built-in command as a host name,
+precede it with an escape character
+.RC ( \e ).
+When using
+.SM NIS
+or the host table, only host names and Internet addresses
+are allowed as commands.
+An unrecognized command is interpreted as a host name.
+.PP
+.TP 15
+.IR host\0 [ server ]
+Look up information for
+.I host
+using the current default server or using
+.I server
+if specified.
+If
+.I host
+is an Internet address and the query type is A or
+.SM PTR,
+the name of the host is returned.
+If
+.I host
+is a name and does not have a trailing period,
+one or more domains are appended to the name
+(this behavior depends on the state of the
+.C set
+options
+.CR domain ,
+.CR srchlist ,
+.CR defname ,
+and
+.CR search ).
+Answers from a name server's cache are labelled ``non-authoritative.''
+.TP
+.C exit
+Exits the program.
+.TP
+.CR finger \0[\|\f2name\fP\|]\0[ > \0\f2filename\fP\|]
+.PD 0
+.TP
+.CR finger \0[\|\f2name\fP\|]\0[ >> \0\f2filename\fP\|]
+Connects with the finger server on the current host.
+The current host is defined when a previous lookup for a host
+was successful and returned address information (see the
+.C set querytype=A
+command).
+.I name
+is optional.
+.C >
+and
+.C >>
+can be used to redirect output in the usual manner.
+.PD
+.TP
+.C help
+.PD 0
+.TP
+.C ?
+Prints a brief summary of commands.
+.PD
+.TP
+.CR ls \0[\|\f2option\f1\|]\0\f2domain\f1\0[ > \0\f2filename\f1\|]
+.PD 0
+.TP
+.CR ls \0[\|\f2option\f1\|]\0\f2domain\f1\0[ >> \0\f2filename\f1\|]
+List the information available for
+.IR domain ,
+optionally creating or appending to
+.IR filename .
+The default output contains host names and their Internet addresses.
+.I option
+can be one of the following:
+.PD
+.RS
+.TP 15
+.CI -t \0querytype
+lists all records of the specified type (see
+.I querytype
+below).
+.TP
+.C -a
+lists aliases of hosts in the domain (synonym for
+.CR -t\0CNAME ).
+.TP
+.C -d
+lists all records for the domain (synonym for
+.CR -t\0ANY ).
+.TP
+.C -h
+lists
+.SM CPU
+and operating system information for the domain (synonym for
+.CR -t\0HINFO ).
+.TP
+.C -s
+lists well-known services of hosts in the domain (synonym for
+.CR -t\0WKS ).
+.RE
+.IP
+When output is directed to a file,
+.C #
+characters are printed for every 50 records received from the server.
+.TP
+.C policy
+prints out the policy read from the switch configuration file for name services.
+.TP
+.C root
+Changes the default server to the server
+for the root of the domain name space.
+Currently, the host
+.C ns.nic.ddn.mil
+is used
+(this command is a synonym for the
+.CR lserver ns.nic.ddn.mil ).
+The name of the root server can be changed with the
+.C set root
+command.
+.TP
+.CI server\0 domain
+.PD 0
+.TP
+.CI lserver\0 domain
+Change the default server to
+.IR domain .
+.C lserver
+uses the initial server to look up information about
+.I domain
+while
+.C server
+uses the current default server.
+.PD
+.TP
+.CR set \0\f2keyword\fP[ = \f2value\fP\|]
+This command is used to change state information
+that affects the lookups.
+Valid keywords are:
+.RS
+.RS
+.TP 15
+.C all
+Prints the current values of the various options to
+.CR set .
+Information about the current default server and host is also printed.
+.TP
+.CR cl [ ass ] = \f2value\fP
+Change the query class to one of:
+.RS
+.RS
+.TP 10
+.C IN
+the Internet class.
+.TP
+.C CHAOS
+the Chaos class.
+.TP
+.C HESIOD
+the
+.SM MIT
+Athena Hesiod class.
+.TP
+.C ANY
+wildcard (any of the above).
+.RE
+.RE
+.IP
+The class specifies the protocol group of the information.
+.br
+(Default =
+.CR IN )
+.TP
+.ift .RC [\f4\s+1no\s0\fP] deb [\f4\s+1ug\s0\fP]
+.ifn .RC [\f3no\fP] deb [\f3ug\fP]
+Turn debugging mode on.
+More information is printed about the packet
+sent to the server and the resulting answer.
+.br
+(Default = nodebug)
+.TP
+.RC [ no ] d2
+Turn exhaustive debugging mode on.
+Essentially all fields of every packet are printed.
+.br
+(Default = nod2)
+.TP
+.ift .RC [\f4\s+1no\s0\fP] def [\f4\s+1name\s0\fP]
+.ifn .RC [\f3no\fP] def [\f3name\fP]
+If set,
+append the default domain name to a single-component lookup request
+(i.e., one that does not contain a period character).
+.br
+(Default =
+.CR defname )
+.TP
+.CR do [ main ] = \f2name\fP
+Change the default domain name to
+.IR name .
+The default domain name is appended to a lookup request,
+depending on the state of the
+.C defname
+and
+.C search
+options.
+The domain search list contains the parents of the default domain
+if it has at least two components in its name.
+For example, if the default domain is
+.CR CC.Berkeley.EDU ,
+the search list is
+.C CC.Berkeley.EDU
+and
+.CR Berkeley.EDU .
+Use the
+.C set srchlist
+command to specify a different list.
+Use the
+.C set all
+command to display the list.
+.br
+(Default = value from hostname,
+.C /etc/resolv.conf
+or
+.CR LOCALDOMAIN )
+.TP
+.ift .RC [\f4\s+1no\s0\fP] ig [\f4\s+1nore\s0\fP]
+.ifn .RC [\f3no\fP] ig [\f3nore\fP]
+Ignore truncation errors.
+.br
+(Default = noignore)
+.TP
+.CR q [ uerytype ] = \f2value\fP
+.PD 0
+.TP
+.CR ty [ pe ] = \f2value\fP
+Change the type of information returned from a query to one of:
+.PD
+.RS
+.RS
+.TP 12
+.C A
+Host's Internet address
+.TP
+.C ANY
+All types of data
+.TP
+.C CNAME
+Canonical name for an alias
+.TP
+.C GID
+Group ID
+.TP
+.C HINFO
+Host CPU and operating system type
+.TP
+.C MB
+Mailbox domain name
+.TP
+.C MG
+Mail group member
+.TP
+.C MINFO
+Mailbox or mail list information
+.TP
+.C MR
+Mail rename domain name
+.TP
+.C MX
+Mail exchanger
+.TP
+.C NS
+Name server for the named zone
+.TP
+.C PTR
+Host name if the query is an Internet address,
+otherwise the pointer to other information.
+.TP
+.C SOA
+Start of authority record
+.TP
+.C TXT
+Text information
+.TP
+.C UID
+User ID
+.TP
+.C UINFO
+User information
+.TP
+.C WKS
+Well-known service description
+.RE
+.RE
+.TP
+.CR po [ rt ] = \f2value\fP
+Change the default
+.SM TCP/UDP
+name server port to
+.IR value .
+.br
+(Default = 53)
+.TP
+.ift .RC [\f4\s+1no\s0\fP] rec [\f4\s+1urse\s0\fP]
+.ifn .RC [\f3no\fP] rec [\f3urse\fP]
+Tell the name server to query other servers
+if it does not have the information.
+.br
+(Default = recurse)
+.TP
+.CR ret [ ry ] = \f2number\fP
+Set the number of retries to
+.IR number .
+When a reply to a request is not received
+within a certain amount of time (changed with
+.CR "set timeout" ),
+the timeout period is doubled and the request is resent.
+The retry value controls
+how many times a request is resent before giving up.
+.br
+(Default = 4)
+.TP
+.CR ro [ ot ] = \f2host\fP
+Change the name of the root server to
+.IR host .
+This affects the
+.C root
+command.
+.br
+(Default =
+.CR ns.nic.ddn.mil )
+.TP
+\f3[no]sea[rch]\fP
+If the lookup request contains at least one period
+but doesn't end with a trailing period,
+append the domain names in the domain search list
+to the request until an answer is received.
+See
+.IR hostname (5).
+.br
+(Default =
+.CR search )
+.TP
+.CR srchl [ ist ]= \f2name1/name2/...\fP
+Change the default domain name to
+.I name1
+and the domain search list to
+.IR name1 ,
+.IR name2 ,
+etc.
+A maximum of 6 names separated by slashes
+.RC ( \|/\| )
+can be specified.
+For example,
+.RS
+.IP
+.C set srchlist=lcs.MIT.EDU/ai.MIT.EDU/MIT.EDU
+.RE
+.IP
+sets the domain to
+.C lcs.MIT.EDU
+and the search list to the three names.
+This command overrides the default domain name and search list of the
+.C set domain
+command.
+Use the
+.C set all
+command to display the list.
+.br
+(Default = value based on hostname,
+.C /etc/resolv.conf
+or
+.CR LOCALDOMAIN )
+.TP
+\f3[no]swtr[ace]\fP
+When set this flag causes nslookup to print out information about sources used,
+as per the switch policy, for a name or an address lookup.
+.br
+(Default =
+.CR noswtrace)
+.TP
+.CR t [ imeout ] = \f2number\fP
+Change the initial timeout interval for waiting for a reply to
+.I number
+seconds.
+Each retry doubles the timeout period.
+.br
+(Default = 5 seconds)
+.TP
+.ift .RC [\f4\s+1no\s0\fP] v [\f4\s+1c\s0\fP]
+.ifn .RC [\f3no\fP] v [\f3c\fP]
+Always use a virtual circuit when sending requests to the server.
+.br
+(Default =
+.CR novc )
+.RE
+.TP
+.CI view \0filename
+Sorts and lists the output of previous
+.C ls
+command(s) using
+.C more
+(see
+.IR more (1)).
+.SH DIAGNOSTICS
+If the lookup request was not successful, an error message is printed.
+Possible errors are:
+.RS
+.TP
+.C Time-out
+The server did not respond to a request after a certain amount of
+time (changed with
+.C set timeout=\c
+.IR value )
+and a certain number of retries (changed with
+.C set retry=\c
+.IR value ).
+.TP
+.C No response from server
+No name server is running on the server machine.
+.TP
+.C No records
+The server does not have resource records
+of the current query type for the host,
+although the host name is valid.
+The query type is specified with the
+.C set querytype
+command.
+.TP
+.C Non-existent domain
+The host or domain name does not exist.
+.TP
+.C Connection refused
+.PD 0
+.TP
+.C Network is unreachable
+The connection to the name server could not be made
+at the present time.
+.PD
+.TP
+.C Server failure
+The name server found an internal inconsistency in its database
+and could not return a valid answer.
+.TP
+.C Refused
+The name server refused to service the request.
+.TP
+.C Format error
+The name server found that the request packet
+was not in the proper format.
+.RE
+.SH AUTHOR
+.C nslookup
+was developed by the University of California, Berkeley.
+.SH FILES
+.PD 0
+.TP 30
+.C /etc/resolv.conf
+initial domain name and name server addresses
+.TP
+.SM
+.C $HOME/.nslookuprc	
+user's initial options
+.PD
+.SH SEE ALSO
+named(1M),
+resolver(3N),
+resolver(4),
+hostname(5),
+.PP
+RFC1034, RFC1035
+.\"
+.\" index	\f4nslookup\f1 \- query name servers interactively 	 \f3nslookup(1)\f1
+.\" index	query name servers interactively 	 \f3nslookup(1)\f1
+.\" index	name servers, query interactively 	 \f3nslookup(1)\f1
+.\" index	servers, name, query interactively 	 \f3nslookup(1)\f1
+.\"
+.\" toc	\f3nslookup(1)\f1:\0\0\f4nslookup\f1 	 query name servers interactively
+.\"
+.\" fileset_database	nslookup.1 ARPA-MAN

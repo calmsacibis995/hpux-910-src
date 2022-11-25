@@ -1,0 +1,249 @@
+
+.H 1 "Alpha/Beta-Site Pretesting (Steve Booth)
+
+RESPONSIBLE ENGINEER: Steve Booth
+
+The state of the NFS code must be well-known for each of three planned
+pre-releases, one in late March or early April, a second in late May or
+early June, and a possible third pre-release in July.
+This chapter outlines the steps that will be taken to determine
+the state of the code for each pre-release.
+
+Should the testing determine that the code is not ready for release,
+a short summary document will be written explaining what needs to be
+done to make the code ready for release.  Each beta site will receive
+a summary document listing known deficiencies in the beta code.
+
+This chapter will not define additional tests for the scaffold; it
+will use those NFS scaffold tests which exist when beta-site testing
+commences.
+
+The summary document (above) will indicate whether the
+number and content of tests was sufficient to determine
+the readiness of the code.
+
+Defect weighting is as defined by the Defect Tracking System
+(DTS) program in common use by HP-UX testers.
+.nf
+PERFORM TIME:    6.0 md 
+		(2.0 md per beta release)
+.fi
+.H 2 "NFS/300 Pre-release Strategy"
+
+What follows is the current plan for early release of the code
+for beta sites and Business Opportunities (B.O.'s):
+
+Key people in this area are Carole Crall (CND Tech Support),
+Andy Drol (CND Marketing), and Jeff Lindberg (NerFS project
+manager).
+
+CND R&D and  Marketing  have  agreed to support  three (3) customers
+receiving  pre-releases  of the NFS/300 product.  This is the combined total
+of beta sites and  B.O.'s.  It is uncertain whether there will be
+1 or 2 beta  sites.  Alpha  sites  (internal  HP users  not
+directly   involved  in  the  NFS  project)  are  being  handled
+separately, and are not included in this number.
+
+Some of the  accounts  identified  by Les  Walker's  team in FSD
+marketing as potential  NFS early  release  sites may qualify as
+full  fledged  beta  sites.  The  level of  commitment  from the
+field,  multi-vendor  configurations,  and expected usage of NFS
+are the key criteria used to select beta sites.  Other  accounts
+may fall into the  category of B.O.'s,  which are general  early
+releases given to customers for HP business  reasons,  without a
+formal beta site  agreement.  The time-line for selecting  these
+sites and for early shipments is listed later.
+
+For beta sites, the account SE will be the first line of support
+for  responding to problems and  questions.  The SE will rely on
+CND  Tech  Support  (Carole)  for the  next  level  of  support,
+followed by the NerFS R&D project  group. 
+The support  mechanism  for B.O.'s has not been resolved,
+but should follow the same strategy as the beta sites
+as much as possible.
+
+The  first  beta/B.O.  release  will
+piggyback on the system built in the second  300/6.0 SSIT cycle.
+Second draft manuals will be included with this release.
+
+.H 3 "Alpha Sites"
+
+Early  releases will be provided to three HP internal
+alpha sites:  HP Labs at Palo Alto, HP Labs at Bristol, and Salt
+Lake  Operation.  These alpha sites will be supported through
+the NerFS R&D project group.  The system built in
+the first 300/6.0 SSIT cycle will be the first alpha release.
+
+.H 3 "Other Pre-Releases"
+
+It may be necessary to provide additional early releases, near the end of
+the project, to high priority  customers.  The output of later SSIT cycles
+and the latest draft of the manuals will be used for  these  shipments.
+
+There is no time budgeted for supporting these early releases before the
+final release to SSIT.
+
+.DS
+PROPOSED TIME-LINE
+
+2/9	Les	New prioritized list of accounts based on latest 
+		data; include their level of need for NFS, 
+		potential sales.
+
+2/13	Carole	Get information from the hot accounts regarding
+		configuration information, potential NFS usage.
+
+2/17	Team	Decide on beta and B.O. sites.
+
+2/13	Carole	Beta support plan complete.
+
+2/18	Carole	Distribute beta support plan to field.
+
+2/13	Andy	Complete proposed beta site legal agreement.
+
+2/18	Andy	Distribute beta site agreements to field.
+
+March	Lab	Distribute first alpha site release (HP internal).
+
+April	Andy	Conclude beta site agreements with accounts.
+
+April	Carole	SE training for beta site and B.O. SE's, NMC.
+		[ISSUE:  How many people can attend this class?]
+
+May	Annette	Copies of second draft manuals for beta release.
+
+May	Lab	Ship beta site release.
+
+June	Carole	Get early feedback from beta sites.
+
+July	Lab	Release to final SSIT.
+
+July	Lab	Possible additional early customer shipments.
+
+July	Carole	Final feedback from beta sites; 
+		write final beta site report.
+.DE
+
+.H 2  "March Alpha Release"
+.DS
+
+
+DEPENDENCIES: full HP-NFS/YP functionality by 3/23/87
+              preliminary documentation by 4/1/87
+ISSUES: what to release to beta-sites if full
+        functionality is not available by 3/23/87
+    
+.DE
+
+Certification of the first pre-release code will consist of running the 
+existing complement of functional and stress tests,
+for a continuous 12 hours,
+each of 3 consecutive nights.
+Machine configuration for the testing will be
+.DS
+
+-------    -------     -------    -------     -------    -------
+|     |    |     |     |     |    |     |     |     |    |     |
+| 3x0 |--->| 3x0 |     | SUN |--->| 3x0 |     | 3x0 |--->| SUN |
+|     |    |     |     |     |    |     |     |     |    |     |
+-------    -------     -------    -------     -------    -------
+
+.DE
+and will require a total of 6 machines.
+
+Defects found during the first two nights can be fixed for the final (3rd) run.
+
+.ne 15
+The following minimum code and documentation objectives must be met
+for the initial pre-release:
+
+.BL
+.LI
+no system crashes due to mainline NFS/YP code
+.LI
+no greater than 5 (known) corner cases which result in system
+crashes; no greater than 5 defects with weight greater than 7
+.LI
+at least two tests exist for each NFS/YP user-level function,
+one each for valid/invalid input
+.LI
+lab has reviewed the technical content of preliminary documentation
+being sent out
+.LE
+
+.H 2  "May Beta Release"
+.DS
+
+DEPENDENCIES: all tests outlined in the testplan
+              are written and in the scaffold
+
+.DE
+Certification of the beta-site code for the May release will consist of
+running the full set of NFS functional and stress tests, for a continuous
+12 hours, each of 3 consecutive nights.
+Machine configuration for the testing will be
+.DS
+
+-------     -------     -------
+|     |     |     |     |     |
+| 3x0 |<--->| 3x0 |<--->| SUN |
+|     |     |     |     |     |
+-------     -------     -------
+
+.DE
+and will require 3 machines.
+
+Defects found during the first two nights
+can be fixed for the final (3rd) run.  Errors found during the third night
+of testing must have a defect weight less than 6.
+
+.ne 12
+The following minimum code and documentation objectives must be met
+for the May beta-site release:
+
+.BL
+.LI
+no system crashes due (directly or indirectly) to NFS/YP code
+.LI
+all known defects resulting in a system crash have been logged in the
+appropriate dts database, and documented for the beta site customers
+.LI
+all defects of weight greater than 5 have been fixed
+.LI
+no known technical errors exist in the documentation being sent to beta sites
+.LE
+
+.H 2  "July Beta Release"
+
+Certification of the beta-site code for the possible July release will
+consist of running the full set of NFS functional and stress tests for
+a continuous 24 hours.
+
+Machine configuration for the testing will be
+.DS
+
+-------     -------     -------
+|     |     |     |     |     |
+| 3x0 |<--->| 3x0 |<--->| SUN |
+|     |     |     |     |     |
+-------     -------     -------
+
+.DE
+and will require 3 machines.
+
+
+.ne 12
+The following minimum code and documentation objectives must be met
+for the July beta-site release:
+
+.BL
+.LI
+no system crashes due (directly or indirectly) to NFS/YP code
+.LI
+all known defects resulting in a system crash have been fixed
+.LI
+all known defects have either been fixed, or resolved as "will not fix"
+.LI
+no known errors exist in the documentation
+.LE
+

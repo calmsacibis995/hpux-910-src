@@ -1,0 +1,268 @@
+#!/bin/sh
+#  @(#) $Revision: 70.1 $ */    
+
+#
+# Options recognized:
+
+# Primary Symbol Set:	(Default Roman-8)
+#	r8 | -r8	Roman Extended Character Set
+#	k8 | -k8	Katakana Character Set
+
+# Print Pitch:		(Default 10 cpi)
+#	10 | -10	pica print mode (10.00 cpi)
+#	12 | -12	elite expanded print mode (12.00 cpi)
+#	c  | -c		compressed print mode (16.36 cpi)
+
+# Page orientation:	(Default portrait)
+#	portrait	portrait mode orientation.
+#	landscape	landscape mode orientation.
+
+# Output filtering:	(Default Cooked)
+#	r  | raw	raw mode for plotting mode etc.
+#	i  | italics 	Translates backspace/underscore to italics
+#	n  | nroff	set up to properly print output from nroff
+#	pr              set up to properly print output from pr
+#	lnnn		set page length to nnn (only in cooked mode)
+
+# Font Selection:	(Default Portrait/Roman-8/10cpi/Courier)
+#	l  | lp		lp mode 66 lines by 170 chars compressed landscape.
+#	l  | lp		lp mode 70 lines by 183 chars compressed landscape.
+
+# Paper control:	(Default Single sided feed)
+#	d  | double	do double sided copy
+#
+# Other:		(Default output banner page)
+#       nb		do not output banner page (to save paper)
+#
+# Default: normal print mode
+# 
+
+# POSSIBLE  ENHANCEMENTS:  This model  assumes  that the letter  size (8.5
+# inches by 11  inches)  paper  cartridge  is used with 66 lines per page.
+# The A4 size (210 millimeters by 297 millimeters)  paper cartridge may be
+# used with 70 lines per page.  This is done by finding  those lines which
+# indicate "70" lines,  uncommenting  them, and commenting out the line or
+# lines which are used for "66" lines.
+
+# POSSIBLE  ENHANCEMENTS:  Other fonts may be available for this  printer.
+# These may add new type faces and pitches to the standard  character sets
+# or may add new character  sets.  In order to make effective use of them,
+# this  model  should  be  modified  with new  options  for the  "symbol",
+# "pitch", or "font" variables used below.
+
+# POSSIBLE  UPGRADE:  This model  provides some options  which may only be
+# supported with certain printer hardware  options.  There may be hardware
+# upgrades  available to support these options.  If these options are used
+# without the required  hardware, the result should be acceptable  even if
+# not exactly what was expected.
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+# set up redirection of stderr
+log=/usr/spool/lp/log
+exec 2>>$log
+
+printer=`basename $0`
+
+# Set up RS-232 interface if this is a tty port
+if tty -s <&1
+then
+	stty raw 9600 -parenb cs8 ixon -istrip clocal <&1
+fi
+
+# Set printer for number copies requested
+reqid=$1
+user=$2
+title=$3
+copies=$4
+echo "\033&l1X\c"
+
+# Handle disable and cancel traps.
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Set up printer default modes
+echo "\033E\c"		# Reset Printer
+echo "\033&l0O\c"	# Portrait orientation
+echo "\033)0B\c"	# Secondary character set Line Draw
+echo "\033&k2G\c"	# Set line termination mode.
+
+# Determine which options have been invoked
+
+double=""
+symbol=""
+pitch=""
+font="default"
+outputmode="cooked"
+pagelen=""
+pagemode=""
+nroff=""
+italics=""
+orientation="portrait"
+banner="yes"
+
+for i in $5
+do
+	case "$i" in
+	-r8 | r8) # Roman8 Character set
+		symbol="r8";;
+
+	-k8 | k8) # Kana8 Character set
+		symbol="k8";;
+
+	-10 | 10) # normal print (10.00 cpi)
+		pitch="p2";;
+	-12 | 12) # normal print (12.00 cpi)
+		pitch="p3";;
+	-c | c) # compressed print (16.36 cpi)
+		pitch="p4";;
+
+	-landscape | landscape) #Select landscape mode
+		orientation="landscape";;
+
+	-portrait | portrait) #Select portrait mode
+		orientation="portrait";;
+
+	r | raw) # raw mode for binary output to printer
+		outputmode="raw";;
+
+	i | italics) # underline mode - does not italicise underlines.
+		italics="-i";;
+
+	d | double) # set up for double sided copy.
+		double="double";;
+
+	n | nroff)  # set up printer to properly print nroff output
+		font="nroff"
+		nroff="-n";;
+
+	pr | -pr)  #set up printer to properly print pr output
+		font="pr"
+		nroff="-p";;
+
+	nb | -nb) # Do not output banner page
+		banner="";;
+
+	l | lp)	# set up lp mode 170 chars X 66 lines
+#	l | lp)	# set up lp mode 183 chars X 70 lines
+		font="lp";;
+
+	portrait)
+		font="";;
+
+	l[0-9]*) #set the page length to nnn
+		pagelen="-$i";;
+
+	esac
+done
+
+# print the banner if no banner not specified
+if [ -n "$banner" ]
+then
+#	echo "\033(8U\033&l1O\033(s0p10h12v0s0b3T\c"
+
+	# Print the standard header
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "$x\n$x\n$x\n$x\n"
+	banner `echo $user | tr [a-z] [A-Z]`
+	echo "\n"
+	user=`pwget -n $user | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $reqid    Printer: `basename $0`\n"
+	date
+	echo "\n"
+	banner "$title" 
+	echo "\f\c"
+	echo "\033E\c"		# Reset Printer
+	echo "\033&l0O\c"	# Portrait orientation
+	echo "\033)0B\c"	# Secondary character set Line Draw
+	echo "\033&k2G\c"	# Set line termination mode.
+fi
+
+# Assume that the rest of the arguments are files
+shift; shift; shift; shift; shift
+files="$*"
+
+# Print the spooled files
+i=1
+while [ $i -le $copies ]
+do
+
+#	Set for double sided.
+	if [ -n "$double" ]
+	then
+		echo "\033&l1S\c"
+	fi
+
+	for file in $files
+	do
+		case "$orientation" in
+			portrait)	echo "\033&l0O\c";;
+			landscape)	echo "\033&l1O\c";;
+		esac
+
+		case "$font" in 
+			none);;
+
+			nroff)  pagelen="-l66";;
+#			nroff)  pagelen="-l70";;
+
+			lp)	echo "\033&l1O\c"           # Set Landscape mode
+				echo "\033(s16.7H\c"  	    # Primary char pitch
+				echo "\033)s16.7H\c" 	    # Sec char pitch
+				echo "\033&l5.7c2e66F\c"    # Set 66 lines/page
+#				echo "\033&l5.22c3e70F\c"   # Set 70 lines/page
+#				echo "\033&a4L\c"	    # .4" Left Margin
+				pagelen=-l66;;
+#				pagelen=-l70;;
+
+#			In the default case:
+#				for portrait  set 66 lines per page maximum.
+#				for landscape set 45 lines per page maximum.
+#				set vertical motion to 7.55 48's of an inch.
+#				set the top margin to 2 lines.
+#				use the user lpecified number of lines if
+#					specified.
+			default)case "$orientation" in
+					portrait)	echo "\033&l7.48c2e66F\c"
+							temppagelen=-l66;;
+#							temppagelen=-l70;;
+					landscape)	echo "\033&l7.48c2e50F\c"
+							temppagelen=-l50;;
+				esac
+#				echo "\033&a4L\c"	     # .4" Left Margin
+				echo "\033&k11H\c"	     # 10.9 chars/inch
+				if [ -z "$pagelen" ]
+				then
+					pagelen=$temppagelen
+				fi;;
+		esac
+
+		case "$symbol" in
+			r8)	echo "\033(8U\c";;
+			k8)	echo "\033(8K\c";
+		esac
+
+		case "$pitch" in
+			p2)	echo "\033(s10H\033)s10H\c";;
+			p3)	echo "\033(s12H\033)s12H\c";;
+			p4)	echo "\033(s16.7H\033)s16.7H\c";
+		esac
+
+		case $outputmode in
+			raw)		cat $file 2>&1;;
+			cooked)		lprpp $italics $pagelen $nroff <$file 2>&1 ;;
+#			cooked)		lprpp $italics $pagelen $nroff <$file 2>&1;;  # Use with 70 lines per page
+		esac
+		echo "\033E\c"		# Reset Printer
+		echo "\033)0B\c"	# Secondary character set Line Draw
+		echo "\033&k2G\c"	# Set line termination mode.
+	done
+	i=`expr $i + 1`
+done
+exit 0

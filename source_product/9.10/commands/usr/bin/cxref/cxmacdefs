@@ -1,0 +1,23 @@
+/* @(#) $Revision: 66.1 $      */
+/* macro definitions to null out functions irrelevant to CXREF. */
+/* Used for the s300 build. */
+
+# define efcode()
+# define bfcode(x,y)
+# define defnam(p)
+# define commdec(x)
+
+# define locctr(n)  0
+# define bccode()
+# define incode(a,s) (inoff += (s))
+# define fincode(a,s) (inoff += (s))
+# define vfdzero(n) (inoff += (n))
+
+# define genswitch(p,n,t)
+
+/* Set compile flags for onepass, lint-type operation. */
+
+# undef ONEPASS
+# undef  STDPRTREE
+# define LINT
+

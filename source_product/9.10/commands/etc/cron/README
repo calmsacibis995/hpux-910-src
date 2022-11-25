@@ -1,0 +1,15 @@
+The following files are NOT source files for cron/crontab/at but
+are put here for the sake of completeness (and also to make the
+make process easier).  These files are: at.allow, cron.allow, 
+queuedefs and .proto.  Please look into the Makefile to see how
+they are used.  They normally belong to the /usr/lib/cron directory.
+
+
+11/1/88 - R. Campbell
+The XPG3 standard calls for 'at' to recognize 'next' as an increment,
+as in "next Monday".  This is curremtly provided for in the function
+'parsedatetime()' in pdt.c as long as 'at' is compiled under NLS.
+Otherwise a yacc program 'yyparse()' is supposed to be called.
+The instructions to create yyparse() are no longer in the makefile.
+If we ever need to build w/o NLS, the ability to recognize 'next' should
+be included in att1.y and this should be created in the makefile.

@@ -1,0 +1,63 @@
+# $Header: ChangeLog,v 1.2.109.2 94/11/03 14:42:33 mike Exp $
+
+xntpd/refclock_wwvb.c
+    __ In routine wwvb_receive, Constant 0 (GMT) is passed to the routine 
+       clocktime as the received time zone offset relative to GMT time. However
+       format 0 of netclock sends the time depending the time zone that the
+       user configure on the clock, so in our case, we set the time zone to
+       PST, which is 8 hour difference from GMT. So a real time zone instead of
+       a 0 should be sent to the clocktime call.
+       two changes:
+	1. Add on field in wwvb structure
+	   u_char tz;
+
+	2. Add in routine wwvb_receive:
+	   wwvb->tz = MULBY10(cp[20] - '0') + cp[21] - '0';
+	   if (cp[16] == 'D' || cp[16] == 'I')
+		wwvb->tz=wwvb->tz-1;           /* Daylight Saving Time */
+	   for format 0 code.
+
+	3. Pass wwvb->tz to the clocktime call instead of GMT.
+
+     -- File hpuxclock.c
+	clock_parm(*tick, *tickadj) is a routine to find the system variable
+        tickadj and tick. On hpux tick=10000, and tickadj will be 240 for
+        10.0 implementation. Should investigate if we can compile xntpd 
+        including the header file <machine/space.h> where tickadj and tick
+        are defined. 
+
+
+    -- File ntp_io.c
+	The system call "signal" is used to set the signal handler (routine
+	input_handler ) for SIGIO (22). The routine uses select system call
+	to pull if there is any input data with 0 waiting time. This routine
+	keeps on pulling (call selected repeatedly) until there is no more
+	data available (return value =0) or an error occurs for the select
+	call. When that happens, the input_handler routine reset the signal
+	routine (STUPID_SIGNAL) and return. The problem that I've observed 
+	when I use a netclock/2 (format 0)
+        on my HP700 machine:
+	 The format look like :
+	 (CR)(LF)data(CR)(LF)
+	 Based on the requirement of the wwvb driver, the temio/RS232 has been
+	 configured to read in each format 0 data in four buffers.
+	 1. read (CR)
+	 2. read (LF)
+	 3. read data (CR)
+	 4. read (LF)
+     
+	 Because of the timing (I guess), the select call sometimes returns 
+	 0 (no more data) after it gets the third data buffer. (The last LF
+	 may not be there yet?). So the input_handler checks the return value
+	 and set the signal handling again and then return. However, after the
+	 select call with return value=0, and before calling signal to set 
+	 the signal handler, the LF could come and send the signal to the
+	 process which could be missed (since the signal handling is not 
+	 set yet and the default is IGNORE). So the LF is not read. After that,
+	 when xntpd poll the clock again, the clock will send the data in,
+	 however, since the LF is not read, the termio driver finds that
+	 the buffer in not empty, so it will not send any signal to the 
+	 process (xntpd).
+
+	 Fix 1. Use sigvector call.
+	 Fix 2. Use BSD signal (on HPUX link with -lBSD, see bsdproc.)

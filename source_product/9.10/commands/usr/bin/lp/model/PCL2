@@ -1,0 +1,331 @@
+#!/bin/sh
+#  $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lp/model/PCL2,v $
+#  $Revision: 70.5 $
+
+# Printer Command Language level 2 model
+ 
+
+#=======================================================================#
+# OPTIONS RECOGNIZED: ( all may be preceded by a '-' )			#
+#	NOTE: Options marked with a '*' before their description	#
+#	      are provided for backward compatibility with the		#
+#	      former hp2934a printer model. 				#
+#									#
+# Horizontal Pitch Selection						#
+#	10		10 cpi (Pica print pitch)			#
+#	12		12 cpi (Elite print pitch)			#
+#	c		compressed print pitch				#
+#	e		expanded print pitch				#
+#	fp#		set primary font pitch to # cpi			#
+#	sfp#		set secondary font pitch to # cpi		#
+#			    ( # may be floating point )			#
+#			    ( e.g. 16.66 = compressed )			#
+#									#
+# Vertical Pitch Selection						#
+#	lpi#		print at # lines per inch			#
+#			    ( default is 6 lpi)				#
+#									#
+# Font Selection							#
+#	cs#$		set primary character set to #$			#
+#	scs#$		set secondary character set to #$		#
+#			    ( see printer reference manual )		#
+#			    ( for possible character sets  )		#
+#			    ( e.g. cs8U sets Roman 8 char set )		#
+#	r8		Roman 8 character set				#
+#	k8		Kana 8 character set				#
+#	i | italic    * set font style ti italic			#
+#	b | bold      * set font stroke weight to bold			#
+#									#
+# Print Quality Selection						#
+#	q | lq	      * set letter quality and Courier typeface		#
+#									#
+# Page Length Selection							#
+#	lnnn		set absolute length of page to nnn lines	#
+#	tlnnn		set text length of page to nnn lines		#
+#									#
+# Margin Selection							#
+#	lm#		set left margin in column #			#
+#	rm#		set right margin in column #			#
+#			    ( left most column = 0 )			#
+#									#
+# Output filtering: (Default Cooked)					#
+#	r  | raw	raw mode for plotting mode etc.			#
+#       nb		do not output banner page (to save paper)	#
+# 									#
+#=======================================================================#
+
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+# set up redirection of stderr
+log=/usr/spool/lp/log
+exec 2>>$log
+
+if [ -z "$LANG" ]
+then
+	LANG="C"
+	export LANG
+fi
+
+# Save the arguments to the model
+printer=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+
+
+# Definitions of functions used within this script
+
+do_banner()
+{
+	# Print the standard header
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "$x\n$x\n$x\n$x\n"
+	banner `echo $user`
+	echo "\n"
+	user=`pwget -n $user | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $reqid    Printer: `basename $0`\n"
+	date
+	echo "\n"
+	if [ -n "$title" ]
+	then
+		banner "$title" 
+	fi
+	echo "\f\r\c"
+}
+
+
+# Set up interface
+if [ -t 1 ]
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+else
+	slp -n -k 2>/dev/null
+fi
+
+# Handle disable and cancel traps.
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Set up printer default modes
+echo "\033E\r\c"	# Reset Printer
+echo "\033&k2G\r\c"	# Set line termination mode.
+
+
+# Determine which options have been invoked
+
+pitch="def"
+spitch="def"
+lpi="def"
+charset="def"
+scharset="def"
+pagelen="def"
+tpagelen="def"
+lmargin="def"
+rmargin="def"
+outputmode="cooked"
+banner="yes"
+style="def"
+weight="def"
+quality="def"
+
+for i in $5
+do
+	case "$i" in
+
+	-10 | 10) 	# primary font pitch set to 10.00 cpi
+		pitch="10";;
+
+	-12 | 12) 	# primary font pitch set to 12.00 cpi
+		pitch="12";;
+
+	-c | c) 	# primary font pitch set to compressed print 
+		pitch="c";;
+
+	-e | e) 	# primary font pitch set to expanded print
+		pitch="e";;
+
+			# set primary font pitch to value following fp
+	-fp[0-9]* | fp[0-9]* | -fp.[0-9]* | fp.[0-9]*) 
+		pitch="`echo "$i" | sed 's/^[-]*fp//'`";;
+
+			# set secondary font pitch to value following sfp
+	-sfp[0-9]* | sfp[0-9]* | -sfp.[0-9]* | sfp.[0-9]*) 
+		spitch="`echo "$i" | sed 's/^[-]*sfp//'`";;
+
+			# set lines per inch to value following lpi
+	-lpi[0-9]* | lpi[0-9]*)	
+		lpi="`echo "$i" | sed 's/^[-]*lpi//'`";;	
+
+			# set primary character set to value following cs
+	-cs[0-9]* | cs[0-9]*)
+		charset="`echo "$i" | sed 's/^[-]*cs//'`";;
+
+			# set secondary character set to value following scs
+	-scs[0-9]* | scs[0-9]*)
+		scharset="`echo "$i" | sed 's/^[-]*scs//'`";;
+
+	-r8 | r8) 	# primary character set is Roman8 
+		charset="8U";;
+
+	-k8 | k8) 	# primary character set is Kana8 
+		charset="8K";;
+
+			#set absolute length of page to the value following l
+	l[0-9]* | -l[0-9]*)
+		pagelen="`echo "$i" | sed 's/^[-]*l//'`";;
+
+ 			#set text length of page to the value following tl
+	tl[0-9]* | -tl[0-9]*)
+		tpagelen="`echo "$i" | sed 's/^[-]*tl//'`";;
+
+			# set right margin in column given by value after lm
+	lm[0-9]*| -lm[0-9]*)
+		lmargin="`echo "$i" | sed 's/^[-]*lm//'`";;
+
+			# set left margin in column given by value after lm
+	rm[0-9]* | -rm[0-9]*)
+		rmargin="`echo "$i" | sed 's/^[-]*rm//'`";;
+
+	r | -r | raw | -raw) 	# raw mode for binary output to printer
+		outputmode="raw";;
+
+	nb | -nb) 	# Do not output banner page
+		banner="";;
+
+# The following three options are provided for backward compatability
+# with the former hp2934a model
+
+	i | -i | italic | -italic)	# set italic font style
+		style="italic";;
+
+	b | -b | bold | -bold)		# set font stroke weight to bold
+		weight=1;;
+
+	q | -q | lq | -lq)		# letter quality and Courier typeface
+		quality="letter";;
+
+	esac
+done
+
+# Assume that the rest of the arguments are files
+shift; shift; shift; shift; shift
+files="$*"
+
+
+# print the banner if no banner not specified
+if [ -n "$banner" ]
+then
+	do_banner
+	echo "\033E\r\c"	# Reset Printer
+	echo "\033&k2G\r\c"	# Set line termination mode.
+fi
+
+
+
+# Print the spooled files
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		# If raw mode turn off output processing
+		if [ "$outputmode" = "raw" ]
+		then
+			if [ -t 1 ]
+			then
+				stty raw 9600 -parenb cs8 ixon -istrip clocal tab0 <&1 2>/dev/null
+			else
+				slp -r 2>/dev/null
+			fi
+			echo "\033&k0G\r\c"	# Reset line termination mode
+		fi
+
+		case "$pitch" in 
+			def);;
+			c)	echo "\033&k2S\r\c";;
+			e)	echo "\033&k1S\r\c";;
+			*)	echo "\033(s${pitch}H\r\c";;
+		esac
+
+		case "$spitch" in 
+			def);;
+			*)	echo "\033)s${spitch}H\r\c";;
+		esac
+
+		case "$lpi" in
+			def);;
+			*)	echo "\033&l${lpi}D\r\c";;
+		esac
+
+		case "$charset" in
+			def);;
+			*)	echo "\033(${charset}\r\c";;
+		esac
+
+		case "$scharset" in
+			def);;
+			*)	echo "\033)${scharset}\r\c";;
+		esac
+		
+		case "$pagelen" in
+			def)	;;
+			*)	echo "\033&l${pagelen}P\r\c";;
+		esac
+
+		case "$tpagelen" in
+			def);;
+			*)	echo "\033&l${tpagelen}F\r\c";;
+		esac
+
+		case "$lmargin" in
+			def);;
+			*)	echo "\033&a${lmargin}L\r\c";;
+		esac
+	
+		case "$rmargin" in
+			def);;
+			*)	echo "\033&a${rmargin}M\r\c";;
+		esac
+
+		case "$style" in
+			def);;
+			italic)	echo "\033(s1S\033)s1S\r\c";;
+		esac
+
+		case "$weight" in
+			def);;
+			*)	echo "\033(s${weight}B\033)s${weight}B\r\c";;
+		esac	
+
+		case "$quality" in
+			def);;
+			letter)	echo "\033(s2q3T\033)s2q3T\r\c";;
+		esac
+
+		cat $file 2>/tmp/sh$$
+		if [ -s /tmp/sh$$ ]
+		then
+		    cat /tmp/sh$$		# output any error messages
+		fi
+		rm /tmp/sh$$
+
+		echo "\033E\r\c"		# Reset Printer
+	done
+	i=`expr $i + 1`
+done
+
+# Insure all buffers are flushed to printer
+if [ -t 1 ]
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+fi
+
+exit 0

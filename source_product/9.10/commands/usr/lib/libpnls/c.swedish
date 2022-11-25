@@ -1,0 +1,8 @@
+$set 1
+1 DD dd MMM yyyy
+2 dd/mm/yy
+3 24.
+19 1
+26 3
+30 WWWWWWW ~den dd OOOOOOOOO yyyy
+1003 DDD, MMM dd, yyyy,

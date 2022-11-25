@@ -1,0 +1,115 @@
+#  Makefile for the ELM mail program.
+#
+# @(#) $Revision: 64.3 $
+#
+# (c) Copyright Hewlett-Packard Company, 1986, 1987, 1988, 1989
+# (c) Copyright Yokogawa-Hewlett-Packard Ltd., 1988, 1989
+#
+#  Acknowledgment is made to Dave Taylor for his creation of
+#  the original version of this software.
+
+
+##############################
+
+CFILES=	addr_utils.c alias.c aliasdb.c aliaslib.c args.c bounceback.c        \
+	builtin.c calendar.c checkname.c connect_to.c curses.c date.c        \
+	delete.c del_alias.c domains.c edit.c editmsg.c elm.c encode.c       \
+	errno.c expires.c file.c file_utils.c fileio.c forms.c getopt.c      \
+	hdrconfg.c hdrconfg_b.c help.c initialize.c in_utils.c	             \
+	leavembox.c limit.c mailmsg1.c mailmsg2.c mailtime.c                 \
+	mkhdrs.c newmbox.c opt_utils.c options.c out_utils.c                 \
+	pattern.c pmalloc.c quit.c read_rc.c remail.c reply.c returnaddr.c   \
+	save_opts.c savecopy.c screen.c showmsg.c showmsgcmd.c signals.c     \
+	softkeys.c sort.c string2.c strings.c syscall.c utils.c              \
+	validname.c
+
+HEADERS= ../hdrs/defs.h ../hdrs/headers.h ../hdrs/sysdefs.h
+
+OBJS1 =	addr_utils.o alias.o aliasdb.o aliaslib.o args.o bounceback.o        \
+	builtin.o calendar.o checkname.o connect_to.o date.o        \
+	delete.o del_alias.o domains.o edit.o editmsg.o encode.o       \
+	errno.o expires.o file.o file_utils.o fileio.o forms.o getopt.o      \
+	hdrconfg.o hdrconfg_b.o help.o initialize.o in_utils.o               \
+	leavembox.o limit.o mailmsg1.o mailmsg2.o mailtime.o                 \
+	mkhdrs.o newmbox.o opt_utils.o options.o out_utils.o                 \
+	pattern.o pmalloc.o quit.o read_rc.o remail.o reply.o returnaddr.o   \
+	save_opts.o savecopy.o screen.o showmsg.o showmsgcmd.o signals.o     \
+	softkeys.o sort.o string2.o strings.o syscall.o utils.o              \
+	validname.o
+
+OBJS2 = curses.o elm.o version.o
+
+##############################
+
+SHELL=/bin/sh
+
+BIN=    ../bin
+CC=	/bin/cc
+# CFLAGS= -O -I../hdrs
+CFLAGS= -I../hdrs -Wc,-p
+DEFINE=
+LIBS=   -lcurses
+LIB2  = /usr/local/lib/libpfa.a
+
+RM=	/bin/rm -f
+
+# If you're on an ACSnet system in Australia (or elsewhere) then you'll 
+# want to uncomment the following line additional;
+
+#   DEFINE= ${DEFINE} -DACSNET
+
+
+../bin/elm: ${OBJS1} ${OBJS2}
+	${CC}  -g -o ${BIN}/elm.pfa -n ${OBJS1} ${OBJS2} ${LIBS} ${LIB2}
+
+${OBJS1}: ${HEADERS} ../hdrs/elm.h
+	${CC} -c ${CFLAGS} -DELM ${DEFINE} $*.c 
+
+curses.o: ${HEADERS} curses.c ../hdrs/curses.h
+	${CC} -c ${CFLAGS} -DELM -DRAWMODE ${DEFINE} curses.c
+
+elm.o: ../hdrs/elm.h ../hdrs/defs.h ../hdrs/sysdefs.h ../hdrs/curses.h \
+	elm.c
+	${CC} -c ${CFLAGS} -DELM ${DEFINE} elm.c
+
+version.o: version.mstr ../hdrs/version_id.h ${CFILES} ${HEADERS}
+	@/bin/echo "\\t(Updating the compile time version id string)"
+	/usr/bin/ident *.c | /bin/grep Revision | /bin/sort |\
+        /bin/tail -1 | /bin/sed -e "s/     //" > version.tmp;\
+	/bin/sed -e "s/REVISION/`/bin/cat version.tmp`/" version.mstr |\
+	/bin/sed -e "s/COMPILE_TIME/`date`/" > version.c;\
+	${RM} version.tmp;\
+	${CC} -c ${CFLAGS} -DELM ${DEFINE} version.c;\
+	${CC} -c ${CFLAGS} -DELM ${DEFINE} version.c
+
+
+
+clean:
+	${RM} ${OBJS} LINT.OUT ../bin/elm.pfa
+
+
+lint: LINT.OUT
+
+LINT.OUT: ${CFILES}
+	lint ${DEFINE} -DRAWMODE -I../hdrs -DELM ${CFILES} > LINT.OUT
+
+
+listing: LISTING
+
+LISTING: Makefile INDEX ${HEADERS} ${CFILES}
+	@echo adding file 'Makefile'...
+	@/bin/echo \\f > LISTING
+	@cat Makefile >> LISTING
+	@echo adding file 'INDEX'...
+	@/bin/echo \\f >> LISTING
+	@cat INDEX >> LISTING
+	@../bin/makelisting ${HEADERS} ${CFILES}
+	@echo LISTING generated.
+
+
+index: INDEX
+
+INDEX: ${CFILES} ${HEADERS}
+	@echo Creating function definition index
+	@index *.c | sort > INDEX
+	@echo File INDEX generated

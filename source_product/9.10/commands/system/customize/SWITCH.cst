@@ -1,0 +1,99 @@
+#!/bin/ksh
+# @(#) $Revision: 70.2 $
+#
+fileset=SWITCHOVER
+exitval=0
+export PATH=/bin:/usr/bin:/etc
+
+regenrc=/etc/conf/gen/.regenrc		# regen option file.
+
+echo "-P" >> $regenrc		# no, add SWITCHOVER to $regenrc
+
+#
+# Remove the roots6 device file if it exists.  This
+# is no longer used as of 9.0.
+#
+if [ -c /dev/rdsk/roots6 ]; then
+	rm -f /dev/rdsk/roots6
+fi
+
+#
+# If it doesn't already exist, copy the SwitchOver rc file
+# from /etc/newconfig to /etc/switch
+#
+if [ ! -s /etc/switch/switchrc ]; then
+    cp /etc/newconfig/switchrc /etc/switch/switchrc
+    chgrp bin /etc/switch/switchrc
+    chown bin /etc/switch/switchrc
+    chmod 544 /etc/switch/switchrc
+fi
+
+#
+# Now customize the inittab file, adding the necessary lines
+# for the SwitchOver/UX daemons.
+#
+# Note, this customize script may run before the UX-CORE customize
+# script has installed /etc/inittab.  In that case, we copy the default
+# inittab file from /etc/newconfig (this is what the UX-CORE customize
+# script would have done).
+#
+if [ ! -s /etc/inittab ]; then
+    cp /etc/newconfig/inittab.ite /etc/inittab
+    chgrp bin /etc/inittab
+    chown bin /etc/inittab
+    chmod 444 /etc/inittab
+fi
+
+
+#
+# Add SwitchOver daemons, heartbeat and readpulse to /etc/inittab
+#
+
+if [ "`grep -c /etc/switch/switch /etc/inittab`" -eq 0 ]; then
+    echo "#so1:2:respawn:/etc/switch/switchheartb        # SwitchOver/UX primary daemon" >> /etc/inittab
+    echo "#so2:2:respawn:/etc/switch/switchreadp         # SwitchOver/UX standby daemon" >> /etc/inittab
+    cat <<EOF
+NOTE:    Depending on the type of host this is, primary or 
+         standby, the corresponding line in /etc/inittab needs 
+         to be uncommented by the system administrator.
+EOF
+fi
+
+
+#
+# Add switchsetflg command to /etc/inittab
+# Install on all systems, used on SCSI configurations only.
+#
+
+if [ "`grep -c /etc/switch/switchsetflg /etc/inittab`" -eq 0 ]; then
+    echo "#so3:2::/etc/switch/switchsetflg               # SwitchOver/UX set flag command" >> /etc/inittab
+    cat <<EOF
+NOTE:    For SCSI configurations, the line containing switchsetflg needs
+         to be completed and uncommented by the system administrator.
+EOF
+fi
+
+
+#
+# Convert disklocking LABEL file from 8.X format to 9.0 format
+# Note success or failure for customer.
+#
+
+HOST_NAME=`hostname`
+. /etc/switch/switchrc
+SWITCH_INFO="${SWITCH_INFO:-/etc/switch/Switchinfo}"
+
+if [ $HOST_NAME != "unknown" ]; then
+	if [ -f $SWITCH_INFO ]; then
+		if swret=`/etc/switch/switch_convert -f $SWITCH_INFO $HOST_NAME`
+		then
+			echo "NOTE:    Disklocking successfully converted to new format."
+		else
+			echo "ERROR:   Disklocking conversion to new format failed."
+			echo "         See \"Managing SwitchOver/UX\" document for manual conversion process."
+			exitval=1
+		fi
+	fi
+fi
+
+exit $exitval

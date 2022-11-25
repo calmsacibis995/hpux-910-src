@@ -1,0 +1,884 @@
+# This is my schedule for the work on NFS on the s800.
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	  	. concerns lists, agendas
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. Coordinate with partners since it is mainly based on interrupts
+#
+# 0.1 = 48 min
+# 0.2 = 1h 36 min
+# 0.3 = 2h 24 min
+# 0.4 = 3h 12 min
+# 0.5 = 4h
+# 0.6 = 4h 48 min
+# 0.7 = 5h 36 min
+# 0.8 = 6h 24 min
+# 0.9 = 7h 12 min
+
+NAME: Cristina Mahon
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+2	0	0	Oth		System Administration Conference
+					in Palo Alto
+
+0.1	0	0	Oth		NFS tutorial wrap-up
+
+2.0	0	0	Sup		3.0 NFS and program involvement:
+					. Lifecycle
+					. Issues: performance for 3.0
+					. Testplan
+					. Integration cycles
+						. filesets for AXE
+
+0.3	0	0	Sup		SSIT 6.2 meeting
+
+2.1	0	0	Dev		Specific development work:
+					(counts for 3.0)
+					. Reproduce defects in Sun list on
+					  s800
+					. Fix any new defects:
+						. rstatxdr
+						. rpc.mountd
+						. rstat.h
+					. Investigate possible defects
+						. ypserv power-failure
+						. XTTC YP problem
+					. VHE (testplan)
+					. Long filenames and NLS changes
+					  for 6.2/3.0 time frame.
+					. Provide NLS information to the
+					  whole group.
+					. Prepare single revision level for
+					  libc and header files for 6.2 and
+					  3.0.
+					TO DO:
+					. BFA report
+
+0.6	0	0	Sup		4.0 Preparation	
+					. PDS
+					. Staffing
+					. Requirements Complete deliverables
+
+4	0	2	Sup		Wrap-up tasks and ongoing project 
+					work for 2.0
+					. Modified how-to document, ERS,
+					  NLS cookbook, lifecycle
+					. Made archive tape: copy it and
+					  verify it.
+					. Project Notebook: two copies
+					. Maintain defects lists
+					. QA metrics (corporate, CND)
+					. STARS: enter defects
+					. MR meeting (dry run, preparation,
+					  attendance)
+					. Update hpcndau to latest code
+					. 2.0 TQC meeting
+					. Turn tape with tests to manufacturing
+					TO DO:
+					. Finish project notebooks
+					. Update 2.0 lifecycle
+					. Finish TQC report
+
+1.0	0 	0	Sup		Section I shared source
+					. We still need to setup a build
+					  on hpcndhf (next month?)
+
+0.9	0	0	Sup		NFS tutorial for Sys Adm Conference
+
+0.4	0	0	Doc		Review VHE documentation
+					(6.2 but applies to 3.0)
+
+0.5	0	0	Sup		Spread development env. info:
+					. Help Peking with setting up
+					  DE and explained it to whole group
+					. Discussed DE with Steve Booth
+					. Discussed DE
+
+0.3	0	0	Sup		Review 6.0 TQC results to make
+					sure we are folowing the 
+					recommendations
+
+0.4	0	0.5	Sup		Ongoing development environment
+					work
+					. Helped Mark admin some files
+					. RCS testplan for Toni
+					. Setup dev. env. for Toni
+
+2.2	0	0	Sup		SCCS to RCS conversion
+
+0.1	0	0	Oth		Information for ranking
+
+0.1	0	0	Oth		Talk to Meena about porting
+					documenting ported code
+
+0.1	0	0	Test		PC-NFS and PAM problems:
+					. Find someone to talk to Geoff Arnold
+					  of Sun
+
+0.1	0	0	Oth		Helped Doug Gregory with a xdb/cc
+					problem on the s800
+
+0.1	0	0	Sup		NFS/800 monthly report
+
+# Overhead included 6 and 1/2 hours of meetings (lab meeting, group meetings,
+# program meetings).
+=============================================================================
+Checkpoint	MR	02/29/88	Manufacturing Release
+=============================================================================
+
+=============================================================================
+# Checkpoint	IntIntg	06/15/87	Initial Integration
+=============================================================================
+
+6.3	0	10	Sup		Setup development environment for
+					800 commands work. 
+					. Preliminary changes to build to
+					  match 800 IC build environment.
+					. Still need to make the more 
+					  substantial changes when we receive
+					  the preliminary paper describing
+					  process.
+
+0.2	0	0	Sup		Descriptions for the 800 processes
+					and contract information.
+
+4.7	0	5	Sup		Lifecycle dependencies, deliverables, 
+					checkpoints; effort estimates
+					. lifecycle updates
+					. tasks for the 800 (estimates): meeting
+					  and time spent thinking about them
+					. agenda sent for group meeting concerns
+					. still need to come up with full list
+					  of 800 dev. tasks.
+
+1.6	0	0	Test		Gather data for NFS/800 performance 
+					brief
+
+0.7	0	5	Sup		Working with Darren on initial setup
+					of kernel source code sharing	
+					. Helping Darren with kernel shared 
+					  source (explain tools I got at ISO,
+					  compile rmtrcs)
+
+4	0	15	Dev		Port NFS commands to 800
+					. fsirand is only command left because
+					  it relies on kernel include files.
+
+0.6	0	0	Coord		Ongoing coordination and status
+					checking with ISO.  Should I list this?
+					. found about status of DTS, kernel,
+					  commands.  Get 800 kernel over.
+
+0.4	0	0			Overhead
+					. Time spent rebuilding commands and
+					  getting the kernel from ISO
+
+0.1	0	0	Sup		ERS changes 
+
+0.8	0	3	Iss		Product structure issues:
+					. link level dependencies:
+					  Inetd will be on link product.
+
+2.6	0	0	Sup		Trip to ISO mainly to discuss
+					processes and arrangements between
+					groups and setup test suite at ISO.
+					. the trip lasted two days
+					. this time includes arrangements
+					  before the trip and writing the trip
+					  report.
+
+1	0	1	FTO		Vacation
+
+2	0	2	Train		Team Building for Non-Managers
+
+=============================================================================
+#Checkpoint	IC1	08/19/87	Full Functional Complete (IC1)
+=============================================================================
+
+3.5	0	0	Iss		Product structure issues:
+					. Checked on status of routines at
+					  SSO and ISO
+					. Helped Gayle fix scripts for transfer
+					  of routines between CND and SSO
+					. Talked with all parties involved
+					  about the location of the bsdipc 
+					  routines (we have decided which
+					  and where the shared ones will go)
+					. Talked to Donn Terry about
+					  his group serving as an intermediary
+					  between CND and ISO for the libc
+					  routines (agreed on).
+					. Maintained IND integration group	
+					  up to date on situation.
+					. Investigated where to start inetd
+					  for both s300 and s800 with David
+					  Haimson.  It looks like netlinkrc is
+					  the best place.  However, 800 
+					  netlinkrc does not have any of the
+					  product files on it.  They are added
+					  by the user.
+					. Reviewed customize script from Steve
+					  Hares for the 800.  Made changes to it
+					. Talked to Brian Buyan about how to
+					  find out if filesystem supports long
+					  filenames.  We will read the 
+					  superblock.
+
+0.3	0	0	Sup		Talked to Warren and Walter Underwood
+					about the problems we have been seeing
+					with the Internet.  Talked to Dan
+					about it yesterday.  It would be good
+					if we could raise the priority of 
+					looking at this problem for Warren.
+
+5.4	0	20	Dev/Test	Major bug fixes after initial porting
+					. Tracking ypcat core dump
+					. General problems with YP and hpcndau
+					. Run lint through the files to fix
+					  variables used before initialized.
+					  Reason for core dumps with -O
+					  option.
+					. Looked at svc bug, have not been able
+					  to track it down yet.
+					. Resolved rpc.yppasswdd bug with Dave.
+					. Looked at several bugs including
+					  two from the XTTC that turned out
+					  to be operator errors (old inetd.conf
+					  with new inetd, wrong parameter
+					  to client_call).
+
+10.1	0	0	Sup		Integration cycles/partner deliveries/
+					development environment for 800
+					. Re-submit because of Makefile problems
+					. Add a makefile at the front of normal
+					  Makefile to compile inetd.
+					. Fix up_release tool to do what we
+					  need.
+					. Header file delivery problem:
+					  who will deliver header files to 
+					  integration group.  This has
+					  been resolved.
+					. Builds/tars/deliveries of commands 
+					  for partners 
+					. Changes to Makefiles to match
+					  integration format (test also) 
+					. Create master database and 
+					  documentation of what is delivered
+					. Delivered test base build
+					. Got 800 tools for the 2.0 release:
+					  we will have to test the compiler
+					  to see if it still has the -O problem
+					. Added what strings for man pages.
+					. Changed what strings for libraries
+					  and header files.
+					. Made sure customize script will be
+					  submitted to me by Steve Head for
+					  submission to the integration group.
+					. Looked through the integration tools
+					. Changed some of our Makefiles.
+					. Delivered tar files to partners.
+
+1	0	1	Train		HP-PA class
+
+1.2	0	4	Sup		Mentoring Mark Kean
+					. Explained Makefile set up for 800.
+					. Showed him integration process
+					. Answered Makefiles and bfa questions
+
+5	0	0	Sup		Lifecycle dependencies, deliverables, 
+					checkpoints; effort estimates
+					. Added actual completion dates for
+					  several tasks.
+
+0.3	0	0	Sup		Answered questions Chuck Untulis had
+					about the development environment and
+					talked to Scott Engles about it so
+					that they can use some of the concepts
+					on their dev. env.
+
+0.1	0	0	Doc		Clarified some documentation comments
+					and got some more information for 
+					Annette.
+
+0.3	0	0	Train		Went to the pay system class
+
+0.3	0	0	Metr		Looked at some of the metrics
+					required.
+					. Filled the metrics form and
+					  send it to Brian Sakai even though
+					  we officially didn't need to submit it
+					. Talked to him about all the fields
+					  in the form and what they meant.
+					. Developed script to produce a list
+					  of bugs and serve as input to future
+					  metrics script.
+
+1.1	0	0	Coord		Ongoing coordination and status
+					checking with ISO.  Should I list this?
+					. Arrange for missing HP-UX commands 
+					  to get here
+					. Followed up on the DTS process
+					. Checked if DTS project available here
+					  and talked to Tim Remple about it.
+					. Mailed documentation that ITG lost to
+					  them again.
+
+0.1	0	0	Dev		Helped SPL check results they obtained
+					and send them the Turbo Lan cards.
+
+0.2	0	0	Doc		Reviewed 6.0 Arpa/Berkeley 
+					documentation for NFS differences.
+
+0.2	0	0	Doc		Reviewed 2.0 documentation structure
+				 	for changes because of inetd in link
+					product.
+
+0.2	0	0	Dev/Test	Problems that affect the testing and
+					development:
+					. Got new C compiler from Randy Barbano.
+					  It still has problems with -O option.
+					. We still have problems with the 
+					  Internet.  They could be caused by
+					  our gateway.  Warren is looking
+					  into it.
+
+0.2	0	0.5	Tech		Review tech support class
+
+0.5	0	0.5	Doc		Review man pages for differences
+					between 300 and 800
+
+0.6	0	0	Sup		Helped the SPL with our tests and
+					NFS information in general
+
+0.2	0	0	Dev		Code review and discussion for inetd
+					changes.
+
+6	0	15	Dev		Port NFS commands to 800
+					(more like ongoing development)
+					. ported and tested fsirand
+					. changed what strings to match 2.0
+					  convention
+					. cleaned up header files
+					. changes to YP to support long
+					  filenames
+
+0.5	0	0	Sup		Descriptions for the 800 processes
+					and contract information.
+					. Wrote this up, mailed it.
+					. Will merge comments back as they
+					  arrive.
+
+0.7	0	0	Sup		Working with Darren on initial setup
+					of kernel source code sharing	
+
+2.4	0	0	Test		Gather data for NFS/800 performance 
+					. Ran tests first on the CND test LAN
+					  and then on an isolated LAN
+					. Wrote a report on the results and
+					  distributed it.  
+					. Explained the tests to Andy Drol.
+=============================================================================
+#Checkpoint	IC2A	09/07/87	Level A - 24 hour reliability (by IC2B)
+=============================================================================
+
+# Some of the overhead since the last meeting included the voice mail training,
+# the 2.0 update meeting, helping SPL with performance measurements and
+# general NFS 800 meetings and teleconferences.
+
+0.1	0	0.1	Supp		Find solution to Internet problem
+
+1.3	0	2	Doc		Review third documentation draft 
+					(2nd for 800)
+
+0.8	0	1	Metr		Gather breadth coverage metrics
+					and create scripts to help in metrics
+					collection
+					. Mainly time spent on understanding
+					  and collecting the breadth coverage
+					  numbers.  I still need to update
+					  some of the scripts I have to perform
+					  extra work for the DTS metrics 
+					  required.
+
+9	0	10	Dev/Test	Continuing bug fixes
+					. Small NLS fixes and changes to certain
+					  routines.
+					. Many bug fixes including alignment 
+					  problems on the 800.
+					. Code review of xdr_rec.
+					. Because we just got a system
+					  with long filename support setup
+					  I still need to implement long file 
+					  name support on YP commands.
+					  I have a set of routines that should 
+					  do the work. 
+
+0.2	0	2	Doc		Provide Annette with information on
+					300/800 differences (Sept. 1)
+
+0.3	0	1	Sup		Help Mark Kean with the Integration
+					process so that he come up to speed
+					on it.
+					. He will be missing the hands-on
+					  training on how to change the 
+					  revision levels for a final
+					  build since he is in class today.
+
+2.2	0	2	Sup		Integration work:
+					. Fixing what strings for IC2
+					. Verifying that the correct version
+					  of routines and header files were
+					  being used for IC2 base build
+					  (including netlinkrc)
+					. Changing makefiles to fix problems
+					  that happened during IC1.
+					. Fixing master database of files we
+					  submit.
+					. Submitting files for IC2 base build
+
+0.3	0	0	Sup		Sharing code with Smelter:
+					. inetd and A/B routines.  Discussed
+					  with John and David system to
+					  share that code.  John has 
+					  implemented this system.
+
+1	0	1	FTO		FTO
+
+=============================================================================
+#Checkpoint	IC3A	10/19/87	Level B - 48 hour reliability (by IC3B)
+=============================================================================
+
+7.8	0	10	Dev/Test	Continuing bug fixes
+					. Investigated defects in rup, rusersd,
+					  innetgr, rpc.mountd and others
+					. Added support for long filenames
+					  in ypxfr and ypsrv.
+					. Investigated XTTC problems with
+					  inetd/portmap.
+					. Made all changes that need to be
+					  made to fix outstanding bugs in
+					  separate versions of the code so
+					  we can put them in as fast as 
+					  possible after we unfreeze.
+
+2.5	0	0 	Dev		Work on the 300
+					. Helped track an ftp problem that 
+					  showed up if we had a + in the
+					  passwd file.  However, the defect
+					  turned out to be an stdio problem
+					  brought about by a wrong call in
+					  ftp.
+					. Did a lot of work on the validation
+					  suite, both setting it up and 
+					  looking at the results (0.7 days)
+					. Found out about whether libc had to
+					  turn or not.
+					. Helped John roll the command levels 
+					  for the s300 6.0 release. 
+					. Talked to Holly about delivering our
+					  man pages for typesetting.
+					. Check if the revision levels and the
+					  tags were correct for libc for
+					  s300.
+					. Produced list of all NFS message
+					  catalogs to give to Dave, John and
+					  Mark as soon as I know if there is
+					  a specific format for the final
+					  document.
+
+1.5	0	0	Sup		Minor integration work left
+					between IC2 base and final build
+					. Need to help John with rolling
+					  revision levels
+					. I will help Mark with the IC3
+					  release if he has any questions
+					  about it.
+					. Changes to database for new 
+					  permissions for some YP commands
+					. Talked to Randy about having backup
+					  tapes sent to us (still in the air)
+					. Mainly did things that Mark would
+					  have done if he was here
+					. Check revision levels for IC3 code
+					  that we sent to integration.
+
+0.7	0	2	Iss		Any issues that might come up.
+					. Discussed code sharing with John, 
+					  David Haimson and Barb Hein
+					. Looked at 825 performance (general
+					  information available from Smelter)
+					. Performance meeting: what numbers
+					  do SE's need.
+					. Verified if open reservation was 
+					  going to be the default (IC3)
+					. Product tape for 800 2.0 release
+					  (how is it done)
+					. 3.0 certification criteria
+					. Disc space required for NFS 800 user
+					  level commands for Andy Drol.
+
+0.3	0	0	Sup		Worked on a proposal for a new way
+					to do code sharing.
+
+1.9	0	3	Dev		Redoing message catalogs and 
+					investigation of future improvements
+
+0.7	0	0.2	Metr		Modify scripts I currently have to
+					give more information for the DTS 
+					based metrics.
+
+0.2	0	0	Sup		Updated lifecycle and ERS to reflect
+					some changes
+
+0.2	0	0	Sup		Metrics for IC2
+					. I feel I probably should keep doing
+					  the metrics part of the reporting
+					  while Mark handles integration
+
+0.2	0	1	Doc		Documentation review and consulting
+					. Had only to review the final draft
+					  of programming with NFS quickly
+					  for 300/800 differences.
+
+1.7	0	0	Over		The overhead this month included
+					several group meetings (300/800),
+					teleconferences, program meeting,
+					communication session with Art and
+					my evaluation.
+=============================================================================
+#Checkpoint	IC4A	11/23/87	Level C - 120 hour reliability (by IC4B)
+=============================================================================
+
+6.8	0	5	Test		Write more tests to bring the BFA
+					coverage to 60% or above.
+					. Left to do:
+					    . Put tests on scaffold
+					    . Get coverage to 75%
+					. Did some interactive testing to bring
+					  coverage up.
+					  (65.4% + 11h30mn = 68.9%)
+					  (68.9% + 3h30 mn = 69.5%)
+					  (69.5% + 2h	   = 70.45%)
+					  (70.45% + 2h	   = 70.7%)
+					  (70.7% + 2h	   = 72%)
+					  (72%   + 3h30	   = 72.9%)
+					  (72.9% + 1h30	   = 73%)
+					  ( 73% + 6h	   = 73%)
+					. Help Mark with some of the Makefiles
+					  for the 800.
+					. Fix BFA build problems
+					. Started putting tests in scaffold.
+
+2.9	0	0	Test/Sup	Work on the s300:
+					. Wrote NLS cookbook.
+					. Gathered some of the metrics for
+					  Corporate.
+					. Checked tags for libc and header 
+					  files.
+					. TQC on NFS 300 project
+					. README file for doc directory
+					. Examine results of validation suite.
+					  Found one real defect and a lot of 
+					  environment and test problems.
+					  Also found out that the SCCS commands
+					  were compiled with the wrong library
+					  and would not work over NFS at all.
+					. Tracked down format of NLS message
+					  description.
+					. Helped Mikey with the NFS/300 metrics
+					. Setup procedure to rebuild 6.0
+					  NFS if necessary.
+		
+
+1.5	0	5	Dev/Test	Fixing defects and development:
+					. Fixed defect in gettransient found
+					  during minimal code read.
+					. Investigated a defect related
+					  to removing mount points when
+					  something is mounted (300 and 800
+					  problem).  Forwarded DTS to correct
+					  group.
+					. Fixed wrong error message.
+					. Looked at John's fixes for
+					  rpc.rusersd.
+					. Checked strange showmount problem 
+					  (old showmount found in wrong 
+					   location) and other interesting
+					  things (NFS and sym links, etc.).
+					. Fixed pmap_rmtcall timeout problem.
+					. Read John's RPC IMS and provided
+					  comments.
+					. Investigated test problem and 
+					  portmap problem (was a kernel 
+					  problem)
+
+0.9	0	0.5	Sup		Shared code:
+					. Left to do:
+					   . Writeup about shared source
+					     directory structure.
+
+					. Folded in the comments from John, 
+					  Barb and David to the shared code 
+					  document.  
+					. Presented it with John to Jeff.
+					. Reviewed requirements to be
+					  part of shared source (Makefile
+					  targets, etc.)
+
+1.9	0	3	Doc		Documentation review (installation,
+					etc.)
+					. Ran an RPC program to get results
+					  for the 840 for a table in the
+					  programming guide.  The results
+					  were so bad compared to the 300
+					  that I did not run the program on
+					  the 825.  If it does not improve the
+					  table might be removed.
+					. Reviewed 6.0 man pages for 800 
+					  changes and made some changes
+					  that Mark and I discussed.
+					. Review installation part of the
+					  documentation.
+
+0.7	0	0.5	Test		Installation testing:
+					. Helped Toni try to install 2.0
+					  on an 825.
+					. Once the installation was complete
+					  reviewed problems with the 
+					  documentation and checked permissions
+					  of NFS files (specially header files)
+
+0.6	0	1	Metr		Metrics required for this integration
+					cycle.
+					. Explained ssize to Mike Clinger from
+					  the PTT.
+					. Refined the scripts even more so 
+					  that the metrics gatering itself
+					  for each cycle will require less time
+					. Defects per line of code per module
+					  metric (to use in conjunction with 
+					  BFA).
+
+0.4	0	2	Iss		Any issues that might come up
+					. NFS certification criteria
+					  for 3.0 had not been mailed
+					  to Brian Sakai.  I made sure that
+					  NFS should be covered by the 
+					  products with no changes rule.
+					  Follow up on that.
+	
+0.4	0	0	Sup		Development environment for NFS 800:
+					. Showed Mark how to change some 
+					  directory structures on the 
+					  development environment and changed
+					  scripts to match that.
+					. Put new assembler in place for
+					  the NFS 800 compiles.
+					. Added a process to make BFA commands
+					  for the 800 to the overnight process.
+					. Fixed up_release to be more reliable
+
+1.4	0	0.1	Sup		Integration:
+					. Track down problem with Internet
+					  connectivity with ISO/IND from
+					  dk/du.  That caused problems 
+					  checking in the header files and
+					  explains a larger amount of the time
+					  spent.
+					. Helped Mark solve a problem with a
+					  build not working at ISO:
+					  it turned out to be that a file
+					  provided by the commands group was
+					  wrong.
+					. Make a tar tape with the ERS for
+					  ITG archival purposes.
+					. Showed Mark Kean how to change 
+					  revision levels for IC3B.
+					. Checked problem with ypmake that
+					  Greg Smith had.
+					. Verified the correct library 
+					  routines were available for IC3B.
+					. Got new version of customize
+
+0.1	0	0	Sup		Talked to Mike Robinson about how we
+					estimated how long it would take us 
+					to port/debug the NFS user level code.
+
+0.1	0	0	Oth		TQC on interview process
+
+0.4	0	0.5     Doc		Man pages:
+					. Changed man pages to say series
+					   300 and 800 only, instead of 
+					   series 300 only.
+					. Added Series 800 dependencies for
+					  the long versus short filenames
+					  file system and YP.
+
+0.3	0	0	Oth		Since I was waiting for BFA numbers
+					before being able to deal with that
+					and IC3B has been delayed I started
+					reading about NCA and NCS for my
+					own information.
+=============================================================================
+#Checkpoint	IC5A	01/04/88	Level C - 120 hour reliability (IC5)
+=============================================================================
+
+4.6	0	5	Test		Increase BFA coverage and
+					put tests in scaffold.
+					. Put tests in scaffold and in
+					  testplan.
+
+3.7	0	2.5	Doc		Documentation review
+					. Finished reading first draft and
+					  had the documentation meeting.
+					. Reviewed Arpa/Berkeley 2.0 man pages
+					  for NFS specific parts.
+					. Reviewed parts of link/A/B node
+					  manager's guide.
+					. Reviewed Eric Wilford's comments.
+					. Reviewed final draft.
+					. Reviewed NS/ARPA/NFS overview doc.
+
+4.4	0	5	Dev/Test	Bug fixes and development:
+					. Changes to ypserv and ypmake
+					  to handle long filenames better
+					. Strange remsh problem
+					. 255.255.255.255 problem
+					. Inetd.sec/mount through gateway
+					  problem.
+					. Defects submitted by XTTC:
+					  operator errors and wrong
+					  error message returned by Sun code.
+					. Ypserv/longfilenames defect.
+					. Connectivity problem with hpcndax.
+					. Getpwent problem.
+					. Cleanup code (possible problem with
+					  clnt_tcp.c opening 0, 1 or 2).
+					. Fix nfsd/biod when system call not
+					  available.
+					. Review ownership of commands 
+					  (nfsstat).
+					. Problem with Internet and checking
+					  in clnt_tcp.c
+					. Nroff testplan problem.
+
+0.5	0	2	Sup		Shared source process for section I.
+					. Meeting about equipment required.
+					. Wrote about the structure
+					  of the shared source.  Being 
+					  reviewed.
+
+4	0	4	FTO		Vacation
+
+0.1	0	0	Sup		NFS tutorial at Sys Admin conference.
+
+0.6	0	0	Sup		SCCS to RCS conversion
+
+0.2	0	0	Dev/Sup		NLS:
+					. slide for Jim Willits
+					. Fixing a catalog problem
+					. Adding more messages to catalogs
+
+0.8	0	0.5	Metr		Metrics required for this integration
+					cycle:
+					. Recovering from plot programs lost						  on hpcndhf.
+					. Fixing defect on getmiscdata Pascal
+					  program.
+
+1.2	0	1	Sup		Any work left on the s300 that
+					I need to do (NLS cookbook, tape, etc.)
+					. TQC report
+					. How_to document
+					. Metrics required for Corporate
+					  and QA complete.
+
+0.4	0	0	Sup		Integration problems:
+					. hpisoa1 out of memory buffers
+					  problem (so change to header
+					  files had to be done there).
+					. Added chmod's to up_release.
+					. Resubmitted because of ypserv
+					  problem
+
+0.1	0	0	Sup		NFS 800 development group objectives
+
+# Some of the overhead for this month included coffee talks, teleconferences, 
+# MR meeting and group meetings.
+
+=============================================================================
+#Checkpoint	IC6A	01/25/88	Final Bits
+=============================================================================
+
+2	0	0	Sup		NFS tutorial for Sys Adm conference
+					. Clarify facilitator and panel 
+					  requirements
+					. Write first draft
+
+1.4	0	0	Sup		SCCS to RCS conversion
+
+0.9	0	0	Sup		Other tasks
+					. s800 equipment planning for 3.0/4.0
+					. Plan NFS NLS requirements in 
+					  upcoming releases for the 
+					  "Phase 0 Estimates for International
+					   Features" document.	
+					. Percentage of my time spent on 
+					  the 2.1 and 3.0 releases respectively
+					. Talked to Danny Lau about NS bfa 
+					  waiver.
+
+1.2	0	0	Sup		Other project related tasks:
+					. Keeping most wanted defects list
+					. Changes to development environment
+					  for NFS 3.2
+					. BFA report
+
+2.5	0	3.5	Dev		Defect fixes:
+					. Fixed spray problem
+					. Identified ypserv/libdbm.a abort
+					  problem
+					. Examined problem that turned out
+					  to be a bad routing table
+					. Looked at makedbm fix with Mark
+					. Checked on Link/NFS testing 
+					  planned by XTTC
+					. Checked signal sent by abort call
+					. Look at PC-NFS problem
+					. CRT for ypmake problem
+
+0.1	0	0	Sup		Reviewing the UKL/UDL new shared
+					build process proposal as a partner
+					This might affect us in the future
+					if it changes the requirements for
+					integration submissions and affects
+					our interaction with the commands
+					group (especially from the point
+					of view of the central source server)
+					I will be talking to Gayle Dilley after
+					February 01.
+
+0.4	0	0	Sup		NFS 800 submission
+					. Prepare files to be submitted
+					. Put metrics in form
+
+1.3	0	1	Doc		Review documentation for final
+					sign-off:
+					. Reviewed Don Hines documentation
+					. Reviewed NFS manuals
+					  (reread everything for formatting
+					   check)
+
+3	0	3	FTO		Vacation
+
+# Overhead includes group meetings, catching up after vacation, writing
+# the NFS/800 monthly report and scheduling teleconferences.
+
+=============================================================================
+Checkpoint 	END
+=============================================================================

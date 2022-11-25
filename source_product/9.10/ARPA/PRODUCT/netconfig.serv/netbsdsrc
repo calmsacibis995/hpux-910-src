@@ -1,0 +1,149 @@
+#! /bin/sh
+
+#
+# @(#)$Header: netbsdsrc,v 1.22.109.4 94/03/18 15:21:56 mike Exp $
+# 
+# shell script for initialization of BSD services networking product
+#
+
+#
+# Establish the system context.
+#
+
+STANDALONE=""
+REMOTEROOT=""
+LOCALROOT=""
+
+# save the return status of the first error
+returnstatus=0
+
+#
+# set_return sets the returnstataus to be the exit value of the 
+# previous command only if the returnstatus is not already set
+#
+set_return() {
+
+save=$?
+if [ $returnstatus = 0 ] ; then
+   returnstatus=$save
+fi
+
+}
+
+
+if [ ! -x /bin/getcontext ] ; then
+	STANDALONE=1
+else
+	CONTEXT=`/bin/getcontext`
+	if echo $CONTEXT | grep 'standalone' >&- ; then
+		STANDALONE=1
+	elif echo $CONTEXT | grep 'remoteroot' >&- ; then
+		REMOTEROOT=1
+	elif echo $CONTEXT | grep 'localroot' >&- ; then
+		LOCALROOT=1
+	else
+		STANDALONE=1
+	fi
+fi
+
+
+#
+# To start the dynamic routing daemon, uncomment the following lines.
+# Gated is started only if it is executable.
+#
+
+# if [ -x /etc/gated ] ; then
+#   /etc/gated && /bin/echo "gated  \c"
+#   set_return
+# fi
+
+
+#
+# The name server is started on standalones or on the root server if
+# /etc/named.boot is present and /etc/named is executable.
+#
+
+if [ "$LOCALROOT" -o "$STANDALONE" ] ; then
+  if [ -x /etc/named -a -f /etc/named.boot ] ; then
+    /etc/named && /bin/echo "named  \c"
+	set_return
+  fi
+fi
+
+
+#
+# Diskless clients start "/etc/rwhod -s", all others start "/etc/rwhod".
+# Uncomment these lines if you want to run rwhod.
+#
+
+# if [ $REMOTEROOT ] ; then
+#   /etc/rwhod -s && /bin/echo "rwhod -s  \c"
+#   set_return
+# else      
+#   /etc/rwhod && /bin/echo "rwhod  \c"
+#   set_return
+# fi
+
+
+#
+# sendmail is used by the system only if the file /usr/lib/sendmail is
+# executable.  
+#
+
+if [ -x /usr/lib/sendmail ] ; then
+  if [ $STANDALONE ] ; then
+    #
+    # On standalone system, start sendmail daemon.  Freeze the
+    # configuration file only if one already exists on the system.
+    # (Presumably the administrator uses freeze files)
+    #
+    /bin/rm -f /usr/spool/mqueue/xf*
+    /usr/bin/logger -t netbsdsrc\[$$\] -p mail.notice "#### rebooted ####"
+    if [ -f /usr/lib/sendmail.fc ] ; then
+	/usr/lib/sendmail -bz
+    fi
+    /usr/lib/sendmail -bd -q30m && /bin/echo "sendmail  \c"
+    set_return
+  elif [ $LOCALROOT ] ; then
+    # 
+    # On diskless systems the sendmail frozen configuration file is a
+    # CDF.  This is done since, on hetergeneous clusters, HP-PA frozen
+    # configuration files are not compatible with MC68020 frozen
+    # configuration files.  Each cnode freezes the configuration file
+    # in such a way that mail from client nodes appears to be from the
+    # server node.
+    #
+    /usr/lib/sendmail -bz
+    set_return
+    /usr/bin/logger -t netbsdsrc\[$$\] -p mail.notice "#### rebooted ####"
+    #
+    # Start sendmail daemon on server node only.
+    #
+    /bin/rm -f /usr/spool/mqueue/xf*
+    /usr/lib/sendmail -bd -q30m && /bin/echo "sendmail  \c"
+    set_return
+  elif [ $REMOTEROOT ] ; then
+    #
+    # Diskless clients freeze and read a sendmail configuration file
+    # with the server's hostname, and run no sendmail daemon.
+    #
+    /usr/lib/sendmail -oMw`cnodes -r` -bz
+    set_return
+  fi
+fi 
+
+#
+# DDFA is part of the ARPA-AUX fileset, and it must have been loaded
+# for these files to be present.
+#
+# To start DTC device file access (DDFA), uncomment the following lines. 
+# Also, the configuration files need to be copied from the directory 
+# /etc/newconfig/ddfa into /etc.
+#
+
+# if [ -x /etc/dpp -a -x /etc/ocd -a -f /etc/dp ]; then
+#   /etc/dpp /etc/dp && /bin/echo "dpp  \c"
+#   set_return
+# fi
+
+exit $returnstatus

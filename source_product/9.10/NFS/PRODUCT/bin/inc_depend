@@ -1,0 +1,23 @@
+#!/bin/sh
+##	@(#)inc_depend	$Revision: 1.12.109.1 $	$Date: 91/11/19 13:55:41 $
+#	inc_depend	--	create a list of include files we depend upon
+# Written for NFS project by Cristina Mahon
+# This script creates a list of all the include files the NFS commands
+# depend on.  We should have all those include files.
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $Nfs begin
+
+cd $Nfs
+HOLD=`find $Nfs/cmds/libc/net $Nfs/cmds/libc/rpc $Nfs/cmds/libc/yp $Nfs/cmds/usr.lib $Nfs/cmds/bin $Nfs/cmds/etc $Nfs/cmds/ucb $Nfs/cmds/usr.bin $Nfs/cmds/usr.etc -name "*.c" -print`
+
+for FILE in $HOLD
+do
+	$Nfs/bin/listtd -I$Nfs/include $FILE >> /tmp/incdep.$$ 
+done
+
+cat /tmp/incdep.$$ | sort | uniq > $Nfs/log/header_files
+rm /tmp/incdep.$$
+
+echo `date "+%y.%m.%d %T"` $0 $Nfs end

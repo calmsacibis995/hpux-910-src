@@ -1,0 +1,3015 @@
+
+.\"  .PH "''''"
+.\"  .PF "''\\\\nP''"
+.\"  .ds HF 4 4 4 4 4 4 4	\" all headings are bold
+.\"  .nr Hb 7
+.\"  .nr Hs 7
+.\"  .pl 66
+.\"  .ll 70
+.\"  .po -5
+.\"  .ad b
+.\"  .nf
+.\"  \fBNFS Black Box Test Plan\fR             Jim Hunter        x2877
+.\"                                            Jeff Elison       x2265
+.\"					       June 19, 1984
+.\"					       Updated: June 8, 1985
+.\"                                            Updated last: Jan. 22, 1986
+.\"  .fi
+.\"  .ad b
+.H 1 "Functionality (Ported) (Jeff Elison, Jim Hunter)"
+
+The tests defined in this chapter were originally defined and written
+as RFA tests for an earlier series 300 release.  The original tests
+were ported and/or modified for use as NFS functional tests.
+
+The original documentation for the tests has been updated for use
+in this chapter [3].
+
+.nf
+IMPLEMENT TIME: 10.0  md 
+		plus time indicated at various points in the chapter
+.fi
+
+.H 2 "Test separation and coverage"
+
+The tests will be separated into three (3) sets.
+One set will test the HP-UX high level commands (Section 1 of the brick),
+one set will test the HP-UX intrinsics (Section 2 of the brick),
+and one set will test the Section 3 of the brick.
+
+Section one includes:
+.ta 10 20 30 40 50 60
+.nf
+	cat,	cd,	chmod,    cp,	find,      ls,
+	mkdir,	pwd,	rm,	rmdir,	touch
+.fi
+Section 2 includes:
+.nf
+.ta 10 20 30 40 50 60 70 
+	access,	chdir,	chmod,	chown,	chroot,
+	close,	creat,	dup,	exec,	fcntl,
+	fstat,	ioctl,	link,	lseek,	mkdir,
+	mount,	open,	prealloc,	read,	rmdir,
+	select,	stat,	truncate,	write,	unlink 
+.fi
+.br
+Section 3 includes:
+.nf
+	fclose,   fdopen,   fflush,   fgetc,	fopen,	  fread,
+	freopen,	fwrite,   getc,	  getchar,	getw
+.ta 10 20 30 40 50 60 70 
+.fi
+
+.ta 3 6 9 12 15 18 21 24 28 30 33 36 39 42 45 48 51 54 57 60 63 66 69 72 75 78 81
+
+Many of the commands in section 1 will have differing sets of options and
+usage statements depending on the type of machine.  These will have to be
+modified to expect different results depending on the node type.  This has
+not been done yet.
+
+Several tests from section 2 are known to be missing.  The following tests
+will be ported from the ISO file system tests: fsync, mkdir, mount,
+umount, readv, rmdir, writev, and utime.  Jeff Elison will be responsible for
+porting these tests and should require 2 md.  Tests for chgrp, mknod, sync, and
+ustat will need to be developed.
+
+The section 3 routines getgrent* and getpwent will be tested by ISO.  These
+tests will then be included in our yellow pages testing.
+
+The correct functioning of both the commands and library calls will be tested
+for proper response as well as for the correct error responses.
+The error responses, as outlined in the LAN 9000 documentation,
+HP-UX manual, will be tested for.  Generally, the tests for error
+responses will require the LAN to be up.
+
+.H 2 "Section 1 Tests"
+
+RESPONSIBLE ENGINEER: Jeff Elison
+
+This section contains the outlines for testing the different commands.
+Each command will have a separate section.
+The tests will be then divided into tests for proper responses to correct use
+of the command, and then a set of tests for proper responses to the incorrect
+use of the command.
+
+It is assumed that a correct mount has been run to tie the machines.
+This is assumed for all but the mount tests.
+The tests should be run as nonsuperuser; the superuser tests are marked 
+with the .su suffix and will be executed seperately.
+
+In all of the following tests, the phrase "Remote Home directory" indicates
+some standard directory on a remote machine.  In describing the test cases
+many of these sections use the form, action : expected output.
+
+.sp 2
+.H 3 "The command 'cat'"
+.sp 1
+
+These tests require the file t1 and the commands cd and diff.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+cd local home directory: none
+cat t1 >t2; diff t1 t2:	 null
+cat t1 t2 >t3; cat t1 t1 >t4; diff t4 t3: null
+
+REMOTE MACHINE
+cd remote home directory: none
+cat t1 >t2; diff t1 t2:	 null
+cat t1 t2 >t3; cat t1 t1 >t4; diff t4 t3: null
+cat t1(full remote name) >t2; diff t1 t2: null
+cat t1(full remote name) t2 >t3; 
+   cat t1(full remote name) t1(full remote name) >t4; diff t4 t3: null
+cat t1 >t2(full remote name); diff t1 t2: null
+cat t1(full remote name) >t2(full remote name); diff t1 t2: null
+
+cd local home directory: none
+cat t1(full remote name) >t2; diff t1(full remote name) t2: null
+cat t1 >t2(full remote name); diff t1 t2(full remote name): null
+cat t1(full remote name) >t2(full remote name);
+   diff t1(full remote name) t2(full remote name): null
+
+ADDITIONAL TESTS with ".." in path name
+cd $LOCALDIR/d1 : none
+cat ../d2/t1 > t2; diff $LOCALDIR/d2/t1 t2 : null
+cat t1 > ../d2/t2; diff t1 $LOCALDIR/d2/t2 : null
+cd $REMOTEDIR/d1 : none
+cat ../d2/t1 > t2; diff $REMOTEDIR/d2/t1 t2 : null
+cat t1 > ../d2/t2; diff t1 $REMOTEDIR/d2/t2 : null
+cat t1 ../d2/t2 > t3
+   cat t1 $REMOTEDIR/d2/t2 > t4
+   diff t3 t4 : null
+cd $LOCALDIR/d1 : none
+cat $REMOTEDIR/d2/../d1/t1 > t2; diff $REMOTEDIR/d1/t1 t2 : null
+cat t1 > $REMOTEDIR/d2/../d1/t2; diff t1 $REMOTEDIR/d1/t2 : null
+cat $REMOTEDIR/d1/../d2/t1 > $REMOTEDIR/d1/../d2/t3; 
+   diff $REMOTEDIR/d2/t1 $REMOTEDIR/d2/t3 : null
+cd $REMOTEDIR/d1 : none
+cat $LOCALDIR/d2/../d1/t1 > t2; diff $LOCALDIR/d1/t1 t2 : null
+cat t1 > $LOCALDIR/d1/../d2/t2; diff t1 $LOCALDIR/d2/t2 : null
+cat $LOCALDIR/d1/../d2/t1 > $LOCALDIR/d1/../d2/t3;
+   diff $LOCALDIR/d2/t1 $LOCALDIR/d2/t3 : null
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+/* only t1 exists on the local and remote home directories */
+cd local home directory: none
+cat t2 >t3: cat: cannot open t2
+cat t1 >t1: cat: input t1 is output
+
+REMOTE MACHINE
+cd remote home directory: none
+cat t2 >t3: cat: cannot open t2
+cat t1 >t1: cat: input t1 is output
+
+/*the following tests use the full remote pathnames */
+cd local home directory: none
+cat t2 >t3: cat: cannot open t2
+cat t1 >t1 : cat: input t1 is output
+
+.sp 2
+.H 3 "The command 'cd'"
+.sp 1
+
+.fi
+The cd command is used to set the current working directory.
+It is used for both local directories and remote directories.
+It should work as in the HP-UX reference manual.
+
+These tests will use the commands: pwd, chmod.
+The tests will always use pwd to see if the cd worked.
+The chmod is only to see if it works right with the incorrect permission
+on the directory.
+This set of tests is executed for both the Bourne and C shells.
+.nf
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+The tests will be of the pattern:
+.br
+"cd XX;pwd" 
+in order to see if they worked.
+
+.nf
+LOCAL MACHINE
+home directory: path from local root
+parent of home: path from local root
+home directory: path from local root
+subdir of home: path from local root
+subdir: path from local root
+to parent:	path from local root
+to parent:	path from local root
+to parent(till at root):	path from local root
+local root to local root:	path from local root
+REMOTE MACHINE
+root of remote: path from remote root
+down to users of remote:	path from remote root
+down to a subdir:	path from remote root
+up to parent in remote: path from remote root
+up to parent in remote: path from remote root
+to parent(till at root):	path from local root
+from root to root in remote:	path from remote root
+back to a directory on local:	path from local root
+home directory: path from local root
+nonroot of remote:	path from remote root
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+local home:	path from root
+invalid subdir: path from root
+invalid full local path:	path from root
+invalid full remote path:	path from root
+valid directory,but no "x" permission:	path from root
+REMOTE MACHINE
+remote home:	path from root
+invalid subdir: path from root
+invalid full local path:	path from root
+invalid full remote path:	path from root
+valid directory,but no "x" permission:	path from root
+
+.sp 2
+.H 3 "The command 'chmod'"
+.sp 1
+
+.fi
+These tests use the commands cd, ll, rm, mkdir, cp, and sed.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+cd local home directory: none
+/* get to a directory with only file t1 in it */
+chmod 4000 t1; ll | sed ->>> ---s------	 
+chmod 2000 t1; ll | sed ->>> ------s---
+chmod 1000 t1; ll | sed ->>> ----------
+chmod 0400 t1; ll | sed ->>> -r--------
+chmod 0200 t1; ll | sed ->>> --w-------
+chmod 0100 t1; ll | sed ->>> ---x------
+chmod 0040 t1; ll | sed ->>> ----r-----
+chmod 0020 t1; ll | sed ->>> -----w----
+chmod 0010 t1; ll | sed ->>> ------x---
+chmod 0004 t1; ll | sed ->>> -------r--
+chmod 0002 t1; ll | sed ->>> --------w-
+chmod 0001 t1; ll | sed ->>> ---------x
+rm t1;mkdir d1
+chmod 4000 d1; ll | sed ->>> d--s------	 
+chmod 2000 d1; ll | sed ->>> d-----s---
+chmod 1000 d1; ll | sed ->>> d---------
+chmod 0400 d1; ll | sed ->>> dr--------
+chmod 0200 d1; ll | sed ->>> d-w-------
+chmod 0100 d1; ll | sed ->>> d--x------
+chmod 0040 d1; ll | sed ->>> d---r-----
+chmod 0020 d1; ll | sed ->>> d----w----
+chmod 0010 d1; ll | sed ->>> d-----x---
+chmod 0004 d1; ll | sed ->>> d------r--
+chmod 0002 d1; ll | sed ->>> d-------w-
+chmod 0001 d1; ll | sed ->>> d--------x
+rmdir d1
+
+REMOTE MACHINE
+cd remote home directory: none
+/* remove all files out of the home directory but t1 */
+chmod 4000 t1; ll | sed ->>> ---s------	 
+chmod 2000 t1; ll | sed ->>> ------s---
+chmod 1000 t1; ll | sed ->>> ----------
+chmod 0400 t1; ll | sed ->>> -r--------
+chmod 0200 t1; ll | sed ->>> --w-------
+chmod 0100 t1; ll | sed ->>> ---x------
+chmod 0040 t1; ll | sed ->>> ----r-----
+chmod 0020 t1; ll | sed ->>> -----w----
+chmod 0010 t1; ll | sed ->>> ------x---
+chmod 0004 t1; ll | sed ->>> -------r--
+chmod 0002 t1; ll | sed ->>> --------w-
+chmod 0001 t1; ll | sed ->>> ---------x
+rm t1;mkdir d1
+chmod 4000 d1; ll | sed ->>> d--s------	 
+chmod 2000 d1; ll | sed ->>> d-----s---
+chmod 1000 d1; ll | sed ->>> d---------
+chmod 0400 d1; ll | sed ->>> dr--------
+chmod 0200 d1; ll | sed ->>> d-w-------
+chmod 0100 d1; ll | sed ->>> d--x------
+chmod 0040 d1; ll | sed ->>> d---r-----
+chmod 0020 d1; ll | sed ->>> d----w----
+chmod 0010 d1; ll | sed ->>> d-----x---
+chmod 0004 d1; ll | sed ->>> d------r--
+chmod 0002 d1; ll | sed ->>> d-------w-
+chmod 0001 d1; ll | sed ->>> d--------x
+cd local home directory: none
+/* get to a directory with only file t1(full remote path name) in it */
+chmod 4000 t1(full remote path name); ll | sed ->>> ---s------	
+chmod 2000 t1(full remote path name); ll | sed ->>> ------s---
+chmod 1000 t1(full remote path name); ll | sed ->>> ----------
+chmod 0400 t1(full remote path name); ll | sed ->>> -r--------
+chmod 0200 t1(full remote path name); ll | sed ->>> --w-------
+chmod 0100 t1(full remote path name); ll | sed ->>> ---x------
+chmod 0040 t1(full remote path name); ll | sed ->>> ----r-----
+chmod 0020 t1(full remote path name); ll | sed ->>> -----w----
+chmod 0010 t1(full remote path name); ll | sed ->>> ------x---
+chmod 0004 t1(full remote path name); ll | sed ->>> -------r--
+chmod 0002 t1(full remote path name); ll | sed ->>> --------w-
+chmod 0001 t1(full remote path name); ll | sed ->>> ---------x
+rm t1(full remote path name);mkdir d1(full remote path name)
+chmod 4000 d1(full remote path name); ll | sed ->>> d--s------	
+chmod 2000 d1(full remote path name); ll | sed ->>> d-----s---
+chmod 1000 d1(full remote path name); ll | sed ->>> d---------
+chmod 0400 d1(full remote path name); ll | sed ->>> dr--------
+chmod 0200 d1(full remote path name); ll | sed ->>> d-w-------
+chmod 0100 d1(full remote path name); ll | sed ->>> d--x------
+chmod 0040 d1(full remote path name); ll | sed ->>> d---r-----
+chmod 0020 d1(full remote path name); ll | sed ->>> d----w----
+chmod 0010 d1(full remote path name); ll | sed ->>> d-----x---
+chmod 0004 d1(full remote path name); ll | sed ->>> d------r--
+chmod 0002 d1(full remote path name); ll | sed ->>> d-------w-
+chmod 0001 d1(full remote path name); ll | sed ->>> d--------x
+
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+/* Only the file t1 exists on the local and remote directories */
+LOCAL MACHINE
+cd local home directory: none
+chmod 8000 t1: "chmod: invalid mode"
+chmod 0800 t1: "chmod: invalid mode"
+chmod 9999 t1: "chmod: invalid mode"
+chmod  777 t2: "chmod: no access"
+
+REMOTE MACHINE
+cd remote home directory: none
+chmod 8000 t1: "chmod: invalid mode"
+chmod 0800 t1: "chmod: invalid mode"
+chmod 9999 t1: "chmod: invalid mode"
+chmod  777 t2: "chmod: no access"
+cd local home directory: none
+chmod 8000 t1(full remote path name): "chmod: invalid mode"
+chmod 0800 t1(full remote path name): "chmod: invalid mode"
+chmod 9999 t1(full remote path name): "chmod: invalid mode"
+chmod  777 t2: "chmod: no access"
+
+.sp 2
+.H 3 "The command 'cp'"
+.sp 1
+
+.fi
+where target is either a file or a directory. If there is only one
+file specified, then the target can be a nondirectory name.
+In both cases, the target can be a directory.
+
+These tests use the commands: cd, mkdir, and diff.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+cd local home directory: none
+/* remove all files out of the home directory but t1 */
+mkdir subdir: none
+cp t1 t2; diff t1 t2: null
+cp t1 subdir; diff t1 subdir/t1: null
+cp t1(a full remote pathname) t2; diff t1(a full remote pathname) t2: null
+cp t1 t2(a full remote pathname); diff t1 t2(a full remote pathname): null
+cp t1(a full remote pathname) t2(a full remote pathname);
+   diff t1(a full remote pathname) t2(a full remote pathname): null
+cp t1(a full remote pathname) t2(directory); 
+     diff t1(a full remote pathname) t2/t1: null
+cp t1 t2(a full remote pathname directory); 
+     diff t1 t2(a full remote pathname)/t1: null
+cp t1(a full remote pathname) t2(a full remote pathname directory);
+   diff t1(a full remote pathname) t2(a full remote pathname directory)/t1: null
+
+REMOTE MACHINE
+cd remote home directory: none
+/* remove all files out of the home directory but t1 */
+mkdir subdir: none
+cp t1 t2; diff t1 t2: null
+cp t1 subdir; diff t1 subdir/t1: null
+cp t1(a full local pathname) t2; diff t1(a full local pathname) t2: null
+cp t1 t2(a full local pathname); diff t1 t2(a full local pathname): null
+cp t1(a full local pathname) t2(a full local pathname);
+   diff t1(a full local pathname) t2(a full local pathname): null
+cp t1(a full local pathname) t2(directory); 
+     diff t1(a full local pathname) t2/t1: null
+cp t1 t2(a full local pathname directory); 
+     diff t1 t2(a full local pathname)/t1: null
+
+cd local home directory: none
+/* remove all files out of the home directory but t1 */
+mkdir subdir: none
+cp t1(a full remote pathname) t2; diff t1(a full remote pathname) t2: null
+cp t1 t2(a full remote pathname); diff t1 t2(a full remote pathname): null
+cp t1(a full remote pathname) t2(a full remote pathname);
+   diff t1(a full remote pathname) t2(a full remote pathname): null
+cp t1(a full remote pathname) t2(directory); 
+     diff t1(a full remote pathname) t2/t1: null
+cp t1 t2(a full remote pathname directory); 
+     diff t1 t2(a full remote pathname)/t1: null
+cp t1(a full remote pathname) t2(a full remote pathname directory);
+   diff t1(a full remote pathname) t2(a full remote pathname directory)/t1: null
+
+ADDITIONAL TESTS with ".." in path name
+cd $LOCALDIR/d1 : none
+cp ../d2/t1 t2; diff $LOCALDIR/d2/t1 t2 : null
+cp t1 ../d2/t2; diff t1 $LOCALDIR/d2/t2 : null
+cd $REMOTEDIR/d1 : none
+cp ../d2/t1 t2; diff $REMOTEDIR/d2/t1 t2 : null
+cp t1 ../d2/t2; diff t1 $REMOTEDIR/d2/t2 : null
+cp t1 ../d2/t2 t3
+   cp t1 $REMOTEDIR/d2/t2 t4
+   diff t3 t4 : null
+cd $LOCALDIR/d1 : none
+cp $REMOTEDIR/d2/../d1/t1 t2; diff $REMOTEDIR/d1/t1 t2 : null
+cp t1  $REMOTEDIR/d2/../d1/t2; diff t1 $REMOTEDIR/d1/t2 : null
+cp $REMOTEDIR/d1/../d2/t1 $REMOTEDIR/d1/../d2/t3; 
+   diff $REMOTEDIR/d2/t1 $REMOTEDIR/d2/t3 : null
+cd $REMOTEDIR/d1 : none
+cp $LOCALDIR/d2/../d1/t1  t2; diff $LOCALDIR/d1/t1 t2 : null
+cp t1 $LOCALDIR/d1../d2/t2; diff t1 $LOCALDIR/d2/t2 : null
+cp $LOCALDIR/d1/../d2/t1 $LOCALDIR/d1/../d2/t3;
+   diff $LOCALDIR/d2/t1 $LOCALDIR/d2/t3 : null
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+/* for these, only t1, t2, t3, and d1 (a directory) exist in the
+   home directories						  */
+LOCAL MACHINE
+cd local home directory: none
+cp t1 t2 t4: "cp: t4 not found"
+cp t1 t2 t3: "Usage: {mv|cp|ln} f1 f2
+		     {mv|cp|ln} f1 ... fn d
+		     mv d1 d2"
+cp d1 d2: just as above
+cp t4 d1: "cp: cannot access t4"
+
+REMOTE MACHINE
+cd remote home directory: none
+cp t1 t2 t4: "cp: t4 not found"
+cp t1 t2 t3: "Usage: {mv|cp|ln} f1 f2
+		     {mv|cp|ln} f1 ... fn d
+		     mv d1 d2"
+cp t1(full local pathname) t2 t4: "cp: t4 not found"
+cp t1(full local pathname) t2 t3: "Usage: {mv|cp|ln} f1 f2
+					  {mv|cp|ln} f1 ... fn d
+					   mv d1 d2"
+cp t1(full local pathname) t2 t4(full local pathname): "cp: t4 not found"
+cp t1(full local pathname) t2 t3(full local pathname):
+       "Usage: {mv|cp|ln} f1 f2
+	       {mv|cp|ln} f1 ... fn d
+		mv d1 d2"
+
+cd local home directory: none
+cp t1(full remote pathname) t2 t4: "cp: t4 not found"
+cp t1(full remote pathname) t2 t4(full remote pathname): "cp: t4 not found"
+cp t1 t2 t3(full remote pathname nonexistent file):
+      "Usage: {mv|cp|ln} f1 f2
+	      {mv|cp|ln} f1 ... fn d
+	       mv d1 d2"
+cp t1(full remote pathname) t2 t4(full remote pathname): "cp: t4 not found"
+cp t1(full remote pathname) t2 t3(full remote pathname nonexistent file): 
+     "Usage: {mv|cp|ln} f1 f2
+	     {mv|cp|ln} f1 ... fn d
+	     mv d1 d2"
+
+
+.sp 2
+.H 3 "The command 'find'"
+.sp 1
+
+Format: in HP-UX Reference manual
+
+.fi
+These tests use the commands: cd and mkdir.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+The following tests are for having the working directory as either
+local or remote
+
+find all occurrences of a file name in a path name
+
+find all occurrences of a file name in 2 path names
+
+file name has a normal shell argument syntax *; with \\ the shell will not
+expand * but 'find' will; note that 'ls' will not.
+
+find with -perm option
+
+find with -type option
+
+find with option -linkn
+
+find with -user option
+- user id
+- user name
+
+find with -group option
+- group name
+- group id
+
+find with -size option
+
+find with -atime, -mtime, -ctime
+
+find with -exec and -ok option
+
+find with optional parameter -cpio
+
+find with optional parameter -ncpio
+
+find with optional parameter -newer
+
+find with optional primaries in an expression 
+
+find with -inum option
+
+The following tests are for full remote pathnames with local working directory.
+
+find all occurrences of a file name in a path name
+
+find all occurrences of a file name in 2 path names
+
+file name has a normal shell argument syntax *; with \\ the shell will not
+expand * but 'find' will; note that 'ls' will not.
+
+find with -perm option
+
+find with -type option
+
+find with option -linkn
+
+find with -user option
+-user username
+-user id 
+
+find with -group option
+-group name
+-group id
+
+find with -size option
+
+find with -atime, -mtime, -ctime
+
+find with -exec and -ok option
+
+find with optional parameter -newer
+
+find with optional primaries in an expression 
+
+find with -inum option
+
+.sp 2
+.H 3 "The command 'ls'"
+.sp 1
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+ls : appropriate response
+ls -a : appropriate response
+ls -A : appropriate response
+ls -l : appropriate response
+ls -s : appropriate response
+ls -d dir1 : appropriate response
+ls full_local_pathname : appropriate response
+ls -a full_local_pathname : appropriate response
+ls -A full_local_pathname : appropriate response
+ls -l full_local_pathname : appropriate response
+ls -s full_local_pathname : appropriate response
+ls -d full_local_pathname/dir1 : appropriate response
+cd full_remote_pathname : appropriate response
+ls : appropriate response
+ls -a : appropriate response
+ls -A : appropriate response
+ls -l : appropriate response
+ls -s : appropriate response
+ls -d dir1 : appropriate response
+cd full_local_pathname : appropriate response
+ls full_remote_pathname : appropriate response
+ls -a full_remote_pathname : appropriate response
+ls -A full_remote_pathname : appropriate response
+ls -l full_remote_pathname : appropriate response
+ls -s full_remote_pathname : appropriate response
+ls -d full_remote_pathname/dir1 : appropriate response
+
+.sp 2
+.H 3 "The command 'mkdir'"
+.sp 1
+
+.fi
+This should take either a part (i.e. assuming current path to current directory)
+or a full name on either the local or remote system.
+
+These tests will use cd, chmod, and ls commands.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+These tests should be run in this order:
+.nf
+LOCAL MACHINE
+home directory: none
+make subdir:	list with subdir included
+cd to subdir:	none
+make subdir:	list with only subdir
+up to parent:	none
+make subdir with full pathname: list with both subdirs
+REMOTE MACHINE
+home remote directory:	none
+make subdir:	list with subdir included
+cd to subdir:	none
+make subdir:	list with only subdir
+up to parent:	none
+make subdir with full remote pathname: list with both subdirs
+.fi
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+home directory: none
+make subdir:	none
+make existing subdir:	"mkdir: cannot make directory xxx"
+make subdir with wrong pathname (wrong internal node):
+		"mkdir: cannot access xxx/."
+make a subdir without "w" access in current:	"mkdir: cannot access ."
+REMOTE MACHINE
+cd to remote dir:	none
+make subdir:	none
+make existing subdir:	"mkdir: cannot make directory xxx"
+make subdir with wrong pathname (wrong internal node "ndir/xxx"):
+		"mkdir: cannot access xxx/."
+make a subdir without "w" access in current:	"mkdir: cannot access ."
+make subdir with wrong full pathname (wrong internal node):
+		"mkdir: cannot access xxx/."
+make a subdir without "w" access in full pathname:
+		"mkdir: cannot access xxx/."
+
+.sp 2
+.H 3 "The command 'pwd'"
+.sp 1
+
+Format: pwd
+
+.fi
+These tests will occur in the pattern of "cd XX;pwd" to check pwd after cds.
+This command requires the use of the command cd.
+These tests must be executed with all supported shells (currently, /bin/sh and /bin/csh).
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.fi
+The pwd command should give the proper pathname from the root of the local
+system.
+These tests specify the conditions for the cds and the result of the
+subsequent pwd.
+These assume all the cds work correctly.
+
+These tests should be run in this order:
+.nf
+home directory: path from local root
+parent of home: path from local root
+root of remote: path from local root
+down to users of remote: path from local root
+down to a subdir: path from local root
+up to parent in remote: path from local root
+up to parent in remote: path from local root
+from root to root in remote: path from local root
+back to a directory on local: path from local root
+home directory: path from local root
+.fi
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+The following is done both through a mount point and locally.
+cd /a/b/c; chmod 0 /a/b; pwd : "pwd: cannot open .."
+
+.sp 2
+.H 3 "The command 'rm'"
+.sp 1
+
+These tests use the commands cd, cp, mkdir, and ls.
+
+.H 4 "Tests for correct response"
+
+.nf
+LOCAL SYSTEM
+rm single file; ls:	one fewer file
+rm several files; ls:	several fewer files
+rm -r directory;ls:	no more directory
+rm -r ../directory;ls:	no more files in the tree
+rm -f file with no write permission;	ls: no more file
+rm -ri directory; ls:	once leaving it and once not
+REMOTE SYSTEM
+cd remote home: none
+rm single file; ls:	one fewer file
+rm several files; ls:	several fewer files
+rm -r directory;ls:	no more directory
+rm -r ../directory;ls:	no more files in the tree
+rm -f file with no write permission;	ls: no more file
+rm -ri directory; ls:	once leaving it and once not
+REMOTE SYSTEM
+cd local home:	none
+rm single file(full pathname); ls:	one fewer file
+rm several files; ls(full pathname):	several fewer files
+rm -r directory; ls(full pathname):	no more directory
+rm -f file with no write permission(full pathname);	ls: no more file
+
+.H 4 "Tests for error response"
+
+.nf
+LOCAL MACHINE
+no arguments: usage message
+nonexistent file(t2):	"rm: t2 non_existent"
+directory has no write permission:	"rm: t1 not removed"
+component of the path has no search permission: "rm: t1 non-existent"
+
+.sp 2
+.H 3 "The command 'rmdir'"
+.sp 1
+
+This command requires the use of cd, ls, and mkdir.
+
+.H 4 "Tests for correct response"
+
+.nf
+LOCAL MACHINE
+cd home: none
+mkdir subdir: none
+rmdir subdir; ls: no subdir!
+REMOTE MACHINE
+cd remote directory: none
+mkdir subdir: none
+rmdir subdir;ls: no subdir!
+cd home: none
+mkdir remote;ls remote: subdir
+rmdir remote;ls remote: nosubdir!
+
+.H 4 "Tests for error response"
+.sp
+
+/* file xxx is the erroneous pathname */
+.nf
+LOCAL MACHINE
+cd home: none
+rmdir nonexisting subdir: "rmdir: xxx non-existent"
+rmdir subdir with no "w" in parent: "rmdir: xxx: no permission"
+rmdir nonempty subdir: "rmdir: xxx not empty"
+REMOTE MACHINE
+cd remote directory: none
+rmdir nonexisting subdir: "rmdir: xxx non-existent"
+rmdir subdir with no "w" in parent: "rmdir: xxx: no permission"
+rmdir nonempty subdir: "rmdir: xxx not empty"
+cd home: none
+rmdir nonexisting remote subdir: "rmdir: xxx non-existent"
+rmdir remote subdir with no "w" in parent: "rmdir: xxx: no permission"
+rmdir nonempty remote subdir: "rmdir: xxx not empty"
+
+.sp 2
+.H 3 "The command 'touch'"
+.sp 1
+
+.fi
+These tests use the commands: mkdir, rm, and cd.
+
+.H 4 "Tests for correct response"
+.sp 1
+
+touch a single file with no optional parm. 
+ Verify that a, m and c times are updated to current time.
+
+touch multiple files with no optional parameter.
+ Check each file's times to verify time update.
+
+touch -a update access time.
+ Make sure mtime was not modified.
+   
+touch -m updates modification.
+ Make sure atime was not modified.
+
+touch -c prevents creating of file if not existing 
+ Check touch return code.
+
+.de TB   \"TAB used for titles
+.ta 31
+..
+
+.de TL   \"THIS CREATES THE LOCAL MACHINE TITLE
+.TB
+	LOCAL MACHINE
+.sp 1
+..
+
+.de TR   \"THIS CREATES THE REMOTE MACHINE TITLE
+.TB
+	REMOTE MACHINE
+.sp 1
+..
+
+.de TI   \"THIS CREATES THE TITLES AND TABS USED FOR THE RESULT TABLES
+.sp 1
+.ta 10 21 62
+	test#	description	expect response
+.sp 1
+..
+
+.H 2 "Section 1M Tests"
+.sp 1
+RESPONSIBLE ENGINEER: Jeff Elison
+.sp 1
+AUTHOR: Steve Booth
+.sp 1
+.H 3 "mount(1M)"
+The inclusion of NFS in the HP-UX kernel will require a more sophisticated
+mount command. The following test scenarios will attempt to uncover defects in
+the updated mount command.  All of these tests assume the attempted mount
+of a remote machine's file system over NFS.  The "remote" machine may in fact
+be the local machine.
+.sp 2
+.nf
+  Test mount with various combinations of read and write sizes.  Because
+  of known limitations in NFS design, these read/write sizes should be 
+  at least 1024.  For each combination, run the quick regression tests.
+  For example, try mount -o rsize=1031,wsize=1987 ... . 
+
+  The optional parameters (rsize,wsize,retry,timeo,retrans) should be
+  tested with both legal and illegal values.  Illegal values should
+  generate an EINVAL error.  Legal values should behave as defined;
+  legal/illegal values should be obtained from the manual pages.
+
+  Unrecognized options should generate an error.  Try some.
+
+  The "port=NFS_PORT" option should work. Any port specification
+  other than the actual NFS port number should hang the mount command.
+  For instance, mount -o port=2000 ... should hang.
+
+  Try to mount a machine which is currently down:
+      mount -o bg,retry=1 ...          - should give up after 1 retry
+      mount -o fg,retry=1 ...          - should give up after 1 retry
+      mount -o soft,retry=1 ...        - should give up after 1 retry
+
+      mount -o hard,retry=4,intr ...   - the hard and retry options
+                                         appear to be mutually exclusive
+                                         see if such is the case
+
+  Mount to a machine which is currently up:
+      mount -o rw ... 
+          try to read/write files; normal behavior is expected
+      mount -o ro ...
+          try to create a remote file
+      mount -o suid ...
+      mount -o nosuid ...
+          create a remote, executable file called <file>,
+              owned by user "x" (NOT root), with mode 4755,
+              which prints out the current effective user id
+          as user "y" (other than "x") try to execute <file>
+
+          the suid case should execute as "x" 
+          the nosuid case should print an error message, and then
+             execute the script as "y"
+
+  Remove /etc/exports (or equivalent) from the remote machine,
+  then try to mount it.
+
+  Make an entry in /etc/checklist for a remote system which is up,
+  and another which is down, then execute:
+      mount -a -t nfs
+
+  Disallow a node from mounting itself by allowing access only by a
+  specific client which is NOT the local node;  at the same time,
+  test that the "continuation line" feature works as advertised in
+  exports(4).
+        /etc/exports should contain (both lines start in column 1):
+           / <newline>
+           <space><space><tab><local hostname>xyzzy
+        now try to mount the local node to itself; should work
+
+  With the following in /etc/exports:
+       / group1
+  execute the following tests (see netgroups(4) for more info):
+       # test 1
+       in /etc/netgroup, have 1 line: "group1 (<hostname>,,)"
+       try to mount the local node to itself; should work
+       # test 2
+       in /etc/netgroup, have 2 lines:
+           group1 group2
+           group2 (<hostname>,,)
+       try to mount the local node to itself; should work
+       # test 3
+       in /etc/netgroup, have 1 line:
+           group1 (<hostname>,,<bogus domainname>)
+       try to mount the local node to itself; should fail
+       # test 4
+       in /etc/netgroup, have 1 line:
+           group1 (<hostname>,<any userid>,)
+       try to mount the local node to itself; should work
+       # test 5
+       in /etc/netgroup, have 1 line:
+           group1 (<hostname>,,-)
+       try to mount the local node to itself; should fail
+       # test 6
+       in /etc/netgroup, have 1 line:
+           group1 (,,)
+       try to mount the local node to itself; should work
+       # test 7
+       in /etc/netgroup, have 1 line:
+           group1 (-,,)
+       try to mount the local node to itself; should fail
+       # test 8
+       in /etc/netgroup, have 1 line:
+           group1 (,-,)
+       try to mount the local node to itself; should work
+.fi
+.sp 1
+.H 3 "umount(1M)"
+.sp 1
+.nf
+  Mount the same remote machine on several different local directories.
+  After executing "umount -h <remote nodename>", all should be
+  umounted.
+
+  Mount several remote machines onto local directories, then execute
+  umount -t nfs.
+.fi
+.sp 2
+.H 2 "Section 2 Tests"
+.sp 1
+RESPONSIBLE ENGINEER: Jim Hunter
+.sp 1
+This is the NFS functional test plan for HP-UX intrinsics (Section 2
+of the brick) for Series 300.  In describing the test cases many of these 
+sections use the form, action : expected output.
+.sp 2
+.H 3 "access(2)"
+.sp 1
+.nf
+Format: int access(path, )
+	char *path;
+	int ;
+.sp 2
+These tests use the calls: creat and chdir.
+.sp 2
+.ne 10
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+chdir LOCALDIR
+creat files and directories with read, write, execute, all, and no permissions
+ (t1(d1), t2(d2), t3(d3), t4(d4), t5(d5) respectively): none
+.TI
+	1	access file with  04	no error
+	2	access file with  02	no error
+	3	access file with  01	no error
+	4	access file with  00	no error
+	5	access directory with  04	no error
+	6	access directory with  02	no error
+	7	access directory with  01	no error
+	8	access directory with  00	no error
+.sp 2
+.ne 7
+.TR
+chdir REMOTEDIR
+creat files and directories with read, write, execute, all, and no permissions
+ (t1(d1), t2(d2), t3(d3), t4(d4), t5(d5) respectively): none
+.TI
+	9-16	same as tests 1-8	no error
+.sp 2
+.ne 8
+chdir LOCALDIR
+creat files and directories with read, write, execute, all, and no permissions
+ (t1(d1), t2(d2), t3(d3), t4(d4), t5(d5) respectively): none
+/* all of the following tests use the full remote path name */
+.TI
+	17-24	same as tests 1-8	no error
+.sp 2
+.ne 10
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	25	a component of the path not a directory	ENOTDIR
+	26	read permission is requested for null	ENOENT
+		path name
+	27	write permission is requested for null	ENOENT
+		path name
+	28	execute permission is requested for null	ENOENT
+		path name
+	29	existence requested for null path	ENOENT
+	30	the named file does not exist	ENOENT
+	31	search permission is denied on a	EACCES
+		component of the path prefix
+	32	permission bits of the filenode do not	EACCES
+		permit the requested access
+	33	path points outside of the process's	EFAULT
+		allocated address space
+.sp 2
+.ne 6
+.TR
+.TI
+	34-42	same as tests 25-33	same
+.sp 1
+.ne 8 
+/* all of the following tests use the full remote path name */
+.TI
+	43	a component of the path prefix is not	ENOTDIR
+		a directory
+	44	the named file does not exist	ENOENT
+	45	search permission is denied on a	EACCES
+		component of the path prefix
+	46	permission bits of the filenode do not	EACCES
+		permit the requested access: EACCES
+	47	path points outside of the process's	EFAULT
+		allocated address space
+.fi
+.sp 2
+.H 3 "chdir(2)"
+.sp 1
+.nf
+Format: int chdir (path)
+	char *path;
+.sp 2
+These test use chmod.
+.sp 2
+.ne 10
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	chdir to LOCALDIR	no error
+	2	chdir to parent of LOCALDIR (..)	no error
+	3	chdir to LOCALDIR			no error
+	4	chdir to subdir of LOCALDIR	no error
+	5	chdir to next subdir	no error
+	6	chdir to parent of subdir (..)	no error
+	7	chdir from LOCALDIR to REMOTE root	no error
+.sp 2
+.TR
+.ne 5
+.TI
+	8-14	same as tests 1-7	no error
+.sp 2
+.ne 9 
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TI
+	15	chdir to invalid subdir ("INVALID")      ENOENT
+	16	invalid component in local path	ENOTDIR
+	17	chdir to existing file on remote	ENOTDIR
+	18	valid directory with no "x" permission   EACCES
+	19	chdir with null path name	ENOENT
+	20	invalid full local path	ENOENT
+	21	invalid subdir (does not exist)	ENOENT
+	22	invalid full remote path	ENOENT
+	23	invalid full local path (really a file)	ENOTDIR
+	24	invalid full remote path (really a file)	ENOTDIR
+	25	full remote path name with no "x" perm	EACCES 
+	26	null name	ENOENT
+.fi
+.sp 2
+.H 3 "chmod(2)"
+.sp 1
+.nf
+Format: chmod(path, mode)
+	char *path;
+	int mode;
+.sp 2
+These tests use the library calls: chdir, creat, unlink, and fstat.
+.sp 2
+.ne 8
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TB
+	(regular file)
+.TI
+	1	chmod 4000 t1; fstat gives same back	no error
+	2	chmod 2000 t1; fstat gives same back	no error
+	3	chmod 1000 t1; fstat gives same back	no error
+	4	chmod 0400 t1; fstat gives same back	no error
+	5	chmod 0200 t1; fstat gives same back	no error
+	6	chmod 0100 t1; fstat gives same back	no error
+	7	chmod 0040 t1; fstat gives same back	no error
+	8	chmod 0020 t1; fstat gives same back	no error
+	9	chmod 0010 t1; fstat gives same back	no error
+	10	chmod 0004 t1; fstat gives same back	no error
+	11	chmod 0002 t1; fstat gives same back	no error
+	12	chmod 0001 t1; fstat gives same back	no error
+	13	chmod 0000 t1; fstat gives same back	no error
+	14	chmod 0777 t1; no "r" permissions but	no error
+		owner.
+.sp 2
+.ne 6
+.TL
+	(directory file)
+.TI
+	15-28	same as tests 1-14 except directory	no error
+.sp 2
+.ne 7
+.TR
+	(regular file)
+.TI
+	29-42	same as tests 1-14	no error
+.sp 2
+.ne 7
+.TR
+	(directory file)
+.TI
+	43-56	same as tests 1-14 except directory	no error
+.sp 2
+.ne 8
+/* remote directory with only file t1 in it */
+/* the following tests use the full remote path name */
+.sp 1
+.TB
+	(regular file)
+.TI
+	57-70	same as tests 1-14	no error
+.sp 2
+.ne 4
+.TB
+	(directory file)
+.TI
+	71-84	same as tests 1-14 except directory	no error
+.sp 2
+.ne 10
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	85	component of prefix name is not a	ENOTDIR
+		directory
+	86	named file does not exist	ENOENT
+	87	no "x" permission on a component of	EACCES
+		the path name
+	88	null path name	ENOENT
+.sp 2
+.ne 8 
+.TR
+.TI
+	89	component of prefix name is not a	ENOTDIR
+		directory
+	90	named file does not exist	ENOENT
+	91	no "x" permission on a component of the	EACCES
+		path name
+	92	chmod 0777; no "r" permission and not	EACCES
+		owner
+.sp 1
+.ne 4
+/*These all use full remote path name */
+.TI
+	93-96	same as tests 89-92	same
+.fi
+.sp 2
+.H 3 "chown(2)"
+.sp 1
+.nf
+Format: int chown(path, owner, group)
+	char *path;
+	int owner;
+	int group;
+.sp 2
+This test will only work between hp-ux nodes.  If the remote node is not
+hp-ux (e.g., Sun) then EPERM should always be returned.  A check will be made
+in the test to decide the proper response based on the remote node's type.
+.ne 9
+.H 4 "Test for responses in REMOTEDIR"
+.sp 1
+.nf
+.TR
+cd to REMOTEDIR
+.TI
+	1	chown of file	no error
+	2	chown of directory	no error
+	3	chown of file owned by somebody else	EPERM
+	4	chown of directory owned by somebody	EPERM
+		else
+	5	file does not exist	ENOENT
+	6	component of path name not a directory	ENOTDIR
+	7	no "x" permission for component of	EACCES
+		path name
+.sp 2
+.ne 4
+.H 4 "Test for responses while in LOCALDIR"
+.sp 1
+.nf
+cd to LOCALDIR
+/* using full path name */
+.TI
+	8-14	same as tests 1-7	no error
+.fi
+.sp 2
+.H 3 "chroot(2) (SUPERUSER)"
+.sp 1
+.nf
+Format: int chroot(path)
+	char *path;
+.sp 2
+.ne 9
+.H 4 "Tests for responses in REMOTEDIR"
+.sp 1
+.nf
+.TI
+	1	component of path name not a directory	ENOTDIR
+	2	chroot to nonexistent directory	ENOENT 
+	3	chroot to a remote directory	no error
+	4	chroot to LOCAL root	ENOENT
+.sp 2
+.ne 7
+.H 4 "Tests for responses in LOCALDIR"
+.sp 1
+.nf
+/* following tests use full path name */
+.TI
+	5-8	same as tests 1-4	ENOTDIR
+.fi
+.sp 2
+.H 3 "close(2)"
+.sp 1
+.nf
+Format: int close(fildes)
+	int fildes;
+.sp 2
+.ne 11
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	close file opened O_RDONLY	no error
+	2	close file opened WRONLY	no error
+	3	close "rw" file opened WRONLY	no error
+	4	close file opened RDONLY in a 	no error
+		no write directory
+.sp 2
+.ne 6
+.TR
+.TI
+	5-8	same as tests 1-4	no error
+.sp 2
+.ne 7
+.TR
+	(full path name)
+.TI
+	9-12	same as tests 1-4	no error
+.sp 2
+.ne 9
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	13	cd LOCALDIR	no error
+	14	creat file and close it twice	EBADF
+	15	close negative integer  (-1)	EBADF
+	16	close negative integer  (-11)	EBADF
+.sp 2
+.ne 7
+.TR
+.TI
+	17	cd REMOTEDIR	no error
+	18	creat file and close it twice	EBADF
+	19	close negative integer  (-1)	EBADF
+	20	close negative integer  (-11)	EBADF
+.fi
+.sp 2
+.H 3 "creat(2)"
+.sp 1
+.nf
+Format: int creat(path, mode)
+	char *path;
+	int mode;
+.sp 2
+.fi
+This creates an ordinary file or prepares to rewrite an existing file.
+These tests require commands: cd, mkdir, and ll.
+.nf
+.sp 2
+.ne 15
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+cd LOCALDIR;mkdir subdir;cd subdir: none
+/* need a directory with no entries */
+create files:
+t04000, t02000, t01000, t00400, t00200, t00100, t00040, t00020, t00010,
+t00004, t00002, t00001 with the corresponding modes 
+Then ll is executed to see if the results are correct 
+.TI
+	1	creat file with mode 04000	no error
+	2	creat file with mode 02000	no error
+	3	creat file with mode 01000	no error
+	4	creat file with mode 00400	no error
+	5	creat file with mode 00200	no error
+	6	creat file with mode 00100	no error
+	7	creat file with mode 00040	no error
+	8	creat file with mode 00020	no error
+	9	creat file with mode 00010	no error
+	10	creat file with mode 00004	no error
+	11	creat file with mode 00002	no error
+	12	creat file with mode 00001	no error
+	13	creat file with mode 00777	no error
+	14	creat file with mode 00000	????????
+.sp 2
+.ne 10
+.TR
+.sp 1
+cd REMOTEDIR;mkdir subdir;cd subdir: none
+/* need a directory with no entries */
+create files:
+t04000, t02000, t01000, t00400, t00200, t00100, t00040, t00020, t00010,
+t00004, t00002, t00001 with the corresponding modes 
+Then ll is executed to see if the results are correct 
+.TI
+	15-28	same as tests 1-14	no error
+.sp 2
+.ne 10
+cd LOCALDIR;mkdir subdir;cd subdir: none
+/* need a directory with no entries */
+create files on remote using full path name:
+t04000, t02000, t01000, t00400, t00200, t00100, t00040, t00020, t00010,
+t00004, t00002, t00001 all with full path name, with the corresponding modes 
+Then ll	 on the remote directory is executed to see if the results are correct 
+.TI
+	29-42	same as 1-14	no error
+.sp 2
+.ne 12
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+cd LOCALDIR/subdir (which is empty) 
+.TI
+	43	creat file with component of path prefix ENOTDIR
+		not a directory
+	44	creat file with component of path prefix ENOENT
+		nonexistent
+	45	creat file with no "x" permission on a	EACCES
+		component
+	46	creat file with null path name	ENOENT
+	47	creat nonexistent file in directory	EACCES
+		with no "w" permission
+	48	creat existing file with no "w"	EACCES
+		permission
+	49	creat existing file which is a directory EISDIR
+	50	creat >= MAX files	EMFILE
+	51	creat file with pointer to path being 0	EFAULT
+.sp 2
+.ne 8
+.TR
+.sp 1
+cd REMOTEDIR/subdir
+.TI
+	52-60	same as 43-51	same
+.sp 2
+.ne 10
+cd LOCALDIR/subdir/subdir;creat files on remote using full path name 
+.TI
+	61	creat file with component of path prefix ENOTDIR
+		not a directory
+	62	creat file with component of path prefix ENOENT
+		nonexistent
+	63	creat file with no "x" permission on a	EACCES
+		component
+	64	creat file with null path name	ENOENT
+	65	creat nonexistent file in directory	EACCES
+		with no "w" permission
+	66	creat existing file with no "w"	EACCES
+		permission
+	67	creat existing file which is a directory EISDIR
+	68	creat >= MAX files	EMFILE
+.fi
+.sp 2
+.H 3 "dup(2)"
+.sp 1
+.nf
+Format: int dup(fildes)
+	int fildes;
+.sp 2
+The required library calls are: creat, fstat, and chdir 
+.sp 2
+.H 4 "Tests for correct response"
+.ne 8
+.sp 1
+.nf
+.TL
+cd LOCALDIR
+.TI 
+	1	creat file;dup,compare file descriptors; no error
+		compare fields by fstat
+.sp 2
+.ne 9
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	2	creat file;dup,compare file descriptors;	no error
+		compare fields by fstat
+	3	creat file(using the full remote	no error
+		path name); dup (using the full remote 
+		path name), compare the file descriptors;
+		same fields by fstat
+.sp 2
+.ne 7
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TI
+	4	creat >= MAX files	EMFILE
+	5	use negative file descriptor (-1)	EBADF
+.fi
+.sp 2
+.H 3 "exec(2)"
+.sp 1
+.nf
+Formats: int execl (path, arg0, arg1, ...,argn, 0)
+         char *path, *arg0, *arg1, ..., *argn;
+
+         int execv (path, argv)
+         char *path, *argv[];
+
+         int execle (path, arg0, arg1, ...,argn, 0, envp)
+         char *path, *arg0, *arg1, ..., *argn, *envp[];
+
+         int execve (path, argv, envp)
+         char *path, *argv[], *envp[];
+
+         int execlp (path, arg0, arg1, ...,argn, 0)
+         char *path, *arg0, *arg1, ..., *argn;
+
+         int execvp (path, argv)
+         char *path, *argv[];
+.sp 2
+.ne 12
+.H 4 "Tests for correct response"
+.sp 1
+.fi
+These tests are chained together. Each test program executes itself a
+certain number of times and then the next one 
+.sp 1
+.nf
+.TL
+cd LOCALDIR
+.TI
+	1-4	execl executed 4 times	no error
+	5-8	execv executed 4 times	no error
+	9-12	execle executed 4 times	no error
+	13-16	execve executed 4 times	no error
+	17-20	execlp executed 4 times	no error
+	21-24	execvp executed 4 times	no error
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	25-28	execl executed 4 times	no error
+	29-32	execv executed 4 times	no error
+	33-36	execle executed 4 times	no error
+	37-40	execve executed 4 times	no error
+	41-44	execlp executed 4 times	no error
+	45-48	execvp executed 4 times	no error
+.sp 1
+        49-54	test setuid by mounting remote file system	no error
+		with setuid option then have each exec type
+		access a file that will require the setuid 
+		capability.
+.sp 2
+cd LOCALDIR; execute from remote dir using full path name
+.TI
+	55-84   same as tests 25-54	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1 
+.TL 
+.sp 1 
+cd LOCALDIR
+Each error condition is produced once for execl, execv, execle, execve, 
+execlp, execvp
+.nf
+.TI
+	73-78	component of path prefix does not exist	ENOENT
+	79-84	component of path prefix not a directory	ENOTDIR
+	85-90	search permission is denied for a	EACCES
+		directory in path prefix
+	91-96	not an ordinary file	EACCES
+	97-102	not executable	EACCES
+	103-106	file does not exist	ENOENT
+        107-112	test setuid by mounting remote file system	EACCES
+		WITHOUT setuid option then have each exec type
+		access a file that will require the setuid 
+		capability.
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.fi
+Each error condition is produced once for execl, execv, execle, execve, 
+execlp, execvp
+.nf
+.TI
+	113-152	same as tests 73-112	same
+.fi
+.sp 2
+.H 3 "fchmod(2)"
+.sp 1
+.nf
+Format: fchmod(fd, mode)
+	int fd, mode;
+.sp 2
+This test will only work between two hp-ux nodes.  The tests will always
+fail with EPERM to a non hp-ux machine (e.g., Sun).  A check will be made
+within the tests to determine the remote node's type in order to test for
+the proper results.
+.TR
+.sp 1
+cd REMOTEDIR 
+.TI
+	1	fchmod of a file to 4000	no error
+	2	fchmod of a file to 2000	no error
+	3	fchmod of a file to 1000	no error
+	4	fchmod of a file to 0400	no error
+	5	fchmod of a file to 0200	no error
+	6	fchmod of a file to 0100	no error
+	7	fchmod of a file to 0040	no error
+	8	fchmod of a file to 0020	no error
+	9	fchmod of a file to 0010	no error
+	10	fchmod of a file to 0004	no error
+	11	fchmod of a file to 0002	no error
+	12	fchmod of a file to 0001	no error
+	13	fchmod of a file to 0000	no error
+.sp 2
+.TI
+	14-26	same as tests 1-13 expect directory	no error
+.sp 1
+cd LOCALDIR; user full path name to remote
+.TI
+	26-38	same as tests 1-13	no error
+	38-60	same as tests 1-13 except directory	no error
+.fi
+.sp 2
+.H 3 "fchown(2)"
+.sp 1
+.nf
+Format: int fchown(fd, owner, group)
+	int fildes, group;
+.sp 2
+This test will only work between hp-ux nodes.  If the remote node is not
+hp-ux (e.g., Sun) then EPERM should always be returned.  A check will be made
+in the test to decide the proper response based on the remote node's type.
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	1	fchown of a file (user 100)	no error
+	2	fchown of a directory (user 100)	no error
+	3	fchown of a file not owned	EPERM
+	4	fchown of a directory not owned	EPERM
+.sp 2
+cd LOCALDIR; fopen using full path name to remote
+.TI
+	5-8	same as tests 1-4	same
+.fi
+.sp 2
+.H 3 "fcntl(2)"
+.sp 1
+.nf
+Format: int fcntl(fildes, cmd, arg)
+	int fildes, cmd, arg;
+.sp 2
+These tests use the calls: open.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1-6	F_DUPFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	7-12	F_GETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	13-18	F_SETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	19-24	F_GETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	25-30	F_SETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+.sp 2
+.TR
+.TI
+	31-36	F_DUPFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	37-42	F_GETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	43-48	F_SETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	49-54	F_GETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	54-60	F_SETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+.sp 2
+/* all of the following tests use the full remote path name */
+.TI
+	61-66	F_DUPFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	67-72	F_GETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	73-78	F_SETFD for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	79-84	F_GETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+	85-90	F_SETFL for files opened by:	no error
+		creat, open, dup, fcntl, pipe(both)
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	91	F_DUPFD invalid file descriptor (-1)	EBADF
+	92	F_DUPFD invalid file descriptor (21)	EBADF
+	93	F_DUPFD and 20 files are already open	EMFILE
+	94	F_DUPFD and arg is negative (-1)	EINVAL
+	95	F_DUPFD and arg is negative (-1001)	EINVAL
+	96	F_DUPFD and arg is invalid 	EINVAL
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	97-102	same as tests 91-96	same
+.sp 1
+/* all of the following tests use the full remote path name */
+.sp 1
+cd LOCALDIR 
+.TI
+	103-108	same as tests 91-96	same
+.fi
+.sp 2
+.H 3 "fstat(2)"
+.sp 1
+.nf
+Format: int fstat(fildes, buf)
+	int fildes;
+	struct stat *buf;
+.sp 2
+.ne 9
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	1	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 1
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	2	check stats of one file (could be	no error
+        	modified by touch, etc.)
+.sp 1
+/* all of the following tests use the full remote path name */
+.sp 1
+cd LOCALDIR
+.TI
+	3	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	4	fildes not a valid open file descriptor	EBADF
+	5	buf points to an invalid address	EFAULT
+.sp 2
+.TR
+.TI
+	6	fildes not a valid open file descriptor	EBADF
+	7	buf points to an invalid address	EFAULT
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	8	buf points to an invalid address	EFAULT
+.fi
+.sp 2
+.H 3 "ftruncate(2)"
+.sp 1
+.nf
+Format: ftruncate(fd, length)
+	int fd, length;
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.sp 1
+These tests make files of various sizes and then truncate them
+.TI
+	1	ftruncate 5 files to size 1	no error
+	2	ftruncate 5 files to size 100	no error
+	3	ftruncate 5 files to size 1000	no error
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+These tests make files of various sizes and then truncate them
+.TI
+	4-6	same as tests 1-3	no error
+.sp 1
+cd LOCALDIR; use full path name to remote
+These tests make files of various sizes and then truncate them
+.TI
+	7-9	same as tests 1-3	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	1	bad file descriptor	EBADF
+	2	bad address	EFAULT
+.sp 2
+.TR
+.TI
+	1	bad file descriptor	EBADF
+	2	bad address	EFAULT
+.fi
+.sp 2
+.H 3 "ioctl(2)"
+.sp 1
+.nf
+Format: ioctl(fildes, request, arg)
+	int fildes, request;
+.sp 2
+This test should always fail over nfs.
+.sp 1
+.nf
+IMPLEMENT TIME:  1.0  md 
+.fi
+.sp 2
+.H 3 "link(2)"
+.sp 1
+.nf
+Format: int link(path1,path2)
+	char *path1, path2;
+.sp 2
+The required library calls are: creat,chdir.
+.sp 2
+.H 4 "Tests for correct response non SUPER user"
+.sp 1
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	1	link file t2 to file t1	no error
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	2	link file t2 to file t1	no error
+.sp 1
+.ne 4
+cd LOCALDIR; use full path names to remote
+.TI
+	3	link file t2 to file t1	no error
+.sp 2
+.H 4 "Tests for error response for non SUPER user"
+.sp 1
+.nf
+.TL
+.sp 1
+/* for the following try to link t2 to file t1 with errors as follows */
+.TI
+	4	component of path1 is not a directory	ENOTDIR
+	5	component of path2 is not a directory	ENOTDIR
+	6	component of path1 does not exist	ENOENT
+	7	component of path2 does not exist	ENOENT
+	8	component of path1 denies "x" permission EACCES
+	9	component of path2 denies "x" permission EACCES
+	10	file of path1 does not exist	ENOENT
+	11	file of path2 exists	EEXIST
+	12	path2 points to a null path name	ENOENT
+	13	The requested link requires writing in	EACCES
+		a directory with a mode that denies write 
+		permission
+	14	path1 points outside of the process's	EFAULT
+		allocated address space
+	15	path2 points outside of the process's	EFAULT
+		allocated address space
+	16	path1 is null	ENOENT
+	17	path2 is null	ENOENT
+.sp 2
+.TR
+.sp 1
+/* for the following try to link t2 to file t1 with errors as follows */
+.TI
+	18-31	same as tests 4-17	same
+	32	path1 be local machine and path2 be	EXDEV
+		remote
+	33	path2 be local machine and path1 be	EXDEV
+		remote
+.sp 1
+/* do the following with full path name from local machine */
+.TI
+	34-47	same as tests 4-17	same
+	48	path1 be local machine and path2 be	EXDEV
+		remote
+	49	path2 be local machine and path1 be	EXDEV
+		remote
+.fi
+.sp 2
+.H 3 "lockf(2)"
+.sp 1
+.nf
+Format: lockf(fildes, function, size)
+	int fildes, function;
+.sp 2
+This should always return an error for remote files.
+.sp 1
+.nf
+IMPLEMENT TIME:  1.0  md 
+.fi
+.sp 2
+.H 3 "lseek(2)"
+.sp 1
+.nf
+Format: long lseek(fildes, offset, whence)
+	int fildes;
+	long offset;
+	int whence;
+.sp 2
+The required library calls are: creat, open, dup.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	open to read ;size 0;whence 0	no error
+	2	open to read ;size 1;whence 0	no error
+	3	open to read ;size 2;whence 0	no error
+	4	open to read ;size 511 ;whence 0	no error
+	5	open to read ;size 512 ;whence 0	no error
+	6	open to read ;size 513 ;whence 0	no error
+	7	open to read ;size 1023;whence 0	no error
+	8	open to read ;size 1024;whence 0	no error
+	9	open to read ;size 1025;whence 0	no error
+	10	open to read ;size 9999;whence 0	no error
+	11-20	repeat tests 1-10 with whence 1	no error
+	21-30	repeat tests 1-10 with whence 2	no error
+	31-60	repeat tests 1-30 with open for write	no error
+	61	mix getdirentries and lseek to read	no error
+		a directory
+	62	open for write; seek way out; close;	no error
+		open for read; read zeros	
+.sp 2
+.TR
+.sp 1
+chdir REMOTEDIR
+.TI
+	63-124	same as tests 1-62	no error
+.sp 1
+/* do the following tests using the full remote path name */
+cd LOCALDIR
+.TI
+	125-186	same as tests 1-62	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+	(open for read)
+.TI
+	187	fildes not an open file descriptor	EBADF
+	188	fildes is associated with a pipe or	ESPIPE
+		FIFO
+	189	Whence is not 0, 1, or 2:	EINVAL
+		EINVAL and SIGSYS signal
+	190	Whence is -1 EINVAL and SIGSYS signal	EINVAL
+	191	Whence is 0 and offset -1	EINVAL
+	192	Whence is 0 and offset -100	EINVAL
+	193	Whence is 1 and offset -100	EINVAL
+	194	Whence is 2 and offset -100	EINVAL
+	195-202	same as tests 187-194 except open	same
+		for write
+.sp 2
+.TR
+.TI
+	203-216	same as tests 187-202	same
+		(without test 182 and test 189)
+.sp 1
+/* for the following tests use the full remote path name */
+.TI
+	217-230	same as tests 203-216	same
+.fi
+.sp 2
+.H 3 "lstat(2)"
+.sp 1
+.nf
+Format: int lstat(path, buf)
+	char *path;
+	struct stat *buf;
+.sp 2
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	1	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 1
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	2	check stats of one file (could be	no error
+		modified by touch, etc.)
+	3	set up symlink to file; lstat symlink;	no error
+		should be different then original
+		file and size should be equal to 
+		number of characters in path name.
+.sp 1
+/* all of the following tests use the full remote path name */
+.sp 1
+cd LOCALDIR
+.TI
+	4	check stats of one file (could be	no error
+		modified by touch, etc.)
+	5	set up symlink to file; lstat symlink;	no error
+		should be different then original
+		file and size should be equal to 
+		number of characters in path name.
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	4	component of path not a directory	ENOTDIR
+	5	named file does not exist	ENOENT
+	6	search permission denied for component	EACCES
+		of path name
+	7	path points to invalid address	EFAULT
+	8	path is null	ENOENT
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	9-13	same as tests 4-8	same
+.sp 2
+cd LOCALDIR; use full path names to remote
+.TI
+	14-17	same as tests 4-8	same
+.fi
+.sp 2
+.H 3 "open(2)"
+.sp 1
+.nf
+Format: int open(path,oblag[,mode])
+	char *path;
+	int oflag, mode;
+.sp 2
+The required library calls are:	chdir and fstat.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	open file for reading only;check status	no error
+	2	open file for writing only;check status	no error
+	3	open file for reading and writing;	no error
+		check status
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	4-6	same as tests 1-3	no error
+	7	open file with append mode from two	no error
+		processes.  Write to file from both.  
+		Should not get any errors except file 
+		contents will be unpredictable
+.sp 1
+/* use full remote path name for the following */
+.TI
+	8-11	same as tests 4-7	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	10	component of path prefix is not a	ENOTDIR
+		directory
+	11	O_CREAT is not set and the named file	ENOENT
+		does not exist: ENOENT
+	12	a component of the path prefix denies	EACCES
+		the search permission
+	13	oflag permission is denied for the named EACCES
+		file
+	14	The named file is a directory and oflag	EISDIR
+		is write or read/write
+	15	20 file descriptors are currently open	EMFILE
+	16	the named file is a character special	ENXIO
+		or block special file, and the device
+		associated with this special file does 
+		not exist
+	17	Path points outside the process's	EFAULT
+		allocated address space
+	18	E_CREAT and O_EXCL are set, and the	EEXIST
+		named file exists
+	19	O_NDELAY is set, the named file is a	ENXIO
+		FIFO, O_WRONLY is set, and no process
+		has the file open for reading
+	20	Path is null	ENOENT
+	21	oflag specifies both O_WRONLY and O_RDWR EINVAL
+.sp 2
+.TR
+.sp 1
+chdir REMOTEDIR
+.TI
+	22-33	same as tests 10-21	same
+        34	open file on remote file system, remove	EBADF
+		file from remote node and try to access
+		file 
+		
+.sp 1
+/* use the full remote path name for all the following */
+.TI
+	35-47	same as tests 22-33	same
+.fi
+.sp 2
+.H 3 "mkdir(2)"
+.sp 1
+.nf
+Format: mkdir(path, mode)
+	char *path;
+	int mode;
+.sp 2
+Will be ported from SSO file system tests.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md 
+.fi
+.sp 2
+.H 3 "mount(2)"
+.sp 1
+.nf
+Format: int mount(spec, dir, rwflag)
+	char *spec, *dir;
+	int rwflag;
+.sp 2
+This will be ported from the SSO file system tests.
+.nf
+IMPLEMENT TIME:  1.0  md 
+.fi
+.sp 2
+.H 3 "prealloc(2)"
+.sp 1
+.nf
+Format: int prealloc(fildes, size)
+	int fildes;
+	int size;
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	1	prealloc 10	no error
+	2	prealloc a non empty file	ENOTEMPTY
+	3	prealloc too much (-1)	EFBIG
+.sp 2
+cd LOCALDIR; use full path names to remote
+.TI
+	4-6	same as tests 1-3	same
+.fi
+.sp 2
+.H 3 "read(2)"
+.sp 1
+.nf
+Format: int read(fildes, buf, nbyte)
+	int fildes;
+	char *buf;
+	unsigned nbyte;
+.sp 2
+These tests use the calls: chdir, creat, and open.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.sp 1
+cd LOCALDIR
+.TI
+	1	read 0 bytes from 0 size file	no error
+	2	read 1 byte from 1 byte size file	no error
+	3	read 2 bytes from 2 byte size file	no error
+	4	read 511 bytes from 511 byte size file	no error
+	5	read 512 bytes from 512 byte size file	no error
+	6	read 513 bytes from 513 byte size file	no error
+	7	read 1023 bytes from 1023 byte size file no error
+	8	read 1024 bytes from 1024 byte size file no error
+	9	read 1025 bytes from 1025 byte size file no error
+	10	read 9999 bytes from 9999 byte size file no error
+	11-100	same as 1-10 repeated	no error
+	101	read 0 byte file 1 byte at a time	no error
+	102	read 1 byte file 1 byte at a time	no error
+	103	read 2 byte file 1 byte at a time	no error
+	104	read 511 byte file 1 byte at a time	no error
+	105	read 512 byte file 1 byte at a time	no error
+	106	read 513 byte file 1 byte at a time	no error
+	107	read 1023 byte file 1 byte at a time	no error
+	108	read 1024 byte file 1 byte at a time	no error
+	109	read 1025 byte file 1 byte at a time	no error
+	110	read 9999 byte file 1 byte at a time	no error
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	111-220	same as tests 1-110	no error
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	221-330	same as tests 1-110	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI 
+	331	fildes is not a valid file descriptor	EBADF
+		by invalid file descriptor
+	332	fildes is not a valid file descriptor	EBADF
+		by only being for writing
+	333	buf points outside the allocated	EFAULT
+		address space: EFAULT
+.sp 2
+.TR
+.sp 1
+chdir REMOTEDIR
+.TI
+	334-336	same as tests 331-333	same
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	337-339	same as tests 331-333	same
+.fi
+.sp 2
+.H 3 "rmdir(2)"
+.sp 1
+.nf
+Format: rmdir(path)
+	char *path;
+.sp 2
+Ported from SSO file system tests.
+.nf
+IMPLEMENT TIME:  0.25 md 
+.fi
+.sp 2
+.H 3 "select(2)"
+.sp 1
+.nf
+Format: int select(nfds, readfds, writefds, execptfds, timeout)
+	int nfds, *readfds, *writefds, *execptfds;
+	struct timeval *timeout;
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	1	select on file "t1"	no error
+.sp 1
+/* use full path name from LOCALDIR        */
+.TI
+	2	select on file "t1"	no error
+.fi
+.sp 1
+Also ported SSO file system test.
+.nf
+IMPLEMENT TIME:  0.25 md 
+.fi
+.sp 2
+.H 3 "stat(2)"
+.sp 1
+.nf
+Format: int stat(path, buf)
+	char *path;
+	struct stat *buf;
+.sp 2
+These tests use the call: chdir.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 2
+.TR
+.TI
+	2	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	3	check stats of one file (could be	no error
+		modified by touch, etc.)
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	4	a component of the path prefix is not	ENOTDIR
+		a directory
+	5	the named file does not exist	ENOENT
+	6	search permission is denied for a	EACCES
+		component of the path prefix
+	7	Path points to an invalid address	EFAULT
+	8	Path is null	ENOENT
+.sp 2
+.TR
+.sp 1
+chdir REMOTEDIR
+.TI
+	9-13	same as tests 4-8	same
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	14-17	same as tests 4-8	same
+.fi
+.sp 2
+.H 3 "truncate(2)"
+.sp 1
+.nf
+Format: truncate(path, length)
+	char *path;
+	int length;
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+These tests are the same as those of ftruncate.
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TI
+	1	path component not a directory (local)	ENOTDIR
+	2	path component not a directory (remote)	ENOTDIR
+	3	named file does not exist (local)	ENOENT
+	4	named file does not exist (remote)	ENOENT
+	5	component of path denies permission	EACCES
+		(local)
+	6	component of path denies permission	EACCES
+		(remote)
+	7	name file is a directory (local)	EISDIR
+	8	path name too long (local)	ENOENT
+	9	path points out of process's address	EFAULT
+		space (local)
+	10	name file is a directory (remote)	EISDIR
+	11	path name too long (remote)	ENOENT
+	12	path points out of process's address	EFAULT
+		space (remote)
+.sp 2
+cd REMOTEDIR
+.TI
+	1	path component not a directory	ENOTDIR
+	2	named file does not exist	ENOENT
+	3	component of path denies permission	EACCES
+	4	name file is a directory	EISDIR
+	5	path name too long	ENOENT
+	6	path points out of process's address	EFAULT
+		space          
+.fi
+.sp 2
+.H 3 "unlink(2)"
+.sp 1
+.nf
+Format: int unlink(path)
+	char *path;
+.sp 2
+These tests use the commands chdir, creat, and link.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1-40	creat then unlink the file;no file left	no error
+	41-80	creat,dup the file then unlink	no error
+.sp 2
+.TR
+.sp 1
+cd REMOTEDIR
+.TI
+	81-120	same as 1-80	no error
+.sp 1
+cd LOCALDIR; use full path name to remote
+.TI
+	121-200	same as 1-80	no error 
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	201	unlink file with component of path	ENOTDIR
+		prefix is not a directory
+	202	unlink file with component of path	ENOENT
+		prefix is nonexistent
+	203	unlink file with no "x" permission on	EACCES
+		a component
+	204	unlink existing file with no "w"	EACCES
+		permission in parent directory
+	205	unlink file with null path name	ENOENT
+	206	unlink file with path pointing outside	EFAULT
+		of process space
+.sp 2
+.TR
+.TI
+	207-202	same as tests 201-206	same
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	203-208	same as tests 121-126	same
+.fi
+.sp 2
+.H 3 "write(2)"
+.sp 1
+.nf
+Format: int write(fildes, buf, nbyte)
+	int fildes;
+	char *buf;
+	unsigned nbyte;
+.sp 2
+These tests use the calls: creat, chdir, close, and open.
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+.nf
+.TL
+.TI
+	1	write 0 bytes	no error
+	2	write 1 bytes	no error
+	3	write 2 bytes	no error
+	4	write 511 bytes	no error
+	5	write 512 bytes	no error
+	6	write 513 bytes	no error
+	7	write 1023 bytes	no error
+	8	write 1024 bytes	no error
+	9	write 1025 bytes	no error
+	10	write 9999 bytes	no error
+	11-100	repeat tests 1-10	no error
+.sp 2
+.TR
+.TI
+	101-200	same as tests 1-100	no error
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	201-300	same as tests 1-100	no error
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+.nf
+.TL
+.TI
+	301	fildes is not a valued file descriptor	EBADF
+		open for writing by only for reading
+	302	fildes is not a valued file descriptor	EBADF
+		open for writing by invalid file 
+		descriptor
+	303	write a huge amount of data	EFBIG
+.sp 2
+.TR
+.TI
+	303-306	same as tests 301-303	same
+.sp 1
+/* all of the following tests use the full remote path name */
+.TI
+	307-309	same as tests 301-303	same
+.nf
+.H 2 "Section 3 Tests"
+
+.sp 2
+.H 3 "The library call 'fclose'"
+.sp 1
+.nf
+Format: int fclose(stream)
+	FILE *stream;
+.sp 2
+
+These tests use the calls:chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a local file: none
+fclose the file: none
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file: none
+fclose the file: none
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a remote file: none
+fclose the file: none
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+incorrect stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+incorrect stream: EOF returned
+
+.sp 2
+.H 3 "The library call 'fdopen'(3S)"
+.sp 1
+.nf
+Format: FILE *fopen(fildes, type)
+	int fildes;
+	char *type;
+.sp 2
+
+These tests use the calls: chdir.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fdopen valid local file: 0 return
+   - read only
+   - write only
+   - read and write
+
+REMOTE MACHINE
+chdir remote home directory: none
+fdopen valid file: 0 return
+   - read only
+   - write only
+   - read and write
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fdopen valid remote file: 0 return
+   - read only
+   - write only
+   - read and write
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+
+.sp 2
+.H 3 "The library call 'fflush'(3S)"
+.sp 1
+.nf
+Format: int fflush(stream)
+	FILE *stream;
+.sp 2
+
+These tests use the calls: fopen and fgetc.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a local file: none
+fgetc a char: none
+fflush the file: none
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file: none
+fgetc a char: none
+fflush the file: none
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a remote file: none
+fgetc a char: none
+fflush the file: none
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+incorrect stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+incorrect stream: EOF returned
+
+.sp 2
+.H 3 "The library call 'fgetc'(3S)"
+.sp 1
+.nf
+Format: int getc(stream)
+	FILE *stream;
+.sp 2
+
+These tests use the calls: chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file and fgetc it and see if it got them all: same
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file and fgetc it and see if it got them all: same
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file and fgetc it and see if it got them all: same
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+invalid stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+invalid stream: EOF returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+invalid stream: EOF returned
+
+.sp 2
+.H 3 "The library call 'fopen'(3)"
+.sp 1
+.nf
+Format: FILE *fopen(file-name, type)
+	char *file-name, *type;
+.sp 2
+
+These tests use the calls: chdir.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen valid local file: 0 return
+   - read only
+   - write only
+   - read and write
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen valid file: 0 return
+   - read only
+   - write only
+   - read and write
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen valid remote file: 0 return
+   - read only
+   - write only
+   - read and write
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+fopen file with component of path prefix is not a directory
+O_CREAT is not set and the named file does not exist
+a component of the path prefix denies search permission
+oflag permission denied
+the named file is a directory and the oflag is write
+the named file is a directory and the oflag is read/write
+
+REMOTE MACHINE
+chdir remote home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+fopen file with component of path prefix is not a directory
+O_CREAT is not set and the named file does not exist
+a component of the path prefix denies search permission
+oflag permission denied
+the named file is a directory and the oflag is write
+the named file is a directory and the oflag is read/write
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+too many open files: NULL returned
+incorrect type: NULL returned
+fopen file with component of path prefix is not a directory
+O_CREAT is not set and the named file does not exist
+a component of the path prefix denies search permission
+oflag permission denied
+the named file is a directory and the oflag is write
+the named file is a directory and the oflag is read/write
+
+.sp 2
+.H 3 "The library call 'fread'(3)"
+.sp 1
+.nf
+Format: int fread((char *) ptr, sizeof(* ptr),nitems,stream)
+	FILE *stream; 
+.sp 2
+
+These tests use the calls: chdir, fopen, and fclose.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+open a file: none
+fread stuff and see if it is right: none
+
+REMOTE MACHINE
+chdir remote home directory: none
+open a file: none
+fread stuff and see if it is right: none
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+open a file: none
+fread stuff and see if it is right: none
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+open a file: none
+use invalid stream: null returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+open a file: none
+use invalid stream: null returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+open a file: none
+use invalid stream: null returned
+
+.sp 2
+.H 3 "The library call 'freopen'(3)"
+.sp 1
+.nf
+Format: FILE *freopen(file-name, type, stream)
+	char *file-name, *type;
+	FILE *stream;
+.sp 2
+
+These tests use the calls: chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen valid local file: 0 return
+freopen valid local file: 0 return
+   - read only
+   - write only
+   - read + write
+ 
+REMOTE MACHINE
+chdir remote home directory: none
+fopen valid file: 0 return
+freopen valid file: 0 return
+   - read only
+   - write only
+   - read + write
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen valid remote file: 0 return
+freopen valid remote file: 0 return
+   - read only
+   - write only
+   - read + write
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+   /* This condition is tested under fdopen */
+   too many open files: NULL returned
+incorrect type: NULL returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+   /* This condition is tested under fdopen */
+   too many open files: NULL returned
+incorrect type: NULL returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+   /* This condition is tested under fdopen */
+   too many open files: NULL returned
+incorrect type: NULL returned
+
+.sp 2
+.H 3 "The library call 'fwrite'"
+.sp 1
+.nf
+Format: int fwrite((char *) ptr, sizeof(* ptr),nitems,stream)
+	FILE *stream; 
+.sp 2
+
+These tests use the calls: chdir, fopen, and fclose.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file: none
+fwrite stuff: none
+fclose and see if the file is the same: same
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file: none
+fwrite stuff: none
+fclose and see if the file is the same: same
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file: none
+fwrite stuff: none
+fclose and see if the file is the same: same
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+/* This test really does no error testing.  The following conditions are all
+   tested under section 2 write. */
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file: none
+fwrite lots of stuff at once: none
+fclose and see if the file is the same: same
+use invalid stream: null returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file: none
+fwrite lots of stuff at once: none
+fclose and see if the file is the same: same
+use invalid stream: null returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file: none
+fwrite lots of stuff at once: none
+fclose and see if the file is the same: same
+use invalid stream: null returned
+
+.sp 2
+.H 3 "The library call 'getc'(3S)"
+.sp 1
+.nf
+Format: int getc(stream)
+	FILE *stream;
+.sp 2
+
+These tests use the calls: chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file and getc it and see if it got them all: same
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file and getc it and see if it got them all: same
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file and getc it and see if it got them all: same
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+invalid stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+invalid stream: EOF returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+invalid stream: EOF returned
+
+.sp 2
+.H 3 "The library call 'getchar'(3S)"
+.sp 1
+.nf
+Format: int getchar()
+.sp 2
+
+These tests use the calls: chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file  as stdin and getchar it and see if it got them all: same
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file and getchar it and see if it got them all: same
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file and getchar it and see if it got them all: same
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+/* This test really does no error testing.  The following conditions are all
+   tested under getc. */
+LOCAL MACHINE
+chdir local home directory: none
+invalid stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+invalid stream: EOF returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+invalid stream: EOF returned
+
+.sp 2
+.H 3 "The library call 'getw'(3S)"
+.sp 1
+.nf
+Format: int getw(stream)
+	FILE *stream;
+.sp 2
+
+These tests use the calls: chdir and fopen.
+
+.sp 2
+.H 4 "Tests for correct response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+fopen a file and getw it and see if it got them all: same
+
+REMOTE MACHINE
+chdir remote home directory: none
+fopen a file and getw it and see if it got them all: same
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+fopen a file and getw it and see if it got them all: same
+
+.sp 2
+.H 4 "Tests for error response"
+.sp 1
+
+.nf
+LOCAL MACHINE
+chdir local home directory: none
+invalid stream: EOF returned
+
+REMOTE MACHINE
+chdir remote home directory: none
+invalid stream: EOF returned
+
+/* all of the following tests use the full remote pathname */
+chdir local home directory: none
+invalid stream: EOF returned

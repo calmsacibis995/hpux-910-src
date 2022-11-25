@@ -1,0 +1,70 @@
+$set 1
+1 Internal error trying to talk to %s.
+2 %s has been called.
+3 %s (v1 ypserv) sent an old-style request.
+4 nis server not registered at %s.
+5 RPC error to %s:  
+6 Local resource allocation failure - can't talk to %s.
+7 System error talking to %s:  
+8 Map successfully transferred.
+9 Transfer not done:  master's version isn't newer.
+10 Failed - ypxfr can't find the map in the server's NIS domain.
+11 Failed - domain isn't supported.
+12 Failed - local resource allocation failure.
+13 Failed - ypxfr had an RPC failure
+14 Failed - ypxfr couldn't get the map master's address.
+15 Failed - nis server or map format error.
+16 Failed - args to ypxfr were bad.
+17 Failed - dbm operation on map failed.
+18 Failed - file I/O operation on map failed
+19 Failed - map version skew during transfer.
+20 Map successfully transferred, but ypxfr couldn't send Clear map to ypserv 
+21 Failed - no local order number in map - use -f flag to ypxfr.
+22 Failed - ypxfr internal error.
+23 Failed - Transfer request refused.
+24 RPC success
+25 RPC Can't encode args
+26 RPC Can't decode results
+27 RPC Can't send
+28 RPC Can't recv
+29 NIS server registered, but does not respond
+30 RPC version mismatch
+31 RPC auth error
+32 RPC remote program unavailable
+33 RPC program mismatch
+34 RPC unknown procedure
+35 RPC Can't decode args
+36 unknown host
+37 portmap failure (host is down?)
+38 RPC prog not registered
+39 RPC system error
+41 Can't get domainname from system call.\n
+42 The domainname hasn't been set on this machine.\n
+43 Finding NIS servers:
+44 Can't find a nis server for domain %1$s.  Reason:  %2$s.\n
+45 Can't build server list from map "ypservers".  Reason:  %s.\n
+46  %s
+47 \n
+48 Can't build server list from map "ypservers".  Reason:  %s.\n
+49 \n
+50 yppush malloc failure
+51 Can't get an address for server %s.\n
+52 yppush gettimeofday failure
+53 Can't set up as a udp server.\n
+54 Can't set up transient callback server.\n
+55 main loop select
+56 Invalid timeout in main loop select.\n
+57 No response from ypxfr on %s\n
+58 Can't reply to rpc call.\n
+59 \n
+60 yppush: Bad server state value %d.\n
+61 Status received from ypxfr on %1$s:\n\t%2$s\n
+62 yppush listener: Garbage transaction status value from ypxfr on %s.\n
+63 Bad error code passed to rpcerr_msg: %d.\n
+64 Can't reply to rpc call.\n
+65 Error talking to %s: 
+66 \n
+67 V1 Error talking to %s: 
+68 \n
+69 Usage:  yppush [-d domain] [-v] mapname\n
+70 yppush:  NIS domain name exceeds %d characters\n

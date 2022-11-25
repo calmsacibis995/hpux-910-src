@@ -1,0 +1,77 @@
+#
+#   @(#) $Revision: 64.2 $
+# 
+#  (c) Copyright Hewlett-Packard Company, 1986, 1987, 1988, 1989
+#  (c) Copyright Yokogawa-Hewlett-Packard Ltd., 1988, 1989
+#
+#  Acknowledgment is made to Dave Taylor for his creation of
+#  the original version of this software.
+# 
+# 
+#  Makefile for the Elm system utilities to make PFA objects.
+#
+
+
+SHELL=/bin/sh
+
+DEFINE= -DPFA
+LIB2  = 
+
+CFLAGS= -I../hdrs -Wc,-p
+# CFLAGS= -O -I../hdrs
+# CFLAGS= -g -I../hdrs
+CC=	/bin/cc
+RM= 	/bin/rm -f
+ECHO=  /bin/echo
+
+OBJS=	../bin/elmalias ../bin/mailfrom \
+	../bin/newmail ../bin/readmail  
+
+all: ${OBJS}
+
+../bin/elmalias:  elmalias.c checkalias.o listalias.o           \
+	../src/validname.o ../src/getopt.o ../src/opt_utils.o ../src/string2.o
+	${CC} ${CFLAGS} ${DEFINE} elmalias.c ../src/validname.o \
+	../src/opt_utils.o ../src/getopt.o listalias.o          \
+	checkalias.o ../src/string2.o -o ../bin/elmalias.pfa
+
+../bin/mailfrom: mailfrom.c expand.o ../src/opt_utils.o         \
+	../src/string2.o ../src/getopt.o
+	${CC} ${CFLAGS} ${DEFINE} mailfrom.c ../src/opt_utils.o \
+	../src/string2.o ../src/getopt.o expand.o -o ../bin/mailfrom.pfa
+
+../bin/newmail: newmail.c expand.o ../src/string2.o
+	${CC} ${CFLAGS} ${DEFINE} newmail.c expand.o ../src/string2.o \
+	-o ../bin/newmail.pfa
+
+../bin/readmail: readmail.c expand.o ../src/getopt.o 		\
+	../src/opt_utils.o ../src/string2.o
+	${CC} ${CFLAGS} ${DEFINE} readmail.c ../src/getopt.o    \
+	../src/string2.o ../src/opt_utils.o expand.o -o ../bin/readmail.pfa
+
+../src/validname.o: ../src/validname.c ../hdrs/defs.h 
+	@(cd ../src; ${CC} -c ${CFLAGS} ${DEFINE} validname.c; cd ../utils)
+
+../src/opt_utils.o: ../src/opt_utils.c ../hdrs/defs.h
+	@(cd ../src; ${CC} -c ${CFLAGS} ${DEFINE} opt_utils.c; cd ../utils)
+
+../src/getopt.o: ../src/getopt.c ../hdrs/defs.h
+	@(cd ../src; ${CC} -c ${CFLAGS} ${DEFINE} getopt.c; cd ../utils)
+
+../src/string2.o: ../src/string2.c ../hdrs/defs.h
+	@(cd ../src; ${CC} -c ${CFLAGS} ${DEFINE} string2.c; cd ../utils)
+
+checkalias.o: checkalias.c ../hdrs/defs.h ../hdrs/sysdefs.h
+	${CC} -c ${CFLAGS} ${DEFINE} checkalias.c
+
+expand.o: expand.c ../hdrs/defs.h ../hdrs/sysdefs.h
+	${CC} -c ${CFLAGS} ${DEFINE} expand.c
+
+listalias.o:  listalias.c ../hdrs/defs.h ../hdrs/sysdefs.h
+	${CC} -c ${CFLAGS} ${DEFINE} listalias.c
+
+clean:
+	${RM} *.o ${OBJS}
+
+lint:
+	lint -I../hdrs *.c > LINT.OUT

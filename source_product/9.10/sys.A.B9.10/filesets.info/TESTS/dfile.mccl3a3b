@@ -1,0 +1,35 @@
+98265
+98624
+98625
+98626
+98628
+98642
+apci
+cdfs
+cs80
+dskless
+dskless_node  1
+dump cs80 0x070700 0
+gpio
+hpib
+inet
+lan01
+lla
+maxuprc    128
+meas_sys
+netdiag1
+netman
+nfile     4096
+nfs
+ni
+nipc
+nproc      250
+printer
+ptymas
+ptyslv
+ramdisc
+scsi
+stape
+swap cs80 0x070700 0
+tape
+uipc

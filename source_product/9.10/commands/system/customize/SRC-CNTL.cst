@@ -1,0 +1,21 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+fileset=SRC-CNTL
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# /usr/lib/rdiff3 is no longer used (it was used only by rcsmerge)
+#======
+/bin/rm -f /usr/lib$CDF/rdiff3
+
+exit $exitval

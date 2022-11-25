@@ -1,0 +1,43 @@
+
+# HPUX_ID: @(#) $Revision: 56.3 $
+
+# This is the sequencer initialization microcode table
+# ----------------------------------------------------
+#  The first microcode location contains the ucode version 
+#  number for the rest of the ucode. An example is as follows
+#     0x800000001122 means that this is the 0x11(17 decimal) major revision
+#                    and the 0x22(35 decimal) minor revision of the microcode
+#
+# 1/27/87 first created Joe Bakel
+# 3/3/87  changed -0 load to nops Joe Bakel
+# 3/19/87 added NOP in the MSW location of ucode Joe Bakel
+# 4/2/87  -moved a nop to the beginning of seq.ucode to
+#          give the reset two nops before executing
+#         -removed the cosine routines,added nops in the 
+#          other routines to cover possible setup time problems
+#         -enabled the board before the fpmov's in zero.code
+#
+$0
+0x8000  0x00000006  Nop     version_#_major_0_minor_6
+0x8000  0x00000000  Nop     need_for_reset
+0x8d01  0x00000000  wriv    IRV0<=0
+0x8d01  0x00000000  wriv    IRV1<=0
+0x8d01  0x00000000  wriv    IRV2<=0
+0x8d01  0x00000000  wriv    IRV3<=0
+0x8d01  0x00000000  wriv    IRV4<=0
+0x8d01  0x00000000  wriv    IRV5<=0
+0x8d01  0x00000000  wriv    IRV6<=0
+0x8d01  0x00000000  wriv    IRV7<=0
+0x8d01  0x00000014  wriv    IRV8<=10_need_to_change_with_added_instr
+0x8d01  0x00000000  wriv    IRV9<=0
+0x9201  0x0000bfc0  irmbc   8_enabled
+0x8100  0x00000000  cair    clear_interrupts
+0x8000  0x00000000  nop     dummy
+0x8000  0x00000000  nop     dummy
+0xa400  0x00000000  rel16   set_to_16_bit_relative_jumps
+0xb620  0x00000000  enair   enable_interrupts
+0xf121  0x0000ffff  jdr     jump_self
+0xf101  0x0000fffe  jdr     jump_back_1
+0x8000  0x00000000  Nop     Dummy_statement
+0xf008  0x00000000  jsa     jump_sub_data_bus
+0x8300  0x00000000  rtnir   return_from_interrupt

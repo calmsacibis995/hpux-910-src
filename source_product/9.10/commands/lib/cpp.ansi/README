@@ -1,0 +1,77 @@
+README file for cpp.ansi
+Feb. 7, 1992
+John Vasta (vasta@apollo.hp.com)
+
+
+The ANSI cpp source code is used on a variety of platforms and in a
+variety of environments. It is built into both standalone programs
+and libraries to be incorporated into other programs. Several
+conventions must be followed to make sure that it continues to work
+in all these environments.
+
+1. NO STATIC INITIALIZATION
+
+Although the cpp.ansi programs process one source file and then
+exit, other applications which use the cpp library may process more
+than one source file during their lifetimes, which means that they
+call the cpp code repeatedly. This means that it must be possible
+to reinitialize the state of cpp after it has processed a file.
+Therefore, you cannot depend on static initialization for data
+which must be in a defined state before processing a file; there
+must be a way to bring that data back to initial state between
+files.
+
+The convention used is that each module which has data that must be
+initialized prior to processing a file contains a function named
+"init_<file>_module"; for example, there are "init_define_module",
+"init_error_module", "init_if_module", "init_file_module", and
+"init_substitute_module" functions today. These functions are
+called by the "startup" function in startup.c. If you add static
+data to some other file which currently has no initialization
+function, then add one and add a call to it from the startup
+function.
+
+Of course, static initialization can still be used for data which
+does not have to be reinitialized between files.
+
+2. DO NOT WRITE TO STDERR
+
+Programs which incorporate cpp as a library may want to capture cpp
+error messages, but they can't if error messages are written to
+their standard error files. Instead, use the "error" function in
+error.c to write error messages; it uses a FILE *variable as the
+error message destination. The variable is initialized to stderr,
+but programs can change it to redirect error messages.
+
+3. DO NOT CALL EXIT ON FATAL ERROR
+
+Do not directly call the "exit" function; if cpp is embedded in
+some other application, it may not be appropriate to kill the whole
+application. Instead, call the "fatal_cpp_error" function in
+error.c. It writes an error message and then either calls "exit" or
+"longjmps" back to a top-level function which can then return to
+the calling program. There are currently only two functions which
+an application might call in cpp: "startup" and "get_output_line".
+They both use "setjmp" to set up a return point for fatal errors
+(if the application has set a flag indicating to do so).
+
+4. DO NOT CALL MALLOC DIRECTLY
+
+Cpp has its own memory management scheme, designed to improve
+performance in the face of many small and large allocation
+requests. Use the "temp_alloc" macro to allocate short-lived memory
+which can be disposed after the current output line is assembled,
+and use the "perm-alloc" macro for memory which can be disposed
+after an entire file is processed. See the support.h and support.c
+files for details.
+
+5. WATCH THE NAMESPACE
+
+Because cpp is incorporated as a library into other programs, the
+possibility exists that symbol name clashes will occur. When adding
+any new named elements to cpp (functions, global variables, etc.)
+please make them private (i.e. static) if they do not have to be
+visible outside the file they're in, and if they truly must be
+global, try to concoct a name which is less likely to occur in
+other programs -- I suggest prefixing every global name with
+"cpp_".

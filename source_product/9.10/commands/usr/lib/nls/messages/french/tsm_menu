@@ -1,0 +1,79 @@
+############################################################################
+# TSM user customizable file: tsm_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# main menu bar for TSM control menu
+# @(#) $Header: tsm_menu,v 70.1 92/06/11 19:39:04 ssa Exp $
+
+# LOCALIZERS
+#  This is the description of TSM menu menu.
+#  In all the following the items you can localize include:
+#       item_name  you can localize the string following the = sign.
+#  item_selection  which the letter users can enter to select this item
+#                  when the menu is displayed instead of using arrow keys.
+#                  You can change the character to the right of = sign.
+#  Do NOT change the strings $current_window_number and $current_window_title.
+#
+
+menu_bar
+menu_title=Menu TSM    Session $current_window_number: $current_window_title
+
+item_name=S≈lectionner
+item_selection=S
+item_type=intrinsic
+item_action=win_menu
+# item_auto_select
+
+item_name=Ex≈cuter
+item_selection=E
+item_type=menu
+item_action=prog_menu
+
+item_name=CouperColler
+item_selection=C
+item_type=menu
+item_action=cut_paste_menu
+
+item_name=Imprimer
+item_selection=I
+item_type=menu
+item_action=print_menu
+
+item_name=Divers
+item_selection=D
+item_type=menu
+item_action=misc_menu
+
+item_name=Fin
+item_selection=F
+item_type=intrinsic
+item_action=quit_tsm
+dialog_box
+# LOCALIZERS
+#   The prompt strings following dialog_item_prompt in the next 3 lines
+#   can be localized
+dialog_item_prompt TSM sera ferm≈ et toutes les
+dialog_item_prompt sessions TSM prendront fin.
+#dialog_item_prompt fin.
+
+item_name=Aide
+item_selection=A
+item_type=ft_command
+item_action=?

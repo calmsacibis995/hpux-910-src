@@ -1,0 +1,11 @@
+## FacetTerm  3164stat  description file 04/25/91
+## Copyright (c) Structured Software Solutions, Inc 1991.  All Rights Reserved.
+## @(#) $Header: 3164stat.FC,v 70.1 92/03/09 16:52:26 ssa Exp $
+function_key_file=sl_12.ftkey
+##				status_line
+perwindow-204-CSQF---s-------..........................=\E=%200u12\E=
+perwindow_default-.....................................=\E=\EI\E=
+set-status_line-=\E=\E4I%200u12\E=\E#;
+perwindow-3-CSQF---s--------enable_machine_status_line.=\E#:
+perwindow_also-disable_machine_status_line.............=\E#;
+perwindow_default=\E#:

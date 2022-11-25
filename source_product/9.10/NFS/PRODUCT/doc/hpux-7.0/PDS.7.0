@@ -1,0 +1,55 @@
+_______________________________________________________________________________
+|          ___       |                                                        |
+|         /  /       | PRODUCT DATA SHEET                                     |
+| HEWLETT/hp/PACKARD | NFS Services Series 300/800 HP-UX 7.0                  |
+|       /__/         | Network File System Version 3.2 for Series 300/800     |
+|                    | Project Managers:  Dave Matthews, Glen Foster,         |
+|  Colorado Networks |                    Greg Smith, Eric Okholm             |
+|      Division      | October 11, 1988                                       |
+|_____________________________________________________________________________|
+ 
+ DESCRIPTION
+				       
+ Provide Sun Microsystems' Network File System version 3.2 (NFS/3.2) on the
+ HP9000 Series 300/800 HP-UX system.  With NFS, heterogeneous systems on a
+ common network can transparently share files.  Enhancements provided in Sun's
+ NFS/3.2 include remote file locking, a remote execution service, and an RPC
+ protocol compiler.
+				       
+ Dave Matthews' NFS development group will have primary responsibility for the
+ user level code enhancements to NFS.  Glen Foster's project team will be
+ responsible for regression and reliability tests.  Other groups in IND and UKL
+ are providing kernel support for NFS functionality enhancements.  The NFS code
+ is being ported from source code provided by Sun.
+______________________________________________________________________________
+ 
+ MARKET CONTRIBUTION
+ 
+ Sun has established NFS as an emerging industry standard.  Customers now
+ expect the additional features provided in NFS version 3.2.  The Lock Manager
+ provides System V compatible file and record locking for both local and remote
+ files.  The RPC protocol compiler, rpcgen, introduces a language for creating
+ RPC servers and XDR routines without having to write C routines.  REX provides
+ remote execution, including interactive commands, while preserving the working
+ directory and environment variables of the invoking process.
+ ______________________________________________________________________________
+ 
+ KEY PROJECT "MUST" OBJECTIVES
+ 
+ Port Sun's NFS/3.2 to the Series 800 HP-UX system from the Series 300 6.5
+ release.  Enhancements include remote file locking, a remote execution
+ service, an RPC protocol compiler, and support for named pipes over NFS.
+
+ Provide the same connectivity with 7.0 as HP-UX 6.5/3.0.
+  
+ ______________________________________________________________________________
+
+ KEY ISSUES
+ ______________________________________________________________________________
+ 
+ KEY CHECKPOINTS      	     
+ Phase I exit	 	      07/14/88	
+ Phase II exit                10/12/88	
+ Phase III exit               02/01/89	
+ Phase IV exit                07/25/89	
+ Customer Shipments           08/27/89	

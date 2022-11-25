@@ -1,0 +1,35 @@
+# Makefile for CMD for HP 9000/300
+# @(#) $Header: Make_hp9000,v 70.1 92/03/09 15:37:25 ssa Exp $
+MACH=		hp9000
+MACH_CFLAGS= \
+		-DHP9000 \
+		-DTSM \
+		-DHPREV="`expr \`uname -r\` : '\(.\)'`" \
+		-DPSEUDOTTY \
+		-DHAS_LTCHARS \
+		-O
+
+.SUFFIXES:
+MAKE=	              MACH=$(MACH) \
+	       MACH_CFLAGS="$(MACH_CFLAGS)" \
+	MACH_FILES_TOP_DIR="" \
+	         MACH_LIBS="" \
+	        MACH_MODEL="" \
+	       FACETPREFIX="tsm." \
+	     USR_FACET_DIR="/usr/tsm" \
+	 USR_FACETTERM_DIR="/usr/tsm" \
+	     FACET_BIN_DIR="/usr/tsm/facetpcbin" \
+     NO_FACET_USR_BIN_LINK="NO_FACET_USR_BIN_LINK" \
+ NO_FACETTERM_USR_BIN_LINK="NO_FACETTERM_USR_BIN_LINK" \
+        FACETTERM_BIN_PROG='$$(HP_FACETTERM_BIN_PROG)' \
+    USR_FACETTERM_SYS_PROG='$$(NO_SUID_ROOT_USR_FACETTERM_SYS_PROG)' \
+USR_FACETTERM_SYS_PROG_SETUID='$$(NO_SUID_ROOT_USR_FACETTERM_SYS_PROG_SETUID)' \
+			make -e -f Make_comm
+.DEFAULT:
+		$(MAKE) $<
+all:
+		$(MAKE)
+
+# For release specific fct_utmp and tsm.utmp, add the following line in
+# the MAKE= command: UTMP_VERSION="`expr \`uname -r\` : '\(.\)'`"
+# and put a /usr/tsm/tsm.utmp that calls the appropriate program.

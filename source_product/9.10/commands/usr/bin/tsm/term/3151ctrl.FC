@@ -1,0 +1,74 @@
+## FacetTerm   3151ctrl COMMON file 09/06/91
+##   IBM 3151 control words
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 3151ctrl.FC,v 70.1 92/03/09 16:53:44 ssa Exp $
+### kind  0=screen 1=input
+### ibm_control-kind=
+### ibm_control_auto_wrap-pos-sense=#
+### ibm_control_auto_wrap_on_out-...=
+### ibm_control_auto_wrap_off_out-..=
+### ibm_control_default-............=###
+### ibm_control_force_mask-.........=
+### ibm_control_force_value-........=
+## control 1
+enter_ca_mode=\E 9@
+pass-ibm3151_fullduplex=\E 9@
+pass-ibm3151_fullduplex=\E 9 `
+## control 2
+###				ca_mode	wrap	nowrap	def	mask	value
+###				0x30=0			0x39=9	0x30=0	0x30=0
+### 0x10=force_insert_line	0x10			0x10	0x10	0x10
+### 0x08=enter_key_is_return	-			0x08
+### 0x04=reserved		-
+### 0x03  0x01=15_min_crt_save	-			0x01
+###							0x2A=*  0x22="  0x22="
+### 0x10=force_insert_char
+### 0x08=1						0x08
+### 0x04=no_transparent	
+### 0x02=return_key_is_cr				0x02    0x02    0x02
+### 0x01=reserved
+enter_ca_mode-force_insert_line=\E!90a
+ibm_control-1=\E!9%3I1
+ibm_control_default-............=9*
+ibm_control_force_mask-.........=0"
+ibm_control_force_value-........=0"
+## control 3
+###				ca_mode	wrap	nowrap	def	mask	value
+###				0x24=$	0x24=$	0x38=8	0x2C=,	0x23=#	0x20= 
+### 0x18 0x08=jump_scroll			0x18	0x08
+### 0x04=line_wrap		0x04	0x04		0x04
+### 0x02=auto_lf		0x00				0x02	0x00
+### 0x01=lf_does_newline	0x00				0x01	0x00
+###							0x2F=/
+### 0x18 0x08=jump_scroll(NVR)				0x08
+### 0x04=insert_is_one_space				0x04
+### 0x02=column_tab					0x02
+### 0x01=return_key_moves_new_line			0x01
+enter_ca_mode-auto_wrap=\E"9$a\E"9<b
+ibm_control-1=\E"9%3I1
+ibm_control_auto_wrap-0-1=\004
+ibm_control_auto_wrap_on_out-...=$a
+ibm_control_auto_wrap_off_out-..=8b
+*ibm_control_auto_scroll-0-1=\030
+auto_scroll_off_wraps_top
+ibm_control_default-............=,/
+ibm_control_force_mask-.........=#
+ibm_control_force_value-........=\040
+## control 4
+###				ca_mode	wrap	nowrap	def	mask	value
+###							0x24=$	0x22="	0x20=\s
+### 0x10 reserved
+### 0x08 switch send key
+### 0x04 send null suppress				0x04
+### 0x02 lock keyboard and MDT					0x02	0x00
+### 0x01 send data AID LTA
+ibm_control-1=\E#9%2I1
+ibm_control_default-............=$
+ibm_control_force_mask-.........="
+ibm_control_force_value-........=\s
+## control 5
+not_imp-line_speed=\E$9%5I1
+## control 6
+pass-set_aux_port=\E%%9%5I1
+## control 7
+pass-set_print_operation=\E&9%4I1

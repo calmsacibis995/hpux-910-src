@@ -1,0 +1,105 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS libc/yp source.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS	= -g -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+CSOURCE	= yp_bind.c yp_match.c ypprot_err.c yp_enum.c yp_order.c ypv1_xdr.c \
+	  yp_all.c yp_master.c yperrstrng.c ypxdr.c
+
+OBJECTS	= yp_bind.o yp_match.o ypprot_err.o yp_enum.o yp_order.o ypv1_xdr.o \
+	  yp_all.o yp_master.o yperrstrng.o ypxdr.o
+
+TARGETS	= ../libc.a
+
+all:		build
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) $(TARGETS) \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/libc.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)"
+
+build:		$$(TARGET)	
+
+install:;	/bin/echo NFS project does not deliver any portions of libc
+
+rinstall:	install
+
+yp.libc:	$(TARGETS)
+
+yp_bind.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_bind.c
+
+yp_match.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_match.c
+
+yperrstrng.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yperrstrng.c
+
+yp_enum.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_enum.c
+
+ypprot_err.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/ypprot_err.c
+
+ypxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/ypxdr.c
+
+yp_all.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_all.c
+
+yp_master.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_master.c
+
+yp_order.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yp_order.c
+
+ypv1_xdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/ypv1_xdr.c
+
+$(TARGETS):	$(OBJECTS)
+    	$(CP) $(TARGETS) ../libc.tmp
+    	$(MV) -f ../libc.tmp $(TARGETS)
+	$(CHMOD) u+w $(TARGETS)
+	ar r $(TARGETS) $(OBJECTS)
+	$(CHMOD) 664 $(TARGETS)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build
+

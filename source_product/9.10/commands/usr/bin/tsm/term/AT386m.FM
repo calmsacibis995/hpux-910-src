@@ -1,0 +1,44 @@
+## FacetTerm Menu Capabilities for a AT386 monochrome console  06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: AT386m.FM,v 70.1 92/03/09 16:52:13 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\E[%i%p1%d;%p2%dH
+##-menu-cap-clear_screen=\E[H\E[2J
+##-menu-cap-clr_eol=\E[K
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\E[12m
+##-menu-cap-exit_alt_charset_mode=\E[10m
+##-menu-cap-acs_chars=``a1fxgqh0jYk?lZm@nEooppqDrrsstCu4vAwBx3yyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\E[m
+##-menu-cap-shadow_attr=\E[m
+##-menu-cap-item_attr=\E[m
+##-menu-cap-box_attr=\E[7m
+##-menu-cap-title_attr=\E[7m
+##-menu-cap-highlight_attr=\E[7m
+##-menu-cap-highlight_blink_attr=\E[5;7m
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\E[A
+##-menu-cap-key_down=\E[B
+##-menu-cap-key_right=\E[C
+##-menu-cap-key_left=\E[D
+##-menu-cap-key_home=\E[H
+##-menu-cap-key_ignore=\E0
+##-menu-cap-key_ignore=\EOA
+##-menu-cap-key_ignore=\EOP
+##-menu-cap-key_ignore=\EOQ
+##-menu-cap-key_ignore=\EOR
+##-menu-cap-key_ignore=\EOS
+##-menu-cap-key_ignore=\EOT
+##-menu-cap-key_ignore=\EOU
+##-menu-cap-key_ignore=\EOV
+##-menu-cap-key_ignore=\EOW
+##-menu-cap-key_ignore=\EOX
+##-menu-cap-key_ignore=\EOY
+##-menu-cap-key_ignore=\EOZ
+##-menu-cap-key_ignore=\E[@
+##-menu-cap-key_ignore=\E[P
+##-menu-cap-key_ignore=\E[U
+##-menu-cap-key_ignore=\E[V
+##-menu-cap-key_ignore=\E[Y

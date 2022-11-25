@@ -1,0 +1,133 @@
+## FacetTerm   3151attr COMMON file 07/15/91
+##   IBM 3151 attributes
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 3151attr.FC,v 70.1 92/03/09 16:50:17 ssa Exp $
+##--- ATTRIBUTES URBOI ---##
+##blink=\E4$a,    bold=\E4(a,    invis=\E40a,    rev=\E4!a,
+##smso=\E4!a,     rmso=\E4@,     smul=\E4"a,     rmul=\E4=b,
+##
+attribute-....R-IOBU.=\E4A
+attribute-...U.-IOB.R=\E4B
+attribute-...UR-IOB..=\E4C
+attribute-..B..-IO.UI=\E4D
+attribute-..B.R-IO.U.=\E4E
+attribute-..BU.-IO..R=\E4F
+attribute-..BUR-IO...=\E4G
+attribute-.O...-I.BUR=\E4H
+attribute-.O..R-I.BU.=\E4I
+attribute-.O.U.-I.B.R=\E4J
+attribute-.O.UR-I.B..=\E4K
+attribute-.OB..-I..UR=\E4L
+attribute-.OB.R-I..U.=\E4M
+attribute-.OBU.-I...R=\E4N
+attribute-.OBUR-I....=\E4O
+attribute-I....-.OBUR=\E4P
+##
+attribute-....R-IOBU.=\E4!`
+attribute-...U.-IOB.R=\E4"`
+attribute-...UR-IOB..=\E4#`
+attribute-..B..-IO.UI=\E4$`
+attribute-..B.R-IO.U.=\E4%`
+attribute-..BU.-IO..R=\E4&`
+attribute-..BUR-IO...=\E4'`
+attribute-.O...-I.BUR=\E4(`
+attribute-.O..R-I.BU.=\E4)`
+attribute-.O.U.-I.B.R=\E4*`
+attribute-.O.UR-I.B..=\E4+`
+attribute-.OB..-I..UR=\E4,`
+attribute-.OB.R-I..U.=\E4-`
+attribute-.OBU.-I...R=\E4.`
+attribute-.OBUR-I....=\E4/`
+attribute-I....-.OBUR=\E40`
+##
+ignore-   .....-.....=\E4 a
+attribute-....R-.....=\E4!a
+attribute-...U.-.....=\E4"a
+attribute-...UR-.....=\E4#a
+attribute-..B..-.....=\E4$a
+attribute-..B.R-.....=\E4%a
+attribute-..BU.-.....=\E4&a
+attribute-..BUR-.....=\E4'a
+attribute-.O...-.....=\E4(a
+attribute-.O..R-.....=\E4)a
+attribute-.O.U.-.....=\E4*a
+attribute-.O.UR-.....=\E4+a
+attribute-.OB..-.....=\E4,a
+attribute-.OB.R-.....=\E4-a
+attribute-.OBU.-.....=\E4.a
+attribute-.OBUR-.....=\E4/a
+attribute-I....-.....=\E40a
+##
+attribute-.....-IOBU.=\E4!b
+attribute-.....-IOB.R=\E4"b
+attribute-.....-IOB..=\E4#b
+attribute-.....-IO.UI=\E4$b
+attribute-.....-IO.U.=\E4%b
+attribute-.....-IO..R=\E4&b
+attribute-.....-IO...=\E4'b
+attribute-.....-I.BUR=\E4(b
+attribute-.....-I.BU.=\E4)b
+attribute-.....-I.B.R=\E4*b
+attribute-.....-I.B..=\E4+b
+attribute-.....-I..UR=\E4,b
+attribute-.....-I..U.=\E4-b
+attribute-.....-I...R=\E4.b
+attribute-.....-I....=\E4/b
+##
+attribute-.....-.OBUR=\E40b
+attribute-.....-.OBU.=\E41b
+attribute-.....-.OB.R=\E42b
+attribute-.....-.OB..=\E43b
+attribute-.....-.O.UI=\E44b
+attribute-.....-.O.U.=\E45b
+attribute-.....-.O..R=\E46b
+attribute-.....-.O...=\E47b
+attribute-.....-..BUR=\E48b
+attribute-.....-..BU.=\E49b
+attribute-.....-..B.R=\E4:b
+attribute-.....-..B..=\E4;b
+attribute-.....-...UR=\E4<b
+attribute-.....-...U.=\E4=b
+attribute-.....-....R=\E4>b
+ignore-   .....-.....=\E4?b
+##
+### attribute_next-A-=
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                              ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+### parm_attribute_out=\E[%s1;%s2m
+### parm_attribute_out=\E[%s1;%s2;%s3m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+### parm_attribute_val-R-=number
+### parm_attribute_val-B-=number
+### parm_attribute_val-D-O=number
+### parm_attribute_val-O-D=number
+### parm_attribute_val-I-=number
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode--URBOI=\E4 b
+exit_attribute_mode--URBOI=\E4 `
+exit_attribute_mode--URBOI=\E4@
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##-- END --##

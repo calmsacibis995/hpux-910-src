@@ -1,0 +1,305 @@
+.H 2  "Innetgr (Cristina Mahon)"
+
+.PP
+Innetgr returns a zero or a one depending on whether 
+the network group contains the machine, user, domain triple
+as a member.  Any of the three strings machine, user, or 
+domain can be NULL, in which case it signifies a wild card.
+.PP
+The format of the routine is as follows:
+.sp
+.nf
+innetgr(netgroup, machine, user, domain)
+.fi
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  2.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Call innetgr with domainname not set"
+.sp 1
+.PP
+Domainname should not be set on that machine.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: getdomainname system call missing"
+       I will change this message so that it actually says
+       what it means, domainname not set.
+.fi
+.sp 2
+.H 3 "Call innetgr with unknown netgroup"
+.sp 1
+.PP
+The file /etc/netgroup should have been put on a Yellow Pages
+database.  The netgroup we call innetgr with should not be 
+in /etc/netgroup.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns zero.
+.fi
+.sp 2
+.H 3 "/etc/netgroup not in YP"
+.sp 1
+.PP
+The file /etc/netgroup will not have been put into a Yellow
+Pages database.  
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns zero.
+.fi
+.sp 2
+.H 3 "Call innetgr with a cycle in /etc/netgroup"
+.sp 1
+.PP
+A cycle is when a network group defines itself based on itself.
+That is, if a member of the group uses the group itself as one
+of its fields.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: netgroup <netgroup> called recursively"
+.fi
+.sp 2
+.H 3 "Call innetgr with only hostname field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with only hostname, username field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with no separating commas"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname username domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with all information"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null hostname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null username"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with all null fields"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group with more than one triplet"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname) (host1, user1, domain1)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, host1, user1, domain1)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group with spaces between the hostname, username and domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(  hostname , - , domainname ) 
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group that points to another group"
+.sp 1
+.PP
+Have entries in /etc/netgroup as follows:
+.sp
+group	group1
+group1	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr will NULL username, but with hostname and domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr will group missing close parentheses"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username, domainname
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi

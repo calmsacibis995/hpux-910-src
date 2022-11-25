@@ -1,0 +1,16 @@
+#!/bin/sh
+##	@(#)backup	$Revision: 1.20.109.1 $	$Date: 91/11/19 13:52:49 $
+#	backup	--	backup the NFS source tree
+# written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $Nfs begin
+
+# $Nfs/log/fulltime is a file touched by fullbackup that indicates when the
+# last full backup occured.
+cd $Nfs/..
+find `basename $Nfs` -type f -newer $Nfs/log/fulltime -print | tee $Nfs/log/incremental | cpio -o | compress -v | tcio -or -T /dev/console /dev/rctnfs
+
+echo `date "+%y.%m.%d %T"` $0 $Nfs end

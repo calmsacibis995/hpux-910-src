@@ -1,0 +1,59 @@
+Following is a list of steps to go through to install bfa commands on two 
+machines and to install the scaffold. This document was created on the 
+fly and not intended as a complete guide. Also, if you change the process
+please update this document.
+
+1) run $nfs/bin/bfatrans to transfer commands and kernel to machines
+ex.	! $nfs/bin/bfatrans machine1 -bfa >& errs &
+ex.     ! $nfs/bin/bfatrans machine2 -bfa >& errs &
+
+2) run $nfs/bin/bfa_libc to build a libc that includes library routines
+built with bfa.
+ex.	$nfs/bin/bfa_libc /tmp/libc.bfa >& errs &
+
+3) run $nfs/bin/headtrans to copy latest version of header files to machine
+that will have the scaffold on it.
+ex.	$nfs/bin/headtrans hostname >& errs &
+
+4) copy new libc to machine that will have the scaffold on it
+ex.	! rcp /tmp/libc.bfa hostname:/lib/libc.a
+
+5) copy scaffold from hpcndm to scaffold directory.  
+ex.	rcp -r /scaf/ADMIN hostname:/users/scaf
+	rcp -r /scaf/nfs hostname:/users/scaf
+
+6) Make sure bfa is installed on the machines.
+   a) check to see if the following files exist on the machine:
+       /usr/local/bin/bfa
+       /usr/local/bin/bfacc 
+       /usr/lib/libbfa.a
+    b) if they do not exist copy them to the machine:
+        rcp /usr/local/bin/bfa hostname:/usr/local/bin/bfa
+        rcp /usr/local/bin/bfacc hostname:/usr/local/bin/bfacc
+        rcp /usr/local/lib/libbfa.a hostname:/usr/local/lib/libbfa.a
+
+7) go to machine with scaffold on it, log in as root (csh)
+	setenv SCAFFOLD /users/scaf   		-these values can be found
+	setenv ROOTDIR /users/rootdir		-in .profile in nfsbb's 
+	setenv SCAFOWN scafadm			-account 
+	cd /users/scaf/ADMIN/TOOLS.SRC
+	make all >& errs &
+	cd .. 
+	build_skel -o scafadm >& errs &
+	mkdir /users/scaf/GOOD /users/scaf/BAD 
+		/users/scaf/RESULTS /users/scaf/DOC
+	install_mod -xbfa nfs >& errs &
+
+8) run tests.  run yp tests with one machine as client and 
+	another machine as server.
+
+9) run $nfs/bin/bfamerge300 to merge databases from both machines.  
+ex.	$nfs/bin/bfamerge300 machine1 machine2
+
+10) run $nfs/bin/bfasum300 to create report
+ex.	$nfs/bin/bfasum300
+
+11) look at results
+	cat bfaout
+	cat list_byBFA
+

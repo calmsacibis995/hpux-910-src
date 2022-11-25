@@ -1,0 +1,15 @@
+## FacetTerm  dg463com COMMON  description file  12/11/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: dg463com.FC,v 70.1 92/03/09 16:55:50 ssa Exp $
+attribute_next-A=^R
+parm_mode_val-APPKEYON-00000000=?66
+## ?67 backarrow key mode P-del_is_backspace=\E[?67h P-del_is_del=\E[?67l
+parm_mode_val-PASS....-PASS....=?67
+## ?68 typewriter/data_processing P-typewriter=\E[?68h P-data=\E[?68l
+parm_mode_val-PASS....-PASS....=?68
+## ?73 limited_transmit N-yes=\E[?73h P-not=\E[?73l
+parm_mode_val-NOTIMP..-PASS....=?73
+pass-set_time=\E[?;%p1%d;;;%p2%d;%p3%dF
+pass_current-bit_dump_screen=\E[6i
+pass-set_device_options=\E[?%p1%d;%p2%d;%p3%d;%p4%dQ
+not_imp-split_screen=\E[?%p1%d;%p2%d;%p3%dI

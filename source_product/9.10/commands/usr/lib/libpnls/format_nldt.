@@ -1,0 +1,209 @@
+
+
+/*
+
+    Format a string with date information. The string is formatted per date 
+    description information. The following date descriptions are valid:
+
+                ~    -- Escapes the meaning of the next character
+		D    -- For 1-character week-day abbreaviation
+		DD   -- For 2-character week-day abbreaviation
+		DDD  -- For 3-character week-day abbreaviation
+		M    -- For 1-character month abbreaviation
+		MM   -- For 2-character month abbreaviation
+		MMM  -- For 3-character month abbreaviation
+		MMMM -- For 4-character month abbreaviation
+		mm   -- Formnumeric month of the year
+		dd   -- for numeric date of the month
+		yy   -- For numeric year of the century
+		yyyy -- For numeric year, like 1981
+		Nyy  -- For National year (Japenese, Korean, etc.)
+
+*/
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+#include <langinfo.h>
+#include <nlinfo.h>
+
+#define LC_ESCAPE	'~'
+#define LC_DAYABBR	'D'
+#define LC_DAYFULL	'W'
+#define LC_DAYNUM	'd'
+#define LC_MONABBR	'M'
+#define LC_MONFULL	'O'
+#define LC_MONNUM	'm'
+#define LC_YEAR		'y'
+#define LC_YRNATNL	'N'
+
+/*
+ *	the following code is used extensively, and was therefore put into
+ *	a macro in order to make the code more readable.
+ */
+#define NLCHARTYPE(c) n->char_set_definition[(unsigned char)c]
+
+
+extern int _nl_errno;
+
+
+/*
+ *	format a string w/ date information.
+ */
+format_nldt(langid, f, lenf, s, lens, pN, ltim)
+short		langid;
+char		*f;			/* format string */
+int		lenf;			/* length of format string */
+char		*s;			/* formatted string */
+int		lens;			/* length of formatted string */
+struct l_info	*pN;
+struct tm 	*ltim;
+{
+	struct l_info	*getl_info(), *n;
+	char *fEnd;
+	char *sEnd, *sStart;
+	char *wrk, *wrkEnd;
+	char   *get_end();
+	char	spChar;			/* space character */
+	short	shVal;
+
+	sStart = s;		/* to be saved for alt digits */
+
+        if (langid == -1) {
+	    _nl_errno = E_LNOTCONFIG;
+	    return;
+        }
+
+	n = (pN) ? pN : getl_info(langid);
+        if (n == NULL) {
+	    _nl_errno = E_LNOTCONFIG;
+	    return;
+        }
+
+
+	/*
+	 * we need to do this one first so that we can get the right
+	 *	to left space for languages that need it.
+	 */
+	memcpy((char *)&shVal, n->lang_dir, sizeof(short));
+	spChar = (shVal) ? n->lang_dir[2] : ' ';
+
+	for (fEnd = f + lenf, sEnd = s + lens; (f < fEnd)&&(s < sEnd); ){
+	   if (NLCHARTYPE(*f)==NLI_FIRSTOF2) {
+	       *s++ = *f++;                /* Copy first of two bytes */
+               if (f < fEnd) *s++ = *f++;  /* Copy second of two bytes */
+           }
+           else switch (*f){
+		case LC_DAYABBR:
+			wrk = n->wk_day_abbrev + (ltim->tm_wday * SIZE_ABDAY) ;
+			wrkEnd = get_end(wrk, SIZE_ABDAY, spChar);
+			while (*f == LC_DAYABBR){
+				if (wrk < wrkEnd)
+					*s++ = *wrk++;
+				f++;
+			}
+			break;
+		case LC_DAYFULL:
+			wrk = n->wk_day_full + (ltim->tm_wday * SIZE_DAY) ;
+			wrkEnd = get_end(wrk, SIZE_DAY, spChar);
+			while (*f == LC_DAYFULL){
+				if (wrk < wrkEnd)
+					*s++ = *wrk++;
+				f++;
+			}
+			break;
+		case LC_DAYNUM:
+			if ((*(f + 1) == LC_DAYNUM) && (s < sEnd -1)){
+				sprintf(s, "%02d", ltim->tm_mday);
+				f = f + 2;
+				s = s + 2;
+			}
+			else
+				*s++ = *f++;
+			break;
+		case LC_MONABBR:
+			wrk = n->month_abbrev + (ltim->tm_mon * SIZE_ABMONTH) ;
+			wrkEnd = get_end(wrk, SIZE_ABMONTH, spChar);
+			while (*f == LC_MONABBR){
+				if ((wrk < wrkEnd) && (s < sEnd))
+					*s++ = *wrk++;
+				f++;
+			}
+			break;
+		case LC_MONFULL:
+			wrk = n->month_full + (ltim->tm_mon * SIZE_MONTH) ;
+			wrkEnd = get_end(wrk, SIZE_MONTH, spChar);
+			while (*f == LC_MONFULL){
+				if ((wrk < wrkEnd) && (s < sEnd))
+					*s++ = *wrk++;
+				f++;
+			}
+			break;
+		case LC_MONNUM:
+			if ((*(f + 1) == LC_MONNUM) && (s < sEnd -1)){
+				sprintf(s, "%02d", ltim->tm_mon + 1);
+				f = f + 2;
+				s = s + 2;
+			}
+			else
+				*s++ = *f++;
+			break;
+		case LC_YEAR:
+			if ((strncmp(f, "yyyy", 4) == 0) && (s < sEnd -3)){
+				sprintf(s, "%4d", ltim->tm_year + 1900);
+				f = f + 4;
+				s = s + 4;
+			}
+			if ((strncmp(f, "yy", 2) == 0) && (s < sEnd -1)){
+				sprintf(s, "%02d", ltim->tm_year);
+				f = f + 2;
+				s = s + 2;
+			}
+			else
+				*s++ = *f++;
+			break;
+		case LC_YRNATNL:
+	/*
+			if (strncmp(f, "Nyy", 3) == 0){
+				sprintf(s, "%s", get_nyr(f));
+				f = f + 3;
+				s = s + 3;
+			}
+			else
+	*/
+				*s++ = *f++;
+			break;
+		case LC_ESCAPE:
+			f++;
+			if (f < fEnd) *s++ = *f++;
+			break;
+		default:
+			*s++ = *f++;
+			break;
+		}
+	}
+	while (s < sEnd)
+		*s++ = ' ';
+
+	if (isaltdig(n->alt_digits))
+		convalt(sStart, sStart, sEnd, ASCIITOALT, n);
+}
+
+/*
+ *	find the first blank character in the array *s
+ *	*s is defined as c bytes long.
+ */
+char *get_end(s, c, spChar)
+char	*s;
+int	c;
+char	spChar;
+{
+	static char	*w;
+
+	for (w = s + c - 1; w > s  &&  *w == spChar; w--)
+		;
+
+	return(w + 1);
+}

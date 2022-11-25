@@ -1,0 +1,76 @@
+---------------------
+This directory contains all the info and sources that
+exist for the Berkeley Internet Name Domain server.
+
+bin       - shell scripts used by current Berkeley makefiles
+man       - manual pages & documentation
+doc       - copy of Bind Operations Guide (not yet), and other documents 
+include   - include files to go in /usr/include
+named     - name server sources
+res       - source for C library resolver routines
+	    (may be used as separate library, resolv.a)
+master    - Sample data files
+tools     - some test programs
+
+
+Here is how to install the name server on 4.3BSD:
+
+0) cp bin/mkdep /usr/ucb/mkdep
+   cp bin/manroff /usr/man/manroff
+1) cp include/arpa/* /usr/include/arpa  
+2) cp include/*.h /usr/include 
+3) cp man/*.1 /usr/man/manl
+   cp man/*.3 /usr/man/man3
+   cp man/*.5 /usr/man/man5
+   cp man/*.7 /usr/man/man7
+   cp man/*.8 /usr/man/man8
+4) cp res/{*.c,Makefile} /usr/src/lib/libc/net
+   cp res/named/{*.c,Makefile} /usr/src/lib/libc/net/named
+5) rebuild and install /lib/libc.a.
+6) cd named; make named; make install
+7) cd tools/nslookup; make nslookup; make install
+8) create the master files (samples in master/*)
+9) edit /etc/rc.local to include:
+
+if [ -f /etc/named ]; then
+        /etc/named; echo -n ' named' >/dev/console
+fi
+
+10) recompile network client and server programs that use gethostbyname, etc.
+
+
+Here is how to install the name server on 4.2BSD or similar systems.
+Rather than building libresolv.a, you may wish to integrate the resolver
+routines into /lib/libc.a.  This is recommended to make it easy to recompile
+network programs once named is running.  This procedure may require hand-
+tayloring on some systems.
+
+0) cp tools/mkdep /usr/ucb/mkdep
+   cp tools/manroff /usr/man/manroff
+1) cp include/arpa/* /usr/include/arpa
+2) cp include/resolv.h /usr/include
+   cp include/netdb.h.4.2 /usr/include/netdb.h
+3) cp man/*.1 /usr/man/manl
+   cp man/*.3 /usr/man/man3
+   cp man/*.5 /usr/man/man5
+   cp man/*.7 /usr/man/man7
+   cp man/*.8 /usr/man/man8
+4) cd res; make -f Makefile.resolv resolv.a install
+6) cd named; make RES=-lresolv named; make install
+7) cd tools/nslookup; make RES=-lresolv nslookup install
+8) create the master files (samples in master/*)
+9) edit /etc/rc.local to include:
+
+if [ -f /etc/named ]; then
+        /etc/named; echo -n ' named' >/dev/console
+fi
+
+
+If you have any problems or fixes send them to 
+		bind-test@ucbarpa.berkeley.edu
+	     or bind-test@ucbarpa.arpa
+
+For sendmail that supports MX records, use anonymous ftp to obtain
+	ucbarpa.Berkeley.EDU:~ftp/pub/4.3/sendmail.MX.tar.Z (compressed)
+or
+	ucbarpa.Berkeley.EDU:~ftp/pub/4.3/sendmail.MX.tar

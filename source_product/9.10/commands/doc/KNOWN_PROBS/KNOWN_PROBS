@@ -1,0 +1,892 @@
+
+                            Known Problems
+			    --------------
+
+Following is a list of some known problems with the S300/400 HP-UX 8.0
+release.  If you should experience a problem, check this list to see
+if it is one that has already been encountered.
+
+
+______________________________________________________________________
+
+KPR #: 4701000844 Product: HP SYMBOLIC DEBUGGER  98680-02B    08.00
+
+One-line description:
+xdb cannot do stack trace on shared library core file
+
+Problem:
+
+xdb will not provide any information about the core file that is
+produced when the routine is in a shared library and is produced
+from compiling shared and linking into a shared library.
+
+Fix Information:
+
+This defect will be fixed in a followup release.
+
+_____________________________________________________________
+
+KPR #: 4700977181 Product: HPUX                  9245XA       B8.00
+
+One-line description:
+/etc/update complains, might hang, when updating to relative symlink
+
+Problem:
+
+Relative symbolic links are not handled robustly.
+
+Cause:
+
+The problem is caused by the establishment of relative (not absolute)
+symbolic links created by the user.  A relative symbolic link is one
+which refers to the target by relative notation, for example, bin/foo or
+../bin/foo, as opposed to absolute notation, for example, /usr/bin/foo,
+in the ln(1) command line.  The possibility exists that by unmounting a
+volume the symlink could point to a nonexistent target.
+
+Symlinks should be absolute.
+
+Fix Information:
+
+Will be corrected in a future release.
+
+_____________________________________________________________
+
+KPR #: 4700979542 Product: HPUX                  9245XA       08.00
+
+One-line description:
+The <ESC>= feature of ksh is broken if an env variable is being used
+
+Problem:
+
+    The <ESC>= feature of the ksh editing modes does not work
+    correctly if the current word contains $<variable_name>.
+    <ESC>= is supposed to expand the current word as if a '*'
+    were appended to the current word.  If the word contains
+    $<variable_name>, then the '*' is not implicitly added.
+
+Cause:
+
+    The ksh code was updated to ksh88b source, and the case of <ESC>=
+    was overlooked.
+
+Workaround:
+
+    There are two workarounds for the problem.  Suppose you have the
+    following setup: TMP=/tmp and the only files in /tmp are:
+    /tmp/xyz1, /tmp/xyz2, /tmp/xyz3.
+
+    1.  Add the '*' yourself.
+
+            Just typing <ESC>= fails:
+                $ echo $TMP/xyz<ESC>=
+                1) /tmp/xyz
+
+            But adding the trailing '*' before <ESC>= works:
+                $ echo $TMP/xyz*<ESC>=
+                1) /tmp/xyz1
+                2) /tmp/xyz2
+                3) /tmp/xyz3
+
+    2.  Do an <ESC><ESC> to expand the variable before doing <ESC>=.
+
+            Just typing <ESC>= fails:
+                $ echo $TMP/xyz<ESC>=
+                1) /tmp/xyz
+
+            So, first type <ESC><ESC> to expand $TMP:
+                $ echo $TMP/xyz<ESC><ESC>
+
+            yeilds:
+                $ echo /tmp/xyz
+
+            And now <ESC>= will work:
+                $ echo /tmp/xyz<ESC>=
+                1) xyz1
+                2) xyz2
+                3) xyz3
+
+Fix Information:
+
+    Fixed in the 9.0 release of HP-UX.
+
+_____________________________________________________________
+
+KPR #: 4700979609 Product: HPUX                  9245XA       B8.00
+
+One-line description:
+Client with LMFS walls message everytime it does a shutdown(1M)
+
+Problem:
+
+When a cnode with a local mounted file system (LMFS) does a shutdown,
+shutdown wanted to warn everyone that the user's file system is going
+away if any user had an open file on the LMFS.  However, if the
+following conditions are met, shutdown will also wall the entire
+cluster:
+        - user has LMFS as their home directory
+        - user executes shutdown from ksh or csh
+        - no one (other than the person doing the shutdown) has an open
+          file on the LMFS
+
+This can be annoying, because the wall will mess up bitmap displays on
+all the cnodes in the cluster.
+
+Cause:
+
+When the user runs shutdown from ksh or csh, the shell maintains an open
+history file on the LMFS, so shutdown cannot unmount the disk, and
+consequently walls the entire cluster.
+
+Fix Information:
+
+This will be fixed in the 9.0 release of HP-UX.
+
+_____________________________________________________________
+
+KPR #: 4700979617 Product: HPUX                  9245XA       B8.00
+
+One-line description:
+rmfn apparently leave file system in bad shape, files in /lost+found
+
+Problem:
+
+When a user selects a fileset for removal, rmfn will unlink the
+/system/<fileset> directory after the files listed in the
+/etc/filesets/<fileset> have been removed. However, if there
+is any unremoved inode under that directory, then it will become
+an orphan inode, and after the file system is fscked (e.g. in this
+case when the system crashed) the orphan inode(s) will be put in
+the lost+found directory.
+
+So for example in this case, files like customize,old, revlist
+are obsoleted 7.0 files and should be removed when the fileset is
+updated from 7.0 to 8.0.  Since they are not deleted during the
+update process and their entries are not listed in the 8.0
+/etc/filesets/<fileset> files, so when the user used the rmfn to
+remove a fileset, those files were not removed and the inodes of
+those files become orphan inodes.
+
+Workaround:
+
+There is no real workaround for this problem other than the user being
+aware of the problem and checking the lost+found directory after using
+rmfn.
+
+Fix Information:
+
+The code has been fixed. The fix will be available by next release.
+
+_____________________________________________________________
+
+KPR #: 4700979666 Product: HPUX                  9245XA       B7.00
+
+One-line description:
+Cursor does not move for pads.
+
+Problem:
+
+cursor stays in the upper leftmost corner in a pad even it has
+been move() and refresh().
+
+Cause:
+
+Curses treats PAD window as a special case when deciding where
+to leave the cursor.  It always puts the cursor in the upper
+leftmost corner (beginX, beginY), which is WRONG!
+
+Fix Information:
+
+Will be fixed in a future release.
+
+_____________________________________________________________
+
+KPR #: 4700979690 Product: HPUX                  9245XA       B7.00
+
+One-line description:
+Elm output too large for window scrolls display
+
+Problem:
+
+Some elm messages are incorrectly displayed by the built-in elm pager.
+When the user attempts to display a page of such a message, elm will
+produce too many lines of output, causing one or more lines of the
+page to scroll off the screen before they can be read.  Messages that
+cause this problem contain lines of text that require more than one
+screen line to display and contain tab characters.
+
+Cause:
+
+elm incorrectly accounts for tabs when it calculates the length of
+a line.  A message line that contains tabs and is longer than one line
+on the screen may only be counted as taking up one line rather than
+two.  This causes too many lines to be displayed, scrolling one or
+more lines off the screen.
+
+Fix Information:
+
+Fixed in release 9.0.
+
+_____________________________________________________________
+
+KPR #: 4700980235 Product: HPUX                  9245XA       B8.00
+
+One-line description:
+aliases.text files with leading spaces cause big problems.
+
+Problem:
+
+If a user creates and installs an aliases.text file that contains
+lines that begin with a space or a tab character, elm will interpret
+the lines that begin with spaces or tabs as continuations of the
+previous line.
+
+Cause:
+
+This problem is caused by an undocumented feature of elm.  Elm allows
+aliases to be continued across lines of the aliases.text file by
+starting the second and subsequent lines of the alias with a space or
+a tab.
+
+Fix Information:
+
+The elmalias manual page will be modified to document this behaviour
+in release 9.0.
+
+_____________________________________________________________
+
+KPR #: 4700983296 Product: HPUX                  9245XA       B8.00
+
+One-line description:
+man fails for multiple files, "man sync ksh" fails to find ksh
+
+Problem:
+
+At 7.0 and before, man(1) accepted multiple arguments:
+
+        $ man id touch grep
+
+and would print the manpage for each argument successively.
+At 8.0, for manpages beyond the first one, man prints:
+
+        "No manual entry for <arg>".
+
+Cause:
+
+This functionality was lost while adding the MANPATH recognition.
+As man loops through directories searching for files, the path it
+is searching gets progressively truncated.
+
+The default paths are:  "/usr/man"
+                        "/usr/contrib/man"
+                        "/usr/local/man"
+
+After the first manpage is found and displayed, "/usr/man" is no
+longer searched.  Since the majority of manpages are in /usr/man,
+the likelyhood of the next arguments being found is very low.
+
+Workaround:
+
+There are a couple of workarounds (not as nice as the original
+functionality, but something).
+
+1.  Call man once for each argument.
+
+2.  If you have a lot of entries, put them in a shell loop:
+
+        $ for page in sync ksh grep
+        > do
+        >     man $page
+        > done
+
+Fix Information:
+
+Fixed in HP-UX Release 9.0.
+
+_____________________________________________________________
+
+KPR #: 1650147355 Product: S300 GENERAL HPUX     98680B       07.03
+
+One-line description:
+Elm mailer does not recognize forms as forms if it contains headers
+
+Problem:
+
+An elm form letter will not be recognized as a form letter if the
+letter contains lines from an elmheaders file that are not correctly
+formatted header lines.  A correctly formatted header line is of the
+form "Heading: Data".  The critical point is that each line in the
+elmheaders file must contain a colon.  If one or more lines in the
+elmheaders file is not correctly formatted, then form letters and
+other elm capabilities will not work correctly.
+
+Fix Information:
+
+The manual page for elm will be updated to indicate the restrictions
+on what may be put in the elmheaders file.  This will be done in release
+9.0.  The manual page will also be modified to give more information on 
+how one goes about sending a form letter, since this is not currently
+clearly explained.
+
+_____________________________________________________________
+
+KPR #: 5000616300 Product: S300 GENERAL HPUX     98680B       07.00
+
+One-line description:
+file is not recoverable if edited using vi and cnode goes down.
+
+Problem:
+
+Problem:  If a file is being edited on a c-node and that node goes down,
+no copy is saved in /usr/preserve.  No email messages are sent
+indicating a problem, and the file is not recoverable using "vi -r".
+
+Cause:
+
+When a system crashes, vi does not have time to save the temporary files
+out to /usr/preserve so they can be recovered.  However, if a standalone
+or cluster server was the system that crashed, then on bootup, it executes
+/usr/lib/expreserve to preserve Ex***** files that were in the /tmp
+directory when the system crashed.
+
+When a cnode crashes and boots up, it does not execute expreserve on
+/tmp because others may have a current vi session in progress in which
+temporary files are being kept in /tmp.  Expreserve would preserve a
+copy of the files being edited, and destroy the temporary files for the
+current vi sessions.
+
+One more caveat:  In 8.0, the environment variable TMPDIR may be
+specified by users for storing their temporary files (like the Ex*****
+files) in a directory other than /tmp.  Therefore, the expreserve which
+is executed on standalones, and cluster servers after a crash will not
+be able to find temporary files not stored in TMPDIR.  Use the same
+workaround listed below to get around this problem for 8.0.
+
+Workaround:
+
+The workaround is to have the superuser copy the Ex***** file to
+/usr/preserve.  The superuser should change the owner to be the original
+owner of the temporary file.  The original owner can then type "vi -r"
+to see which files are recoverable, and "vi -r filename" on the file
+that they wish to recover.
+
+Fix Information:
+
+A fix will be added to expreserve to allow normal users to the ability
+to preserve (and consequently recover) their own files for the 9.0
+release of HP-UX.
+
+________________________________________________________________________       
+SR # 4700982280 HPUX                 9245XA          B8.00 
+                                                                               
+One-line description:
+malloc defect corrupts user data                                               
+                                                                               
+Problem:                                                                  
+                                                                               
+Malloc(3C) in conjunction with user calls to brk() or sbrk()                   
+can corrupt user memory.                                                       
+                                                                               
+Cause:                                                                    
+                                                                               
+If (1) a user program calls brk() or sbrk() to increase the size               
+of the data segment and, (2) at some later time calls malloc() to              
+allocate a block and, (3) malloc must increase the size of the                 
+data segment to satisfy the request then, malloc may corrupt the               
+four bytes of memory directly preceding the previous end of the                
+data segment.                                                                  
+                                                                               
+There is no defect if the user program does not directly call                  
+brk() or sbrk().                                                               
+                                                                               
+                                                                               
+TEMPORARY SOLUTION TEXT:                                                       
+                                                                               
+There are two workarounds for this problem:                                    
+                                                                               
+1) Use the malloc(3X) allocator found in /usr/lib/libmalloc.a                  
+                                                                               
+2) When using sbrk() or brk() to allocate memory, allow for an                 
+   additional four bytes at the end of the allocated area.                     
+                                                                               
+Fix Information:                                                          
+                                                                               
+Fixed in HP-UX release 9.0                                                     
+                                                                               
+________________________________________________________________________
+
+SR # 4701010876 S300 GENERAL HPUX    98680B          08.00 
+                                                                               
+One-line description:
+
+libcurses and libmalloc lint libraries incorrectly installed: LFN system
+
+Problem:
+
+The compiled lint library files for libmalloc and libcurses are left in
+an inconsistent state after an 8.0 install or update to a long-filename
+(LFN) mixed cluster.  Only the s800 versions of these files are
+available after the update is completed.
+
+When the s300 8.0 bits are updated onto a LFN mixed cluster, the
+following error messages will appear in the C-TOOLS customize section of
+the file /tmp/update.log (lines had to be wrapped to avoid a line length
+limit in this report):
+
+mkdir: cannot create /usr/lib/llib-lcurses.ln: File exists
+mv: /usr/lib/llib-lcurses.ln+/HP-MC68020: rename: No such file or
+    directory
+mkdir: cannot create /usr/lib/llib-lmalloc.ln: File exists
+mv: /usr/lib/llib-lmalloc.ln+/HP-MC68020: rename: No such file or
+    directory
+
+Cause:
+
+This problem is caused by logic errors in the fileset C-TOOLS customize
+script.  Because of HP-UX's 14-character filename length default, these
+two files are shipped with their last characters truncated
+(/usr/lib/llib-lmalloc.l and /usr/lib/llib-lcurses.l).  The C-TOOLS
+customize script attempts to rename the compiled lint libraries for
+libmalloc and libcurses so that the lint program can find them on a LFN
+system (as /usr/lib/llib-lcurses.ln and /usr/lib/llib-lmalloc.ln).  (An
+underlying problem is that on a LFN system, the lint program could not
+find the files if they were left with the truncated, 14-character
+filename.)
+
+Workaround:
+
+The workaround for this LFN mixed cluster problem is, when using the
+libmalloc or libcurses lint libraries, to invoke the lint program on the
+s800 server.
+
+Fix Information:
+
+This problem will be fixed in HP-UX Release 9.0.
+
+________________________________________________________________________
+
+SR # 4701008656 S300 GENERAL HPUX    98680B          08.00 
+                                                                               
+One-line description:
+                                                                               
+ECC-TOOLS customize should remove PECC fileset if already on system            
+                                                                               
+                                                                               
+Problem:                                                                  
+                                                                               
+The PECC fileset is not removed when the ECC-TOOLS fileset is loaded.          
+It is possible for a customer to remove the PECC fileset, unknowingly          
+removing files from the ECC-TOOLS fileset.                                     
+                                                                               
+Cause:                                                                    
+                                                                               
+Oversight.                                                                     
+                                                                               
+Fix Information:                                                          
+                                                                               
+Don't remove the PECC fileset.                                                 
+Fixed in HP-UX release 9.0                                                     
+
+_________________________________________________________________________
+                                                                               
+SR # 4701010496 HPUX                 9245XA          08.00 
+                                                                               
+One-line description:
+SAM may sometimes remove an entry in /etc/checklist
+
+Problem:                                                                  
+                                                                               
+The problem is that SAM may remove an entry from /etc/checklist when           
+running on a cluster and when the entry includes a CDF in it.                  
+                                                                               
+This will only occur when the following tasks are performed:                        
+Add File System Swap                                                           
+Modify a Local File System                                                     
+Modify Device Swap                                                             
+Remove a Hard Disk Drive                                                       
+Change a Hard Disk Drive Address                                               
+                                                                               
+In order for SAM to remove the entry, it must be an NFS mount, you must        
+be running on a cluster, and the remote mount directory must include a CDF.       
+An example would be:                                                           
+                                                                               
+hpfclj:/usr/bin+/HP-MC68020/X11 /usr/bin/X11 nfs soft,ro 0 0 0                 
+                                                                               
+                                                                               
+Cause:                                                                    
+                                                                               
+The cause is that SAM is trying to collapse a CDF for the remote  mount        
+point, and since it is not a device file, it is failing.  Thus, that line
+is not written in /etc/checklist.                                              
+                                                                               
+                                                                               
+Workaround:                                                       
+                                                                               
+SAM keeps your old /etc/checklist in /etc/checklist.old, so you can copy
+the omitted line back from /etc/checklist.old to the /etc/checklist                
+                                                                               
+Fix Information:                                                          
+                                                                               
+This defect has been fixed for the next release.                               
+
+________________________________________________________________________
+
+SR # 4701010504 HPUX                 9245XA          08.00     
+                                                                               
+One-line description:
+SAM may do previously selected medianinit even if you cancel newfs             
+                                                                               
+Problem:                                                                
+                                                                               
+If the user goes into the Add a Hard Disk Drive or Add a Local File            
+System screen and answers "yes" to Create a New File System, and then          
+answers "yes" to Initializing the Disk and then presses "Done" on the          
+popup, and then answers "no" to Create a New File System, it does not          
+cancel the mediainit.                                                          
+                                                                               
+The workaround is to either press "Exit Task" in the popup, or to              
+re-enter the popup and explicitly set "Initializing the Disk" to be no.        
+                                                                               
+Cause:                                                                    
+                                                                               
+The cause is a global data structure that does not have the Initialize         
+Disk flag set back to "no" when the Create a New File System Field is          
+changed.                                                                       
+                                                                               
+Fix Information:                                                       
+                                                                               
+The workaround is that if you wish to cancel the mediainit, simply press       
+"Exit Task", and then re-enter the screen.  Another way is to answer 'y'       
+to Create a New File System, and then put 'n' in the Initialize disk           
+question.  Press 'Done', and then change the Create a New File System          
+field to 'n'.                                                                  
+
+___________________________________________________________________________
+
+KPR #: 4701010173   Product: SYMBOLIC DEBUG 68K   98680-02B        08.00
+
+One-line description:
+xdb cannot do stack trace on shared library core file
+
+Problem:
+    xdb cannot provide any useful information about a core file that is
+    produced when the routine that failed is within a shared library.
+
+Temporary solution:
+    If this occurs, link application with archive libraries.
+
+Fix information:
+    This defect will be fixed in a followup release.
+
+________________________________________________________________________
+
+KPR #: 4701010181   Product: SYMBOLIC DEBUG 68K   98680-02B        08.00
+
+One-line description:
+pxdb internal warning: cu[N]: SLT_XXX[M] out of synch - confusing
+
+Problem:
+    When attempting to debug a program that contains one or more modules
+    compiled (with -g) using a 7.40 version of the compiler, occasionally
+    a message of this form may appear:
+
+      pxdb internal warning: cu[nn]: SLT_???[mm] out of synch
+      Please contact your HP Support representative
+
+    where '???' is one of MOD, FUNC, END, or SRCFILE.
+
+    This message indicates that the old module(s) ("dot-o files")
+    contain symbolic-debug information which is erroneous, but usually
+    not fatally so.  The pxdb pre-preprocessor now detects these
+    inconsistencies, where earlier releases did not.  We hope to flush
+    out all these occurrances over time.
+
+    While the warning itself is not usually fatal, the user may experience
+    some unusual behavior when debugging the program.  Usually it will not
+    be a problem.
+
+    Occasionally the above warning may be followed by one of the messages:
+	pxdb: invalid debug info. abort
+    or
+	pxdb: internal error. File won't be debuggable
+		(still a valid executable)
+
+    This may indicate that the current compiler is still generating
+    erroneous symbolic-debug information.
+
+Temporary solution:
+    Ensuring that all modules of the program are compiled with an 8.0
+    compiler should eliminate the cause of these messages.
+    
+    If the fatal error continues to occur, the only workaround is to
+    turn symbolic-debugging (-g) off for the offending module.
+    The module can be identified with:
+		% /usr/bin/pxdb -x /dev/null *.o
+    and noting which .o generates the error.
+
+    For C programs compiled and linked with -Aa, eliminating the -Aa
+    from the link-phase may remove some of the causes.
+
+    Should you continue to see this message, please contact HP Support and
+    be prepared to provide them with the source of the offending module(s).
+    This will enable us to continue to eliminate any further causes in the
+    future.
+
+Fix information:
+    This defect will be fixed in a future release.
+________________________________________________________________________
+
+KPR #: 4701010165   Product: SYMBOLIC DEBUG 68K   98680-02B        08.00
+
+One-line description:
+"p *pointervar" prints meaningless data in some cases (X11/Motif)
+
+Problem:
+    In instances where xdb has incomplete type information for a pointer
+    to a data object, it cannot give meaningful values when attempting to
+    print that object (dereference the pointer).
+
+    The submitter's example attempts to print a "widget", as defined by
+    the X11 Programming Environment, using the 7.0/800 xdb.  A meaningless
+    string results.  Later releases of the debugger do better than print
+    a meaningless string, but the basic problem remains - no meaningful
+    data (other than the widget's address) can be printed.
+
+    The following example clearly illustrates the problem.
+
+                    * * * * * * * * * * * * * * * *
+
+    The standard include file <X11/Intrinsic.h> contains a definition like
+    this:
+
+            typedef struct _WidgetRec *Widget;
+
+    Note that struct _WidgetRec is not defined within this file.  It is
+    defined in <X11/CoreP.h>:
+
+            typedef struct _CorePart {
+                Widget          self;
+                ...
+            } CorePart;
+
+            typedef struct _WidgetRec {
+                CorePart    core;
+             } WidgetRec, CoreRec;
+
+    Some X applications would normally treat a 'Widget' as an abstract
+    ("opaque") object, and interface with (non-debuggable) X libraries
+    using types defined in <X11/Intrinsic.h> only.
+
+    The X libraries would, of course, need to include <X11/CoreP.h> in
+    some way or another, in order to treat Widgets as concrete objects
+    (pointer to struct _WidgetRec).
+
+    Since the libraries are not compiled with -g, the symbolic debug
+    information for the application can indicate to xdb that "type Widget
+    is a pointer to a structure named _WidgetRec" (from Intrinsic.h).
+    Conversely, "structure _WidgetRec has the following fields..."  cannot
+    be determined, since no symbolic information from CoreP.h is carried
+    through from the libraries.
+
+    Using this scenario, and an object declared thusly:
+
+            Widget thisWidg = CreateAWidget();
+                            /* assume CreateAWidget() is in a library */
+
+    Some earlier releases of the debugger treat pointers to unknown types
+    as pointers to character, and behave as follows:
+
+            >p thisWidg\t
+            char *thisWidg
+            >p thisWidg
+            thisWidg = "\002M?\009("
+            # default format for (char *) is string
+            >p *thisWidg
+            0x40006240      \002 (^B)
+
+    Applications debugged using the 7.40 (s300/400) and all 8.0-based
+    debuggers can provide a little more useful information, but the
+    contents of a Widget is still unknown:
+
+            >p thisWidg\t
+            struct _WidgetRec *thisWidg
+            >p thisWidg
+            thisWidg = 0x40006240
+            >p *thisWidg
+            0x40006240 struct _WidgetRec {
+            }
+            >p *thisWidg
+
+Temporary solution:
+    For the submitter's case, either directly or indirectly #include the
+    header-file <X11/CoreP.h> into a module of the application being
+    debugged.
+
+    In general:  libraries dealing with opaque types (for which the
+    application programmer uses only a pointer) should be compiled
+    debuggable where possible, or the full definition of the abstract type
+    must somehow be included into the application for debugging purposes
+    only.
+
+
+Fix information:
+    This problem is an artifact of some abstracted programming
+    environments (and source structuring), and must be addressed by
+    method.  There is no "fix" possible in the debugger.
+
+________________________________________________________________________
+
+KPR #: 4700976316   Product: SYMBOLIC DEBUG 68K   98680-02B        08.00
+
+One-line description:
+Xdb cannot single-step into shared-library; adb can
+
+Problem:
+    Single-stepping into shared-libraries (at the instruction level)
+    is allowed by adb, but disallowed by xdb.
+
+Cause:
+    Because shared-libraries are indeed "shared" (read-only), xdb cannot
+    support debugging of them, as this would require the ability to
+    write to the library to set breakpoints.  Single-stepping into them
+    is also disallowed, since under certain circumstances, xdb attempts
+    to set internal (user-invisible) breakpoints while single-stepping.
+
+Temporary solution:
+    There is no workaround other than to use adb or link the application
+    with archive libraries.
+
+Fix information:
+    This defect (enhancement) is expected to be fixed in a followup
+    release.
+
+________________________________________________________________________
+
+KPR #: ----------   Product: SYMBOLIC DEBUG 68K   98680-02B        08.00
+
+One-line description:
+"p any_shlib_func()" may result in segmentation violation 
+
+Problem:
+    Calling from the command-line a function that is within a shared
+    library will fail with a segmentation violation only if the function
+    is not referenced by the program at all, or if it is referenced but
+    has not yet been called by the program.
+
+Cause:
+    This defect is caused by the delayed ("smart") binding feature of
+    the dynamic loader: symbols referenced by a shared-library function
+    are not dynamically bound until that function is called.  The
+    mechanism used by the debugger to call functions from the command-line
+    does not trigger this binding.
+
+Temporary solution:
+
+    For functions which the program references, ensure that the
+    command-line call is not made until that function has been called by
+    the program.  For function that are not referenced, there is no
+    workaround other than to generate references, and the ability to
+    trigger the binding through a programmatic call.  For example, to allow
+    calling getpid(2) and getgid(2) from the command-line while debugging a
+    program that does not call either one, a function like this linked into
+    the program will facilitate that:
+
+	void _debug_set_cmdline_funcs()
+	{
+	    getpid();
+	    getgid();
+	    return 0;
+	}
+
+    Before calling either getpid() or getgid() from the command-line,
+    the function _debug_set_cmdline_funcs() must be called first:
+
+	> p _debug_set_cmdline_funcs()
+	_debug_set_cmdline_funcs = 0
+	> p getpid()
+	getpid = 2314
+
+Fix information:
+    This defect will be fixed in a followup release.
+
+________________________________________________________________________
+
+KPR #: ----------   Product: SYMBOLIC DEBUG 68K   98680-02B        07.40
+
+One-line description:
+Debugger cannot deal with structures with same name in different scopes
+
+Problem:
+    In the case of several user defined types that have the same name but
+    represent different types, the debugger assumes that all the types are
+    the same.  This makes it impossible to debug objects of different types
+    with the same name that come from different compilation units.  Xdb
+    only keeps the first definition it finds and assumes that all object
+    with the same type name are the same kind of objects.
+
+Cause:
+    The symbolic-debug preprocessor (/usr/bin/pxdb) merges all the
+    (unscoped) named types from the different compilation units into one
+    common table.  In doing so it assumes that any successive types with
+    the same name are the same type as the first that appears in
+    link-order.
+
+Temporary solution:
+
+    The following workarounds are possible:
+ 
+        1. Rename one of the types in the source
+
+        2. Add a #define that effectively renames the type for the compiler;
+	   For example:
+
+		#define common_name unique_name	   /* add this line */
+		struct common_name {
+			..
+		} some_struct_var;
+
+	3. Switch the order of linking so that the structure definition for
+	   the object that needs to be debugged is found first.
+
+	4. Turn the debug flag (-g) off on all files that declare a type
+	   with the same name but with a different type than the one of the
+	   object that needs to be debugged.
+
+	5. Link as the first object-file (.o) a module which references the
+	   type that is needed for debugging.  For example:
+
+		/* dummy.c */
+		#include "somehdrs.h"	
+		  /* somehdrs.h defines the type we want to debug with */
+		static struct common_name _dummy_var ;
+
+	    and:
+		cc -g -c dummy.c
+		cc -o myprog dummy.o ...
+
+Fix information:
+    This defect (enhancement) is expected to be fixed in a followup
+    release.
+________________________________________________________________________
+
+SR # 4701011593  Product: CE Utilities
+
+One Line Description:
+The CRT Adjust and SFT Graphics CE Utilities require the Starbase prog env.
+
+
+Problem:
+
+The CRT Adjust CE Utility, and the Graphics section of the SFT CE Utility,
+will not work unless the Starbase programming environment is present.
+This environment is not part of the Run-Time product, but is in the
+Developer's Bundle.  It is contained in the fileset 'STAR-PGM'.  If this
+environment is not present when these utilities are run, the error message
+   Can't find include file starbase.c.h
+is displayed.
+
+
+Fix Information:
+
+Will be corrected in a future release.
+

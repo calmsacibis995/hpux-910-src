@@ -1,0 +1,1065 @@
+/* @(#) $Revision: 70.1 $    */
+
+/* This file is run through "cpp" and then through one of two awk scrips:   */
+/* 									    */
+/* Pairs of ivalues and corresponding skeleton opcode bit patterns	    */
+/* This file used by 2 awk scripts:					    */
+/*   gendefs.awk produces ivalues.h, a sequential list of defines for the   */
+/*   I_xxx's.  								    */
+/*   genops.awk produces iops.c, a C program which declares a sequential    */
+/*   array of the bit patterns						    */
+/* 									    */
+/* File format - The file is run through cpp first, so any # defines and    */
+/*               c style comments are valid.				    */
+/* 									    */
+/* Forms that are for generic pattern matching only, but are always	    */
+/* replaced by a more specific form (eg, I_ADD) are arbitrarily given a     */
+/* bit pattern of all zeroes.  The pass2 bit generation never accesses      */
+/* these dummy patterns.						    */
+
+I_ABCD		0x0000 		abcd.b
+I_ABCD_REG	0xc100 		abcd.b %dy,%dx
+I_ABCD_MEM	0xc108 		abcd.b -(%ay),-(%ax)
+I_ADD		0x0000		add.S 
+I_ADD_REG	0xd000		add.S EA,%dn
+I_ADD_MEM	0xd100		add.S %dn,EA
+I_ADDI		0x0600		add.S &I,EA
+I_ADDA		0xd0c0		add.A EA,%an
+I_ADDQ		0x5000		add.S &Q,EA
+I_ADDX		0x0000		addx.S
+I_ADDX_REG	0xd100		addx.S %dy,%dx
+I_ADDX_MEM	0xd108		addx.S -(%ay),-(%ax)
+I_AND		0x0000		and.S
+I_AND_REG	0xc000		and.S EA,%dn
+I_AND_MEM	0xc100		and.S %dn,EA
+I_ANDI		0x0200		and.S &I,EA
+I_ANDI_CCR	0x023c		and.b &I,%cc
+I_ANDI_SR	0x027c		and.w &I,%sr
+I_ASL		0x0000		asl.S 
+I_ASL_REG	0xe120		asl.S %dx,%dy
+I_ASL_IMM	0xe100		asl.S &Q,%dy
+I_ASL_MEM	0xe1c0		asl.w EA
+I_ASR		0x0000		asr.S
+I_ASR_REG	0xe020		asr.S %dx,%dy
+I_ASR_IMM	0xe000		asr.S &Q,%dy
+I_ASR_MEM	0xe0c0		asr.w EA
+I_BCC		0x6400		bcc L
+I_BCS		0x6500		bcs L
+I_BEQ		0x6700		beq L
+I_BGE		0x6c00		bge L
+I_BGT		0x6e00		bgt L
+I_BHI		0x6200		bhi L
+I_BLE		0x6f00		ble L
+I_BLS		0x6300		bls L
+I_BLT		0x6d00		blt L
+I_BMI		0x6b00		bmi L
+I_BNE		0x6600		bne L
+I_BPL		0x6a00		bpl L
+I_BVC		0x6800		bvc L
+I_BVS		0x6900		bvs L
+I_BCHG		0x0000		bchg 
+I_BCHG_REG	0x0140		bchg %dn,EA
+I_BCHG_IMM	0x0840		bchg &I,EA
+I_BCLR		0x0000		bclr 
+I_BCLR_REG	0x0180		bclr %dn,EA
+I_BCLR_IMM	0x0880		bclr &I,EA
+I_BFCHG		0xeac0		bfchg EA{offset:width}
+I_BFCLR		0xecc0		bfclr EA{offset:width}
+I_BFEXTS	0xebc0		bfexts EA{offset:width},%dn
+I_BFEXTU	0xe9c0		bfextu EA{offset:width},%dn
+I_BFFFO		0xedc0		bfffo EA{offset:width},%dn
+I_BFINS		0xefc0		bfins %dn,EA{offset:width}
+I_BFSET		0xeec0		bfset EA{offset:width}
+I_BFTST		0xe8c0		bftst EA{offset:width}
+I_BKPT		0x4848		bkpt &I
+I_BRA		0x6000		bra L
+I_BSET		0x0000		bset 
+I_BSET_REG	0x01c0		bset %dn,EA
+I_BSET_IMM	0x08c0		bset &I,EA
+I_BSR		0x6100		bsr L
+I_BTST		0x0000		btst 
+I_BTST_REG	0x0100		btst %dn,EA
+I_BTST_IMM	0x0800		btst &I,EA
+I_CALLM		0x06c0		callm &I,EA
+I_CAS		0x08c0		cas %dx,%dy,EA
+I_CAS2		0x08fc		cas2 %dx:%dy,%dx:%dy,%rx:%ry
+I_CHK		0x4000		chk EA,%dn
+I_CHK2		0x00c0		chk2 EA,%rn
+# ifdef OFORTY
+I_CINVL		0xf408		cinvl xC,(%an)
+I_CINVP		0xf410		cinvl xC,(%an)
+I_CINVA		0xf418		cinvl xC
+# endif
+I_CLR		0x4200		clr.S EA
+I_CMP		0xb000		cmp.S %dn,EA
+I_CMPA		0xb0c0		cmp.A %an,EA
+I_CMPI		0x0c00		cmp.S EA,&I
+I_CMPM		0xb108		cmp.S (%ax)+,(%ay)+
+I_CMP2		0x00c0		cmp.S %rn,EA
+# ifdef OFORTY
+I_CPUSHL	0xf428		cpushl xC,(%an)
+I_CPUSHP	0xf430		cpushl xC,(%an)
+I_CPUSHA	0xf438		cpushl xC
+# endif
+I_DBCC		0x54c8		dbcc %dn,L
+I_DBCS		0x55c8		dbcs %dn,L
+I_DBEQ		0x57c8		dbeq %dn,L
+I_DBF		0x51c8		dbf %dn,L
+I_DBGE		0x5cc8		dbge %dn,L
+I_DBGT		0x5ec8		dbgt %dn,L
+I_DBHI		0x52c8		dbhi %dn,L
+I_DBLE		0x5fc8		dble %dn,L
+I_DBLS		0x53c8		dbls %dn,L
+I_DBLT		0x5dc8		dblt %dn,L
+I_DBMI		0x5bc8		dbmi %dn,L
+I_DBNE		0x56c8		dbne %dn,L
+I_DBPL		0x5ac8		dbpl %dn,L
+I_DBT		0x50c8		dbt %dn,L
+I_DBVC		0x58c8		dbvc %dn,L
+I_DBVS		0x59c8		dbvs %dn,L
+/*  "dbra" and "dbr" are mapped to "dbt" in the symbol table.	*/
+/*		0x50c8		dbra %dn,L			*/
+/*		0x50c8		dbr %dn,L			*/
+I_DIVS		0x0000		divs.S
+I_DIVS1		0x81c0		divs.w EA,%dx
+I_DIVS2		0x4c40		divs.l EA,%dx
+I_DIVS3		0x4c40		divs.l EA,%dx:%dy
+I_DIVSL		0x4c40		tdivs.l EA,%dx:%dy
+I_TDIVS		0x0000		tdivs.l 
+I_DIVU		0x0000		divu.S
+I_DIVU1		0x80c0		divu.w EA,%dx
+I_DIVU2		0x4c40		divu.l EA,%dx
+I_DIVU3		0x4c40		divu.l EA,%dx:%dy
+I_DIVUL		0x4c40		tdivu.l EA,%dx:%dy
+I_TDIVU		0x0000		tdivu.S
+I_EOR		0xb100		eor.S %dn,EA
+I_EORI		0x0a00		eor.S &I,EA
+I_EORI_CCR	0x0a3c		eor.b &I,%cc
+I_EORI_SR	0x0a7c		eor.w &I,%sr
+I_EXG		0x0000		exg 
+I_EXG_DD	0xc140		exg %dx,%dy
+I_EXG_AA	0xc148		exg %ax,%ay
+I_EXG_DA	0xc188		exg %dx,%ay
+I_EXG_AD	0xc188		exg %ax,%dy
+I_EXT		0x4800		ext %dn
+I_EXTB		0x49c0		extb.l %dn
+I_EXTW		0x0000		extw.l %dn
+I_ILLEGAL	0x4afc		illegal
+I_JMP		0x4ec0		jmp EA
+I_JSR		0x4e80		jsr EA
+I_LEA		0x41c0		lea.l EA,%an
+I_LINK		0x0000		link %an,&I
+I_LINK_WORD	0x4e50		link %an,&I
+I_LINK_LONG	0x4808		link %an,&I
+I_LSL		0x0000		lsl 
+I_LSL_REG	0xe128		lsl %dx,%dy
+I_LSL_IMM	0xe108		lsl &Q,%dy
+I_LSL_MEM	0xe3c0		lsl EA
+I_LSR		0x0000		lsr 
+I_LSR_REG	0xe028		lsr %dx,%dy
+I_LSR_IMM	0xe008		lsr &Q,%dy
+I_LSR_MEM	0xe2c0		lsr EA
+I_MOVE		0x0000		mov.S EA,EA
+I_MOVEA		0x0040		mov.A EA,%an
+I_MOVE_from_CCR	0x42c0		mov.w %cc,EA
+I_MOVE_to_CCR	0x44c0		mov.w EA,%cc
+I_MOVE_from_SR	0x40c0		mov.w %sr,EA
+I_MOVE_to_SR	0x46c0		mov.w EA,%sr
+I_MOVE_to_USP	0x4e60		mov.l %an,%usp
+I_MOVE_from_USP	0x4e68		mov.l %usp,%an
+I_MOVEC		0x0000		mov.l
+I_MOVEC_CTL	0x4e7b		mov.l %rn,%rc
+I_MOVEC_REG	0x4e7a		mov.l %rc,%rn
+I_MOVEM		0x0000		movm.A
+I_MOVEM_MEM	0x4880		movm.A &I,EA
+I_MOVEM_REG	0x4c80		movm.A EA,&I
+I_MOVEP		0x0000		movp.A
+I_MOVEP_MEM	0x0188		movp.A %dx,d(%ay)
+I_MOVEP_REG	0x0108		movp.A d(%ay),%dx
+I_MOVEQ		0x7000		mov.l &I,%dn
+I_MOVES		0x0000		movs.S
+I_MOVES_MEM	0x0e00		movs.S %rn,EA
+I_MOVES_REG	0x0e00		movs.S EA,%rn
+# ifdef OFORTY
+I_MOVE16			0x0000	move16
+I_MOVE16_INC_INC	0xf620	move16 (%an)+,(%am)+
+I_MOVE16_INC_ABS	0xf600	move16 (%an)+,xxxx
+I_MOVE16_ABS_INC	0xf600	move16 xxxx,(%an)+
+I_MOVE16_IND_ABS	0xf600	move16 (%an),xxxx
+I_MOVE16_ABS_IND	0xf600	move16 xxxx,(%an)
+# endif
+I_MULS		0x0000		muls.S
+I_MULS1		0xc1c0		muls.w EA,%dx
+I_MULS2		0x4c00		muls.l EA,%dx
+I_MULS3		0x4c00		muls.l EA,%dx:%dy
+I_TMULS		0x0000		tmuls.l EA,%dx --> muls.l
+I_MULU		0x0000		mulu.S
+I_MULU1		0xc0c0		mulu.w EA,%dx
+I_MULU2		0x4c00		mulu.l EA,%dx
+I_MULU3		0x4c00		mulu.l EA,%dx:%dy
+I_TMULU		0x0000		tmulu.l EA,%dx --> muls.l
+I_NBCD		0x4800		nbcd.b EA
+I_NEG		0x4400		neg.S EA
+I_NEGX		0x4000		negx.S EA
+I_NOP		0x4e71		nop
+I_NOT		0x4600		not.S EA
+I_OR		0x0000		or.S
+I_OR_REG	0x8000		or.S EA,%dn
+I_OR_MEM	0x8100		or.S %dn,EA
+I_ORI		0x0000		or.S &I,EA
+I_ORI_CCR	0x003c		or.S &I,%cc
+I_ORI_SR	0x007c		or.S &I,%sr
+I_PACK		0x0000		pack 
+I_PACK_MEM	0x8148		pack -(%ax),-(%ay),&I
+I_PACK_REG	0x8140		pack %dx,%dy,&I
+I_PEA		0x4840		pea.l EA
+I_RESET		0x4e70		reset
+I_ROL		0x0000		rol.S
+I_ROL_REG	0xe138		rol.S %dx,%dy
+I_ROL_IMM	0xe118		rol.S &Q,%dy
+I_ROL_MEM	0xe7c0		rol.w EA
+I_ROR		0x0000		ror.S 
+I_ROR_REG	0xe038		ror.S %dx,%dy
+I_ROR_IMM	0xe018		ror.S &Q,%dy
+I_ROR_MEM	0xe6c0		ror.w EA
+I_ROXL		0x0000		roxl.S
+I_ROXL_REG	0xe130		roxl.S %dx,%dy
+I_ROXL_IMM	0xe110		roxl.S &Q,%dy
+I_ROXL_MEM	0xe5c0		roxl.w EA
+I_ROXR		0x0000		roxr.S
+I_ROXR_REG	0xe030		roxr.S %dx,%dy
+I_ROXR_IMM	0xe010		roxr.S &Q,%dy
+I_ROXR_MEM	0xe4c0		roxr.w EA
+I_RTD		0x4e74		rtd &I
+I_RTE		0x4e73		rte
+I_RTM		0x0000		rtm
+I_RTM_AREG	0x06c8		rtm %an
+I_RTM_DREG	0x06c0		rtm %dn
+I_RTR		0x4e77		rtr
+I_RTS		0x4e75		rts
+I_SBCD		0x0000		sbcd.b
+I_SBCD_REG	0x8100		sbcd.b %dy,%dx
+I_SBCD_MEM	0x8108		sbcd.b -(%ay),-(%ax)
+I_SCC		0x54c0		scc.b EA
+I_SCS		0x55c0		scs.b EA
+I_SEQ		0x57c0		seq.b EA
+I_SF		0x51c0		sf.b EA
+I_SGE		0x5cc0		sge.b EA
+I_SGT		0x5ec0		sgt.b EA
+I_SHI		0x52c0		shi.b EA
+I_SLE		0x5fc0		sle.b EA
+I_SLS		0x53c0		sls.b EA
+I_SLT		0x5dc0		slt.b EA
+I_SMI		0x5bc0		smi.b EA
+I_SNE		0x56c0		sne.b EA
+I_SPL		0x5ac0		spl.b EA
+I_ST		0x50c0		st.b EA
+I_SVC		0x58c0		svc.b EA
+I_SVS		0x59c0		svs.b EA
+I_STOP		0x4e72		stop &I
+I_SUB		0x0000		sub.S
+I_SUB_REG	0x9000		sub.S EA,%dn
+I_SUB_MEM	0x9100		sub.S %dn,EA
+I_SUBA		0x90c0		sub.A EA,%an
+I_SUBI		0x0400		sub.S &I,EA
+I_SUBQ		0x5100		sub.S &Q,EA
+I_SUBX		0x0000		subx.S
+I_SUBX_REG	0x9100		subx.S %dy,%dx
+I_SUBX_MEM	0x9108		subx.S -(%ay),-(%ax)
+I_SWAP		0x4840		swap.w %dn
+I_TAS		0x4ac0		tas.b EA
+I_TRAP		0x4e40		trap &I
+I_TRAPV		0x4e76		trapv
+I_TCC		0x54fc		tcc
+I_TCS		0x55fc		tcs
+I_TEQ		0x57fc		teq
+I_TF		0x51fc		tf
+I_TGE		0x5cfc		tge
+I_TGT		0x5efc		tgt
+I_THI		0x52fc		thi
+I_TLE		0x5ffc		tle
+I_TLS		0x53fc		tls
+I_TLT		0x5dfc		tlt
+I_TMI		0x5bfc		tmi
+I_TNE		0x56fc		tne
+I_TPL		0x5afc		tpl
+I_TT		0x50fc		tt
+I_TVC		0x58fc		tvc
+I_TVS		0x59fc		tvs
+I_TPCC		0x54f8		tpcc &I
+I_TPCS		0x55f8		tpcs &I
+I_TPEQ		0x57f8		tpeq &I
+I_TPF		0x51f8		tpf &I
+I_TPGE		0x5cf8		tpge &I
+I_TPGT		0x5ef8		tpgt &I
+I_TPHI		0x52f8		tphi &I
+I_TPLE		0x5ff8		tple &I
+I_TPLS		0x53f8		tpls &I
+I_TPLT		0x5df8		tplt &I
+I_TPMI		0x5bf8		tpmi &I
+I_TPNE		0x56f8		tpne &I
+I_TPPL		0x5af8		tppl &I
+I_TPT		0x50f8		tpt &I
+I_TPVC		0x58f8		tpvc &I
+I_TPVS		0x59f8		tpvs &I
+I_TST		0x4a00		tst.S EA
+I_UNLK		0x4e58		unlk %an
+I_UNPK		0x0000		unpk
+I_UNPK_REG	0x8180		unpk %dx,%dy,&I
+I_UNPK_MEM	0x8188		unpk -(%ax),-(%ay),&I
+
+/* generic forms, used in template matching only.	*/
+I_Bcc		0x0000
+I_DBcc		0x0000
+I_Scc		0x0000
+I_Tcc		0x0000
+I_TPcc		0x0000
+
+/* 68881								*/
+/* The templates in vtables.c for the 68881 use "generic" templates for	*/
+/* the I_Fmop's and I_Fdop's.  A generic op (e.g., I_FABS) is mapped to	*/
+/* the I_FABS_EA form by adding 1, to the I_FABS_FPDREG form by adding	*/
+/* 2.  									*/
+/* **** This requires that any opcode that is mapped via the generics	*/
+/* I_Fmop or I_Fdop MUST have 3 consecutive entries in this table, in	*/
+/* the order as shown for FABS:						*/
+/*	I_FABS		0x0000	fabs					*/
+/*	I_FABS_EA	0x401c  fabs <ea>,%fpn				*/
+/*	I_FABS_FPDREG	0x001c  fabs %fpm,%fpn				*/
+/*									*/
+/* 68881 instructions are classed into 8 types (based on bits [8..6])   */	
+/* of the operation word.  For types 0 and 1, the instruction has two   */
+/* "core" words, and this table defines the SECOND word.  The other     */
+/* types have	 one core word, which is the bit value in this table.   */
+
+
+I_FABS			0x0000
+I_FABS_EA		0x4018
+I_FABS_FPDREG		0x0018
+I_FACOS			0x0000
+I_FACOS_EA		0x401c
+I_FACOS_FPDREG		0x001c
+I_FADD			0x0000
+I_FADD_EA		0x4022
+I_FADD_FPDREG		0x0022
+I_FASIN			0x0000
+I_FASIN_EA		0x400c
+I_FASIN_FPDREG		0x000c
+I_FATAN			0x0000
+I_FATAN_EA		0x400a
+I_FATAN_FPDREG		0x000a
+I_FATANH		0x0000
+I_FATANH_EA		0x400d
+I_FATANH_FPDREG		0x000d
+
+I_FBF			0xf080
+I_FBEQ			0xf081
+I_FBOGT			0xf082
+I_FBOGE			0xf083
+I_FBOLT			0xf084
+I_FBOLE			0xf085
+I_FBOGL			0xf086
+I_FBOR			0xf087
+I_FBUN			0xf088
+I_FBUEQ			0xf089
+I_FBUGT			0xf08a
+I_FBUGE			0xf08b
+I_FBULT			0xf08c
+I_FBULE			0xf08d
+I_FBNEQ			0xf08e
+I_FBT			0xf08f
+I_FBSF			0xf090
+I_FBSEQ			0xf091
+I_FBGT			0xf092
+I_FBGE			0xf093
+I_FBLT			0xf094
+I_FBLE			0xf095
+I_FBGL			0xf096
+I_FBGLE			0xf097
+I_FBNGLE		0xf098
+I_FBNGL			0xf099
+I_FBNLE			0xf09a
+I_FBNLT			0xf09b
+I_FBNGE			0xf09c
+I_FBNGT			0xf09d
+I_FBSNEQ		0xf09e
+I_FBST			0xf09f
+
+I_FCMP			0x0000
+I_FCMP_EA		0x4038
+I_FCMP_FPDREG		0x0038
+I_FCOS			0x0000
+I_FCOS_EA		0x401d
+I_FCOS_FPDREG		0x001d
+I_FCOSH			0x0000
+I_FCOSH_EA		0x4019
+I_FCOSH_FPDREG		0x0019
+
+# ifdef OFORTY
+I_FDABS			0x0000
+I_FDABS_EA		0x405c
+I_FDABS_FPDREG	0x005c
+I_FDADD			0x0000
+I_FDADD_EA		0x4066
+I_FDADD_FPDREG	0x0066
+I_FDDIV			0x0000
+I_FDDIV_EA		0x4064
+I_FDDIV_FPDREG	0x0064
+I_FDMOVE		0x0000
+I_FDMOVE_EA		0x4044
+I_FDMOVE_FPDREG	0x0044
+I_FDMUL			0x0000
+I_FDMUL_EA		0x4067
+I_FDMUL_FPDREG	0x0067
+I_FDNEG			0x0000
+I_FDNEG_EA		0x405e
+I_FDNEG_FPDREG	0x005e
+I_FDSQRT		0x0000
+I_FDSQRT_EA		0x4045
+I_FDSQRT_FPDREG	0x0045
+I_FDSUB			0x0000
+I_FDSUB_EA		0x406c
+I_FDSUB_FPDREG	0x006c
+# endif
+I_FDBF			0x0000
+I_FDBEQ			0x0001
+I_FDBOGT		0x0002
+I_FDBOGE		0x0003
+I_FDBOLT		0x0004
+I_FDBOLE		0x0005
+I_FDBOGL		0x0006
+I_FDBOR			0x0007
+I_FDBUN			0x0008
+I_FDBUEQ		0x0009
+I_FDBUGT		0x000a
+I_FDBUGE		0x000b
+I_FDBULT		0x000c
+I_FDBULE		0x000d
+I_FDBNEQ		0x000e
+I_FDBT			0x000f
+I_FDBSF			0x0010
+I_FDBSEQ		0x0011
+I_FDBGT			0x0012
+I_FDBGE			0x0013
+I_FDBLT			0x0014
+I_FDBLE			0x0015
+I_FDBGL			0x0016
+I_FDBGLE		0x0017
+I_FDBNGLE		0x0018
+I_FDBNGL		0x0019
+I_FDBNLE		0x001a
+I_FDBNLT		0x001b
+I_FDBNGE		0x001c
+I_FDBNGT		0x001d
+I_FDBSNEQ		0x001e
+I_FDBST			0x001f
+
+I_FDIV			0x0000
+I_FDIV_EA		0x4020
+I_FDIV_FPDREG		0x0020
+I_FETOX			0x0000
+I_FETOX_EA		0x4010
+I_FETOX_FPDREG		0x0010
+I_FETOXM1		0x0000
+I_FETOXM1_EA		0x4008
+I_FETOXM1_FPDREG	0x0008
+I_FGETEXP		0x0000
+I_FGETEXP_EA		0x401e
+I_FGETEXP_FPDREG	0x001e
+I_FGETMAN		0x0000
+I_FGETMAN_EA		0x401f
+I_FGETMAN_FPDREG	0x001f
+I_FINT			0x0000
+I_FINT_EA		0x4001
+I_FINT_FPDREG		0x0001
+I_FINTRZ		0x0000
+I_FINTRZ_EA		0x4003
+I_FINTRZ_FPDREG		0x0003
+I_FLOG10		0x0000
+I_FLOG10_EA		0x4015
+I_FLOG10_FPDREG		0x0015
+I_FLOG2			0x0000
+I_FLOG2_EA		0x4016
+I_FLOG2_FPDREG		0x0016
+I_FLOGN			0x0000
+I_FLOGN_EA		0x4014
+I_FLOGN_FPDREG		0x0014
+I_FLOGNP1		0x0000
+I_FLOGNP1_EA		0x4006
+I_FLOGNP1_FPDREG	0x0006
+I_FMOD			0x0000
+I_FMOD_EA		0x4021
+I_FMOD_FPDREG		0x0021
+
+I_FMOVE			0x0000
+I_FMOVE_from_EA		0x4000
+I_FMOVE_FPDREG		0x0000
+I_FMOVE_to_EA		0x6000
+I_FMOVE_toEA_PK		0x6000
+I_FMOVE_to_FPCREG	0x8000
+I_FMOVE_from_FPCREG	0xa000
+I_FMOVECR		0x5c00
+
+I_FMOVEM		0x0000
+I_FMOVEM_to_FPCREG	0x8000
+I_FMOVEM_from_FPCREG	0xa000
+I_FMOVEM_toFP_mode2	0xd000
+I_FMOVEM_toFP_mode3	0xd800
+I_FMOVEM_fromFP_mode0	0xe000
+I_FMOVEM_fromFP_mode1	0xe800
+I_FMOVEM_fromFP_mode2	0xf000
+I_FMOVEM_fromFP_mode3	0xf800
+
+I_FMUL			0x0000
+I_FMUL_EA		0x4023
+I_FMUL_FPDREG		0x0023
+I_FNEG			0x0000
+I_FNEG_EA		0x401a
+I_FNEG_FPDREG		0x001a
+I_FNOP			0xf080
+I_FREM			0x0000
+I_FREM_EA		0x4025
+I_FREM_FPDREG		0x0025
+I_FRESTORE		0xf140
+# ifdef OFORTY
+I_FSABS			0x0000
+I_FSABS_EA		0x4058
+I_FSABS_FPDREG	0x0058
+I_FSADD			0x0000
+I_FSADD_EA		0x4062
+I_FSADD_FPDREG	0x0062
+I_FSDIV			0x0000
+I_FSDIV_EA		0x4060
+I_FSDIV_FPDREG	0x0060
+I_FSMOVE		0x0000
+I_FSMOVE_EA		0x4040
+I_FSMOVE_FPDREG	0x0040
+I_FSMUL			0x0000
+I_FSMUL_EA		0x4063
+I_FSMUL_FPDREG	0x0063
+I_FSNEG			0x0000
+I_FSNEG_EA		0x405a
+I_FSNEG_FPDREG	0x005a
+I_FSSQRT		0x0000
+I_FSSQRT_EA		0x4041
+I_FSSQRT_FPDREG	0x0041
+I_FSSUB			0x0000
+I_FSSUB_EA		0x4068
+I_FSSUB_FPDREG	0x0068
+# endif
+I_FSAVE			0xf100
+I_FSCALE		0x0000
+I_FSCALE_EA		0x4026
+I_FSCALE_FPDREG		0x0026
+
+/* Note: don't change the ordering of these,  there are range checks	*/
+/* in ea.c (operation_base_size()) that check for			*/
+/*     I_FSF <= ivalue <= I_FSST					*/
+I_FSF		0x0000
+I_FSEQ		0x0001
+I_FSOGT		0x0002
+I_FSOGE		0x0003
+I_FSOLT		0x0004
+I_FSOLE		0x0005
+I_FSOGL		0x0006
+I_FSOR		0x0007
+I_FSUN		0x0008
+I_FSUEQ		0x0009
+I_FSUGT		0x000a
+I_FSUGE		0x000b
+I_FSULT		0x000c
+I_FSULE		0x000d
+I_FSNEQ		0x000e
+I_FST		0x000f
+I_FSSF		0x0010
+I_FSSEQ		0x0011
+I_FSGT		0x0012
+I_FSGE		0x0013
+I_FSLT		0x0014
+I_FSLE		0x0015
+I_FSGL		0x0016
+I_FSGLE		0x0017
+I_FSNGLE	0x0018
+I_FSNGL		0x0019
+I_FSNLE		0x001a
+I_FSNLT		0x001b
+I_FSNGE		0x001c
+I_FSNGT		0x001d
+I_FSSNEQ	0x001e
+I_FSST		0x001f
+
+I_FSGLDIV	0x0000
+I_FSGLDIV_EA	0x4024
+I_FSGLDIV_FPDREG	0x0024
+I_FSGLMUL		0x0000
+I_FSGLMUL_EA		0x4027
+I_FSGLMUL_FPDREG	0x0027
+I_FSIN		0x0000
+I_FSIN_EA	0x400e
+I_FSIN_FPDREG	0x000e
+I_FSINCOS		0x0000
+I_FSINCOS_EA		0x4030
+I_FSINCOS_FPDREG	0x0030
+I_FSINH		0x0000
+I_FSINH_EA	0x4002
+I_FSINH_FPDREG	0x0002
+I_FSQRT		0x0000
+I_FSQRT_EA	0x4004
+I_FSQRT_FPDREG	0x0004
+I_FSUB		0x0000
+I_FSUB_EA	0x4028
+I_FSUB_FPDREG	0x0028
+I_FTAN		0x0000
+I_FTAN_EA	0x400f
+I_FTAN_FPDREG	0x000f
+I_FTANH		0x0000
+I_FTANH_EA	0x4009
+I_FTANH_FPDREG	0x0009
+I_FTENTOX		0x0000
+I_FTENTOX_EA		0x4012
+I_FTENTOX_FPDREG	0x0012
+
+/* Note: don't change the ordering of these,  there are range checks	*/
+/* in ea.c (operation_base_size()) that check for			*/
+/*     I_FTF <= ivalue <= I_FTPST					*/
+I_FTF		0x0000
+I_FTEQ		0x0001
+I_FTOGT		0x0002
+I_FTOGE		0x0003
+I_FTOLT		0x0004
+I_FTOLE		0x0005
+I_FTOGL		0x0006
+I_FTOR		0x0007
+I_FTUN		0x0008
+I_FTUEQ		0x0009
+I_FTUGT		0x000a
+I_FTUGE		0x000b
+I_FTULT		0x000c
+I_FTULE		0x000d
+I_FTNEQ		0x000e
+I_FTT		0x000f
+I_FTSF		0x0010
+I_FTSEQ		0x0011
+I_FTGT		0x0012
+I_FTGE		0x0013
+I_FTLT		0x0014
+I_FTLE		0x0015
+I_FTGL		0x0016
+I_FTGLE		0x0017
+I_FTNGLE	0x0018
+I_FTNGL		0x0019
+I_FTNLE		0x001a
+I_FTNLT		0x001b
+I_FTNGE		0x001c
+I_FTNGT		0x001d
+I_FTSNEQ	0x001e
+I_FTST		0x001f
+
+I_FTPF		0x0000
+I_FTPEQ		0x0001
+I_FTPOGT	0x0002
+I_FTPOGE	0x0003
+I_FTPOLT	0x0004
+I_FTPOLE	0x0005
+I_FTPOGL	0x0006
+I_FTPOR		0x0007
+I_FTPUN		0x0008
+I_FTPUEQ	0x0009
+I_FTPUGT	0x000a
+I_FTPUGE	0x000b
+I_FTPULT	0x000c
+I_FTPULE	0x000d
+I_FTPNEQ	0x000e
+I_FTPT		0x000f
+I_FTPSF		0x0010
+I_FTPSEQ	0x0011
+I_FTPGT		0x0012
+I_FTPGE		0x0013
+I_FTPLT		0x0014
+I_FTPLE		0x0015
+I_FTPGL		0x0016
+I_FTPGLE	0x0017
+I_FTPNGLE	0x0018
+I_FTPNGL	0x0019
+I_FTPNLE	0x001a
+I_FTPNLT	0x001b
+I_FTPNGE	0x001c
+I_FTPNGT	0x001d
+I_FTPSNEQ	0x001e
+I_FTPST		0x001f
+
+I_FTEST		0x0000
+I_FTEST_EA	0x403a
+I_FTEST_FPDREG	0x003a
+I_FTWOTOX		0x0000
+I_FTWOTOX_EA		0x4011
+I_FTWOTOX_FPDREG	0x0011
+
+/* generic floating point forms	*/
+I_FBcc		0x0000
+I_FDBcc		0x0000
+I_FScc		0x0000
+I_FTcc		0x0000
+I_FTPcc		0x0000
+I_Fmop		0x0000
+I_Fdop		0x0000
+I_Fmop_EA	0x0000
+I_Fmop_FPDREG1	0x0000
+I_Fmop_FPDREG2	0x0000
+I_Fdop_EA	0x0000
+I_Fdop_FPDREG	0x0000
+
+/* MC68851 (PMU coprocessor) opcodes	*/
+I_PBBS		0xf080
+I_PBBC		0xf081
+I_PBLS		0xf082
+I_PBLC		0xf083
+I_PBSS		0xf084
+I_PBSC		0xf085
+I_PBAS		0xf086
+I_PBAC		0xf087
+I_PBWS		0xf088
+I_PBWC		0xf089
+I_PBIS		0xf08a
+I_PBIC		0xf08b
+I_PBGS		0xf08c
+I_PBGC		0xf08d
+I_PBCS		0xf08e
+I_PBCC		0xf08f
+
+I_PDBBS		0x0000
+I_PDBBC		0x0001
+I_PDBLS		0x0002
+I_PDBLC		0x0003
+I_PDBSS		0x0004
+I_PDBSC		0x0005
+I_PDBAS		0x0006
+I_PDBAC		0x0007
+I_PDBWS		0x0008
+I_PDBWC		0x0009
+I_PDBIS		0x000a
+I_PDBIC		0x000b
+I_PDBGS		0x000c
+I_PDBGC		0x000d
+I_PDBCS		0x000e
+I_PDBCC		0x000f
+
+# ifdef OFORTY
+I_PFLUSH	0xf508
+I_PFLUSHN	0xf500
+I_PFLUSHA	0xf518
+I_PFLUSHAN	0xf510
+# else
+I_PFLUSHA	0x2400
+I_PFLUSH	0x3000
+I_PFLUSH_EA	0x3400
+I_PFLUSHS	0x3800
+I_PFLUSHS_EA	0x3c00
+I_PFLUSHR	0xa000
+# endif
+
+I_PLOADR	0x2000
+I_PLOADW	0x2200
+
+I_PMOVE		0x0000
+/* The ordering of these pairs must be maintained 	*/
+I_PMOVE_to_EA1	0x4200
+I_PMOVE_to_EA2	0x6200
+I_PMOVE_to_PMU1	0x4000
+I_PMOVE_to_PMU2	0x6000
+
+I_PRESTORE	0xf140
+I_PSAVE		0xf100
+
+I_PSBS		0x0000
+I_PSBC		0x0001
+I_PSLS		0x0002
+I_PSLC		0x0003
+I_PSSS		0x0004
+I_PSSC		0x0005
+I_PSAS		0x0006
+I_PSAC		0x0007
+I_PSWS		0x0008
+I_PSWC		0x0009
+I_PSIS		0x000a
+I_PSIC		0x000b
+I_PSGS		0x000c
+I_PSGC		0x000d
+I_PSCS		0x000e
+I_PSCC		0x000f
+
+# ifdef OFORTY
+I_PTESTR	0xf568
+I_PTESTW	0xf548
+# else
+I_PTESTR	0x8000
+I_PTESTW	0x8200
+# endif
+
+I_PTRAPBS	0x0000
+I_PTRAPBC	0x0001
+I_PTRAPLS	0x0002
+I_PTRAPLC	0x0003
+I_PTRAPSS	0x0004
+I_PTRAPSC	0x0005
+I_PTRAPAS	0x0006
+I_PTRAPAC	0x0007
+I_PTRAPWS	0x0008
+I_PTRAPWC	0x0009
+I_PTRAPIS	0x000a
+I_PTRAPIC	0x000b
+I_PTRAPGS	0x000c
+I_PTRAPGC	0x000d
+I_PTRAPCS	0x000e
+I_PTRAPCC	0x000f
+
+I_PVALID	0x0000
+I_PVALID_VAL	0x3000
+I_PVALID_AREG	0x2c00
+
+/* MC68851 generic forms	*/
+I_PBcc		0x0000
+I_PDBcc		0x0000
+I_PScc		0x0000
+I_PTRAPcc	0x0000
+
+/* DRAGON							*/
+/* *** NOTE the LOAD field [1..0] is not set to a LOAD value.  	*/
+/* ***      Instead the UPOP bit [16] is here. !!! 		*/
+/* *** Probably cleaner to just redefine ops.c to be an array	*/
+/*	of long instead of short -- it's not that big.		*/
+I_FPADD		0x4008
+I_FPSUB		0x5008
+I_FPMUL		0x6008
+I_FPDIV		0x7008
+I_FPABS		0x9008
+I_FPCMP		0x8008
+/* I_FPSQRT	0x5000		Not used by compilers, not documented to user	*/
+I_FPTEST	0x2008
+I_FPINTRZ	0x2000
+I_FPNEG		0x3000
+I_FPRDIV	0x4000
+I_FPRSUB	0xe008
+
+I_FPMADD	0x4008
+I_FPMSUB	0x5008
+I_FPMMUL	0x6008
+I_FPMDIV	0x7008
+I_FPMABS	0x9008
+I_FPM2CMP	0x8008
+/* I_FPMSQRT	0x5000	*/
+I_FPMTEST	0x2008
+I_FPMINTRZ	0x2000
+I_FPMNEG	0x3000
+I_FPMRDIV	0x4000
+I_FPMRSUB	0xe008
+
+I_FPM2ADD	0x0009		UPOP=1
+I_FPM2SUB	0x1009		UPOP=1
+I_FPM2MUL	0x2009		UPOP=1
+I_FPM2DIV	0x3009		UPOP=1
+I_FPM2RSUB	0x4009		UPOP=1
+I_FPM2RDIV	0x0001		UPOP=1
+
+I_FPMOVE	0x0000		generic
+I_FPMOVE_on_DRG	0x3008		moves between dragon registers
+I_FPMOVE_to_DRG	0x1008
+I_FPMOVE_from_DRG	0x1008
+I_FPMOVED_to_DRG	0x1008		.d moves
+I_FPMOVED_from_DRG	0x1008		.d moves
+I_FPMOVE_to_DRGCREG	0x0000
+I_FPMOVE_from_DRGCREG	0x0000
+
+I_FPMMOVE		0x3008
+
+I_FPCVS		0x0000		generic form
+I_FPCVSL	0xa008
+I_FPCVSD	0xc00c
+
+I_FPCVD		0x0000		generic form
+I_FPCVDL	0xb008
+I_FPCVDS	0xc008
+
+I_FPCVL		0x0000		generic form
+I_FPCVLS	0xd008
+I_FPCVLD	0xd00c
+
+I_FPMCVS	0x0000		generic form
+I_FPMCVSL	0xa008
+I_FPMCVSD	0xc00c
+
+I_FPMCVD	0x0000		generic form
+I_FPMCVDL	0xb008
+I_FPMCVDS	0xc008
+
+I_FPMCVL	0x0000		generic form
+I_FPMCVLS	0xd008
+I_FPMCVLD	0xd00c
+
+I_FPBSEQ	0x000c
+I_FPBLT		0x001c
+I_FPBLE		0x002c
+I_FPBGT		0x003c
+I_FPBGE		0x004c
+I_FPBGL		0x005c
+I_FPBGLE	0x006c
+I_FPBST		0x007c
+I_FPBEQ		0x008c
+I_FPBOLT	0x009c
+I_FPBOLE	0x00ac
+I_FPBOGT	0x00bc
+I_FPBOGE	0x00cc
+I_FPBOGL	0x00dc
+I_FPBOR		0x00ec
+I_FPBT		0x00fc
+I_FPBSNE	0x000c
+I_FPBNLT	0x001c
+I_FPBNLE	0x002c
+I_FPBNGT	0x003c
+I_FPBNGE	0x004c
+I_FPBNGL	0x005c
+I_FPBNGLE	0x006c
+I_FPBSF		0x007c
+I_FPBNE		0x008c
+I_FPBUGE	0x009c
+I_FPBUGT	0x00ac
+I_FPBULE	0x00bc
+I_FPBULT	0x00cc
+I_FPBUEQ	0x00dc
+I_FPBUN		0x00ec
+I_FPBF		0x00fc
+
+I_FPAREG	0x0000
+I_FPWAIT	0x0000
+
+/* DRAGON generic forms	*/
+I_FPdop		0x0000		dyadic op
+I_FPmop		0x0000		monadic op
+I_FPMdop	0x0000		combined move (to source1) /dyadic op
+I_FPM2dop	0x0000		combined move (to source2) /dyadic op
+I_FPMmop	0x0000		combined move/monadic op
+I_FPBcc1	0x0000		bpl type 
+I_FPBcc2	0x0000		bmi type
+
+/* end of code-generating op codes	*/
+
+I_LASTOP	0x0000
+
+/* pseudo-ops	*/
+
+I_BYTE		0x0000
+I_SHORT		0x0000
+I_LONG		0x0000
+I_ASCIZ		0x0000
+I_FLOAT		0x0000
+I_DOUBLE	0x0000
+I_PACKED	0x0000
+I_EXTEND	0x0000
+I_SPACE		0x0000
+I_LCOMM		0x0000
+I_TEXT		0x0000
+I_DATA		0x0000
+I_BSS		0x0000
+I_SET		0x0000
+I_COMM		0x0000
+I_GLOBAL	0x0000
+I_LALIGN	0x0000
+I_EVEN		0x0000
+I_ALIGN		0x0000
+I_FPMODE	0x0000
+I_FPID		0x0000
+I_EQU		0x0000
+I_VERSION	0x0000
+I_SHLIBVERSION  0x0000
+I_SGLOBAL	0x0000
+I_INTERNAL	0x0000
+I_MODULE	0x0000
+
+I_P1SUBON	0x0000
+I_P1SUBOFF	0x0000
+
+I_GNTT		0x0000
+I_LNTT		0x0000
+I_DNTSRCFILE	0x0000
+I_DNTMODULE	0x0000
+I_DNTFUNCTION	0x0000
+I_DNTENTRY	0x0000
+I_DNTBLOCKDATA	0x0000
+I_DNTBEGIN	0x0000
+I_DNTEND	0x0000
+I_DNTIMPORT	0x0000
+I_DNTLABEL	0x0000
+I_DNTWITH       0x0000
+I_DNTCOMMON     0x0000
+I_DNTFPARAM	0x0000
+I_DNTSVAR	0x0000
+I_DNTDVAR	0x0000
+I_DNTCONST	0x0000
+I_DNTTYPEDEF	0x0000
+I_DNTTAGDEF	0x0000
+I_DNTPOINTER	0x0000
+I_DNTENUM	0x0000
+I_DNTMEMENUM	0x0000
+I_DNTSET	0x0000
+I_DNTSUBRANGE	0x0000
+I_DNTARRAY	0x0000
+I_DNTSTRUCT	0x0000
+I_DNTUNION	0x0000
+I_DNTFIELD	0x0000
+I_DNTVARIANT	0x0000
+I_DNTFILE	0x0000
+I_DNTFUNCTYPE	0x0000
+I_DNTCOBSTRUCT	0x0000
+I_DNTGENFIELD	0x0000
+I_DNTMEMACCESS	0x0000
+I_DNTMODIFIER	0x0000
+I_DNTVFUNC	0x0000
+I_DNTCLASSSCOPE	0x0000
+I_DNTFRIENDCLASS	0x0000
+I_DNTFRIENDFUNC	0x0000
+I_DNTCLASS	0x0000
+I_DNTPTRMEM	0x0000
+I_DNTINHERITANCE	0x0000
+I_DNTOBJECTID	0x0000
+I_DNTMEMFUNC	0x0000
+I_DNTBLOCK	0x0000
+I_DNTXREF	0x0000
+I_DNTSA		0x0000
+I_DNTMACRO	0x0000
+I_DNTREFERENCE	0x0000
+I_DNTINCLUDE	0x0000
+I_DNTFIXUP	0x0000
+I_DNTENDINCLUDE	0x0000
+I_SLTNORMAL	0x0000
+I_SLTSPECIAL	0x0000
+I_SLTEXIT	0x0000
+I_SLTASST	0x0000
+I_VT		0x0000
+I_VTBYTES	0x0000
+I_VTFILE	0x0000
+I_XT		0x0000
+I_XTINFO	0x0000
+I_XTLINK	0x0000
+I_XTNAME	0x0000
+I_XTINFO1	0x0000
+I_XTINFO2A	0x0000
+I_XTINFO2B	0x0000
+I_XTBLOCK	0x0000
+
+/* intermidate code ops	*/
+I_INSTRUCTION	0x0000
+I_FILL		0x0000
+I_CONSTANT	0x0000
+I_STRING	0x0000
+I_FPINSTRUCTION0	0x0000
+I_FPINSTRUCTION1	0x0000
+I_FPINSTRUCTION2	0x0000
+I_FPINSTRUCTION3	0x0000		/* placeholder - not used	*/
+I_FPINSTRUCTION4	0x0000
+I_FPINSTRUCTION5	0x0000
+I_PMUINSTRUCTION0	0x0000
+I_PMUINSTRUCTION1	0x0000
+I_PMUINSTRUCTION2	0x0000
+I_PMUINSTRUCTION3	0x0000		/* placeholder - not used	*/
+I_PMUINSTRUCTION4	0x0000
+I_PMUINSTRUCTION5	0x0000

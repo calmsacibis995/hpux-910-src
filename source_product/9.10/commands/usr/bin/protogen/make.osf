@@ -1,0 +1,38 @@
+# $Header: make.osf,v 70.1 91/06/06 11:55:28 ssa Exp $
+# @(#) $Revision: 70.1 $
+#
+# makefile for /usr/bin/protogen
+#
+VERSION = hpux_rel
+SOURCES = main.c scan.c
+OBJECTS = main.o scan.o
+LEX = /paXdev/bin/lex
+XAR = /usr/apollo/bin/xar
+FLAGS =
+CFLAGS = 
+CCX=/paXdev/bin/cc
+
+default:	protogen.X protogen endif
+
+scan.c:	scan.l
+	$(LEX) scan.l
+	mv lex.yy.c scan.c
+
+protogen.X: $(SOURCES)
+	$(CC) $(CFLAGS) -A cpu,a88k -o protogen.a88kbin main.c scan.c
+	$(LD) -A cpu,a88k protogen.a88kbin -o protogen.a88k
+	$(CC) $(CFLAGS) -A cpu,m68k -o protogen.m68kbin main.c scan.c
+	$(LD) -A cpu,m68k protogen.m68kbin -o protogen.m68k
+	$(XAR) -cv protogen.X protogen.m68k protogen.a88k
+
+protogen: $(SOURCES)
+	$(CCX) $(CFLAGS) main.c scan.c -o protogen
+
+endif:	endif.sh
+	/bin/cp endif.sh endif
+
+clean:
+	/bin/rm -f *.o *a88* *m68* scan.c
+
+clobber: clean
+	rm -f protogen.X protogen endif

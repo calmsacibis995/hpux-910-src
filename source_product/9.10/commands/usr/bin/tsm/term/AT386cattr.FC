@@ -1,0 +1,92 @@
+## FacetTerm  AT386cattr  COMMON description file 10/09/89
+## color attributes
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: AT386cattr.FC,v 70.1 92/03/09 15:52:14 ssa Exp $
+##--- ATTRIBUTES URBDOIPA ---##
+### attribute-U=
+### attribute--U=
+### attribute-R=
+### attribute-B=
+### attribute-D-O=
+### attribute-O-D=
+### attribute-I=
+### attribute-P=
+### attribute-A=
+### attribute--A=
+### attribute_next-A-=
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     475218   ---##
+parm_attribute=\E[%7MMm
+## implied 0 parameter is ignored
+parm_attribute--=\E[;%7MMm
+parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1;%s2m
+parm_attribute_out=\E[%s1;%s2;%s3m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+parm_attribute_val--URBDOIponmlkji--ponmlkji=0
+parm_attribute_val-U-=4
+parm_attribute_val-Ronmi-plkj-onmi-plkj=7
+parm_attribute_val-B-=5
+## 9 is listed in terminfo as invisible 
+##   but is not in display(7) and appears to be ignored by monochrome driver
+parm_attribute_val-D-=9
+parm_attribute_val-O-=1
+parm_attribute_val-I-=8
+parm_attribute_val--AP=10
+### TBD this 11 mode makes all control chars less than 32 visible
+parm_attribute_val-P-A=11
+parm_attribute_val-A-P=12
+## 38 and 39 are not documented in display(7) and are passed through.
+parm_attribute_val-*-=38
+parm_attribute_val-*-=39
+parm_attribute_val-...-kji=37
+parm_attribute_val-..i-kj.=30
+parm_attribute_val-.j.-k.i=31
+parm_attribute_val-.ji-k..=32
+parm_attribute_val-k..-.ji=33
+parm_attribute_val-k.i-.j.=34
+parm_attribute_val-kj.-..i=35
+parm_attribute_val-kji-...=36
+parm_attribute_val-...-onm=40
+parm_attribute_val-..m-on.=41
+parm_attribute_val-.n.-o.m=42
+parm_attribute_val-.nm-o..=43
+parm_attribute_val-o..-.nm=44
+parm_attribute_val-o.m-.n.=45
+parm_attribute_val-on.-..m=46
+parm_attribute_val-onm-...=47
+exit_attribute_mode--URBDOIponmlkji=\E[0m
+exit_attribute_mode--URBDOIponmlkji=\E[m
+##--- MAGIC COOKIE ATTRIBUTES ---##
+## console driver needs this sequence for cent sign - \233 treated as \E
+magic=\E\233
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##---                                   ---##
+### lock_shift_0=
+### single_shift_0=
+### select_character_set_0--=
+### select_character_set_0--=
+### lock_shift_1=\E[12m
+### single_shift_1=
+### select_character_set_1--=
+### select_character_set_1--=
+### single_shift_2=
+### lock_shift_2=
+### select_character_set_2--=
+### single_shift_3=
+### lock_shift_3=
+### select_character_set_3--=

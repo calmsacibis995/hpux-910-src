@@ -1,0 +1,43 @@
+
+        Commande                        Action
+
+           |            Cr≈er un conduit entre le message en cours et...
+           $            Resynchronisation (resync) de la bo—te aux lettres.
+           !            Passage au shell
+           ?            Les informations de cet ≈cran
+           +            Page d'en-t¡tes suivante
+           -            Page d'en-t¡tes pr≈c≈dente
+           =            D≈finir le message en cours » 1
+           *            D≈finir le message en cours au dernier
+           <n>          D≈finir le message en cours » n
+           /            Chercher l'expression de from (DE) » subject (objet)
+           //           Chercher l'expression dans tous les messages
+           <            Chercher entr≈e "calendar" dans message en cours
+
+           a            Alias, passer au mode 'alias' 
+           b            Faire suivre le message en cours
+           c            Modifier le fichier mail en cours
+           d            Supprimer le message en cours
+          ^D            Supprimer les messages de l'expression sp≈cifi≈e
+           f            R≈acheminer le message » l'utilisateur sp≈cifi≈
+           g            Grouper r≈ponses au message (tous les destinataires)
+           h            En-t¡tes affich≈s avec le message
+           j            Passer au message suivant
+           k            Passer au message pr≈c≈dent
+           l            Limiter les messages aux crit…res sp≈cifi≈s
+           m            Exp≈dier » tous les utilisateurs sp≈cifi≈s
+           n            Lire le message suivant
+           o            Modifier des valeurs d'options Elm
+           p            Imprimer le message
+           q            Sortie - courrier supprim≈, sauvegard≈ ou non modifi≈
+           r            R≈pondre au message en cours
+           s            Sauvegarder le message dans le fichier sp≈cifi≈
+           t            Marquer/D≈marquer un message pour op≈rations » venir
+          ^T            Marquer les messages contenant l'expression
+           u            Restaurer le message en cours
+          ^U            Restaurer les messages de l'expression sp≈cifi≈e
+           x            Sortie - ne pas enregistrer, ne pas sauvegarder...
+
+          ^L            R≈g≈n≈rer l'≈cran.
+          <RETOUR>      Lire le message en cours
+          ^Q, DEL       Sortie - ne pas enregistrer, ne pas sauvegarder...

@@ -1,0 +1,33 @@
+#!/bin/sh
+
+# lpsched -- remoteroot version allowing execution by cluster clients
+# 
+# Must be run by root or lp 
+
+optionlist=$*
+
+euser=`/usr/bin/whoami` > /dev/null 2>&1
+
+if [ x"$euser" != "xroot" -a x"$euser" != "xlp" ]
+then
+	/bin/echo "lpsched: this command for use only by LP Administrators"
+	exit 1
+fi
+
+# Determine rootserver name
+ROOTSERVER=`/bin/cnodes -r`
+
+# Make remsh call to rootserver to restart the lp scheduler
+/usr/bin/remsh $ROOTSERVER -n /usr/lib/lpsched $optionlist
+
+status=`/usr/bin/remsh $ROOTSERVER -n /usr/bin/lpstat -r` > /dev/null 2>&1
+
+if [ x"$status" = "xscheduler is running" ]
+
+then
+	/bin/echo "Scheduler started on $ROOTSERVER"
+	exit 0
+else
+	/bin/echo "Scheduler was not started on $ROOTSERVER"
+	exit 1
+fi

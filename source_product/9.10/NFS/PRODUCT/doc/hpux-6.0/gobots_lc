@@ -1,0 +1,311 @@
+
+
+
+
+
+
+
+
+
+
+
+
+                        PROJECT TRANSFORMERS LIFE CYCLE
+                           NFS Testing for 9000/300
+
+				 Bill Mowson
+                                    1/23/87 
+                                    2/09/87
+
+				  Dan Simula
+				    4/23/87
+				    6/04/87  - document obsoleted
+
+
+
+             Major Project Checkpoints:           Goal:
+          
+             1) Planning Complete                 2/20/87
+
+             2) 24 hour system reliability        3/16/87
+
+             3) 48 hour system reliability        4/30/87
+
+             4) 120 hour system reliability       8/15/87
+
+             5) Bit release                       9/15/87
+
+
+
+
+                              Introduction
+
+The "traNsFormerS" project has the responsibility for testing NFS on the
+HP 9000 series 300 computers.  The overriding objectives for this project
+are to meet the product quality goals (as outlined in the NFS Product 
+Requirements Document) and to meet the 6.0 300 system bit release schedule
+(currently unknown).  The code porting, development, and defect 
+fixing responsibilities for the NFS project are in the NerFS project group
+under Jeff Lindberg.  Jeff also serves as program manager for NFS 300/800.
+Other project efforts related to this project include the Peking project
+for porting the 800 networking kernel to the 300 (under Dean Thompson), and
+the Smelter project for testing Arpa/Berkeley and NS protocols on the 300
+(under Chris Fugitt).
+
+The intent of this document is to clarify the expectations, both internal
+and external to the project group, for the different phases of the project.
+These expectations are formulated as a series of project checkpoints,
+project team deliverables at each checkpoint, key dependencies on other
+groups, and goal dates for each checkpoint and deliverable.  The goal
+dates are a reflection of the project team's current 50% schedule estimates.
+These dates may need to change as key dependencies are negotiated and
+planned into other project groups' schedules. 
+ 
+
+
+
+ 
+                                Terminology
+
+
+Several phrases are used within this docoment which require a clear and 
+concise definition.  These key phrases and a first pass at their definitions
+are as follows:
+
+   Level A Quality System  - characterized by:
+         - No "mainline" functionality system code panics
+         - No more than 5 known "corner case" function system code panics
+         - No more than 5 known weight 8 or above code defects 
+         - final "phase 1" NFS commands (from ISO/SSO) in place
+
+   Level B Quality System  - characterized by:
+         - No more than 2 known "corner case" function system code panics
+         - No more than 5 known weight 6 or above code defects 
+         - 50% of final NFS commands (from ISO/SSO) in place
+         - 80% of SUN NFS performance demonstratable (330-330)
+        
+   Level C Quality System  - characterized by: 
+         - No unresolved defects of weight 6 or above
+           (if SUNs exhibit the same defect then it may be resolvable as a
+            no fix)
+         - No system crashes (panics) in the last 5 working days
+         - Has passed all available NFS functional tests
+         - All final NFS commands (from ISO/SSO) in place
+         - 75% of SUN NFS performance demonstratable (330-330)
+
+
+   Level 1 System Stress  - characterized by being able to execute:
+         - 5 concurrent file copies thru NFS
+         - 2 concurrent NFS functional tests 
+         - 3 concurrent Quick Regression tests
+
+   Level 2 System Stress  - characterized by being able to execute: 
+         - 10 concurrent file copies thru NFS
+         - 3 concurrent NFS functional tests 
+         - 1 NFS functional test with 50% CPU loading
+         - 3 Node testing with slow (310 and 320) servers 
+
+   Level 3 System Stress  - characterized by being able to execute: 
+         - 10 concurrent file copies thru NFS
+         - 5 concurrent NFS functional tests 
+         - 2 NFS functional test with 80% CPU loading
+         - 4 Node testing with slow (310 and 320) servers 
+         - 3 Node testing with all nodes both as NFS requesters and servers
+         - Mounts of at least 4 remote file system simultaneously
+                              
+
+                              
+
+
+
+
+                      traNsFormerS Project Lifecycle
+
+
+Project Checkpoint                                             Goal
+
+PLANNING COMPLETE                                             2/24/87
+
+     Deliverables: 
+
+         1) System Test Plan complete and reviewed
+         2) All project deliverables and dates defined
+         3) All dependencies on other project groups listed and resolved
+	    with that group's schedule
+         4) NFS Program Lifecycle complete and signed off by the Program Team   
+         5) NFS Quick Regression Test complete and tested
+            (*** didn't complete YP QR tests - YP not running on the 300 ***)
+         6) Scaffold and NFS test environment defined and implemented 
+         7) Project metrics and data gathering processes defined 
+         8) Final 50% and 90% confidence project schedules
+
+
+
+     Dependencies:                             On whom:          By when:
+       
+         1) Project Life Cycles               Nerfs, Peking,      
+                                              Smelter, Others     1/26/87
+         2) Scaffold agreements               Smelter             1/30/87
+         3) Deliverables expectations         Nerfs               1/30/87
+         4) Discless Testing Agreement        SSO                 1/30/87
+         5) System Test Plan Inputs           Nerfs               2/10/87
+         6) System Test Plan reviewed         Nerfs               2/20/87 
+         7) Quick Regression extra tests      Nerfs               2/13/87
+         8) Automatic System Update process   Nerfs               2/13/87
+         9) Defect Turnaround Time goals      Nerfs               2/20/87
+                                               
+
+
+
+
+Project Checkpoint                                             Goal
+
+24 HOUR RELIABILITY                                           3/16/87
+
+     Deliverables: 
+         1) 24 Hour 3 node NFS reliability with Level 1 stress 
+         2) Stress test suites complete
+         3) 75% of functional test progs complete
+         4) Initial connectivity tests complete
+
+
+     Dependencies:                             On whom:          By when:
+         1) One additional 330 system         Lab Equipment       2/23/87
+         2) Stable Level A system             Nerfs/Peking        3/2/87
+         3) 50% of YP functional tests           Nerfs            3/2/87
+         4) NFS Wollongong Software           Lab Equipment       3/2/87
+         5) One additional 330 system         Lab Equipment       3/2/87
+         6) Self hostable system available       Nerfs            3/16/87
+                                               
+
+
+
+Project Checkpoint						  Goal
+
+48 HOUR RELIABILITY                                           	 4/30/87
+
+    Status Summary:
+
+	The NFS/300 testing team accomplished all of its primary objectives
+	for the 48-hour reliability checkpoint.  During this phase of the 
+	project, the team remained on schedule despite a reduction in 
+	staffing (by 1 MTS) and an increase in testing responsibility; the 
+	YP test suites.
+
+	Most of the deliverables arrived ahead of schedule.  Deliverables 
+	which were not met were delayed due to lack of testing equipment.
+
+
+   Deliverables:						Completed:
+        1) 48 Hour system reliability at Level 2 stress		 4/18/87
+        2) 95% of NFS functional test progs complete (97.8%)	 4/29/87
+        3) Security test suites complete			 4/27/87
+        4) System recovery test suites complete			 3/18/87
+        5) Un*x/Un*x connectivity test suites complete		 4/16/87
+        6) SUN gateway testing complete				 -------
+        7) Series 300 gateway testing complete 			 -------
+
+
+    Dependencies:			On whom:	By:	Completed:
+	1) NFS Corner Case Test Suites   Nerfs        3/25/87    -------
+	2) YP Functional Test Suites	 Nerfs        3/25/87    see note
+	3) Sun Gateway Configuration	 Lab Equip    4/1/87     -------
+	4) One additional 350		 Lab Equip    4/1/87     4/23/87
+	5) Stable Level B system         Nerfs/Peking 4/8/87	 4/14/87
+ 
+
+    Deviations:
+	1) YP Functional Test Suites
+	   Responsibility for the YP functional test suite was taken 
+	   over by the Transformer project.  This additional respon-
+	   sibility cost approximately 8 engineer days, but was handled
+	   without causing any slip in the original schedule.
+
+	   Cost:  Engineer days 8;  Calendar days 0;
+
+        2) Gateway Testing
+	   S300 gateway testing was rescheduled due to the lack of s300
+	   system resources.  The existing s300 resources were dedicated
+	   to functional, reliability and stress testing in an attempt to 
+	   stabilize the early systems.  Although s300 gateway testing was 
+	   not completed, the system did have exposure to s300 gateways and 
+	   operated without problems.  Sun gateway testing was rescheduled 
+	   due to the Sun2/160 being unavailable in the desired timeframe.  
+	   These tasks have been rescheduled for mid-May.
+
+	   Cost:  Engineer days 0;  Calendar days 0;
+	   
+	3) NFS Corner Case Test Suites
+	   As of 4/30, the NFS corner case test suite has not been completed 
+	   by the NERFS project team.
+
+	   Cost:  Engineer days --;  Calendar days --;
+
+	4) Equipment
+	   Availability of s300 test equipment continues to affect the 
+	   project team.  The team has been extremely flexible in sharing
+	   and obtaining test systems; the K-cats, which are on loan from
+	   TWO, have been a critical element in maintaining enough viable 
+	   test systems.
+
+	   Cost:  Engineer days 7;  Calendar days 0;
+
+
+
+
+Project Checkpoint                                              Goal
+
+120 HOUR RELIABILITY (stress II)                               7/01/87
+
+    Status Summary:
+
+    Deliverables: 						Completed:
+	1) 120 Hour system reliability at Level 2 stress
+	2) 100% of all test suites complete
+	3) Security testing complete
+	4) Recovery testing complete
+	5) Error condition testing complete
+	6) RND Bridge configuration testing complete
+	7) Un*x/Un*x connectivity testing complete
+	8) VMS test suites complete
+
+
+    Dependencies:			On whom:        By:	Completed:
+	1) Required s300s available    Lab Equip      5/01/87    5/23/87
+	2) RND Bridge Gateway          Lab Equip      5/15/87    5/23/87
+        3) NFS Wollongong Software     Lab Equip      5/25/87    -------
+	4) 30% access to VMS/NFS sys   Lab Equip      5/25/87    -------
+	5) Stable Level C system       Nerfs/Peking   6/01/87    -------
+	6) PC test suites complete     Timo/Marie     6/01/87    5/03/87
+	7) NS/NFS X-services testing   Peking	      6/30/87    -------
+	    complete
+ 
+
+    Checkpoint Status Summary:
+
+
+    Deviations:
+
+
+
+Project Checkpoint                                              Goal
+
+BIT RELEASE TO MANUFACTURING                                   7/31/87
+
+    Status Summary:
+
+    Deliverables: 						Completed:
+	1) 120 Hour system reliability at Level 3 stress
+	2) All connectivity testing complete
+	3) All system corner case testing complete
+	4) All NFS/Discless X-services testing complete
+	5) 120 Hour system reliability at final NS/AB/NFS 
+	   networking stress (i.e., provide NFS expertise)
+	6) Quality statement prepared for manufacturing release
+
+
+    Dependencies:			On whom:        By:	Completed:
+	1) Final 120 network testing   Smelter        7/31/87
+ 
+
+    Deviations:

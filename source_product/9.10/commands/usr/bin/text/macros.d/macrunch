@@ -1,0 +1,103 @@
+
+# @(#) $Revision: 66.5 $    
+#	macros crunch procedure
+#
+
+move=n
+roff=
+pname=
+name=
+path=/usr/bin
+
+roffdir=../roff.d
+
+
+if [ $# -lt 1 ]
+	then echo usage: macrunch [-m] [-d path] [{-n _o_r -t} "package name"] ".src name" 
+	exit 1
+fi
+
+while [ $# -gt 0 ]
+do
+    case $1 in
+
+	-m)	move=y;;
+	-n)	roff=n; pname=$2; shift;;
+	-t)	roff=t; pname=$2; shift;;
+	-d)	path=$2; shift;;
+	*)	name=$1;;
+
+    esac
+    shift
+done
+
+rm -f NOCOMPACT${name}
+
+sed -e "3,\${
+		/^''*\\\\\"/d
+		s/	*\\\\\".*//
+		s/@//g
+		s/^\(['.]\)[ 	]*/\1/
+		s/^\\([.'][a-z][a-z]\\)  */\\1/
+		s/\\\\{[ 	]*/\\\\{/g
+		s/<<name>>/${name}/g
+	    } " \
+	${name}.src | ./ntar -h "'''>S>" -t "'''>E>" -g  >  ${name}
+
+library=`dirname ${path}`/lib
+# This variable is used only when '-m' option is given, i.e. $move = 'y'.
+# Note that the Makefile for macros.d should not use macrunch with -m option.
+
+if [ -r NOCOMPACT${name} ]
+then
+	if [ -n "${roff}" ]
+	then
+		mv NOCOMPACT${name} ucmp.${roff}.${pname}
+		if [ -x ${roffdir}/${roff}roff ]
+		then
+			roffcmd=${roffdir}/${roff}roff
+		else
+			roffcmd=${path}/${roff}roff
+		fi
+		case "`uname -r`" in
+		A.B3.* | A.B7.* | 6* | B.07.* | 7*)
+		    ( cd ${roffdir}; make ${roff}roff )
+		    roffcmd=${roffcmd}
+		    ;;
+		esac
+		${roffcmd} -kTMP ${name} - <<!
+.co
+!
+		mv d.TMP cmp.${roff}.d.${pname}
+		mv t.TMP cmp.${roff}.t.${pname} 2>/dev/null
+		cat ucmp.${roff}.${pname} >> ${name}
+		if [ $move = "y" ]
+		then
+		    cp cmp.${roff}.[dt].${pname} ucmp.${roff}.${pname} ${library}/macros
+		    ( cd ${library}/macros
+			chmod 644 cmp.${roff}.[dt].${pname} ucmp.${roff}.${pname} )
+		    if [ "${path}" = "/usr/bin" ]
+			then ( cd ${library}/macros
+			  chown bin cmp.${roff}.[dt].${pname} ucmp.${roff}.${pname}
+			  chgrp bin cmp.${roff}.[dt].${pname} ucmp.${roff}.${pname} )
+			else true
+		    fi
+		    rm -f cmp.${roff}.[dt].${pname} ucmp.${roff}.${pname}
+		fi
+	else
+		cat NOCOMPACT${name} >> ${name}
+		rm NOCOMPACT${name}
+	fi
+fi
+
+if [ $move = "y" ] 
+then
+	cp ${name} ${library}/macros
+	chmod 644 ${library}/macros/${name}
+	if [ "${path}" = "/usr/bin" ]
+	    then chown bin ${library}/macros/${name}
+	         chgrp bin ${library}/macros/${name}
+	    else true
+	fi
+	rm -f ${name}
+fi

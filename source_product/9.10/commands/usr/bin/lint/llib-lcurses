@@ -1,0 +1,975 @@
+/* @(#) $Revision: 70.6 $      */
+/*LINTLIBRARY*/
+#define NOMACROS
+#include <curses.h>
+#include <term.h>
+
+int addch(char ch) 			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int addstr(char *s) 			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int attroff(int a) 			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int attron(int a) 			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int attrset(int a)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int baudrate(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int beep(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int box(WINDOW *w, chtype v, chtype h)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int cbreak(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int clear(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int clearok(WINDOW *w, int b)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int clrtobot(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int clrtoeol(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int def_prog_mode(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int def_shell_mode(void)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int delay_output(int ms)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int delch(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int deleteln(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int delwin(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int del_curterm(struct term *oterm) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The del_curterm() call is part of the HP-UX curses(3X) library.  
+	It is used to free the space pointed to by it's parameter.
+	It is not supported by some open systems curses libraries.  
+	See curses(3X) */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int doupdate(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int echo(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int endwin(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int erase(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char erasechar(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int fixterm(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The fixterm() call is part of the HP-UX curses(3X) library.
+	It is used to restore tty modes for terminfo use (it is 
+	called by setupterm).  It is not supported by some open
+	systems curses libraries.   See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int flash(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int flushinp(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int getch(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int getstr(char *str)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int gettmode(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The gettmode() call is part of the HP-UX curses(3X) library.
+	It is used to establish current tty modes.  It is not supported
+	by some open systems curses libraries.  See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+#ifdef NOMACROS
+int getyx(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int has_ic(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int has_il(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int idlok(WINDOW *w, int bf)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int inch(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+WINDOW * initscr(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int insch(chtype c)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int insertln(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int intrflush(WINDOW *w, int bf)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int keypad(WINDOW *w, int bf)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char killchar(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int leaveok(WINDOW *w, int bf)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char * longname(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int meta(WINDOW *w, int f)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int move(int y, int x)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int mvaddch(int y, int x, char ch)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int mvcur(int or, int oc, int nr, int nc)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int mvdelch(int y, int x)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvgetch(int y, int x)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvgetstr(int y, int x)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvinch(int y, int x)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvinsch(int y, int x, char c)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+/*VARARGS*/
+int mvprintw(int y, int x, const char *fmt, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/*VARARGS*/
+int mvscanw(int y, int x, const char *fmt, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int mvwaddch(WINDOW *w, int y, int x, char ch)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwaddstr(WINDOW *w, int y, int x, int str)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwdelch(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwgetch(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwgetstr(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int mvwin(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int mvwinch(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwinsch(WINDOW *w, int y, int x, char c)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+/*VARARGS*/
+int mvwprintw(WINDOW *w, int y, int x, const char *fmt, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int mvwscanw(WINDOW *w, int y, int x, const char *fmt, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+WINDOW * newpad(int nl, int nc)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+struct screen * newterm(const char *t, FILE *out, FILE *in) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+WINDOW * newwin(int nl, int nc, int by, int bx)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int nl(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int nocbreak(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int nodelay(WINDOW *w, int bf)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int noecho(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int nonl(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int noraw(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int overlay(WINDOW *w1, WINDOW *w2)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int overwrite(WINDOW *w1, WINDOW *w2)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int pnoutrefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow,
+                 int smincol, int smaxrow, int smaxcol)		
+	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int prefresh(WINDOW *pad, int pminrow, int pmincol, int sminrow,
+             int smincol, int smaxrow, int smaxcol)		
+	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/*VARARGS*/
+int printw(const char *fmt, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int raw(void)				{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int refresh(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int resetterm(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The resetterm() call is part of the HP-UX curses(3X) library.
+	It is used to reset tty modes to the state before program 
+	entry.  It is not supported by some open systems curses 
+	libraries.  See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int resetty(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int reset_prog_mode(void)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int reset_shell_mode(void)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int saveterm(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The saveterm() call is part of the HP-UX curses(3X) library.
+	It is used save the current modes as "in curses" state.  It 
+	is not supported by some open systems curses libraries.
+	See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int savetty(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/*VARARGS*/
+int scanw(const char *fmt, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int scroll(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int scrollok(WINDOW *w, char f)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+struct screen *set_term(struct screen *new) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int setscrreg(int t, int b)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int setterm(const char *type)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The setterm() call is part of the HP-UX curses(3X) library.
+	It is used to establish a terminal with a given type.  
+	It is not supported by some open systems curses libraries.
+	See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int setupterm(const char *term, int fd, int *rc)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The setupterm() call is part of the HP-UX curses(3X) library.
+	It is used to read in the terminal database.  It is not
+	supported by some open systems curses libraries.  See
+	curses(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int set_curterm(struct term *nterm) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The set_curterm() call is part of the HP-UX curses(3X) library.  
+	It is used to set the database pointed to by it's parameter.
+	It is not supported by some open systems curses libraries.  
+	See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int standend(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int standout(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+WINDOW * subwin(WINDOW *o, int nlsw, int nc, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int touchwin(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int traceoff(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The traceoff() call is part of the HP-UX curses(3X) library.
+	It is used to turn off debugging trace output.  It is not 
+	supported by some open systems curses libraries.  See 
+	curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int traceon(void)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The traceon() call is part of the HP-UX curses(3X) library.
+	It is used to turn on debugging trace output.  It is not 
+	supported by some open systems curses libraries.  See 
+	curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int typeahead(int fd)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int unctrl(char ch)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int waddch(WINDOW *w, chtype c)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int waddstr(WINDOW *w, const char *str)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wattroff(WINDOW *w, int attrs)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wattron(WINDOW *w, int attrs)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wattrset(WINDOW *w, int attrs)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wclear(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wclrtobot(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wclrtoeol(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wdelch(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wdeleteln(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int werase(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wgetch(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wgetstr(WINDOW *w, char *str)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int winsch(WINDOW *w, chtype c)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int winsertln(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wmove(WINDOW *w, int y, int x)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wnoutrefresh(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/*VARARGS*/
+int wprintw(WINDOW *w, const char *fmt, ...) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int wrefresh(WINDOW *w)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+/*VARARGS*/
+int wscanw(WINDOW *w, const char *fmt, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int wsetscrreg(WINDOW *w, int t, int b)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+int wstandend(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#ifdef NOMACROS
+int wstandout(WINDOW *w)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+#endif
+
+/*VARARGS*/
+char * tparm(const char *str, ...)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tparm() call is part of the HP-UX curses(3X) library.
+	It is used to instantiate a string with parameters.
+	It is not supported by some open systems curses libraries.
+	See curses(3X) */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int tputs(const char *s, int a, int (*f_putc)(char))	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tputs() call decodes the padding information of a string.
+	It is one of the termcap emulation routines.  This
+	functionality is not portable to open systems.  See
+	termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int putp(const char *s)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The putp() call is part of the HP-UX curses(3X) library.
+	It is used to add padding characters to a string.  It is
+	not supported by some open systems curses libraries.
+	See curses(3X). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int vidputs(int a, int (*f_putc)(char))	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The vidputs() call is part of the HP-UX curses(3X) library.
+	It is used to output a string to a terminal with certain
+	video attributes turned on.  It is not supported by some
+	open systems curses libraries.  See curses(3X). */	
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int vidattr(int newmode)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The vidattr() call is part of the HP-UX curses(3X) library.
+	It is used to output a string to stdin with certain video 
+	attributes turned on.  It is not supported by some open 
+	systems curses libraries.  See curses(3X). */	
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+int tgetent(const char *bp, const char *n)		{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tgetent() call extracts the compiled entry for a terminal
+	into a buffer accessible by the process.  This is one of the
+	termcap emulation routines.  This functionality is not
+	portable to open systems.  See termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int tgetflag(const char *id)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tgetflag() call is used to determine if a terminal
+	has a specified capability.  This is one of the termcap 
+	emulation routines.  This functionality is not portable 
+	to open systems.  See termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int tgetnum(const char *id)			{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tgetnum() call gets the numeric value of a capability.
+	This is one of the termcap emulation routines.  This
+	functionality is not portable to open systems.  See
+	termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char * tgetstr(const char *id, char **area)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tgetstr() call returns a pointer to the string value of a
+	capability.  This is one of the termcap emulation routines.
+	This functionality is not portable to open systems.  See
+	termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+char * tgoto(const char *cap, int c, int r)	{ 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,FIPS151_1]
+	The tgoto() call returns cursor addressing string.  This is
+	one of the termcap emulation routines.  This functionality is
+	not portable to open systems.  See termcap(3X).  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+

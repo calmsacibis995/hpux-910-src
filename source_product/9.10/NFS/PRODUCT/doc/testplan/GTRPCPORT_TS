@@ -1,0 +1,90 @@
+.H 2  "Getrpcport (Cristina Mahon)"
+
+.PP
+Getrpcport returns the port number kept by portmap for a given
+hostname, program number, version number and protocol.
+.PP
+The format of getrpcport is as follows:
+.sp
+getrpcport(host, prognum, versnum, protocol)
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.5  md
+.fi
+.sp 2
+.H 3 "Call getrpcport with unknown host"
+.sp 1
+.PP
+If getrpcport is called with an unknown host (meaning a host not listed
+in /etc/hosts, either kept by the Yellow Pages or locally) it will not
+be able to contact the host that contains the information requested.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Zero returned. 
+.fi
+.sp 2
+.H 3  "Call getrpcport with unknown prognum"
+.sp 1
+.PP
+Getrpcport will call portmap (PMAPPROC_GETPORT) which will return a
+zero since the program number is not registered with portmap. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Zero returned.
+.fi
+.sp 2
+.H 3  "Call getrpcport with unknown versnum, known prognum"
+.sp 1
+.PP
+This is what I think it should do:
+.sp
+Getrpcport will call portmap (PMAPPROC_GETPORT) which will return a
+zero since that version number is not registered with portmap.
+.sp
+What it does though is return the port number of the program even if
+the version does not match.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+.fi
+.sp 2
+.H 3  "Call getrpcport with unknown protocol"
+.sp 1
+.PP
+Getrpcport will call portmap (PMAPPROC_GETPORT) which will return a
+zero since the protocol number is unknown to it (even though the program
+is registered under a different protocol).
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Zero returned.
+.fi
+.sp 2
+.H 3  "Call getrpcport with all parameters known"
+.sp 1
+.PP
+Getrpcport will call portmap (PMAPPROC_GETPORT) which will return the
+port number since all the parameters match a program registered with 
+portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns port that was originally registered with portmap for this
+       program number, version number and protocol.
+.fi

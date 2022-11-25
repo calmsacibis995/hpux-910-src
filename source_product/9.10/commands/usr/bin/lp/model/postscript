@@ -1,0 +1,274 @@
+#! /bin/sh
+# @(#) $Revision: 72.2 $
+# 
+# lp interface for PostScript printer
+#
+# Designed primarily for use on the Hewlett-Packard LaserJet IID and III
+# printers with the Hewlett-Packard 33439P LaserJet PostScript cartridge,
+# as well as generic PostScript printers.
+#
+# Supported interfaces are limited to RS-232 and Centronics
+# 
+#=======================================================================#
+# OPTIONS RECOGNIZED: ( all may be preceded by a "-" )                  #
+#                                                                       #
+# Output filtering: 			                                #
+#	a | ascii	ASCII-to-PostScript text conversion             #
+#			- Also used to print PostScript file as text    #
+#                                                                       #
+# Banner Page Control:							#
+#       nb              do not output banner page (to save paper)       #
+#       yb              do output banner page				#
+#                                                                       #
+# Paper Control: (Default single sided feed from paper cassette)        #
+#       d | double      do automatic double sided printing              #
+#               	* Only used if your printer is capable          #
+#			  of duplex printing!				#
+#                                                                       #
+# Font Selection:                                                       #
+#	f          	Set font for ASCII-to-PostScript conversion     #
+#			This option has no effect in PostScript Mode    #
+#                                                                       #
+#=======================================================================#
+
+# This model is designed to allow the printing of PostScript
+# files to the given printer.  The file command is used to achieve
+# this purpose and relies heavily on the 8.0 or later /etc/magic file.
+# If a non-PostScript file is sent, an ASCII-to-PostScript conversion
+# routine is called (pslp).
+
+# Define Functions:
+
+do_ps_banner()
+{
+	date=`date`
+	capuser=`echo $user | tr [a-z] [A-Z]`
+	user=`pwget -n $user | line | cut -d: -f5`
+	cat <<-EOF
+		/TopOfPage 10.75 72 mul def
+		/LeftMargin .375 72 mul def
+		%%
+		90 rotate
+		18 -850 translate
+		%%
+		/Times-Italic findfont
+		100 scalefont
+		setfont
+		LeftMargin TopOfPage 100 sub moveto
+		($capuser) show
+		LeftMargin currentpoint exch pop moveto
+		currentpoint 85 sub moveto
+		%%
+		/Times-Roman findfont
+		18 scalefont
+		setfont
+		(User: $user) show
+		LeftMargin currentpoint exch pop moveto
+		currentpoint 22 sub moveto
+		(Request id: $reqid    Printer: $printer) show
+		LeftMargin currentpoint exch pop moveto
+		currentpoint 22 sub moveto
+		(Options: $options) show
+		LeftMargin currentpoint exch pop moveto
+		currentpoint 22 sub moveto
+		(Date: $date) show
+		LeftMargin currentpoint exch pop moveto
+		currentpoint 125 sub moveto
+		%%
+		/Times-Italic findfont
+		75 scalefont
+		setfont
+		($title) show
+		%%
+		/Courier findfont
+		10 scalefont
+		setfont
+		%%
+		showpage
+EOF
+echo "\004\c"
+}
+
+pslp()
+{
+# pslp --- PostScript emulation of LaserJet default mode - 82 chars, 66 lines
+#
+#
+
+# Put out the header
+cat <<-EnD
+	%!PS-Adobe-2.0
+	%%Title: pslp
+	%
+	/$font findfont 11.5 scalefont setfont
+	/inch {72 mul} def
+	/deltay  10.5 66.5 div  inch def    % allow .25 inch margins all sides
+	/leftmargin .4 inch def
+	/topmargin  10.75 inch deltay sub def
+	/gotop {
+	    leftmargin topmargin moveto
+	    /linecount 0 def
+	    } def
+	/checkpage {
+	    linecount 66 ge 
+		{
+		showpage 
+		gotop
+		} 
+	    if  	% end of page?
+	    /linecount linecount 1 add def  		    % incr linecount
+	    } def
+	/crlf {
+	    currentpoint exch pop deltay sub leftmargin exch moveto
+	    } def
+
+	gotop
+	%%EndProlog pslp
+EnD
+
+# Put out the text
+# expand tabs:
+expand $file | 
+# delete control chars unknown to PS:
+tr -s '[\001-\011][\016-\037]' '@' |
+# escape chars special to PS, isolate formfeeds
+# and format each line as 
+#   checkpage (This is the text.) show crlf
+sed -e 's/\\/\\\\/g' -e 's/[()]/\\&/g' |
+awk ' /\014/ {   str = $0
+                 while (match(str,/\014/))
+                 {
+                     if (RSTART > 1)
+                         print substr(str,1,RSTART-1)
+                     print "\014"
+                     str = substr(str,RSTART+1)
+                 }
+                 if (length(str))
+                     print str
+                 next
+             }
+     {print}' |
+sed -e 's/^/checkpage (/' -e 's/$/) show crlf/' |
+# replace formfeeds with postscript formfeed instructions
+awk '/^checkpage \(\014\) show crlf$/ {
+           print "linecount 66 lt {showpage gotop} if"
+           next
+           }
+    {print}'
+
+cat <<-'EnD'
+	%%Trailer  pslp
+	showpage
+EnD
+}
+
+# Parse parameters passed to interface script:
+printer=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+options="$5"
+shift;shift;shift;shift;shift
+# The remaining arguments are files
+files="$*"
+
+# Open log file -- Postscript cannot easily print error messages:
+log=/usr/spool/lp/log
+echo "start: $reqid  `date`"    >>$log
+exec 2>>$log        # catch error messages, since PS printer won't print them
+
+# Initialize option variables to default values:
+ascii=""
+banner="yes"	# set to banner="" to not automatically print banner page
+#banner=""	# set to banner="yes" to automatically print banner page
+duplex=""
+font=Courier
+
+# Handle disable and cancel traps:
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Set up interface:
+if [ -t 1 ]
+then
+    stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+else
+    slp -r 2>/dev/null
+fi
+
+# Determine which options have been invoked:
+
+for option in $options
+do
+        case "$option" in
+
+        a  | -a | ascii | -ascii)   # force ASCII-to-PostScript Conversion
+		ascii="yes";;
+
+        nb | -nb)       # Do not output banner page
+                banner="";;
+
+        yb | -yb)       # Do not output banner page
+                banner="yes";;
+
+        -d | d | -double | double)      # set up for automatic double sided copy
+                duplex="yes";;
+
+        f*  | -f*)	# redefine font used by ASCII-to-PostScript Conversion
+                font="`echo "$option" | sed 's/^[-]*f//'`" ;;
+
+        esac
+done
+
+# Clean out remnants of last job if printer was disabled or job cancelled:
+echo "\004\c"
+
+# print the banner if banner specified:
+if [ -n "$banner" ]		# banner does not equal ""
+then
+    do_ps_banner
+fi
+
+# Print the spooled files:
+
+i=1
+while [ $i -le $copies ]
+do
+    for file in $files
+    do
+
+	# Set up double-sided printing
+	if [ -n "$duplex" ]
+	then
+	    echo "statusdict begin"
+	    echo "true setduplexmode"
+	    echo "false settumble"
+	    echo "end"
+	fi
+
+        ftype=`/usr/bin/file $file | cut -d: -f2`
+	echo $ftype | grep postscript > /dev/null
+	ft=$?
+	if [ $ft = 0 -a -z "$ascii" ] # file is verified as PostScript
+	then
+ 	    cat "$file"
+	    echo "\004\c"       # End of job to PS printer
+	else
+	    # perform ASCII-to-PostScript conversion with pslp
+	    pslp	# Assumes operation on $file
+	    echo "\004\c"       # End of job to PS printer
+	fi
+    done
+    i=`expr $i + 1`
+done
+
+echo "done: $reqid `date`" >>$log
+
+# Insure all buffers are flushed to printer:
+if [ -t 1 ]
+then
+    stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+fi
+
+# Exit:
+exit 0

@@ -1,0 +1,26 @@
+#!/bin/ksh
+# @(#) $Revision: 66.3 $
+#
+fileset=C
+exitval=0
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+
+#
+# If the C-MIN cc driver is present, we must restore /bin/cc to the
+# minimum cc driver.  Otherwise, we may simply remove /bin/cc.
+#
+rm -f /bin$CDF/cc
+if [ -s /system$CDF/C-MIN/scc ]; then
+    ln /system$CDF/C-MIN/scc /bin$CDF/cc 2>/dev/null ||
+	cp_retain /system$CDF/C-MIN/scc /bin$CDF/cc
+fi
+
+exit $exitval

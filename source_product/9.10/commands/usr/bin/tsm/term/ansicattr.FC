@@ -1,0 +1,116 @@
+## FacetTerm  ansicattr COMMON   description file  06/26/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: ansicattr.FC,v 70.1 92/03/09 15:57:06 ssa Exp $
+##--- MULTIPLE ATTRIBUTES URBDOIPA ponmlkjihgfedcba ---##
+##---                     475218..                  ---##
+### parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA-=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+### parm_attribute_out=\E[%s1;%s2m
+### parm_attribute_out=\E[%s1;%s2;%s3m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=4
+### parm_attribute_val-R-=7
+### parm_attribute_val-B-=5
+### parm_attribute_val-O-=1
+
+#########-ponmlkjidcbaURBOPA-ponmlkjidcbaURBOPA--ponmlkjidcbaURBOPA=
+##charset                   PA
+##hardclr ponm
+##foregrnd    lkji
+##backgrnd        dcba
+##and                 URBO
+attribute-..................-....lkjidcba.R..PA--....lkjidcba.R....=\E[10m
+attribute-....l........R...A-.....kjidcba....P.-l-....kjidcba......=\E[12;7m
+attribute-....l............A-.....kjidcba.R..P.-l-....kjidcba.R....=\E[12m
+attribute-....l........R..P.-.....kjidcba.....A-l-....kjidcba......=\E[11;7m
+attribute-....l...........P.-.....kjidcba.R...A-l-....kjidcba.R....=\E[11m
+
+#########-ponmlkjidcbaURBOPA-ponmlkjidcbaURBOPA--ponmlkjidcbaURBOPA=
+## grey
+attribute-p..m..............-.on.lkjidcba.R....--....lkjidcba.R....=\E[2;8;0m
+## red     lt red     31 - 40
+attribute-..n...............-po.mlkjidcba.R....--....lkjidcba.R....=\E[2;4;0m
+attribute-p.n...............-.o.mlkjidcba.R....--....lkjidcba.R....=\E[2;12;0m
+## green   lt green   32 - 40
+attribute-..nm..............-po..lkjidcba.R....--....lkjidcba.R....=\E[2;2;0m
+attribute-p.nm..............-.o..lkjidcba.R....--....lkjidcba.R....=\E[2;10;0m
+## brown   yellow(lt) 33 - 40
+attribute-.o................-p.nmlkjidcba.R....--....lkjidcba.R....=\E[2;6;0m
+attribute-po................-..nmlkjidcba.R....--....lkjidcba.R....=\E[2;14;0m
+## blue    lt blue    34 - 40
+attribute-.o.m..............-p.n.lkjidcba.R....--....lkjidcba.R....=\E[2;1;0m
+attribute-po.m..............-..n.lkjidcba.R....--....lkjidcba.R....=\E[2;9;0m
+## magenta lt magenta 35 - 40
+attribute-.on...............-p..mlkjidcba.R....--....lkjidcba.R....=\E[2;5;0m
+attribute-pon...............-...mlkjidcba.R....--....lkjidcba.R....=\E[2;13;0m
+## cyan    lt cyan    36 - 40
+attribute-.onm..............-p...lkjidcba.R....--....lkjidcba.R....=\E[2;3;0m
+attribute-ponm..............-....lkjidcba.R....--....lkjidcba.R....=\E[2;11;0m
+## white   lt white   37 - 40
+attribute-..................-ponmlkjidcba.R....--....lkjidcba.R....=\E[2;7;0m
+attribute-p.................-.onmlkjidcba.R....--....lkjidcba.R....=\E[2;15;0m
+
+## perwindow-6-CIQL-d---blink_bit=\E[3;1m
+## perwindow_also-...............=\E[3;0m
+## perwindow_default=\E[3;1m
+ignore=\E[3;0m
+pass=\E[3;1m
+
+## black on white
+attribute-..................-IDfe..............--..................=\E[7;0;7m
+## lt.red on black
+attribute-I.................-.Dfe..............--..................=\E[7;12;0m
+## 0-black 1-red 2-green 3-yellow 4-blue 5-magenta 6-cyan 7-white
+#########-ponmlkjidcbaURBOPA-ponmlkjidcbaURBOPA--ponmlkjidcbaURBOPA=
+attribute-.............R....-....lkjidcba......--....lkjidcba......=\E[7m
+
+attribute-.......i..........-....lkj...........--..................=\E[30m
+attribute-......j...........-....lk.i..........--..................=\E[31m
+attribute-......ji..........-....lk............--..................=\E[32m
+attribute-.....k............-....l.ji..........--..................=\E[33m
+attribute-.....k.i..........-....l.j...........--..................=\E[34m
+attribute-.....kj...........-....l..i..........--..................=\E[35m
+attribute-.....kji..........-....l.............--..................=\E[36m
+attribute-....l.............-.....kji..........--..................=\E[37m
+attribute-...........a......-........dcb.......--..................=\E[40m
+attribute-..........b.......-........dc.a......--..................=\E[41m
+attribute-..........ba......-........dc........--..................=\E[42m
+attribute-.........c........-........d.ba......--..................=\E[43m
+attribute-.........c.a......-........d.b.......--..................=\E[44m
+attribute-.........cb.......-........d..a......--..................=\E[45m
+attribute-.........cba......-........d.........--..................=\E[46m
+attribute-........d.........-.........cba......--..................=\E[47m
+exit_attribute_mode--....lkjidcbaURBO..=\E[0m
+exit_attribute_mode--....lkjidcbaURBO..=\E[m
+#########-ponmlkjidcbaURBOPA-ponmlkjidcbaURBOPA--ponmlkjidcbaURBOPA=
+attribute-............U.....-..................--..................=\E[4m
+attribute-..............B...-..................--..................=\E[5m
+attribute-...............O..-..................--..................=\E[1m
+attribute-............U..O..-..................--..................=\E[1;4m
+attribute-..............BO..-..................--..................=\E[1;5m
+attribute-.............R.O..-..................--..................=\E[1;7m
+attribute-............U.B...-..................--..................=\E[4;5m
+attribute-............UR....-....lkjidcba......--..................=\E[4;7m
+attribute-.............RB...-....lkjidcba......--..................=\E[5;7m
+attribute-............U.BO..-..................--..................=\E[1;4;5m
+attribute-............UR.O..-....lkjidcba......--..................=\E[1;4;7m
+attribute-.............RBO..-....lkjidcba......--..................=\E[1;5;7m
+attribute-............URB...-....lkjidcba......--..................=\E[4;5;7m
+attribute-............URBO..-....lkjidcba......--..................=\E[1;4;5;7m
+
+#########-ponmlkjidcbaURBOPA-ponmlkjidcbaURBOPA--ponmlkjidcbaURBOPA=
+attribute-.............R....-....lkjidcbaU.BO..--..................=\E[0;7m
+attribute-..................-....lkjidcbaURBOPA--..................=\E[10;0m
+attribute-..................-....lkjidcbaURBOPA--..................=\E[0;10m
+attribute-............U.....-....lkjidcba.RBO..--..................=\E[0;4m
+attribute-..............B...-....lkjidcbaUR.O..--..................=\E[0;5m
+attribute-...............O..-....lkjidcbaURB...--..................=\E[0;1m
+attribute-.............RB...-....lkjidcbaU..O..--..................=\E[0;5;7m
+attribute-.............RB...-....lkjidcbaU..O..--..................=\E[0;7;5m
+attribute-....l......a......-.....kjidcb.......--..................=\E[37;40m

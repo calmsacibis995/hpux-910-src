@@ -1,0 +1,47 @@
+This directory contains files used to build the C cross reference program
+cxref.  This is the Bell Sys 5.2 cxref.
+
+In this directory you will find the following source files:
+
+	cxr.c  This file contains the code for the main driver for
+	       cxref; it also contains the backend processing code.  It
+	       is compiled to generate 'cxref'.  This is the Bell
+	       'cxr.c' file, plus 'owner.h' has been merged inline.  So
+	       'cxref' is a single-file command.
+
+	cxlocal.c  A file needed to build the special compiler frontend,
+		   xpass, used by cxref.  This contains the code from
+		   S5.2 cxref/xlocal.c, and also "customized" code
+		   needed to satisfy external references for a compiler
+		   front-end, etc.  Along the lines of S5.2
+		   cxref/lint.c.
+
+	xpass_rel.c  An sccs-version control file for the xpass files
+		     maintained in the cxref directory (cxlocal.c,
+		     cxmacdefs).  It should be deltaed when any of the
+		     files (cxlocal.c, cxmacdefs) are modified.
+
+	makefile  make command file to build cxref, xpass, xcpp.  The
+		  install/release200 target can be used to recursively
+		  reinvoke the makefile with the correct macros for a
+		  S200 build.
+
+Cxref operates by invoking a specially made version of cpp (xcpp), and
+ccom (xpass).  These are built from the cpp source and ccom source
+(front-end files) which have been modified to contain cxref support
+code.  When the cpp and ccom files are compiled with -DCXREF they
+generate special versions which run to produce cross-reference
+information (rather than code) from a source file.
+
+Rather than keeping separate copies of the cpp and ccom source (making
+bug fix tracking unpredictable), the code to support CXREF was directly
+merged into the cpp and ccom source files (ala Sys 5.2 approach).
+
+The build command file makefile copies the files it will need from the
+system source directories for cpp and ccom in order to build xcpp and
+xpass.  Note that the file cxlocal.c is also used in forming xpass.  It
+contains cxref-type functions, and "stubs" needed to complete a
+front-end only version of the compiler.
+
+The version of xpass seen via 'what' is defined by two id numbers:  the
+xpass_rel.c id, and the id for the compiler:  ccom/Uni_rel.c.

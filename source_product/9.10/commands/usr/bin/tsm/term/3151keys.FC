@@ -1,0 +1,31 @@
+## FacetTerm  3151keys  description file 04/25/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 3151keys.FC,v 70.1 92/03/09 16:50:30 ssa Exp $
+function_key_default=\E t
+function_key_type_default=!
+pkey_key=\E!=%p1%c%1fB%64u12\E=
+function_key-!=
+function_key-"=
+function_key-#=
+function_key-$=
+function_key-%=
+function_key-&=
+function_key-'=
+function_key-(=
+function_key-)=
+function_key-*=
+function_key-+=
+function_key-,=
+shift_function_key
+function_key-45=
+function_key-.=
+function_key-/=
+function_key-0=
+function_key-1=
+function_key-2=
+function_key-3=
+function_key-4=
+function_key-5=
+function_key-6=
+function_key-7=
+function_key-8=

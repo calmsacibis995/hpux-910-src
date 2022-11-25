@@ -1,0 +1,16 @@
+## FacetTerm  tm228  COMMON  description file  05/13/91
+##    MOTOROLA TM3180 & TM3220
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: tm228.FC,v 70.1 92/03/09 16:04:00 ssa Exp $
+###### AVOID 2.1.0 and before %i bug ##################
+### onstatus=\E[%i99H
+### onstatus=\E[%i99;H
+### onstatus=\E[%i99;%p1%dH
+#######################################################
+onstatus=\E[99H
+onstatus=\E[99;H
+onstatus=\E[99;%p1%{1}%+%dH
+#######################################################
+columns_wide_clears_onstatus
+insdel_line_move_col0
+pass-answerback=^E

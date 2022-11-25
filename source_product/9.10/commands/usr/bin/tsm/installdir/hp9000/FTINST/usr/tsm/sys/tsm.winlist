@@ -1,0 +1,13 @@
+:
+if [ $# -lt 1 ]
+then
+	echo "usage: $0  window ..."
+	echo "FOR USE BY facet AND facetterm ONLY!"
+else
+	term=
+	for i in $*
+	do
+		term="$term -t "`expr "$i" : '.*/\(.*\)'`
+	done
+	ps	-f $term
+fi

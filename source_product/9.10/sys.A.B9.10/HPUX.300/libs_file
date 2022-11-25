@@ -1,0 +1,1 @@
+LIBS = $(ROOT)/libuipc.a $(ROOT)/libnipc.a $(ROOT)/liblan.a $(ROOT)/libinet.a $(ROOT)/libnet.a $(ROOT)/libcdrom.a $(ROOT)/libdskless.a $(ROOT)/libnfs.a $(ROOT)/libkreq.a $(ROOT)/libdreq.a $(ROOT)/libpm.a $(ROOT)/libvm.a $(ROOT)/libduxreq.a $(ROOT)/libsysV.a $(ROOT)/libmin.a $(ROOT)/libdevelop.a $(ROOT)/libdil_srm.a $(ROOT)/libkern.a $(ROOT)/libk.a

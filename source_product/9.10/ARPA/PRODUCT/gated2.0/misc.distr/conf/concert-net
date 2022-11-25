@@ -1,0 +1,39 @@
+#
+#   NCNOC.CONCERT.NET GATED  initialization file:
+#
+
+#tracefile /usr/tmp/gated.trace replace ;
+traceoptions general kernel icmp egp update protocol ;
+
+autonomoussystem 81 ;
+
+rip no ;
+
+egp yes {
+        group ASin 145 {
+                neighbor 128.109.193.3  ;
+        } ;
+} ;
+
+static {
+        140.213 interface 128.109.193.1 pref 100 ;
+        default gateway 128.109.193.3 pref 100 ;
+        192.58.204 gateway 128.109.193.254 pref 100 ;
+        192.58.247 gateway 128.109.193.254 pref 100 ;
+        192.73.4 gateway 128.109.193.254 pref 100 ;
+        192.82.102 gateway 128.109.193.254 pref 100 ;
+        192.76.186 gateway 128.109.193.254 pref 100 ;
+} ;
+
+propagate proto egp as 145 {
+        proto static gateway 128.109.193.254 {
+                announce 192.58.204 metric 2 ;          #GLAXO
+                announce 192.58.247 metric 2 ;          #EPA
+                announce 192.73.4 metric 2 ;            #CIIT
+                announce 192.82.102 metric 2 ;          #NTI
+                announce 192.76.186 metric 2 ;          #SRC
+        } ;
+        proto direct {
+                announce 128.109 metric 1 ;             #CONCERT
+        } ;
+} ;

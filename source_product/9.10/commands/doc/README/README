@@ -1,0 +1,96 @@
+This  directory,  /etc/newconfig,  contains  new  versions of HP-UX core
+product  configuration  files  and  shell  scripts  which  may have been
+customized  (localized)  on your system.  Old versions in their  regular
+locations in the filesystem are not overwritten by the update process.
+
+You may wish to compare these new versions with the counterparts in your
+filesystem, and incorporate  some or all of the changes for this update.
+
+These files MAY not have changed since the previous  HP-UX  release.  If
+you  wish,  you may  modify  or remove  any or all of the  files in this
+directory without affecting your system's operation.
+
+
+File location	Filename	Comments
+==============	==============	========================================
+/etc/newconfig  Update_info     System update information (please read).
+				Note that this is a directory containing
+				two files:  read Update_info/from.2.x if
+				you  previously  used Release 2 of HP-UX
+				and  read  Update_info/from.5.0  if  you
+				previously used Release 5.0 of HP-UX.
+
+/etc            backup          Script  to do  backup,  archive,  and/or
+				fsck.
+		backupf         Script to do backup onto  floppies  (for
+				AXE users).
+		bcheckrc	System initialization shell script;  see
+				brc(1M).
+		brc		System initialization shell script;  see
+				brc(1M).
+		checklist	List of the filesystems to be mounted to
+				a system; see checklist(5).
+		csh.login	Global csh(1) initialization script.
+		disktab         Disc   description   file  used  by  the
+				newfs(1M) command.
+		gettydefs       Baud rates and line types for  getty(1M)
+				and gettydefs(5).
+		group		User group definitions; see newgrp(1).
+		inittab		Process control file; see init(1M).
+		mkdev           Script  to  make   device   files;   see
+				mkdev(1M).
+		mklp            Script  to  configure  the line  printer
+				spooler; see mklp(1M).
+		motd            Message of the day (text); see brc(1M).
+		multi_user      Script to  ensure  proper  security  for
+				multi-user systems; see inittab.
+		passwd		Definition of user logins; see login(1).
+		profile		Global sh(1) initialization script.
+		rc              Script  run  for  each  init(1M)   state
+				change; see also brc(1M).
+		termcap         Terminal   capabilities   database   for
+				tset(1).
+		ttytype		Control file for tset(1).
+
+/usr/lib	lib.b		Default math library for bc(1).
+
+/usr/lib/cron   .proto          Prototype   shell   script  for  use  by
+				cron(1M).
+		at.allow        Default set of users that are allowed to
+				use the at(1) command; see at(1).
+		cron.allow      Default set of users that are allowed to
+				use the cron(1M) command; see cron(1M).
+		queuedefs       Definitions  of the queues used by at(1)
+				to schedule jobs.
+
+/usr/lib/mailx	mailx.rc	Initialization for mailx(1).
+
+/usr/lib/spell  hlist		Hashed spelling list for spell(1).
+		hlista          Hashed   spelling   list  for   spell(1)
+				(American).
+		hlistb          Hashed   spelling   list  for   spell(1)
+				(British).
+		hstop		Hashed stop list (see spell(1)).
+
+/usr/spool/cron/crontabs:
+		crontab         Sample control file for cron(1M); put it
+				in /usr/lib/cron/root if you use it.
+
+/usr/spool/lp	pstatus		Record physical printer status.
+		qstatus         Record   logical   destination   (queue)
+				status.
+
+/               .profile        Superuser  sh(1)  init  script;  name it
+				".profile"  (goes in /users/root  if you
+				create one.)
+
+/users/xxx	d.exrc		Init file for ex(1); name it ".exrc".
+		d.profile       Local   sh(1)  init   script;   name  it
+				".profile".
+		d.login		Local  csh(1)  init   script;   name  it
+				".login".
+
+
+Also, the  Asynchronous  Communications  package  has its own  newconfig
+directory, named /usr/lib/uucp/newconfig.
+

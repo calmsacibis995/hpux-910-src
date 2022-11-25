@@ -1,0 +1,153 @@
+#!/bin/sh
+##	@(#)setup_rel	$Revision: 1.11.109.1 $	$Date: 91/11/19 13:57:42 $
+#	setup_rel	--	set up a development tree given a release tag
+# Created for NFS project by Darren Smith
+# Modified to use RCS first by Cristina Mahon
+##
+# setup_release:
+#   	Given a release tag and a directory, get the versions from the
+# source control system into that nfs-relative directory.  Relies on the
+# control system supporting either symbolic tags or a tag file.
+# Tag files are assumes to reside in $nfs/bin/releases  ($nfs is used instead of
+# $Nfs to support testing of tagfiles, etc.).
+##
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH
+
+umask 022
+
+# Check for options:
+#   "-r" or "-rcs" forces usage of rcs in operations.  
+#   "-s" or "-sccs" forces usage of sccs in operations.
+CS="rcs"
+
+while [ $# -gt 0 ]
+do
+	case $1 in
+	    -r | -rcs ) 
+	            CS="rcs"
+		    ;;
+	    -s | -sccs ) 
+	            CS="sccs"
+		    ;;
+	    *)     
+	            break
+		    ;;
+	esac
+	shift
+done
+
+# Usage
+if [ $# -eq 0 ] ; then
+   echo "Usage: $0 [-r or -rcs] [-s or -sccs] <release> <nfs-relative directories>"
+   echo "The default is to use RCS"
+   exit 1
+fi
+
+# where to find the release tag files.
+release_path=${release_path:=$nfs/releases}
+export release_path
+
+# Get the release requested:
+RELEASE=$1
+shift
+if [ ! -f $release_path/$RELEASE ] ; then
+	echo "ERROR($0): $RELEASE is not a valid release in $release_path" >&2
+	exit 1
+fi
+
+if [ $# -eq 0 ] ; then 	# get everything
+   DIRECTORIES="."
+else
+   DIRECTORIES="$*"
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+echo "release_path=$release_path"
+echo "RELEASE=$RELEASE"
+if [ "$DIRECTORIES" = "." ] ; then
+   echo "DIRECTORIES=<everything>"
+else
+   echo "DIRECTORIES=$DIRECTORIES"
+fi
+
+# Warn if a kernel build is in progress
+if [ ! -w $Nfs/log/update ] ; then
+    echo "WARNING: Overnight build in progress!"
+fi
+
+if [ "$CS" = "rcs" ] ; then
+	CSDIR=${Rcs:=$Nfs/rcs}
+else
+	CSDIR=${Sccs:=$Nfs/sccs}
+fi
+# Loop for each argument
+for ARG in $DIRECTORIES
+do
+   # Show the user what we are doing this time through the loop
+   echo "\\nSetting up \"$ARG\":\\n"
+   STARTDIR=$CSDIR/$ARG
+   WORKINGDIR=$nfs/$ARG
+
+   # operate only on directories
+   if [ ! -d $STARTDIR ] ; then
+	echo "ERROR($0): \"$STARTDIR\" is not a directory!"
+	continue
+   fi
+
+   # Get the list of $CS files under that directory
+   cd $STARTDIR
+   if [ "$CS" = "rcs" ] ; then
+      FILELIST=`find . -type f -name '*,v' -print | sed -e 's,^./,,' `
+   else
+      FILELIST=`find . -type f -name 's.*' -print | sed -e 's,^./,,' `
+   fi
+
+   # Make working directories as needed for starting directory.
+   cd $nfs
+   for D in `echo $ARG | sed 's#/# #g'`
+   do
+      if [ ! -d $D ] ; then
+         mkdir $D
+      fi
+      cd $D
+   done
+
+   # For each file, make directories as needed, and get the file.
+
+   for FILE in $FILELIST
+   do
+      cd $WORKINGDIR
+      DIR=`dirname $FILE`
+      if [ ! -d $DIR ] ; then
+	 for D in `echo $DIR | sed 's#/# #g'`
+	 do
+	    if [ ! -d $D ] ; then
+	       mkdir $D
+	    fi
+	    cd $D
+	 done
+      else
+	 cd $DIR
+      fi
+
+      # Get the file from the Control System into current directory.
+      # Changed "get" to "Get".  "Get" understands about the RFA files
+      # the kernel uses. dds 2/2/87
+      echo "$WORKINGDIR/$FILE:"
+      if [ $CS = "rcs" ] ; then
+	Co -r$RELEASE $STARTDIR/$FILE
+      else
+	Get -r$RELEASE $STARTDIR/$FILE
+      fi
+
+      # Preserve execute mode
+      if [ -x $CSDIR/$ARG/$FILE ] ; then
+	 chmod u+x,g+x,o+x `basename $FILE`
+      fi
+
+   done
+
+done
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

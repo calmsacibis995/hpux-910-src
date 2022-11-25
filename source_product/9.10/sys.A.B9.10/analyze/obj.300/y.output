@@ -1,0 +1,7309 @@
+
+state 0
+	$accept : _command $end 
+	cmds : _    (4)
+
+	$end  reduce 4
+	error  shift 4
+	TBUF  shift 15
+	TFRAME  shift 25
+	TPORT  shift 27
+	TINODE  shift 28
+	TPDIR  shift 33
+	TPROC  shift 35
+	TSHMEM  shift 45
+	TSWBUF  shift 23
+	TTEXT  shift 46
+	TDUMP  shift 50
+	TSHOW  shift 5
+	TSNAP  shift 10
+	TSCAN  shift 13
+	TSYM  shift 49
+	TBINARY  shift 56
+	TREALTIME  shift 6
+	TLTOR  shift 47
+	THELP  shift 48
+	TVFILE  shift 57
+	TSETMASK  shift 54
+	TSEARCH  shift 55
+	TXDUMP  shift 52
+	TPTYINFO  shift 42
+	TPTTY  shift 43
+	TTTY  shift 44
+	TSEMA  shift 26
+	TMUXDATA  shift 39
+	TMUXCAMDATA  shift 40
+	TMUXHWDATA  shift 41
+	TCMAP  shift 24
+	TWIZ  shift 8
+	TFIXBUG  shift 9
+	TLOOK  shift 7
+	TSETOPT  shift 12
+	TLISTDUMP  shift 38
+	TLISTCOUNT  shift 37
+	TPREGION  shift 17
+	TREGION  shift 20
+	TSWAPTAB  shift 21
+	TDBD  shift 22
+	TPFDAT  shift 16
+	TSYSMAP  shift 18
+	TSHMMAP  shift 19
+	TSAVESTATE  shift 51
+	TDRIVER  shift 14
+	TPRINT  shift 36
+	TPDIRHASH  shift 34
+	TQUIT  shift 11
+	TVNODE  shift 29
+	TRNODE  shift 30
+	TCRED  shift 31
+	TFILE  shift 32
+	TSTKTRC  shift 53
+	\n  shift 2
+	?  shift 67
+	h  shift 68
+	q  shift 66
+	=  shift 63
+	:  shift 64
+	$  shift 65
+	.  error
+
+	command  goto 1
+	cmds  goto 3
+	equal_c  goto 58
+	colon_c  goto 59
+	dollar_c  goto 60
+	q_c  goto 61
+	h_c  goto 62
+
+state 1
+	$accept :  command_$end 
+
+	$end  accept
+	.  error
+
+
+state 2
+	command :  \n_    (1)
+
+	.  reduce 1
+
+
+state 3
+	command :  cmds_    (2)
+
+	.  reduce 2
+
+
+state 4
+	command :  error_\n 
+
+	\n  shift 69
+	.  error
+
+
+state 5
+	cmds :  TSHOW_showopt oredir \n 
+	showopt : _    (129)
+
+	TSYMBOL  shift 71
+	TVMSTATS  shift 72
+	TVMADDR  shift 73
+	TIOSTATS  shift 74
+	TDNLCSTATS  shift 75
+	.  reduce 129
+
+	showopt  goto 70
+
+state 6
+	cmds :  TREALTIME_\n 
+
+	\n  shift 76
+	.  error
+
+
+state 7
+	cmds :  TLOOK_\n 
+
+	\n  shift 77
+	.  error
+
+
+state 8
+	cmds :  TWIZ_\n 
+
+	\n  shift 78
+	.  error
+
+
+state 9
+	cmds :  TFIXBUG_\n 
+
+	\n  shift 79
+	.  error
+
+
+state 10
+	cmds :  TSNAP_\n 
+
+	\n  shift 80
+	.  error
+
+
+state 11
+	cmds :  TQUIT_\n 
+
+	\n  shift 81
+	.  error
+
+
+state 12
+	cmds :  TSETOPT_scanopt \n 
+	scanopt : _    (135)
+
+	TSCANOP  shift 83
+	.  reduce 135
+
+	scanopt  goto 82
+
+state 13
+	cmds :  TSCAN_scanopt oredir \n 
+	scanopt : _    (135)
+
+	TSCANOP  shift 83
+	.  reduce 135
+
+	scanopt  goto 84
+
+state 14
+	cmds :  TDRIVER_string \n 
+	cmds :  TDRIVER_\n 
+
+	TSTRING  shift 87
+	\n  shift 86
+	.  error
+
+	string  goto 85
+
+state 15
+	cmds :  TBUF_devblk opt oredir \n 
+	cmds :  TBUF_error \n 
+	devblk : _    (150)
+
+	error  shift 89
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 88
+	term  goto 90
+
+state 16
+	cmds :  TPFDAT_devblk opt oredir \n 
+	cmds :  TPFDAT_error \n 
+	devblk : _    (150)
+
+	error  shift 111
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 110
+	term  goto 90
+
+state 17
+	cmds :  TPREGION_devblk opt oredir \n 
+	cmds :  TPREGION_error \n 
+	devblk : _    (150)
+
+	error  shift 113
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 112
+	term  goto 90
+
+state 18
+	cmds :  TSYSMAP_devblk opt oredir \n 
+	cmds :  TSYSMAP_error \n 
+	devblk : _    (150)
+
+	error  shift 115
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 114
+	term  goto 90
+
+state 19
+	cmds :  TSHMMAP_devblk opt oredir \n 
+	cmds :  TSHMMAP_error \n 
+	devblk : _    (150)
+
+	error  shift 117
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 116
+	term  goto 90
+
+state 20
+	cmds :  TREGION_devblk opt oredir \n 
+	cmds :  TREGION_error \n 
+	devblk : _    (150)
+
+	error  shift 119
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 118
+	term  goto 90
+
+state 21
+	cmds :  TSWAPTAB_devblk opt oredir \n 
+	cmds :  TSWAPTAB_error \n 
+	devblk : _    (150)
+
+	error  shift 121
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 120
+	term  goto 90
+
+state 22
+	cmds :  TDBD_devblk opt oredir \n 
+	cmds :  TDBD_error \n 
+	devblk : _    (150)
+
+	error  shift 123
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 122
+	term  goto 90
+
+state 23
+	cmds :  TSWBUF_devblk opt oredir \n 
+	cmds :  TSWBUF_error \n 
+	devblk : _    (150)
+
+	error  shift 125
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 124
+	term  goto 90
+
+state 24
+	cmds :  TCMAP_devblk opt oredir \n 
+	cmds :  TCMAP_error \n 
+	devblk : _    (150)
+
+	error  shift 127
+	NUMBER  shift 109
+	TGR  reduce 150
+	TGR2  reduce 150
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 150
+	h  reduce 150
+	q  reduce 150
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 150
+	b  reduce 150
+	c  reduce 150
+	d  reduce 150
+	e  reduce 150
+	f  reduce 150
+	g  reduce 150
+	i  reduce 150
+	j  reduce 150
+	k  reduce 150
+	l  reduce 150
+	m  reduce 150
+	n  reduce 150
+	o  reduce 150
+	p  reduce 150
+	r  reduce 150
+	s  reduce 150
+	t  reduce 150
+	u  reduce 150
+	v  reduce 150
+	w  reduce 150
+	x  reduce 150
+	y  reduce 150
+	z  reduce 150
+	.  error
+
+	devblk  goto 126
+	term  goto 90
+
+state 25
+	cmds :  TFRAME_oexpr opt oredir \n 
+	cmds :  TFRAME_error \n 
+	oexpr : _    (154)
+
+	error  shift 129
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 128
+	expr  goto 130
+	term  goto 131
+
+state 26
+	cmds :  TSEMA_oexpr opt oredir \n 
+	cmds :  TSEMA_error \n 
+	oexpr : _    (154)
+
+	error  shift 133
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 132
+	expr  goto 130
+	term  goto 131
+
+state 27
+	cmds :  TPORT_oexpr opt oredir \n 
+	cmds :  TPORT_error \n 
+	oexpr : _    (154)
+
+	error  shift 135
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 134
+	expr  goto 130
+	term  goto 131
+
+state 28
+	cmds :  TINODE_devino opt oredir \n 
+	cmds :  TINODE_error \n 
+	devino : _    (147)
+
+	error  shift 137
+	NUMBER  shift 109
+	TGR  reduce 147
+	TGR2  reduce 147
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 147
+	h  reduce 147
+	q  reduce 147
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 147
+	b  reduce 147
+	c  reduce 147
+	d  reduce 147
+	e  reduce 147
+	f  reduce 147
+	g  reduce 147
+	i  reduce 147
+	j  reduce 147
+	k  reduce 147
+	l  reduce 147
+	m  reduce 147
+	n  reduce 147
+	o  reduce 147
+	p  reduce 147
+	r  reduce 147
+	s  reduce 147
+	t  reduce 147
+	u  reduce 147
+	v  reduce 147
+	w  reduce 147
+	x  reduce 147
+	y  reduce 147
+	z  reduce 147
+	.  error
+
+	devino  goto 136
+	term  goto 138
+
+state 29
+	cmds :  TVNODE_oexpr oredir \n 
+	cmds :  TVNODE_error \n 
+	oexpr : _    (154)
+
+	error  shift 140
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oexpr  goto 139
+	expr  goto 130
+	term  goto 131
+
+state 30
+	cmds :  TRNODE_oexpr opt oredir \n 
+	cmds :  TRNODE_error \n 
+	oexpr : _    (154)
+
+	error  shift 142
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 141
+	expr  goto 130
+	term  goto 131
+
+state 31
+	cmds :  TCRED_oexpr oredir \n 
+	cmds :  TCRED_error \n 
+	oexpr : _    (154)
+
+	error  shift 144
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oexpr  goto 143
+	expr  goto 130
+	term  goto 131
+
+state 32
+	cmds :  TFILE_oexpr opt oredir \n 
+	cmds :  TFILE_error \n 
+	oexpr : _    (154)
+
+	error  shift 146
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 145
+	expr  goto 130
+	term  goto 131
+
+state 33
+	cmds :  TPDIR_oexpr opt oredir 
+	cmds :  TPDIR_error \n 
+	oexpr : _    (154)
+
+	$end  reduce 154
+	error  shift 148
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 147
+	expr  goto 130
+	term  goto 131
+
+state 34
+	cmds :  TPDIRHASH_spcaddr opt oredir \n 
+	cmds :  TPDIRHASH_error \n 
+
+	error  shift 150
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddr  goto 149
+	term  goto 151
+
+state 35
+	cmds :  TPROC_oexpr opt oredir \n 
+	cmds :  TPROC_error \n 
+	oexpr : _    (154)
+
+	error  shift 153
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 152
+	expr  goto 130
+	term  goto 131
+
+state 36
+	cmds :  TPRINT_string oexpr oredir \n 
+	cmds :  TPRINT_error \n 
+
+	error  shift 155
+	TSTRING  shift 87
+	.  error
+
+	string  goto 154
+
+state 37
+	cmds :  TLISTCOUNT_spcaddr oexpr oredir \n 
+	cmds :  TLISTCOUNT_error \n 
+
+	error  shift 157
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddr  goto 156
+	term  goto 151
+
+state 38
+	cmds :  TLISTDUMP_spcaddrcnt opt oexpr oredir \n 
+	cmds :  TLISTDUMP_error \n 
+
+	error  shift 159
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddrcnt  goto 158
+	term  goto 160
+
+state 39
+	cmds :  TMUXDATA_oexpr opt oredir \n 
+	cmds :  TMUXDATA_error \n 
+	oexpr : _    (154)
+
+	error  shift 162
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 161
+	expr  goto 130
+	term  goto 131
+
+state 40
+	cmds :  TMUXCAMDATA_oexpr opt oredir \n 
+	cmds :  TMUXCAMDATA_error \n 
+	oexpr : _    (154)
+
+	error  shift 164
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 163
+	expr  goto 130
+	term  goto 131
+
+state 41
+	cmds :  TMUXHWDATA_oexpr opt oredir \n 
+	cmds :  TMUXHWDATA_error \n 
+	oexpr : _    (154)
+
+	error  shift 166
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 165
+	expr  goto 130
+	term  goto 131
+
+state 42
+	cmds :  TPTYINFO_oexpr opt oredir \n 
+	cmds :  TPTYINFO_error \n 
+	oexpr : _    (154)
+
+	error  shift 168
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 167
+	expr  goto 130
+	term  goto 131
+
+state 43
+	cmds :  TPTTY_oexpr opt oredir \n 
+	cmds :  TPTTY_error \n 
+	oexpr : _    (154)
+
+	error  shift 170
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 169
+	expr  goto 130
+	term  goto 131
+
+state 44
+	cmds :  TTTY_oexpr opt oredir \n 
+	cmds :  TTTY_error \n 
+	oexpr : _    (154)
+
+	error  shift 172
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 171
+	expr  goto 130
+	term  goto 131
+
+state 45
+	cmds :  TSHMEM_oexpr opt oredir \n 
+	cmds :  TSHMEM_error \n 
+	oexpr : _    (154)
+
+	error  shift 174
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 173
+	expr  goto 130
+	term  goto 131
+
+state 46
+	cmds :  TTEXT_oexpr opt oredir \n 
+	cmds :  TTEXT_error \n 
+	oexpr : _    (154)
+
+	error  shift 176
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	h  reduce 154
+	q  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	a  reduce 154
+	b  reduce 154
+	c  reduce 154
+	d  reduce 154
+	e  reduce 154
+	f  reduce 154
+	g  reduce 154
+	i  reduce 154
+	j  reduce 154
+	k  reduce 154
+	l  reduce 154
+	m  reduce 154
+	n  reduce 154
+	o  reduce 154
+	p  reduce 154
+	r  reduce 154
+	s  reduce 154
+	t  reduce 154
+	u  reduce 154
+	v  reduce 154
+	w  reduce 154
+	x  reduce 154
+	y  reduce 154
+	z  reduce 154
+	.  error
+
+	oexpr  goto 175
+	expr  goto 130
+	term  goto 131
+
+state 47
+	cmds :  TLTOR_error \n 
+	cmds :  TLTOR_spcaddr oredir \n 
+
+	error  shift 177
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddr  goto 178
+	term  goto 151
+
+state 48
+	cmds :  THELP_error \n 
+	cmds :  THELP_oredir \n 
+	oredir : _    (125)
+
+	error  shift 179
+	TGR  shift 182
+	TGR2  shift 183
+	\n  reduce 125
+	.  error
+
+	oredir  goto 180
+	redir  goto 181
+
+state 49
+	cmds :  TSYM_error \n 
+	cmds :  TSYM_oexpr oredir \n 
+	oexpr : _    (154)
+
+	error  shift 184
+	NUMBER  shift 109
+	TGR  reduce 154
+	TGR2  reduce 154
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 154
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oexpr  goto 185
+	expr  goto 130
+	term  goto 131
+
+state 50
+	cmds :  TDUMP_oredir \n 
+	cmds :  TDUMP_spcaddrcnt opt oredir \n 
+	cmds :  TDUMP_error \n 
+	oredir : _    (125)
+
+	error  shift 188
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 125
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oredir  goto 186
+	spcaddrcnt  goto 187
+	redir  goto 181
+	term  goto 160
+
+state 51
+	cmds :  TSAVESTATE_oredir \n 
+	cmds :  TSAVESTATE_spcaddr opt oredir \n 
+	cmds :  TSAVESTATE_error \n 
+	oredir : _    (125)
+
+	error  shift 191
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 125
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oredir  goto 189
+	spcaddr  goto 190
+	redir  goto 181
+	term  goto 151
+
+state 52
+	cmds :  TXDUMP_oredir \n 
+	cmds :  TXDUMP_spcaddrcnt oredir \n 
+	cmds :  TXDUMP_error \n 
+	oredir : _    (125)
+
+	error  shift 194
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 125
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oredir  goto 192
+	spcaddrcnt  goto 193
+	redir  goto 181
+	term  goto 160
+
+state 53
+	cmds :  TSTKTRC_spcaddr secspcaddr \n 
+	cmds :  TSTKTRC_error \n 
+
+	error  shift 196
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddr  goto 195
+	term  goto 151
+
+state 54
+	cmds :  TSETMASK_oredir \n 
+	cmds :  TSETMASK_valmsk oredir \n 
+	cmds :  TSETMASK_error \n 
+	oredir : _    (125)
+
+	error  shift 199
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 125
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oredir  goto 197
+	valmsk  goto 198
+	redir  goto 181
+	term  goto 200
+
+state 55
+	cmds :  TSEARCH_oredir \n 
+	cmds :  TSEARCH_spcaddrcnt oredir \n 
+	cmds :  TSEARCH_error \n 
+	oredir : _    (125)
+
+	error  shift 203
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	\n  reduce 125
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	oredir  goto 201
+	spcaddrcnt  goto 202
+	redir  goto 181
+	term  goto 160
+
+state 56
+	cmds :  TBINARY_redir \n 
+	cmds :  TBINARY_spcaddrcnt redir \n 
+	cmds :  TBINARY_error \n 
+
+	error  shift 206
+	NUMBER  shift 109
+	TGR  shift 182
+	TGR2  shift 183
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	spcaddrcnt  goto 205
+	redir  goto 204
+	term  goto 160
+
+state 57
+	cmds :  TVFILE_redir \n 
+	cmds :  TVFILE_error \n 
+
+	error  shift 208
+	TGR  shift 182
+	TGR2  shift 183
+	.  error
+
+	redir  goto 207
+
+state 58
+	cmds :  equal_c_    (108)
+
+	.  reduce 108
+
+
+state 59
+	cmds :  colon_c_    (109)
+
+	.  reduce 109
+
+
+state 60
+	cmds :  dollar_c_    (110)
+
+	.  reduce 110
+
+
+state 61
+	cmds :  q_c_    (111)
+
+	.  reduce 111
+
+
+state 62
+	cmds :  h_c_    (112)
+
+	.  reduce 112
+
+
+state 63
+	equal_c :  =_expr \n 
+	equal_c :  =_error \n 
+
+	error  shift 210
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 209
+	term  goto 131
+
+state 64
+	colon_c :  :_error \n 
+
+	error  shift 211
+	.  error
+
+
+state 65
+	dollar_c :  $_lc = expr \n 
+	dollar_c :  $_error \n 
+
+	error  shift 213
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  error
+
+	lc  goto 212
+
+state 66
+	q_c :  q_\n 
+	q_c :  q_error \n 
+
+	error  shift 241
+	\n  shift 240
+	.  error
+
+
+state 67
+	h_c :  ?_\n 
+	h_c :  ?_error \n 
+
+	error  shift 243
+	\n  shift 242
+	.  error
+
+
+state 68
+	h_c :  h_error \n 
+
+	error  shift 244
+	.  error
+
+
+state 69
+	command :  error \n_    (3)
+
+	.  reduce 3
+
+
+state 70
+	cmds :  TSHOW showopt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 245
+	redir  goto 181
+
+state 71
+	showopt :  TSYMBOL_    (130)
+
+	.  reduce 130
+
+
+state 72
+	showopt :  TVMSTATS_    (131)
+
+	.  reduce 131
+
+
+state 73
+	showopt :  TVMADDR_    (132)
+
+	.  reduce 132
+
+
+state 74
+	showopt :  TIOSTATS_    (133)
+
+	.  reduce 133
+
+
+state 75
+	showopt :  TDNLCSTATS_    (134)
+
+	.  reduce 134
+
+
+state 76
+	cmds :  TREALTIME \n_    (6)
+
+	.  reduce 6
+
+
+state 77
+	cmds :  TLOOK \n_    (7)
+
+	.  reduce 7
+
+
+state 78
+	cmds :  TWIZ \n_    (8)
+
+	.  reduce 8
+
+
+state 79
+	cmds :  TFIXBUG \n_    (9)
+
+	.  reduce 9
+
+
+state 80
+	cmds :  TSNAP \n_    (10)
+
+	.  reduce 10
+
+
+state 81
+	cmds :  TQUIT \n_    (11)
+
+	.  reduce 11
+
+
+state 82
+	cmds :  TSETOPT scanopt_\n 
+
+	\n  shift 246
+	.  error
+
+
+state 83
+	scanopt :  TSCANOP_    (136)
+
+	.  reduce 136
+
+
+state 84
+	cmds :  TSCAN scanopt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 247
+	redir  goto 181
+
+state 85
+	cmds :  TDRIVER string_\n 
+
+	\n  shift 248
+	.  error
+
+
+state 86
+	cmds :  TDRIVER \n_    (15)
+
+	.  reduce 15
+
+
+state 87
+	string :  TSTRING_    (153)
+
+	.  reduce 153
+
+
+state 88
+	cmds :  TBUF devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 249
+	lc  goto 250
+
+state 89
+	cmds :  TBUF error_\n 
+
+	\n  shift 251
+	.  error
+
+
+state 90
+	devblk :  term_    (151)
+	devblk :  term_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 151
+
+	term  goto 252
+
+state 91
+	term :  TCMHASH_( expr ) 
+
+	(  shift 253
+	.  error
+
+
+state 92
+	term :  TCMTOPG_( expr ) 
+
+	(  shift 254
+	.  error
+
+
+state 93
+	term :  TPTOB_( expr ) 
+
+	(  shift 255
+	.  error
+
+
+state 94
+	term :  TBTOP_( expr ) 
+
+	(  shift 256
+	.  error
+
+
+state 95
+	term :  TPGTOCM_( expr ) 
+
+	(  shift 257
+	.  error
+
+
+state 96
+	term :  TBTOC_( expr ) 
+
+	(  shift 258
+	.  error
+
+
+state 97
+	term :  TCTOB_( expr ) 
+
+	(  shift 259
+	.  error
+
+
+state 98
+	term :  TKMXTOB_( expr ) 
+
+	(  shift 260
+	.  error
+
+
+state 99
+	term :  TBTOKMX_( expr ) 
+
+	(  shift 261
+	.  error
+
+
+state 100
+	term :  TUPADD_( expr ) 
+
+	(  shift 262
+	.  error
+
+
+state 101
+	term :  TUVADD_( expr ) 
+
+	(  shift 263
+	.  error
+
+
+state 102
+	term :  TPGTOPDE_( expr ) 
+
+	(  shift 264
+	.  error
+
+
+state 103
+	term :  TVTOI_( expr ) 
+
+	(  shift 265
+	.  error
+
+
+state 104
+	term :  TITOV_( expr ) 
+
+	(  shift 266
+	.  error
+
+
+state 105
+	term :  -_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 267
+
+state 106
+	term :  $_lc 
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  error
+
+	lc  goto 268
+
+state 107
+	term :  @_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 269
+
+state 108
+	term :  (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 270
+	term  goto 131
+
+state 109
+	term :  NUMBER_    (182)
+
+	.  reduce 182
+
+
+state 110
+	cmds :  TPFDAT devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 271
+	lc  goto 250
+
+state 111
+	cmds :  TPFDAT error_\n 
+
+	\n  shift 272
+	.  error
+
+
+state 112
+	cmds :  TPREGION devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 273
+	lc  goto 250
+
+state 113
+	cmds :  TPREGION error_\n 
+
+	\n  shift 274
+	.  error
+
+
+state 114
+	cmds :  TSYSMAP devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 275
+	lc  goto 250
+
+state 115
+	cmds :  TSYSMAP error_\n 
+
+	\n  shift 276
+	.  error
+
+
+state 116
+	cmds :  TSHMMAP devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 277
+	lc  goto 250
+
+state 117
+	cmds :  TSHMMAP error_\n 
+
+	\n  shift 278
+	.  error
+
+
+state 118
+	cmds :  TREGION devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 279
+	lc  goto 250
+
+state 119
+	cmds :  TREGION error_\n 
+
+	\n  shift 280
+	.  error
+
+
+state 120
+	cmds :  TSWAPTAB devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 281
+	lc  goto 250
+
+state 121
+	cmds :  TSWAPTAB error_\n 
+
+	\n  shift 282
+	.  error
+
+
+state 122
+	cmds :  TDBD devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 283
+	lc  goto 250
+
+state 123
+	cmds :  TDBD error_\n 
+
+	\n  shift 284
+	.  error
+
+
+state 124
+	cmds :  TSWBUF devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 285
+	lc  goto 250
+
+state 125
+	cmds :  TSWBUF error_\n 
+
+	\n  shift 286
+	.  error
+
+
+state 126
+	cmds :  TCMAP devblk_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 287
+	lc  goto 250
+
+state 127
+	cmds :  TCMAP error_\n 
+
+	\n  shift 288
+	.  error
+
+
+state 128
+	cmds :  TFRAME oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 289
+	lc  goto 250
+
+state 129
+	cmds :  TFRAME error_\n 
+
+	\n  shift 290
+	.  error
+
+
+state 130
+	oexpr :  expr_    (155)
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	.  reduce 155
+
+
+state 131
+	expr :  term_    (163)
+
+	.  reduce 163
+
+
+state 132
+	cmds :  TSEMA oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 298
+	lc  goto 250
+
+state 133
+	cmds :  TSEMA error_\n 
+
+	\n  shift 299
+	.  error
+
+
+state 134
+	cmds :  TPORT oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 300
+	lc  goto 250
+
+state 135
+	cmds :  TPORT error_\n 
+
+	\n  shift 301
+	.  error
+
+
+state 136
+	cmds :  TINODE devino_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 302
+	lc  goto 250
+
+state 137
+	cmds :  TINODE error_\n 
+
+	\n  shift 303
+	.  error
+
+
+state 138
+	devino :  term_    (148)
+	devino :  term_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 148
+
+	term  goto 304
+
+state 139
+	cmds :  TVNODE oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 305
+	redir  goto 181
+
+state 140
+	cmds :  TVNODE error_\n 
+
+	\n  shift 306
+	.  error
+
+
+state 141
+	cmds :  TRNODE oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 307
+	lc  goto 250
+
+state 142
+	cmds :  TRNODE error_\n 
+
+	\n  shift 308
+	.  error
+
+
+state 143
+	cmds :  TCRED oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 309
+	redir  goto 181
+
+state 144
+	cmds :  TCRED error_\n 
+
+	\n  shift 310
+	.  error
+
+
+state 145
+	cmds :  TFILE oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 311
+	lc  goto 250
+
+state 146
+	cmds :  TFILE error_\n 
+
+	\n  shift 312
+	.  error
+
+
+state 147
+	cmds :  TPDIR oexpr_opt oredir 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 313
+	lc  goto 250
+
+state 148
+	cmds :  TPDIR error_\n 
+
+	\n  shift 314
+	.  error
+
+
+state 149
+	cmds :  TPDIRHASH spcaddr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 315
+	lc  goto 250
+
+state 150
+	cmds :  TPDIRHASH error_\n 
+
+	\n  shift 316
+	.  error
+
+
+state 151
+	spcaddr :  term_. term 
+	spcaddr :  term_    (142)
+
+	.  shift 317
+	.  reduce 142
+
+
+state 152
+	cmds :  TPROC oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 318
+	lc  goto 250
+
+state 153
+	cmds :  TPROC error_\n 
+
+	\n  shift 319
+	.  error
+
+
+state 154
+	cmds :  TPRINT string_oexpr oredir \n 
+	oexpr : _    (154)
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 154
+
+	oexpr  goto 320
+	expr  goto 130
+	term  goto 131
+
+state 155
+	cmds :  TPRINT error_\n 
+
+	\n  shift 321
+	.  error
+
+
+state 156
+	cmds :  TLISTCOUNT spcaddr_oexpr oredir \n 
+	oexpr : _    (154)
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 154
+
+	oexpr  goto 322
+	expr  goto 130
+	term  goto 131
+
+state 157
+	cmds :  TLISTCOUNT error_\n 
+
+	\n  shift 323
+	.  error
+
+
+state 158
+	cmds :  TLISTDUMP spcaddrcnt_opt oexpr oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 324
+	lc  goto 250
+
+state 159
+	cmds :  TLISTDUMP error_\n 
+
+	\n  shift 325
+	.  error
+
+
+state 160
+	spcaddrcnt :  term_. term term 
+	spcaddrcnt :  term_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	.  shift 326
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 327
+
+state 161
+	cmds :  TMUXDATA oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 328
+	lc  goto 250
+
+state 162
+	cmds :  TMUXDATA error_\n 
+
+	\n  shift 329
+	.  error
+
+
+state 163
+	cmds :  TMUXCAMDATA oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 330
+	lc  goto 250
+
+state 164
+	cmds :  TMUXCAMDATA error_\n 
+
+	\n  shift 331
+	.  error
+
+
+state 165
+	cmds :  TMUXHWDATA oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 332
+	lc  goto 250
+
+state 166
+	cmds :  TMUXHWDATA error_\n 
+
+	\n  shift 333
+	.  error
+
+
+state 167
+	cmds :  TPTYINFO oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 334
+	lc  goto 250
+
+state 168
+	cmds :  TPTYINFO error_\n 
+
+	\n  shift 335
+	.  error
+
+
+state 169
+	cmds :  TPTTY oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 336
+	lc  goto 250
+
+state 170
+	cmds :  TPTTY error_\n 
+
+	\n  shift 337
+	.  error
+
+
+state 171
+	cmds :  TTTY oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 338
+	lc  goto 250
+
+state 172
+	cmds :  TTTY error_\n 
+
+	\n  shift 339
+	.  error
+
+
+state 173
+	cmds :  TSHMEM oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 340
+	lc  goto 250
+
+state 174
+	cmds :  TSHMEM error_\n 
+
+	\n  shift 341
+	.  error
+
+
+state 175
+	cmds :  TTEXT oexpr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 342
+	lc  goto 250
+
+state 176
+	cmds :  TTEXT error_\n 
+
+	\n  shift 343
+	.  error
+
+
+state 177
+	cmds :  TLTOR error_\n 
+
+	\n  shift 344
+	.  error
+
+
+state 178
+	cmds :  TLTOR spcaddr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 345
+	redir  goto 181
+
+state 179
+	cmds :  THELP error_\n 
+
+	\n  shift 346
+	.  error
+
+
+state 180
+	cmds :  THELP oredir_\n 
+
+	\n  shift 347
+	.  error
+
+
+state 181
+	oredir :  redir_    (126)
+
+	.  reduce 126
+
+
+state 182
+	redir :  TGR_TPATH 
+
+	TPATH  shift 348
+	.  error
+
+
+state 183
+	redir :  TGR2_TPATH 
+
+	TPATH  shift 349
+	.  error
+
+
+state 184
+	cmds :  TSYM error_\n 
+
+	\n  shift 350
+	.  error
+
+
+state 185
+	cmds :  TSYM oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 351
+	redir  goto 181
+
+state 186
+	cmds :  TDUMP oredir_\n 
+
+	\n  shift 352
+	.  error
+
+
+state 187
+	cmds :  TDUMP spcaddrcnt_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 353
+	lc  goto 250
+
+state 188
+	cmds :  TDUMP error_\n 
+
+	\n  shift 354
+	.  error
+
+
+state 189
+	cmds :  TSAVESTATE oredir_\n 
+
+	\n  shift 355
+	.  error
+
+
+state 190
+	cmds :  TSAVESTATE spcaddr_opt oredir \n 
+	opt : _    (123)
+
+	h  shift 221
+	q  shift 230
+	a  shift 214
+	b  shift 215
+	c  shift 216
+	d  shift 217
+	e  shift 218
+	f  shift 219
+	g  shift 220
+	i  shift 222
+	j  shift 223
+	k  shift 224
+	l  shift 225
+	m  shift 226
+	n  shift 227
+	o  shift 228
+	p  shift 229
+	r  shift 231
+	s  shift 232
+	t  shift 233
+	u  shift 234
+	v  shift 235
+	w  shift 236
+	x  shift 237
+	y  shift 238
+	z  shift 239
+	.  reduce 123
+
+	opt  goto 356
+	lc  goto 250
+
+state 191
+	cmds :  TSAVESTATE error_\n 
+
+	\n  shift 357
+	.  error
+
+
+state 192
+	cmds :  TXDUMP oredir_\n 
+
+	\n  shift 358
+	.  error
+
+
+state 193
+	cmds :  TXDUMP spcaddrcnt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 359
+	redir  goto 181
+
+state 194
+	cmds :  TXDUMP error_\n 
+
+	\n  shift 360
+	.  error
+
+
+state 195
+	cmds :  TSTKTRC spcaddr_secspcaddr \n 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	secspcaddr  goto 361
+	term  goto 362
+
+state 196
+	cmds :  TSTKTRC error_\n 
+
+	\n  shift 363
+	.  error
+
+
+state 197
+	cmds :  TSETMASK oredir_\n 
+
+	\n  shift 364
+	.  error
+
+
+state 198
+	cmds :  TSETMASK valmsk_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 365
+	redir  goto 181
+
+state 199
+	cmds :  TSETMASK error_\n 
+
+	\n  shift 366
+	.  error
+
+
+state 200
+	valmsk :  term_    (139)
+	valmsk :  term_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 139
+
+	term  goto 367
+
+state 201
+	cmds :  TSEARCH oredir_\n 
+
+	\n  shift 368
+	.  error
+
+
+state 202
+	cmds :  TSEARCH spcaddrcnt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 369
+	redir  goto 181
+
+state 203
+	cmds :  TSEARCH error_\n 
+
+	\n  shift 370
+	.  error
+
+
+state 204
+	cmds :  TBINARY redir_\n 
+
+	\n  shift 371
+	.  error
+
+
+state 205
+	cmds :  TBINARY spcaddrcnt_redir \n 
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  error
+
+	redir  goto 372
+
+state 206
+	cmds :  TBINARY error_\n 
+
+	\n  shift 373
+	.  error
+
+
+state 207
+	cmds :  TVFILE redir_\n 
+
+	\n  shift 374
+	.  error
+
+
+state 208
+	cmds :  TVFILE error_\n 
+
+	\n  shift 375
+	.  error
+
+
+state 209
+	equal_c :  = expr_\n 
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	\n  shift 376
+	.  error
+
+
+state 210
+	equal_c :  = error_\n 
+
+	\n  shift 377
+	.  error
+
+
+state 211
+	colon_c :  : error_\n 
+
+	\n  shift 378
+	.  error
+
+
+state 212
+	dollar_c :  $ lc_= expr \n 
+
+	=  shift 379
+	.  error
+
+
+state 213
+	dollar_c :  $ error_\n 
+
+	\n  shift 380
+	.  error
+
+
+state 214
+	lc :  a_    (183)
+
+	.  reduce 183
+
+
+state 215
+	lc :  b_    (184)
+
+	.  reduce 184
+
+
+state 216
+	lc :  c_    (185)
+
+	.  reduce 185
+
+
+state 217
+	lc :  d_    (186)
+
+	.  reduce 186
+
+
+state 218
+	lc :  e_    (187)
+
+	.  reduce 187
+
+
+state 219
+	lc :  f_    (188)
+
+	.  reduce 188
+
+
+state 220
+	lc :  g_    (189)
+
+	.  reduce 189
+
+
+state 221
+	lc :  h_    (190)
+
+	.  reduce 190
+
+
+state 222
+	lc :  i_    (191)
+
+	.  reduce 191
+
+
+state 223
+	lc :  j_    (192)
+
+	.  reduce 192
+
+
+state 224
+	lc :  k_    (193)
+
+	.  reduce 193
+
+
+state 225
+	lc :  l_    (194)
+
+	.  reduce 194
+
+
+state 226
+	lc :  m_    (195)
+
+	.  reduce 195
+
+
+state 227
+	lc :  n_    (196)
+
+	.  reduce 196
+
+
+state 228
+	lc :  o_    (197)
+
+	.  reduce 197
+
+
+state 229
+	lc :  p_    (198)
+
+	.  reduce 198
+
+
+state 230
+	lc :  q_    (199)
+
+	.  reduce 199
+
+
+state 231
+	lc :  r_    (200)
+
+	.  reduce 200
+
+
+state 232
+	lc :  s_    (201)
+
+	.  reduce 201
+
+
+state 233
+	lc :  t_    (202)
+
+	.  reduce 202
+
+
+state 234
+	lc :  u_    (203)
+
+	.  reduce 203
+
+
+state 235
+	lc :  v_    (204)
+
+	.  reduce 204
+
+
+state 236
+	lc :  w_    (205)
+
+	.  reduce 205
+
+
+state 237
+	lc :  x_    (206)
+
+	.  reduce 206
+
+
+state 238
+	lc :  y_    (207)
+
+	.  reduce 207
+
+
+state 239
+	lc :  z_    (208)
+
+	.  reduce 208
+
+
+state 240
+	q_c :  q \n_    (116)
+
+	.  reduce 116
+
+
+state 241
+	q_c :  q error_\n 
+
+	\n  shift 381
+	.  error
+
+
+state 242
+	h_c :  ? \n_    (113)
+
+	.  reduce 113
+
+
+state 243
+	h_c :  ? error_\n 
+
+	\n  shift 382
+	.  error
+
+
+state 244
+	h_c :  h error_\n 
+
+	\n  shift 383
+	.  error
+
+
+state 245
+	cmds :  TSHOW showopt oredir_\n 
+
+	\n  shift 384
+	.  error
+
+
+state 246
+	cmds :  TSETOPT scanopt \n_    (12)
+
+	.  reduce 12
+
+
+state 247
+	cmds :  TSCAN scanopt oredir_\n 
+
+	\n  shift 385
+	.  error
+
+
+state 248
+	cmds :  TDRIVER string \n_    (14)
+
+	.  reduce 14
+
+
+state 249
+	cmds :  TBUF devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 386
+	redir  goto 181
+
+state 250
+	opt :  lc_    (124)
+
+	.  reduce 124
+
+
+state 251
+	cmds :  TBUF error \n_    (17)
+
+	.  reduce 17
+
+
+state 252
+	devblk :  term term_    (152)
+
+	.  reduce 152
+
+
+state 253
+	term :  TCMHASH (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 387
+	term  goto 131
+
+state 254
+	term :  TCMTOPG (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 388
+	term  goto 131
+
+state 255
+	term :  TPTOB (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 389
+	term  goto 131
+
+state 256
+	term :  TBTOP (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 390
+	term  goto 131
+
+state 257
+	term :  TPGTOCM (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 391
+	term  goto 131
+
+state 258
+	term :  TBTOC (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 392
+	term  goto 131
+
+state 259
+	term :  TCTOB (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 393
+	term  goto 131
+
+state 260
+	term :  TKMXTOB (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 394
+	term  goto 131
+
+state 261
+	term :  TBTOKMX (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 395
+	term  goto 131
+
+state 262
+	term :  TUPADD (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 396
+	term  goto 131
+
+state 263
+	term :  TUVADD (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 397
+	term  goto 131
+
+state 264
+	term :  TPGTOPDE (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 398
+	term  goto 131
+
+state 265
+	term :  TVTOI (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 399
+	term  goto 131
+
+state 266
+	term :  TITOV (_expr ) 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 400
+	term  goto 131
+
+state 267
+	term :  - term_    (178)
+
+	.  reduce 178
+
+
+state 268
+	term :  $ lc_    (179)
+
+	.  reduce 179
+
+
+state 269
+	term :  @ term_    (180)
+
+	.  reduce 180
+
+
+state 270
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 401
+	.  error
+
+
+state 271
+	cmds :  TPFDAT devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 402
+	redir  goto 181
+
+state 272
+	cmds :  TPFDAT error \n_    (19)
+
+	.  reduce 19
+
+
+state 273
+	cmds :  TPREGION devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 403
+	redir  goto 181
+
+state 274
+	cmds :  TPREGION error \n_    (21)
+
+	.  reduce 21
+
+
+state 275
+	cmds :  TSYSMAP devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 404
+	redir  goto 181
+
+state 276
+	cmds :  TSYSMAP error \n_    (23)
+
+	.  reduce 23
+
+
+state 277
+	cmds :  TSHMMAP devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 405
+	redir  goto 181
+
+state 278
+	cmds :  TSHMMAP error \n_    (25)
+
+	.  reduce 25
+
+
+state 279
+	cmds :  TREGION devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 406
+	redir  goto 181
+
+state 280
+	cmds :  TREGION error \n_    (27)
+
+	.  reduce 27
+
+
+state 281
+	cmds :  TSWAPTAB devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 407
+	redir  goto 181
+
+state 282
+	cmds :  TSWAPTAB error \n_    (29)
+
+	.  reduce 29
+
+
+state 283
+	cmds :  TDBD devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 408
+	redir  goto 181
+
+state 284
+	cmds :  TDBD error \n_    (31)
+
+	.  reduce 31
+
+
+state 285
+	cmds :  TSWBUF devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 409
+	redir  goto 181
+
+state 286
+	cmds :  TSWBUF error \n_    (33)
+
+	.  reduce 33
+
+
+state 287
+	cmds :  TCMAP devblk opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 410
+	redir  goto 181
+
+state 288
+	cmds :  TCMAP error \n_    (35)
+
+	.  reduce 35
+
+
+state 289
+	cmds :  TFRAME oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 411
+	redir  goto 181
+
+state 290
+	cmds :  TFRAME error \n_    (37)
+
+	.  reduce 37
+
+
+state 291
+	expr :  expr +_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 412
+	term  goto 131
+
+state 292
+	expr :  expr -_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 413
+	term  goto 131
+
+state 293
+	expr :  expr *_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 414
+	term  goto 131
+
+state 294
+	expr :  expr /_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 415
+	term  goto 131
+
+state 295
+	expr :  expr %_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 416
+	term  goto 131
+
+state 296
+	expr :  expr &_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 417
+	term  goto 131
+
+state 297
+	expr :  expr |_expr 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 418
+	term  goto 131
+
+state 298
+	cmds :  TSEMA oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 419
+	redir  goto 181
+
+state 299
+	cmds :  TSEMA error \n_    (39)
+
+	.  reduce 39
+
+
+state 300
+	cmds :  TPORT oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 420
+	redir  goto 181
+
+state 301
+	cmds :  TPORT error \n_    (41)
+
+	.  reduce 41
+
+
+state 302
+	cmds :  TINODE devino opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 421
+	redir  goto 181
+
+state 303
+	cmds :  TINODE error \n_    (43)
+
+	.  reduce 43
+
+
+state 304
+	devino :  term term_    (149)
+
+	.  reduce 149
+
+
+state 305
+	cmds :  TVNODE oexpr oredir_\n 
+
+	\n  shift 422
+	.  error
+
+
+state 306
+	cmds :  TVNODE error \n_    (45)
+
+	.  reduce 45
+
+
+state 307
+	cmds :  TRNODE oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 423
+	redir  goto 181
+
+state 308
+	cmds :  TRNODE error \n_    (47)
+
+	.  reduce 47
+
+
+state 309
+	cmds :  TCRED oexpr oredir_\n 
+
+	\n  shift 424
+	.  error
+
+
+state 310
+	cmds :  TCRED error \n_    (49)
+
+	.  reduce 49
+
+
+state 311
+	cmds :  TFILE oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 425
+	redir  goto 181
+
+state 312
+	cmds :  TFILE error \n_    (51)
+
+	.  reduce 51
+
+
+state 313
+	cmds :  TPDIR oexpr opt_oredir 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 426
+	redir  goto 181
+
+state 314
+	cmds :  TPDIR error \n_    (53)
+
+	.  reduce 53
+
+
+state 315
+	cmds :  TPDIRHASH spcaddr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 427
+	redir  goto 181
+
+state 316
+	cmds :  TPDIRHASH error \n_    (55)
+
+	.  reduce 55
+
+
+state 317
+	spcaddr :  term ._term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 428
+
+state 318
+	cmds :  TPROC oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 429
+	redir  goto 181
+
+state 319
+	cmds :  TPROC error \n_    (57)
+
+	.  reduce 57
+
+
+state 320
+	cmds :  TPRINT string oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 430
+	redir  goto 181
+
+state 321
+	cmds :  TPRINT error \n_    (59)
+
+	.  reduce 59
+
+
+state 322
+	cmds :  TLISTCOUNT spcaddr oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 431
+	redir  goto 181
+
+state 323
+	cmds :  TLISTCOUNT error \n_    (61)
+
+	.  reduce 61
+
+
+state 324
+	cmds :  TLISTDUMP spcaddrcnt opt_oexpr oredir \n 
+	oexpr : _    (154)
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  reduce 154
+
+	oexpr  goto 432
+	expr  goto 130
+	term  goto 131
+
+state 325
+	cmds :  TLISTDUMP error \n_    (63)
+
+	.  reduce 63
+
+
+state 326
+	spcaddrcnt :  term ._term term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 433
+
+state 327
+	spcaddrcnt :  term term_    (146)
+
+	.  reduce 146
+
+
+state 328
+	cmds :  TMUXDATA oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 434
+	redir  goto 181
+
+state 329
+	cmds :  TMUXDATA error \n_    (65)
+
+	.  reduce 65
+
+
+state 330
+	cmds :  TMUXCAMDATA oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 435
+	redir  goto 181
+
+state 331
+	cmds :  TMUXCAMDATA error \n_    (67)
+
+	.  reduce 67
+
+
+state 332
+	cmds :  TMUXHWDATA oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 436
+	redir  goto 181
+
+state 333
+	cmds :  TMUXHWDATA error \n_    (69)
+
+	.  reduce 69
+
+
+state 334
+	cmds :  TPTYINFO oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 437
+	redir  goto 181
+
+state 335
+	cmds :  TPTYINFO error \n_    (71)
+
+	.  reduce 71
+
+
+state 336
+	cmds :  TPTTY oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 438
+	redir  goto 181
+
+state 337
+	cmds :  TPTTY error \n_    (73)
+
+	.  reduce 73
+
+
+state 338
+	cmds :  TTTY oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 439
+	redir  goto 181
+
+state 339
+	cmds :  TTTY error \n_    (75)
+
+	.  reduce 75
+
+
+state 340
+	cmds :  TSHMEM oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 440
+	redir  goto 181
+
+state 341
+	cmds :  TSHMEM error \n_    (77)
+
+	.  reduce 77
+
+
+state 342
+	cmds :  TTEXT oexpr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 441
+	redir  goto 181
+
+state 343
+	cmds :  TTEXT error \n_    (79)
+
+	.  reduce 79
+
+
+state 344
+	cmds :  TLTOR error \n_    (80)
+
+	.  reduce 80
+
+
+state 345
+	cmds :  TLTOR spcaddr oredir_\n 
+
+	\n  shift 442
+	.  error
+
+
+state 346
+	cmds :  THELP error \n_    (82)
+
+	.  reduce 82
+
+
+state 347
+	cmds :  THELP oredir \n_    (83)
+
+	.  reduce 83
+
+
+state 348
+	redir :  TGR TPATH_    (127)
+
+	.  reduce 127
+
+
+state 349
+	redir :  TGR2 TPATH_    (128)
+
+	.  reduce 128
+
+
+state 350
+	cmds :  TSYM error \n_    (84)
+
+	.  reduce 84
+
+
+state 351
+	cmds :  TSYM oexpr oredir_\n 
+
+	\n  shift 443
+	.  error
+
+
+state 352
+	cmds :  TDUMP oredir \n_    (86)
+
+	.  reduce 86
+
+
+state 353
+	cmds :  TDUMP spcaddrcnt opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 444
+	redir  goto 181
+
+state 354
+	cmds :  TDUMP error \n_    (88)
+
+	.  reduce 88
+
+
+state 355
+	cmds :  TSAVESTATE oredir \n_    (89)
+
+	.  reduce 89
+
+
+state 356
+	cmds :  TSAVESTATE spcaddr opt_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 445
+	redir  goto 181
+
+state 357
+	cmds :  TSAVESTATE error \n_    (91)
+
+	.  reduce 91
+
+
+state 358
+	cmds :  TXDUMP oredir \n_    (92)
+
+	.  reduce 92
+
+
+state 359
+	cmds :  TXDUMP spcaddrcnt oredir_\n 
+
+	\n  shift 446
+	.  error
+
+
+state 360
+	cmds :  TXDUMP error \n_    (94)
+
+	.  reduce 94
+
+
+state 361
+	cmds :  TSTKTRC spcaddr secspcaddr_\n 
+
+	\n  shift 447
+	.  error
+
+
+state 362
+	secspcaddr :  term_. term 
+	secspcaddr :  term_    (144)
+
+	.  shift 448
+	.  reduce 144
+
+
+state 363
+	cmds :  TSTKTRC error \n_    (96)
+
+	.  reduce 96
+
+
+state 364
+	cmds :  TSETMASK oredir \n_    (97)
+
+	.  reduce 97
+
+
+state 365
+	cmds :  TSETMASK valmsk oredir_\n 
+
+	\n  shift 449
+	.  error
+
+
+state 366
+	cmds :  TSETMASK error \n_    (99)
+
+	.  reduce 99
+
+
+state 367
+	valmsk :  term term_    (140)
+
+	.  reduce 140
+
+
+state 368
+	cmds :  TSEARCH oredir \n_    (100)
+
+	.  reduce 100
+
+
+state 369
+	cmds :  TSEARCH spcaddrcnt oredir_\n 
+
+	\n  shift 450
+	.  error
+
+
+state 370
+	cmds :  TSEARCH error \n_    (102)
+
+	.  reduce 102
+
+
+state 371
+	cmds :  TBINARY redir \n_    (103)
+
+	.  reduce 103
+
+
+state 372
+	cmds :  TBINARY spcaddrcnt redir_\n 
+
+	\n  shift 451
+	.  error
+
+
+state 373
+	cmds :  TBINARY error \n_    (105)
+
+	.  reduce 105
+
+
+state 374
+	cmds :  TVFILE redir \n_    (106)
+
+	.  reduce 106
+
+
+state 375
+	cmds :  TVFILE error \n_    (107)
+
+	.  reduce 107
+
+
+state 376
+	equal_c :  = expr \n_    (118)
+
+	.  reduce 118
+
+
+state 377
+	equal_c :  = error \n_    (119)
+
+	.  reduce 119
+
+
+state 378
+	colon_c :  : error \n_    (120)
+
+	.  reduce 120
+
+
+state 379
+	dollar_c :  $ lc =_expr \n 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	expr  goto 452
+	term  goto 131
+
+state 380
+	dollar_c :  $ error \n_    (122)
+
+	.  reduce 122
+
+
+state 381
+	q_c :  q error \n_    (117)
+
+	.  reduce 117
+
+
+state 382
+	h_c :  ? error \n_    (115)
+
+	.  reduce 115
+
+
+state 383
+	h_c :  h error \n_    (114)
+
+	.  reduce 114
+
+
+state 384
+	cmds :  TSHOW showopt oredir \n_    (5)
+
+	.  reduce 5
+
+
+state 385
+	cmds :  TSCAN scanopt oredir \n_    (13)
+
+	.  reduce 13
+
+
+state 386
+	cmds :  TBUF devblk opt oredir_\n 
+
+	\n  shift 453
+	.  error
+
+
+state 387
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TCMHASH ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 454
+	.  error
+
+
+state 388
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TCMTOPG ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 455
+	.  error
+
+
+state 389
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TPTOB ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 456
+	.  error
+
+
+state 390
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TBTOP ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 457
+	.  error
+
+
+state 391
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TPGTOCM ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 458
+	.  error
+
+
+state 392
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TBTOC ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 459
+	.  error
+
+
+state 393
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TCTOB ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 460
+	.  error
+
+
+state 394
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TKMXTOB ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 461
+	.  error
+
+
+state 395
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TBTOKMX ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 462
+	.  error
+
+
+state 396
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TUPADD ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 463
+	.  error
+
+
+state 397
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TUVADD ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 464
+	.  error
+
+
+state 398
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TPGTOPDE ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 465
+	.  error
+
+
+state 399
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TVTOI ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 466
+	.  error
+
+
+state 400
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	term :  TITOV ( expr_) 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	)  shift 467
+	.  error
+
+
+state 401
+	term :  ( expr )_    (181)
+
+	.  reduce 181
+
+
+state 402
+	cmds :  TPFDAT devblk opt oredir_\n 
+
+	\n  shift 468
+	.  error
+
+
+state 403
+	cmds :  TPREGION devblk opt oredir_\n 
+
+	\n  shift 469
+	.  error
+
+
+state 404
+	cmds :  TSYSMAP devblk opt oredir_\n 
+
+	\n  shift 470
+	.  error
+
+
+state 405
+	cmds :  TSHMMAP devblk opt oredir_\n 
+
+	\n  shift 471
+	.  error
+
+
+state 406
+	cmds :  TREGION devblk opt oredir_\n 
+
+	\n  shift 472
+	.  error
+
+
+state 407
+	cmds :  TSWAPTAB devblk opt oredir_\n 
+
+	\n  shift 473
+	.  error
+
+
+state 408
+	cmds :  TDBD devblk opt oredir_\n 
+
+	\n  shift 474
+	.  error
+
+
+state 409
+	cmds :  TSWBUF devblk opt oredir_\n 
+
+	\n  shift 475
+	.  error
+
+
+state 410
+	cmds :  TCMAP devblk opt oredir_\n 
+
+	\n  shift 476
+	.  error
+
+
+state 411
+	cmds :  TFRAME oexpr opt oredir_\n 
+
+	\n  shift 477
+	.  error
+
+
+state 412
+	expr :  expr_+ expr 
+	expr :  expr + expr_    (156)
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	.  reduce 156
+
+
+state 413
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr - expr_    (157)
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	.  reduce 157
+
+
+state 414
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr * expr_    (158)
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	.  reduce 158
+
+
+state 415
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr / expr_    (159)
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	.  reduce 159
+
+
+state 416
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr % expr_    (160)
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	.  reduce 160
+
+
+state 417
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr & expr_    (161)
+	expr :  expr_| expr 
+
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	.  reduce 161
+
+
+state 418
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+	expr :  expr | expr_    (162)
+
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	.  reduce 162
+
+
+state 419
+	cmds :  TSEMA oexpr opt oredir_\n 
+
+	\n  shift 478
+	.  error
+
+
+state 420
+	cmds :  TPORT oexpr opt oredir_\n 
+
+	\n  shift 479
+	.  error
+
+
+state 421
+	cmds :  TINODE devino opt oredir_\n 
+
+	\n  shift 480
+	.  error
+
+
+state 422
+	cmds :  TVNODE oexpr oredir \n_    (44)
+
+	.  reduce 44
+
+
+state 423
+	cmds :  TRNODE oexpr opt oredir_\n 
+
+	\n  shift 481
+	.  error
+
+
+state 424
+	cmds :  TCRED oexpr oredir \n_    (48)
+
+	.  reduce 48
+
+
+state 425
+	cmds :  TFILE oexpr opt oredir_\n 
+
+	\n  shift 482
+	.  error
+
+
+state 426
+	cmds :  TPDIR oexpr opt oredir_    (52)
+
+	.  reduce 52
+
+
+state 427
+	cmds :  TPDIRHASH spcaddr opt oredir_\n 
+
+	\n  shift 483
+	.  error
+
+
+state 428
+	spcaddr :  term . term_    (141)
+
+	.  reduce 141
+
+
+state 429
+	cmds :  TPROC oexpr opt oredir_\n 
+
+	\n  shift 484
+	.  error
+
+
+state 430
+	cmds :  TPRINT string oexpr oredir_\n 
+
+	\n  shift 485
+	.  error
+
+
+state 431
+	cmds :  TLISTCOUNT spcaddr oexpr oredir_\n 
+
+	\n  shift 486
+	.  error
+
+
+state 432
+	cmds :  TLISTDUMP spcaddrcnt opt oexpr_oredir \n 
+	oredir : _    (125)
+
+	TGR  shift 182
+	TGR2  shift 183
+	.  reduce 125
+
+	oredir  goto 487
+	redir  goto 181
+
+state 433
+	spcaddrcnt :  term . term_term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 488
+
+state 434
+	cmds :  TMUXDATA oexpr opt oredir_\n 
+
+	\n  shift 489
+	.  error
+
+
+state 435
+	cmds :  TMUXCAMDATA oexpr opt oredir_\n 
+
+	\n  shift 490
+	.  error
+
+
+state 436
+	cmds :  TMUXHWDATA oexpr opt oredir_\n 
+
+	\n  shift 491
+	.  error
+
+
+state 437
+	cmds :  TPTYINFO oexpr opt oredir_\n 
+
+	\n  shift 492
+	.  error
+
+
+state 438
+	cmds :  TPTTY oexpr opt oredir_\n 
+
+	\n  shift 493
+	.  error
+
+
+state 439
+	cmds :  TTTY oexpr opt oredir_\n 
+
+	\n  shift 494
+	.  error
+
+
+state 440
+	cmds :  TSHMEM oexpr opt oredir_\n 
+
+	\n  shift 495
+	.  error
+
+
+state 441
+	cmds :  TTEXT oexpr opt oredir_\n 
+
+	\n  shift 496
+	.  error
+
+
+state 442
+	cmds :  TLTOR spcaddr oredir \n_    (81)
+
+	.  reduce 81
+
+
+state 443
+	cmds :  TSYM oexpr oredir \n_    (85)
+
+	.  reduce 85
+
+
+state 444
+	cmds :  TDUMP spcaddrcnt opt oredir_\n 
+
+	\n  shift 497
+	.  error
+
+
+state 445
+	cmds :  TSAVESTATE spcaddr opt oredir_\n 
+
+	\n  shift 498
+	.  error
+
+
+state 446
+	cmds :  TXDUMP spcaddrcnt oredir \n_    (93)
+
+	.  reduce 93
+
+
+state 447
+	cmds :  TSTKTRC spcaddr secspcaddr \n_    (95)
+
+	.  reduce 95
+
+
+state 448
+	secspcaddr :  term ._term 
+
+	NUMBER  shift 109
+	TCMHASH  shift 91
+	TCMTOPG  shift 92
+	TPGTOCM  shift 95
+	TBTOC  shift 96
+	TCTOB  shift 97
+	TPTOB  shift 93
+	TBTOP  shift 94
+	TKMXTOB  shift 98
+	TBTOKMX  shift 99
+	TUPADD  shift 100
+	TUVADD  shift 101
+	TPGTOPDE  shift 102
+	TVTOI  shift 103
+	TITOV  shift 104
+	-  shift 105
+	$  shift 106
+	(  shift 108
+	@  shift 107
+	.  error
+
+	term  goto 499
+
+state 449
+	cmds :  TSETMASK valmsk oredir \n_    (98)
+
+	.  reduce 98
+
+
+state 450
+	cmds :  TSEARCH spcaddrcnt oredir \n_    (101)
+
+	.  reduce 101
+
+
+state 451
+	cmds :  TBINARY spcaddrcnt redir \n_    (104)
+
+	.  reduce 104
+
+
+state 452
+	dollar_c :  $ lc = expr_\n 
+	expr :  expr_+ expr 
+	expr :  expr_- expr 
+	expr :  expr_* expr 
+	expr :  expr_/ expr 
+	expr :  expr_% expr 
+	expr :  expr_& expr 
+	expr :  expr_| expr 
+
+	|  shift 297
+	&  shift 296
+	+  shift 291
+	-  shift 292
+	*  shift 293
+	/  shift 294
+	%  shift 295
+	\n  shift 500
+	.  error
+
+
+state 453
+	cmds :  TBUF devblk opt oredir \n_    (16)
+
+	.  reduce 16
+
+
+state 454
+	term :  TCMHASH ( expr )_    (164)
+
+	.  reduce 164
+
+
+state 455
+	term :  TCMTOPG ( expr )_    (165)
+
+	.  reduce 165
+
+
+state 456
+	term :  TPTOB ( expr )_    (166)
+
+	.  reduce 166
+
+
+state 457
+	term :  TBTOP ( expr )_    (167)
+
+	.  reduce 167
+
+
+state 458
+	term :  TPGTOCM ( expr )_    (168)
+
+	.  reduce 168
+
+
+state 459
+	term :  TBTOC ( expr )_    (169)
+
+	.  reduce 169
+
+
+state 460
+	term :  TCTOB ( expr )_    (170)
+
+	.  reduce 170
+
+
+state 461
+	term :  TKMXTOB ( expr )_    (171)
+
+	.  reduce 171
+
+
+state 462
+	term :  TBTOKMX ( expr )_    (172)
+
+	.  reduce 172
+
+
+state 463
+	term :  TUPADD ( expr )_    (173)
+
+	.  reduce 173
+
+
+state 464
+	term :  TUVADD ( expr )_    (174)
+
+	.  reduce 174
+
+
+state 465
+	term :  TPGTOPDE ( expr )_    (175)
+
+	.  reduce 175
+
+
+state 466
+	term :  TVTOI ( expr )_    (176)
+
+	.  reduce 176
+
+
+state 467
+	term :  TITOV ( expr )_    (177)
+
+	.  reduce 177
+
+
+state 468
+	cmds :  TPFDAT devblk opt oredir \n_    (18)
+
+	.  reduce 18
+
+
+state 469
+	cmds :  TPREGION devblk opt oredir \n_    (20)
+
+	.  reduce 20
+
+
+state 470
+	cmds :  TSYSMAP devblk opt oredir \n_    (22)
+
+	.  reduce 22
+
+
+state 471
+	cmds :  TSHMMAP devblk opt oredir \n_    (24)
+
+	.  reduce 24
+
+
+state 472
+	cmds :  TREGION devblk opt oredir \n_    (26)
+
+	.  reduce 26
+
+
+state 473
+	cmds :  TSWAPTAB devblk opt oredir \n_    (28)
+
+	.  reduce 28
+
+
+state 474
+	cmds :  TDBD devblk opt oredir \n_    (30)
+
+	.  reduce 30
+
+
+state 475
+	cmds :  TSWBUF devblk opt oredir \n_    (32)
+
+	.  reduce 32
+
+
+state 476
+	cmds :  TCMAP devblk opt oredir \n_    (34)
+
+	.  reduce 34
+
+
+state 477
+	cmds :  TFRAME oexpr opt oredir \n_    (36)
+
+	.  reduce 36
+
+
+state 478
+	cmds :  TSEMA oexpr opt oredir \n_    (38)
+
+	.  reduce 38
+
+
+state 479
+	cmds :  TPORT oexpr opt oredir \n_    (40)
+
+	.  reduce 40
+
+
+state 480
+	cmds :  TINODE devino opt oredir \n_    (42)
+
+	.  reduce 42
+
+
+state 481
+	cmds :  TRNODE oexpr opt oredir \n_    (46)
+
+	.  reduce 46
+
+
+state 482
+	cmds :  TFILE oexpr opt oredir \n_    (50)
+
+	.  reduce 50
+
+
+state 483
+	cmds :  TPDIRHASH spcaddr opt oredir \n_    (54)
+
+	.  reduce 54
+
+
+state 484
+	cmds :  TPROC oexpr opt oredir \n_    (56)
+
+	.  reduce 56
+
+
+state 485
+	cmds :  TPRINT string oexpr oredir \n_    (58)
+
+	.  reduce 58
+
+
+state 486
+	cmds :  TLISTCOUNT spcaddr oexpr oredir \n_    (60)
+
+	.  reduce 60
+
+
+state 487
+	cmds :  TLISTDUMP spcaddrcnt opt oexpr oredir_\n 
+
+	\n  shift 501
+	.  error
+
+
+state 488
+	spcaddrcnt :  term . term term_    (145)
+
+	.  reduce 145
+
+
+state 489
+	cmds :  TMUXDATA oexpr opt oredir \n_    (64)
+
+	.  reduce 64
+
+
+state 490
+	cmds :  TMUXCAMDATA oexpr opt oredir \n_    (66)
+
+	.  reduce 66
+
+
+state 491
+	cmds :  TMUXHWDATA oexpr opt oredir \n_    (68)
+
+	.  reduce 68
+
+
+state 492
+	cmds :  TPTYINFO oexpr opt oredir \n_    (70)
+
+	.  reduce 70
+
+
+state 493
+	cmds :  TPTTY oexpr opt oredir \n_    (72)
+
+	.  reduce 72
+
+
+state 494
+	cmds :  TTTY oexpr opt oredir \n_    (74)
+
+	.  reduce 74
+
+
+state 495
+	cmds :  TSHMEM oexpr opt oredir \n_    (76)
+
+	.  reduce 76
+
+
+state 496
+	cmds :  TTEXT oexpr opt oredir \n_    (78)
+
+	.  reduce 78
+
+
+state 497
+	cmds :  TDUMP spcaddrcnt opt oredir \n_    (87)
+
+	.  reduce 87
+
+
+state 498
+	cmds :  TSAVESTATE spcaddr opt oredir \n_    (90)
+
+	.  reduce 90
+
+
+state 499
+	secspcaddr :  term . term_    (143)
+
+	.  reduce 143
+
+
+state 500
+	dollar_c :  $ lc = expr \n_    (121)
+
+	.  reduce 121
+
+
+state 501
+	cmds :  TLISTDUMP spcaddrcnt opt oexpr oredir \n_    (62)
+
+	.  reduce 62
+
+Rule not reduced:   offcnt :  term 
+Rule not reduced:   offcnt :  term term 
+
+126/2000 terminals, 24/600 nonterminals
+209/800 grammar rules, 502/1000 states
+0 shift/reduce, 0 reduce/reduce conflicts reported
+123/650 working sets used
+memory: states,etc. 2470/12000, parser 339/12000
+46/650 distinct lookahead sets
+21 extra closures
+2824 shift entries, 771 exceptions
+200 goto entries
+138 entries saved by goto default
+Optimizer space used: input 6026/12000, output 2517/12000
+2517 table entries, 1024 zero
+maximum spread: 337, maximum offset: 448

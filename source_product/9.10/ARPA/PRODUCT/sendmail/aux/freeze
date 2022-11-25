@@ -1,0 +1,42 @@
+#!/bin/sh
+
+#  freeze: Freeze sendmail configuration.
+
+#       $Header: freeze,v 1.2.109.1 91/11/21 12:05:42 kcs Exp $
+#
+#	On standalone system, just run sendmail -bz.
+#	On cluster, /usr/lib/sendmail.fc is a CDF; run sendmail -bz
+#	on each cnode, setting the hostname to the name of the server
+#	cnode.
+#
+#	Any arguments to freeze are passed to sendmail.
+#
+#	Assumes root is equivalent on all cnodes of the cluster.
+
+#  Must be run as root
+
+id | grep '^uid=0(' >&- 2>&- ||
+    { echo "`basename $0`: Permission denied"; exit 1;}
+
+#  Don't bother if sendmail not executable
+
+if [ -x /usr/lib/sendmail ] ; then
+  if [ ! -x /bin/getcontext ] || getcontext | grep 'standalone' >&- ; then
+
+    #  On standalone systems, just freeze the configuration file.
+
+    /usr/lib/sendmail -bz "$@"
+  else
+
+    #  On a cluster /usr/lib/sendmail.fc is a CDF, because series 300 and
+    #  series 800 frozen configuration files are not compatible.  Each
+    #  cnode freezes the configuration file in such a way that mail from
+    #  that cnode appears to be from the server cnode.
+
+    server=`cnodes -r`
+    for cnode in `cnodes -x` ; do
+      remsh $cnode -l root -n /usr/lib/sendmail -oMw${server} -bz "$@" &
+    done
+    /usr/lib/sendmail -oMw${server} -bz "$@"
+  fi
+fi 

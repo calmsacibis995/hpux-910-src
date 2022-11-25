@@ -1,0 +1,328 @@
+.\"
+.\" format with     mm <file> 
+.\"
+.PH "'Network/Datacomm''SECTION 8"
+.PF "'Revision:A.0'HP Confidential'\\\\nP'"
+
+.\"
+.\" beginning of section for NFS
+.\"
+.bp
+.H 2 "NFS 3.2 (Network File System)"
+.H 3 "Introduction/Product Number"
+.sp
+NFS 3.2 is Sun Microsystems' Network File System Version 3.2 (NFS/3.2) 
+on the HP9000 systems.  Specific enhancements from last release include
+remote file locking, a remote execution service, and an RPC protocol compiler.
+.sp
+Product Numbers:
+.DL 5 1
+.LI
+Series 300: 50969A
+.LI
+Series 800: 50970A 
+.LE
+.sp
+Dependencies:			
+.DL 5 1
+.LI
+Series 300: NS-ARPA Services/300 (product number 50952C)
+.LI
+Series 800: LAN/9000 Series 800 LINK (product number 98194A)
+.LE
+.sp
+Filesets:
+.DL 5 1
+.LI
+NFS_CMDS - contains NFS commands and kernel files
+.LI
+NFS_INCL - contains NFS header files
+.LI
+NFS_MAN  - contains compressed pre-nroffed NFS man files
+.LI
+NFS_MANC - contains "catable" (post-nroff) NFS man files
+.LE
+.H 3 "Functionality"
+.H 4 "Major Features"
+.DL
+.LI
+NFS: transparent access to remote files in a heterogeneous network 
+.LI
+Yellow Pages (YP): centrally administered 
+distributed data look-up service 
+.LI
+Remote Procedure call (RPC): programmatic 
+interface for interprocess communication,
+including external data representation (XDR)
+.LI
+Remote File Locking: provides System V 
+compatible file and record locking for remote files
+.LI
+Rpcgen: produces skeleton RPC programs
+.LI
+Remote Execution Service (REX): allows execution of processes on remote machines
+All features in SUN's 3.2 Version
+.LI
+Virtual Home Environment (VHE): an extension to NFS
+
+.H 4 "System Entry Points/Commands"
+.sp
+System Entry Points:		
+.nf
+	async_daemon()
+	getdomainname()
+	getfh()
+	nfssvc()
+	setdomainname()
+	nfs_fcntl() (hidden system call used only for NFS)
+.fi
+.sp 3
+Library Functions:
+(N = new as of NFS 3.2)
+.sp 
+.nf
+General functions:
+
+	getrpcbyname			setnetgrent
+	getrpcbynumber                  endnetgrent
+	setrpcent			getnetgrent
+	endrpcent			innetgr
+	getrpcent			lookup
+	
+XDR functions:
+
+	xdr_accepted_reply		xdr_pmaplist
+	xdr_array			xdr_pointer		N
+	xdr_authunix_parms		xdr_reference
+	xdr_bool			xdr_rejected_reply
+	xdr_bytes			xdr_replymsg
+	xdr_callhdr			xdr_rmtcall_args	N
+	xdr_callmsg			xdr_rmtcallres		N
+N	xdr_char			xdr_short
+	xdr_deskey			xdr_string
+	xdr_double			xdr_u_char		N
+	xdr_enum			xdr_u_int
+	xdr_fhandle			xdr_u_long
+	xdr_fhstatus			xdr_u_short
+	xdr_float			xdr_union
+N	xdr_free			xdr_vector		N
+	xdr_int				xdr_void
+	xdr_long			xdr_wrapstring
+	xdr_netobj			xdrmem_create
+	xdr_opaque			xdrrec_create
+	xdr_opaque_auth                 xdrrec_endofrecord
+	xdr_path			xdrrec_eof
+	xdr_pmap			xdrrec_skiprecord
+					xdrstdio_create
+
+RPC functions:
+
+	_authenticate			pmap_rmtcall
+	_rpc_free			pmap_set
+	_rpc_malloc			pmap_unset
+	_seterr_reply			registerrpc		
+	_svcauth_null			svc_getreq		N	
+	_svcauth_short			svc_getreqset		
+	_svcauth_unix			svc_register		
+	authnone_create              	svc_run   
+	authunix_create			svc_sendreply	
+	authunix_create_default		svc_unregister	
+N	bindresvport			svcerr_auth	
+	callrpc				svcerr_decode	
+	clnt_broadcast			svcerr_noproc	
+N	clnt_create			svcerr_noprog	
+	clnt_pcreateerror		svcerr_progvers	
+	clnt_perrno			svcerr_systemerr	
+	clnt_perror			svcerr_weakauth	
+N	clnt_spcreateerror		svcfd_create	
+N	clnt_sperrno			svcraw_create	
+N	clnt_sperror			svctcp_create	
+	clntraw_create			svcudp_bufcreate	
+	clnttcp_create			svcudp_create	
+	clntudp_bufcreate		xprt_register		
+	clntudp_create		    	xprt_unregister
+	get_myaddress			
+	gettransient
+	pmap_getmaps
+	pmap_getport
+
+
+YP routines:
+
+	_xdr_ypbind_oldsetdom		xdr_ypreq_key
+	_xdr_yprequest			xdr_ypreq_nokey
+	_xdr_ypresponse                 xdr_ypreq_xfr
+	_yp_dobind			xdr_ypresp_key_val
+	v1prot_dofirst			xdr_ypresp_maplist
+	v1prot_donext			xdr_ypresp_master
+	xdr_datum			xdr_ypresp_order
+	xdr_yp_binding			xdr_ypresp_val
+	xdr_yp_inaddr			yp_all
+	xdr_ypall			yp_bind
+	xdr_ypbind_resp                 yp_first
+	xdr_ypbind_setdom		yp_get_default_domain
+	xdr_ypdomain_wrap_string	yp_master
+	xdr_ypmap_parms                 yp_match
+	xdr_ypmap_wrap_string		yp_next
+	xdr_ypmaplist			yp_order
+	xdr_ypmaplist_wrap_string	yp_unbind
+	xdr_ypowner_wrap_string         yperr_string
+	xdr_yppushresp_xfr		ypprot_err
+
+
+Librpcsvc.a functions:
+
+	xdr_exportbody		xdr_utmpidleptr
+	xdr_exports		xdr_utmpptr
+	xdr_groups		rwall
+	xdr_mountbody		xdr_sprayarr
+	xdr_mountlist		xdr_spraycumul
+	havedisk		getrpcport
+	rstat			xdr_passwd
+	xdr_stats		xdr_yppasswd
+	xdr_statsswtch		yppasswd
+	xdr_statstime		xdr_mon
+	xdr_timeval		xdr_mon_id
+	rnusers			xdr_my_id
+	rusers			xdr_res
+	xdr_utmp		xdr_sm_name
+	xdr_utmparr		xdr_sm_stat
+	xdr_utmpidle		xdr_sm_stat_res
+	xdr_utmpidlearr         xdr_status
+
+
+
+Commands:
+
+	bin/domainname
+	etc/biod
+	etc/fsirand
+	etc/netnfsrc
+	etc/nfsd
+	etc/pcnfsd
+	etc/portmap
+	etc/rpc.lockd		N
+	etc/rpc.statd		N
+	etc/ypbind
+	usr/bin/rpcgen		N
+	usr/bin/rup
+	usr/bin/rusers
+	usr/bin/ypcat
+	usr/bin/ypmatch
+	usr/bin/yppasswd
+	usr/bin/ypwhich
+	usr/etc/nfsstat
+	usr/bin/on		N
+	usr/etc/rpc.mountd
+	usr/etc/rpc.rexd	N
+	usr/etc/rpc.rstatd
+	usr/etc/rpc.rusersd
+	usr/etc/rpc.rwalld
+	usr/etc/rpc.sprayd
+	usr/etc/rpc.yppasswdd
+	usr/etc/rpcinfo
+	usr/etc/rwall
+	usr/etc/showmount
+	usr/etc/spray
+	usr/etc/vhe/vhe_altlog
+	usr/etc/vhe/vhe_getlist
+	usr/etc/vhe/vhe_mounter
+	usr/etc/vhe/vhe_u_mnt
+	usr/etc/yp/makedbm
+	usr/etc/yp/revnetgroup
+	usr/etc/yp/stdhosts
+	usr/etc/yp/ypinit
+	usr/etc/yp/ypmake
+	usr/etc/yp/yppoll
+	usr/etc/yp/yppush
+	usr/etc/yp/ypset
+	usr/etc/yp/ypxfr
+	usr/etc/yp/ypxfr_1perday
+	usr/etc/yp/ypxfr_1perhour
+	usr/etc/yp/ypxfr_2perday
+	usr/etc/ypserv
+
+
+
+Fileformats:
+
+	etc/exports
+	etc/netgroup
+	etc/rpc
+	etc/vhe_list
+.fi
+.H 4 "Standards Conformance"
+.DL 5 1
+.LI
+OSF Level 0: as supported by version 2 of the NFS protocol
+.LI
+POSIX: as supported by version 2 of the NFS protocol 
+(do not support full [f]pathconf functionality)
+.LI
+X/OPEN XPG3: not applicable
+.LE
+.H 4 "Performance Features"
+.DL 5 1
+.LI
+s350: 90% of Sun Read/Write 3/260 with NFS 3.2
+.LI
+s835: 75% of Sun Read/Write 4/260 with NFS 4.0
+.LE
+.H 4 "Security Level"
+.DL 5 1
+.LI
+NFS will coexist with new C2 security features
+.LI
+NFS does not support setting and getting ACLs
+.LI
+NFS does not provide a secure RPC for this release
+.LE
+.H 4 "Internationalization (NLS)"
+.DL 5 1
+.LI
+support 8/16 bit data (for scanning, collating,
+up/downshift, range checking) 
+.LI
+language selectable messages 
+.LI
+message file localization  
+.LI
+date/time formatting
+.LE
+.H 4 "System Requirements"
+.DL 5 1
+.LI
+memory requirements: 500KB above base networking requirements (?)
+.LI 
+disc space requirements: ~4.5MB (?)
+.LE
+.H 3 "Documentation"
+.sp
+Internal:
+.DL 5 1
+.LI
+ERS: External Requirements Specifications Document S300/S800 NFS Project
+.LI
+Sun Documentation: Sun Microsystems' Network Services Guide
+.LE
+.sp
+External:
+.DL 5 1
+.LI
+Installing NFS
+.LI
+Administering NFS
+.LI
+Using NFS
+.LI
+NFS Services Reference Pages
+.LE
+.H 3 "Training / Support"
+.\"
+.\" end of section for NFS
+.\"
+.\" 
+.\" generate table of contents
+.\"
+.TC 1 1 3
+

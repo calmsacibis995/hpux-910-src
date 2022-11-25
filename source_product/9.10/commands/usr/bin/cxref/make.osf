@@ -1,0 +1,251 @@
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/cxref/make.osf,v $
+# $Revision: 70.5 $
+
+# Common makefile for cxref -- built using the s300 front-end C compiler
+# files
+
+# the MIP varirable tells where to find the s300 front-end compiler files
+MIP = ../ccom
+
+XPASS = xpass
+CLEANFILES = $(CLN)
+
+# Common flags
+FLAGS = -DSLOW_WALKF -D_LOCALE_INCLUDED -DOSF -UIRIF -DCXREF -DBUG4 -DNOCDB -DSLOW_WALKF -DC1 -D_HPUX_SOURCE
+FLAGS_COMPAT = -UANSI
+FLAGS_ANSI  = -DANSI -DLDBL
+
+# S800 specific flags, needed for the cross-compile 
+FLAGS800 = $(FLAGS) -Dxcomp300_800 -Dprntf=printf -Dfprntf=fprintf -Dsprntf=sprintf 
+FLAGS300_68 = $(FLAGS) -DPAXDEV -A cpu,m68k -Dprntf=printf -Dfprntf=fprintf -Dsprntf=sprintf
+FLAGS300_88 = $(FLAGS) -DPAXDEV -A cpu,a88k -Dprntf=printf -Dfprntf=fprintf -Dsprntf=sprintf
+FLAGS300_X  = $(FLAGS) -UPAXDEV -Dprntf=printf -Dfprntf=fprintf -Dsprntf=sprintf
+
+# flags for unifdef'ing cgram.y
+UNIFFLAGS_800 = -UIRIF -DLINT -Dxcomp300_800
+UNIFFLAGS_300 = -UIRIF -DLINT -Uxcomp300_800
+
+XAR = /usr/apollo/bin/xar
+YACC = /paXdev/bin/yacc
+CC = /bin/cc
+CFLAGS = 
+
+EXTERNFILES=	$(MIP)/cgram.y 	\
+		$(MIP)/comm1.c	\
+		$(MIP)/optim.c	\
+		$(MIP)/pftn.c	\
+		$(MIP)/scan.c	\
+		$(MIP)/trees.c	\
+		$(MIP)/xdefs.c	\
+		$(MIP)/messages.c	\
+		$(MIP)/messages.h	\
+		$(MIP)/manifest	\
+		$(MIP)/macdefs	\
+		$(MIP)/mfile1	\
+		$(MIP)/common	\
+		$(MIP)/commonb	\
+		$(MIP)/opcodes.h	\
+		$(MIP)/mac2defs	\
+		$(MIP)/yaccpar
+
+EXTERNFILES300= $(EXTERNFILES)
+
+EXTERNFILES800= $(EXTERNFILES) $(MIP)/quad.c
+
+# sources linked from other directories that need to be cleaned up
+# rm -f won't complain if the file is not there, so don't distinguish
+# 300/800 exceptions, just list everything
+CLN =		cgram.y		\
+		comm1.c		\
+		optim.c		\
+		pftn.c		\
+		scan.c		\
+		trees.c		\
+		xdefs.c		\
+		messages.c	\
+		messages.h	\
+		manifest	\
+		mfile1		\
+		common		\
+		commonb		\
+		opcodes.h	\
+		macdefs		\
+		mac2defs	\
+		print.s		\
+		xccom_rel.c	\
+		xcpp_rel.c	\
+		quad.c		\
+		yaccpar
+
+
+XPASSOBJS    =  cgram.o		\
+		comm1.o		\
+		optim.o	\
+		pftn.o		\
+		scan.o		\
+		trees.o		\
+		xdefs.o		\
+		messages.o	\
+		cxlocal.o	\
+		xpass_rel.o	\
+		xccom_rel.o
+
+XPASSOBJS300 = $(XPASSOBJS)
+
+XPASSOBJS800 = $(XPASSOBJS) quad.o
+
+XPASSINC = manifest macdefs mfile1 cxmacdefs messages.h
+
+LIBS="-lm" 
+
+default:
+	clnfiles="$(CLN)";						\
+	xpassinc="$(XPASSINC)";						\
+	efiles="$(EXTERNFILES300)";					\
+	xpassobjs="$(XPASSOBJS300)";					\
+	flags="$(FLAGS300_68)";						\
+	unifflags="$(UNIFFLAGS_300)";					\
+	xpassname="xpass";						\
+	target="clean_o all";                   			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"					\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"   	\
+		FLAGS="$$flags $(FLAGS_COMPAT)"				\
+		UNIFFLAGS="$$unifflags -UANSI -ULDBL"			\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target ;						\
+	xpassname="xpass.ansi";         				\
+	target="clean_o xpass.ansi";            			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"             			\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"  		\
+		FLAGS="$$flags $(FLAGS_ANSI)"    			\
+		UNIFFLAGS="$$unifflags -DANSI -DLDBL"       		\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target;						\
+	$(LD) -A cpu,m68k xpass -o xpass.m68k;				\
+	$(LD) -A cpu,m68k xpass.ansi -o xpass.ansi.m68k;		\
+	$(LD) -A cpu,m68k cxref -o cxref.m68k;				\
+	flags="$(FLAGS300_88)";						\
+	xpassname="xpass";						\
+	target="clobber_o all";                   			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"             			\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"   	\
+		FLAGS="$$flags $(FLAGS_COMPAT)"				\
+		UNIFFLAGS="$$unifflags -UANSI -ULDBL"			\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target ;						\
+	xpassname="xpass.ansi";         				\
+	target="clean_o xpass.ansi";            			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"             			\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"  		\
+		FLAGS="$$flags $(FLAGS_ANSI)"    			\
+		UNIFFLAGS="$$unifflags -DANSI -DLDBL"       		\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target;						\
+	$(LD) -A cpu,a88k xpass -o xpass.a88k;				\
+	$(LD) -A cpu,a88k xpass.ansi -o xpass.ansi.a88k;		\
+	$(LD) -A cpu,a88k cxref -o cxref.a88k;				\
+	/bin/rm -f xpass xpass.ansi cxref;				\
+	$(XAR) -cv cxref.X cxref.m68k cxref.a88k;			\
+	$(XAR) -cv xpass.X xpass.m68k xpass.a88k;			\
+	$(XAR) -cv xpass.ansi.X xpass.ansi.m68k xpass.ansi.a88k;	\
+	flags="$(FLAGS300_X)";						\
+	xpassname="xpass";						\
+	target="clobber_o all";                   			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"             			\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"   	\
+		FLAGS="$$flags $(FLAGS_COMPAT)"				\
+		CC="/paXdev/bin/cc"					\
+		UNIFFLAGS="$$unifflags -UANSI -ULDBL"			\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target ;						\
+	xpassname="xpass.ansi";         				\
+	target="clean_o xpass.ansi";            			\
+	$(MAKE) -f make.osf EFILES="$$efiles" XPASSOBJS="$$xpassobjs"	\
+		XPASS="$$xpassname"             			\
+		CLEANFILES="$$clnfiles" XPASSINC="$$xpassinc"  		\
+		FLAGS="$$flags $(FLAGS_ANSI)"    			\
+		UNIFFLAGS="$$unifflags -DANSI -DLDBL"       		\
+		CC="/paXdev/bin/cc"					\
+		CFLAGS="$(CFLAGS)" LDFLAGS="$(LDFLAGS)" MIP="$(MIP)"	\
+		$$target;
+
+all: link_files cxref $(XPASS)
+
+# --- CXREF ---
+cxref: cxr.o
+	$(CC) $(CFLAGS) $(LDFLAGS) $(FLAGS) cxr.o -o cxref 
+
+
+# --- XPASS ---
+$(XPASS): $(XPASSOBJS)
+	$(CC) $(CFLAGS) $(LDFLAGS) $(FLAGS) $(XPASSOBJS) -o $(XPASS) $(LIBS)
+
+cgram.c: cgram.y
+	-unifdef $(UNIFFLAGS) cgram.y >gram.y
+	$(YACC) -l gram.y
+	mv y.tab.c cgram.c
+	/bin/rm -f gram.y
+
+cgram.o: cgram.c
+	$(CC) $(CFLAGS) $(FLAGS) -c cgram.c
+
+comm1.o: common comm1.c
+	$(CC) $(CFLAGS) $(FLAGS) -c comm1.c
+
+trees.o: trees.c
+	$(CC) $(CFLAGS) $(FLAGS) -c trees.c
+
+optim.o: optim.c
+	$(CC) $(CFLAGS) $(FLAGS) -c optim.c
+
+pftn.o: pftn.c
+	$(CC) $(CFLAGS) $(FLAGS) -c pftn.c
+
+scan.o: scan.c
+	$(CC) $(CFLAGS) $(FLAGS) -c scan.c
+
+xdefs.o: xdefs.c
+	$(CC) $(CFLAGS) $(FLAGS) -c xdefs.c
+
+xccom_rel.o: xccom_rel.c
+	$(CC) $(CFLAGS) $(FLAGS) -c xccom_rel.c
+
+messages.o: messages.c messages.h
+	$(CC) $(CFLAGS) $(FLAGS) -c messages.c
+
+#
+# Cxref, xpass and xpass.ansi all rely on sources in other places.  This
+# target creates links to those sources so we can access the remote
+# file as if it were in the current directory.
+# The link is symbolic so that a dependency make (patch make) will see
+# the date stamps on the actual source files, not the link.
+#
+link_files:
+	ln -s $(EFILES) .
+	ln -s $(MIP)/K_rel_ccom.c ./xccom_rel.c
+
+clean:
+	-/bin/rm -f *.o cgram.c $(CLEANFILES)
+
+# clean_o target:  clean up .o files and cgram.c ;  needed between the
+#       recursive calls to build xpass, and xpass.ansi.
+clean_o:
+	-/bin/rm -f *.o  cgram.c
+
+
+clobber_o: clean
+	/bin/rm -f cxref xpass xpass.ansi
+
+clobber: clean
+	/bin/rm -f cxref.X cxref xpass.X xpass xpass.ansi.X xpass.ansi *m68* *a88*
+
+#
+# Re-define .c.o rule to use FLAGS
+#
+.c.o:
+	$(CC) $(CFLAGS) $(FLAGS) -c $<

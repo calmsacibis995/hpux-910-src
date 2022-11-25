@@ -1,0 +1,159 @@
+#!/bin/sh
+# @(#) $Header: tsm.lpadmin,v 66.2 90/09/20 12:22:40 kb Exp $
+PROG=$0
+PIPEPATH=/usr/spool/lp/tsm.pipes
+USAGE="$PROG: Add a printer to the LP system for use by TSM.
+usages: $PROG -p printer_name  -m lp_model_name
+        $PROG -x printer_name"
+
+stop_lp_sched()
+{
+  if [ -f /usr/spool/lp/SCHEDLOCK ]
+  then 
+    LP_RUN=1
+    /usr/lib/lpshut > /dev/null 2>&1
+  else
+    LP_RUN=0
+  fi
+}
+
+start_lp_sched()
+{
+  if [ "$LP_RUN" = 1 ]
+  then
+    /usr/lib/lpsched > /dev/null 2>&1
+  fi
+}
+
+set -- `getopt x:p:m: $*`
+if [ "$?" != 0 -o "$#" = 1 ]
+then
+  echo "$USAGE"
+  exit 1
+fi
+OPTX=
+OPTP=
+OPTM=
+for i in $*
+do
+  case $i in
+  -x) P=$2; OPTX=1; shift 2;;
+  -p) P=$2; OPTP=1; shift 2;;
+  -m) M=$2; OPTM=1; shift 2;;
+  --) shift; break;;
+  esac
+done
+
+if [ -n "$OPTX" ]  # Check for valid combination of options
+then
+  if [ -n "$OPTP" -o -n "$OPTM" ]
+  then
+    echo "$PROG: -x requires no other options"
+    echo "$USAGE"
+    exit 1
+  fi
+else
+  if [ -n "$OPTP" ]
+  then
+    if [ ! -n "$OPTM" ]
+    then
+      echo "$PROG: Must also specify model" 
+      echo "$USAGE"
+      exit 1
+    fi
+  else
+    echo "$PROG: Must also specify printer name"
+    echo "$USAGE"
+    exit 1
+  fi
+fi
+
+if [ ! -w /usr/spool/lp ]  # Do we have correct permissions
+then
+  echo "$PROG: for use only by LP administators (user lp or superuser)"
+  exit 1
+fi
+
+if [ -H /dev ]  # Is this a clustered system?
+then 
+  if [ "`/bin/cnodes -r`" != "`/bin/cnodes -m`" ]
+  then
+    echo "$PROG: must run on the root server of a cluster"
+    exit 1
+  fi
+fi
+
+if [ -n "$OPTX" ]  # Remove the printer P
+then
+  if [ -p $PIPEPATH/$P ] 
+  then
+    /bin/rm -f $PIPEPATH/$P
+    echo "Pipe $PIPEPATH/$P removed"
+    if [ -f /usr/spool/lp/interface/$P ]
+    then
+      stop_lp_sched > /dev/null
+      /usr/lib/lpadmin -x$P > /dev/null
+      start_lp_sched > /dev/null
+      echo "Printer $P removed"
+      exit 0
+    fi
+    exit 0
+  else
+    echo "$PROG: The printer $P has no assosiated pipe. Printer not removed."
+    exit 1
+  fi
+else           # Add the printer P with model M
+  if [ -f /usr/spool/lp/interface/$P ]
+  then
+    echo "$PROG: Printer $P already exists"
+    echo "It may or may not be compatible with TSM"
+    exit 1
+  fi
+  if [ ! -f /usr/spool/lp/model/$M ]
+  then
+    echo "$PROG: Unknown model $M"
+    exit 1
+  fi
+  if [ ! -d $PIPEPATH ]  # Has the pipe directory been built?
+  then
+    /bin/mkdir $PIPEPATH &&
+    /bin/chown lp $PIPEPATH &&
+    /bin/chgrp bin $PIPEPATH &&
+    /bin/chmod 755 $PIPEPATH 
+    if [ $? != 0 ] 
+    then 
+      echo "$PROG: Unable to create directory $PIPEPATH"
+      exit 1
+    else
+      echo "Directory $PIPEPATH created"
+    fi
+  fi
+  if [ ! -p $PIPEPATH/$P ]
+  then
+    /etc/mknod $PIPEPATH/$P p &&  # Create the pipe
+    /bin/chown lp $PIPEPATH/$P &&
+    /bin/chgrp bin $PIPEPATH/$P &&
+    /bin/chmod +rw $PIPEPATH/$P 
+    if [ $? != 0 ]
+    then
+      echo "$PROG: Unable to create named pipe in $PIPEPATH"
+      exit 1
+    else
+      echo "Pipe $PIPEPATH/$P created"
+    fi
+  else
+    echo "Using existing pipe $PIPEPATH/$P"
+  fi
+  stop_lp_sched > /dev/null &&
+  /usr/lib/lpadmin -p$P -m$M -v$PIPEPATH/$P > /dev/null &&
+  start_lp_sched > /dev/null &&
+  /usr/bin/enable $P > /dev/null &&
+  /usr/lib/accept $P > /dev/null 
+  if [ $? != 0 ]
+  then
+    echo "Error occured while adding printer $P"
+  else 
+    echo "Printer $P added, enabled, and accepting requests."
+  fi
+fi
+exit 0

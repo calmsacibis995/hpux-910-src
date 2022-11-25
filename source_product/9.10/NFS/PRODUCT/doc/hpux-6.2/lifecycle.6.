@@ -1,0 +1,131 @@
+NFS 300 6.2 release Life Cycle
+------------------------------
+
+Checkpoint: I -> L
+
+  Milestone Date: February 2, 1988
+
+  Deliverables:
+
+  1. Initial project documentation complete:
+      - PDS, Life Cycle, I/L presentation, Summary of investigation
+
+  2. Decision on what will be included in the 6.2 release made.
+
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1.  2 350s                           Equip.    perf.     2/1
+  2.  3 disks  (at least 1 7958)       Equip.    perf.     2/1
+
+
+Checkpoint: Functional Complete
+
+  Milestone Date: March 1, 1988
+
+  Deliverables:
+
+  1. All code changes for additional functionality completed.
+
+  2. New man pages and man page changes for new functionality completed.
+
+  3. All input for manual changes required by new functionality given 
+     to documentation.
+
+  4. Test plans complete.
+
+  5. Measurement of current NFS performance 350 to 350.
+
+  6. All changes needed to reach 75% of SUN3/260 results defined.
+
+  7. Training and support plan in place for VHE. (Tech Support).
+  
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1.  Copy of current  NFS manuals     doc.      lab       2/12
+  2.  Training and support plan in     tech.     lab       3/1
+      place for VHE.
+
+
+Checkpoint: Deliver to IC 1
+
+  Milestone Date: March 14, 1988
+
+  Deliverables:
+
+  1. All code changes for performance enhancements complete.
+
+  2. Code submitted for IC1 build.
+
+  3. Measurement of current NFS performance 350 to 350. Must be at least
+     75% of SUN3/260 performance.
+
+  4. High want: meet or exceed SUN3/260 performance.
+
+  5. Tests complete and put into CND scaffold.
+
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1. Any changes needed in local       kern.     perf.     3/14
+     file system or kernel for 
+     NFS performance gains.
+
+  2. Tests put into scaffold.          arsenal   smurfs    3/14
+
+
+Checkpoint: Deliver to IC 2
+
+  Milestone Date: March 28, 1988
+
+  Deliverables: 
+
+  1. All major defects (weight 5 and above fixed).
+
+  2. Code submitted for IC2 build.
+
+  3. Measurement of current NFS performance 350 to 350. Must be at least
+     75% of SUN.
+
+  4. High want: meet or exceed SUN3/260 performance.
+
+  5. Regression tests complete (arsenal)
+
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1. Regression tests completed by     arsenal  smurfs    4/17
+     arsenal team.  
+
+
+Checkpoint: Deliver to Final SSIT
+
+  Milestone Date: April 18, 1988
+
+  Deliverables:
+
+  1. All major defects (weight 5 and above) fixed.
+
+  2. Code submitted for Final SSIT.
+
+  3. Review of manuals complete.
+
+  4. Measurement of current NFS performance 350 to 350. Must be at least
+     75% of SUN.
+
+  5. High want: meet or exceed SUN3/260 performance.
+
+  6. Regression tests complete (arsenal)
+
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1. Manual changes completed.         doc.      lab.      4/11
+  2. Regression tests completed by     arsenal  smurfs    4/17
+     arsenal team.
+
+
+Checkpoint: MR
+
+  Milestone Date: June 1, 1988
+
+  Dependencies                         On Whom   By Whom   By When   Actual
+  -------------------------------------------------------------------------
+  1. Manuals in Stock                  doc.      lab       5/25
+

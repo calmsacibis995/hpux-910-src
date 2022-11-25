@@ -1,0 +1,34 @@
+## FacetTerm  ptclearcom  description file 03/15/88
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: ptclearcom.FC,v 70.1 92/03/09 16:02:22 ssa Exp $
+##--- CLEAR ---##
+clear_screen=\E?
+### NO clear_all=\E?
+### change visual attributes to end of line using SGR - clear to end of line
+### pt200.ti:	   clr_eol=\E[t\E[K
+### pt250.ti:	   clr_eol=\E[t\E[K
+### pt200-merge.ti: clr_eol=\E[K\E$O\E[2m\E[t\E$Q\E[C\E$O\E[D\E[2m\s\E$Q\E[D
+### pt250-merge.ti: clr_eol=\E[K\E$O\E[m\E[t\E$Q\E[C\E$O\E[D\E[m\s\E$Q\E[D
+out_clr_eol=\E[t\E[K
+### NO clr_eol_w_attr=\E[t\E[K
+clr_eol_chars=\E[K
+set_attr_eol=\E[t
+set_attr_eol=\E[0t
+### pt200-merge.ti: clr_bol=\E[1K\E$O\E[2m\E[1t\E$Q\E[D\E$O\E[C\E[2m\s\E$Q\E[C
+### pt200.ti:	   clr_bol=\E[1t\E[1K
+### pt250-merge.ti: clr_bol=\E[1K\E$O\E[m\E[1t\E$Q\E[D\E$O\E[C\E[m\s\E$Q\E[C
+### pt250.ti:	   clr_bol=\E[1t\E[1K
+clr_bol_chars=\E[1K
+set_attr_bol=\E[1t
+### SPLIT clear_line=\E[2t\E[2K
+clear_line_chars=\E[2K
+set_attr_line=\E[2t
+### clear to end of display - change attr to end of display
+### pt200-merge:	clr_eos=\E[J\E$O\E[2m\E[r\E$Q\E[C\E$O\E[D\E[2m\s\E$Q\E[D
+### pt200:	clr_eos=\E[r\E[J
+### pt250-merge:	clr_eos=\E[J\E$O\E[m\E[r\E$Q\E[C\E$O\E[D\E[m\s\E$Q\E[D
+### pt250:	clr_eos=\E[r\E[J
+out_clr_eos=\E[J\E[r
+### NO clr_eos_w_attr=\E[J\E[r
+clr_eos_chars=\E[J
+set_attr_eos=\E[r

@@ -1,0 +1,39 @@
+#!/bin/sh
+# NFS-INC
+#=============================================================================
+#
+#  This is the customize script for the NFS-INC fileset of the NFS Services 
+#  product on the series 300 and 800.
+#
+#  This script merely removes the old NFS_INCL fileset
+#
+#=============================================================================
+
+ARCH=$1
+shift
+PATH=/bin:/usr/bin:/etc
+
+if [ -d /etc/filesets+ ] ; then
+	FILESETS_DIR=/etc/filesets+/$ARCH
+else
+	FILESETS_DIR=/etc/filesets
+fi
+
+if [ -d /system+ ] ; then
+	SYSTEM_DIR=/system+/$ARCH
+else
+	SYSTEM_DIR=/system
+fi
+
+export PATH ARCH FILESETS_DIR SYSTEM_DIR 
+			
+#==========
+#  Remove outdated filesets.
+#==========
+
+if [ -f $FILESETS_DIR/NFS_INCL ] ; then
+	rm -rf $FILESETS_DIR/NFS_INCL
+	rm -rf $SYSTEM_DIR/NFS_INCL
+fi
+
+exit ${EXIT_CODE:-0}

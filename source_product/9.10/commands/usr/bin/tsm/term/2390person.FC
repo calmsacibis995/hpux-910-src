@@ -1,0 +1,33 @@
+## FacetTerm  2392/2393/2396/2397 COMMOM description file 04/04/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2390person.FC,v 70.1 92/03/09 15:49:11 ssa Exp $
+##--- CONTROL_8_BIT ---##
+### control_8_bit
+### graphics_8_bit
+### input_8_bit
+##### input_8_bit
+### force_CS8
+### no_clear_ISTRIP
+### NOT_IN_COMMON
+### terminal_mode_default=number
+### NOT_IN_COMMON
+### terminal_mode_name-CG=
+### terminal_mode_select-0-RP=
+### out_terminal_mode_switch-0-RP=
+### out_terminal_mode_select=
+terminal_mode_name-0-GP0=hp
+terminal_mode_name-1-GP1=ansi
+terminal_mode_select-*0-H=\E&k0\\
+out_terminal_mode_select=\E&k0\\$<2000/>
+terminal_mode_select-*1-AC=\E&k1\\
+## force single page
+out_terminal_mode_select=\E&k1\\$<2000/>\E[>1l
+## ===================== PERSONALITY ANSI ===========================
+NEW_PERSONALITY
+terminal_mode_select-*0-HC=\E&k0\\
+out_terminal_mode_select=\E&k0\\$<2000/>
+terminal_mode_select-*1-AC=\E&k1\\
+## force single page
+out_terminal_mode_select=\E&k1\\$<2000/>\E[>1l
+not_imp-multi_page=\E[>1h
+ignore-forced_single_page=\E[>1l

@@ -1,0 +1,119 @@
+#
+# @(#) $Revision: 70.5 $
+# $Source: /misc/source_product/9.10/commands.rcs/lib/cpp.ansi/make.osf,v $
+#
+# Common makefile for ANSI cpp
+#
+# This makefile makes two targets, cpp.ansi and libcpp.a
+# The object files are built differently, so we rename the objects
+# that go into the libcpp.a file as object_a.o instead of object.o
+#
+# This allows the two makes to be done simultaneously without
+# confusing the .o files
+#
+
+SHELL=/bin/sh
+LIBFLAGS = -DHP_OSF -DOPT_INCLUDE
+CMDFLAGS = -DCXREF -DHP_OSF -DOPT_INCLUDE
+BLDFLAGS=
+ARCH=
+CC=/bin/cc
+
+SOURCES = main.c startup.c define.c substitute.c support.c if.c \
+	error.c readline.c file.c iflex.c ifgram.y memmove.c support.h file.h \
+	if.h define.h hpux_rel.c
+
+OBJECTS = startup.o define.o substitute.o support.o if.o error.o \
+	readline.o file.o iflex.o ifgram.o memmove.o hpux_rel.o
+
+
+default: cpp.ansi
+
+cpp.ansi:
+	@rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+	@$(MAKE) -f make.osf CC="/paXdev/bin/cc" BLDFLAGS="$(CMDFLAGS)" _cpp.ansi
+
+cpp.ansi.X:
+	@rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+	@$(MAKE) -f make.osf ARCH="-Acpu,m68k" BLDFLAGS="$(CMDFLAGS)" cpp.ansi.m68k
+	@rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+	@$(MAKE) -f make.osf ARCH="-Acpu,a88k" BLDFLAGS="$(CMDFLAGS)" cpp.ansi.a88k
+	/usr/apollo/bin/xar -cv cpp.ansi.X cpp.ansi.m68k cpp.ansi.a88k
+
+libcpp.a: always
+	@rm -f libcpp.a
+	@rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+	@$(MAKE) -f make.osf CC="/paXdev/bin/cc" BLDFLAGS="$(LIBFLAGS)" _objects
+	/paXdev/bin/ar qc libcpp.a $(OBJECTS)
+
+libcppcmd.a: always
+	@rm -f libcppcmd.a
+	@rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+	@$(MAKE) -f make.osf CC="/paXdev/bin/cc" BLDFLAGS="$(CMDFLAGS)" _objects
+	/paXdev/bin/ar qc libcppcmd.a $(OBJECTS)
+
+_cpp.ansi: $(OBJECTS) main.o
+	$(CC) $(OBJECTS) main.o -o cpp.ansi
+
+_objects: $(OBJECTS)
+
+cpp.ansi.m68k: $(OBJECTS) main.o
+	$(CC) $(ARCH) $(OBJECTS) main.o -o cpp.ansi.m68k
+
+cpp.ansi.a88k: $(OBJECTS) main.o
+	$(CC) $(ARCH) $(OBJECTS) main.o -o cpp.ansi.a88k
+
+ifgram.o: ifgram.c y.tab.h
+	$(CC) $(BLDFLAGS) $(ARCH) -c ifgram.c
+
+ifgram.c y.tab.h: ifgram.y
+	yacc -d ifgram.y
+	sed "s/yy/zz/g" y.tab.c > ifgram.c
+	rm -f y.tab.c
+
+clean:
+	@echo "\tRemoving all object files"
+	@/bin/rm -f $(OBJECTS) main.o ifgram.c y.tab.h
+
+clobber: clean
+	@echo "\tRemoving cpp.ansi, libcpp.a, and libcppcmd.a"
+	@/bin/rm -f cpp.ansi cpp.ansi.X libcpp.a libcppcmd.a
+
+always:
+
+#####################################################################
+# Re-define .c.o rule so implicit compiles will use the correct FLAGS
+#####################################################################
+.SUFFIXES:
+.SUFFIXES: .o .s .c 
+
+.c.o:
+	$(CC) $(BLDFLAGS) $(ARCH) -c $<
+
+##########################
+# Source file dependencies
+##########################
+
+main.o: main.c support.h file.h
+
+startup.o startup_a.o: startup.c support.h file.h
+
+define.o define_a.o: define.c support.h define.h
+
+substitute.o substitute_a.o: substitute.c support.h define.h file.h
+
+support.o support_a.o: support.c support.h
+
+if.o if_a.o: if.c support.h
+
+error.o error_a.o: error.c support.h file.h
+
+readline.o readline_a.o: readline.c support.h if.h file.h
+
+file.o file_a.o: file.c support.h file.h
+
+iflex.o iflex_a.o: iflex.c support.h y.tab.h
+
+memmove.o memmove_a.o: memmove.c
+
+hpux_rel.o hpux_rel_a.o: hpux_rel.c

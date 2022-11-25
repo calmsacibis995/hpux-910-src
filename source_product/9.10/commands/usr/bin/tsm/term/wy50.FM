@@ -1,0 +1,4 @@
+## FacetTerm Menu Capabilities for a WYSE 50  06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy50.FM,v 70.1 92/03/09 16:46:22 ssa Exp $
+use=wy50prot.fm

@@ -1,0 +1,88 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS libc/net source.
+#	
+#	Created by:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRST)
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS	= -g -DDEBUG 
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+CSOURCE	= gtnetgrent.c getrpcent.c innetgr.c realpath.c exportent.c
+OBJECTS	= gtnetgrent.o getrpcent.o innetgr.o realpath.o exportent.o
+
+TARGETS	= ../libc.a
+
+all:		build
+
+build:		$$(TARGET)	
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) $(TARGETS) \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/libc.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)"
+
+
+install:;	/bin/echo NFS project does not deliver any portions of libc
+
+rinstall:	install
+
+net.libc:	$(TARGETS)
+
+gtnetgrent.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/gtnetgrent.c
+
+getrpcent.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/getrpcent.c
+
+innetgr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/innetgr.c
+
+realpath.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/realpath.c
+
+exportent.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/exportent.c
+
+$(TARGETS):	$(OBJECTS)
+    	$(CP) $(TARGETS) ../libc.tmp
+    	$(MV) -f ../libc.tmp $(TARGETS)
+	$(CHMOD) u+w $(TARGETS)
+	ar r $(TARGETS) $(OBJECTS)
+	$(CHMOD) 664 $(TARGETS)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build
+

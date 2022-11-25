@@ -1,0 +1,9 @@
+#!/bin/sh
+##	@(#)make_bfa	$Revision: 1.12.109.1 $	$Date: 91/11/19 13:56:17 $
+#	make_bfa	--	make all commands with BFA turned on
+# Written for NFS project by Cristina Mahon
+# This script finds out if there are any files checked out and compiles
+# them with bfa if the developer wants it (by having a file by the name 
+# of make_bfa in their log directory).
+##
+exec	make_cmd bfa

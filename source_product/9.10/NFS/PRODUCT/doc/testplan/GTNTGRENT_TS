@@ -1,0 +1,232 @@
+.H 2  "Get/set/endnetgrent (Cristina Mahon)"
+
+.PP
+Getnetgrent uses /etc/netgroup to return the next member of a network 
+group.  Setnetgrent establishes the network group from which getnetgrent 
+will obtain members and also restarts calls to getnetgrent from the beginning
+of the list.  Endnetgrent frees the space allocated during the getnetgrent
+calls.
+.PP
+The formats of the routines are as follows:
+.sp
+.nf
+getnetgrent(machine, user, domain)
+setnetgrent(netgroup)
+endnetgrent()
+.fi
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.5  md
+.fi
+.sp 2
+.H 3 "Call setnetgrent with unknown netgroup"
+.sp 1
+.PP
+The file /etc/netgroup should have been put on a Yellow Pages
+database.  The netgroup we call setnetgrent with should not be 
+in /etc/netgroup.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns.
+.fi
+.sp 2
+.H 3 "Call setnetgrent with domainname not set"
+.sp 1
+.PP
+Domainname should not be set on that machine.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "getnetgrent: getdomainname system call missing"
+       I will change this message so that it actually says
+       what it means, domainname not set.
+.fi
+.sp 2
+.H 3 "Call setnetgrent with a cycle in /etc/netgroup"
+.sp 1
+.PP
+A cycle is when a network group defines itself based on itself.
+That is, if a member of the group uses the group itself as one
+of its fields.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "Cycle detected in /etc/netgroup: <groupname>."
+.fi
+.sp 2
+.H 3 "Call setnetgrent with only hostname field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "syntax error in /etc/netgroup"
+       "--- <group>"
+.fi
+.sp 2
+.H 3 "Call setnetgrent with only hostname, username field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "syntax error in /etc/netgroup"
+       "--- <group>"
+.fi
+.sp 2
+.H 3 "Call setnetgrent with no separating commas"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname username domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "syntax error in /etc/netgroup"
+       "--- <group>"
+.fi
+.sp 2
+.H 3 "Have a comment on /etc/netgroup"
+.sp 1
+.PP
+Have a comment line on /etc/netgroup.  A comment line starts
+with a '#'.  For example, if the comment symbol is followed by the
+definition of a group, make sure that that group is never actually
+defined.
+.sp
+#commentgroup	(hostname, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       If getnetgrent ask for commentgroup, such information should not
+       exist.
+.fi
+.sp 2
+.H 3 "Have a comment on end of line"
+.sp 1
+.PP
+Have a comment line on /etc/netgroup at the end of a group
+description.  A comment line starts with a '#'.  
+The definition of the group should not be affected.
+.sp
+group  (hostname, username, domainname) # (bogus, , nodomain)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       In this example the list of members on the group should not 
+       include the triplet after the comment.
+.fi
+.sp 2
+.H 3 "Call setnetgrent with empty field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with one of its fields empty,
+like for example:
+.sp
+group	(hostname, ,domainname)
+.sp
+In this example all user should be members of that group.
+.sp 
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       A null pointer should be returned for the username during
+       a getnetgrent call.
+.fi
+.sp 2
+.H 3 "Call setnetgrent twice in a row"
+.sp 1
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Start form beginning of netgroup list again.  A getnetgrent
+       call should return the first member of the group again.
+.fi
+.sp 2
+.H 3 "Have a group with several triplets"
+.sp 1
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Several getnetgrent calls for the same group should return all the
+       members of the triplet.  That should be checked against the values 
+       stored in the Yellow Pages database.
+.fi
+.sp 2
+.H 3 "Have group that points to another group in /etc/netgroup"
+.sp 1
+.PP
+Have entries in /etc/netgroup as follows:
+.sp
+group	group1
+group1  (hostname, username, domainname)
+.sp
+Have blanks after group1.  This was a defect that we found.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Gtnetgrent should show hostname, username and domainname as
+       part of group.
+.fi
+.sp 2
+.H 3 "Have cycle in /etc/netgroup"
+.sp 1
+.PP
+Have entries in /etc/netgroup as follows:
+.sp
+group	group1
+group1  group
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should give an error message.       
+.fi
+.sp 2
+.H 3 "Have a group missing a close parentheses in /etc/netgroup"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username, domainname
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should give an error message.       
+.fi

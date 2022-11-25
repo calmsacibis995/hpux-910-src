@@ -1,0 +1,19 @@
+## FacetTerm  em4010stat  description file  09/10/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: em4010stat.FC,v 70.1 92/03/09 16:48:04 ssa Exp $
+ignore-=\E[40h
+function_key_file=sl_16.ftkey
+## status line
+## perwindow-320-CLSQF=\E[1$}%300u15\E[0$}
+## perwindow_default=\E[1$}\r\E[K\E[0$}
+## set-status_line=\E[1$}\r\E[K\E[37;41m%s1\E[m\E[0$}
+set-status_line=\E[7m\E[0;0|\E[0;2|\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|\E\\\E[0;3;1|%s1\E\\\E[m
+perwindow-5-CLSQ----host_writeable...............................=\E[2$~
+perwindow_also-.....none.........................................=\E[0$~
+perwindow_also-.....indicator....................................=\E[1$~
+perwindow_default-...............................................=\E[2$~
+perwindow-320-CLSQ----host_writeable.............................=\E[0;0|\E[0;2|\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\\E[0;3;%p1%d|%s1\E\\
+perwindow_before-................................................=\E[7m
+perwindow_after-.................................................=\E[m
+perwindow_also-..................................................=\E[0;1|
+perwindow_default-...............................................=\E[0;1|

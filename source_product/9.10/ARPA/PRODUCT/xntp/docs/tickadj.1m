@@ -1,0 +1,108 @@
+.ds )H Hewlett-Packard Company
+.ds ]W Unsupported
+.TH tickadj 1m Unsupported
+.SH NAME
+tickadj - fiddle time-related variables in the kernel
+.SH SYNOPSIS
+.B tickadj
+[
+.B -Aqs
+] [
+.B -a
+.I new_tickadj
+] [
+.B -t
+.I new_tick
+]
+.SH DESCRIPTION
+The
+.I tickadj
+program reads, and optionally modifies, several time-keeping-related
+variables in the running kernel, via
+.IR /dev/kmem .
+The particular variables it is concerned with are:
+.RS
+.TP 12
+.IR tick
+The number of microseconds added to the system time during a
+clock interrupt.
+.TP 12
+.I tickadj 
+Sets the slew rate and resolution used by the
+.IR adjtime (2)
+system call.
+.TP 12
+.I dosynctodr 
+Indicates to the kernels on some machines whether they should internally
+adjust the system clock to keep it in line with with time-of-day clock
+or not.
+.RE
+.PP
+By default, with no arguments,
+.I tickadj
+reads the variables of interest in the kernel and prints them.  At the
+same time it determines an "optimal" value for the value of the
+.I tickadj
+variable if the intent is to run the
+.IR xntpd (1m)
+Network Time Protocol daemon, and prints this as well.  Since the operation
+of
+.I tickadj
+when reading the kernel mimics the operation of similar parts of the
+.I xntpd
+program fairly closely, this is useful for doing debugging of problems
+with
+.IR xntpd .
+.PP
+Various flags may be specified to change the variables of interest in
+the running kernel.  The
+.B -a
+flag allows one to set the the variable
+.I tickadj
+to the value specified as an argument.  The
+.B -A
+flag will also cause
+.I tickadj
+to be modified, but instead will set it to the internally computed
+"optimal" value.  The
+.B -t
+flag may be used to reset the kernel's value of
+.IR tick ,
+a capability which is useful on machines with very broken clocks.  The
+.B -s
+flag tells the program to set the value of the variable
+.I dosynctodr
+to zero, a prerequisite for running the
+.I xntpd 
+daemon under SunOS 4.0.  Normally
+.I tickadj
+is quite verbose about what it is doing.  The
+.B -q
+flag tells it to shut up about everything except errors.
+.PP
+Note that
+.I tickadj
+should be run with some caution when being used for the first time on
+different types of machines.  The operations which
+.I tickadj
+trys to perform are not guaranteed to work on all Unix machines.
+.SH FILES
+.nf
+/vmunix
+/unix
+/dev/kmem
+.fi
+.SH SEE ALSO
+xntpd(8)
+.SH HISTORY
+Written by Dennis Ferguson at the University of Toronto
+.SH BUGS
+Fiddling with kernel variables at run time as a part of ordinary
+operations is a hideous practice which is only necessary to make
+up for deficiencies in the implementation of
+.IR adjtime (2)
+in many kernels and/or brokenness of the system clock in some
+vendors' kernels.  It would be much better if the kernels were fixed
+and the
+.I tickadj
+program went away.

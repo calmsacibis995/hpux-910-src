@@ -1,0 +1,5 @@
+$set 1
+1 %s() fork failure
+2 %s() execl failure
+3 %s() can't respond to rpc request
+4 %s() can't free args

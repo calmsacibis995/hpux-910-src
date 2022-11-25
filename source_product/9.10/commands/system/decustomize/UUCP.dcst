@@ -1,0 +1,25 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+exitval=0
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+PATH=/bin:/usr/bin:/etc
+
+if [ "$1" = "HP-PA" ]; then
+    rm -rf /usr/lib/dialit+
+fi
+rm -f /usr/lib/dialit /usr/lib/dialit.c
+
+if [ -d /usr/lib/uucp ]; then
+    cd /usr/lib/uucp
+    rm -f Devices Dialcodes Dialers Maxuuscheds Maxuuxqts \
+	  Permissions Poll Systems remote.unknown uudemon.poll \
+	  uudemon.hour uudemon.admin uudemon.cleanu uudemon.cleanup
+fi
+
+exit $exitval

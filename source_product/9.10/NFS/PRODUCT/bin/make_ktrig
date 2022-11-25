@@ -1,0 +1,165 @@
+#!/bin/sh
+#	@(#)$Revision: 1.7.109.1 $	$Date: 91/11/19 13:56:37 $
+#	make_kbfa	--	make kernel with BFA and TRIGGERS turned on
+# Written by Darren D. Smith for NFS project
+# Modified by Mark Kepke for making kernel with bfa and triggers
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+umask 022
+
+KERNELDIR=$nfs/kernel/300
+BFADIR=$KERNELDIR/BFA
+WOPRDIR=$KERNELDIR/WOPR
+
+if [ ! -d $KERNELDIR ]
+then
+	echo "ERROR: $KERNELDIR does not exist, don't know where kernel is!"
+	echo \\n`date "+%T %y.%m.%d"` $0 for $nfs done
+fi
+
+if [ ! -d $WOPRDIR ]
+then
+	echo "ERROR: $WOPRDIR does not exist, don't know where source is!"
+	echo \\n`date "+%T %y.%m.%d"` $0 for $nfs done
+fi
+
+#
+# Process arguments
+VMAKEOBJS=nfsobjs
+DBASE=""
+SUFFIX="bfa"
+ERROR="false"
+while [ $# -gt 0 ]
+do
+    case $1 in
+
+	-rpc ) VMAKEOBJS=rpc_objs
+	       SUFFIX="rpcbfa"
+	       shift ;;
+
+	-nfs ) VMAKEOBJS=nfs_objs
+	       SUFFIX="nfsbfa"
+               shift ;;
+
+	-dbase ) DBASE=$2
+               shift 
+	       shift ;;
+
+	* )
+		/bin/echo "ERROR: unrecognised argument: $1"
+		ERROR="true"
+		shift 1;;
+    esac
+	
+done
+
+if [ "$ERROR" = "TRUE" ]
+then
+	/bin/echo "Usage: $0 [ -rpc | -nfs ] [ -dbase <dbasefile> ]"
+	echo `date "+%y.%m.%d %T"` $0 $nfs abort
+	exit 1;
+fi
+
+if [ "$DBASE" = "" ]
+then
+	DBASE=/BFA/k${SUFFIX}	# the database information file.
+fi
+
+cd $KERNELDIR
+# Make sure that the BFADIR directory exits
+if [ ! -d $BFADIR ]
+then
+    /bin/mkdir $BFADIR
+    /bin/chmod 775 $BFADIR
+fi
+
+# Make links of all the stuff in WOPR
+echo `date "+%y.%m.%d %T"` $0 "Linking WOPR/* to BFA"
+cd $WOPRDIR
+ln -f * $BFADIR 2>/dev/null # don't produce warnings about identical files
+
+cd $BFADIR
+
+# OFILES should be the list of objects files involved in the nfs stuff.
+OFILES=`vmake $VMAKEOBJS`
+
+#Produce a list of the .o and .i versions of the .c files
+IFILES=""
+CFILES=""
+BFILES=""
+for F in $OFILES
+do
+    F1=""
+    F1=`expr $F : '\(.*\)\.o'`
+    if [ "$F1" != "0" -a "$F1" != "" ]
+    then
+	CFILES="$CFILES ${F1}.c"
+	IFILES="$IFILES ${F1}.i"
+	BFILES="$BFILES ${F1}.B"
+    fi
+done
+
+DIR=`pwd`
+DIR=`basename $DIR`
+
+# Get rid of any old versions to avoid confusion
+rm -f $OFILES
+rm -f $IFILES
+rm -f $CFILES
+rm -f $BFILES
+rm -f kmake.bfa kmake.bfa2
+rm -f hp-ux.$SUFFIX
+rm -f $DBASE
+
+# Call kmake to call the makefile, but redefine the OFLAG to -P
+# to get the post-cpp versions of the files, even though it thinks its
+# making the .o versions
+# To do this, need to make a version of kmake with the OFLAG changed
+# NOTE: the following line is VERY hardwired, need a better way.
+echo `date "+%y.%m.%d %T"` $0 "Making .i versions of files"
+sed -e "/OFLAG=\"-O\"/s/-O/-P -DBFA -DTRIGGERS/" -e "/CONFDIR=.*/s//CONFDIR=$DIR/" <kmake >kmake.bfa
+chmod +x kmake.bfa
+./kmake.bfa $OFILES
+	
+# remove the blank lines and make look nice and then run it through BFA
+echo \\n`date "+%T %y.%m.%d"` "Making bfa versions of .c files, dbase=$DBASE"
+for I in $IFILES
+do
+	F=`basename $I .i`
+	F=${F}.c
+	expand $I | rmnl >$F
+	rm -f _$F
+	/usr/local/bin/bfa -k -e -d$DBASE $F	# produces _$F
+	mv _$F $F
+done
+
+# Now remake with the new .c files
+echo `date "+%y.%m.%d %T"` $0 "Kmaking .o versions of files"
+./kmake $OFILES
+
+# Need to remove the old versions of the library and hp-ux
+rm -f hp-ux
+
+# Now do the load, but we need to specify an extra library. 
+# Unfortunately, we need to produce a kmake that does an extra eval
+# to get it to interpret the assignment correctly.
+echo `date "+%y.%m.%d %T"` $0 "Lding hp-ux.bfa versions of files"
+sed -e '/vmake/s/^/eval /' <kmake >kmake.bfa2
+chmod +x kmake.bfa2
+./kmake.bfa2 LIBS=\"-ll -lc -lbfa -lktrigger\" ld
+mv hp-ux hp-ux.$SUFFIX
+
+# Clean up cfiles and ifiles to avoid confusing cscope
+# However, we want the .c versions, so change the .c to .B for BFA
+echo `date "+%y.%m.%d %T"` $0 "Cleaning up"
+rm -f $IFILES
+for C in $CFILES
+do
+	B=`basename $C .c`
+	B=${B}.B
+	mv $C $B
+done
+echo `date "+%y.%m.%d %T"` $0 $nfs end

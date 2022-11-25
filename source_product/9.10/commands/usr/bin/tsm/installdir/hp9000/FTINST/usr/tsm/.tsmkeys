@@ -1,0 +1,118 @@
+############################################################################
+# TSM user customizable file:  .tsmkeys, used for TSM softkey initialization
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./
+#     $HOME/
+#     /usr/tsm/
+#
+# It is recommended that you copy this file to $HOME/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+#
+# If you do not want TSM to program your softkeys, comment out the line:
+# 'function_keys=.tsmkeys' in your LOCAL copy of the file:  .tsm
+#
+# lines that begin with # are treated as comments
+############################################################################
+# @(#) $Header: .tsmkeys,v 66.10 90/11/21 18:55:42 jag Exp $
+  
+############################################################################
+# Format: Two lines per softkey, A label line and a key contents line
+# 
+# The label line begins with an 'L', then a number to indicate which
+# label, then a TAB character and then the text to be placed in the key
+# label.  On HP terminals the label text will wrap at 8 characters so both
+# lines of the softkey labels may be used.  All characters after the first
+# whitespace character (TAB) following the 'L#' are put in the label,
+# including whitespace.  Labels that are too long are truncated.
+# 
+# The key contents line begins with a number which indicates which key,
+# then a TAB character and then the text to be transmitted (as if keys
+# were pressed) when the softkey is pressed.  Typically these will be TSM
+# commands but the text can be "anything" (see below for limitations and
+# substitutions). Lines that are too long are truncated.
+# 
+# The first section of this file defines the contents of softkeys that
+# have no "override" definition when a particular session is current.  The
+# later sections define session dependent changes to the defaults
+# programmed in the first section.  These later sections start with a
+# session ID and end when another session ID is encountered.  The syntax
+# for the session ID is 'W#' where # is a number indicating which session
+# the definitions are active for.
+# 
+# Substitutions: There are special sequences that can be put in the
+# text fields which expand to character sequences determined by TSM,
+# they are:
+# 
+#   \p#  Expands to the program name as defined in the .tsm file
+#        for session number #
+#   \h   Expands to the current TSM command line hotkey sequence
+#   \m   Expands to the current TSM menu hotkey sequence 
+# 
+# Limitations:  Certain control characters cannot be used in softkey
+# programming because they may be interpreted by the terminal during the
+# softkey programming sequence, they are:
+# 
+#   ^E   ENQ,  Don't use if terminal is set for ENQ/ACK handshake (HP)
+#   ^S   XOFF, Don't use if terminal is set for XON/XOFF handshake
+#   ^Q   XON,  Don't use if terminal is set for XON/XOFF handshake
+# 
+##########################################################################
+
+###### default for all windows #####
+min_label_from_title=2
+max_label_from_title=15
+label_attr_reverse
+label_attr_dim_reverse
+L1	\p1
+1	\h1
+L2	\p2
+2	\h2
+L3	\p3
+3	\h3
+L4	\p4
+4	\h4
+L5	\p5
+5	\h5
+L6	\p6
+6	\h6
+L7	LAST
+7	\hl
+L8	MENU
+8	\m
+labels_on
+
+##### on session 1 only #####
+W1
+L1	\p1*
+1	\h1
+labels_on
+##### on session 2 only #####
+W2
+L2	\p2*
+2	\h2
+labels_on
+##### on session 3 only #####
+W3
+L3	\p3*
+3	\h3
+labels_on
+##### on session 4 only #####
+W4
+L4	\p4*
+4	\h4
+labels_on
+##### on session 5 only #####
+W5
+L5	\p5*
+5	\h5
+labels_on
+##### on session 6 only #####
+W6
+L6	\p6*
+6	\h6
+labels_on

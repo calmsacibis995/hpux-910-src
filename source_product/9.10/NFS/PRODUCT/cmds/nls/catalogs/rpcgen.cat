@@ -1,0 +1,39 @@
+$set 1
+1 usage: %s [-u] infile\n
+2        %s [-c | -h | -l | -m | -u] [-o outfile] [infile]\n
+3        %s [-s udp|tcp]* [-o outfile] [-u] [infile]\n
+4 %1$s: output would overwrite %2$s\n
+5 %s: unable to open 
+6 execl
+7 fork
+8 %s: 
+21 definition keyword expected
+22 illegal result type
+23 illegal argument type
+24 no array-of-pointer declarations -- use typedef
+25 no array-of-pointer declarations -- use typedef
+26 array declaration expected
+27 variable-length array declaration expected
+28 voids allowed only inside union and program definitions
+29 expected type specifier
+30 only simple declaration allowed in switch
+41 constant or identifier expected
+42 (NLS) illegal second byte in 16-bit character
+43 illegal character in file: 
+44 (NLS) illegal second byte in 16-bit character
+45 unterminated string constant
+46 illegal character constant
+47 illegal character constant
+48 illegal character constant
+49 illegal character constant
+50 illegal character constant
+51 illegal character constant
+52 preprocessor error
+53 (NLS) illegal second byte in 16-bit character
+54 preprocessor error
+61 %1$s, line %2$d: 
+62 %s\n
+63 too many files!\n
+64 expected '%s'
+65 expected '%s' or '%s'
+66 expected '%s', '%s' or '%s'

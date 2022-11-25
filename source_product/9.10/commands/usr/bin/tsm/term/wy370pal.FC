@@ -1,0 +1,21 @@
+## FacetTerm  wy370pal COMMON   description file  11/06/90
+## background and border
+## defining color associations
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy370pal.FC,v 70.1 92/03/09 16:48:39 ssa Exp $
+perwindow-5-ASQ-cde---=\E[50w
+perwindow_default=\E[50w
+perwindow-14-A-cd-e--foreground..=\E[48;%p1%dw
+perwindow-14-A-c-d--background..=\E[49;%p1%dw
+perwindow-14-A--c--border......=\E[51;%p1%dw
+perwindow-14-A--c-=\E[0;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[2;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[4;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[8;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[32;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[36;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[12;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[14;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[40;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[44;%p1%d;%p2%d;%p3%dw
+perwindow-14-A--c-=\E[10;%p1%d;%p2%d;%p3%dw

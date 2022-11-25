@@ -1,0 +1,210 @@
+#!/bin/sh
+#
+# $Header: convert_rhosts,v 1.3.109.1 91/11/21 11:43:35 kcs Exp $
+#
+# SYNOPSIS
+#	convert_rhosts [-i] <.rhosts >new.rhosts
+#
+# DESCRIPTION 
+#	This shell script filters .rhosts and hosts.equiv files,
+# 	converting each host name to the official host name known
+#	by the system's host database (BIND, YP, or /etc/hosts).  In
+# 	particular, when your system uses the name server, it converts
+# 	host names to the full domain extended host name known by the
+# 	name server.
+#
+#	If any errors occur during a query to the name server, they
+# 	are echoed in comments as the last lines of the output.
+#
+# OPTIONS
+#	-i	Include both old and new entries in the
+#		output.  For example, if your .rhosts has
+#		the line
+#
+#			hpcndaa user1
+#
+#		then the output will have the lines
+#
+#			hpcndaa user1
+#			hpcndaa.cnd.hp.com user1
+#
+#		as opposed to just the last line.
+#
+# WARNINGS
+#	Use this script after the name server has been configured with
+# 	hosts_to_named(1m).
+#
+# (C) 1989 Hewlett Packard Corporation, All Rights Reserved
+#
+
+#
+# Globals
+# 
+
+LOG=/tmp/converr.$$
+trap "rm -f ${LOG}" 0, 1, 2, 9, 15
+HOST=""
+HOSTADDRS=""
+LINENUM=0
+INCLUDEOLD=""
+
+
+
+#
+# Check argument(s)
+#
+
+if test $# -ge 1 ; then
+    if test "$1" = "-i" ; then
+        INCLUDEOLD=1
+    else
+        echo "Usage: convert_rhosts [-i] <.rhosts >new.rhosts"
+        echo
+        echo "Read the comments at the beginning of the script for more information."
+        exit
+    fi
+fi
+
+
+#
+# Get the latest status of the error log.
+#
+
+checklog()
+{
+	LOGSTAT="`ll ${LOG} 2>&-`"
+}
+
+
+#
+# See if any error was logged.  If so, record a line number.
+#
+
+logerrors()
+{
+	OLDLOG=${LOGSTAT}
+	checklog
+	if test "${OLDLOG}" != "${LOGSTAT}" ; then
+		echo ${LINENUM} >>${LOG}
+	fi
+	checklog
+}
+
+
+#
+# Initialize the error log.
+#
+initlog()
+{
+    touch ${LOG}
+    checklog
+}
+
+
+#
+# Retrieve a known address for a host.
+#
+
+getaddr()
+{
+    HOST=$1
+    HOSTADDR=`nslookup ${HOST} 2>>${LOG} |
+                  awk '
+                       /^Address/    {
+                                         if (NR > 2) {
+                                             if (substr(\$2, length(\$2), 1) == ",")
+                                                 print substr(\$2, 1, length(\$2)-1);
+                                             else
+                                                 print \$2;
+                                         }
+                                     }'`
+    logerrors
+}
+
+
+#
+# Retrieve the official host name for HOSTADDR.
+#
+
+gethostname()
+{
+    HOSTNAME=""
+    if test "${HOSTADDR}" = "" ; then
+        return
+    fi
+    HOSTNAME=`echo "set type=ptr\\n\$HOSTADDR\\n" | 
+                  nslookup - 2>>${LOG} | 
+                      awk '/name/ { print \$4 ; exit }'`
+    logerrors
+}    
+
+
+#
+# Given a host name, find the name known by the name server.
+#
+
+resolvehost()
+{
+    HOST=$1
+    getaddr ${HOST}
+    gethostname
+    if test "${HOSTNAME}" = "" ; then
+        HOSTNAME=${HOST}
+    fi
+}
+
+
+#
+# Parse the .rhosts file and resolve any host names.
+#	
+initlog
+while read LINE ; do
+    LINENUM=`expr ${LINENUM} + 1`
+    if test "${LINE}" = "" ; then
+        echo ${LINE}
+    else
+        case "$LINE" in
+            \#*)
+                    echo ${LINE}
+                    ;;
+            \+*)
+                    echo ${LINE}
+                    ;;
+            \-\@*)  
+                    echo ${LINE}
+                    ;;
+            \-*)    
+                    OLDLINE=$LINE
+                    LINE=`expr "$LINE" : "-\(.*\)"`
+                    set $LINE
+                    LINE=`expr "${LINE}" : "$1\(.*\)"` 
+                    resolvehost $1
+                    if test "${HOSTNAME}" != "${HOST}" -a "${INCLUDEOLD}" ; then
+                        echo ${OLDLINE}
+                    fi
+                    echo "-${HOSTNAME}${LINE}"
+                    ;;
+            [0-z]*) 
+                    OLDLINE=$LINE
+                    set $LINE
+                    LINE=`expr "${LINE}" : "$1\(.*\)"` 
+                    resolvehost $1
+                    if test "${HOSTNAME}" != "${HOST}" -a "${INCLUDEOLD}" ; then
+                        echo ${OLDLINE}
+                    fi
+                    echo "${HOSTNAME}${LINE}"
+                    ;;
+        esac
+    fi
+done
+
+
+#
+# Put any errors in comments at the end.
+#
+if test -s ${LOG} ; then
+    while read LINE ; do 
+	read LINENUM
+        echo "# line ${LINENUM}: ${LINE}"
+    done <${LOG}
+fi

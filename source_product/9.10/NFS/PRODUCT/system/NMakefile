@@ -1,0 +1,34 @@
+/* -*-C-*-
+********************************************************************************
+*
+* File:         Makefile
+* RCS:          $Revision: 1.1.109.1 $
+* Description:  NMakefile for the NFS DEL-INFO fileset.
+* Author:       David Wetchler
+* Created:      Mon Dec 18 16:48:13 1989
+* Modified:     Wed Nov  6 16:33:06 1991 (David Wetchler) davidw@hpinddmw
+*
+* (c) Copyright 1989, Hewlett-Packard Company, all rights reserved.
+*
+********************************************************************************
+*/
+
+.OPTIONS:
+.MAIN: build
+
+SRC=$(SRCDIR:/^$/./)
+
+install: $(SRC)/nfs
+	$(INSTALL) -f DEL-INFO nfs
+
+rinstall: $(SRC)/nfs
+	$(RINSTALL) -f DEL-INFO nfs
+
+
+
+build:
+
+clean:
+
+clobber:
+

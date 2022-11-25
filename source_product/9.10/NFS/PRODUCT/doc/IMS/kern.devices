@@ -1,0 +1,530 @@
+.\"	Format using "nroff -mm"
+.nr Cl 4	\"	save 4 levels of headings for table of contents
+.sp 4
+.ce 1
+Internal Maintenance Specification
+.sp 2
+.ce 3
+NFS 3.2 DEVICE FILE SUPPORT
+.sp 2
+.ce 1
+Darren D. Smith
+.sp 2
+.ce 2
+$Date: 91/11/19 14:27:22 $
+$Revision: 1.2.109.1 $
+.sp 4
+.H 1 "Abstract"
+Sun's Microsystem's NFS 3.2 release introduced support for device
+file and named pipe access via NFS.  This support is not true remote
+device support, working only on a per-client basis.  As of the 6.5
+release on the 300 and the 7.0 release on the 800, HP-UX will also
+support this feature.  This was done largely by porting the Sun code
+directly to HP-UX with minimal changes.  Thus, the implementation
+details discussed here are largely a result of Sun's design, with
+HP differences noted where applicable.  The basic design involves
+adding new vnodes for device files and named pipes, that are linked
+in the kernel to the underlying file system providing the access.
+The main difference between HP's and Sun's implementations is that
+HP will use this design only for NFS, while Sun uses this design for
+both NFS and local access.
+.ad
+.PH "'Kernel IMS -- NFS 3.2 features'  'Device Files'"
+.bp
+.PF "'HP Internal Use ONLY' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.H 1 "Introduction"
+.ad
+The 3.2 release of Sun Microsystem's Network File System (NFS 3.2)
+supports access to devices via device files located on the NFS
+server.  Since a major goal of the HP-UX 6.5 and 7.0 releases was to
+incorporate all new NFS 3.2 features into HP-UX, this support had to
+also be added to the HP-UX implementation.  As part of the strategy
+of this implementation, a goal was to change as little as possible
+of the existing implementation as a means of controlling the likelyhood
+of major problems with the release.  Another strategic goal was to
+port directly as much as possible of the Sun code when providing this
+support, as a means of keeping down the investment needed to add these
+features.  The result is that the NFS code looks largely like the Sun
+stack, but the local code is largely untouched, and very little interaction
+occurs between the two.
+.sp
+Before going further, it is necessary to completely understand the nature
+of the support provided for device file access.  NFS device file access
+is not true remote device file access, in which a process could write or
+read from a device on the NFS server.  Instead, NFS device file access is
+always relative to the client.  Accesses to a device file on the server
+refer to a device attached to the requesting client.  Multiple clients 
+accessing the same device file will have no interaction between clients,
+and each will access a device on its own system.  The same is true of
+Named Pipe (aka. FIFO) access, thus keeping NFS FIFOs from being an
+inter-machine communication mechanism.  (NOTE:  This is unlike what
+DUX does, see the section below on HP-UX interactions).
+.sp
+The basic structure of the NFS device file code relies on recognizing
+device files the first time they are accessed (via either a lookup or
+create).  At that time, a new vnode is set up representing the device
+file, and this vnode is used for accesses to the device.  It in turn has
+a pointer to the NFS vnode (i.e. the real rnode).  Depending on the vnode
+operation involved, it may be routed to the NFS layer for interaction with
+the server, or it may access the device code, or only do something in the
+NFS device file code.  Each of the three cases, character special files,
+block special files, and named pipes, has a slightly different structure
+that will be discussed in more detail below.
+.bp
+.H 1 "The basic structures"
+.ad
+The three different kinds of device file access (block and character device
+files and names pipes) share a common structure for allocation and use
+in the kernel, though each has its peculiarities.
+The basic idea underlying the structure is to
+provide a new vnode and associated operations when accessing an NFS device
+file.  This new set of vnode operations could take any of several possible
+actions, from accessing the device to calling the real NFS code to service
+some request.  These common ideas and structures are described more in
+this section, along with some of the impact on the existing NFS code.
+.H 2 "Nfs_lookup() and specvp()"
+There are three cases in which vnodes get allocated by the NFS code,
+via a lookup, a create, or a mkdir.  The latter case obviously does not
+apply to device files, but the first two could both be a reference a
+device file.  This is checked for in the code after the initial lookup
+or create has been done, and if the file is a device file, the
+specvp() is called to create a vnode for the device file.  This new vnode
+is then returned to the calling function.  The basic algorithm for the
+nfs_lookup code is thus:
+.nf
+
+	if (vp in directory lookup cache)
+		VN_HOLD(vp)
+	else
+		rfs_call(RFS_LOOKUP);
+		vp = makenfsnode()
+		enter in cache
+	fi
+	if (vp is a device file)
+		newvp = specvp();
+		VN_RELE(vp);
+		vp = newvp;
+	fi
+	return vp
+
+.fi
+There are a couple of things to notice here.  The first is that all three
+of the possible cases (character, block, pipe) are allocated via specvp().
+Second, notice that only the NFS vnode lookup is entered in the Directory
+Name Lookup Cache(), and thus each new call to nfs_lookup() will result
+in a call to specvp().  This means that specvp() must be responsible for
+recognizing subsequent lookups of the same device file.
+.H 2 "Snode structure"
+Just as regular NFS vnodes are contained in a rnode structure, NFS device
+file vnodes are contained in an snode structure (shadow-node).  The snode
+contains a pointer to the original vnode, which is used in certain operations
+requiring regular NFS activity.  It also contains various other flags and
+time values, of course, and a link to the next snode.  Snodes are created
+by specvp() when needed, and kept in a linked list.  When specvp() is called,
+this list is first searched for an already allocated snode, and if found
+the vnode associated with the snode is returned.  Otherwise, a new snode
+is allocated and linked into the linked list.  There is a set of routines
+for manipulating the linked list, including ssave(), sunsave() and sfind()
+for adding to, deleting from, and searching the linked list.  The main
+point to keep track of is that the snode contains the vnode, and also
+a pointer to the "real" vnode.  See Figure 1 for how this looks.
+.nf
+
+    SNODE                                  RNODE
+    +-----------------+                +---------------+
+    |  next snode --->|                | next rnode -->|
+    |  +--------------|                |-----------+   |
+    |  | vnode for    |         +----->| vnode for |   |
+    |  |    snode     |        /       |   rnode   |   |
+    |  |              |       /        |           |   |
+    |  +--------------|      /         |-----------+   |
+    |     realvp ---->|-----+          |               |
+    |     flags       |                | rnode specific|
+    |     time values |                |    info.      |
+    +-----------------+                +---------------+
+
+    Figure 1.  Snode structure and pointer to rnode.
+
+.fi
+.H 2 "Creation and attributes for device files"
+As was mentioned above, device files and named pipes are recognized at
+lookup time as being special objects to handle.  This implies that there
+is something in the attributes that specifies what type of file is being
+looked at, and indeed there is, we find an "nfsftype" field in the NFS
+attributes structure.  The problem is that the NFS protocol does not specify
+a type to match up for named pipes (clearly an over-sight on the part of the
+protocol designers).  To handle this, Sun "hacked" the attribute passing code
+to check for named pipes.  Named pipes are passed as being character special
+files with a minor number equal to -1.  This is recognized on the client side
+as being a special flag for named pipes.
+.sp
+The case is even worse for creation of device files and named pipes, which
+is the other situation where the special vnodes get created.  In this case,
+the RFS_CREATE does not have a field for passing the file type, it being
+assumed in the original protocol that only regular files were supported.
+In this case, the file type to be created is encoded into the mode field
+in the same way that it is in the mknod(2) system call.  Again, translation
+must occur on both sides of the communication for this to work correctly.
+NOTE:  HP-UX has a further check on the server side, which is to disallow
+the creation of device special files (named pipes are ok) unless the user
+is the super-user.  This has the effect of disallowing mknod over NFS unless
+the variable "nobody" is set to zero (root).
+.H 2 "Removal of device files"
+The final case where fairly major modification had to be made to the
+existing NFS code was in the nfs_remove() code.  This code had a special
+case for handling removal of open files.  Open files were detected by the
+fact that the ROPEN flag was set in the rnode.  In that case, the file was
+renamed instead of being removed.  If a second remove request was issued,
+then the file actually went away.  This was done to simulate the local
+UNIX semantics of being able to remove an open file without effecting the
+access to the file.
+.sp
+With the addition of the NFS device file layer, it is possible that the 
+file may be open, but the ROPEN flag not set.  Further, there could be
+other references to the vnode, besides just having the file open, that it
+would be desirable to handle in the same manner.  Thus, the code was changed
+to instead check the reference count on the vnodes involved.  If the count
+on any of the vnodes is greater than one, then the file is renamed instead
+of being removed.  Note that various caches (specifically the DNLC and the
+file system) may have pointers to the vnode that will keep the reference 
+count up, and thus, these pointers are invalidated when a remove is
+attempted so we can check the real reference count.
+.bp
+.H 1 "Character Special Files and the default vnode ops"
+Character special files are the simplest case of how the NFS device files
+are handled.  Beyond the initial setup described above, there is very
+little special handling for character special files.  The functionality
+is provided with no additional structures beyond the snode described above,
+and the vnode operations described here.
+.H 2 "Vnode operations."
+The handling of the vnode operations for NFS device files is slightly different
+than that of other layers.  For NFS device files, there is a lower layer of
+vnode operations that we sometimes must make use of, and there is also the
+set of operations supported by the device driver interface also.  Thus, from
+this we can see that there are a few different ways a request can be handled.
+First, it could simply be passed on to the real vnode layer for handling.
+This is done with file locking, for example.  Other possible cases are that
+the device driver layer is called to do the handling, or the NFS device
+file code could handle it all itself.  Most cases, however, are either
+a mixture of the NFS device code and calling the real NFS code, or a mixture
+of the NFS device file code and calling the local device driver code.  For
+example, spec_setattr() is called to set the attributes for the device (e.g.
+who owns the file).  This involves calling the NFS layer to do the actual
+remote call, and also some updating of the fields in the snode after the
+call is done.  As another example, opening a device file involves calling
+the device driver open routine through the cdevsw[] table, and appropriate
+handling of errors and setting up the vnode.  The major work of handling
+the NFS device files, though, involves the opening, closing, reading, and
+writing of device files, and these are largely the latter case of calling
+the device driver code plus appropriate handling of results.
+.nf
+
+			+--------------+
+                        | open(), etc. |
+			+--------------+
+                                |
+                                V
+                        +--------------+
+                        | spec_vnops() |
+                        +--------------+
+                           /       \
+                         /           \
+                +------------+   +-------------------------+
+                | nfs_vnops()|   | device driver functions |
+                +------------+   +-------------------------+
+
+    Figure 2.  Calling structure of character special files.
+
+.fi
+.H 2 "Special cases."
+The functions for handling character special files are largely the functions
+use for handling all of NFS device files, but many of these functions have
+special cases for the different types of files, including character special
+files.  Many of these cases simply fall out of the fact that we have a 
+different switch table (cdevsw[]) from block device files (bdevsw[]).  These
+cases include open(), close(), and rdwr().  In addition, select() and ioctl()
+are ONLY only supported with character special files.  Finally, there are a
+few other random special cases in the code, such as handling indirect
+devices (e.g. /dev/tty) on opens.   Over all, however, the main body of
+the character special code is straight forward from the special vnode
+operations.
+.bp
+.H 1 "Block Special Files"
+Block special files are handled very similarly to character special files.
+In general, the same places there are special cases for character special
+files, there are special cases for device files.  The main difference comes
+in the initial setup and when actually reading from
+or writing to the blocked device, since these operations must go through 
+the blocked I/O functions (e.g. bread(), bwrite()).  This is described more
+below.
+.H 2 "Initial setup via bdevvp()"
+As is the case with character special files, block special files use the
+standard snode/vnode structure created via specvp().  However, there will
+also be another set of vnode operations needed later for reading and writing
+to the blocked devices.  For this reason, another vnode structure is set up
+for block device files called a dev_vnode.  This new vnode is referenced
+from the snode, and is only used when reading or writing.  (This is very
+similar to what is done in the local file system, and in fact the two
+could probably be combined with no problems at all!)  The new vnode is
+created via the bdevvp() routine, which simply checks to see if it has
+already created a vnode for this device, and if not allocates space for
+the new vnode.  This structure is shown in Figure 3.
+.nf
+
+    SNODE                                  RNODE
+    +-----------------+                +---------------+
+    |  next snode --->|                | next rnode -->|
+    |  +--------------|                |-----------+   |
+    |  | vnode for    |         +----->| vnode for |   |
+    |  |    snode     |        /       |   rnode   |   |
+    |  |              |       /        |           |   |
+    |  +--------------|      /         |-----------+   |
+    |     realvp ---->|-----+          |               |
+    |     flags,etc   |                | rnode specific|
+    |     bdevvp ---->|-----+          |    info.      |
+    +-----------------+      \         +---------------+
+                              \ 
+                               \           DEV_VNODE
+                                \      +---------------+
+                                 \     | next devnode->|
+                                  +--->|-----------+   |
+                                       | vnode for |   |
+                                       |    bdev   |   |
+                                       +---------------+
+
+    Figure 3.  Snode structure with block device files.
+
+.fi
+.H 2 "Reading and writing block special files"
+The major special case for block special files is when they are read and
+written.  In this case, the operations go through the block I/O system
+using the bread() and bwrite() calls.   The block I/O code eventually ends
+up calling bdev_strategy() via the VOP_STRATEGY() macro to do the actual
+physical read or write.  The trick is that the VOP_STRATEGY() macro needs
+a vnode to operate on, and that is why the dev_vnode was allocated above.
+This vnode is the one passed in to bread() and bwrite() from the spec_rdwr()
+routine.  The bdev_strategy routine is very simple, calling the device
+driver strategy routine.  The only other vnode operation used for the
+dev_vnode is the bdev_inactive routine, which does nothing.
+.nf
+
+                         +----------+
+                         | vno_rw() |
+                         +----------+
+                              |
+                              V
+                        +-------------+
+                        | spec_rdwr() |
+                        +-------------+
+                              |
+                              V
+                     +-------------------+
+                     | bread(), bwrite() |
+                     +-------------------+
+                              |
+                              V
+                      +-----------------+
+                      | bdev_strategy() |
+                      +-----------------+
+                              |
+                              V
+                  +--------------------------+
+                  | bdevsw[dev].d_strategy() |
+                  +--------------------------+
+
+    Figure 4.  Calling sequence for blocked reads and writes.
+
+.fi
+.bp
+.H 1 "Named Pipes"
+The named pipe implemenation is both similar and different than the previously
+described inplementations for device files.  It is similar in that it does
+use the snode structure, the functions for manipulating snodes, and some of
+the snode vnode operations.  However, the named pipe routines have their
+own vnode structure called a fifonode, and a large chunk of code specifically
+for named pipe support.  This is due to the need to keep track of how many
+readers and writers are accessing the fifo, and allocation of buffer space
+for the actual read and write operations to work with.
+.H 2 "Fifosp() and fifonodes."
+While the named pipe code has some very specific needs, many of the tasks
+that will be performed on named pipes are very similar or the same as those
+for device files.  Also, we will need to recognize when two opens are
+referring to the same named pipe.  Since this capability is already built
+into the snode operations in specvp(), the fifonode was carefully structured
+to contain an snode as the first item in the structure.  This means that
+the list manipulation routines that keep track of already allocated snodes
+can be shared between device files and named pipes.  However, there are
+also named pipe specific fields that cannot be filled in by the specvp()
+code.  Thus, the first time a named pipe is referenced (e.g. via lookup())
+and specvp() gets called, specvp() in turn calls fifosp() to create the
+fifo version of the snode.  The fifonode's vnode is then returned from
+specvp().  Since the fifonode contains an snode, it too has a reference
+to the real NFS vnode as shown in the figure below.
+.nf
+
+    FIFONODE                                RNODE
+    +-----------------+                +---------------+
+    |  |SNODE         |
+    |  |next snode -->|                | next rnode -->|
+    |  +--------------|                |-----------+   |
+    |  | vnode for    |         +----->| vnode for |   |
+    |  |    snode     |        /       |   rnode   |   |
+    |  |              |       /        |           |   |
+    |  +--------------|      /         |-----------+   |
+    |  |  realvp ---->|-----+          |               |
+    |  |  flags       |                | rnode specific|
+    |  |  time values |                |    info.      |
+    |  +--------------|                +---------------+
+    |  reader count   |
+    |  writer count   |
+    |  ptr. to buffers|
+    |  etc.           |
+    +-----------------+
+
+    Figure 1.  Snode structure for named pipes.
+
+.fi
+.H 2 "Fifonode operations."
+The vnode operations for a fifonode fall into two categories:  those that
+require specific actions for named pipes (i.e. open(), close(), rdwr(),
+select(), getattr(), pathconf()) and those that are the can be exactly the same
+as for device files (i.e. setattr(), access(), link(), fsync(), lockctl(),
+lockf(), fid(), getacl(), and setacl()).  In the latter case, instead of doing
+another indirection in the fifo layer to the device layer, the device file
+function is simply filled in in the vnodeops structure for fifos.  For example,
+there is no fifo_setattr(), only spec_setattr().  
+.sp
+For those functions that are filled in for fifos, the code is fairly straight
+forward.  Fifo_open() increments the reader and writer counts as appropriate,
+and sleeps if necessary to wait for someone else to open the fifo.
+Fifo_close() does the opposite, decrementing counts and waking up people
+sleeping on the fifo.  Fifo_getattr() if very straight forward, calling the
+underlying routine for most values, with the main exception that it fills in
+the size with the number of unread bytes, and sets the vnode blocksize to
+be that being used for the fifo buffers (see below).  Fifo_select() is very
+similar to fifo_open(), in that it mostly just checks counts and sleeps if
+necessary.  Fifo_pathconf() is a special case so that it can handle the
+requests for _PC_PIPE_BUF.  Other requests are routed through spec_pathconf().
+.sp
+The only other vnode operation of significance if fifo_rdwr(),
+which is the "meat" of the fifo implemenation, comprising over a third of
+fifo_vnops.c.  While it is a fairly large routine, the code is fairly
+straight forward, with the size being largely due to two reasons.  First,
+this function is handling BOTH the read and write cases.  Second, there are
+a large number of special conditions that must be handled with fifos due to
+the limit on the size of the buffers used with the fifo (see below for more
+details on the buffer scheme).  For example, if it is a write request for
+a size that would normally fit in a fifo buffer, but the buffer is full
+enough that there is only room for part of it and F_NDELAY is set, then we
+return 0 having written nothing.  This is complicated further by the fact
+that we now support F_NONBLOCK as well as F_NDELAY.  Finally, the fifo_rdwr()
+routine also takes care of waking up waiting processes and going to sleep if
+necessary to wait for space or a write to occur.
+.H 2 "Fifo buffer allocation."
+Local FIFOS use the file system for their buffers to store the data from
+the time it is written to the time it is read, using regular file system
+buffers.  NFS fifos instead allocate and use in-memory buffers for this purpose
+as required, and free them when no longer needed.  This is done via a
+set of buffer manipulation functions called fifo_bufalloc() and fifo_buffree().
+These routines, and the rest of the NFS fifo code, is written to vary the
+allocation of the buffers depending on constants defined in nfs/fifo.h.  It
+is possible to have a chain of buffers per fifo, or one buffer per fifo, and
+of varying sizes.  The constants currently in use are set at one buffer per
+fifo with a size per buffer of 8192.  This causes the code to essentially
+behave the same as the local file system.  Note that these parameters are
+set the same as Sun's, except with HP-UX we allow 8192 (PIPSIZ)
+per buffer instead of 4196.
+.sp
+The allocation routines are called directly from fifo_rdwr(), which keeps
+a linked list of buffers allocated per each fifo.  The allocation routine
+is also written to limit the total memory allocated to fifo buffers to
+a maximum value, again defined in fifo.h.  Currently, the maximum
+buffer space allowed is ten times the size of a buffer, or 80K.  If another
+buffer is requested when we are at the maximum, the process is forced to
+go to sleep until one becomes available.  This could theoretically lead to
+a deadlock or starvation situation.  One a buffer is freed, the allocated
+memory is freed and wakeup is called for any processes waiting for a buffer.
+.H 2 "Special cases for fifos."
+Beyond the fifo vnode operations discussed above, the main remaining special
+case for fifos is in the way the vnode attributes are passed around.  When
+Sun wrote a specification for the NFS protocol, they did not include 
+NFFIFO as one of the possible file types (clearly an oversite on their
+part).  This makes it difficult to create pipes with the mknod() system
+call.  To work around this, a "hack" was done which sets the NFS file type
+to NFCHR, and the device number to all ones.  This is used as a special
+indication from the server to the client to create a named pipe instead of a
+device file, which restores the modes to the necessary values to create the
+fifo.  Other than this case and those discussed above, the fifo could is
+largely the same as the normal device file code.
+.bp
+.H 1 "HP-UX interactions (or lack thereof)"
+In porting Sun's NFS code, there are always cases where we have to make
+a choice between doing things Sun's way or the HP-UX way, or some mixture
+of the two.  This section discusses some areas where that trade-off is the
+most apparent.  The general rule that was followed was that if it is a
+user-visible difference with HP-UX, try to look like HP-UX as much as 
+possible, provided it does not effect the protocol.  Otherwise we attempt
+to look like Sun.  The other guiding principal used in this design is that
+we wanted to keep the changes necessary to support  NFS 3.2 devices and
+named pipes as isolated as possible from the rest of the system.  This is
+due to the time constraints under which the project is implemented, and the
+desire to not mess with the local implementation and possibly break
+something in the process.
+.H 2 "Comparison to Sun's design"
+As was mentioned above, the NFS 3.2 code was largely ported from Sun's 
+implementation, and because of this the code for the NFS case looks largely
+the same as Sun's.  There is a major difference, however.  Sun's kernel was
+changed to use common device file and named pipe routines for BOTH the
+local and NFS case.  While this seems to be a desirable change, it also
+seemed very likely to break something for the HP-UX case.  Also, the
+HP-UX diskless code is not as easily changed to use these common routines,
+and would require a substantial investment to make work.  As a result, HP-UX
+has largely separate code for the NFS and local file systems, as opposed to
+Sun's case, which largely shares this code.  This is the main structural
+difference between the HP-UX code and the Sun code.
+.H 2 "Root and mknod()"
+Device files are created through the use of the mknod command which uses the
+mknod() system call.  This operation normally requires super-user (root)
+priviliges.  However, you will call that root over NFS normally gets mapped
+to "nobody" on the NFS server, which would normally be expected to cause
+the mknod() operation to fail with permission denied.  Indeed, this is exactly 
+what happens with HP servers.  Thus, a mknod() will normally fail over
+NFS.  However, this is a check that Sun failed to put in their code.  Hence,
+this a difference from both Sun AND the local file system.
+.H 2 "No RFA support"
+Similar to FIFOs, there is no file type for network special files in
+the NFS protocol.  Unlike FIFOs, however, we cannot add a special kludge
+to the protocol.  This is because it would not be understood by non-HP
+machines and would thus not be guaranteed to be always work.  Thus,
+attempts to create a network special file over NFS will fail, and attempts
+to use an existing network special file through NFS will fail.
+.H 2 "No DUX/fifo support"
+The HP diskless protocol (DUX) behaves differently than NFS fifos in that
+named pipes allow communication between DUX clients.  This means that a
+process on machine A can write data to be read by machine B in the same
+DUX cluster.  This works fairly transparently because of the way the local
+file system code uses inodes and file system buffers to support named pipes.
+Thus, the same code that shares the file system shared the named pipes (in
+general).  This was one of the reasons that it was decided not to share
+the implementations between the local and NFS code.  This does mean however,
+that NFS fifos, even when accessed in a discless cluster, will not be able
+to communicate among NFS clients.
+.H 2 "The mount nodevs option"
+Finally, NFS device files represent a security hole.  This hole is partially
+plugged by disallowing mknod from NFS clients.  However, there still remains
+the problem of what to do if there is a malicious root of an NFS server.  In
+that case, the super-user of the server could mknod a device file for a
+device like /dev/kem, with read/write permission for everybody, and then go
+to the NFS client as a normal user and access the device through NFS to
+read the clients kernel memory.  This is clearly undesirable.
+.sp
+To prevent this, an option was added to the mount command called "nodevs".
+This option turns off access to NFS device files by not doing the
+specvp() call on lookup of a device file.  (NOTE: named pipes are allowed
+to work, since they do not present a security hole in this sense.)  The
+result is that attempted device accesses fail with EINVAL as they did 
+before NFS 3.2 features were supported.  There was some discussion about
+whether this should be on by default or not.  It was decided that the 
+default in this case should be to act like Sun and allow device file access,
+since most users will prefer to have the device file access.
+.TC 1 1 4        \"        create the table of contents, 4 levels

@@ -1,0 +1,21 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+fileset=TEXT-FMT
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Remove obsolete compiled macro temporary files.
+#======
+rm -f /usr/lib/macros/cmp.n.t.*
+
+exit $exitval

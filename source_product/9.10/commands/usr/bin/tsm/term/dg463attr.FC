@@ -1,0 +1,181 @@
+## FacetTerm  dg463attr COMMON   description file  12/16/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: dg463attr.FC,v 70.1 92/03/09 16:55:47 ssa Exp $
+delete_is_a_character
+##--- ATTRIBUTES URBDOIPA ---##
+### attribute-U=
+### attribute--U=
+### attribute-R=
+### attribute-B=
+### attribute-D-O=
+### attribute-O-D=
+### attribute-I=
+### attribute-P=
+### attribute-A=
+### attribute--A=
+### attribute_next-A-=
+## define_erasable_char=\E[0"q  =\E[2"q  =\E["q  define_nonerasable_char=\E[1"q
+attribute-h=\E[1"q
+attribute--h=\E[0"q
+attribute--h=\E["q
+attribute--h=\E[2"q
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     475218.. ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA-=\E[;%7MMm
+parm_attribute--URBDOIPA-=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1;%s2m
+parm_attribute_out=\E[%s1;%s2;%s3m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+parm_attribute_val-U-=4
+parm_attribute_val--U=24
+### parm_attribute_val-R-=number
+parm_attribute_val-R-=7
+parm_attribute_val--R=27
+### parm_attribute_val-B-=number
+parm_attribute_val-B-=5
+parm_attribute_val--B=25
+### parm_attribute_val-D-O=number
+parm_attribute_val-D-O=2
+### parm_attribute_val-O-D=number
+parm_attribute_val-O-D=1
+parm_attribute_val--DO=22
+## parm_attribute_val-I-=8
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode--URBDOIPA=\E[0m
+exit_attribute_mode--URBDOIPA=\E[m
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ponmlkjihgfedcba ---##
+##---                                               dcba ---##
+### vt220 is ( ) * +
+## Default char sets: G0=ASCII G1=ASCII G2=Supplemental G3=Supplemental
+enter_ca_mode=\E(B\E)B\E*<\E+<
+### lock_shift_0=
+lock_shift_0=^O
+### single_shift_0=
+### select_character_set_0--=
+select_character_set_0-......=\E(B
+select_character_set_0-.....a=\E(0
+select_character_set_0-....b.=\E(<
+select_character_set_0-....ba=\E(1
+select_character_set_0-...c..=\E(A
+select_character_set_0-...c.a=\E(%5
+select_character_set_0-...cb.=\E(2
+select_character_set_0-...cba=\E(3
+select_character_set_0-..d...=\E(4
+select_character_set_0-f....a=\E( @
+### select_character_set_0--=
+### lock_shift_1=
+lock_shift_1=^N
+### single_shift_1=
+### select_character_set_1--=
+select_character_set_1-......=\E)B
+select_character_set_1-.....a=\E)0
+select_character_set_1-....b.=\E)<
+select_character_set_1-....ba=\E)1
+select_character_set_1-...c..=\E)A
+select_character_set_1-...c.a=\E)%5
+select_character_set_1-...cb.=\E)2
+select_character_set_1-...cba=\E)3
+select_character_set_1-..d...=\E)4
+select_character_set_1-.e....=\E-B
+select_character_set_1-.e...a=\E-0
+select_character_set_1-.e..b.=\E-<
+select_character_set_1-.e..ba=\E-1
+select_character_set_1-.e.c..=\E-A
+select_character_set_1-.e.c.a=\E-%5
+select_character_set_1-.e.cb.=\E-2
+select_character_set_1-.e.cba=\E-3
+select_character_set_1-.ed...=\E-4
+select_character_set_1-f....a=\E) @
+### select_character_set_1--=
+### lock_shift_2=
+lock_shift_2=\En
+### single_shift_2=
+single_shift_2=\EN
+### select_character_set_2--=
+select_character_set_2-....b.=\E*<
+select_character_set_2-......=\E*B
+select_character_set_2-.....a=\E*0
+select_character_set_2-....ba=\E*1
+select_character_set_2-...c..=\E*A
+select_character_set_2-...c.a=\E*%5
+select_character_set_2-...cb.=\E*2
+select_character_set_2-...cba=\E*3
+select_character_set_2-..d...=\E*4
+select_character_set_2-.e..b.=\E.<
+select_character_set_2-.e....=\E.B
+select_character_set_2-.e...a=\E.0
+select_character_set_2-.e..ba=\E.1
+select_character_set_2-.e.c..=\E.A
+select_character_set_2-.e.c.a=\E.%5
+select_character_set_2-.e.cb.=\E.2
+select_character_set_2-.e.cba=\E.3
+select_character_set_2-.ed...=\E.4
+## Word Perfect 5.0
+select_character_set_2-f...ba=\E*W
+### select_character_set_2--=
+### lock_shift_3=
+lock_shift_3=\Eo
+### single_shift_3=
+single_shift_3=\EO
+### select_character_set_3--=
+select_character_set_3-....b.=\E+<
+select_character_set_3-......=\E+B
+select_character_set_3-.....a=\E+0
+select_character_set_3-....ba=\E+1
+select_character_set_3-...c..=\E+A
+select_character_set_3-...c.a=\E+%5
+select_character_set_3-...cb.=\E+2
+select_character_set_3-...cba=\E+3
+select_character_set_3-..d...=\E+4
+select_character_set_3-.e..b.=\E/<
+select_character_set_3-.e....=\E/B
+select_character_set_3-.e...a=\E/0
+select_character_set_3-.e..ba=\E/1
+select_character_set_3-.e.c..=\E/A
+select_character_set_3-.e.c.a=\E/%5
+select_character_set_3-.e.cb.=\E/2
+select_character_set_3-.e.cba=\E/3
+select_character_set_3-.ed...=\E/4
+## NOTE 20/20 uses \E+W
+select_character_set_3-f...b.=\E+W
+## Word Perfect 5.0 - uvt1224
+select_character_set_3-f..c..=\E+U
+### select_character_set_3--=
+##--- DOWNLOAD CHARACTER SETS ---##
+perwindow-2000-P---------=\EP0;%p2%d;%p3%d;%p4%d;%p5%d;%p6%d;%p7%d;%p8%d{
+perwindow_also-..........=\EP0;%p2%d;%p3%d;%p4%d;%p5%d;%p6%d;%p7%d{
+perwindow_also-..........=\EP0;%p2%d;%p3%d;%p4%d;%p5%d;%p6%d{
+perwindow_also-..........=\EP0;%p2%d;%p3%d;%p4%d;%p5%d{
+perwindow_also-..........=\EP0;%p2%d;%p3%d;%p4%d{
+perwindow_also-..........=\EP0;%p2%d;%p3%d{
+perwindow_special=\E\\
+### decode_type- =\EP cannot use with special above
+perwindow-9-CLA---------DEC_MULTINATIONAL=\EP0!u%%5\E\\
+perwindow_also-.........ISO Latin-1......=\EP1!uA\E\\
+perwindow_default-......DEC_MULTINATIONAL=\EP0!u%5\E\\

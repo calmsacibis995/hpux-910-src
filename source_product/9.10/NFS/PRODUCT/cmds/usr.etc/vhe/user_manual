@@ -1,0 +1,1054 @@
+head     7.1;
+access   nfsmgr jbl dds chm mikey dae jad mjk jwe;
+symbols  ;
+locks    ; strict;
+comment  @# @;
+
+
+7.1
+date     87.10.22.16.05.53;  author nfsmgr;  state Exp;
+branches ;
+next     1.2;
+
+1.2
+date     87.10.22.13.32.36;  author mikey;  state Exp;
+branches ;
+next     1.1;
+
+1.1
+date     87.10.21.15.39.46;  author mikey;  state Exp;
+branches ;
+next     ;
+
+
+desc
+@@
+
+
+7.1
+log
+@Changing to new release level 7.1
+@
+text
+@
+.\ macros do not work otherwise.  Don't ask me why.
+
+.ce 2
+.TL
+USER MANUAL FOR
+VIRTUAL HOME ENVIRONMENT
+
+.\ System test plan title.  Be specific about what the
+.\ test plan covers.
+
+
+
+
+
+.ds d+ etc/vhe
+.\ Set up a string to contain "etc/vhe" which is the directory where
+.\ the VHE scripts will reside.
+.\
+.AS
+.\ Put your abstract here
+This is the User manual
+for a way of using the Network File System (NFS) product which will give
+the user 
+a virtual login capability on any node in an NFS grouping.
+It will be known as
+Virtual Home Environment (VHE).
+
+.AE
+
+
+
+
+
+
+
+
+.ce
+\*(DT
+.nr P 1
+.bp
+
+.PH " 'VHE User Manual ' 'Description ' "
+.bp
+
+.PF " '' ' \\\\n(H1-\\\\nP'  "
+.nr P 1
+.H 1 Description
+VHE is a means of configuring a set of NFS nodes
+such that a user could sit down in front of any node in the grouping (a 
+term describing machines connected together with NFS),
+login, and be put into the
+work environment that is associated with the login on his home node.
+This would include access to his files, shell variables and any other
+environmentally dependent entities.  It is not another virtual terminal
+program such as rlogin or telnet.  The user is logged on to one machine,
+but uses objects such as files from his home machine.
+
+To illustrate VHE, the
+following diagram is given.  The picture is of three nodes in an
+VHE grouping.  Each node is a home node for a certain user, where
+that user has his own customized work environment set up by the login
+process.
+
+There are directories that correspond to
+each of the remote nodes in the grouping.  A mount is done by each
+node to each remote node using these directories as mount points.
+This gives each node access to the file systems located
+on the remote nodes. 
+On each machine, there is also a symbolic link that corresponds to itself which
+is linked to "/". 
+
+In a traditional single node HP-UX configuration,
+the password file contains the directory which will become
+the home directory for the user upon logging in.  This file has been edited
+such that all of the home directories are now relative to a mount point or
+a symbolic link.  When the login program does the
+.I cd
+to the user's home directory,
+it and subsequent requests are made to the users home node via NFS,
+regardless of
+which node the login was instituted.  In the case where the user is
+logging on at his home node, the home directory is relative to a symbolic
+link pointing to root.  This maintains the consistency of form for the
+home directory names, but does not use NFS unnecessarily.  
+.SK
+.DS
+
+.B "     Example Grouping"
+
+
+
+      Dave's Machine                         KO's Machine            
+      +----------+                           +----------+            
+      |          |                           |          |            
+      |  Node A  |                           |  Node B  |            
+      |          |                           |          |            
+      +----------+                           +----------+            
+       /vhe/A  symln--> /                     /vhe/A  mnt pt.            
+       /vhe/B  mnt pt.                        /vhe/B  symln--> /         
+       /vhe/C  mnt pt.                        /vhe/C  mnt pt.            
+                                                                     
+       mount B:/  /vhe/B                      mount A:/  /vhe/A          
+       mount C:/  /vhe/C                      mount C:/  /vhe/C          
+                                                                     
+                                                                     
+                          AJ's Machine                               
+                          +----------+                               
+                          |          |                               
+                          |  Node C  |                               
+                          |          |                               
+                          +----------+                               
+                           /vhe/A  mnt pt.                               
+                           /vhe/B  mnt pt.                               
+                           /vhe/C  symln--> /                            
+                                                                     
+                           mount A:/  /vhe/A                             
+                           mount B:/  /vhe/B                             
+                                                                     
+                                                                     
+                                                                     
+.DE
+In the 
+.B /etc/passwd 
+file, 
+the appropriate mount point or symbolic
+link is added to the beginning of  
+the pathname of the
+home directory for each user.
+As an example, this is how the lines in 
+.B /etc/passwd
+would look for the users dave, aj and ko as shown above.
+.DS
+
+   dave::117:100:Dave M:/vhe/A/users/dave:/bin/csh
+   ko::118:100:Ko Pom  :/vhe/B/users/ko:/bin/sh
+   aj::119:200:Aj Pom  :/vhe/C/users/aj:/bin/ksh
+.DE
+
+No matter which node Dave logs in on, his home directory will be 
+/users/dave located on node A.  When scripts such as .login or .cshrc
+get executed, they will define the execution environment
+as customized by Dave.  His files, shell variables and aliases will be
+available just as if he had physically logged in on node A.
+
+As mentioned, VHE is not a virtual terminal program.  The user's process
+is executing on the node he is logged in to.  If he does an
+.I ls 
+of his home directory,
+the local 
+.B /bin/ls
+is executed, but the listing will show the files of the home node.
+
+Users' shell scripts can probably be executed
+(as long as shells between the user's home node and the node he
+is logged in on operate similarly).
+Compiled files from the user's home node may be
+executable on the node he is logged in on if the two nodes are of the
+same architecture and operating system.
+
+.PH " 'VHE User Manual' 'Human Interface ' "
+.bp
+.nr P 1
+.H 1 "Human Interface"
+
+The human interface to VHE at
+the user level is very simple.
+It is a transparent service.
+It consists of logging on to a machine, and that is just
+the normal HP-UX login sequence.
+
+For the system manager interface,
+there will be a script on each machine
+which would be executed during powerup after the networking
+has been brought up.  
+After it's completion, the node should be ready for VHE.
+The script reads a list of nodes
+that make up the grouping.  The script will then create the directories
+needed for the mount points if they are not already there.  It will
+then attempt to do the appropriate 
+.I mount 's
+of the remote nodes.  The name of this script will be 
+.B /\*(d+/vhe_mounter .
+It can be invoked in the following manner:
+.DS
+
+   /\*(d+/vhe_mounter
+
+.DE
+
+When NFS is working, VHE is very unobtrusive.
+However if a user tries to login and his home machine does not yet have
+a remote mount done to it, the 
+.I cd ,
+done by the login program,
+to the home directory for that
+user cannot be done.  This will 
+cause the login to fail, stating that 
+the home directory cannot be accessed.
+A likely reason that the remote mount had not completed is that the remote 
+node was not powered up when the mount was attempted.
+
+If the remote node later is powered up, the user can cause a mount to
+be done by logging in
+with a user
+name of "mounter".  This will run a program (similar to the logins of
+"who" and "sync") which will prompt for a node name.  The program will then
+attempt to do a mount of that remote node so the user will be able to
+complete his original login.
+
+For example, a user of "dave" attempts to login from node B when
+his home machine is node A which is not mounted by B.
+.DS
+
+login:dave
+Password:
+Unable to change directory to "/vhe/A/users/dave"
+
+login:mounter
+Password:
+Enter the name of the node to mount: A
+
+login:dave
+Password:
+<Dave gets logged in>
+
+.DE
+The program that the "mounter" login executes will only attempt to
+mount a file system of a node that is found in the 
+.B /etc/vhe_list 
+file.  
+This file, which is set up by the system administrator, contains a list
+of the nodes that make up the VHE grouping.  It is used by 
+.I vhe_mounter
+to determine what NFS mount are to be done for VHE.
+This will prevent
+a non-superuser from being able to do mounts to arbitrary nodes.
+He will only
+be able to do mounts that could have been done by the 
+.B /\*(d+/vhe_mounter
+script.
+If the nodename, entered after the prompt, is not found in
+.B /etc/vhe_list ,
+then an error message will be given and no mounts will be done.
+
+The name of the script that will do this mounting is
+.B /\*(d+/vhe_u_mnt .
+In order for it to be executed when logging in with "mounter",
+the following line needs to be added to the 
+.B /etc/passwd
+file.
+.DS
+
+     mounter:*:6:1::/:/\*(d+/vhe_u_mnt
+
+.DE
+The "*" in the password field 
+initially removes access to this login.
+This is similar to what is done with the logins of "sync" and "who".
+The
+system administrator can at his option remove the * such that no password
+is required or give it a password and dispense the password to whomever
+is chosen.  If the system administrator should decide to not allow
+mounts to be done for VHE by non-superusers, he can always put the "*"
+back in the password field.
+
+If a user attempts to login and finds that his home node is unavailable
+for NFS access
+(for example the home node is not powered up),
+there is a way that he can still gain limited access to
+a system. There is a script called 
+.B /\*(d+/vhe_altlog .
+This script will prompt for a login id and then attempt to do a 
+.I su
+using the login id given by the user.
+The user will then be prompted for a password by
+.I su .
+If the proper password is given, the user will be logged in and 
+will have a home directory of /tmp.  None of the user's execution
+environment will be available, but he will have access to the system.
+This will only be access to the local system until his home node is
+available for NFS mounting.
+
+The 
+.I vhe_altlog 
+script is executed in the same fashion as the 
+.I vhe_u_mnt
+script.  The following line needs to be added to the 
+.B /etc/passwd
+file by the system administrator if he wants this capability:
+.DS
+
+     altlogin:*:6:1::/tmp:/\*(d+/vhe_altlog
+
+.DE
+Similar considerations should be taken about the "*" in the password
+field as are taken for the "mounter" login.
+
+.PH " 'VHE User Manual' 'Configuration' "
+.bp
+.nr P 1
+.H 1 Configuration
+
+To configure a grouping of NFS nodes with VHE, the system
+administrator needs to do several things.  The following will present
+steps to configure VHE, beginning with a simple case and 
+then adding complications afterwards. 
+Most of the work of creating mount point directories is done by 
+the scripts provided.
+
+.H 2 "Creating /etc/vhe_list"
+In the simplest case, 
+it will be assumed that each node has
+only one file system which is the "/" file system.
+Every node needs to have a set of directories
+made that correspond to each of the remote nodes.  These directories
+will be the mount points for the NFS 
+.I mount 's.
+The 
+.I mount 's
+will mount
+the root directory of the remote node on the appropriate directory.
+In order for the 
+.B /\*(d+/vhe_mounter
+script to function as provided,
+the following naming conventions need to be followed:
+.AL
+.LI
+The directories need to be named after the
+nodename of the machines they will be the mount point for.
+.LI
+The mount point directories should be located in one central subdirectory.
+In the examples shown in this document, the subdirectory "/vhe" is used.
+.LI
+Every node will also have a symbolic link to its own "/" directory.
+Again the convention would be to have it named after its own nodename
+and located in the one central subdirectory.
+.LI
+The directory and symbolic
+names must be consistent across all members of the grouping.
+.LE
+
+A list of these directories needs to be made and
+placed in the 
+.B /etc/vhe_list
+file.  
+Each node will need access to this list.
+In order for all nodes to have a consistent view of the contents of the
+.B /etc/vhe_list ,
+the Network Information Service (NIS) service needs to be used.  This will allow one 
+copy of the file to be shared by all nodes in the VHE grouping.
+For more information, see the "Network Information Service and VHE" section of this
+document.
+This version of
+.B /etc/vhe_list
+will be used by all of the nodes in the grouping.
+
+The lines in
+.B /etc/vhe_list
+will have the form of:
+.DS
+
+   nodename   file_system   mount_point
+
+.DE
+The first field is the name of the node to which the mount will be done.
+The second
+field is the name of the file system to be mounted and the
+last field is the name of the directory that will act as the mount
+point for the NFS mount.  The
+.B /\*(d+/vhe_mounter 
+script will then be able to use the three fields to
+do the appropriate NFS mounts.
+
+For example, consider a grouping consisting of the nodes A, B,
+C and D.  A list of mount points for this grouping would 
+consist of /vhe/A, /vhe/B, /vhe/C and /vhe/D.  Now taking
+these two lists, one can create the 
+.B /etc/vhe_list
+file with the following contents:
+.DS
+
+      A    /    /vhe/A
+      B    /    /vhe/B
+      C    /    /vhe/C
+      D    /    /vhe/D
+
+.DE
+The
+.B /etc/vhe_list
+file should only be writable by the super-user as 
+.B /etc/passwd
+is.
+Once the
+.B /etc/vhe_list
+file is created, the next step is to edit the
+.B /etc/passwd
+file.
+
+.H 2 "Updating /etc/passwd"
+The
+.B /etc/passwd
+file will need to be updated to 
+force home directory access 
+through the mount points.  The following will show the entries before and
+after the VHE configuration in the password file.
+
+The first user will have her
+home directory located on node A,
+the second user will have
+his home directory located on node B and the
+third user will have the home directory 
+on node C.
+All of the "/users" directories will be located in the "/" file systems
+on their respective nodes.
+.DS
+
+   Before VHE configuration:
+     kar::117:100:Karen :/users/kar:/bin/csh
+     speedy::118:100:D.S:/users/speedy:/bin/ksh
+     chm::119:200:Cris  :/users/chm:/bin/sh
+
+   After VHE configuration:
+     kar::117:100:Karen :/vhe/A/users/kar:/bin/csh
+     speedy::118:100:D.S:/vhe/B/users/speedy:/bin/ksh
+     chm::119:200:Cris  :/vhe/C/users/chm:/bin/sh
+
+.DE
+
+.H 2 "Updating /etc/exports"
+The 
+.B /etc/exports
+files will have to be updated to reflect all of the file systems that
+are available for NFS mounting from each node.
+Details on this can be found
+in the "NFS Configuration and Maintenance" chapter of the 
+.I 
+Using and Administering NFS Services
+.R
+manual.  This operation needs to be done
+on EACH node in the grouping.
+
+.H 2 "Distributing /etc/vhe_list and /etc/passwd"
+Once the list in 
+.B /etc/vhe_list
+is created, it needs to be accessible by the nodes in the grouping.
+It will be assumed that Network Information Service (NIS) will already have been
+configured on the nodes in the grouping.  To get
+.B /etc/vhe_list
+accessible by the nodes, one needs only to run
+.I ypmake
+which will build the NIS maps and push them out to the NIS servers.
+.B /etc/passwd
+also gets distributed as part of the execution of
+.I ypmake .
+
+.H 2 "Creating the Mount Points"
+When the files have been distributed, the
+.B /\*(d+/vhe_mounter
+script needs to be run on each node.  This can be done in the
+following manner:
+.DS
+
+   /\*(d+/vhe_mounter
+
+.DE
+The
+.B /\*(d+/vhe_mounter
+script will use the information in
+.B /etc/vhe_list
+to create the appropriate mount points directories on each node. 
+When 
+.I vhe_mounter
+notices that it is about to make a directory with
+the same name as the node that it is executing on, it will make a symbolic
+link with the same pathname and link it to "/".  After 
+.I vhe_mounter
+has been run on all of the nodes, the nodes in the example grouping would
+have these directories and symbolic links(Symln==>/ denotes a symbolic
+link to the "/" directory):
+.DS
+  Node
+   A        /vhe/A      /vhe/B      /vhe/C      /vhe/D     
+            Symln==>/   Directory   Directory   Directory
+
+   B        /vhe/A      /vhe/B      /vhe/C      /vhe/D     
+            Directory   Symln==>/   Directory   Directory
+
+   C        /vhe/A      /vhe/B      /vhe/C      /vhe/D     
+            Directory   Directory   Symln==>/   Directory
+
+   D        /vhe/A      /vhe/B      /vhe/C      /vhe/D     
+            Directory   Directory   Directory   Symln==>/
+
+.DE
+The
+.B /\*(d+/vhe_mounter
+script will also do NFS mounts using the appropriate directories to the
+remote machines on each node.  When the 
+.I mount 's
+complete, a node is ready for VHE.
+
+The following could
+be done to get all nodes in a grouping to run 
+.I vhe_mounter
+from a single node:
+.DS
+
+   for i in ` ypcat vhe_list | awk '{ print $1 } ' | sort -u `
+   do
+	remsh $i /\*(d+/vhe_mounter
+   done
+
+.DE
+This assumes that all of the nodes are running the ARBA/Berkeley services
+and that super-user capability is allowed between the nodes when using
+.I remsh .
+
+.H 2 Complications
+As mentioned, this is for the simplest case where the "/users" directory
+is found in the "/" file system.  If "/users" is its own file system, then
+the "/users" file system must be NFS mounted.  This is because an NFS
+mount of "/" would not give access to "/users" if "/users" were on
+a separate file system.
+In this case instead of having
+a mount that had the form of:
+.DS
+
+   mount  hostname:/  /vhe/hostname
+
+.DE
+It would have a form of:
+.DS
+
+   mount  hostname:/users  /vhe/hostname/users
+
+.DE
+This would then allow the home directories specified in
+.B /etc/passwd
+file
+to still have the form of "/vhe/hostname/users/user_name".
+
+Having "/users" on a separate file system is a likely situation, 
+that can be easily accommodated.  There are other situations that
+could be found that make things a bit tougher.  For example, if
+a user would want to extend VHE to handle reading his mail, he could
+change his default mail file to have a mount point added to the beginning
+of it (just as
+the home directories are changed in
+.B /etc/passwd )
+and then use VHE to allow mail to be read transparently
+using NFS.  If that mail file is on a separate file system, it would
+also have to be mounted to be available.  Therefore the system administrator
+should make a list of all of the file systems that are to be mounted
+from each node.  The system administrator
+will have to use judgement in deciding which file systems will be mounted.
+
+Having the possibility of doing mounts of several file systems from one node,
+does require some care in creating the 
+.B /etc/vhe_list 
+file.  For example, if "/usr" is a separate file system on node C and a 
+.nf
+
+      mount  C:/     /vhe/C
+
+.fi
+is done on node A, then a 
+.I ls 
+of "/vhe/C/usr" will show it to be an empty directory.
+This is because NFS allows access to separate file systems
+only if they are explicitly mounted.
+
+This directory can be used to do a 
+.I mount
+of the "/usr" file system of node C by doing the following on node A:
+.nf
+
+      mount  C:/usr  /vhe/C/usr
+
+.fi
+Now a
+.I ls
+of /vhe/C/usr on node A will show the contents of the "/usr" file system on
+node C.  When the
+.B /etc/vhe_list
+is created, care must be taken to list the "/" file system of a node
+before file systems contained in the "/" file system (if the "/" file
+system is being mounted).  For example:
+.DS
+
+     An improper ordering for /etc/vhe_list
+       C    /usr    /vhe/C/usr
+       C    /       /vhe/C
+
+     A proper ordering for /etc/vhe_list
+       C    /       /vhe/C
+       C    /usr    /vhe/C/usr
+
+.DE
+The reason for this is that if the 
+.I mount
+is done using "/vhe/C/usr", it will succeed and a 
+.I ls
+of "/vhe/C/usr" will show the contents of "/usr" as it should.  When the
+.I mount
+is done using "/vhe/C", it will also succeed, but now the mount point of
+"/vhe/C/usr" which is the directory "usr" inside the directory "/vhe/C" is
+inaccessible due to the mount and a 
+.I ls 
+of "/vhe/C/usr" will display nothing.  As a rule, mount file systems that
+are highest in the file hierarchy before mounting file systems that
+are found lower in the file hierarchy.  For file systems such as
+"/usr" and "/users" that are on the same level of file hierarchy,
+the order between them makes no difference.
+
+The problem is easily solved by
+listing in
+.B /etc/vhe_list
+the file systems in a manner similar to
+the order shown in the above example for 
+"proper ordering".  This is because the order of how the file systems
+are listed in
+.B /etc/vhe_list
+is the order that the mounts will be done by
+.B /\*(d+/vhe_mounter .
+
+
+The example grouping will be changed to show this complication of additional
+file systems:
+.DS
+
+   A         1 file system under "/"
+   B         2 file systems one under "/" 
+			    and one under "/users"
+   C         2 file systems one under "/" 
+			    and one under "/usr"
+   D         1 file system under "/"
+
+.DE
+The
+.B /etc/vhe_list
+would now contain the following:
+.DS
+
+      A        /        /vhe/A     
+      B        /users   /vhe/B/users
+      C        /        /vhe/C
+      C        /usr     /vhe/C/usr
+      D        /        /vhe/D     
+
+.DE
+When a node has multiple file systems, the system manager may choose
+to have all mounted (as with C) or only to have some of the
+file systems mounted (as with B).
+
+.H 2 "Effects on Configuration"
+Having multiple file systems on a node will not change how the home directories
+are updated for VHE.  Two entries in
+.B /etc/passwd
+will be shown.  The first user (ffm) will have a home node of B
+(having 2 file systems) and the second user (rdl) will have a
+home node of C (having 2 file systems).  The nodes will be from
+the example grouping.
+.DS
+
+   Before VHE configuration
+      ffm::120:200:fielding:/users/ffm:/bin/csh
+      rdl::121:100:Dave    :/users/rdl:/bin/csh
+
+   After VHE configuration
+      ffm::120:200:fielding:/vhe/B/users/ffm:/bin/csh
+      rdl::121:100:Dave    :/vhe/C/users/rdl:/bin/csh
+
+.DE
+For B, "/users" is its own file system and is mounted on the
+directory "/vhe/B/users".  This causes no change in the naming convention
+for the home directory.  The situation on C is a bit contrived.
+"/users" is located on the "/" file system, but there is also the
+"/usr" file system.  If the user rdl wanted to be able to change the
+default path name to his mail file from "/usr/mail/rdl" to 
+"/vhe/C/usr/mail/rdl" (in order to read mail under VHE), the "/usr"
+file system would have to be mounted.  This requires the "/"
+file system to be mounted on "/vhe/C" illustrating what was
+discussed previously about proper ordering.
+But there is no difference in how the
+password entries are updated.  
+
+.H 2 "NFS mounts in the Background"
+The 
+.B /\*(d+/vhe_mounter 
+file can be altered by the system administrator
+to allow mounts to be done in the background to ease the situation
+where not all nodes are ready to respond when a node tries to mount them.
+This can be done by editing the 
+.B /\*(d+/vhe_mounter 
+script.  There will be two lines containing the string "/etc/mount" in
+the script.  One is an executable line and the other is a comment.  The
+executable line is a mount command that does not use the background
+option while the comment line is a mount command that has the
+background option.  By
+making the executable line a comment (add a "#" to the beginning of the
+line) and uncommenting the other line (remove the "#" from 
+the beginning of the line),
+the NFS mount will continue to try in the background if it does not succeed
+at first.
+
+.H 2 "Unmounting file systems"
+When a node wants to unmount all of the remotely mounted file systems, the
+easiest method is the following:
+.nf
+
+      umount -a -t nfs
+
+.fi
+Just as having multiple file systems available for remote mounting
+required mounting to be done in 
+a specific order, unmounting file systems must be done in the
+proper order.  The order is just the reverse from the order that the
+.I mount 's
+were done.  The
+.I umount 
+command with the "-a -t" options will do this automatically.
+
+.H 2 "Altering the Grouping"
+Once the VHE grouping of nodes has been established, it may be desired
+to add or delete nodes from the grouping.  The first step would be to
+update the
+.B /etc/vhe_list 
+on the master Network Information Service (NIS) server.
+The system administrator should either remove file systems that will
+no longer be available (if a node is being deleted), or to add the
+new file systems (if a node is being added).  Then
+.I ypmake
+should be run 
+on the master NIS server
+to update the list for all of the nodes in the grouping.
+
+Each new node will need to have its 
+.B /etc/exports
+file updated to allow the current nodes in the grouping to
+mount its file system.  The
+.B /etc/exports
+file on the current codes in the grouping will also need updating
+to allow new nodes to mount their file systems.  For details on
+.B /etc/exports ,
+see the "NFS Configuration and Maintance" chapter of the
+.I
+Using and Administering NFS Services
+.R
+manual.
+
+Once the list is updated, the script 
+.B /\*(d+/vhe_update
+can be run
+on all of the nodes in the grouping.  
+It is executed in a fashion similar to that of 
+.I vhe_mounter :
+.DS
+
+   /\*(d+/vhe_update
+
+.DE
+The script will do a 
+.I mount 
+without parameters to get a list of which file systems have been mounted.
+The script will then compare that information with the information found
+in vhe_list to decide which new file systems to mount.
+The vhe_update script will not attempt to unmount a node to be deleted
+from the grouping.  This needs to be done explicitly by the
+system administrator.
+
+.H 2 "Network Information Service (NIS) and VHE"
+Administering an NFS grouping for VHE could be a bit cumbersome without
+the use of Network Information Service (NIS).
+It will be assumed that the nodes in the VHE grouping will be
+configured to use NIS.
+Network Information Service is used in a couple of ways with VHE.  First NIS 
+allows the creation and use of a central password file which is
+very important in maintaining a consistent view of the home
+directories for each node.  This is one of the traditional uses
+of NIS. NIS is also used in a custom fashion.  It keeps the list
+of nodes that make up the grouping.  This allows all of the nodes
+to do the same remote mounts (with the exception that each node
+does not do a mount of itself).  The list will be kept in the
+file 
+.B /etc/vhe_list .
+
+The use of NIS in both of these situations allows easier system
+administration.  
+In order for VHE to function, all of the nodes in the grouping need
+to have a consistent view of the
+.B /etc/passwd
+and
+.B /etc/vhe_list
+files.  Therefore the single versions of the files need to be kept on the
+node serving as the master NIS server.
+From the master NIS server, one can add/delete users,
+change their home node and directory and also add/delete nodes from
+the grouping.  Once the changes are made to the 
+.B /etc/passwd 
+and 
+.B /etc/vhe_list
+files, the changes can be made in the NIS maps and propagated to the
+slave NIS servers.  
+The
+.I ypmake 
+program is used to handle this propagation.
+
+Without NIS, both the 
+.B /etc/passwd
+and 
+.B /etc/vhe_list 
+files would
+have to be updated by more conventional methods.  These are discussed
+in the "NIS Configuration and Maintenance" chapter of the 
+.I 
+Using and Administering NFS Services
+.R
+manual.
+It is not recommended that VHE be configured without NIS.
+
+The NIS scripts that are used to propagate files from the master server
+to the slave servers are changed from the standard scripts that are
+given with the NFS product.  The changes were additions made to accommodate
+VHE.   The new scripts can do all of the functions that the standard scripts
+do.  In order to use the new versions, do the following:
+.DS
+
+     mv /usr/etc/yp/ypmake    /usr/etc/yp/ypmake.old
+     mv /usr/etc/yp/Makefile  /usr/etc/yp/Makefile.old
+     mv /usr/etc/yp/ypinit    /usr/etc/yp/ypinit.old
+
+     cp /\*(d+/ypmake    /usr/etc/yp/ypmake
+     cp /\*(d+/Makefile  /usr/etc/yp/Makefile
+     cp /\*(d+/ypinit    /usr/etc/yp/ypinit
+
+.DE
+
+.H 2 "Quick Checklist"
+The following is a checklist of the tasks that need to be done to
+get a group of nodes configured with VHE.
+.AL
+.LI
+Install the VHE file set on all of the nodes that will be in the grouping.
+.LI
+Put the new versions of the nis scripts from the
+.B /\*(d+
+directory into the
+.B /usr/etc/yp
+directory on the NIS master server and the NIS slave servers.
+.LI
+Decide what file systems are to be mounted and what the names
+of the mount point directories need to be.
+.LI
+Put the information from previous step into the
+.B /etc/vhe_list
+file on the master NIS server node.
+.LI
+Change the
+.B /etc/passwd
+file on the master NIS server node to have users' home directories contain
+the appropriate mount point directories.
+.LI
+Execute 
+.I ypmake
+on the master NIS server.
+.LI
+On each node of the grouping, execute
+.B /\*(d+/vhe_mounter .
+.LE
+
+
+.PH " 'VHE User Manual' 'Error Recovery' "
+.bp
+.nr P 1
+.H 1 "Error Recovery"
+
+There are several error conditions and they have different
+effects depending on when they occur.  Possible errors are:
+.AL
+.LI
+Node not mounted
+.LI
+Node got mounted, but has since gone down
+.LI
+Node not a member of the grouping for VHE.
+.LE
+
+.H 2 "Node not mounted"
+The situation of the node not being mounted can happen if
+.B /\*(d+/vhe_mounter
+is executed
+before the remote node is in a state to be able to respond
+to the mount.  When a user attempts to login and access the
+remote node, he will get a message from login stating that the
+home directory is not available. 
+
+There are two methods of
+dealing with this situation.  The first was discussed in the
+Human Interface section and involves giving the user the ability
+to cause a mount to be done.  
+
+The second means of dealing with this
+problem would be to have the 
+.I mount 's
+done in
+.B /\*(d+/vhe_mounter 
+performed with the background option.  The advantage of this would
+be that the
+.I mount 's
+would continue to try to contact the remote
+nodes until they powered up and responded.
+It would be recommended that this method
+should only be used when the number of nodes in the grouping is a
+small number (less than 15).  The reason for this is that the
+.I mount 's
+executing in the background would be taking up space in the
+process table until they get a reply.  If there were a large number of
+these background processes, it could affect the overall performance
+of the node.  If the system administrator is certain that all
+of the nodes would be powered up and responsive within a
+short time (in the range of 5 minutes), then he could use
+this method for a larger number.
+
+If a user attempts to login and finds that his home node is unavailable
+for NFS access, there is a way that he can still gain limited access to
+the node. This is done through the 
+.B /\*(d+/vhe_altlog 
+script.  More details on this can be found in the "Human Interface"
+section of this document.
+
+.H 2 "Node got mounted, but has since gone down"
+For the situation where a node got mounted, but then later went
+down, there are a couple of variations.  First the user could
+attempt to login to such a node and find that the login will not
+complete as the file system that contains the home directory is
+not accessible.  By using interruptible 
+.I mount 's
+in the 
+.B /\*(d+/vhe_mounter
+script, the user will be able to interrupt out of the login sequence
+and attempt to do something else.  He could always wait until the
+node came back on line at which point to login would finish and the
+user able to operate.  
+
+Another variation is simply where a node
+went down and then came back up before someone attempted a login
+that tried to access the node.  In this case, nothing would be
+noticed.
+
+If the user gets logged in and then has the remote node go down, he
+will hang as soon as he tries to access any remote file.  This access can
+also be done implicitly if the user has a remote directory as one of
+the components in his search path for his shell.
+He can again
+wait until the remote node is back up or interrupt the process.
+
+.H 2 "Node not a member of the grouping for VHE."
+Finally a user could attempt to use a login that referred to a node
+that was not a member of the grouping for VHE (i.e. not listed in
+.B /etc/vhe_list ).
+This condition would be displayed during the login attempt with a message
+stating that the login program is unable to access the home 
+directory associated with the user id.
+In this case, he would have to talk with the
+system administrator to get a login in 
+.B /etc/passwd
+that has been adapted for VHE and to have the appropriate node
+entered in the
+.B /etc/vhe_list
+file.
+
+
+
+.\ .PH " 'Document Title Page Header ' 'Preface ' "
+.\ .bp
+.\ .nr P 1
+.\ .H 1 "Preface"
+.\ 
+.\ This should be an area to expand the topics mentioned in the abstract.
+.\ 
+.\ .PH " 'Template for System Test Plan' 'Objectives' "
+.\ .bp
+.\ 
+.\ .nr P 1
+.\ .H 1 "Objectives"
+.\ 
+.\  The following is how to make a indented list with
+.\  "bullets" in front of each item. 
+.\ .BL
+.\ .LI
+.\ Your first test objective.
+.\ .LI
+.\ Your next test objective.
+.\ .LE
+.\ 
+
+.\ Now this will produce a table of contents
+.TC  
+
+
+@
+
+
+1.2
+log
+@Final copy ready for release
+@
+text
+@@
+
+
+1.1
+log
+@Initial revision
+@
+text
+@d221 1
+a221 2
+Enter the name of the node to mount followed by a <CR>
+A
+@

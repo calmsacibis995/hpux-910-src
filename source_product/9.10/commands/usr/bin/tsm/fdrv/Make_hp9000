@@ -1,0 +1,10 @@
+# Makefile for facet host kernel driver for HP 9000/300
+# @(#) $Header: Make_hp9000,v 66.2 90/09/20 12:20:25 kb Exp $
+MACH=		hp9000
+
+.DEFAULT:
+	@echo $< fdrv for $(MACH) done - nothing to do
+#		$(MAKE) $<
+all:
+	@echo make fdrv for $(MACH) done - nothing to do
+#		$(MAKE)

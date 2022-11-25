@@ -1,0 +1,23 @@
+#!/bin/sh
+##	@(#)Make_kern_2	$Revision: 1.11.109.1 $	$Date: 91/11/19 13:52:32 $
+#	Make_kern_2	--	second phase of the kernel make
+# Written by Darren D. Smith for NFS project
+# Make_kernel_2 -- do the rest of the overnight kernel stuff.
+# This is basically the kernel stuff that has to wait for the
+# build stuff on the other machines to complete......
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+#NOTE: get_kobjects will block until the remote machine completes compiling
+# or until it times out.
+
+get_kobjects >$nfs/log/get_kobjects 2>&1
+
+# Make a bfa kernel when requested, assuming that a fullbackup request
+# implies a complete build
+
+make_kbfa >$nfs/log/make_kbfa 2>&1 &
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

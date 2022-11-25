@@ -1,0 +1,8 @@
+$set 1
+1 sprayd: getsockname
+2 %s: couldn't create RPC server\n
+3 %s: couldn't register SPRAYPROG\n
+4 %s shouldn't reach this point\n
+5 couldn't reply to RPC call\n
+6 couldn't reply to RPC call\n
+7 couldn't reply to RPC call\n

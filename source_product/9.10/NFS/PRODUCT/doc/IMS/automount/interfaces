@@ -1,0 +1,237 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/interfaces,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:45 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "Interfaces"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Overview of Interfaces"
+
+The interfaces in this section are made up of a variety of types from
+system calls and log files to the mount table and automount map naming
+conventions.  The user and administrative interfaces are best explained
+in the automount [1M] man page and the HP "Installing and Administering
+NFS Services" manual.  The details are mainly provided for calls that
+automount makes.
+
+.H 2 "External Calls"
+
+.H 3 "/etc/mnttab"
+
+The contents of /etc/mnttab are described in the "Data Structures"
+section of this document.  This subsection explains the interface
+automount uses for updating this file.  See the getmntent[3X] man
+page for all the details.
+
+.nf
+ getmntent(3X)                                                 getmntent(3X)
+
+ NAME
+      getmntent, setmntent, addmntent, endmntent, hasmntopt - get file
+      system descriptor file entry
+
+ SYNOPSIS
+      #include <mntent.h>
+
+      FILE *setmntent(const char *path, char *type);
+
+      struct mntent *getmntent(FILE *stream);
+
+      int addmntent(FILE *stream, struct mntent *mnt);
+
+      char *hasmntopt(struct mntent *mnt, const char *opt);
+
+      int endmntent(FILE *stream);
+
+ DESCRIPTION
+
+      setmntent opens a file system description file and returns a file
+      pointer which can then be used with getmntent, addmntent, or
+      endmntent.  getmntent reads the next line from stream and returns
+      a pointer to an object with the following structure containing the 
+      broken-out fields of a line in the file system description file, 
+      <mntent.h>.
+
+	struct mntent {
+	   char      *mnt_fsname;   /* file system name */
+           char      *mnt_dir;      /* file system path prefix */
+           char      *mnt_type;     /* hfs, nfs, swap, or xx */
+           char      *mnt_opts;     /* ro, suid, etc. */
+           int       mnt_freq;      /* dump frequency, in days */
+           int       mnt_passno;    /* pass number on parallel fsck */
+           long      mnt_time;      /* When file system was mounted; */
+                                    /* see mnttab(4). */
+           cnode_t   mnt_cnode;     /* Cnode id from stat of mnt_fsname */
+	                            /* (0 for NFS) */
+        };
+
+      In the HP Clustered environment, the mnt_cnode field contains the
+      cnode id associated with the file system name named in the mnt_fsname
+      field unless the specified file system is of NFS type in which case
+      the mnt_cnode field is set to 0.  getmntent obtains the mnt_cnode
+      field for non-NFS type file systems by executing the stat(2) system
+      call and using the st_rcnode field of the stat structure.
+
+      addmntent adds the mntent structure mnt to the end of the open file
+      stream.  Note that stream must be opened for writing.  hasmntopt scans
+      the mnt_opts field of the mntent structure mnt for a substring that
+      matches opt.  It returns the address of the substring if a match is
+      found, 0 otherwise.  endmntent closes the file.
+.fi
+
+.H 3 "Kernel Mount Table"
+
+The details of this table are in the kernel and should stay there.  No
+attempt will be made to explain how this table is implemented.  However,
+it is nice to know that it exists and part of its function.
+
+The kernel mount table is the system's view of what file systems are
+currently mounted on the system.  Remember that /etc/mnttab is only a
+mirror image of this table and sometimes gets out of date.  Automount
+indirectly accesses the kernel mount table through two system calls
+vfsmount[2] and umount[2].  Automount's access of the table is indirect
+because that is not automount's primary purpose when making those calls.
+
+Automount calls vfsmount[2] to mount NFS file systems onto the existing
+file system hierarchy.  Please note that this call is made for both
+the automount mount points and real NFS mount points that are mounted
+automatically by automount.  This call has the effect of adding a new
+filesytem entry to the kernel file system table.  Here are some details
+on the vfsmount system call.  Please see the vfsmount[2] man page for
+the rest.
+
+.nf
+ vfsmount(2)                                                     vfsmount(2)
+
+ NAME
+      vfsmount - mount a file system
+
+ SYNOPSIS
+      #include <sys/mount.h>
+
+      int vfsmount(
+           int type,
+	   const char *dir,
+	   int flags,
+	   caddr_t data
+      );
+
+ DESCRIPTION
+      vfsmount attaches a file system to a directory.  After a successful
+      return, references to directory dir refer to the root directory of the
+      newly mounted file system.
+
+ The parameter data is a structure that is the key to how automount works.
+ Here is that structure:
+
+struct nfs_args {
+	struct sockaddr_in      *addr;          /* file server address */
+	fhandle_t               *fh;            /* File handle to be mounted */
+	int                     flags;          /* flags */
+	int                     wsize;          /* write size in bytes */
+	int                     rsize;          /* read size in bytes */
+	int                     timeo;          /* initial timeout in .1 secs */
+	int                     retrans;        /* times to retry send */
+	char                    *hostname;      /* server's name */
+	char                    *fsname;        /* server's fs path name */
+};
+.fi
+
+The key point referred to above is in the addr field.  Automount sets the
+IP address to the local host address and the UDP port number to that of the
+automount daemon.  Since the vfsmount call tells the kernel to mount the
+NFS file system being served at that address and port number, automount 
+becomes the NFS server.  All NFS/RPC traffic generated by the kernel goes
+through loop back to the automount daemon.
+
+Automount calls umount[2] to unmount NFS file systems from the current
+file system hierarchy.  Like vfsmount, this call is made for both real
+NFS mount points and automount mount points.  Umount[2], aside from
+unmounting the requested file system, also deletes the corresponding
+entry for the kernel mount table.  Here are some details on the umount 
+system call.  Please see the umount[2] man page for the rest.
+
+.nf
+ NAME
+       umount - unmount a file system
+
+ SYNOPSIS
+      #include <sys/mount.h>
+
+      int umount(const char *name);
+
+ DESCRIPTION
+      umount requests that a previously mounted file system contained on the
+      block special device identified by name be unmounted.  name is a
+      pointer to a path name.  After unmounting the file system, the
+      directory upon which the file system was mounted reverts to its
+      ordinary interpretation.
+
+      umount can also request that a file system mounted previously on the
+      directory identified by name be unmounted.  After unmounting the file
+      system, name reverts to its ordinary interpretation.
+.fi
+
+.H 3 "/usr/adm/syslog"
+
+Automount uses the system log file for error and status messages.  Here
+is the interface synopsis:
+
+.nf
+ syslog(3C)                                                       syslog(3C)
+
+  NAME
+	syslog, openlog, closelog, setlogmask - control system log
+
+ SYNOPSIS
+      #include <syslog.h>
+
+      int syslog(int priority, const char *message, int parameters, ...);
+
+      int openlog(const char *ident, int logopt, int facility);
+
+      int closelog(void);
+
+      int setlogmask(int maskpri);
+.fi
+
+Please see the syslog[3C] man page for more details.  Also note that the
+calls automount makes to syslog have been localized.  In other words the
+messages passed to syslog are taken from a message catalog.
+
+.H 2 "User/Administrative Interface"
+
+.H 3 "/etc/netnfsrc2"
+
+This is the script that starts automount at boot time.  This script
+must be modified to use any command line options or to specify map
+or master files other than those represented by the NIS auto.master
+file.  See the "Internals" section of this document for details on
+on how this script works with diskless clusters.
+
+.H 3 "/tmp_mnt"
+
+This is simply the default directory to mount the real NFS mount points
+under.  It's value is changed through the -M command line option.  See
+the automount[1M] man page or the "Installing and Administering NFS 
+Services" manual.
+
+.H 3 "auto.master"
+
+This is the NIS automount master file that automount automatically
+references if available.  It can be ignored by using the -m command line
+option.  See the automount[1M] man page or the "Installing and Administering
+NFS Services" manual.
+
+.H 3 "/etc/auto.*"
+
+Automount maps are usually named auto.* where * is a name that describes the
+contents of the map file.  Maps are usually placed in the /etc directory or
+in /etc/auto.config if there are a lot of automount maps.  Automount
+gets these map file names from the NIS auto.master, a local auto.master and
+from the command line.  Automount maps can be named just about anything;
+these are just the normal conventions.  See the automount[1M] man page or 
+the "Installing and Administering NFS Services" manual for details on
+automount maps and the special maps -passwd, -hosts and -null.

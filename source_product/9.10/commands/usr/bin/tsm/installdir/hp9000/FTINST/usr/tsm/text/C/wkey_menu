@@ -1,0 +1,43 @@
+############################################################################
+# TSM user customizable file: wkey_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# per-session key menu for TSM
+# @(#) $Header: wkey_menu,v 66.4 90/11/21 17:33:01 jag Exp $
+
+pull_down_menu
+
+item_name=Re-load function keys with TSM defaults      $tsm_hot_keyk+
+item_selection=R
+item_type=ft_command
+item_action=#*k+\r
+
+item_name=load function keys with terminal Defaults    $tsm_hot_keyk-
+item_selection=D
+item_type=ft_command
+item_action=#*k-\r
+
+item_name=load function keys from File...
+item_selection=F
+item_type=ft_command
+item_action=#*k$0\r
+dialog_box
+dialog_item_prompt Function key file name:
+dialog_item_var $0 40

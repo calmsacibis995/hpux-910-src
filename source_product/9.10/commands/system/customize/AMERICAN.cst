@@ -1,0 +1,16 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+fileset=AMERICAN
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+exit $exitval

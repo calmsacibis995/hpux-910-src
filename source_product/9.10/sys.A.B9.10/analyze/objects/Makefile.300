@@ -1,0 +1,496 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_800/analyze/objects/RCS/Makefile.300,v $
+# $Revision: 1.8.83.4 $	$Author: kcs $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/03/07 09:14:55 $
+#
+#  Use the latest header files in this directory (if used in INC line below)
+# ROOT=.
+#  
+# Name analyze prints at startup. Must be commented out for integration!!!
+#ST_VERSION ="INTERNAL_VERSION_xxx"
+#
+# Possibly effect where header fles come from (if used it in INC line below)
+#HDRRREV=3.0.7
+#
+
+ROOT=
+NETROOT=../net
+IOROOT=../io
+STDROOT=../standard
+DEBROOT=../debrec
+SOMROOT=../somaccess
+MANROOT=../manpage
+LNKROOT=../link
+GRAMROOT=../grammar
+RM=/bin/rm
+MFILE=Makefile.300
+
+#
+# ONE:  Choose the correct INC line
+#
+# INC=${IDIRS} 
+# used by IND 
+# INC=-I${SYS} 
+# INC=-I${ST_SYS} -I.
+# INC=-I${ROOT}/usr/include
+# INC=-I/mnt/dux/root.port/yoursystem -I.
+INC=-I../../Filesets/BUILDENV/usr/include
+
+# link sys in the object directory to the h directory
+# cd objects; ln -s /mnt/dux/root.port/yoursystem/h sys
+#
+# TWO:
+# Do the following to get the right include files if BUILDINGFROMH:
+# cd objects; ln -s /mnt/dux/root.port/yoursystem/h sys
+#
+PRINTWARN:
+	@echo
+	@echo Do not forget to ln -s your kernel h directory to analyze/objects/sys 
+	@echo See instructions in makefile
+	@echo
+	@echo Copy sitemap.h and protocol.h from your dux directory to your kernel
+	@echo sys directory sorry about this its being worked out
+	@echo
+	@echo Be sure to check the IDENT line from your kernel
+	@echo
+# CC    = /bin/cc -t pc2,/lib/ -t a,/bin/as20
+CC    = /bin/cc 
+INCLUDES = /usr/local/bin/includes 
+INCOPTS = -do
+#  S300 flags Need HFS 
+CFLAGS = ${INC} -Wc,-Nd3500,-Ns3500 -Wp,-H250000 $(COPTS) -Dhp-ux -Dhp9000s300 -Dhp9000s200 -D__hp9000s300 -D__hp9000s200 -DWOPR  -DMANX -DHFS  -DNFS -DMOREFILES -D_HPUX_SOURCE
+LEX    = /usr/bin/lex
+
+
+#
+# THREE: If want networking then.
+# Set NETWORK=-DNETWORK and uncomment NETSRC and NETOBJ
+# to turn on networking code 
+#
+# Network files, not necessary
+# For extra NS debug set -DNS_MBUF_QA
+#NETWORK= -DNETWORK -DLAN
+#NETHDR= ${NETROOT}/net.h ${NETROOT}/netkludge.h
+#NETSRC= ${NETROOT}/net.c ${NETROOT}/netdump.c ${NETROOT}/netget.c \
+	${NETROOT}/netscan.c ${NETROOT}/netvfy.c ${NETROOT}/pty.c \
+ 	${NETROOT}/netdump2.c ${NETROOT}/netmux.c ${NETROOT}/netlist.c
+
+#NETOBJ= net.o netdump.o netget.o \
+	netscan.o netvfy.o pty.o \
+	netdump2.o netmux.o netlist.o
+
+#
+# FOUR: If want debug (800 only) then.
+#
+#Debug files , not necessary  
+#DEBWORK= -DDEBREC -DXDB -DSYSIIIOS -DHPSYMTABII -DNLS -DHFS -DNFS
+#DEBHDR= ${DEBROOT}/symtab.h ${DEBROOT}/sym.h ${DEBROOT}/ty.h \
+	${DEBROOT}/basic.h  ${DEBROOT}/cdb.h ${DEBROOT}/macdefs.h \
+	${DEBROOT}/somaccess.h ${DEBROOT}/ext.h ${DEBROOT}/dnttsizes.h
+
+#DEBSRC= ${DEBROOT}/xdbmain.c ${DEBROOT}/fa_unwind.c ${DEBROOT}/format.c \
+	${DEBROOT}/init.c ${DEBROOT}/initcore.c ${DEBROOT}/initsym.c \
+	${DEBROOT}/sym.c ${DEBROOT}/ty.c ${DEBROOT}/slt.c ${DEBROOT}/xdbglue.c \
+	${DEBROOT}/files.c ${DEBROOT}/var.c ${SOMROOT}/somacc.c
+
+#DEBOBJ= xdbmain.o fa_unwind.o format.o \
+	init.o initcore.o initsym.o \
+	sym.o ty.o slt.o xdbglue.o \
+	files.o var.o somacc.o
+
+#
+# FIVE: Must choose standard, Pick correct line
+#
+# The core files must be on!
+#STDWORK= -DMP -DPREEMPTISR -DANALYZE
+#STDWORK= 
+STDWORK= -DREGION
+
+STDHDR= ${STDROOT}/inc.h ${STDROOT}/defs.h ${STDROOT}/externs.h \
+	${STDROOT}/types.h ${STDROOT}/unwind.h ${STDROOT}/dnlc.h
+
+STDSRC= ${STDROOT}/analyze.c ${STDROOT}/analyze1.c ${STDROOT}/version.c \
+	${STDROOT}/scan.c ${STDROOT}/scan1.c ${STDROOT}/log.c ${STDROOT}/get.c \
+	${STDROOT}/dump.c ${STDROOT}/dump2.c ${STDROOT}/symbol.c \
+	${STDROOT}/display.c ${STDROOT}/find.c ${STDROOT}/trace.c \
+	${STDROOT}/dux.c ${STDROOT}/vfd.c ${STDROOT}/qfs.c
+
+STDOBJ= analyze.o analyze1.o version.o \
+	scan.o scan1.o log.o get.o \
+	dump.o dump2.o symbol.o \
+	display.o find.o trace.o dux.o vfd.o qfs.o
+
+STDOBJA= ana.o getl.o symbol.o  dumpa.o
+
+STDOTEST= sqr.o
+
+#
+# SIX: Are you debugging across a parallel card, probably not do not
+#      uncomment these.
+# RDB link version, will run on series 300 across parrallel card
+#LNKWORK= -Dspectrum -DBOBCAT
+#RDBGPIO = -Dold300
+#LNKHDR= ${LNKROOT}/ddbStd.h ${LNKROOT}/ddbCons.h ${LNKROOT}/doio.h
+#LNKSRC= ${LNKROOT}/doio.c ${LNKROOT}/rdbgpio.c ${LNKROOT}/gpiotalker.c
+#LNKOBJ= doio.o rdbgpio.o gpiotalker.o
+
+#
+# SEVEN: If you want IO debug services uncomment these (800 only)
+#
+# Prerelease 2.2 kernels must use -DOLDIOSERV. 
+#
+#IOWORK= -Diostuff -DOLDIOSERV
+#IOWORK= -Diostuff
+#IOHDR= ${IOROOT}/an_io.h ${IOROOT}/aio.h ${IOROOT}/mgr_decode.h
+#IOSRC= ${IOROOT}/an_ioserv.c ${IOROOT}/aio_rtns.c ${IOROOT}/an_cio_ca0.c \
+	${IOROOT}/an_hpib0.c ${IOROOT}/mgr_handlr.c\
+	${IOROOT}/an_lpr10.c ${IOROOT}/an_lpr11.c ${IOROOT}/an_lpr0.c\
+	${IOROOT}/an_disc1.c 
+
+#IOOBJ= an_ioserv.o aio_rtns.o an_cio_ca0.o \
+	an_hpib0.o mgr_handlr.o an_lpr10.o an_lpr11.o an_lpr0.o an_disc1.o
+
+# EIGHT : Choose correct KERNEL defines if special flags enabled in kernel
+#	Typically just pull in kernel IDENT line. Empty when compiling from
+#	/usr/include
+IDENT=
+
+#
+# NINE : Choose correct options.
+#
+# Releases (see rel.h):
+# define R12 for release 12 and later, BUILDFROMH to get right include files
+# define REL7 for Release 7.0  
+CDEFS = -DREL3 -DREL7 -DBUILDFROMH ${NETWORK} ${DEBWORK} ${STDWORK} ${IOWORK} ${LNKWORK} ${IDENT}
+#CDEFS = -DREL3 -DREL7 ${NETWORK} ${DEBWORK} ${STDWORK} ${IOWORK} ${LNKWORK} ${IDENT}
+#
+#
+# Use old300 for series 300 5.17
+# RDBFLAGS = -Dspectrum -DBOBCAT
+# RDBGPIO = -Dold300
+
+.c.o:
+	@$(RM) -f $@
+	$(CC) $(CFLAGS) $(LCFLAGS) $(CDEFS) -c $<
+
+SRC = ${STDSRC} ${DEBSRC} ${IOSRC} ${NETSRC} ${LNKSRC} 
+
+OBJANA = ${STDOBJA} 
+
+OBJ = ${STDOBJ} ${DEBOBJ} ${IOOBJ} ${NETOBJ} ${LNKOBJ} 
+
+PRINTSRC = ${STDHDR} ${STDSRC} ${DEBHDR} ${DEBSRC} ${IOHDR} ${IOSRC} \
+	${NETHDR} ${NETSRC} ${LNKHDR} ${LNKSRC} Makefile ${GRAMROOT}/gram.y \
+	${GRAMROOT}/lexsrc.l
+
+all: preanalyze analyze
+
+test: sqr
+
+preanalyze:
+	@$(RM) -f tmp_v.h;					\
+	echo '#define VERSIONID "'$(ST_VERSION)'"' > tmp_v.h;	\
+	if cmp -s tmp_v.h version.h 2>&1; then			\
+	    : version.h is up to date;				\
+	else							\
+	    $(RM) -f version.h;					\
+	    cp tmp_v.h version.h;				\
+	fi;							\
+	$(RM) -f tmp_v.h
+
+install:
+	${INS} analyze
+
+analyze.quiet: preanalyze y.tab.o ${OBJ}
+	@$(RM) -f analyze
+	${CC} ${CFLAGS} ${LCFLAGS} ${LDFLAGS} y.tab.o ${OBJ} -ll -o analyze
+
+analyze: PRINTWARN preanalyze y.tab.o ${OBJ}
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${LDFLAGS} y.tab.o ${OBJ} -ll -o analyze
+
+sqr: ${STDOTEST}
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${LDFLAGS}  ${STDOTEST} -ll -o sqr
+
+ana:    ${OBJANA}
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${LDFLAGS}  ${OBJANA} -ll -o ana
+
+lint:
+	lint y.tab.c ${SRC}
+
+man: 
+
+tar:
+	tar cv ${SRC}
+
+print:
+	pr -f ${PRINTSRC} | lp
+
+clean:
+	touch junk.o
+	$(RM) -f *.o
+	$(RM) -f y.output
+	$(RM) -f y.tab.c y.tab.h lex.yy.c
+
+cleanio:
+	$(RM) -f ${IOOBJ}
+
+cleanstd:
+	$(RM) -f ${STDOBJ}
+
+cleannet:
+	$(RM) -f ${NETOBJ}
+
+cleanlnk:
+	$(RM) -f ${LNKOBJ}
+
+cleandeb:
+	$(RM) -f ${DEBOBJ}
+
+clobber: clean
+	$(RM) -f analyze
+
+depend: y.tab.c lex.yy.c
+	@$(RM) -f $(MFILE).bak
+	cp $(MFILE) $(MFILE).bak
+	@$(RM) -f $(MFILE)
+	sed "/^# DO NOT DELETE THIS LINE/q" $(MFILE).bak > $(MFILE)
+	${INCLUDES} ${INCOPTS} ${CFLAGS} ${LCFLAGS} ${SRC} y.tab.c lex.yy.c >> $(MFILE)
+
+# GRAMMAR FILES
+y.tab.o: lex.yy.c y.tab.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c y.tab.c
+
+y.tab.c: ${GRAMROOT}/gram.y
+	@$(RM) -f $@
+	yacc -dv ${GRAMROOT}/gram.y
+
+lex.yy.c: ${GRAMROOT}/lexsrc.l
+	@$(RM) -f $@
+	${LEX} -Xa5000 ${GRAMROOT}/lexsrc.l
+
+# NETWORK FILES
+net.o: ${NETROOT}/net.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/net.c
+
+netdump.o: ${NETROOT}/netdump.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netdump.c
+
+netdump2.o: ${NETROOT}/netdump2.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netdump2.c
+
+netmux.o: ${NETROOT}/netmux.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netmux.c
+
+netget.o: ${NETROOT}/netget.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netget.c
+
+netscan.o: ${NETROOT}/netscan.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netscan.c
+
+netvfy.o: ${NETROOT}/netvfy.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netvfy.c
+
+pty.o: ${NETROOT}/pty.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/pty.c
+
+netlist.o: ${NETROOT}/netlist.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${NETROOT}/netlist.c
+
+# DEBREC FILES
+xdbmain.o: ${DEBROOT}/xdbmain.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/xdbmain.c
+
+xdbglue.o: ${DEBROOT}/xdbglue.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/xdbglue.c
+
+fa_unwind.o: ${DEBROOT}/fa_unwind.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/fa_unwind.c
+
+format.o: ${DEBROOT}/format.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/format.c
+
+init.o: ${DEBROOT}/init.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/init.c
+
+initsym.o: ${DEBROOT}/initsym.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/initsym.c
+
+initcore.o: ${DEBROOT}/initcore.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/initcore.c
+
+sym.o: ${DEBROOT}/sym.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/sym.c
+
+ty.o: ${DEBROOT}/ty.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/ty.c
+
+slt.o: ${DEBROOT}/slt.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/slt.c
+
+files.o: ${DEBROOT}/files.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/files.c
+
+var.o: ${DEBROOT}/var.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${DEBROOT}/var.c
+
+somacc.o: ${SOMROOT}/somacc.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${SOMROOT}/somacc.c
+
+# STANDARD FILES
+analyze.o: ${STDROOT}/analyze.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/analyze.c
+
+ana.o:  ${STDROOT}/ana.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/ana.c
+
+sqr.o:  ${STDROOT}/sqr.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/sqr.c
+
+analyze1.o: ${STDROOT}/analyze1.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/analyze1.c
+
+version.o: ${STDROOT}/version.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/version.c
+
+scan.o: ${STDROOT}/scan.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/scan.c
+
+scan1.o: ${STDROOT}/scan1.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/scan1.c
+
+log.o: ${STDROOT}/log.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/log.c
+
+get.o: ${STDROOT}/get.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/get.c
+
+getl.o: ${STDROOT}/get.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/getl.c
+
+dump.o: ${STDROOT}/dump.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/dump.c
+
+dumpa.o: ${STDROOT}/dumpa.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/dumpa.c
+
+dump2.o: ${STDROOT}/dump2.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/dump2.c
+
+symbol.o: ${STDROOT}/symbol.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/symbol.c
+
+vfd.o: ${STDROOT}/vfd.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/vfd.c
+
+qfs.o: ${STDROOT}/qfs.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/qfs.c
+
+display.o: ${STDROOT}/display.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/display.c
+
+find.o: ${STDROOT}/find.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/find.c
+
+trace.o: ${STDROOT}/trace.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/trace.c
+
+dux.o: ${STDROOT}/dux.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${STDROOT}/dux.c
+
+# LINK FILES (series 300 parallel card link)
+doio.o: ${LNKROOT}/doio.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${LNKROOT}/doio.c
+
+rdggpio.o: ${LNKROOT}/rdbgpio.c
+	@$(RM) -f $@
+	cc ${RDBFLAGS} ${RDBGPIO} -c ${LNKROOT}/rdbgpio.c
+
+gpiotalker.o: ${LNKROOT}/gpiotalker.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${LNKROOT}/gpiotalker.c
+
+# IO FILES
+an_ioserv.o: ${IOROOT}/an_ioserv.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_ioserv.c
+
+aio_rtns.o: ${IOROOT}/aio_rtns.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/aio_rtns.c
+
+an_lpr10.o: ${IOROOT}/an_lpr10.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_lpr10.c
+
+an_lpr11.o: ${IOROOT}/an_lpr11.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_lpr11.c
+
+an_lpr0.o: ${IOROOT}/an_lpr0.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_lpr0.c
+
+an_cio_ca0.o: ${IOROOT}/an_cio_ca0.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_cio_ca0.c
+
+an_hpib0.o: ${IOROOT}/an_hpib0.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_hpib0.c
+
+an_disc1.o: ${IOROOT}/an_disc1.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/an_disc1.c
+
+mgr_handlr.o: ${IOROOT}/mgr_handlr.c
+	@$(RM) -f $@
+	${CC} ${CFLAGS} ${LCFLAGS} ${CDEFS} -c ${IOROOT}/mgr_handlr.c
+
+# DO NOT DELETE THIS LINE -- make depend depends on it

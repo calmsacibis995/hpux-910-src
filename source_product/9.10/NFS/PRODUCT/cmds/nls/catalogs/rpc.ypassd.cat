@@ -1,0 +1,26 @@
+$set 1
+1 Usage:\t%s passwd_file [-l log_file] [-m [arg1 arg2 ...]]\n\n\ where\tpasswd_file is the full pathname of the ASCII passwd file from which\n\ \t   the passwd map is built\n\ \t-m specifies that after file is updated, ypmake should be run with\n\ \t   the optional arguments; all arguments after -m are passed to ypmake\n
+2 %s:  can't write %s; it must be writable.\n
+3 %s:  can't bind to a privileged socket\n
+4 %s:  couldn't create an RPC server\n
+5 Couldn't register %s with portmap.\n\tIs portmap running?\n
+6 svc_run shouldn't have returned
+7 NULLPROC couldn't reply to RPC call
+8 No passwd for %s
+9 %s:  bad passwd
+10 Password file busy - try again
+11 Fdopen of %s failed
+12 Fopen of %s failed
+13 Couldn't reply to RPC call\n
+14 socket
+15 Socket:  all ports in use
+16 The log file \"%s\" cannot be opened.\n%s aborted.\n
+17 %s:  can't read %s; it must be readable.\n
+18 Error opening %s:  errno = %d
+19 Error renaming %s to %s:  errno = %d
+20 Passwd for %s contains a colon or newline
+21 No passwd entry for %s
+22 Bad passwd for %s
+23 New passwd for %s
+24 Encrypted passwd for %s too long. Truncated to MAXPWLEN (22) chars\n
+25 A ypmake is running now\nSet flag to run new ypmake after the current ypmake dies\n

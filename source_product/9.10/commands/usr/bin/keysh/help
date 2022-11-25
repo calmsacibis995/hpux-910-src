@@ -1,0 +1,966 @@
+softkey help
+{
+  option using_help
+  help ".p
+        \"--More--\" at the bottom of a help screen indicates
+        that the help is more than one screen long.  To continue
+        reading, press the space bar.
+        .p
+        Online help is available for all pre-configured softkeys
+        and their options.  These softkeys are listed
+        in the help topics \"Visibles\" and \"Invisibles\".
+        .p
+        Help is also available for the following general topics:
+        .ip * 5
+        Using keysh -- How to use Key Shell.  .br
+        .ip * 5
+        Editing -- Editing the Key Shell command line.  .br
+        .ip * 5
+        Visibles -- Visible softkeys, which appear on the
+        top-level softkey menus.  .br
+        .ip * 5
+        Invisibles -- Invisible softkeys, which do not
+        appear on the top-level softkey menus.  If you type an
+        invisible softkey command, Key Shell displays appropriate
+        softkey options.  .br
+        .ip * 5
+        Keysh errors -- Key Shell error messages.  .br
+        .ip * 5
+        Regexp_patterns -- Regular expressions and pattern matching.  .br
+        .ip * 5
+        Redirect_pipe -- Command input/output redirection and piping.
+        .p
+        The following list explains how to get help:
+        .ip * 5
+        For help on a general topic, select \"--Help--\"
+        \"--Help-- (topics)\", then select a topic softkey.
+        .ip * 5
+        For help on a visible softkey command or softkey option BEFORE
+        you have selected the softkey, select \"--Help--\",
+        then select the softkey for which you want help.
+        .ip * 5
+        For help on a visible softkey command or softkey option AFTER
+        you have selected the softkey, select \"--Help--\", then
+        press \"Return\".
+        .ip * 5
+        For help on an invisible softkey command, type the command.
+        Select \"--Help--\", then press \"Return\".
+        .p
+        The help for each softkey command includes the
+        line \"For more information, refer to
+        <command>(#).\"  <command> is the HP-UX
+        equivalent of the softkey command.  (#) is the
+        section of the HP-UX Reference in which the
+        command entry is located (usually 1).
+        .p
+        You can find command entries in the \"HP-UX
+        Reference\" manual.
+        If you cannot find an entry in the
+        HP-UX Reference manual where
+        you expect it to be, use the index.
+        You can also find entries online with the
+        \"Manual page\" softkey or the \"man\"
+        command.  For example, to see the entry for the
+        \"cp\" command, select \"Manual page\", then type
+        \"cp\".  Or, type \"man cp\".
+        .p
+        To exit a help screen, press \"q\".
+        .p"
+  ;
+  option Using_keysh
+  hint ""
+  help ".p
+        This help topic provides general guidelines
+        for using Key Shell:
+        .ip * 5
+        Select softkeys by pressing
+        the corresponding function key on your keyboard, or
+        by clicking on the softkey with your mouse.
+        .ip * 5
+        Always select softkeys from left to right.
+        .p
+        Do not attempt to insert words or options out of order
+        in the command line.
+        .ip * 5
+        Build commands by selecting softkey commands and
+        options, or by typing HP-UX commands and options.  Do not
+        mix HP-UX options and softkey
+        options on the same command line.
+        .ip * 5
+        Follow the prompt messages describing required actions.
+        .ip * 5
+        To see additional softkey commands or options, use the
+        \"--More--\" softkey.  This softkey toggles through the banks of
+        softkeys, showing your position.
+        .ip * 5
+        Option softkeys insert the corresponding command or
+        option into the command line.
+        
+        For example, selecting the \"Change dir\" softkey inserts
+        Change_dir into the command line.
+        .ip * 5
+        Enter your own text for string softkeys.  String softkeys (or parameter
+        softkeys) are enclosed in angle brackets, and
+        indicate that you need to type text on the command line for
+        that parameter or string (such as a user name or file name).
+                
+        For example, for the softkey \"<file>\" you would type a
+        file name.
+        .ip * 5
+        If you make a mistake, use the \"Back space\" key to
+        back up past the error and fix it.  You can also
+        edit the command line with the keyboard editing keys
+        and arrow keys.  For more information, refer to the
+        section titled \"Editing the Command Line\" in the
+        \"Getting Started with Key Shell\" chapter in the
+        \"Shells: User's Guide\" manual.
+        .ip * 5
+        To see a softkey command translated into HP-UX
+        syntax before being executed, use the \"Insert line\" key.  (If you do
+        not have an \"Insert line\" key, use the \"Tab\" key.)
+                
+        .ip * 5
+        To execute the command directly, use the \"Return\" key.
+        After you execute a command you will remain on the
+        current key bank, unless you set the $KEYMORE
+        variable.  Refer to the
+        section titled \"Setting Shell Variables\" in the
+        \"Getting Started with Key Shell\" chapter in the
+        \"Shells: User's Guide\" manual.
+        .ip * 5
+        To cancel a command, press the \"Delete line\" key.
+        .ip * 5
+        If you encounter errors while using Key Shell, refer to the help
+        topic \"Keysh errors\".
+        .p
+        To determine if a softkey command you have entered is complete and
+        can be executed, look for the following cues:
+        .ip * 5
+        Check that Key Shell is not displaying a prompt message
+        that describes a required action, such as \"Enter the name of
+        the file.\"
+        .ip * 5
+        (Optional.) Press the \"Insert line\" key to translate the
+        command to HP-UX syntax.  Key Shell will display a prompt and
+        refuse to translate the
+        command if the command is incomplete.
+        .ip * 5
+        Press \"Return\" to execute the command.
+        Key Shell will display a prompt and refuse to execute the
+        command if the command is incomplete.
+        .p
+        Note that you can press \"Return\" or \"Insert line\"
+        regardless of the cursor's position on the command line."
+  ;
+  option editing
+  help ".p
+        This help topic describes the Key Shell command
+        line and how to edit it.
+        .p
+        You can build commands in Key Shell either by using the softkeys
+        or by typing HP-UX commands and options (as
+        described in the help topics \"visibles\" and \"invisibles\").
+        After completing a softkey command, press \"Insert line\" to
+        see the command translated into HP-UX syntax.
+        .p
+        Key Shell allows extensive command line editing to
+        correct mistakes.  You can edit either of two command lines:
+        .ip * 5
+        The readable command line that you built by using the softkeys.
+        .sp
+        To edit this command line even after translating
+        it to HP-UX syntax, press the \"up arrow\" key to retrieve
+        the line from the command buffer.
+        .ip * 5
+        The HP-UX command line that you typed, or that appeared when
+        you pressed \"Insert line\" after building a softkey command line.
+        .p
+        Key Shell supports the Korn Shell command line editing modes,
+        such as \"vi\" mode.  (Refer to the chapter titled
+        \"Editing Command Lines\" in the \"ksh: The
+        Korn Shell\" section of the \"Shells: User's Guide\" manual.)
+        .p
+        You can also edit the command line by using the cursor movement
+        and editing keys listed below.
+        .p
+        Use caution when mixing \"vi\" and key editing on the same
+        command line.  Key editing does not affect the \"vi\" editing
+        mode.
+        .p
+        .in 2
+        .ti 10
+        EDITING KEYS
+                        
+        .ip KEY 15
+        FUNCTION
+                        
+        .ip \"Back space\" 15
+        Backs the cursor up on the command line, deleting
+        one character at a time.  The available softkey
+        options will change to reflect your position on the command line.
+        .ip \"Clear display\" 15
+        Clears the screen and command line.  If the screen is scrolled,
+        it clears from the cursor position to the end of the command line.
+        .ip \"Clear line\" 15
+        Clears from the cursor position to the end of the line.
+        .ip \"Delete line\" 15
+        Cancels the command.
+        .ip \"Insert line\" 15
+        Translates the readable softkey command line to the equivalent HP-UX
+        command line.
+                        
+        .ip KEY 15
+        FUNCTION
+        .ip \"Delete char\" 15
+        Deletes the character under the cursor.
+        .ip \"Insert char\" 15
+        Toggles between insert and overwrite modes.
+        .ip \"Up arrow\" 15
+        Recalls the previous command from the command history buffer.
+        .ip \"Down arrow\" 15
+        Recalls the next command from the command history buffer.
+        .ip \"Left arrow\" 15
+        Moves the cursor left.
+        .ip \"Right arrow\" 15
+        Moves the cursor right.
+                        
+        .ip KEY 15
+        FUNCTION
+        .ip \"Home\" 15
+        Moves the cursor to the beginning of the command line.
+        .ip \"Shift-Home\" 15
+        Moves the cursor to the end of the command line.
+        .ip \"Tab\" 15
+        If no \"Insert line\" key is present, performs the \"Insert line\"
+        function.
+        Otherwise, if no \"--Help--\" softkey is present,
+        performs the help function.
+        Otherwise, performs the normal tab function.
+        .ip \"Shift-Tab\" 15
+        Moves the cursor to the beginning of the previous word.
+        .ip \"CTRL-L\" 15
+        Redraws the lower lines of the screen and restores any necessary
+        terminal modes.
+        .in -2"
+  ;
+                  
+  option visibles
+  help ".p
+        This help topic describes visible
+        softkey commands.  It includes a list
+        of all available commands.
+        .p
+        The pre-configured softkey commands shown on the top-level softkey
+        menu banks
+        are called the \"visible\" softkeys.  These softkeys are listed in
+        the table below.
+        .p
+        To use them, select the
+        softkey command, then select any options.  Always select
+        softkeys from left to right.
+        .p
+        Press \"Return\" to execute the command, or
+        \"Insert line\" to see the command translated into
+        HP-UX syntax.  Key Shell notifies you if you forget to supply
+        any required information.
+        .p
+        .in 2
+        .ti 10
+        VISIBLE SOFTKEYS
+        .ip \"SOFTKEY           HP-UX EQUIVALENT\" 38
+        FUNCTION
+        .p
+        .ip \"Mail              mailx\" 38
+        Processes electronic mail interactively.
+        .il \"Change dir        cd\" 38
+        Changes current directory.
+        .il \"List files        ls\" 38
+        Lists contents of a directory.
+        .il \"Edit file         vi\" 38
+        Edits files on a screen-oriented display.
+        .il \"Display files     more\" 38
+        Displays the contents of a file one screen at a time.
+        .il \"Print files       pr | lp\" 38
+        Formats a file and sends it to the line printer.
+        .p
+        .ip \"SOFTKEY           HP-UX EQUIVALENT\" 38
+        FUNCTION
+        .p
+        .il \"Search lines      grep\" 38
+        Searches for lines matching a pattern.
+        .il \"Sort lines        sort\" 38
+        Sorts the lines of a file.
+        .il \"Find files        find\" 38
+        Locates files within a directory.
+        .il \"Copy files        cp\" 38
+        Copies files to another location.
+        .il \"Move files        mv\" 38
+        Moves or renames a file.
+        .il \"Set file attribs  chmod chown chgrp\" 38
+        Changes permissions, owner, or group of a file.
+        .p
+        .ip \"SOFTKEY           HP-UX EQUIVALENT\" 38
+        FUNCTION
+        .p
+        .il \"Remove files      rm\" 38
+        Deletes a file.
+        .il \"Remove dirs       rmdir\" 38
+        Deletes a directory.
+        .il \"Create dirs       mkdir\" 38
+        Creates a new directory.
+        .il \"Shell archive     shar\" 38
+        Bundles one or more files into a shell archive package for
+        mailing or moving.
+        .il \"Print status      lpstat\" 38
+        Shows current status of all printers.
+        .il \"Cancel print      cancel\" 38
+        Cancels a print request.
+        .p
+        .ip \"SOFTKEY           HP-UX EQUIVALENT\" 38
+        FUNCTION
+        .p
+        .il \"Process info      ps\" 38
+        Shows status of active processes.
+        .il \"Kill process      kill\" 38
+        Terminates a process.
+        .il \"Manual page       man\" 38
+        Accesses the online manual pages.
+        .il \"Keysh_config      kc\" 38
+        Configures the appearance and behavior of Key Shell.
+        .in -2
+        .sp"
+  ;
+  option invisi+bles
+  help ".p
+        This help topic describes invisible
+        softkey commands.  It includes a list
+        of all available commands.
+        .p
+        Invisible softkey commands are common HP-UX
+        commands for which softkey options are available.  These
+        commands are listed in the table below.
+        These commands do not show up on the softkey
+        menus, but if you type one of them, Key Shell
+        will recognize it and display the appropriate softkey options.
+        .p
+        To use these invisible softkey commands, type a
+        recognized HP-UX command.  Key Shell
+        will display the softkey options for the command.
+        Select any softkey options.
+        Always select softkeys from left to right.
+        .p
+        Then press \"Return\" to execute the command, or
+        press \"Insert line\" to see the command translated into
+        HP-UX syntax.  Key Shell notifies you if you forget to supply
+        any required information.
+        .p
+        .in 2
+        .ti 10
+        INVISIBLE SOFTKEY COMMANDS
+        .ip SOFTKEY 12
+        FUNCTION
+                        
+        .ip adjust 12
+        Performs simple text formatting.
+        .il ar 12
+        Creates and maintains library archives.
+        .il bdf 12
+        Displays free disk space.
+        .il cal 12
+        Displays a calendar.
+        .il cancel 12
+        Cancels a print request.
+        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip cat 12
+        Concatenates and displays files.
+        .il cd 12
+        Changes the current directory.
+        .il cdb 12
+        C programming language symbolic debugger.
+        .il chatr 12
+        Changes a program's internal attributes.
+        .il chgrp 12
+        Changes the group of a file.
+        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip chmod 12
+        Changes the permissions of a file.
+        .il chown 12
+        Changes the owner of a file.
+        .il cmp 12
+        Compares two files and notifies you of any differences.
+        .il col 12
+        Used with nroff(1) to filter reverse linefeeds and backspaces.
+        .il comm 12
+        Prints all the lines common to two sorted files.
+                
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip cp 12
+        Copies files to another location.
+        .il cpio 12
+        Copies file archives.
+        .il cut 12
+        Cuts out selected fields of each line of a file.
+        .il dd 12
+        Copies a tape or file.
+        .il df 12
+        Displays the number of free 512-byte blocks and free inodes on a
+        file system.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip diff 12
+        Compares two files and notifies you of any differences.
+        .il dircmp 12
+        Compares two directories and notifies you of differences in
+        their contents.
+        .il disable 12
+        Disables lp printers.
+        .il du 12
+        Displays disk usage for files or directories.
+        .il elm 12
+        Processes electronic mail interactively.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip enable 12
+        Enables lp printers.
+        .il exit 12
+        Terminates the shell.
+        .il find 12
+        Locates files within a directory.
+        .il fold 12
+        Wraps text lines that exceed maximum width.
+        .il grep 12
+        Searches for lines matching a pattern.
+        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip head 12
+        Displays the first ten lines of a file.
+        .il jobs 12
+        Displays all active jobs.
+        .il kill 12
+        Terminates a process.
+        .il ll 12
+        Lists the contents of a directory in long format.
+        .il lp 12
+        Sends files to an lp line printer or plotter.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip lpstat 12
+        Shows current status of all printers.
+        .il ls 12
+        Lists the contents of a directory.
+        .il lsf 12
+        Lists the contents of a directory, marking
+        directories, executables, and symbolic links.
+        .il mailx 12
+        Processes electronic mail interactively.
+        .il make 12
+        Maintains, updates, and regenerates groups of programs.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip man 12
+        Accesses the online manual pages.
+        .il mkdir 12
+        Creates a new directory.
+        .il more 12
+        Displays the contents of a file one screen at a time.
+        .il mv 12
+        Moves or renames a file.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip nroff 12
+        Formats text for printing.
+        .il od 12
+        Creates an octal dump of a file.
+        .il paste 12
+        Merges same line in several files or subsequent lines of one file.
+        .il pg 12
+        Displays the contents of  a file one screen at a time.
+        .il pr 12
+        Formats text for printing.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip ps 12
+        Shows status of active processes.
+        .il remsh 12
+        Executes a command on a remote host.
+        .il rlogin 12
+        Connects your terminal to a remote host.
+        .il rm 12
+        Deletes files or directories.
+        .il rmdir 12
+        Deletes directories.
+        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip sdiff 12
+        Compares two files and displays a side-by-side listing of
+        differences.
+        .il set 12
+        Sets shell options.
+        .il shar 12
+        Bundles one or more files into a shell archive package for
+        mailing or moving.
+        .il sort 12
+        Sorts the lines of a file.
+        .il tail 12
+        Displays the last ten lines of a file.
+                        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip tar 12
+        Creates, maintains, and accesses a file archive on tape.
+        .il tcio 12
+        Improves data transfer rate to cartridge tape.
+        Commonly used with \"cpio\"(1).
+        .il tee 12
+        In a command pipeline, copies the data passing between commands
+        to a file.
+        .il touch 12
+        Updates the access and/or modification times of a file.
+        .il tr 12
+        Translates characters.
+                
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip umask 12
+        Sets file-creation mode mask.
+        .il uname 12
+        Prints the name of the current HP-UX version.
+        .il vi 12
+        Edits files on a screen-oriented display.
+        .il wc 12
+        Counts lines, words, and characters in a file.
+        .il who 12
+        Lists who is logged on to the system.
+        
+        .ip SOFTKEY 12
+        FUNCTION
+        .ip write 12
+        Interactively writes to another user.
+        .il xd 12
+        Creates a hexadecimal dump of a file.
+        .il xdb 12
+        C, FORTRAN, and Pascal symbolic debugger.
+        .in -2"
+  ;
+            
+  option keysh_errors
+  help ".p
+        This help topic explains the Key Shell error messages.
+        The messages are listed in order according
+        to their numbers.
+        .p
+        To find help for a particular error message, type a slash
+        (\"/\"), type the number of the error, and then press RETURN.
+        ----------------------------------------------------------------------
+        .br
+        \"keysh: [10] Terminfo initialization failed; check $TERM.\"
+        .br
+        \"keysh: [11] Exec'ing /bin/ksh...\"
+        .br
+        \"keysh: [12] Continuing without terminfo...\"
+        .p
+        The $TERM variable was not set correctly when Key Shell was invoked;
+        therefore, Key Shell could not read the terminal information from the
+        terminfo(4) database.  If this occurs, Key Shell will start
+        up a Korn Shell so that you can log in and fix the
+        problem.
+        .p
+        If it cannot start up a Korn Shell, Key Shell continues executing
+        without terminfo(4).  Edit your .profile file
+        to correctly set the $TERM variable.  Then log out and log back in.
+        .p
+        For example, to have Key Shell prompt you for a terminal
+        type when you first log in, add the following line to your .profile:
+        .p
+        .ti 5
+        TERM=`tset - -Q ?hp`
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[13] Cannot find softkey <softkey> in file <file>.\"
+        .p
+        You tried to add a softkey from a file.  However, the file
+        did not contain the specified softkey.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[14] Cannot find softkey <softkey>.\"
+        .p
+        You referenced a visible softkey that is not in the
+        top-level softkey menu.  The referenced softkey is typically either
+        the source or destination of a \"Keysh_config softkey move\" or
+        \"Keysh_config softkey add ... and_place before_softkey\" command.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[15] <rcfile> overwritten; previous changes may be lost.\"
+        .p
+        The \".keyshrc\" file was changed by another invocation of
+        Key Shell since the last time that this invocation of Key
+        Shell changed it.  The configuration changes written by the other
+        invocation of Key Shell have now been overwritten.
+        .p
+        If this is not what you want,
+        go to the window containing the overwritten configuration of Key
+        Shell, then use the \"Keysh_config write\" command.
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[16] Cannot write <rcfile>; changes cannot be saved.\"
+        .p
+        Key Shell could not open your \".keyshrc\" file to write your
+        configuration changes.  Hence, the configuration changes
+        cannot be saved.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[17] Cannot remove <rcfile>; nothing changed.\"
+        .p
+        This message can occur in response to a \"Keysh_config restart
+        default\" command.
+        Key Shell cannot remove your \".keyshrc\" file, either
+        because it cannot write to the file's directory or because the file
+        is not a \"regular\" file (e.g., it is a directory).
+        Therefore, your previous configuration is not changed.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[18] Syntax error in configuration file -- ignored.\"
+        .p
+        A line in your \".keyshrc\" file has a syntax error.
+        The second line of the above error message is the line
+        with the error in inverse video.
+        Key Shell ignores the line.
+        .p
+        If you subsequently rewrite your configuration (either by
+        using the \"Keysh_config write\" command or by changing your
+        configuration), Key Shell will remove the line and the error will
+        not occur again.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[19] Cannot open softkey file <file>.\"
+        .p
+        You attempted to add softkeys from a file that could not be opened.
+        Either the file does not exist or it is not readable.  Or, a
+        directory component of the path leading to the file does
+        not exist or is not searchable.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[20] Unknown user <user>.\"
+        .p
+        You attempted to add a softkey from another user's softkey file
+        but the user did not exist.  This error is typically the result
+        of a \"Keysh_config softkey add ...  from_user\" command.
+        .p
+        All users on a system are listed in the \"/etc/passwd\" file.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+    \"[21] Error in softkey file <file>, line <number>, character <number>.\"
+        .br
+        \"[22]                  (New softkey node expected; found <word>.\")
+        .br
+        \"[23]                  (Softkey attribute expected; found <word>.\")
+        .br
+        \"[24]                  (\";\" expected; found <word>.\")
+        .br
+        \"[25]                  (\"}\" expected; found end of file.\")
+        .br
+    \"[26]                  (Non-zero code value expected; found <word>.\")
+        .p
+        You attempted to add a softkey from a file that had
+        a syntax error at the specified line and character.  The second line
+        of the message indicates what Key Shell was
+        expecting to read and what it actually read when the error
+        occurred.  Key Shell skipped
+        the softkey with the error and continued reading any other
+        softkeys from the file.
+        .p
+        Edit the softkey file to fix the error, then try adding the
+        softkey again.  You do not need to exit Key Shell.
+        
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[27] Too many errors; skipping remaining softkeys.\"
+        .p
+        Key Shell encountered more than ten syntax errors in a single
+        softkey file.
+        It then skipped the rest of the file.
+        .p
+        Edit the softkey file to fix the errors, then try adding the
+        softkey again.  You do not need to exit Key Shell.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+    \"keysh: [28] parse error in softkey <softkey> near character <number>.\"
+        .p
+        The editrule for the
+        softkey node had a syntax error near the specified
+        character.  No translation was performed for the softkey command.
+        .p
+        Edit the softkey file to fix the error, then try adding the
+        softkey again.  You do not need to exit Key Shell.
+                
+        .p
+        ----------------------------------------------------------------------
+        .br
+        \"[29] Softkey file has changed; cannot read help.\"
+        .p
+        This message occurs when you modify a softkey file
+        after it is first loaded, then request online help.
+        Key Shell no longer knows where the appropriate help
+        text is in the file.  To fix this problem, simply
+        reload the softkey file, using the \"Keysh_config
+        restart\" command.
+        
+        .p
+        ----------------------------------------------------------------------
+        .br
+    \"[30] Cannot read configuration from .keyshrc or /usr/keysh/C/keyshrc.\"
+        .p
+        Key Shell could not read a default configuration from either your
+        \".keyshrc\" file or \"/usr/keysh/C/keyshrc\".  This can
+        only occur if Key Shell installation was incomplete.  Contact
+        your system administrator.
+        .p
+        ----------------------------------------------------------------------"
+  ;
+            
+  option regexp_patterns
+  help ".p
+        This help topic describes the regular expression
+        and pattern matching notation used by HP-UX.
+        .ip * 5
+        Regular expressions are used by commands and utilities
+        (such as \"grep\" or \"Search lines\") to locate
+        and manipulate patterns in text.
+        .ip * 5
+        Pattern matching is used by shells and other utilities
+        (such as \"find\", \"Find files\", and \"cpio\") for file
+        name expansion.
+        .p
+        REGULAR EXPRESSION SYNTAX
+        .p
+        Regular expressions are case-sensitive.
+        The following regular expressions (REs) match a single
+        character:
+        .ip * 5
+        An ordinary character matches itself.
+        An ordinary character is any character in the supported
+        character set except newline and special characters.
+        .ip * 5
+        A special character preceded by a backslash
+        matches the special character.  The following are special
+        characters: period (.), left square bracket ([), backslash
+        (\\), asterisk (*), circumflex (^), dollar sign ($),
+        and any character used to delimit an RE.
+        .ssp
+        For example, \"\\\\$\" searches for dollar signs.  (Two
+        backslashes are needed because the shell strips one of them.)
+        .ip * 5
+        A period, used outside of a bracket expression,
+        matches any printable or non-printable character except
+        newline.
+        .ip * 5
+        A dollar sign matches the end of a line.
+        .ip * 5
+        A circumflex matches the start of a line.
+        .ip * 5
+        Any RE followed by an asterisk matches 0 or
+        more occurrences of the RE.  For example,
+        \"a.*d\" would match \"ad\", \"add\", \"altered\",
+        etc.
+        .p
+        An expression enclosed in square brackets
+        matches a single character contained in the set
+        of characters represented by the bracket expression.
+        .p
+        For example, \"[0-9]:[0-5][0-9]:[0-5][0-9]\"
+        matches lines containing time strings.
+        \"[A-Z]\" matches lines containing a capital
+        letter.
+        .p
+        The following rules apply to bracket expressions:
+        .ip * 5
+        The special characters period, asterisk, left square
+        bracket, and backslash are not special within a bracket
+        expression.
+        .ip * 5
+        A range expression matches any character that falls
+        between the starting and ending points of the range.
+        The starting and ending points are separated with
+        a hyphen.  For example, \"[a-z]\" matches any
+        lowercase letter in the alphabet.
+        .ip * 5
+        A matching list expression matches any one of the characters
+        in the list.  For example, \"[abc]\" matches a, b, or c.
+        .ip * 5
+        A non-matching list expression begins with a circumflex, and
+        matches any character EXCEPT newline and the characters in the
+        list.  For example, \"[^abc]\" matches any
+        character except newline and a, b, or c.
+        \"[^.] [ \t] [ \t]\" matches two or more
+        white-spaces not preceded by a period.
+        .p
+        For more information about regular expressions, see
+        regexp(5).
+        .p
+        .p
+        PATTERN MATCHING NOTATION
+        .p
+        The following rules apply to pattern matching notation:
+        .ip * 5
+        An ordinary character matches itself.
+        An ordinary character is any character in the supported
+        character set except newline and special characters.
+        .ip * 5
+        A special character preceded by a backslash
+        matches the special character.  The following are special
+        characters: question mark (?), left square bracket ([), and
+        asterisk (*).
+        .ip * 5
+        A question mark, when used outside of a bracket expression,
+        matches any printable or nonprintable
+        character except newline.
+        .ip * 5
+        The asterisk matches any string.
+        For example, \"jo*\" would match \"joe\", \"joining\", \"jolly\",
+        etc.
+        .p
+        For pattern bracket expressions, the syntax and rules
+        are the same as for RE bracket expressions, with the
+        following exceptions:
+        .ip * 5
+        The exclamation point is used instead of the
+        the circumflex to indicate a non-matching list.
+        .ip * 5
+        The backslash is used as an escape character with bracket
+        expressions.
+        .p
+        For more information on pattern matching, see regexp(5)."
+  ;
+            
+  option redirect_pipe
+  help ".p
+        This help topic explains command input/output redirection and piping.
+        .p
+        Input/output redirection is useful with
+        commands such as \"shar\" (\"Shell archive\"), \"adjust\", \"cat\",
+        \"diff\", and \"mailx\" (\"Mail\"), where you want the command to read
+        its input from a file or write its output to
+        a file.
+        .p
+        Piping allows you to string several commands
+        together, using the output of one command as
+        input to the next.
+        .p
+        INPUT/OUTPUT REDIRECTION
+        .p
+        A command reads its input from \"standard input\" (stdin).
+        The default for stdin is the keyboard.  The
+        command writes its output to
+        \"standard output\" (stdout), and its errors to \"standard
+        error\" (stderr).  The default for stdout and stderr is the screen.
+        .p
+        You can redirect a command's input, output, and errors by
+        using the redirection symbols \"<\", \">\", and
+        \"2>\", respectively.
+        .ip * 5
+        To redirect input from a file, use \"< <file>\".
+        For example, \"mailx joe < letter\" redirects the contents
+        of \"letter\" as input to the \"mailx\" command.
+        For the softkey equivalent, select the \"Mail\"
+        softkey, then type \"joe < letter\".
+        .ip * 5
+        To redirect output to a file, use \"> <file>\".
+        For example, \"shar file1 file2 > archive\" creates a shell archive
+        that is written to \"archive\".
+        For the softkey equivalent, select the \"Shell
+        archive\" softkey, then type \"file1 file2 > archive\".
+        .ip * 5
+        To redirect output and error to a file, use \"> <file> 2>&1\".
+        For example, \"find / -user joe > log 2>&1\" finds
+        all files owned by \"joe\" and lists these files
+        and any errors (such as directories that could not
+        be searched) in \"log\".
+        For the softkey equivalent, select the \"Find
+        files\" softkey, type \"/\", select the \"owner\"
+        softkey, then type \"joe > log 2>$1\".
+        .ip * 5
+        To append output to a file, use \">>\" instead of \">\".
+        For example, \"ps >> processes\" appends the output from \"ps\"
+        to the \"processes\" file.
+        For the softkey equivalent, select the \"Process
+        info\" softkey, and type \">> processes\".
+        .p
+        For more information, refer to the \"Input and Output\"
+        section in the \"Using Metacharacters\"
+        chapter in the \"ksh: The Korn Shell\" part
+        of \"Shells: User's Guide\".
+        .p
+        COMMAND PIPING
+        .p
+        A pipe allows you to take the output of one
+        command and use it as input to another command without
+        using intermediate files.  For instance, you
+        can use the \"pr\" command to format a file,
+        then pipe the formatted file to the \"lp\" command for printing.
+        (The \"Print files\" softkey command automatically pipes
+        \"pr\" to \"lp\".)
+        .p
+        The metacharacter for the pipe is the vertical bar (|).
+        The output of the command preceding the pipe
+        symbol is redirected to the input of the command
+        following the pipe symbol.
+        .p
+        For example, to list all the current
+        users logged on to the system and then sort
+        them alphabetically, use this command: \"who | sort\"
+        For the softkey equivalent, type \"who |\", then
+        select the \"Sort lines\" softkey.
+        .p
+        If you want to see the data passing from one command to the
+        next, use the \"tee\" command.
+        It copies the data passing between commands to
+        a file, allowing you to keep a copy for
+        documentation or debugging purposes.  Using \"tee\" does not affect
+        how the pipeline functions.
+        .p
+        In the following example, the output from \"who\" is
+        piped into \"tee\", which saves a copy of the
+        output in the file \"savewho\" and passes the unchanged
+        output to the \"wc\" command:
+        .p
+        .ti 5
+        who | tee savewho | wc -l
+        .p
+        For more information, refer to tee(1) and to \"A Beginner's
+        Guide to HP-UX.\"  "
+  ;
+}
+    

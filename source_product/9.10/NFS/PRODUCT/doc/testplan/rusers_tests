@@ -1,0 +1,97 @@
+.H 2 "rusers Test Plan"
+
+This chapter covers the
+.B rusers
+command.  The main use of this command is to list information about
+what users are on each of the
+hosts on the network, and how long they have been idle.
+It provides much the same functionality as the Berkeley
+.B rwho
+command.  The main distinction is that Berkeley
+.B rwho
+uses a database of values collected from hosts sending broadcast
+packets, one a minute (or so), and therefore the database may be
+out of date.  The
+.B rusers
+command, on the other hand, polls all the hosts on the network each time
+it is run, so the values should be more accurate.
+
+.H 3  "rusers options"
+.sp 1
+.nf
+RESPONSIBLE ENGINEER:    John A Dilley
+ASSUMPTIONS:             module to be tested is functional
+.fi
+
+.sp 2
+.H 4 "no options"
+.sp 2
+.nf
+IMPLEMENT TIME:  0.25 md
+PERFORM TIME:    1.0 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B rusers
+with no options.
+It should print information about the hosts on the network.
+Look for the local host; if it's present the test passes.
+
+.sp 2
+.H 4 "bad option"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md
+PERFORM TIME:    1.0 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B rusers
+with any option besides "-l", "-h", "a", "-i", or "-u".
+It should print the usage error message on stderr
+and exit with a non-zero status.
+Use the "-d" option with no parameters.  Also, run 
+.B rusers 
+with all the following options together:
+"-i", "-u", "-h" and a hostname.
+.sp 2
+.H 4 "good options"
+.sp 1
+.nf
+IMPLEMENT TIME:  1.25 md
+PERFORM TIME:    1.25 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B rusers
+with all combinations of the valid options listed above.
+Run 
+.B rusers 
+with the "-d" option and a hostname.
+Test with zero hosts, the local host, and then the local host and a
+remote host.  In all cases, information about the local host should be
+present in the output.  It should be sufficient to merely check for the
+presence of the local host and current user name;
+the options control the format or order of
+the output.  It might be worthwhile to see if they fit the desired
+pattern, but checking the order or values in the output is unnecessary.
+.sp 2
+.H 2 "Rusersd test plan"
+.sp
+The functionality of the rusers daemon is covered by the rusers tests.
+The following tests were added to increase the BFA coverage for the
+rusers daemon:
+.sp
+.AL
+.LI
+Use pmap_conf with the "-p" option to call rpc.rusersd, program 100002,
+versions 1 and 2 with procedure 4 (not defined, it will execute the default 
+case on the case statement).
+.LE
+

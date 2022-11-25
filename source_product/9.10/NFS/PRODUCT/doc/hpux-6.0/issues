@@ -1,0 +1,834 @@
+.nf
+Glossary:  UI is an Urgent and Important item.
+	   I is an Important item.
+	   i is an item of lesser importance.
+	   o denotes an ordinary item.
+	   R is a Resolved item.
+	   W is a Written off item.
+	  
+.fi
+
+.ul 1
+Active or deferred Issues
+
+.AL
+
+.LI
+I)  Identification of anomalies and possible fixes
+What incompatibilities will we have with System V?
+What commands will be affected and need change?
+What level of TWG approval will be needed?
+How closely will we follow all of the option changes
+between commands that were effected by NFS for SUN
+and the commands that will be effected by NFS for HP?
+What errno values that have been added by SUN will we support,
+such as ESTALE and EREMOTE?  They deal with NFS.
+
+ANSWER: DDS is keeping a list of anomalies.
+
+THIS ISSUE TO REMAIN OPEN UNTIL ALL NFS RELATED
+ANOMALIES BETWEEN 4.2 AND HP-UX
+ARE IDENTIFIED AND A PLAN OF ACTION IS DETERMINED.
+THIS WILL BE DONE BEFORE DEFINITION COMPLETE.
+
+Identification of anomalies:  There will be differences with the utime()
+intrinsic as BSD 4.2 does not allow users with write permission to a 
+file to change access times on a file as HP-UX does.  There is also a
+difference between BSD 4.2 and HP-UX with chown().  4.2 allows only 
+the superuser to do a chown() while HP-UX will also allow the file's
+owner to do a chown().  One effect of this is that NOBODY can do a
+chown() on a file residing on a remote SUN node as superuser gets
+mapped to -2 and therefore will not be the required superuser to do
+the chown().   
+I think that the stat() information returned for a file 
+will be different between a 4.2 kernel and a HP-UX kernel.
+We will need to talk with the kernel and commands
+groups to see what other differences exist between 4.2 and HP-UX.
+Basically what your functional capabilities will be are determined
+by what kind of operating system kernel the remote node has.
+
+The following is a partial list of some of the commands that will
+need some modifications: mount(to handle the remote mounting of NFS),
+fsck(this needs to be changed to not follow mounted file systems),
+ls(when doing a long listing, file modes may not make sense when
+they are in reference to a non UNIX file), getpwent(this and other
+things that access the password file would be using the Yellow
+Pages), touch(since it uses utime(), it will probably change),
+find(we will have to decide how to handle find'ing through a
+remote file system, RFA does not allow it)
+See the list of HP-UX commands affected by NFS for more details.
+
+Doug Hartman's group will handle all changes related to adding new
+errno values required by NFS.  They will also handle the TWG part 
+of it.  They are making the changes required for NFS to all HP-UX
+commands affected.
+.LI
+I)  What to do with non supported 4.2 features such as long file names
+and symbolic links?  What to do with a HP-UX feature that 4.2 lacks.
+
+ANSWER: DDS
+
+THIS ISSUE TO REMAIN OPEN UNTIL ALL NFS RELATED
+DIFFERENCES BETWEEN 4.2 AND HP-UX
+ARE IDENTIFIED AND A PLAN OF ACTION IS DETERMINED.
+THIS WILL BE DONE BEFORE DEFINITION COMPLETE.
+
+In checking with Debbie Bartlett, I found out that there is pressure
+by other divisions to have HP-UX support symbolic links.  This will
+solve problems we would have in support of that functionality of
+NFS.  The second feature is a bit more involved.  Debbie thought
+that we should be able to accept a long path name from a user
+if they were trying to access a file with a long path name on
+a remote file system.  We would not change the HP-UX file system
+to have long file names for local files.  This would mean that someone
+on a remote machine would not be able to create a file with a
+name longer than 14 characters on a HP-UX machine using NFS.
+4.2 has a system call of rename() that changes the name of a file.
+A HP-UX NFS server could provide this functionality for remote requestors.
+But it is would be up to TWG to allow this for local users.
+SUN added a system call to read directory entries called getdirentries().
+As a server, HP-UX will need to support it to maintain NFS compatability.
+HP-UX also needs to support the call as a requestor as NFS needs to know
+if it is reading a normal file or a directory.
+
+The chgrp() system call is supported by HP-UX, but 
+in 4.2 the ability to change the group is 
+part of the chown() system call.  It could cause a 
+problem, but I don't think it likely.
+
+This list was compiled by comparing the section 2 portions of the HP-UX
+and SUN bricks.
+
+Symbolic links and the rename system call will be supported.  Long file names
+are still pending.
+
+.LI
+i)  How should the NFS library routines be shipped? SUN ships several of 
+them in libc.a.  Should we use libc.a or a separate library (libnfs.a?)?
+Where should the header files be?  
+
+ANSWER: CHM
+
+DEFERRED UNTIL DEFINITION COMPLETE.
+
+There is no information on this yet.  A precedent is the ARPA/Berkeley
+separate library.  So far Carole Crall only got two calls from SE's 
+wanting to know why the library had to be added.  She didn't feel it was
+a major problem to have a separate library (even if it is different from 
+SUN), as long as it is well documented.
+There are problems with the dependencies between getpwent and similar
+routines in libc.a and the YP/RPC libraries.
+
+.LI
+i)  Should we port the pcnfsd.c code provided with Sun's PC-NFS?  If so,
+should it be included with the NFS versions we release?  Will this
+require us to be licensed separately for PC-NFS?
+
+ANSWER: ANDY DROL
+
+We should port pcnfsd, even though it is described in the PC-NFS manual
+as providing optional functions.  Those functions are: remote printing
+ability and user authentication.  Remote printing is not so critical as
+giving the user more flexible file access (he/she essentially receives
+the capabilities of a user on the server, if that user's password is
+provided correctly).  Without pcnfsd, a PC-NFS client is "nobody," with
+UID = GID = -2.  Porting pcnfsd will require inetd to be updated.
+
+It would be easiest to include pcnfsd's port with our releases, so it is
+readily available for the customer.  It would be unacceptable to have to
+provide the code at a customer's request.  It would be undesirable to be a
+PC-NFS licensee in order to distribute the code with the PC-NFS product
+as Sun does.
+
+I am working with George Adams, PC-NFS marketing in MA,
+and Bill Keating, NFS marketing in CA, to
+find if we could arrange to include pcnfsd with our NFS port without
+having to get a PC-NFS license.
+
+We will port pcnfsd.c.  We are waiting for the written agreement that
+it is OK to ship with our product, but we have obtained an oral agreement.
+
+.LI
+o) Should inetd be part of the link product?
+
+ANSWER: CHM
+
+If the socket library routines are part of the link product, it might 
+make sense to also have inetd as part of the link product.
+The reason for that is that services other than the Arpa/Berkeley ones
+can use the inetd.  An example of that is lpd (the remote printer spooler)
+and some NFS servers.
+.LI
+o) Were should the error messages that go to the console on SUN go to on
+HP-UX systems?
+
+ANSWER:
+
+Because of windows, all error messages, including those from the kernel,
+should go to the device that is serving as the system console, even if
+it is a window pseudo-device.  Otherwise, the display is disturbed.
+
+Some suggestions on how to handle this problem from the kernel:
+
+The kernel writes to a circular buffer, which a user process
+continually reads and writes to the console.  There is some kind
+of semaphore telling the user process when more data exists;
+there is nothing to control the kernel when the buffer is full:
+it just overwrites whatever the user process didn't get a chance
+to write.  I believe the NS tracing facility uses this method
+for logging from kernel land -- we may be able to get tested
+code from them, which would save us a lot of time.
+
+This is similar to the errlog facility in System V.  A user daemon
+process reads from a special driver in the kernel.  The data read is the
+content of the messages to be written to the /usr/adm/errlog file.  That
+way the user process can handle all the complexities of getting the
+information to the right place, handling errors, etc.  I don't know if
+the errlog mechanism was put into the 300 (it's completely different on
+the 500, of course).  We can check with the 300 kernel group to see if
+it was.  Also we should have the System V code from AT&T which
+implemented this mechanism for errlog.
+
+.LI
+o)  How well do NFS connections to non-UNIX servers work (esp. VMS)?  The
+issue has to do with the non-UNIX file systems that reside on these
+systems, and how NFS maps those file systems into the UNIX environment.
+
+ANSWER: 
+
+WE NEED TO DOCUMENT THIS AND SET EXPECTATIONS IN THE FIELD, THEREFORE
+THIS WILL REMAIN OPEN TO ACT AS A REMINDER.
+We have only one contact with non-UNIX servers an it was not positive.
+We will get more information from UNIFORUM and our formal testing with 
+Wollongong's NFS.
+
+.LE
+.SK
+.ul 1
+Resolved Issues
+
+.AL
+.LI
+R)  Does ar (or ranlib) need to be fixed changed to fix the clock skew
+problem that can appear between two NFS nodes?
+
+According to Suhaib Khan when we changed from ranlib as a command to ar and 
+ranlib as a library we changed the way things work.  Instead of having ranlib
+timestamp the library and have ld check the date, now ranlib is always called 
+and that solves the problem.
+
+R)  Would customers want to run Yellow Pages without NFS?  If so, does the
+system call discussed above need to behave differently?  Do {set,get}domain-
+name() need to be in the normal kernel (i.e. without NFS)?
+
+ANSWER: CHM
+
+SUN allows the Yellow Pages to be used when NFS is not configured in. 
+As a first pass I think that for us to provide that same flexibility
+the system calls {get,set}domainname will need to be always present in the
+kernel.  This might not be something we want to do, and if it is it might
+affect the need for a specific system call that indicates if NFS is configured
+into the kernel or not.
+Get and setdomainname might need to be in the kernel at all times if an
+extra system call to determine whether NFS is configured doesn't exist.
+Mikey thinks that it is easier to always have set and getdomainname in the
+kernel than it is to create a new system call.
+Get and setdomainname will always be in the kernel.
+
+.LI
+R)  Verify how 4.3 based implementations of NFS have rolled into the 
+inetd configuration file the changes required to support rpc-based services.
+
+ANSWER: CHM
+
+Mt. Xinu started with a Berkeley 4.3 based configuration file as we did and they
+changed it to support rpc services by having the following fields for rpc:
+.nf
+rpc
+<socket type>
+<protocol>
+<wait/nowait>
+<user>
+<server program>
+<program number>
+<version number>
+<server program arguments>
+.fi
+They added program number and version number and moved server program 
+arguments to the end of the line as opposed to SUN which has server
+program arguments, program number and version number.  Mt. Xinu approach
+allows for several arguments to the server without major coding contorsions,
+while SUN's version doesn't.  We will follow Mt. Xinu's approach since we
+also started with a 4.3 based inetd.conf file.
+
+.LI
+R)  Performance goals: relative to RFA or relative to SUN's NFS
+
+ANSWER: DAE/GMF
+
+THIS ISSUE IS ADDRESSED IN THE PROJECT REQUIREMENTS AND SYSTEMS TEST PLAN
+
+A goal of HP's NFS performance is to be no worse than Sun, for those
+items which are measured.  We can attempt to do better than Sun, by a
+level which is best determined in a session involving marketing, Q/M and
+R&D reps.  It is important to establish goals which are meaningful and
+measurable.
+
+Comparison of NFS to RFA performance is not suggested.  Although they
+provide similar functions, contrasting them should not affect how we
+implement NFS.
+
+Before we can set performance goals, we must determine how
+performance is best quantified.  Bud Hivner of Quality and Manufacturing
+has suggested a few things regarding performance determination:
+.nf
+
+	o  A customer  should be able to replicate
+	   our  results.  Consequently,  we should
+	   use methods which a customer can use.
+
+	o  Our  tests  should  be   performed   on
+	   unloaded  machines  (and  networks,  if
+	   possible).  These are conditions  which
+	   can be duplicated by a customer.
+
+	o  We must set up the  scripts  which  run
+	   the  tests,  and we must  perform  them
+	   ourselves.    Q/M    will     calculate
+	   statistics from them.
+
+Some ideas about how and what to measure:
+
+	o  Use the time  command  to find how long
+	   it  takes  to  cat  an  NFS   (remotely
+	   mounted) file on the screen or diverted
+	   to a file.
+
+	o  This method could be used with files of
+	   various  sizes.  Files of  100Kb to 1Mb
+	   (by   100Kb)   are   typically    used.
+	   Changing    file    size    may    show
+	   non-linearity of performance.
+
+	o  The  "overhead"   involved  in  such  a
+	   transaction   could  be  determined  by
+	   cat-ing a file whose length is zero, if
+	   time has sufficient accuracy.  This may
+	   be  valuable  to  isolate   differences
+	   between Sun and HP.  Performance  goals
+	   may even be based on this overhead.
+
+.fi
+Sun has done benchmark testing, but by their own admission, its
+meaning is somewhat vague.  Each test which has been provided with the
+3.0 code we received will return elapsed wall clock time.
+This may be of questionable significance.  The time command, on the
+other hand, accounts for elapsed time, system time and time spent
+while executing a command.
+Sun made a good point: the speed of a disk drive can
+obviously affect timing measurements.
+
+The tests which came with 3.0 are meant to be used to see if the port works
+properly, so they exercise a number of features.  They include:
+file/directory creation and removal; lookups (getwd and stat) up and
+down, across mount points; getting and setting file attributes; reading
+and writing of files (most like the suggested cat); reading directories;
+and renaming and linking.  We may consider some of these for
+performance testing.
+
+A difficulty involved with comparing Sun and HP's performances is the
+fact that we have two different Suns.  Performance could be measured on
+one and then the other, using the average or the better of the two as
+the representative sample.
+
+The performance of Yellow Pages might well be measured.  A worthwhile
+choice would be to time the login process.
+
+The performance of mount could be checked, too.  This command is
+restricted to root, so its speed is not seen by the general user.
+As long as it is not evidently slow, looking at mount's performance may
+be moot.
+
+.LI
+R)  There should be a way of knowing when NFS is configured into the kernel.
+This is required for certain commands to work properly on both machines with
+NFS and without NFS.
+
+ANSWER: 
+
+Have a system call that returns whether NFS is configured into the kernel or
+not.
+This system call would not solve problems that occur when we don't know
+if Yellow Pages is running or not.  This system call will not be needed.
+ISO commands group (specifically Mike Saboff) don't think we need this 
+system call either.
+
+.LI
+R)  Should we ship any of the modified HP-UX commands with NFS?  Or just 
+ship with the core product a single version of each command that works
+whether NFS is present or not?  A corollary:  how do the HP-UX and A/B
+commands handle the absence of NFS/YP?
+
+ANSWER: CHM
+
+Both Doug Hartman and Donn Terry would prefer to have a single version of the
+commands. 
+The major problem with having a single version of the commands are the 
+dependencies between getpwent and getgrent and the YP/RPC libraries.
+If the YP/RPC/socket libraries required become part of libc.a then that 
+problem will not exist anymore.
+.LI
+R)  Will the changes to the _dirdesc structure affect object code
+compatibility?
+
+ANSWER: CHM
+
+As a first impression I don't think we will have problems with object
+code compatibility.  Programs will still work on the local system, but
+they will need to be recompiled to take advantage of remote directory
+access.  
+Doug Hartman, project manager for the commands group at ISO that is
+modifying commands for NFS and DUX, does not see any problems with
+changing the _dirdesc structure.  
+The changes to _dirdesc will not affect object code compatibility.
+They will only affect source code compatibility if the customer has
+used the structure directly instead of through the directory routines
+(readdir, opendir, etc.).  This is highly discouraged in the brick pages.
+
+.LI
+R)  Can we use a common scaffold with IND?  ISO?  The use of the
+scaffold (assumptions, environment, etc.) would need to be the
+same too.
+
+ANSWER: DDS
+
+DEFERRED UNTIL DESIGN COMPLETE WHEN WE WILL HAVE TEST PLANS
+AVAILABLE.  ROGER CHEUNG AT IND IS PUSHING FOR A COMMON TEST
+SCAFFOLD.
+
+Tom Bartz is driving the scaffold work at CND.  Steve Booth 
+and Darren are representing the NFS testing group and our
+group.  For the moment there will be at least a common
+scaffold for section I at CND.
+
+.LI
+R) How will NFS affect the install process for other products?
+For example, if a cluster of work stations has only one machine
+with manual pages that are accessed via NFS,
+how will that affect manual page installations?
+
+ANSWER: JAD
+
+Individual systems administrators will determine for themselves where
+they want their manuals (or whatever) installed.  If manual pages only
+live on one filesystem and are NFS-mounted by other machines, then they
+only need to be installed on that one machine.  This should be
+immediately obvious to systems administrators; we might want to have
+this covered somewhere in the documentation, but I do not see this as a
+problem.
+
+.LI
+R)  Release dates  To be tied to HP-UX/DUX release?
+
+ANSWER: 
+
+CHECK WITH JBL ON MORE DATES.
+
+Yes NFS release will be tied to HP-UX/DUX release.
+The date is anywhere from Fall 87 to Summer 88.  The desired date is
+summer of 1987.
+
+.LI
+R)  Another issue will be problem of how individual nodes
+in a DUX cluster view a remote file system mounted by one
+of the nodes in the cluster.  Will requests go through the
+node that did the mount, or will the request go directly to
+the remote node where the NFS mount was made to.
+
+ANSWER: MS
+
+IT REMAINS OPEN TO ACT AS A REMINDER TO MONITOR ACTIONS TAKEN
+BY THE DUX TEAM.
+
+This is more a problem with how DUX handles itself inside the
+kernel and not a direct concern with NFS.  It does need to be
+listed here if only to act as a reminder that the problem exists
+and not to have it fall through the cracks.
+In the current discless implementation a mount done by any of the 
+nodes in the cluster is visible to all other nodes.
+
+The NFS, DUX, RFA paper by Mike Shipley resolves this in detail.
+.LI
+R)  How should Yellow Pages interact with DUX and how will this 
+affect system administration?
+
+ANSWER: MS
+
+DAVE IS PROVIDING ADDITIONAL INFORMATION ON THIS SUBJECT. 
+
+I talked to Joel Tesler and Debbie Bartlett on DUX and the
+Yellow Pages and this is what they said.
+The Yellow Pages will probably not directly interact with DUX.
+This is because DUX is strictly a kernel function while the 
+Yellow Pages exists in user space.  Since a DUX cluster will
+be view as one machine with one password file, it may or may
+not be using the Yellow Pages to login.  This is determined
+by having a "+" in the local /etc/passwd.
+This does lead to some 
+questions in how user id's from a DUX cluster
+will map onto other non-DUX nodes using
+NFS.  If the DUX cluster passwd file has a "+" in it, then
+it can reference the YP version of the passwd file in 
+addition to the local passwd file.  If the cluster has
+no "+" in it, then it would be somewhat isolated and
+any node outside the cluster trying to access the cluster
+through NFS would have to have an entry in the cluster's
+passwd file.
+
+See document on Yellow Pages and DUX interactions for more details.
+.LI
+R)  Leaf Node Architecture vs. Converged Networking for the 300.
+Will it cost more to put NFS on Leaf Node versus the cost
+of converging the network architecture to 4.2?  How does
+this fit in with Group Level strategy?  Which networking should
+we use for a breadboard?
+
+ANSWER: DDS
+
+The issue of Leaf Node vs. 4.2IND is really the issue of IRR for
+the Peking group.  As far as the effect on us, while it is clear that
+there would be a certain amount of effect, the areas that would need
+to be changed APPEAR to be localized.  I am still investigating this
+with Bill Mowson to try and come up with some reasonable estimates for
+how not having convergence would affect us.  First guess is a few person-
+months (to possibly an engineer for the life of the project) of
+engineering/testing time, though the effect of not having to
+re-test all the Leaf Node stuff is also a factor.  Research continuing...
+
+Appendum: Due to executitive decision, we will continue with the 
+Converged Network Archetecture.
+.LI
+R)  Should we keep NFS tied to its own interface to the driver or go 
+through a more standard interface to UDP?
+should we support other protocols besides UDP for NFS?
+
+ANSWER: DDS
+
+First, some clarification.  NFS/RPC uses the standard interface to the
+network card driver.  However, it does have a path which attempts to
+bypass the UDP/IP drivers to go directly to that interface.  If that path
+fails, then it sends packets out via the normal UDP/IP route in the kernel.
+Both of the Paths should work in the 4.2IND architecture.  If we use
+Leaf Node arch., the "fast" udp path will need to be looked at to see if
+the performance improvements are still there.  The only protocols we need
+at the kernel level are UDP, since the current NFS versions only use UDP.
+The RPC library supports RPC calls on other protocols, namely TCP/IP.  It
+seems clear that going beyond SUN is not going to buy us anything here.
+.LI
+R)  Coexistence with DUX, RFA and RFS(in the future).  Which file
+switching mechanism to use?
+
+ANSWER:
+
+We will be using SUN's vnode architecture instead of AT&T's
+file switch.  There is a paper written giving reasons, so they will
+not be reiterated here.  Basically the two are not that different
+and we know that doing NFS is certain while RFS is not, so why invest in
+something that is not that certain when it will not make a difference.
+
+DUX is being incorporated into vnodes at ISO and it looks like
+that will not be a problem.  RFA is also being incorporated into
+vnodes, but it will not be seen as a separate vnode type, but as
+a different type of "local" node as it presently is now.  It was
+felt that RFA could have been folded in as its own vnode type, but
+that it would not be any better functionally and it would change
+how it fits into the present kernel which is well documented and
+understood by many people.
+.LI
+R)  What commands, that SUN has added in support of NFS, will we
+support?
+
+ANSWER: CHM
+
+We will be doing the Yellow Pages and the commands related to
+them such as ypcat.  Andy Drol thinks that customers view all the
+commands shipped by SUN as part of NFS (excluding quota).
+That includes RPC/NFS associated commands such as rup, rusers, etc.
+Some of this may not be ported so that we can pull up the schedule.
+
+.LI
+R)  What other vendors' machines will we test against?
+what test suites can we leverage from SUN?  and what will we
+have to create?
+
+ANSWER: MS
+
+So far the customers that we have talked to about using NFS have
+been using it only on SUN's.  So our major effort in testing
+against other vendors' machines should be with
+SUN's machines.  If we are going to "endorse" NFS on the VECTRA, then we
+should also test against PC's.  
+Dave Erickson's investigation of PC/NFS will have an impact on
+this.  His investigation has pointed to testing with PC/NFS.
+With the popularity of VAX's, we should at least check on
+the popularity of NFS on it.  Mt Xinu and Wollongong have NFS for
+the VAX.  We will test at least against Wollongong's NFS.
+I have sent a note to SUN asking them for information on how many
+systems other NFS vendors have operational and if any of the
+implementations gave people unusual problems when trying
+to do heterogeneous interfacing.
+
+We should also think about which versions of NFS we should
+test against (Sun's 2.0 NFS).
+
+Until we get more information,
+we don't know what else to work with.
+
+.LI
+R)  How to incorporate results of input from customer visits and networking
+survey from marketing?
+
+ANSWER:
+
+We are incorporating results of customer visits into these
+answers as a start.  We will review survey results at requirements
+complete and at definition complete to determine if it makes 
+sense to incorporate any items.  Currently there is a request
+to provide superuser capibility over the network, to allow non
+superusers to do NFS mounts and for an "easier" user interface
+for system administration.
+.LI
+R)  What should be HP's involvement with the NFS vendors' group?
+
+ANSWER:
+
+At the present time HP will not be trying to drive the direction of
+NFS, so we will have less involvement with the NFS vendors group.
+
+.LI
+R)  Will, and if yes how, will the A/B commands interact with both
+the YP and an Internet name server ?
+
+ANSWER: CHM
+
+The proposed solution for the moment is for the commands affected to check
+if Yellow Pages or the name server is present and act accordingly.  This
+issue needs to be discussed with the Arpa/Berkeley CPE group.
+Also, we need to consider the problem of different domains.
+
+Since the Internet name server will not be implemented for the time being
+this problem is not an issue anymore.
+.LI
+R)  IND doesn't have any real time pre-emption points in the 1.0 NS kernel
+code.  Is ISO planning to have these present in NFS?  Will we be relying
+on IND to put these into NFS?
+
+ANSWER:
+
+There are no real time requirements on the 800 that the networking
+code needs to comply with.  This answer was provided by Dan Simula
+with input from Ching Fa Hwang.
+.LI
+R)  How to track future releases of NFS and RFS?
+how to keep in step with SUN on latest version numbers?
+
+ANSWER: MS
+
+As per Product Requirements, we will track the 3.2 release of NFS
+from SUN.  We will try to support the same version numbers that
+SUN supports, but we will not track 4.0 discless functionality.
+This has been modified.  We will track 3.0 and adopt some of the
+bug fixes from 3.2 in order to pull up the schedule.
+.LI
+R)  How will NFS be sold in relation to HP-UX and our other networking 
+products?
+
+ANSWER: DAE
+
+I spoke with Andy Drol about this.  He said that NFS is expected to be
+sold completely separate from other networking products.  It may
+accompany FSD's releases, but NFS will have its own price, versions,
+etc.
+
+.LI
+R)  Existence of special functionality between HP to HP connections
+
+ANSWER:
+
+At the present time, we are not pushing for any special functionality
+between HP to HP connections.
+
+Addendum: (dds):  items that might come to mind here (as partially suggested
+by customer visit reports): non-super-user mounts, root id not being
+mapped to -2 under some circumstances, extra system admin help?
+
+.LI
+R)  What impact does the future diskless standard from SUN 
+have on the project?  Should we provide a SUN compatible 
+diskless server?
+
+ANSWER:
+
+The customer input we have so far does not seem that there is a 
+great demand to have a common diskless functionality between
+SUN and HP workstations and servers.  This is not based on
+a great number of interviews.
+.LI
+R)  Will we implement the NFS/4.0 release?  This includes diskless
+operation.  When will 4.0 be?  What are the features/changes, and 
+why would it be valuable to HP?  Need to be educated about this in
+general.
+
+ANSWER: DAE
+
+We will not implement 4.0 or 3.2 added functionality on the first release.
+
+.LI
+R)  What is the cost to change applications from RFA to NFS
+
+ANSWER:
+
+No comment of cost to change applications from RFA to NFS.
+(I think that is not a big issue as we will continue to
+support RFA.  It will only affect programs that will be
+extended to talk to other non-HP machines.)
+George Feinberg and Mike Shipley are looking into the migration path
+from RFA to NFS.
+.LI
+R)  How do we get the latest/correct version numbers and procedure
+numbers (for RPC) at release?  Do we just use those provided by
+Sun in 3.0 (or 3.2)?
+
+ANSWER: WE WILL TRY TO SUPPORT THE VERSIONS CURRENTLY SUPPORTED
+BY SUN.
+
+.LI
+R) Which implementation of MBUFs will be used in the s300/DUX kernel?
+Should we simply converge to the IND version or does that introduce
+excessive overhead for the DUX performance requirements?
+
+ANSWER:
+
+The Series 300 should converge to IND's mbuf implementation.  The convergence
+will be done as part of PEKING's efforts.  This decision has mimimal impact
+on the NFS project since the ISO/NFS code already contains the modification 
+needed to use the IND mbuf routines.
+
+In order to sufficiently address
+the requirements of DUX, Peter Notess, Dave Gutierrez  and I met to design
+a memory management sub-system for the DUX network interactions.  PEKING
+will provide the DUX kernel with;
+.nf
+	1) a network powerup routine callable at system startup,
+	2) process synchronization at the hardware_send() level,
+	3) a special DUX_copyin_frame routine that allows data to be
+	   copied from the card directly to network or file system 
+	   buffers.
+	4) the appropriate hooks in the ISR_proc.
+.fi
+
+This design provides significant DUX-related performance 
+enhancements over IND's, as
+well as 4.2's, mbuf implentation.
+.LE
+
+.SK
+.ul 1
+Written off Issues (due to low risk)
+
+.AL
+.LI
+W) What impact will changes in the HP-UX kernel have on NFS?
+How will real time requirements made by the Spectrum kernel
+affect NFS?
+
+ANSWER:
+
+S300: NOT AN ISSUE.  WE WILL CONTINUE TO MONITOR HP-UX CHANGES.
+
+S800: NOT AN ISSUE.  CHING INFORMED ME THAT THE SPECTRUM RT REQUIREMENTS FOR
+      NETWORKING ARE SO ILL-DEFINED THAT THEY ARE ESSENTIALLY A "DON'T CARE".
+
+I would suspect that NFS will not cause problems with
+the real time nature of the 800's kernel.  The "real" 
+work, (reading, writing files), done by NFS is handled by the normal
+local file functions, once the request makes its way
+to the server node, and these functions will have the necessary code for
+the real time functionality already there.  To check on
+this, we need to contact Dave Lennert at ISO.
+
+Further input from Ching indicates that any RT testing/verification will 
+likely happen in the early phases of QA and will involve the entire rel2.0
+kernel.
+
+
+
+
+
+.LI
+W)  How does RFS fit into the DUX/NFS/RFA scheme?  This includes
+both implementation issues and market positioning issues.  We at
+least need to state our assumptions and opinions.
+
+ANSWER: 
+
+.LI
+W)  Does the 300 need to be multi-homed in order to talk on both DUX
+and TCP/IP networks?
+
+ANSWER: NO
+
+.LI
+W)  How does a user move files from a workstation to a server?
+What about executable commands?  Do they have to be the same
+type of machine?  Are there multiple versions for different
+processors?  How does DUX address this issue?
+
+ANSWER: THIS IS A NON ISSUE AS A USER WOULD SIMPLY USE cp WITH NFS
+OR rcp TO MOVE FILES
+.LE
+.SK
+.ul 1
+
+.AL
+Removed Issues (because they belong elsewhere)
+
+.LI
+Checkpoints: demonstrate at UNIFORUM
+
+ANSWER:
+
+THE ISSUE OF SHOWING AT UNIFORUM HAS BEEN PUT OFF TO THE
+PROGRAM ISSUES.
+
+The people at ISO want to demonstrate NFS along with DUX at
+the UNIFORUM conference in January 1987.  In order to appear
+as a cohesive company, it would not look good for just the
+840 to be there and not the 300.  If higher level management
+does not have a problem with showing NFS on the 840 even 
+though it will not be available until much later, then let's
+do it together.
+
+.LI
+How to do product support/training?  How to create manuals?
+
+ANSWER:
+
+THE APPROPIATE PEOPLE HAVE BEEN IDENTIFIED AND THE NECESSARY
+ACTIONS WILL BE TAKEN BY THEM.
+
+Carole Crall is the NFS support person.  Annette Parsons and
+Carolyn Mozley are our manual writers.  No information about
+installation complications.
+
+.LI
+How do DUX and NFS interact, in ways visible to the user?
+E.g. when one DUX node is an NFS client, should remote mounts to
+an NFS server be transparent to another DUX node?  Also, should a DUX
+cluster (containing an NFS server) look like a single system to an 
+NFS client?
+
+ANSWER: 
+THIS IS A DUPLICATE ISSUE
+
+.LE

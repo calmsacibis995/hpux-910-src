@@ -1,0 +1,188 @@
+#!/bin/sh
+##	@(#)create_rel	$Revision: 1.13.109.1 $	$Date: 91/11/19 13:54:10 $
+#	create_rel	--	create a release tag file
+# Created for NFS project by Darren Smith
+# Modified to use RCS first by Cristina Mahon
+##
+# create_release
+# 	This file creates a release "tag" file to be used with "setup_release".
+# The idea is to get the current revision of everything into a file that we
+# can use to restore the current release.  However, the only thing we actually
+# get are things that we have pointers to in the SCCS (RCS) directory.  Other
+# file, like libc.a, need to be saved as part of a seperate process.  Ideas?
+# Tag file is created, checked_out, in $nfs/releases.  A "checkin" would
+# then make the release an official release.
+##
+# Initialize
+PATH="$Nfs/bin:/bin:/usr/bin:/usr/local/bin"
+export PATH
+umask 022
+
+# Check for options:
+#   "-r" or "-rcs" forces usage of rcs in operations.
+#   "-s" or "-sccs" forces usage of sccs in operations.
+CS="rcs"
+while [ $# -gt 0 ]
+do
+	case $1 in
+	    -r | -rcs ) 
+	            CS="rcs"
+		    ;;
+	    -s | -sccs ) 
+	            CS="sccs"
+		    ;;
+	    *)     
+	            break
+		    ;;
+	esac
+	shift
+done
+
+# Usage
+if [ $# -eq 0 ] ; then
+   echo "Usage: $0 [-r or -rcs] [-s or -sccs] <newrelease> <nfs-relative directories>"
+   echo "The default is to use RCS"
+   exit 1
+fi
+
+# where to find the release tag files.
+release_path=${release_path:=$nfs/releases}
+export release_path
+
+# Get the release requested:
+RELEASE=$1
+shift
+if [ -f $release_path/$RELEASE ] ; then
+   echo "Release $RELEASE already exists in $release_path"
+   echo "Append on end? [y/n] \\c"
+   read answer
+   if [ $answer != "y" -a $answer != "yes" ] ; then
+	exit 1
+   fi
+fi
+
+if [ $# -eq 0 ] ; then 	# get everything
+   DIRECTORIES="."
+else
+   DIRECTORIES="$*"	# only for certain directories
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+echo "release_path=$release_path"
+echo "RELEASE=$RELEASE"
+if [ "$DIRECTORIES" = "." ] ; then
+   echo "DIRECTORIES=<everything>"
+else
+   echo "DIRECTORIES=$DIRECTORIES"
+fi
+
+# Warn if a kernel build is in progress
+if [ ! -w $Nfs/log/update ] ; then
+    echo "WARNING: Overnight build in progress!"
+fi
+
+if [ "$CS" = "rcs" ] ; then
+	CSDIR=${Rcs:=$Nfs/rcs}
+else
+	CSDIR=${Sccs:=$Nfs/sccs}
+fi
+
+# Make working directories as needed for releases and checked_out version
+# NOTE: Should it really be checked out?
+if [ ! -d $nfs/releases ] ; then
+   mkdir $nfs/releases
+fi
+if [ ! -d $nfs/checkout ] ; then
+   mkdir $nfs/checkout
+fi
+if [ ! -d $nfs/checkout/releases ] ; then
+   mkdir $nfs/checkout/releases
+fi
+cd $nfs/releases
+touch $RELEASE
+RELEASEFILE=$nfs/checkout/releases/$RELEASE
+if [ ! -f $RELEASEFILE ] ; then
+   ln $RELEASE $RELEASEFILE
+fi
+
+
+# Loop for each argument
+for ARG in $DIRECTORIES
+do
+   # Show the user what we are doing this time through the loop
+   if [ "$ARG" = "." ] ; then 
+      STARTDIR=$CSDIR
+   else
+       STARTDIR=$CSDIR/$ARG
+   fi
+   echo "\\nProcessing \"$STARTDIR\":\\n"
+
+   # operate only on directories
+   if [ ! -d $STARTDIR ] ; then
+	echo "ERROR($0): \"$STARTDIR\" is not a directory!"
+	continue
+   fi
+
+   # Get the list of $CS files under that directory
+   cd $STARTDIR
+   if [ "$CS" = "rcs" ] ; then
+      FILELIST=`find . -type f -name '*,v' -print | sed -e 's,^./,,' `
+   else
+      FILELIST=`find . -type f -name 's.*' -print | sed -e 's,^./,,' `
+   fi
+
+   # For each file, get the revision level, and add an entry to the tags file.
+
+   for FILE in $FILELIST
+   do
+      cd $STARTDIR
+      CSFILE=$STARTDIR/$FILE
+
+      # Unfortunately, the implementations we have of Prs/Rlog are buggy
+      # and get confused when we have SCCS files pointint to RCS and vice-versa.
+      # So we endup doing a remote access to find the current revision.
+      # This is so gross, it makes my cat puke too! -dds-
+
+      if read KEYWORD HOSTNAME FILENAME <$CSFILE
+      then
+	if [ "$KEYWORD" = "%%" ] ; then
+	   # Remote file, so do a netunam and access directly.
+	   if val=`do_netunam $HOSTNAME`
+	   then
+		 eval $val
+	   else
+		 echo "ERROR: could not establish contact with $HOSTNAME!"
+		 echo "ERROR: could not create an entry for $CSFILE"
+		 continue
+	   fi
+	   # Decide if RCS, easier way?
+	   NAME1=`basename $FILENAME ,v`
+	   NAME2=`basename $FILENAME`
+	   if [ ${NAME1},v = $NAME2 ] ; then 	# remote rcs file
+	      REVISION=`rlog -h /net/$HOSTNAME/$FILENAME | \
+		       grep '^head:' | sed 's/^head:[ 	]*//'`
+	   else
+	      REVISION=`prs -d":I:" /net/$HOSTNAME/$FILENAME`
+	   fi
+	else
+	  if [ $CS = "rcs" ] ; then
+	      REVISION=`rlog -h $CSFILE | grep '^head:' | \
+			sed 's/^head:[ 	]*//'`
+	  else
+	      REVISION=`prs -d":I:" $CSFILE`
+	  fi
+	fi
+      else
+	echo "ERROR($0): could not read $CSFILE!"
+	continue
+      fi
+
+      echo "$REVISION	$STARTDIR/$FILE"
+      echo "$REVISION	$STARTDIR/$FILE" >>$RELEASEFILE
+
+   done
+
+done
+
+echo "\\nNOTE: 'checkin releases/$RELEASE' to make release official"
+echo `date "+%y.%m.%d %T"` $0 $nfs end

@@ -1,0 +1,62 @@
+## FacetTerm  em4010keys   description file  11/30/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: em4010keys.FC,v 70.1 92/03/09 16:48:01 ssa Exp $
+ignore=\E[5|def\skey\s%100s1\E\\
+##
+enter_ca_mode=\E[5|def\skey\sF1\s=\s"<27>[?5i"\E\\
+enter_ca_mode=\E[5|def\skey\sF2\s=\s"<27>[?3i"\E\\
+enter_ca_mode=\E[5|def\skey\sF3\s=\s"<27>[2i"\E\\
+enter_ca_mode=\E[5|def\skey\sF4\s=\s"<27>[@"\E\\
+enter_ca_mode=\E[5|def\skey\sF5\s=\s"<27>[M"\E\\
+enter_ca_mode=\E[5|def\skey\sF6\s=\s"<27>[17~"\E\\
+enter_ca_mode=\E[5|def\skey\sF7\s=\s"<27>[18~"\E\\
+enter_ca_mode=\E[5|def\skey\sF8\s=\s"<27>[19~"\E\\
+enter_ca_mode=\E[5|def\skey\sF9\s=\s"<27>[20~"\E\\
+enter_ca_mode=\E[5|def\skey\sF10\s=\s"<27>[21~"\E\\
+enter_ca_mode=\E[5|def\skey\sF11\s=\s"<27>[23~"\E\\
+enter_ca_mode=\E[5|def\skey\sF12\s=\s"<27>[24~"\E\\
+##
+enter_ca_mode=\E[5|def\skey\sSCRLCK\s=\s"<27>[H"\E\\
+enter_ca_mode=\E[5|def\skey\sPGUP\s=\s"<27>[V"\E\\
+enter_ca_mode=\E[5|def\skey\sPGDN\s=\s"<27>[U"\E\\
+##
+function_key-12=\E[5i
+enter_ca_mode=\E[5|def\skey\sS\^F1\s=\s"<27>[5i"\E\\
+function_key-13=\E[?1i
+enter_ca_mode=\E[5|def\skey\sS\^F2\s=\s"<27>[?1i"\E\\
+function_key-14=\E[0i
+enter_ca_mode=\E[5|def\skey\sS\^F3\s=\s"<27>[0i"\E\\
+function_key-15=\E[L
+enter_ca_mode=\E[5|def\skey\sS\^F4\s=\s"<27>[<76>"\E\\
+function_key-16=\E[K
+enter_ca_mode=\E[5|def\skey\sS\^F5\s=\s"<27>[<75>"\E\\
+function_key-17=\E[31~
+enter_ca_mode=\E[5|def\skey\sS\^F6\s=\s"<27>[31~"\E\\
+function_key-18=\E[32~
+enter_ca_mode=\E[5|def\skey\sS\^F7\s=\s"<27>[32~"\E\\
+function_key-19=\E[33~
+enter_ca_mode=\E[5|def\skey\sS\^F8\s=\s"<27>[33~"\E\\
+function_key-20=\E[34~
+enter_ca_mode=\E[5|def\skey\sS\^F9\s=\s"<27>[34~"\E\\
+function_key-21=\E[35~
+enter_ca_mode=\E[5|def\skey\sS\^F10\s=\s"<27>[35~"\E\\
+function_key-23=\E[1~
+enter_ca_mode=\E[5|def\skey\sS\^F11\s=\s"<27>[1~"\E\\
+function_key-24=\E[2~
+enter_ca_mode=\E[5|def\skey\sS\^F12\s=\s"<27>[2~"\E\\
+## ins
+function_key-25=
+enter_ca_mode=\E[5|def\skey\sINS\s=\sUDK13\E\\
+## home
+function_key-26=
+enter_ca_mode=\E[5|def\skey\sHOME\s=\sUDK14\E\\
+## del
+function_key-28=
+enter_ca_mode=\E[5|def\skey\sDEL\s=\sUDK15\E\\
+## end
+function_key-29=
+enter_ca_mode=\E[5|def\skey\sEND\s=\sUDK16\E\\
+function_key-31=
+function_key-32=
+function_key-33=
+function_key-34=

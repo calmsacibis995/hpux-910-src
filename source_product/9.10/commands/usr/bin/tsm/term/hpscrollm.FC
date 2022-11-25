@@ -1,0 +1,10 @@
+## FacetTerm  hpscrollm  description file 09/04/90
+## HP scroll memory
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hpscrollm.FC,v 70.1 92/03/09 16:01:36 ssa Exp $
+lines_scroll_memory-24-2400=192
+### OLD scroll_refresh_start=\E&w13F\E&a0c0R\EJ
+scroll_refresh_start=\E&w13F\E&acR\EJ
+### OLD scroll_refresh_end=\E&a+23R\E&w12F
+scroll_refresh_end=^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J^J\E&w12F
+out_scroll_memory_clear=\E&acR\EJ

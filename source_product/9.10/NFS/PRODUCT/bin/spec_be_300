@@ -1,0 +1,16 @@
+#!/bin/sh
+###
+#
+# This is a special patch script for the s300 build environment.  This 
+# special # script should be used only to fix up known problems with the 
+# build environment.  For example, to temporary kludge header files as we 
+# wait for GSI to catch up.
+#
+###
+
+date '+%y.%m.%d s300 Build Environment Special Script'
+
+set +x
+
+cp /nfs/7.0fixes/dbm.h /nfs/usr/include/dbm.h
+

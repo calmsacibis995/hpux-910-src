@@ -1,0 +1,47 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/overview,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:58 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "General Overview"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "What is Automount?"
+
+     Automount is an automatic filesytem mounting service for NFS
+filesystems.  Automount detects access to remote filesystems and mounts
+them on demand.  The detection and following mounting is transparent to users
+and user programs.  After some period of inactivity in automounted
+filesystems automount automatically unmounts them.  Map files are used
+to configure and direct automount's activities.  The map files can be
+set up with multiple server names for a given filesystem that is replicated
+across the network.  These maps can also specify mount hierarchies.  The
+automount maps can be set up as local files on the client system or
+administered through a NIS (Network Information Service) domain.
+
+.H 2 "Why use Automount?"
+
+    Automount provides even more transparent access to files accross
+the network than NFS alone does.  With automount properly configured
+a user can access any file on the network with a unix pathname and leave
+automount the task of finding it and mounting the filesytem containing it.
+Automount is extremely helpful in a large network with many NFS servers.
+If a particular client node needs access to a large portion of the exported
+filesystems on the network it would normally have to mount all the needed
+filesystems.  However with automount the filesystems are mounted on
+demand and thus only the filesystems that actually get used are mounted
+at any given time.
+
+.H 2 "How does it really work?"
+
+    Automount is a user level server for the Network File System, NFS.
+Automount does not require any explicit support from the kernel beyond
+what is required for NFS.  The automount server is a daemon (/etc/automount)
+that runs on NFS clients, and emulates NFS daemons (/etc/nfsd) that run on
+NFS servers.  Automount intercepts NFS requests that would normally
+go to an NFS server daemon.  Automount then consults its internal
+tables to see if the requested filesystem is already mounted.  If it is not
+already mounted, automount mounts the remote filesystem (possibly
+considering a list of choices for the particular server to use).  The
+details of this is the topic of the rest of this document.

@@ -1,0 +1,4 @@
+$set 1
+1 Stat error on map file %s
+2 Stat error on map file %s
+3 The map pathname, "%-30s...", is too long:\r\nit should not exceed %d characters

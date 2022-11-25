@@ -1,0 +1,108 @@
+
+.H 1 "NFS Using UDP Checksumming"
+The following are test cases to check out the use of UDP checksumming
+in use with NFS.  Since this checksumming is not to be a supported
+feature for 6.2, we will not put it through total testing.  The
+emphasis is to insure that checksumming is used when the flag is
+turned on.  We will not be trying to insure that the checksumming
+is valid under all forms of stress.  This should be part of the
+networking kernel testing.
+
+To turn the udp checksumming on, you must adb the kernel to change
+the flag (kupd_checksumming) to be a value of 1 or 2.  To do
+this, do the following:
+.nf
+
+adb -w /hp-ux  /dev/kmem
+kudp_checksumming/W   new_value
+<cntr d>
+
+.fi
+.H 2 "Test Cases"
+.AL
+.LI
+Set kudp_checksumming to 1.  Mount a file system that is on a machine
+that is accessed through a gateway and goes through the route table.
+Create a trigger that will change a byte of data for every other packet
+sent to be a different value.  Copy a file to the remote file system.
+This file should be at least 50K bytes in size.  Now copy the file
+from the remote system back to the local directory. 
+.nf
+                                                                        
+                                                                        
+     +---------+                                 +---------+       
+     |         |          -------------+         |         |       
+     | Client  |         | GATEWAY     |<--------| Server  |       
+     |         |-------->|             |         |         |       
+     |         |         +-------------+         |         |       
+     |         |                                 |         |       
+     +---------+                                 +---------+       
+                                                                        
+                                                                        
+
+
+   Estimates.
+     Implementation: (1.5 hr)
+     Execution:      (.20 hr)
+
+.fi
+Results: Compare the orginal
+file with the new file.  They should compare properly.
+.LI
+Set kudp_checksumming to 1.  Mount a file system that is on a machine
+that is not accessed through the route table.
+Create a trigger that will change a byte of data for every other packet
+sent to be a different value.  Copy a file to the remote file system.
+This file should be at least 50K bytes in size.  Now copy the file
+from the remote system back to the local directory.  
+.nf
+
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.20 hr)
+
+.fi
+Results:  The file should not compare properly because even though 
+kudp_checksumming is 1, checksumming is not used as the neworking is
+not using the route table to get to the server machine and that
+is a condition that needs to be met when the flag is 1.  Since
+more that just data is getting corrupted, either machine may hang,
+panic or just get very weird.  This is expected and accepted behavior.
+.LI
+Set kudp_checksumming to 2.  Mount a file system that is on a machine
+that is accessed through a gateway and goes through the route table.
+Create a trigger that will change a byte of data for every other packet
+sent to be a different value.  Copy a file to the remote file system.
+This file should be at least 50K bytes in size.  Now copy the file
+from the remote system back to the local directory. 
+
+.nf
+
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.20 hr)
+
+.fi
+Results: Compare the orginal
+file with the new file.  They should compare properly.
+.LI
+Set kudp_checksumming to 2.  Mount a file system that is on a machine
+that is not accessed through the route table.
+Create a trigger that will change a byte of data for every other packet
+sent to be a different value.  Copy a file to the remote file system.
+This file should be at least 50K bytes in size.  Now copy the file
+from the remote system back to the local directory.  
+.nf
+
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.20 hr)
+
+.fi
+Results: Compare the orginal
+file with the new file.  They should compare properly.  This is because
+with kudp_checksumming being 2, checksumming is always done.
+.LE

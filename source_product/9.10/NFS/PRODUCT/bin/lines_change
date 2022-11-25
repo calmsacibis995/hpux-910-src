@@ -1,0 +1,139 @@
+          NFS MODULES THAT HAVE CHANGED SINCE 87/10/20 08:32
+
+bin misc files that have changed since 87/10/20
+
+bin/800_files                                   6.2    87/10/21   chm     
+bin/800sub_files                                6.3    87/10/21   chm     
+bin/lines_change                                5.1    87/10/26   mak     
+bin/overnight                                   6.3    87/10/26   chm     
+bin/up_release                                  6.3    87/10/23   chm     
+
+5 files have changed, 11 lines have been deleted, 141 lines have been inserted
+-------------------------------------------------------------------------------
+
+cmds/libc c files that have changed since 87/10/20
+
+cmds/libc/rpc/pmap_rmt.c                        6.2    87/10/26   chm     
+
+1 files have changed, 4 lines have been deleted, 17 lines have been inserted
+-------------------------------------------------------------------------------
+
+cmds c files that have changed since 87/10/20
+
+cmds/usr.etc/rpc.ruserd.c                       6.3    87/10/21   jad     
+cmds/usr.etc/rwall.c                            6.2    87/10/26   chm     
+
+2 files have changed, 4 lines have been deleted, 109 lines have been inserted
+-------------------------------------------------------------------------------
+
+cmds misc files that have changed since 87/10/20
+
+cmds/etc/vhe/Makefile                           7.1    87/10/22   nfsmgr  
+cmds/etc/vhe/vhe_mounter                        7.3    87/10/23   mikey   
+cmds/etc/vhe/vhe_u_mnt                          7.3    87/10/23   mikey   
+cmds/etc/vhe/vhe_update                         7.2    87/10/23   mikey   
+cmds/usr.etc/800/Makefile                       6.2    87/10/21   mjk     
+cmds/usr.etc/Makefile                           6.3    87/10/22   jad     
+cmds/usr.etc/yp/ypmake                          6.2    87/10/21   chm     
+
+7 files have changed, 89 lines have been deleted, 176 lines have been inserted
+-------------------------------------------------------------------------------
+
+doc misc files that have changed since 87/10/20
+
+doc/DE.Detail.mm                                5.1    87/10/26   jad     
+doc/DE.Over.mm                                  5.1    87/10/26   jad     
+doc/IMS.NFS.mm                                  5.2    87/10/26   jad     
+doc/schedule/chm                                2.24   87/10/23   chm     
+
+4 files have changed, 97 lines have been deleted, 2578 lines have been inserted
+-------------------------------------------------------------------------------
+
+man misc files that have changed since 87/10/20
+
+man/man1/domainname.1                           6.4    87/10/22   chm     
+man/man1/rup.1                                  6.2    87/10/22   chm     
+man/man1/rusers.1                               6.2    87/10/22   chm     
+man/man1/ypcat.1                                6.2    87/10/22   chm     
+man/man1/ypmatch.1                              6.2    87/10/22   chm     
+man/man1/yppasswd.1                             6.2    87/10/22   chm     
+man/man1/ypwhich.1                              6.2    87/10/22   chm     
+man/man1m/fsirand.1m                            6.2    87/10/22   chm     
+man/man1m/makedbm.1m                            6.2    87/10/22   chm     
+man/man1m/mountd.1m                             6.2    87/10/22   chm     
+man/man1m/nfsd.1m                               6.2    87/10/22   chm     
+man/man1m/nfsstat.1m                            6.2    87/10/22   chm     
+man/man1m/pcnfsd.1m                             6.2    87/10/22   chm     
+man/man1m/portmap.1m                            6.2    87/10/22   chm     
+man/man1m/rpcinfo.1m                            6.2    87/10/22   chm     
+man/man1m/rstatd.1m                             6.2    87/10/22   chm     
+man/man1m/rusersd.1m                            6.2    87/10/22   chm     
+man/man1m/rwall.1m                              6.2    87/10/22   chm     
+man/man1m/rwalld.1m                             6.2    87/10/22   chm     
+man/man1m/showmount.1m                          6.2    87/10/22   chm     
+man/man1m/spray.1m                              6.2    87/10/22   chm     
+man/man1m/sprayd.1m                             6.2    87/10/22   chm     
+man/man1m/ypinit.1m                             6.2    87/10/22   chm     
+man/man1m/ypmake.1m                             6.3    87/10/22   chm     
+man/man1m/yppasswdd.1m                          6.2    87/10/22   chm     
+man/man1m/yppoll.1m                             6.2    87/10/22   chm     
+man/man1m/yppush.1m                             6.2    87/10/22   chm     
+man/man1m/ypserv.1m                             6.2    87/10/22   chm     
+man/man1m/ypset.1m                              6.2    87/10/22   chm     
+man/man1m/ypxfr.1m                              6.2    87/10/22   chm     
+man/man2/getdmname.2                            6.2    87/10/22   chm     
+man/man2/getfh.2                                6.2    87/10/22   chm     
+man/man2/nfssvc.2                               6.2    87/10/22   chm     
+man/man3/getrpcent.3c                           6.2    87/10/22   chm     
+man/man3/gnetgrent.3c                           6.2    87/10/22   chm     
+man/man3/grpcport.3n                            6.2    87/10/22   chm     
+man/man3/mount.3n                               6.2    87/10/22   chm     
+man/man3/rnusers.3n                             6.2    87/10/22   chm     
+man/man3/rpc.3c                                 6.2    87/10/22   chm     
+man/man3/rstat.3n                               6.2    87/10/22   chm     
+man/man3/rwall.3n                               6.2    87/10/22   chm     
+man/man3/spray.3n                               6.2    87/10/22   chm     
+man/man3/xdr.3c                                 6.2    87/10/22   chm     
+man/man3/ypclnt.3c                              6.2    87/10/22   chm     
+man/man3/yppasswd.3n                            6.2    87/10/22   chm     
+man/man4/exports.4                              6.2    87/10/22   chm     
+man/man4/netgroup.4                             6.2    87/10/22   chm     
+man/man4/rmtab.4                                6.2    87/10/22   chm     
+man/man4/rpc.4                                  6.2    87/10/22   chm     
+man/man4/ypfiles.4                              6.3    87/10/22   chm     
+man/man7/nfs.7                                  6.2    87/10/22   chm     
+
+51 files have changed, 53 lines have been deleted, 84 lines have been inserted
+-------------------------------------------------------------------------------
+
+
+-------------------------------------------------------------------------------
+                              TOTALS
+-------------------------------------------------------------------------------
+
+total inserted - 3105 
+total deleted  - 258 
+total files changed - 70
+
+total lines inserted in c files - 126
+total lines deleted in c files  - 8
+
+total lines inserted in h files - 0
+total lines deleted in h files  - 0
+
+total lines inserted in libc c files - 17
+total lines deleted in libc c files - 4
+total lines inserted in libc h files - 0
+total lines deleted in libc h files - 0
+
+total lines inserted in cmds c files - 109
+total lines deleted in cmds c files - 4
+total lines inserted in cmds h files - 0
+total lines deleted in cmds h files - 0
+
+total lines inserted in kernel c files - 0
+total lines deleted in kernel c files - 0
+total lines inserted in kernel h files - 0
+total lines deleted in kernel h files - 0
+
+		 Mon Oct 26 15:31:38 MST 1987

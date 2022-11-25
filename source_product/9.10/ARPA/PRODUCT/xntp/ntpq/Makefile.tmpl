@@ -1,0 +1,58 @@
+# $Source: /source/hpux_source/networking/rcs/arpa90_800/xntp/ntpq/RCS/Makefile.tmpl,v $
+# $Revision: 1.2.109.1 $	$Author: mike $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/10/27 10:43:11 $
+
+#
+# Makefile.tmpl,v 3.1 1993/07/06 01:09:28 jbj Exp
+#
+PROGRAM=	ntpq
+#
+# ntpq - control mode query program
+#
+COMPILER= cc
+COPTS= -O
+BINDIR=	/usr/local
+DEFS=
+RESLIB=
+COMPAT=
+#
+INCL=		-I../include
+CFLAGS=		$(COPTS) $(DEFS) $(INCL)
+CC=		$(COMPILER)
+LIB=		../lib/libntp.a
+LINTLIB=	../lib/llib-llibntp.ln
+MAKE=		make
+#
+OBJS=	ntpq.o ntpq_ops.o
+SOURCE=	ntpq.c ntpq_ops.c
+
+all:	$(PROGRAM)
+
+$(PROGRAM): $(OBJS) version.o $(LIB)
+	$(CC) $(COPTS) -o $@ $(OBJS) version.o $(LIB) $(RESLIB) $(COMPAT)
+
+install:	$(PROGRAM)
+	install -c -m 0755 $(PROGRAM) $(BINDIR)
+
+tags:
+	ctags *.c *.h
+
+depend:
+	mkdep $(CFLAGS) $(SOURCE)
+
+clean:
+	rm -f $(PROGRAM) *.o *.out tags make.log Makefile.bak lint.errs
+
+distclean:	clean
+	rm -f Makefile
+
+lint:	$(LINTLIB)
+	lint -x -u $(DEFS) $(INCL) $(LINTLIB) $(SOURCE) >lint.errs
+
+../lib/llib-llibntp.ln:
+	cd ../lib ; $(MAKE) $(MFLAGS) lintlib
+
+../libc/libntp.a:
+	cd ../libntp ; $(MAKE) $(MFLAGS)
+

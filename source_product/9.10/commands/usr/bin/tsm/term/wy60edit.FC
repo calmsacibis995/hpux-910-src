@@ -1,0 +1,126 @@
+## FacetTerm  wy60edit  COMMON  description file 12/04/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy60edit.FC,v 70.1 92/03/09 16:48:20 ssa Exp $
+perwindow-16-CQL--n--escape.............=\EZ0 %10s1^?
+perwindow_also-.........................=\EZ1 %10s1^?
+perwindow_default-......................=\EZ0 ^?
+
+perwindow-16-CQL--n--tab................=\EZ0!%10s1^?
+perwindow_also-.........................=\EZ1!%10s1^?
+perwindow_default-......................=\EZ0!^?
+
+perwindow-16-CQL--n--backspace..........=\EZ0"%10s1^?
+perwindow_also-.........................=\EZ1"%10s1^?
+perwindow_default-......................=\EZ0"^?
+perwindow-16-CQL--n--shift.backspace....=\EZ0'%10s1^?
+perwindow_also-.........................=\EZ1'%10s1^?
+perwindow_default-......................=\EZ0'^?
+
+perwindow-16-CQL--n--shift.return.......=\EZ0)%10s1^?
+perwindow_also-.........................=\EZ1)%10s1^?
+perwindow_default-......................=\EZ0)^?
+
+perwindow-16-CQL--n--home...............=\EZ0*%10s1^?
+perwindow_also-.........................=\EZ1*%10s1^?
+perwindow_default-......................=\EZ0*^?
+perwindow-16-CQL--n--shift.home.........=\EZ0/%10s1^?
+perwindow_also-.........................=\EZ1/%10s1^?
+perwindow_default-......................=\EZ0/^?
+
+perwindow-16-CQL--n--cursor_up..........=\EZ0+%10s1^?
+perwindow_also-.........................=\EZ1+%10s1^?
+perwindow_default-......................=\EZ0+^?
+perwindow-16-CQL--n--shift_cursor_up....=\EZ00%10s1^?
+perwindow_also-.........................=\EZ10%10s1^?
+perwindow_default-......................=\EZ00^?
+
+perwindow-16-CQL--n--cursor_down........=\EZ0,%10s1^?
+perwindow_also-.........................=\EZ1,%10s1^?
+perwindow_default-......................=\EZ0,^?
+perwindow-16-CQL--n--shift_cursor_down..=\EZ01%10s1^?
+perwindow_also-.........................=\EZ11%10s1^?
+perwindow_default-......................=\EZ01^?
+
+perwindow-16-CQL--n--cursor_left........=\EZ0-%10s1^?
+perwindow_also-.........................=\EZ1-%10s1^?
+perwindow_default-......................=\EZ0-^?
+perwindow-16-CQL--n--shift_cursor_left..=\EZ02%10s1^?
+perwindow_also-.........................=\EZ12%10s1^?
+perwindow_default-......................=\EZ02^?
+
+perwindow-16-CQL--n--cursor_right.......=\EZ0.%10s1^?
+perwindow_also-.........................=\EZ1.%10s1^?
+perwindow_default-......................=\EZ0.^?
+perwindow-16-CQL--n--shift_cursor_right.=\EZ03%10s1^?
+perwindow_also-.........................=\EZ13%10s1^?
+perwindow_default-......................=\EZ03^?
+
+perwindow-16-CQL--n--enter..............=\EZ0s%10s1^?
+perwindow_also-.........................=\EZ1s%10s1^?
+perwindow_default-......................=\EZ0s^?
+perwindow-16-CQL--n--shift_enter........=\EZ04%10s1^?
+perwindow_also-.........................=\EZ14%10s1^?
+perwindow_default-......................=\EZ04^?
+
+perwindow-16-CQL--n--repl.insert........=\EZ0q%10s1^?
+perwindow_also-.........................=\EZ1q%10s1^?
+perwindow_default-......................=\EZ0q^?
+perwindow-16-CQL--n--ins..shift_insert..=\EZ0p%10s1^?
+perwindow_also-.........................=\EZ1p%10s1^?
+perwindow_default-......................=\EZ0p^?
+
+perwindow-16-CQL--n--next_page..........=\EZ0r%10s1^?
+perwindow_also-.........................=\EZ1r%10s1^?
+perwindow_default-......................=\EZ0r^?
+perwindow-16-CQL--n--prev_page..........=\EZ0w%10s1^?
+perwindow_also-.........................=\EZ1w%10s1^?
+perwindow_default-......................=\EZ0w^?
+
+perwindow-16-CQL--n--del.line...........=\EZ06%10s1^?
+perwindow_also-.........................=\EZ16%10s1^?
+perwindow_default-......................=\EZ06^?
+
+## #########
+## 3161 keyboard only - puts programed contents on screen if not
+## perwindow-16-CQL--n--erase_eof..........=\EZ0Q%10s1^?
+## perwindow_also-.........................=\EZ1Q%10s1^?
+## perwindow_default-......................=\EZ0Q^?
+pass=\EZ0Q%10s1^?
+pass=\EZ1Q%10s1^?
+## perwindow-16-CQL--n--shift_erase_eof....=\EZ0W%10s1^?
+## perwindow_also-.........................=\EZ1W%10s1^?
+## perwindow_default-......................=\EZ0W^?
+pass=\EZ0W%10s1^?
+pass=\EZ1W%10s1^?
+## #########
+
+## NOT ON ASCII
+perwindow-16-CQL--n--print..............=\EZ0R%10s1^?
+perwindow_also-.........................=\EZ1R%10s1^?
+perwindow_default-......................=\EZ0R^?
+perwindow-16-CQL--n--shift_print........=\EZ0X%10s1^?
+perwindow_also-.........................=\EZ1X%10s1^?
+perwindow_default-......................=\EZ0X^?
+
+perwindow-16-CQL--n--end................=\EZ0\\%12s1^?
+perwindow_also-.........................=\EZ1\\%12s1^?
+perwindow_default-......................=\EZ0\\^?
+perwindow-16-CQL--n--shift.end..........=\EZ0]%10s1^?
+perwindow_also-.........................=\EZ1]%10s1^?
+perwindow_default-......................=\EZ0]^?
+
+## NOT ASCII 316X
+perwindow-16-CQL--n--page_up............=\EZ0:%10s1^?
+perwindow_also-.........................=\EZ1:%10s1^?
+perwindow_default-......................=\EZ0:^?
+perwindow-16-CQL--n--shift_page_up......=\EZ0;%10s1^?
+perwindow_also-.........................=\EZ1;%10s1^?
+perwindow_default-......................=\EZ0;^?
+
+## NOT ASCII 316X
+perwindow-16-CQL--n--keypad_5...........=\EZ0<%10s1^?
+perwindow_also-.........................=\EZ1<%10s1^?
+perwindow_default-......................=\EZ0<^?
+perwindow-16-CQL--n--shift_keypad_5.....=\EZ0=%10s1^?
+perwindow_also-.........................=\EZ1=%10s1^?
+perwindow_default-......................=\EZ0=^?

@@ -1,0 +1,214 @@
+.H 2  "Getrpcent/getrpcbynumber/getrpcbyname (Cristina Mahon)"
+
+.PP
+Getrpcent reads the next line of the file /etc/rpc opening the
+file if necessary.
+Getrpcbyname and getrpcbynumber sequentially search from the 
+beginning of the file until the matching rpc program name or 
+program number is found, or until EOF is encountered.
+.PP
+The formats of the routines are as follows:
+.sp
+.nf
+getrpcent()
+getrpcbyname(name)
+getrpcbynumber(number)
+.fi
+.sp 2
+The fields in /etc/rpc are the following:
+.sp 
+.nf
+name of server for the rpc program
+program number
+aliases
+.fi
+.sp
+Make sure to use both spaces and tabs between the fields in the file.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.5  md
+.fi
+.sp 2
+.H 3 "Domainname not set"
+.sp 1
+.PP
+Getrpc* first finds out in what YP domain the machine is and then
+proceeds to find the required information from a YP map.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       setrpcent: getdomainname system call missing
+.fi
+.sp 2
+.H 3  "Call getrpcbynumber with unknown program number"
+.sp 1
+.PP
+We will have the same result whether Yellow Pages is up
+or not.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns NULL.
+.fi
+.sp 2
+.H 3  "Getrpcbynumber: correct program number and YP"
+.sp 1
+.PP
+Call getrpcbynumber with a correct program number and make sure the Yellow
+Pages are up and that /etc/rpc has been made into a Yellow Pages database.
+The only Yellow Pages database that needs to be made for /etc/rpc is
+rpc.bynumber.(dir/pag).
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Getrpcbynumber  will  return  a  structure   containing  all  the
+       information  related to that  program  number.  That is,  program
+       name, program number and aliases.
+.fi
+.sp 2
+.H 3  "Getrpcbynumber: correct program number and no YP"
+.sp 1
+.PP
+Call getrpcbynumber with a correct program number. Make sure the Yellow
+Pages are not running.  Getrpcbynumber will read the local /etc/rpc file.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Getrpcbynumber  will  return  a  structure   containing  all  the
+       information  related to that  program  number.  That is,  program
+       name, program number and aliases.
+.fi
+.sp 2
+.H 3  "Getrpcbynumber: correct program number, YP, no map"
+.sp 1
+.PP
+Call getrpcbynumber with a correct program number. Make sure the Yellow
+Pages are running, but that the Yellow Pages database for rpc was not
+created. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Getrpcbynumber will return a NULL.
+.fi
+.sp 2
+.H 3  "Call getrpcbyname with unknown program name"
+.sp 1
+.PP
+We will have the same result whether Yellow Pages is up or not.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns NULL.
+.fi
+.sp 2
+.H 3  "Getrpcbyname: correct program name and YP"
+.sp 1
+.PP
+Call getrpcbyname with a correct program name and make sure the Yellow
+Pages are up and that /etc/rpc has been made into a Yellow Pages database.
+The only Yellow Pages database that needs to be made for /etc/rpc is
+rpc.bynumber.(dir/pag).
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Getrpcbyname   will  return  a  structure   containing   all  the
+       information related to that program name.  That is, program name,
+       program number and aliases.
+.fi
+.sp 2
+.H 3  "Getrpcbyname: correct program name and no YP"
+.sp 1
+.PP
+Call getrpcbynumber with a correct program number. Make sure the Yellow
+Pages are not running.  Getrpcbynumber will read the local /etc/rpc file.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Getrpcbynumber  will  return  a  structure   containing  all  the
+       information  related to that  program  number.  That is,  program
+       name, program number and aliases.
+.fi
+.sp 2
+.H 3  "Getrpcbyname: correct program name, YP, no map"
+.sp 1
+.PP
+Call getrpcbyname with a correct program name. Make sure the Yellow
+Pages are running, but that the Yellow Pages database for rpc was not
+created.  
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Getrpcbyname will return a NULL.
+.fi
+.sp 2
+.H 3  "Comment line in /etc/rpc"
+.sp 1
+.PP
+Have an entry in /etc/rpc that has a comment as follows:
+.sp
+#bogus	100016	bogusalias
+.sp
+Then call getrpcbyname with bogus.
+.nf
+.sp
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Getrpcbyname should return a NULL pointer.
+.fi
+.sp 2
+.H 3  "Comment at end of line in /etc/rpc"
+.sp 1
+.PP
+Have an entry in /etc/rpc that has a comment as follows:
+.sp
+nfs 100003 nfsprog #bogus
+.sp
+Then call getrpcbyname with bogus.
+.nf
+.sp
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Getrpcbyname should return a NULL pointer.
+.fi
+.sp 2
+.H 3  "Call getrpcbyname with an alias"
+.sp 1
+.PP
+Have an entry in /etc/rpc as follows:
+.sp
+nfs 100003 nfsprog
+.sp
+Then call getrpcbyname with nfsprog.
+.nf
+.sp
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Getrpcbyname  should return the structure  containing nfs, 100003
+       and nfsprog.
+.fi
+.sp 2

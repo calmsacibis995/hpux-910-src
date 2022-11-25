@@ -1,0 +1,84 @@
+
+
+
+#include <stdio.h>
+#include <nlinfo.h>
+
+#define LEFTTORIGHT	(lefttoright != 0)
+#define RIGHTTOLEFT	(lefttoright == 0)
+
+#define NLCHARTYPE	(unsigned char)*instr
+
+nlswitchbuf(langid, instr, outstr, length, lefttoright, err)
+unsigned char   *instr, *outstr;
+short		length, langid;
+unsigned short	lefttoright, err[];
+{
+	unsigned char   *malloc(), *buff, *eInstr, direction[4];
+	int	bytes;
+	void    free ();
+
+	err[0] = err[1] = 0;
+
+	if (length <= 0) {
+		err[0] = E_INVALIDLENGTH;
+		return;
+	}
+
+	nlinfo(L_DIRECTION, (int *) direction, &langid, err);
+	if (err[0])  {
+		err[0] = E_LNOTCONFIG;
+		return;
+	}
+
+
+	if ((direction[0] == 0) && (direction[1] == 0)) {
+		memcpy(outstr, instr, length);
+		return;
+	}
+
+
+	/*
+	 * copy from outstr to instr.
+	 *	the complication comes in when a character of the opposite
+	 *	order is encountered.
+	 *	for instance:
+	 *		if lefttoright is true then all the arabic characters
+	 *		will be in reverse order.
+	 *	when this character is encountered, reversebuff() is called to
+	 *	place this character and all succeeding reversed characters
+	 *	into the temporary buffer "in reverse order". from here they
+	 *	are copied to outstr.
+	 */
+	buff = malloc((int)length+1);
+	for ( eInstr = instr + length; instr < eInstr; ){
+		if ( (LEFTTORIGHT  &&  NLCHARTYPE > 127) ||
+					(RIGHTTOLEFT  &&  NLCHARTYPE < 128)){
+			bytes = reversebuff(lefttoright, instr, eInstr,
+					buff + length - 1);
+			memcpy(outstr, buff + length - bytes, bytes);
+			instr += bytes;
+			outstr += bytes;
+		}
+		else
+			*outstr++ = *instr++;
+	}
+	free(buff);
+}
+
+
+reversebuff(lefttoright, instr, eInstr, buff)
+short	lefttoright;
+char	*instr, *eInstr, *buff;
+{
+	int	bytes;
+
+	for (bytes = 0; instr < eInstr; bytes++){
+		if ( (LEFTTORIGHT  &&  NLCHARTYPE < 128) ||
+					(RIGHTTOLEFT  &&  NLCHARTYPE > 127))
+			break;
+
+		*buff-- = *instr++;
+	}
+	return(bytes);
+}

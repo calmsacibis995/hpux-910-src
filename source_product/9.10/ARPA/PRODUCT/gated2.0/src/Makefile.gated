@@ -1,0 +1,283 @@
+#
+#	Makefile for gated
+#
+#		Don't edit this file, make all changes in Makefile
+#
+#	$Header: Makefile.gated,v 1.1.109.8 92/05/12 16:33:11 ash Exp $
+#
+#	Compile time options:
+#
+#
+#		LOG_FACILITY	- if you don't like gated's syslog
+#				  output in the LOG_DAEMON class, use
+#				  this define to redirect it, for
+#				  example:
+#					-DLOG_FACILITY=LOG_LOCAL7
+#
+#		AGENT_SNMP	- define this when gated is being used
+#				  with NYSERnet's SNMP code.
+#
+#	Operating system defines:
+#
+#		No define is needed for BSD 4.3, IBM/4.3 on a PC/RT,
+#		Gould's UTX/32, Ultrix 1.x and 2.x, AIX/PS2, AIX/370.
+#
+#		ULTRIX3_X 	- if you are running DEC Ultrix 3.x
+#
+#		ULTRIX4_X 	- if you are running DEC Ultrix 4.x
+#
+#		TAHOE		- if you are running 4.3BSD TAHOE release.
+#
+#		BSD42		- for 4.2BSD or any 4.2 based system.  Any
+#				  person running SunOS v3.2 or earlier should
+#				  use this compilation flag.  NOTE:  you will
+#				  need kernel mods to run the HELLO protocol
+#				  under a 4.2 based system.
+#
+#		SUN3_3PLUS      - use this flag for SunOS v3.3 or greater.
+#                                 This SunOS understands subnetting, etc.
+#
+#		SUNOS		- use this flag for SunOS v4.0 or
+#				  greater.  This version of SunOS is
+#				  similar to BSD 4.3
+#
+#		Note: if you are running stock Ultrix 1.x you will
+#		need to make some kernel mods.
+#
+#		IBM/4.3 systems (BSD 4.3 on an IBM PC-RT) require the
+#		use of the High C complier instead of pcc.  This
+#		should be the default compiler
+#
+#		This version of gated does support BSD 4.3 Reno.  To
+#		compile and run on BSD 4.3 Reno it is necessary to make the
+#		following changes to Makefile.config:
+#			AWK=/usr/bin/awk
+#			LFLAGS=-p -s -c
+#			DFLAGS=DUMPFILE="/var/tmp/gated_dump"
+#
+
+
+OBJS= bgp.o bgp_init.o bgp_rt.o\
+		egp.o egp_init.o egp_rt.o\
+		ext.o hello.o\
+		if.o if_rt.o\
+		icmp.o inet.o\
+		krt.o main.o rip.o\
+		rt_control.o\
+		rt_table.o\
+		snmp.o\
+		str.o task.o trace.o\
+		parser.o lexer.o parse.o\
+		version.o
+
+SRCS= bgp.c bgp_init.c bgp_rt.c\
+		egp.c egp_init.c egp_rt.c\
+		ext.c hello.c\
+		if.c if_rt.c\
+		icmp.c inet.c\
+		krt.c main.c rip.c\
+		rt_control.c\
+		rt_table.c\
+		snmp.c\
+		str.c task.c trace.c\
+		parser.c lexer.c parse.c
+
+INCLUDES= bgp.h defs.h egp.h egp_param.h hello.h if.h include.h\
+		rip.h routed.h rt_control.h rt_table.h\
+		snmp.h task.h trace.h\
+		task_sig.h\
+		parse.h parser.h
+
+LIBGATED= libgated.a
+
+COMPAT= compat
+
+#
+#  The default is to build gated and ripquery
+#
+
+all:	make-start gated ripquery make-end
+
+
+gated: ${OBJS} ${LIBGATED}
+	@echo "Linking:	gated"
+	@${CC} ${CFLAGS} ${OBJS} -o gated ${LDFLAGS} ${LIBGATED}
+
+make-start:	true
+	@echo "Make started at `date` with:	${CC} ${CFLAGS}"
+
+make-end:	true
+	@echo "Make ended at `date`"
+
+true:;
+
+#
+#  SNMP needs special includes
+#
+
+snmp.o:	snmp.c
+	@echo "Compiling:	snmp.c"
+	@${CC} -c ${CFLAGS} -I${SNMP_INCLUDE} ${IFLAGS} ${DFLAGS} $*.c
+
+
+#
+#  Clean up objects and stuff, but not the output of YACC and LEX
+#
+
+clean::
+	-rm -f core gated ${OBJS}
+
+cleanall::	clean
+
+#
+#  Build a library of compatible routines for systems that do not have
+#  them
+#
+
+${LIBGATED}: true
+	@cd ${COMPAT}; $(MAKE) CC="${CC}" ${MFLAGS}
+
+clean::
+	-cd ${COMPAT}; $(MAKE) ${MFLAGS} clean
+
+cleanall::	clean
+	-cd ${COMPAT}; $(MAKE) ${MFLAGS} cleanall
+
+#
+#  task.c requires a header built from the names of the signals
+#  available on this system.
+#
+
+task_sig.h:	sigconv.awk ${SIGNAL_H}
+	${AWK} -f sigconv.awk < ${SIGNAL_H} > task_sig.h
+
+clean::
+	-rm -f task_sig.h
+
+#
+#	The parser is not normally rebuilt as not all systems will have
+#	yacc (bison) and lex (flex) available
+#
+
+parser:	parser.c parser.h lexer.c parse.c
+
+parser.h parser.c: parser.y
+	@echo "Building:	parser"
+	@rm -f parser.c parser.h
+	@$(YACC) $(YFLAGS) parser.y
+	@mv y.tab.c parser.c
+	@mv y.tab.h parser.h
+
+#
+#  This was added to get around a global optimizer problem with s300
+#  C compiler... it causes a out of memory error with yyparse
+#
+parser.o: parser.c
+	@${CC} -c +O1 ${IFLAGS} ${DFLAGS} parser.c
+
+
+lexer.c: lexer.l
+	@echo "Building:	lexical analyzer"
+	@rm -f lexer.c
+	@${LEX} ${LFLAGS} lexer.l
+	@mv lex.yy.c lexer.c
+
+clean::
+	-rm -f y.tab.* y.output
+
+cleanall::
+	-rm -f lexer.c parser.c parser.h
+
+#
+#  Build version ID from RCS info in file headers
+#
+
+version:	version.c
+
+version.c:	${SRCS} ${INCLUDES} version.awk version.hd
+	@echo 'Building:	version.c'
+#	@${HEAD} ${SRCS} ${INCLUDES} | ${AWK} -f version.awk - > version.c
+	/bin/rm -rf version.c
+	/bin/cat version.hd >version.c
+	@echo 'const char *build_date = "@(#) Built: '`date`'";' >> version.c
+	@cat version.c
+
+version.o:	version.c
+	@echo 'Compiling:	version.c'
+	@${CC} -c ${CFLAGS} ${IFLAGS} $*.c
+
+
+#
+#  Build the ripquery program
+#
+
+ripquery:	ripquery.o
+	@echo 'Linking:	ripquery'
+	@${CC} ${DFLAGS} ${CFLAGS} ripquery.o -o ripquery ${LDFLAGS} ${LIBGATED}
+
+ripquery.o:	ripquery.c
+	${CC} -c ${DFLAGS} ${CFLAGS} ${IFLAGS} $*.c
+
+clean::
+	-rm -f ripquery ripquery.o
+
+#
+#  Install the new executables if they are out of date
+#
+
+install: ${DESTDIR}/gated ${DESTDIR}/ripquery
+	@echo "Don't forget to Customize gated.conf file for your site"
+	@echo "and install it in /etc (or wherever you specified)"
+
+${DESTDIR}/gated:	gated
+	install -c -s gated ${DESTDIR}
+
+${DESTDIR}/ripquery:	ripquery
+	install -c -s ripquery ${DESTDIR}
+
+
+#
+#	Build the emacs TAGS file
+#
+
+tags:	TAGS
+
+TAGS:	${SRCS} ${INCLUDE}
+	@echo "Building:	tags"
+	@etags -t ${SRCS} ${INCLUDES}
+
+cleanall::
+	-rm -f TAGS
+	
+	
+#
+#  Lint the source
+#
+
+lint:	lint-gated lint-ripquery
+
+lint-gated:
+	lint ${LINTFLAGS} ${DFLAGS} -I${SNMP_INCLUDE} ${SRCS} version.c |\
+		sed -e '/.*math.h.*/d' -e '/.*floatingpoint.h.*/d' -e '/trace.*used inconsistently.*/d' \
+		-e '/[sf]printf.*used inconsistently.*/d' -e '/.*warning: possible pointer alignment problem.*/d' \
+		| tee linterrs.gated
+
+lint-ripquery:
+	lint ${LINTFLAGS} ${DFLAGS} ripquery.c | tee linterrs.ripquery
+
+clean::
+	-rm -f linterrs.*
+
+#
+#  Build the dependency list and put into Makefile.depend
+#
+
+depend:	depend-gated depend-ripquery
+	cd ${COMPAT}; $(MAKE) ${MFLAGS} depend
+
+depend-gated:	task_sig.h parser.c lexer.c
+	${CC} ${DFLAGS} -I${SNMP_INCLUDE} ${IFLAGS} ${CCD} ${SRCS} ripquery.c > Makefile.depend
+
+depend-ripquery:
+	${CC} ${DFLAGS} ${IFLAGS} ${CCD} ripquery.c >> Makefile.depend
+

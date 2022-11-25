@@ -1,0 +1,17 @@
+;
+; Hosts_to_named can be used to generate these files from
+; the host table.
+;
+@       IN	SOA	foo.cnd.hp.com. root.foo.cnd.hp.com. (
+					1	; Serial
+					10800	; Refresh every 3 hours
+					3600	; Retry every hour
+					604800	; Expire after a week
+					86400 )	; Minimum ttl of 1 day
+	IN	NS	foo.cnd.hp.com.
+
+localhost	IN	A	127.0.0.1
+
+foo        	IN	A	15.19.8.1
+foo-alias	IN	CNAME	foo.cnd.hp.com.
+foo        	IN	MX	10	foo.cnd.hp.com.

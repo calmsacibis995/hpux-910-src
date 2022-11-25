@@ -1,0 +1,34 @@
+
+Welcome to version 4.7 of bind (Beta Test 3).
+
+There have been several changes to the named boot file (/etc/named.boot)
+that you should be aware of.  "domain" has been obsoleted and is no
+longer recognized (it generates a warning message), and the term
+"suffixes", which was added in version 4.7alpha, has been removed.
+
+The manual page on named (named.8) has been updated to reflect all
+these changes.  Please read this and look at the example files
+before installation.  You should also note the changes in the
+resolver code to support non-fully-qualified addresses and per-user
+host aliases.  See hostname(7) for an overview.
+
+There have been numerous changes to named, fixing most of the known
+bugs that can be fixed without major structural changes in the server.
+Several server configurations that failed before should now work.
+Certain robustness problems have been fixed, in particular bounds-
+checking when processing incoming packets.
+
+The root "hint" cache and cache file remain the largest problem area,
+along with named's naivete in accepting bogus server's data.
+These will be addressed in the next release, along with asynchronous
+zone transfers, intelligent reloading of zone files, and faster startup.
+
+This version (4.7) will replace the previously-fielded version (4.5).
+Version 4.5 has a serious bug that causes the generation of a continuous
+stream of bogons to the root domain servers (bogus queries with the query
+response bit set and possibly garbage for nsid and rcode).  It is imperative
+that these versions of named be replaced as fast as possible.  I urge you to
+field 4.7 quickly, for the sake of the root domain servers.
+
+	Mike Karels
+	bind-test@ucbarpa.Berkeley.EDU

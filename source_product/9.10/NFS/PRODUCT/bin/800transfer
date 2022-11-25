@@ -1,0 +1,166 @@
+#!/bin/sh
+# @(#)$Revision: 1.11.109.1 $	$Date: 91/11/19 13:51:43 $
+
+#=============================================================================
+#
+#  This shell script, "transfer" is based on the install_SSIT script 
+#  written by Dave Erickson.
+#
+#  This script does the following:
+#
+#		-  create the directory structures, including:
+#			-  all of the needed subdirectories under each of
+#			   these directories
+#			-  set the owner, group and permission bits of
+#			   each of the files (as determined by you)
+#			-  keep track of what strings for the files
+#			   that were sent to the directory 
+#		- tar the final directory into a file that can be sent
+#		  to our partners
+#
+#  This script is used to deliver the executable versions of the NFS commands
+#  to our partners.
+#
+#  Author:  Dave Erickson, CND, April 1987.
+#	    Modified by Cristina Mahon, CND, June 1987.
+#
+#=============================================================================
+
+GENERIC_NAME=tmp/nfs.800	#  The name given the GENERIC PRODUCT NAME
+				#  directory.
+LIST_FILE=800_files		#  The name of the file which contains the
+				#  list of files for distribution.
+DATE=`date "+%m%d"`		#  Date when this script is run, used 
+				#  to mark results of run
+WHAT_STRINGS=/tmp/pwh_str.$DATE #  The name of the file that contains the what 
+				#  strings for all the files submitted
+TAR_FILE=/tmp/cnd.cmds.$DATE	#  Tar file that will contain the full
+				#  product to be distributed to the partners
+
+##########
+#  Check to make sure the user is root.
+##########
+
+if [ `whoami` != root ] ; then
+	echo "\nYou must be root to run $0.\n" >&2
+	exit 1
+fi
+
+##########
+#  Check to make sure the LIST_FILE exists.
+##########
+
+if [ ! -r $LIST_FILE ] ; then
+	echo "\nThe input file, \"$LIST_FILE\", does not exist or is not readable.\n" >&2
+	exit 1
+fi
+
+##########
+#  The function "set_defaults" is used to set the default owner, group and
+#  permission on a file or directory.
+##########
+
+set_defaults() {
+	chown root $1
+	chgrp other $1
+	chmod ${2:-755} $1
+}
+
+##########
+#  Remove and recreate the needed high-level directories.
+##########
+
+echo "Recursively removing /$GENERIC_NAME...."
+rm -rf /$GENERIC_NAME
+echo "Now creating /$GENERIC_NAME"
+mkdir /$GENERIC_NAME
+
+##########
+#  Open the list of files for reading.
+##########
+
+exec 3<$LIST_FILE
+
+##########
+#  Read pairs of lines from the list of files, skipping blanks lines and
+#  lines beginning with '#'.
+##########
+
+while read LOCAL_FILE FINAL_FILE <&3 ; do
+
+	##########
+	#  Check only non-blank lines.
+	##########
+
+	if [ -n "$LOCAL_FILE" ] ; then
+
+		##########
+		#  Check only lines not beginning with '#'.
+		##########
+
+		if [ `expr substr $LOCAL_FILE 1 1` != "#" ] ; then
+			read PERMISSION OWNER GROUP <&3
+			echo "$FINAL_FILE:  $PERMISSION $OWNER $GROUP"
+
+
+			##########
+			#  Strip any leading '/'s from the final filename.
+			##########
+
+			while [ `expr substr $FINAL_FILE 1 1` = / ] ; do
+				LEN=`expr length $FINAL_FILE - 1`
+				FINAL_FILE=`expr substr $FINAL_FILE 2 $LEN`
+			done
+
+			##########
+			#  Generate a list of the directories under which the
+			#  final filename will reside.
+			##########
+
+			DIRNAME=`dirname $FINAL_FILE`
+			while [ $DIRNAME != . ] ; do
+				echo $DIRNAME >> $$.dirs
+				DIRNAME=`dirname $DIRNAME`
+			done
+
+			##########
+			#  Sort the list of directories, so they will be created
+			#  in the proper order.  If the directory does not
+			#  normally exist as part of the HP-UX directory
+			#  structure, add it to the fileset list.  Create the
+			#  subdirectory if it's not there.
+			##########
+
+			sort $$.dirs -o $$.dirs
+			exec 4<$$.dirs
+			while read DIR <&4 ; do
+				if [ ! -d /$GENERIC_NAME/$DIR ] ; then
+					mkdir /$GENERIC_NAME/$DIR
+				fi
+			done
+			rm $$.dirs
+
+			##########
+			#  Copy the local file to its final subdirectory, and
+			#  set the desired owner, group and permissions.  Add
+			#  its name to the fileset list.
+			##########
+
+			cp $LOCAL_FILE /$GENERIC_NAME/$FINAL_FILE
+			what $LOCAL_FILE >> $WHAT_STRINGS
+			chown $OWNER /$GENERIC_NAME/$FINAL_FILE
+			chgrp $GROUP /$GENERIC_NAME/$FINAL_FILE
+			chmod $PERMISSION /$GENERIC_NAME/$FINAL_FILE
+		fi
+	fi
+done
+
+echo "Tar the final directory\n"
+cd /$GENERIC_NAME
+tar cvf $TAR_FILE .
+
+##########
+#  We're done!
+##########
+
+echo "\nDone.\n"

@@ -1,0 +1,116 @@
+#!/bin/ksh
+# @(#) $Revision: 70.4 $
+#
+fileset=UNSUPP
+
+#############################################################################
+#
+#  This is the decustomize script for the UNSUPP fileset. This fileset is
+#  currently available only on series 300/400.
+#
+#############################################################################
+
+script=/system/$fileset/decustomize
+arch=$1
+op=$2
+arg=$3
+exitval=0
+
+if [ "$op" = "check" ] ; then
+	exit 0	# ok to remove
+fi
+
+. /system/UX-CORE/custom_utils
+
+PATH=/bin:/usr/bin:/etc
+daemon=xntpd
+
+#
+# killdaemon - Kill of daemon specified in the $daemons shell variable if they 
+# are running.  Make sure to kill them in reverse order of invocation in case 
+# one is a parent of another.
+#
+function killdaemon
+{
+    pid="`ps -e | /bin/fgrep "$daemon" | sort -r | awk '{print $1}'`"
+    if [ -n "$pid" ]; then
+	kill -15 $pid >/dev/null 2>&1
+	sleep 3
+	kill -9 $pid >/dev/null 2>&1
+    fi
+}
+
+
+#
+# Main 
+#
+
+#
+# Kill the daemon, but only if it's on the local machine and it's 68k
+#
+
+
+i=`getcontext`
+case $i in
+	*localroot*|*standalone*)
+		case $i in 
+			*MC68*)
+				if [ "$arch" = HP-MC68020 ] ; then
+					killdaemon
+				fi
+			;;
+			*)
+			;;
+		esac
+		;;
+	*)
+		;;
+esac
+
+#======
+# /etc/rc
+#
+# Disable (comment out) invocations of xntpd_start if they exist and
+# aren't already commented out.
+#======
+
+if [ -f /etc/rc ] && \
+   [ "`grep -c xntpd_start < /etc/rc`" != 0 ] ; then
+    RCTEMP=/tmp/rctemp$$
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Make a fixed copy of /etc/rc
+    if $awk '
+        #
+        # Disable calls to "xntpd_start"
+        #
+        ## /remoteroot\)/ {in_case=1} # not for clusters!
+        /localroot\)/  {in_case=1}
+        /standalone\)/ {in_case=1}
+        /;;/           {in_case=0}
+        /^[ \t]*xntpd_start/  {	# uncommented invocation
+            if (in_case)
+            {
+		printf("#%s\n",$0);
+                next;
+            }
+        }
+        { print } # print the line if not previously skipped
+        ' $OLDRC > $RCTEMP
+    then
+	if cmp -s $OLDRC $RCTEMP ; then
+	    : # it didn't change; do nothing
+	else
+	    # replace /etc/rc with changed copy
+            cp_set 544 bin bin $RCTEMP $OLDRC
+            cat <<EOF >&2
+NOTE:    Disabled support in /etc/rc for starting up the xntp daemon.
+	 All invocations of xntpd_start have been commented out.
+EOF
+	fi
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+exit $exitval

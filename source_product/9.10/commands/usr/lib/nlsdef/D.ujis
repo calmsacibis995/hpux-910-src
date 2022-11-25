@@ -1,0 +1,163 @@
+# @(#) $Revision: 64.2 $      
+
+langname	"japanese.ujis"
+langid		222
+
+# code set name is "UJIS" and the code set number is 62
+
+hprevision	"$Revision: 64.2 $"
+
+###########################################################################
+# Set up the LC_ALL category
+
+LC_ALL
+yesstr		"yes"				# yes string
+nostr		"no"				# no string
+direction	""				# left-to-right orientation
+END_LC
+
+###########################################################################
+# Set up the LC_CTYPE category
+
+LC_CTYPE
+isupper		'A' - 'Z'			# true if an upper case char
+		166 - 223
+islower		'a' - 'z'			# true if a lower case char
+		166 - 223
+isdigit		'0' - '9'			# true if a digit
+isspace		' '		0x9 - 0xd	# true if a space
+ispunct		'!' - '/'	':' - '@' 	# true if a punctuation char
+		'[' - '`'	'{' - '~'
+		161 - 165
+iscntrl		0x0 - 0x1f	0x7f		# true if a control char
+isblank		' '				# true if a blank char
+isxdigit	'0' - '9'	'a' - 'f'	# true if a hex digit
+		'A' - 'F'
+
+isfirst		0x8e 0xa1 - 0xfe
+
+issecond	0xa1 - 0xfe
+
+ul		< 'A' 'a' >	< 'B' 'b' >	# < upper lower >
+		< 'C' 'c' > 	< 'D' 'd' >
+		< 'E' 'e' >	< 'F' 'f' >
+		< 'G' 'g' >	< 'H' 'h' >
+		<0x49 0x69>	<0x4a 0x6a>	# hex constants can be used
+		<0113 0153>	<0114 0154>	# octal constants can be used
+		< 77  109 >	< 78  110 >	# decimal constants can be used
+		< 'O' 'o' >	< 'P' 'p' >	# literal constants can be used
+		< 'Q' 'q' >	< 'R' 'r' >
+		< 'S' 's' >	< 'T' 't' >
+		< 'U' 'u' >	< 'V' 'v' >
+		< 'W' 'w' >	< 'X' 'x' >
+		< 'Y' 'y' >	< 'Z' 'z' >
+
+bytes_char	"2"
+alt_punct	"\241\241!\"#$%&'()*+,-./:;<=>?@[\\]^_`{|}~"
+						# alternative blank
+END_LC
+
+
+###########################################################################
+# Set up the LC_COLLATE category
+# Machine collation for now; don't have to set up the collate table
+
+
+###########################################################################
+# Set up the LC_MONETARY category
+
+LC_MONETARY
+int_curr_symbol		"JPY "
+currency_symbol		"\\"
+p_cs_precedes		"1"
+p_sep_by_space		"0"
+n_cs_precedes		"1"
+n_sep_by_space		"0"
+mon_decimal_point	"."
+mon_thousands_sep	","
+mon_grouping		"\3"
+positive_sign		""
+p_sign_posn		"1"
+negative_sign		"-"
+n_sign_posn		"3"
+int_frac_digits		"2"
+frac_digits		"2"
+crncystr		"-\\"
+END_LC
+
+
+###########################################################################
+# Set up the LC_NUMERIC category
+
+LC_NUMERIC
+decimal_point	"."			# RADIXCHAR: radix character
+thousands_sep	","			# THOUSEP: thousands separator
+grouping	"\3"
+alt_digit	""			# no alternative digits
+END_LC
+
+
+###########################################################################
+# Set up the LC_TIME category
+
+LC_TIME
+d_t_fmt		"%E%b%.1d\306\374 (%a), %p %.1I\273\376%.1M\312\254%.1S\311\303"
+d_fmt		"%E%b%.1d\306\374 (%a)"
+t_fmt		"%p %.1I\273\376%.1M\312\254%.1S\311\303"
+day_1		"\306\374\315\313\306\374"		# weekday names
+day_2		"\267\356\315\313\306\374"
+day_3		"\262\320\315\313\306\374"
+day_4		"\277\345\315\313\306\374"
+day_5		"\314\332\315\313\306\374"
+day_6		"\266\342\315\313\306\374"
+day_7		"\305\332\315\313\306\374"
+abday_1		"\306\374"			# weekday abbreviations
+abday_2		"\267\356"
+abday_3		"\262\320"
+abday_4		"\277\345"
+abday_5		"\314\332"
+abday_6		"\266\342"
+abday_7		"\305\332"
+mon_1		"1\267\356"			# month names
+mon_2		"2\267\356"
+mon_3		"3\267\356"
+mon_4		"4\267\356"
+mon_5		"5\267\356"
+mon_6		"6\267\356"
+mon_7		"7\267\356"
+mon_8		"8\267\356"
+mon_9		"9\267\356"
+mon_10		"10\267\356"
+mon_11		"11\267\356"
+mon_12		"12\267\356"
+abmon_1		"1\267\356"			# month abbreviations
+abmon_2		"2\267\356"
+abmon_3		"3\267\356"
+abmon_4		"4\267\356"
+abmon_5		"5\267\356"
+abmon_6		"6\267\356"
+abmon_7		"7\267\356"
+abmon_8		"8\267\356"
+abmon_9		"9\267\356"
+abmon_10	"10\267\356"
+abmon_11	"11\267\356"
+abmon_12	"12\267\356"
+am_str		"\270\341\301\260"			# AM string
+pm_str		"\270\341\270\345"		# PM string
+year_unit	"\307\257"				# the unit of year
+mon_unit	"\267\356"			# the unit of month
+day_unit	"\306\374"			# the unit of day
+hour_unit	"\273\376"			# the unit of hour
+min_unit	"\312\254"			# the unit of minute
+sec_unit	"\311\303"				# the unit of second
+era_fmt		"%N%o\307\257"			# era format
+era		"+:2:1990/01/01:+*:\312\277\300\256"
+		"+:1:1989/01/08:1989/12/31:\312\277\300\256:%N\270\265\307\257"
+		"+:2:1927/01/01:1989/01/07:\276\274\317\302"
+		"+:1:1926/12/25:1926/12/31:\276\274\317\302:%N\270\265\307\257"
+		"+:2:1913/01/01:1926/12/24:\302\347\300\265"
+		"+:1:1912/07/30:1912/12/31:\302\347\300\265:%N\270\265\307\257"
+		"+:2:1869/01/01:1912/07/29:\314\300\274\243"
+		"+:1:1868/09/08:1868/12/31:\314\300\274\243:%N\270\265\307\257"
+		"-:1868:1868/09/07:-*::%Y\307\257"	# 1868 -> 1868, 1867 -> 1867, 1866 -> 1866, ...
+END_LC

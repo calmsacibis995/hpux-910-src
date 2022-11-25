@@ -1,0 +1,6 @@
+:
+# @(#) $Header: Checktape_hp,v 66.2 90/09/20 12:21:53 kb Exp $
+echo Checking HP 9000/300 tape
+set -v
+set -e
+tcio -i /dev/rct/c0d1 | cpio -ictv

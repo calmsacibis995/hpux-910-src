@@ -1,0 +1,4 @@
+#!/bin/sh
+# remote root verison of cancel
+
+remsh `cnodes -r` /usr/bin/cancel $*

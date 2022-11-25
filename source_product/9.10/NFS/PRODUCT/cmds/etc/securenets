@@ -1,0 +1,27 @@
+# /etc/securenets file
+#
+# The format of this file is one of more lines of
+#
+# netmask netaddr
+# Both netmask and netaddr must be dotted quads.  The netmask is not
+# generally the same as the netmask set in /etc/netlinkrc.  It can
+# be used to restrict valid system address to be in certain subnets.
+# A netmask of 255.255.255.255 will work with any system IP address.
+# A netmask of 255.255.255.0 followed by a subnet address with '0'
+# in the last position will allow access from any address in that subnet.
+#
+# Note that for a machine with two Ethernet interfaces (i.e. a gateway
+# machine), the IP addresses of both have to be in /etc/securenets.
+#
+# Examples:
+# The entry: 
+#	255.255.255.0 128.185.124.00
+# allows access to all hosts in the 128.185.124 subnet
+# 
+# The entry:
+#	255.255.255.255 15.13.104.138
+# allows access only to the host with IP address 15.13.104.138.
+#
+# Sample entries:
+#255.255.255.255	15.1.42.95
+#255.255.255.0		15.1.128.0

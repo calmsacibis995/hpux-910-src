@@ -1,0 +1,6 @@
+## FacetTerm  wy30ans  COMMON  description file 05/18/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy30ans.FC,v 70.1 92/03/09 16:08:49 ssa Exp $
+answer-..........=30\r
+question-identify=\E\s
+pass-identify_cleanup=^D

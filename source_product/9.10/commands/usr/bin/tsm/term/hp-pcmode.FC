@@ -1,0 +1,66 @@
+## FacetTerm  vt220mode  COMMON description file  09/22/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp-pcmode.FC,v 70.1 92/03/09 15:59:05 ssa Exp $
+##--- CONTROL_8_BIT ---##
+### control_8_bit
+### graphics_8_bit
+### input_8_bit
+input_8_bit
+### force_CS8
+### no_clear_ISTRIP
+### NOT_IN_COMMON
+### terminal_mode_default=number
+### NOT_IN_COMMON
+### terminal_mode_name-CG=
+### terminal_mode_select-0-RP=
+### out_terminal_mode_switch-0-RP=
+### out_terminal_mode_select=
+terminal_mode_name-0-CG.=vt220-7-bit
+terminal_mode_select-*0-R..=\E[62;1"p
+terminal_mode_select-0010-..=\E F
+out_terminal_mode_switch-40-R.C=\E[62;1"p
+terminal_mode_name-1-CG.=vt220-8-bit
+terminal_mode_select-*1-R..=\E[62;2"p
+terminal_mode_select-*1-R..=\E[62;0"p
+terminal_mode_select-*1-R..=\E[62"p
+out_terminal_mode_select=\E[62"p\E[?42l\E}
+out_terminal_mode_switch-41-R.C=\E[62"p
+terminal_mode_select-0111-..=\E G
+terminal_mode_name-2-...=vt100
+terminal_mode_select-*2-R..=\E[63"p
+terminal_mode_select-*2-R..=\E[61"p
+out_terminal_mode_switch-42-R.C=\E[61"p
+terminal_mode_name-3-CG.=hpterm
+terminal_mode_select-03132333-R=\E[44"p
+terminal_mode_select-43-R.C=\E[>12l\E[>11l
+terminal_mode_name-4-.GS=hpterm-pc
+terminal_mode_select-34-R.C=\E[>12h\E[>11h
+out_terminal_mode_switch-041424-R.C=\E[44"p\E[>12h\E[>11h
+pass-multinational=\E[?42l
+pass-G2_in_GR=\E}
+### rows_change-number-N=
+rows_change-24-=\E[>10l
+rows_change-25-=\E[>10h
+### rows_change_se_on_switch_only
+rows_change_se_on_switch_only
+### rows_change_does_clear_screen
+rows_change_does_clear_screen
+### rows_change_turns_auto_wrap_off
+### rows_change_turns_auto_wrap_on
+### rows_change_switch_page_number_0
+### rows_change_clears_pages
+### rows_change_sets_cursor_on
+### rows_change_resets_insert_mode
+rows_change_resets_insert_mode
+### rows_change_resets_appl_keypad_mode
+### rows_change_resets_keypad_xmit
+### rows_change_resets_scroll_region
+rows_change_resets_scroll_region
+### rows_change_resets_character_set
+rows_change_resets_character_set
+### rows_change_attributes_off--P=
+rows_change_attributes_off--URBDOIPA=
+### rows_change_resets_save_cursor
+rows_change_resets_save_cursor
+### rows_change_resets_origin_mode
+### rows_change_sets_mode-00000000-00000000=

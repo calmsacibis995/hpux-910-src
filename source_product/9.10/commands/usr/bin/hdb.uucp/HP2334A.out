@@ -1,0 +1,21 @@
+/ @(#) $Revision: 51.1 $    
+/ was version 37.1 of old uucp
+/
+/ program to dial the 2334 with a given number
+/
+	send "\#\r"
+	expect 20 "COM"
+	error dialfailed
+
+/ leave 2334 in 'command' state
+	run sleep 2
+	send "\020"
+	expectg 10 "@"
+	error waitfailed
+	exit 0
+
+dialfailed:
+	exit 1
+
+waitfailed:
+	exit 2

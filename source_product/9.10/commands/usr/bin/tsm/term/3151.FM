@@ -1,0 +1,36 @@
+## FacetTerm Menu Capabilities for IBM 3151 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: 3151.FM,v 70.1 92/03/09 16:46:31 ssa Exp $
+##-menu-cap-init_string=\E\s1
+##-menu-cap-cursor_address=\EY%p1%'\s'%+%c%p2%'\s'%+%c
+##-menu-cap-clear_screen=\EK
+##-menu-cap-clr_eol=\EI
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\E<A
+##-menu-cap-exit_alt_charset_mode=\E<@
+##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyy{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\E4@
+##-menu-cap-shadow_attr=\E4@
+##-menu-cap-item_attr=\E4H
+##-menu-cap-box_attr=\E4A
+##-menu-cap-title_attr=\E4A
+##-menu-cap-highlight_attr=\E4A
+##-menu-cap-highlight_blink_attr=\E4D
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\EA
+##-menu-cap-key_down=\EB
+##-menu-cap-key_right=\EC
+##-menu-cap-key_left=\ED
+##-menu_cap-key_home=\EH
+##-menu-cap-key_ignore=\Ej\r
+##-menu-cap-key_ignore=\Ea\r
+##-menu-cap-key_ignore=\Eb\r
+##-menu-cap-key_ignore=\Ec\r
+##-menu-cap-key_ignore=\Ed\r
+##-menu-cap-key_ignore=\Ee\r
+##-menu-cap-key_ignore=\Ef\r
+##-menu-cap-key_ignore=\Eg\r
+##-menu-cap-key_ignore=\Eh\r
+##-menu-cap-key_ignore=\Ei\r

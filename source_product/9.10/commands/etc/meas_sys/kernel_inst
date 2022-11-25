@@ -1,0 +1,294 @@
+HP Confidential.
+
+$Header: kernel_inst,v 1.15 88/03/17 16:10:41 dah Exp $
+
+This document describes the measurement system instrumentation shipped
+in all HP-UX kernels on the HP9000 series 800 (840, 825, + 850 so
+far).  First we describe the instrumentation originally shipped, then
+describe the changes made to the various releases.  This version of
+the document includes some preliminary information on rel 3.0, based
+on its current state.  For information on the measurement system
+itself see "External Specification for Release 5 of the HP-UX/RT
+Measurement System", in the Spectrum Program Library, available from
+Ken Macy.  Changes for 1.1, 2.0, and 3.0 are described near the end.
+At the very end are some troubleshooting hints for using the
+measurement system.
+
+Remember that you can always run "msmod -l" on your system to see what
+measureemnts are available on your kernel.  The descriptions below are a 
+supplement to that information.
+
+================================================================
+
+Original Instrumentation:
+
+There are five major groups of instrumentation in the kernel.
+	1) kernel preemption measurements.
+	2) kernel scheduling measurements.
+	3) filesystem/disk measurements.
+	4) networking measurements.
+	5) sampler (MPE-like) measurements.
+
+The first set was done by hpda!davel.  The measurements are ifdef'ed
+out in the kernel sources.  This means a recompilation (at least) is
+necessary to view the data.  See his papers (Usenix) for more info.
+
+The fourth set was done by IND, both for internal debugging and to
+support user-analysis of network traffic.  The networking routines are
+in sys/dctrace.c .  They are enabled by network ioctls.  hpda!rohit is
+the current contact.  (These measurements id's will not be visible
+until a magic networking ioctl has been done on your system).
+
+In the discussion that follows, time generally means a struct timeval.
+This will be printed out by translate as two integers: the first being
+the seconds since Jan 1, 1970, and the next being the microseconds.
+Unlike many Unix systems, our microseconds are meaningful.
+
+Most of the records passed to the measurement system are structures.
+C does it's normal job of packing elements into the words necessary.
+In most cases this is fine, but it turns out that since pid is a
+short, and pri a char, they both get squeezed into one word.  For
+example if a process had pid 1 and priority 2, the output could look
+like 66070 (0x00010214) if the junk in the low byte was 22.
+Pictorially:
+
+	<16-bits-of-pid.><8bit_pri><8bitjunk>
+
+The kernel scheduling measurements were done by hpda!dah.  The kernel
+scheduling measurements allow observation of processes entering and
+leaving the run queue.  The basic idea is to track setrq and remrq
+with enough outside context from other calls to (for example)
+distinguish between a process that is remrq'd to run and one which is
+remrq'd because it is being shuffled to a different priority.  The
+instrumentation records:
+	
+	trap - calls setrq+remrq in unusual ways, hence monitor it.
+		Note that not all trap calls generate records, just
+		those that cause manipulation of the run queues.
+
+	sleep - when a process gives up the cpu to wait for an event,
+		record the time (two words), pid of the process sleeping,
+		priority it sleeps at (this tells you a lot about what
+		it's sleeping for - e.g. there's a specific priority for
+		terminal input sleeps), address that it's sleeping on.
+		(In principle, this tells you more, but it's harder
+		to interpret).
+
+	swtch -calls setrq+remrq in unusual ways, hence monitor it.
+
+	setrq - make a job runnable (either because it just stopped
+		running, or because it just became possible for it to run)
+
+	remrq - remove from run queue.  Oddly enough, this means run the
+		process.
+
+	syscall - calls setrq+remrq in unusual ways, hence monitor it.
+		Note that this is not a general instrumentation of
+		syscall, just of the the part that's interesting from
+		a scheduling point of view.  For example counting these
+		records would give a wildly inaccurate count of the
+		number of syscalls on the system.
+
+	exec - When a new process starts (actually it started in the
+		(v)fork, but the interesting info isn't available there),
+		record lots of stuff about it.
+		The comment line actually inaccurately describes the
+		data output by this measurement.  Each time a new
+		process is started, it outputs three records:
+			- the pid (in left 16 bits)
+			- the name of the new process (e.g. cc)
+			- the time
+
+	exit - This is so that we know when the process leaves the world
+		of scheduling.  Otherwise it appears to remain forever
+		in a running state (since it never goes back onto a run
+		queue.
+		
+
+The filesystem measurements were done by hpda!ajf and are:
+	
+
+	disc_io_id
+		Each physical transfer results in two records.  
+		The first is when the request arrives at the driver, and
+		the second is when the physical read completes.  Because
+		of the request ordering done in the driver, these times
+		could be substantially separated.  Other than the fact
+		that the cylinder field is always zero, I know of no
+		way to distinguish the two records (except of course by
+		order.)
+
+		The components of the disc_io_id record are:
+			timeval (2 words as usual)
+			size (of the request in bytes)
+			device (actually this is a bitfield, compressing
+				the info of "c5d0s3" into one word.  The
+				rightmost 4 bits (28-31) are the section
+				number (s3), bits 24-26 are the unit
+				number (d0), and bits 16-23 are the lu (c5).
+			block number within the device (partition).
+			cylinder - physical cylinder number (or 0 as described
+				above).
+			read flag (1 for read, 0 for write)
+	disc_ctd_id
+		Like disc_io_id, but for cartridge tapes.  I've never
+		used a system that had one, so I don't know if it works.
+
+	bread_read
+		Buffered read routine.  This is the part that reads what's
+		asked for.
+		
+	bwrite
+		Buffered write routine.
+		Generally as above.  The hit field is a boolean indicating
+		whether the buffer cache was able to satisfy the request
+		without generating a physical io.
+
+	bdwrite
+		Like bdwrite, but doesn't try to force the write out to disk.
+
+	breada_read
+		Like bread_read, but also start read_ahead of the next block.
+		This is the information about the requested block.
+		
+	breada_reada
+		Like bread_read, but also start read_ahead of the next block.
+		This is the information about the read-ahead block.
+			
+
+The sampler instrumentation records sampled information about the
+kernel.  I am told that it is somewhat like what the MPE kernel
+samples.  (See hpda!mr for more info).  Every 4th clock tick (pokeable
+from outside the kernel), it records:
+
+	the current pid (or -1 if none)
+	the current program counter of that process
+	the state of the process
+	the approximate time (only accurate to 10ms to reduce overhead).
+The possible values for state are integers defined in h/dk.h :
+	0 user
+	1 nice
+	2 sys
+	3 idle
+
+
+================================================================
+
+Changes for Kernel Release 1.1
+
+	The internals of the measurement system were changed to
+improve speed and reduce space used in the kernel.  The user interface
+is unchanged.  There are new versions of iscan + msmod (with identical
+functionality and user interface) for use with 1.1 .  The new iscan
+will work correctly with either 1.0 or 1.1, while different versions
+of msmod are necessary for the different kernels.  Translate is
+unchanged.
+
+	New instrumentation was added in the Alink driver.  It's name
+starts with disc2_io_id, and is identical to the instrumentation of
+the normal disk driver (disc_io_id).
+
+================================================================
+
+Changes for Kernel Release 2.0
+
+	Instrumentation was added for timeshare_insert, a new
+procedure used to manipulate the queue of disk requests.  When turned
+on, it reports the time, the cylinder of the new request, the current
+length of the disk queue and a list of the current cylinders in the
+queue in order.  Realtime requests are reported as negative values
+(e.g. a realtime request to cylinder 7 would be reported as -7).  At
+most 1000 entries will be reported.  This instrumentation can be used
+to observe the state of the queue when disk_dynamic_limit and
+disk_static_limit are modified.
+
+================================================================
+
+Changes for Kernel Release 3.0
+
+	The major changes for this release are the addition of real
+syscall instrumentation, and the improvement of the disk
+instrumentation.
+
+	The new syscall instrumentation consists of two id's, described as:
+	"syscallstart: time, pid, syscall_num, ret_ptr, args"
+and
+	"syscallexit: time, pid, val1, val2"
+
+	As usual time is two words.  Pid is a separate word containing
+the pid of the calling process.  Syscall_num is the number of the
+syscall (each syscall has a unique number with a few exceptions such
+as getpid, getppid).  Ret_ptr is the address in the user program where
+the call was made.  Args are the arguments passed to the syscall.
+Note that no attempt is made to interpret these in a syscall dependent
+manner.  If the argument is an int, that value is reported, if it's a
+pointer to an int, only the value of the pointer is reported.  This is
+probably not always optimal, but it's not clear where the line should
+be drawn.
+
+	The exit record (make sure you match it by pid with the
+originator, more than one syscall can be in progress at once!)
+contains the obvious values, except that it has two return values.
+This appears to be a time-honored kludge of unix, wherein one syscall
+can simulate two (e.g. getpid, getppid).  Unfortunately, there's no way
+for the kernel to resolve this ambiguity.
+
+	The new disk instrumentation has the same fields as the old
+information, but separate id's are now used, so that you don't have to
+use the hack with cyl=0 to distinguish initiations from completions.
+A new addition is another record with the same information output when
+the request is removed from the queue and handed off to the physical
+device.  This allows the queuing time to be separated from the actual
+device service time (and was added at DMD's request).  These changes
+have been made to the existing disc0 and disc2 drivers, but not yet to
+the new disc1 driver.  I expect that disc1 will also be finished by
+the 3.0 functionally complete milestone.
+
+	The new lan driver may also be instrumented for 3.0, but I am
+not aware of any more details about it.
+
+================================================================
+
+Troubleshooting Hints
+
+	Iscan and msmod need to read /dev/kmem.  This means that it
+must be generally readable, or they must be setuid.  Since msmod
+modifies the kernel (except for the -l option), it must be either run
+as root or be setuid.
+
+	In order for the measurement system to function, it needs a
+'device' called /dev/meas_drivr .  Just mknod it as a character device
+with major 41 and minor 0 (type "mknod /dev/meas_drivr c 41 0").  The
+driver itself is always in the kernel.
+
+	If these problems have been corrected, you most likely have
+the wrong version of iscan or msmod for the kernel you're running (see
+"Changes for Kernel Release 1.1 above").
+
+	The 1.0 version of msmod should have an RCS string like
+Header: msmod.c,v 4.27 86/07/14 14:44:08 dah Exp
+
+	The 1.1 version of msmod should have an RCS string like
+Header: msmod.c,v 4.29.1.1 87/03/04 10:15:29 dah Exp
+
+	The iscan for 1.0 only had an RCS string like
+Header: iscan.c,v 4.34 86/08/28 14:01:12 dah Exp
+
+	The iscan that works with 1.0 and 1.1 should have an RCS string like
+Header: iscan.c,v 4.37 87/03/16 11:05:54 dah Exp
+
+	More on versions: Translate works everywhere.  The versions of
+iscan and translate that work on 1.1 also work on 1.2, 2.0, 2.1, 3.0,
+etc.  If they complain only about "...doesn't match ... Hopefully this
+isn't a problem", then it isn't a problem.  This an unfortunate
+"feature" of our integration process: code keeps changing revisions
+after it has left the developers' hands.
+
+	During development of 2.0 changes were made to the filesystem
+for NFS that could cause a panic when certain of the buffer cache
+instrumentation is turned on.  Final versions of 2.0 have this fixed,
+though the bug reportedly propagated to the 3.0 trunk at one point as
+well.  If your system crashes when you turn on all the instrumentation, 
+avoid using the buffer cache instrumentation until you get a more
+modern (correct) kernel.
+

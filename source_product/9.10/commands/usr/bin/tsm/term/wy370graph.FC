@@ -1,0 +1,14 @@
+## FacetTerm  wy370graph  COMMON description file  09/10/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy370graph.FC,v 70.1 92/03/09 16:48:45 ssa Exp $
+graph_screen_on=\E[?38h
+graph_screen_on_side_effect=clear_screen,scroll_region,character_set
+graph_screen_off=\E[?38l
+graph_screen_off_side_effect=clear_screen
+out_graph_screen_off=\E[?38l\E[?7h
+pass_current=\E[32;1x
+pass_current=\E^L
+pass_current=\E`
+pass_current=^]
+pass_current=^_
+pass_current=\Ea

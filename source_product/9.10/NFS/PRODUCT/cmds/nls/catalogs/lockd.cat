@@ -1,0 +1,296 @@
+$set 1
+$ ==============
+$ hash.c
+$ ==============
+320 zap_all_locks_for %s\n
+321 ...zapping: cp@0x%x, le@0x%x\n
+322 DONE zap_all_locks_for %s\n
+$ ==============
+$ prot_alloc.c
+$ ==============
+1 release_le: pre_le not free yet\n
+2 release_le: pre_fe not free yet\n
+3 malloc
+$ ==============
+$ prot_libr.c
+$ ==============
+11 %1$s:  len(%2$d) greater than max len(%3$d)\n
+12 (%x), oh= 
+13 , svr= %s, fh = 
+14 , op=%1$d, ranges= [%2$d, %3$d)\n
+15 ***** granted reclocks *****\n
+16 ***** msg queue *****\n
+17  (%x, 
+18  lstat =%d),
+19  NULL),
+20 \n
+21 *****no entry in msg queue *****\n
+22 ***** blocked reclocks *****\n
+23 ***** no blocked reclocks ****\n
+24 ***** monitor queue on (%1$s, %2$d) *****\n
+25 used_le=%1$d, used_fe=%2$d, used_me=%3$d\n
+26 lock granted\n
+27 lock denied\n
+28 lock denied_nolocks\n
+29 lock blocked\n
+30 lock denied_grace_period\n
+31 %1$s: kill process (%2$d)\n
+32 %s: cont_lock: remote and local lock tbl inconsistent\n
+33 LOCKD QUEUES:
+34 ***** reply queue *****\n
+35  (%x, 
+36  lstat =%d),
+$ ==============
+$ prot_lock.c
+$ ==============
+41 %1$s: (%2$x)pre_fe == NULL : ABORT in add_reclock\n
+42 %1$s: add_reclock: insrtp = a = %2$x should not happen!!!\n
+43 %1$s: (%2$x) pre_le is NULL : ABORT in delete_reclock\n
+44 %s: add_mon = -1 in delete, should not happen\n
+45 %s: impossible!\n
+46 %s: same blocking lock already exists\n
+47 %1$s: wakeup(%2$x) cannot take place due to add_call malloc error\n
+48 %s: get_fe: out of fs_rlck entry\n
+49 %1$s: obj_copy(a = %2$x, b = NULL), a\n
+50 %1$s: unknown contact monitor (%2$d) : ABORT in contact_monitor\n
+51 %1$s: contact_mon: problem with private data size (%2$d) to status monitor\n
+52 %1$s: site %2$s not subscribe to status monitor service \n
+53 %s: lockd cannot contact local statd\n
+54 %1$s: fcntl (wakeup): errno = %2$d!\n
+$ ==============
+$ prot_main.c
+$ ==============
+62 %s: Not authorized for network subsystem:  Permission denied\n"
+63 %1$s: range[%2$d, %3$d] \n
+64 %s: during grace period, please retry later\n
+65 %1$s: accept reclaim request(%2$x)\n
+66 %s: req discard due status monitor problem\n
+69 %1$s: msg reply(%2$d) to procedure(%3$d)\n
+70 %s: rpc.lockd killed upon request\n
+73 %1$s: range[%2$d, %3$d)\n
+74 %s: during grace period, please retry later\n
+75 %s: accept reclaim request\n
+76 %s: req discard due status monitor problem\n
+78 %1$s: lm_timeout = %2$d secs, grace_period = %3$d secs, hashsize = %4$d\n
+80 %s: in.lockd: fork failure : ABORT in main\n
+81 %s: cannot create tcp service.\n
+82 %s: unable to register (NLM_PROG, NLM_VERS, tcp).\n
+83 %s: cannot create udp service.\n
+84 %s: unable to register (NLM_PROG, NLM_VERS, udp).\n
+85 %s: cannot create udp service.\n
+86 %s: unable to register (KLM_PROG, KLM_VERS, udp).\n
+87 %s: cannot create tcp service.\n
+88 %s: unable to register (KLM_PROG, KLM_VERS, tcp).\n
+89 %s: cannot create tcp service.\n
+90 %s: unable to register (KLM_PROG, KLM_VERS, tcp).\n
+93 %s: svc_run returned\n
+94 signal handler: signal = %d\n
+95 Usage: %s [ -t timeout] [ -g grace_period] [ -l logfile]\n
+96 NLM_PROG+++ version %1$d proc %2$d\n
+97 %s: cannot create tcp service.\n
+98 %s: unable to register (NLM_PROG, NLM_VERSX, tcp).\n
+99 %s: cannot create udp service.\n
+100 %s: unable to register (NLM_PROG, NLM_VERSX, udp).\n
+$ ==============
+$ prot_msg.c
+$ ==============
+101 \nalarm! enter xtimer:\n
+102 **********end of grace period\n
+103 remove grace period msg (%x) from msg queue\n
+104 xtimer retransmit: 
+105 klm_msg = %x\n
+106 klm_msg == NULL\n
+107 xtimer reply to (%x): 
+$ ==============
+$ prot_pklm.c
+$ ==============
+111 \enter klm_msg_routine(proc =%1$d): op=%2$d, (%3$d, %4$d) by 
+112 \n
+113 retransmitted msg!\n
+114 %1$s: *****warning:*******process issues request %2$x (proc = %3$d) before obtaining response for %4$x\n
+115 retransmitted local block lock (%x)\n, nl
+116 %1$s: unknown klm_reply proc(%2$d)\n
+117 klm_reply: stat=%d\n
+$ ==============
+$ prot_pnlm.c
+$ ==============
+121 proc_nlm_test(%x) \n
+122 enter proc_nlm_lock(%x) \n
+123 enter proc_nlm_cancel(%x) \n
+124 enter proc_nlm_unlock(%x) \n
+125 enter proc_nlm_granted(%x)\n
+126 enter proc_nlm_test_msg(%x)\n
+127 enter proc_nlm_lock_msg(%x)\n
+128 enter proc_nlm_cancel_msg(%x)\n
+129 enter proc_nlm_unlock_msg(%x)\n
+130 enter proc_nlm_granted_msg(%x)\n
+131 %1$s: unknown nlm_reply proc vaule: %2$d\n
+132 rpc nlm_reply %1$d: %2$d\n
+133 nlm_reply: (%1$s, %2$d), result = %3$d\n
+135 exit nlm_reply\n
+136 %s: inconsistent  lock reply exists, ignored \n
+137 inconsistent reply (%1$d, %2$d) exists for lock(%3$x)\n
+138 nlm_res_routine(%x)\n
+139 enter nlm_granted_res\n
+140 %1$s: %2$d not supported in nlm_call\n
+141 nlm_call to (%1$s, %2$d) op=%3$d, (%4$d, %5$d); retran = %6$d, valid = %7$d\n
+143 enter call_back(%1$d, %2$d), op =%3$d\n
+144 nlm_call error: ABORT in call_back\n
+$ ==============
+$ prot_priv.c
+$ ==============
+151 %s: unable to free arguments\n
+152 this is not for me(%1$d): %2$d\n
+153 enter proc_lm_crash due to %s failure\n
+154 crashed site is not my concern(%s)\n
+155 remove blocked lock (%x)\n
+156 this is not for me(%1$d): %2$d\n
+157 enter proc_lm_recovery due to %1$s state(%2$d)\n
+158 I have been declared as failed!!!\n
+159 recovered site is not my concern(%s)\n
+160 %1$s: blocked req (%2$x) cannot be found in msg queue\n
+161 %1$s: reclaim requet (%2$x) cannot be sent and cannot be queued either!\n
+$ ==============
+$ prot_proc.c
+$ ==============
+171 enter local_lock\n
+172 %1$s: fcntl (local_lock) : errno = %2$d!\n
+173 enter remote_lock\n
+174 %s: rpc not supported\n
+175 enter local_unlock\n
+176 %1$s: fcntl (local_unlock) : errno = %2$d!\n
+177 enter remote_unlock\n
+178 %s: rpc not supported\n
+179 enter local_test\n
+180 lock blocked by %1$d, (%2$d, %3$d)\n
+181 %1$s: fcntl (local_test) : errno = %2$d!\n
+182 lock blocked by %1$d, (%2$d, %3$d)\n
+183 enter remote_test\n
+184 %s: rpc not supported\n
+185 enter local_cancel(%x)\n
+186  local_cancel: dequeue(%x)\n
+187 enter remote_cancel(%x)\n
+188 remove msg(%x) due to remote cancel\n
+189 %1$s: cancel request pre_le=%2$x pre_fe = %3$x\n
+190 %s: rpc not supported\n
+191 enter local_granted\n
+192 %s: lock_granted msg discarded due to lock tbl inconsistent (unlock reply may be lost!)\n
+193 %1$s: msg(%2$x) is deleted from msg queue because reply cannot be created due to malloc prob\n
+194 %s: msg no longer in msg_queue\n
+195 %s: local granted: rpc not supported\n
+196 %s: msg no longer in wait_queue, this may be a retransmitted msg\n
+197 enter cont_lock\n
+198 %s: cont_lock: remote and local lock tbl inconsistent\n
+199 %1$s: unknown lock return: %2$d\n
+200 enter cont_unlock\n
+201 %1$s: unkown rpc_unlock return: %2$d\n
+202 enter cont_test\n
+203 lock blocked by %1$d, (%2$d, %3$d)\n
+204 %1$s: cont_test: unknown return: %2$d\n
+205 enter cont_cancel\n
+206 cont_cancel: msg must be removed from msg queue due to remote_cancel, now has to be put back\n
+207 %s: cont_cancel: remote and local lock tbl inconsistent\n
+208 cont_cancel: dequeue(%x)\n
+209 %s: cont_cancel cannot find blocked lock request in msg queue! \n
+210 %s: remote and local lock tbl inconsistent\n
+211 %1$s: unexpected remote_cancel %2$d\n
+212 enter cont_reclaim\n
+213 reclaim request(%x) is granted\n
+214 reclaim block request (%x) is granted!!!\n
+215 %s: reclaim blocked request already granted, impossible\n
+216 %1$s: reclaim lock(%2$x) fail!\n
+217 reclaim block lock fail due to(%x)\n
+218 %s: reclaim block lock has been granted with reclaim rejected as nolocks\n
+219 %1$s: reclaim lock(%2$x) fail!\n
+220 %s: blocked reclaim request already granted locally, impossible\n
+221 %1$s: reclaim lock req(%2$x) is returned due to grace period, impossible\n
+222 %1$s: unknown cont_reclaim return: %2$d\n
+$ ==============
+$ sm_monitor.c
+$ ==============
+231 %1$s: stat_mon: len(=%2$d) is greater than 16!\n
+232 %1$s: stat_mon proc(%2$d) not supported\n
+233  request monitor:(svr=%1$s) mon_name=%2$s, my_name=%3$s, func =%4$d\n
+234 timeout, retry contacting status monitor\n
+235 rpc.lockd: Cannot contact status monitor!\n
+236 Error talking to statmon errno= %d\n
+$ ==============
+$ svc_udp.c
+$ ==============
+241 svcudp_create: socket creation problem
+242 svcudp_create - cannot getsockname
+243 svcudp_create: out of memory\n
+244 svcudp_create: out of memory\n
+245 svcudp_create: out of memory\n
+246 enablecache: cache already enabled
+247 enablecache: could not allocate cache
+248 enablecache: could not allocate cache data
+249 enablecache: could not allocate cache fifo
+250 cache_set: victim not found
+251 cache_set: victim alloc failed
+252 cache_set: could not allocate new rpc_buffer
+$ ==============
+$ xdr_klm.c
+$ ==============
+$ ==============
+$ xdr_nlm.c
+$ ==============
+$ ==============
+$ xdr_sm.c
+$ ==============
+$ ==============
+$ prot_share.c
+$ ==============
+300 init_nlm_share\n
+301 proc_nlm_share: %1$s from %2$s\n
+302 oh=
+303 \nfh=
+304 \n
+305 share: mode=%1$d, access=%$\n
+306 ...null sxh - new file\n
+307 ...sxh @0x%x\n
+308 ...matching sxx @0x%x\n
+309 ...not compatible\n
+310 ...compatible. new sxx @0x%x\n
+311 destroy_client_shares for %s\n
+312 ... zap sxx @0x%x\n
+313 ...  &  sx @0x%x\n
+314 File sharing request from %1$s (mode %2$d, access %3$d) conflicts\nwith sharing for %4$s (mode %5$d, access %6$d)\n
+$ ==============
+$ prot_freeall.c
+$ ==============
+330 proc_nlm_freeall from %s\n
+$ ==============
+$ prot_sec.h
+$ ==============
+340 %s:  needs to be executed with SEC_ALLOWDACACCESS, SEC_REMOTE, SEC_KILL and\n              SEC_ALLOWMACACCESS privileges
+$ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$ NOTE!!!!! pmap.c, udp.c, and tcp.c are in both the statd and lockd
+$ catalogs.  If you are changing this portion of the file make sure
+$ you are changing the rest!!!!!
+$ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$ ==============
+$ pmap.c
+$ ==============
+1000 Error in recvfrom on socket used for portmap requests
+1001 pmap_recvfrom(): xid (%d) not found
+1002 Port = %1$d, prog = %2$d, host = %3$s
+1003 pmap_svc_run(): Select failed
+$ ==============
+$ tcp.c
+$ ==============
+10040 call_tcp[%1$s, %2$d, %3$d, %4$d] returns %5$d
+$ ==============
+$ udp.c
+$ ==============
+1020 ERROR -- out of memory
+1021 add hash entry (%1$x), %2$s, %3$x, %4$x\n
+1022 delete hash entry (%1$d), %2$s, %3$d, %4$d\n
+1023 call_udp[%1$s, %2$d, %3$d, %4$d] returns %5$d
+1024 Cannot send due to out of cache\n
+1025 (%1$x):[%2$s, %3$d, %4$d] is a new connection\n
+1026 (%1$x):[%2$s, %3$d, %4$d] is a timed out connection\n
+1027 clnt_create(%1$s): addr = %2$x, port = %3$d
+1028 socket() call failed
+1029 Failure in fcntl() to create new socket
+1030 socket descriptor for link_sock = %d\n

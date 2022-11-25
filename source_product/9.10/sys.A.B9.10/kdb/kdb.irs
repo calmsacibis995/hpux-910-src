@@ -1,0 +1,428 @@
+.ND "Last Update: April 27, 1990"
+.TL
+IRS for Series 300 Kernel Debugger
+.AF "\*(DT"
+.AU "Bill McMahon/Additions by Stuart Bobb"
+.MT 4
+.H 1 Introduction
+The purpose of this document is to 
+explain some of the inner workings of the kernel debugger.
+.P
+.B SYSDEBUG
+is based on version 25.6 of
+.B cdb
+and on an earlier assembly language kernel debugger.
+It has many of the features of
+.B cdb
+as well as some features that make it more useful for
+debugging in an environment where only some of the
+files contain debug information.
+It should be noted that version 25.6 of
+.B cdb
+had not been ported to the series 300 yet.
+There were some features, such as calling procedures
+from within
+.B cdb
+which were not operational yet.
+Some of these were implemented in a more simplified
+fashion, or not implemented at all.
+Also, since the debugger runs at the kernel level and
+cannot read the file system once it has booted the
+kernel, the ability to read source files while debugging
+was stripped out.
+(In HP-UX release 8.0 portions of the code were updated to
+.B cdb
+version 66.1.)
+.H 1 "Build process"
+To simplify the handling of extern functions, a special header file,
+ext.h, is built by the makefile if it doesn't exist.  See the
+makefile for further details on adding procedural formals and building
+the header ext.h.
+The kernel debugger is compiled like any ordinary command, but a
+game is played with it at linking time. First, two different versions
+of it are linked. In one of them the relocation records are preserved.
+This version is linked with the '-d' and '-r' options which creates
+a relocatable version of the kernel debugger where the relocation
+records are all relative to the start of the file. The second linking
+does a full linking of the kernel debugger. This fills in all those
+same locations as are found in the relocation records of the first
+file with their addresses relative to location zero.
+In the next step the command
+.B mvtd
+moves the text and data portions of the fully relocated file into the
+text and data portions of the relocatable file. We now have a kernel
+debugger which is ready to travel as described in the section
+about the boot-up sequence.
+.H 1 "Boot-up Sequence"
+The kernel debugger is loaded into memory by the secondary loader at
+the location LOWRAM + 1 page, and begins execution at that address.
+(LOWRAM is described in Boot Rom documentation. It is a location that
+contains the value of the lowest physical memory address.)
+The code that is running has been relocated to run at location zero --
+which is not where it is located -- so the initial code sequence must
+be carefully constructed to run entirely PC-relative.
+.P
+One of the first things the kernel debugger does is check for the presence of
+address 0x880000. This address space was
+initially set aside for the debugger's purposes. It allows the
+debugger to run without stealing any memory from the system.
+This information is passed to the routine 
+.I relocate().
+This routine will copy the debugger from where it is to location
+0x880000 if that location exists. After that it opens the kernel
+debugger file and reads in the relocation records. It uses routines
+in the secondary loader to do the open and reads. These routines are
+found via a jump table at a pre-set location in memory. 
+After reading in the relocation records 
+.I relocate()
+will patch either the kernel debugger located at 0x880000 (if it exists)
+or the one where it currently resides (at LOWRAM + 1 page). The only
+operation that needs to be performed is to add the location of the base
+of the kernel debugger to the location in each relocation record. The
+debugger then makes a subroutine jump through a procedure variable and
+presto chango, it is running in its proper location, fully relocated.
+Once again, all the code up to this point must run PC-relative.
+.P
+The kernel debugger then zeroes out its bss segment and goes
+to
+.I kdb_main().
+.H 1 "Auto-booting the Kernel"
+At this point the kernel debugger will begin auto-booting the kernel.
+The debugger will print out a message saying "Auto-booting /hp-ux. Hit
+any key to abort."
+It will then loop for a while (about 10 seconds worth).
+If no key is struck the debugger treats that as the command "2R".
+If a key is struck one of the possible "R" or "r" commands must be
+given. See the manual for the syntax and semantics of these commands.
+Suffice it to say that the "2R" command will cause the file
+.B /hp-ux
+to be read in and started running.
+.H 1 "Booting the kernel"
+The first step in booting the kernel is to read all the necessary parts 
+into memory. The text and data segments are the first parts read in.
+If the kernel debugger is running at 0x880000 the kernel is loaded in
+starting at LOWRAM + 1 page (same as the secondary loader) else it
+is loaded in at LOWRAM + 1 page + 1/2 megabyte (giving 1/2 megabyte for
+the debugger to run in). Then the symbol table is read in, sorted and
+stored in the debugger's heap space for its own use. The symbolic debug
+tables are then read in and also stored in the debugger's heap space.
+The debugger must have enough physical RAM to store the entire chunk of
+debug information, since it cannot go out and read in more as it needs to
+(which is the way
+.B cdb
+25.6 was designed).   The debugger will give a warning if it thinks that the
+sum of the kernel symbols, debug tables and the space the debugger is using 
+for its own text, data and bss will exceed the allowed space limit.  
+(That space limit is defined by
+.I KDB_SPACE.
+See also the section on extending the address space). If that happens, the 
+debugger will close the current file, and let you select a different kernel to 
+boot.  Otherwise, the debugger is now ready to start the kernel running.
+If the command given to load the kernel was "0R" the debugger returns
+to the command line at this point, allowing debugging of the initial boot up
+sequence, but not allowing use of any symbol table information, since
+mapping has not been turned on yet.
+.P
+If we assume that the debugger is going to bring up the kernel and not
+stop there, the next step is to set up the stack and jump to the kernel.
+In order to do this the debugger
+pushes on the same
+information that the secondary loader does (text size, data size, processor
+type, etc.). In addition it pushes a flag indicating the presence of the
+kernel debugger, the number of pages to be mapped for the
+debugger as well as the starting address from which to map.
+.P
+Some other
+information pushed on the stack includes the address of the debugger's
+printf, scanf and gets routines. 
+These values are used to set procedure variable in the kernel during
+its initial boot-up sequence.
+This allows someone building kernels
+to write to and read from the debugger terminal.
+For an explanation of how to use these variables see the SYSDEBUG manual
+entry
+.P
+The debugger then
+starts the kernel running.
+.P
+The first task of the kernel is to turn on mapping. The kernel maps itself
+to start at location zero. It also maps IO space (2 meg - 8 meg) 
+with logical address equal
+to physical address. It maps 8 meg to 9 meg logical to physical for use
+by the debugger and for use by test ROMs. If the debugger is not running
+at 0x880000 then the kernel will map the space the debugger told it it
+needed logical to physical as well. After turning on the mapping the 
+kernel jumps back to the debugger if it is there. If the command to load
+the kernel was "1R" then the debugger returns to the command line at this
+point. This allows debugging the powerup sequence following mapping and
+since mapping has been turned on, all symbol table information is valid.
+.P
+If the command was "2R", the debugger does not stop at this point but
+returns back to the kernel which then boots itself up and starts running.
+.H 1 "Debugger-Kernel Interface"
+There are two debugger entry points. The first is 
+.I kdb.
+This is the address at which the kernel enters the debugger when it first
+jumps to the debugger after turning mapping on, when it receives an NMI,
+and when a panic occurs. This address is passed to the kernel when it
+first starts running. The second entry point is 
+.I kdb_bp.
+This is the address which the debugger places in the interrupt vector
+table for trace trap, trap 13 and trap 14.
+.P
+The debugger owns two interrupt vectors all to itself. The first is
+trap 13. This is the breakpoint command. A trap 13 instruction is 
+inserted at all breakpoint locations as part of the debugger's return
+to the kernel (through
+.I kdb_cont).
+The second is trap 14. This instruction is there to provide another
+mechanism for entering the debugger. If the trap 14 instruction is placed
+inside a piece of code in either the kernel or in a user program its
+execution will cause the debugger to be entered.
+The trap 14 can be useful for entering the debugger when debugging on
+a remote console where you cannot generate an NMI to get into the
+debugger.
+These two vectors are grabbed after the kernel returns from 
+setting up mapping. They were initialized to different values when the 
+kernel text segment was read into memory.
+.P
+The debugger shares three interrupt vectors with the kernel these are
+the trace, bus and address interrupt vectors. The reason the debugger
+shares bus and address with the kernel is that if you are running in the
+debugger and generate a bus error by trying to look at a bad address, you
+don't want the kernel to try to handle it. Vice-versa, if the kernel is
+running you don't want to have to go through the debugger in order to
+handle all the bus errors that get generated for pagein for instance.
+The trace trap is shared so that the kernel debugger can do single
+stepping while it is in the driver's seat and the user level debuggers
+(like
+.B cdb
+and
+.B adb)
+can be used when the kernel is running.
+These vectors are saved each time the debugger is entered.
+The debugger's value for the vectors are then inserted.
+They are then restored to the kernel's values
+by the debugger as it returns to the kernel.
+.H 1 "68010 Restrictions"
+The debugger for a system whose processor is a 68010 is restricted to
+running only at location 0x880000. It cannot run at LOWRAM + 1 page.
+The reason for this is that the 68010 has a 16 megabyte address space.
+The high 8 bits are ignored. This means that the kernel debugger at
+address LOWRAM + 1 page would map onto logical memory that the kernel
+recognizes. In fact on the system I discovered this problem on it mapped
+into the address of the kernel variable "u". For this reason the 
+debugger on a system with a 68010 processor must run at 0x880000. The
+debugger checks to make sure this is the case in 
+.I kdb_main.
+.H 1 "Double NMI protection"
+When the debugger is first entered at location
+.I kdb
+a check is made to see if the PC value is greater than the
+start address of the debugger and less than its current max size. This
+is to allow NMI to be hit while you are in the debugger. (Or to allow
+a user to hit NMI more than once trying to get into the debugger). If
+we are already in the debugger we do not want to save the state of the
+exception that is on the stack. If we did not do this we would
+find that we could not get back
+to the kernel since the return information would returns us to the debugger
+and we would be hosed. (to use the vernacular).
+.H 1 "How Can It Be In Two Places At Once..."
+So why does the kernel debugger run at both 0x880000 and LOWRAM + 1 page?
+Well Johnny, a long time ago in a division far, far away...
+the kernel debugger ran only at location 0x880000. This worked fine
+and the debugger was essentially non-interfering in the operation of the
+kernel (it didn't take memory from it and make things work different
+depending upon whether the debugger was loaded or not). But with the
+advent of DIO-II systems which cannot address 0x880000,
+and
+some of which can not contain
+DIO-I memory boards we found ourselves with systems we could not debug.
+So we needed to have a debugger which could run some place in DIO-II
+memory. We also did not want to lose the advantage of having a debugger
+that did not steal space from a system. 
+So the decision was to have
+.B SYSDEBUG
+run at 0x880000 if it existed, else run at LOWRAM + 1 page.
+.H 1 "Extending the Address Space of the Kernel Debugger"
+As it is now, the kernel debugger will use only 1/2 megabyte of 
+physical memory.  This may not be considered enough in the future.
+In order to extend the address space of the kernel debugger both
+of the starting locations for
+.B SYSDEBUG
+must be considered.
+.P
+In order to extend the address space for the kernel debugger when
+it resides at LOWRAM + 1 page the value of the constant
+.I KDB_SPACE 
+which is defined in Kdb.h must be changed to the desired value. This
+value (currently 1/2 megabyte) can not exceed 4 megabytes without changes
+to the kernel itself.  Currently, the kernel has only one segment
+table for the debugger, thus the 4 megabyte limit.
+.P
+In order to extend the address space for the kernel debugger when
+it resides at 0x880000 it must be moved to 0x800000. 
+.I KDB_SPACE
+would need to be set to 1 megabyte.
+.I dbg_addr
+(in Kasm.s)
+would need to be set to 0x800000.  In a similar fashion, Ksys.c would need
+changes where ever 0x880000 is used.
+For the debugger at this address 1 megabyte is the maximum. The kernel
+uses addresses above 0x900000.
+.H 1 KDBKDB
+At various places in the source you will find references to the compile flag
+KDBKDB. This compile flag is used to build the debugger debugger.
+The debugger debugger will load at 0x800000. It can then load in the
+debugger and be used to debug it. Sort of. I have not done it for a
+while and I remember it being a painful process at best. The debugger*2
+and the debugger do not have their interface carefully defined. For instance,
+the debugger does not give control back to debugger*2 and the debugger*2
+will lose its breakpoint vector once a kernel is loaded in by the debugger.
+What I ended up doing was getting the debugger*2 started, getting the 
+debugger started, 
+setting a breakpoint someplace that wouldn't be hit initially (assuming the
+debugger wasn't going to move itself)
+getting the kernel started, going into the debugger,
+using the debugger to set the trap 15 vector (trap 15 is KDBKDB's breakpoint
+instruction) and then running something that would hit the breakpoint
+instruction. If the interface between the debugger and debugger*2 were
+improved it could become more useful. Things like the symbol table of the
+debugger (which was relocated to address zero) were difficult to use in
+the debugger*2 as well. I never used the debugger*2 very much. It proved
+most useful in single stepping through the powerup sequence for the 
+debugger.
+.H 1 CDBKDB
+At various places in the source you will find references to the compile flag
+CDBKDB. This compile flag is used to build a stripped down version of
+the debugger which can be run as a normal process, usually under cdb.
+There are a great many limitations to this (you can read in a kernel but
+obviously not get it running) but much of the cdb portions of the kdb code 
+can be exercised under the control of cdb.
+.H 1 "Stack is OK"
+As a simple stack overflow check I stuck the string "Stack is OK" at
+the bottom of the stack. This string is then printed out by the "I"
+command of
+.B SYSDEBUG.
+Should the command fail to print this string it means that the stack has
+used more space than is allocated to it and has overflowed into the data
+space below it, causing the weird behaviour that you can't explain.
+.H 1 "Kins.c and Kprintf.c"
+The code to print out assembly language instructions was stolen from 
+.B adb.
+Now
+.B adb
+is an arcane and obscure piece of code that possesses its own 
+.I printf
+routine. This 
+.I printf
+routine comes from some strange pre Bell 3.0 
+.I printf
+routine. After trying to bring Kins.c out of the stone age I
+decided it was easier to use 
+.B adb's
+.I printf
+routine instead.
+That is why Kprintf.c looks like it does.
+.H 1 "Cdb Was Stripped Down"
+One of the major considerations in implementing the kernel debugger
+was size. The less needed for the debugger itself the more that was
+available for debug information. So I tried to make the cdb portion
+as small as possible.
+.P
+One of the most enjoyable engineering tasks I have had was removing
+code from the
+.B cdb 
+portion of the debugger. This was similar to the enjoyment I got when
+once I had the opportunity to work with a friend demolishing a house
+after I had spent a couple of years in construction work.
+.P
+The first step was to remove all the ifdef's from the code with
+.B unifdef.
+For the first time I had code I could read!
+Numerous array and buffers were made smaller. Floating point support
+was removed (via an ifdef (oh well)). Supports for Pascal and 
+Fortran language constructs were removed. Support for file reading
+commands was removed. Code that was not removed remained as close as
+possible to the original
+.B cdb
+source.
+.P
+One area that was changed was the treatment of the meaning of constants.
+Originally a command like
+"0x1000/4x" would have printed
+.DS
+0x1000  0x1000 0x1004 0x1008 0x100c
+.DE
+since the 0x1000 would not have been dereferenced. But if you had
+typed "0x1000/4i" the four assembly language instructions at 0x1000 would
+have been printed. The case would have been the same for symbols which
+were in the linker symbol table e.g. "main/i" would print the instruction
+at address main whereas "main/x" would have printed the address of main.
+I decided to make things consistent and to do what I felt most users would
+want. So I made
+.B SYSDEBUG
+treat constants as if they were addresses. Arithmetic can still be done
+with the debugger only it is necessary to use the "?" command instead of
+the "/" command to print the results.
+.H 1 "$noprotect"
+The normal behaviour of the debugger is to write enable kernel text pages
+upon entrance and write protect them upon return to HP-UX.  This allows the 
+debugger to modify kernel text (to set break points, change values, capture 
+exception vectors, etc.) but still supports kernels which write protect their
+text pages.
+.P
+There are two side effects of protecting kernel text pages that are
+important to remember.  The first is that the debugger can not work with
+a kernel that has been totally stripped of all symbolic information.  Usually
+such a kernel is unuseable for anything but installation purposes anyway.
+Note that the default hp-ux is not stripped.  If it were, ps(1) and other
+similar commands would be worthless.  The debugger can not work with such
+a kernel because it can't find the kernel symbol
+.I Sysmap
+which points to the page table entries.  The debugger must access the
+page table entries to write enable the text pages, since it must be permitted
+to modify text.  A double bus fault is the most likely outcome of using a
+kernel debugger with a stripped kernel.
+.P
+Another side effect is that the debugger will always write protect the kernel 
+text pages upon returning to HP-UX.  This will happen 
+.I even 
+.I if 
+.I the 
+.I kernel 
+.I did 
+.I not 
+.I protect 
+.I them
+.I to 
+.I begin 
+.I with.
+In general, this is the desired behaviour.  However, in some cases, this 
+might be very obnoxious, such as when working with a specially instrumented
+kernel.
+.P
+The 
+.I $noprotect 
+variable, which is not documented in the man page, is available
+to stop the debugger from write protecting kernel text pages upon return 
+to HP-UX.  This variable is initialized to 0, so the default behaviour is
+to write protect the text pages upon resuming HP-UX.  Setting 
+.I $noprotect 
+to 1 will cause the debugger to leave the text pages write enabled upon 
+returning to the kernel.  
+.I $noprotect 
+is set and unset in the same way as
+.I $scroll 
+and
+.I $notime,
+which are discussed in the man page.
+.H 1 "revno.c"
+The file revno.c has one purpose -- to hold the what strings for the 
+debugger. For your own sanity and for the sanity of those using the
+debugger, please be sure to change the what string for any new debugger
+created. It will make your life much easier.
+.P
+In 8.0 this file was renamed to hpux_rel.c and modified so that the
+version string will be incremented automatically by the shared source
+check in process when any file is modified.

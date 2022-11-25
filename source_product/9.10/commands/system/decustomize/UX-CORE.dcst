@@ -1,0 +1,10 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+
+/bin/cat <<EOF >&2
+ERROR:   The UX-CORE fileset is required for correct system operation
+	 and may not be removed from the system.
+EOF
+
+exit 1

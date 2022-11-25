@@ -1,0 +1,12 @@
+#
+# This file contains a configuration that will cause a host to use NIS first
+# then /etc/hosts, if NIS is either not up and running, or does not contain
+# any answer in the NIS maps.
+#
+# To use this configuration, copy this file to /etc/nsswitch.conf.
+#
+# See the Adminstering Internet Services Manual and the switch(4) man
+# page for more information on the name service switch.
+#
+
+hosts: nis [NOTFOUND=continue] files

@@ -1,0 +1,28 @@
+# @(#) $Revision: 66.1 $      
+*
+*	Messages for val command of SCCS.
+*
+-1
+"did not find the control line expected"
+The SCCS file should have contained the control string specified
+in the error message.  Run 'man sccsfile' for more information.
+-2
+"delta dates are out of sequence"
+The delta date/time pairs contained in the delta table are not
+in order.  This error can occur when deltas have been made during
+a period when the system clock was set incorrectly.  This problem
+must be fixed by the user, there is no tool to correct dates.
+Run 'man sccsfile' for more information.
+-3
+"illegal control line"
+The control sequence found in the file does not match any that
+are legal.  Run 'man sccsfile' for more information.
+-4
+"unexpected end of file"
+There is not sufficient information in this file to constitute
+a complete SCCS file.  Run 'man sccsfile' for more information.
+-5
+"checksum error"
+The checksum computed for the file does not match that contained
+in the checksum line.  This may be fixed with admin -z.
+Run 'man sccsfile' and 'man admin' for more information.

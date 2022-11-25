@@ -1,0 +1,88 @@
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/cflow/make.osf,v $
+# $Revision: 70.2 $
+
+# Common makefile for cflow
+
+XAR=/usr/apollo/bin/xar
+
+LIBS = -lmalloc
+FLAGS = -DFLEXNAMES -Dhp9000s200
+
+CCX=/paXdev/bin/cc
+
+CFLAGSX=-DOSF -UPAXDEV
+CFLAGS=-DOSF -DPAXDEV
+
+# This assumes the directory that contains lint and its associated files is
+# in shared source (at the same level of the source tree).
+LINT = /users/sje/tools/lint
+
+#
+# The cflow makefile depends on compiler tools that differ between the
+# s300 and s800.  These tools exist in separate directories for each
+# system: /usr/src/cmd/compilers for the s300, and /usr/src/cmd/mip for the
+# s800.  The tools have the same names, but cannot be shared.
+# To get around this, we have a default target in this makefile, which
+# will set the directory variable MIP appropriately for the system it is
+# building on.
+#
+
+default:
+	mipdir=/users/sje/tools/ccom; \
+	$(MAKE) -f make.osf MIP=$$mipdir all
+
+all : cflow cflow.X dag dag.X lpfx lpfx.X nmf nmf.X flip flip.X
+
+cflow: cflow.sh
+	-unifdef $(CFLAGSX) < cflow.sh > cflow
+	echo "Ignore return code"
+
+cflow.X: cflow.sh
+	-unifdef $(CFLAGS) < cflow.sh > cflow.X
+	echo "Ignore return code"
+
+dag.X: dag.c
+	$(CC) -A cpu,a88k $(CFLAGS) $(FLAGS) $(LDFLAGS) dag.c -o dag.a88kbin
+	$(LD) -A cpu,a88k dag.a88kbin -o dag.a88k
+	$(CC) -A cpu,m68k $(CFLAGS) $(FLAGS) $(LDFLAGS) dag.c -o dag.m68kbin
+	$(LD) -A cpu,m68k dag.m68kbin -o dag.m68k
+	$(XAR) -cv dag.X dag.m68k dag.a88k
+
+dag: dag.c
+	$(CCX) $(CFLAGSX) $(FLAGS) $(LDFLAGS) dag.c -o dag
+
+lpfx.X: lpfx.c $(LINT)/lerror.h $(LINT)/lmanifest $(LINT)/lpass2.h $(MIP)/manifest
+	$(CC) -A cpu,a88k $(CFLAGS) $(FLAGS) -I$(LINT) -I$(MIP) $(LDFLAGS) lpfx.c -o lpfx.a88kbin
+	$(LD) -A cpu,a88k lpfx.a88kbin -o lpfx.a88k
+	$(CC) -A cpu,m68k $(CFLAGS) $(FLAGS) -I$(LINT) -I$(MIP) $(LDFLAGS) lpfx.c -o lpfx.m68kbin
+	$(LD) -A cpu,m68k lpfx.m68kbin -o lpfx.m68k
+	$(XAR) -cv lpfx.X lpfx.m68k lpfx.a88k
+
+lpfx: lpfx.c $(LINT)/lerror.h $(LINT)/lmanifest $(LINT)/lpass2.h $(MIP)/manifest
+	$(CCX) $(CFLAGSX) $(FLAGS) $(LDFLAGS) -I$(LINT) -I$(MIP) lpfx.c -o lpfx
+
+nmf.X: nmf.c
+	$(CC) -A cpu,a88k $(CFLAGS) $(FLAGS) $(LDFLAGS) nmf.c -o nmf.a88kbin
+	$(LD) -A cpu,a88k nmf.a88kbin -o nmf.a88k
+	$(CC) -A cpu,m68k $(CFLAGS) $(FLAGS) $(LDFLAGS) nmf.c -o nmf.m68kbin
+	$(LD) -A cpu,m68k nmf.m68kbin -o nmf.m68k
+	$(XAR) -cv nmf.X nmf.m68k nmf.a88k
+
+nmf: nmf.c
+	$(CCX) $(CFLAGSX) $(FLAGS) $(LDFLAGS) nmf.c -o nmf
+
+flip.X: flip.c
+	$(CC) -A cpu,a88k $(CFLAGS) $(FLAGS) $(LDFLAGS) flip.c -o flip.a88kbin
+	$(LD) -A cpu,a88k flip.a88kbin -o flip.a88k
+	$(CC) -A cpu,m68k $(CFLAGS) $(FLAGS) $(LDFLAGS) flip.c -o flip.m68kbin
+	$(LD) -A cpu,m68k flip.m68kbin -o flip.m68k
+	$(XAR) -cv flip.X flip.m68k flip.a88k
+
+flip: flip.c
+	$(CCX) $(CFLAGSX) $(FLAGS) $(LDFLAGS) flip.c -o flip
+
+clean:
+	/bin/rm -f *.o a.out make.out core *a88k* *m68k*
+
+clobber: clean
+	/bin/rm -f cflow flip dag nmf lpfx *.X

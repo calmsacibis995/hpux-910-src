@@ -1,0 +1,114 @@
+#! /bin/ksh
+allargs=$*
+mkdir -p /Filesets.sl/C-INC/usr/include/sys
+chmog 555 bin bin /Filesets.sl/C-INC/usr
+chmog 555 bin bin /Filesets.sl/C-INC/usr/include
+chmog 555 bin bin /Filesets.sl/C-INC/usr/include/sys
+HPUXDEFS="
+	-DARCH42
+	-DBSDIPC
+	-DBSDJOBCTL
+	-DBSDPORT
+	-DCDROM
+	-DCOMPAT
+	-DDISKLESS
+	-DDOTDOT
+	-DDUX
+	-DFSD_KI
+	-DHFS
+	-DHPNFS
+	-DHP_NFS
+	-DINET
+	-DKERNEL_TUNE_DLB
+	-DLAN
+	-DLANRFA
+	-DLOCKF
+	-DMBUFFLAGS
+	-DMBUF_XTRA_STATS
+	-DMESG
+	-DMOREFILES
+	-DNARPA
+	-DNENHANCE
+	-DNFS
+	-DNFS3_2
+	-DNS
+	-DNSCONFIG
+	-DNSDIAG
+	-DNSIPC
+	-DNS_NAMING_GLOBALS
+	-DNS_QA
+	-DPOSIX
+	-DPRIVGRP
+	-DPROCESSLOCK
+	-DPXP
+	-DQUOTA
+	-DRTPRIO
+	-DSEMA
+	-DSHMEM
+	-DSOCKET
+	-DSYMLINKS
+	-D_NAMESPACE_CLEAN
+	-D__hpux
+	-D__unix
+	-Dhpux
+	-Dunix
+	-DACLS
+	-DAUDIT
+	-DSHADOWPWD
+	-DGETMOUNT
+	-DLOCAL_DISK
+	-DGT_64_FDS
+	-DEUC
+	-DSWFS
+	-DUT_HOST
+	-UASYNCIO
+	-UBELL5_2
+	-UBSD_ONLY
+	-UDISPATCHLCK
+	-UFS_TUNE1
+	-UHPUXTTY
+	-UINTRLVE
+	-UKERNEL
+	-UOLDHPUXTTY
+	-UPERFORM_MEM
+	-UPLOCKSIGNAL
+	-USDF
+	-UTEMPORARY_OBJECT_COMPAT
+	-U_ANSIC_CLEAN
+	-UASYNCIO
+	-U__hp9000s500
+	-U__pdp11
+	-U__u3b
+	-U__u3b5
+	-U__vax
+	-Uhp9000s500
+	-Updp11
+	-Uu3b
+	-Uu3b5
+	-Uvax"
+
+cd /src/usr/include
+for head in $allargs
+do
+    cat $head | /usr/local/bin/unifdef $HPUXDEFS > /Filesets.sl/C-INC/usr/include/$head
+done
+cd /Filesets.sl/C-INC/usr/include
+/usr/local/bin/chmog 444 bin bin *
+if [ -d sys ]
+then
+    chmog 555 bin bin sys
+fi
+if [ -f timers.h ]
+then
+    mv timers.h sys
+fi
+find . -print | cpio -pdumx /usr/include
+rm -f /Filesets.sl/C-INC/usr/include/switch.h
+mkdir -p /Filesets.sl/NFS-INC/usr/include/rpcsvc
+cat rquota.h | /usr/local/bin/unifdef $HPUXDEFS > /Filesets.sl/NFS-INC/usr/include/rpcsvc/rquota.h
+! chmog 444 bin bin /Filesets.sl/NFS-INC/usr/include/rpcsvc/rquota.h
+! chmog 555 bin bin /Filesets.sl/NFS-INC/usr/include/rpcsvc
+! chmog 555 bin bin /Filesets.sl/NFS-INC/usr/include
+! chmog 555 bin bin /Filesets.sl/NFS-INC/usr
+! chmog 555 bin bin /Filesets.sl/NFS-INC
+! chmog 555 bin bin /Filesets.sl

@@ -1,0 +1,41 @@
+## FACET/TERM  wyseedit  COMMON  description file 08/31/89
+## @(#) $Header: wyseedit.FC,v 66.2 90/09/20 12:57:33 kb Exp $
+perwindow-16-CQL----enter...............=\EZ0s%10s1^?
+perwindow_also-.........................=\EZ1s%10s1^?
+perwindow_default-......................=\EZ0s^?
+perwindow-16-CQL----backspace...........=\EZ0"%10s1^?
+perwindow_default-......................=\EZ0"^?
+perwindow-16-CQL----escape..............=\EZ0 %10s1^?
+perwindow_default-......................=\EZ0 ^?
+perwindow-16-CQL----end.................=\EZ0\\%10s1^?
+perwindow_default-......................=\EZ0\\^?
+perwindow-16-CQL----cursor_up...........=\EZ0+%10s1^?
+perwindow_default-......................=\EZ0+^?
+perwindow-16-CQL----cursor_down.........=\EZ0,%10s1^?
+perwindow_default-......................=\EZ0,^?
+perwindow-16-CQL----cursor_right........=\EZ0.%10s1^?
+perwindow_default-......................=\EZ0.^?
+perwindow-16-CQL----cursor_left.........=\EZ0-%10s1^?
+perwindow_also-.........................=\EZ1-%10s1^?
+perwindow_default-......................=\EZ0-^?
+perwindow-16-CQL----tab.................=\EZ0!%10s1^?
+perwindow_default-......................=\EZ0!^?
+perwindow-16-CQL----shift_cursor_up.....=\EZ00%10s1^?
+perwindow_default-......................=\EZ00^?
+perwindow-16-CQL----shift_cursor_down...=\EZ01%10s1^?
+perwindow_default-......................=\EZ01^?
+perwindow-16-CQL----shift_cursor_left...=\EZ02%10s1^?
+perwindow_default-......................=\EZ02^?
+perwindow-16-CQL----shift_cursor_right..=\EZ03%10s1^?
+perwindow_default-......................=\EZ03^?
+perwindow-16-CQL----repl.insert.........=\EZ0q%10s1^?
+perwindow_default-......................=\EZ0q^?
+perwindow-16-CQL----ins..shift_insert...=\EZ0p%10s1^?
+perwindow_default-......................=\EZ0p^?
+## 3161 keyboard only - puts programed contents on screen if not
+## perwindow-16-CQL----erase_eof...........=\EZ0Q%10s1^?
+## perwindow_default-......................=\EZ0Q^?
+pass=\EZ0Q%10s1^?
+## perwindow-16-CQL----shift_erase_eof.....=\EZ0W%10s1^?
+## perwindow_default-......................=\EZ0W^?
+pass=\EZ0W%10s1^?

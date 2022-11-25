@@ -1,0 +1,25 @@
+## FacetTerm  kt7ixkeys  description file 09/18/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: kt7ixkeys.FC,v 70.1 92/03/09 16:01:53 ssa Exp $
+pkey_key=\E|%p1%c1%25s1^Y$<80/>
+function_key-1=^A@\r
+function_key-2=^AA\r
+function_key-3=^AB\r
+function_key-4=^AC\r
+function_key-5=^AD\r
+function_key-6=^AE\r
+function_key-7=^AF\r
+function_key-8=^AG\r
+function_key-9=^AH\r
+function_key-0=^AI\r
+shift_function_key
+function_key-!=^A`\r
+function_key-@=^Aa\r
+function_key-#=^Ab\r
+function_key-$=^Ac\r
+function_key-%=^Ad\r
+function_key-^=^Ae\r
+function_key-&=^Af\r
+function_key-*=^Ag\r
+function_key-(=^Ah\r
+function_key-)=^Ai\r

@@ -1,0 +1,19 @@
+#!/bin/sh
+##	@(#)Make	$Revision: 1.8.109.1 $	$Date: 91/11/19 13:52:03 $
+#	Make	--	make all commands, everywhere... (s300 only)
+# Written for NFS project by John Dilley
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# In the overnight script that runs Make_bfa nfs has been set to $Nfs
+DIRS=`find $nfs/cmds/libc $nfs/cmds/usr.lib $nfs/cmds/bin $nfs/cmds/etc $nfs/cmds/ucb $nfs/cmds/usr.bin $nfs/cmds/usr.etc -name Makefile -print | grep -v 800`
+
+for MAKE in $DIRS
+do
+	cd `dirname $MAKE`
+	make $*
+done
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

@@ -1,0 +1,10 @@
+## FacetTerm  wy370ans COMMOM description file 05/21/90
+### 1=132_col  2=printer_port  6=selective_erase  7=DRCS  8=UDK  9=national
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy370ans.FC,v 70.1 92/03/09 16:09:13 ssa Exp $
+answer-..vt320_id=\E[?63;1;2;6;7;8;9c
+question-vt320_id=\E[0c
+question-vt320_id=\E[c
+### not a wyse 30 50 60
+pass-identify_test_for_wyse=\E ^D
+pass-identify_clean_up=^D

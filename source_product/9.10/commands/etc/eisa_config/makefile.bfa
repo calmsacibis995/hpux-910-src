@@ -1,0 +1,47 @@
+#
+#	Make file for the EISA Configuration Utility.
+#                       HP-UX Version
+#			  ** BFA **
+#
+
+CC=/usr/local/bin/bfacc
+
+#
+# source files used to create the eisa_config program
+#
+# NOTE: display.c should be added here when it is needed
+#
+SRCS =	    add.c cf_util.c cfgload.c cl_utils.c config.c           \
+	    emitter.c err.c globals.c help.c init.c      \
+	    lex.c main.c nvmload.c nvmlowlevel.c nvmsave.c	    \
+	    open_save.c parser.c pr.c release.c show.c		    \
+	    string.c sw.c util.c yyparse.c
+
+
+#
+# object files used to create the eisa_config program
+#
+#
+OBJS =	    add.o cf_util.o cfgload.o cl_utils.o config.o           \
+	    emitter.o err.o globals.o help.o init.o      \
+	    lex.o main.o nvmload.o nvmlowlevel.o nvmsave.o	    \
+	    open_save.o parser.o pr.o release.o show.o		    \
+	    string.o sw.o util.o yyparse.o
+
+
+#
+# targets
+#
+
+default:	bfa
+
+
+bfa:	$(OBJS)
+	$(CC) $(OBJS) -o eisa_config.bfa
+
+
+globals.o:
+	/bin/cc -c globals.c
+
+.c.o:
+	$(CC) -c $*.c

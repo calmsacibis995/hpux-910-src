@@ -1,0 +1,152 @@
+.H 1 "Hardware Testing (Steve Booth)"
+
+.H 2 "Series 3x0 machines"
+
+Hardware testing for the Series s300 machines will focus on 2 areas:
+amount of RAM in the machine, and speed of the system disc or other
+mounted (and exported) mass storage device.  Standard configurations
+for memory and disc device will be tested throughout the quality
+assurance (QA) period,
+and will not be specifically included in this chapter.
+
+The goal of this testing is to find defects which would not be found
+by testing "standard" configurations.
+
+
+
+The configurations found in the matrix that follows will be used in
+conjunction with the stress tests (defined in the chapter entitled "Stress")
+and will be executed overnight until all defects found by the tests have
+been fixed.
+
+.DS
+
+2M  = suggested minimum RAM to be used on the 310/320 during testing
+4M  = suggested minimum RAM to be used on the 330 during testing
+8M  = suggested minimum RAM to be used on the 350 during testing
+4M  = suggested maximum RAM to be used on the 310/320 during testing
+6M  = suggested maximum RAM to be used on the 330 during testing
+10M = suggested maximum RAM to be used on the 350 during testing
+
+    Configuration matrix
+
+          | 310     320     330     350
+    ------+----------------------------
+    7935/ |  2M      4M      4M     10M
+    7937  |
+          |
+    9122  |  4M      2M      6M      8M
+
+The 9122 is considered one of HP's slower discs,
+while the 7935 and 7937 are considered fast discs.
+
+.DE
+
+Each machine in the above matrix has two configurations, one each with
+a "large" and "small" amount of memory.  For example, the series 310's
+small configuration uses 2Mbytes of memory and a 7935 or 7937 disc, and
+its large configuration uses 4Mbytes of memory and a 9122 disc.  These
+configurations are used in the test matrix below.
+
+.DS
+    Test matrix, client configuration listed first (Client,Server)
+        L=large memory configuration
+        S=small memory configuration
+        W=whatever is available
+        x=not tested
+
+                                 Client
+
+                | 310     320     330     350     SUN
+            ----+------------------------------------
+            310 | S,S      x       x      L,S     W,L
+            320 |  x       x      L,S      x       x
+    Server  330 |  x      L,S      x       x      W,L
+            350 | L,S      x       x      L,L     W,S
+            SUN | S,W      x       x      L,W      x
+            VAX | L,W      x       x      S,W      x
+.DE
+
+The configurations shown in the test matrix should be sufficient to
+find the defects relating to NFS/YP-RAM/DISC interactions.
+
+The LINUS and BUFFALO tape drives are CS80 devices, and could be
+mounted and used as extremely slow mass storage devices.  The scenario
+is considered bizarre enough not to warrant testing.
+
+.DS
+RESPONSIBLE ENGINEERS: Steve Booth, Jeff Elison
+ASSUMPTIONS :   defects found by early invocations of the stress tests 
+                have been found and fixed; the code is somewhat stable
+DEPENDENCIES:   availability of 9122, 7935, and 7937 disc drives
+ISSUES:         the PHOENIX card (MS-DOS card) is capable of accessing
+                the HPUX file system, and so can use NFS; the issue is
+                where responsibility lies for testing PHOENIX with NFS,
+                (PHOENIX contact: George Meyer)
+PERFORM TIME:   26.0  md 
+		(13 test matrix cases x 2 md per case)
+.DE
+
+.H 2 "Series 8x0 machines"
+
+Hardware testing for the Series s800 machines will focus on 2 areas:
+amount of RAM in the machine, and performance level of the system.
+The objective of this testing is to verify connectivity between
+HP machines of differing performance levels and memory capacity
+for the HP-UX networking product under test.
+
+Amount of RAM will be varied from the minimum to the maximun 
+configuration for each system.  
+
+
+The various possible configurations will be used in conjunction
+with the stress tests (defined in the chapter entitled "Stress")
+and will be executed overnight until all defects found by the tests
+have been fixed.
+
+.DS
+
+8M  = suggested minimum RAM to be used on the 825/840 during testing
+24M = suggested maximum RAM to be used on the 840 during testing
+56M = suggested maximum RAM to be used on the 825 during testing
+32M = suggested (min/max) RAM to be used on the 850 during testing
+
+
+.DE
+
+
+.DS
+                      Configuration Matrix
+
+        Key to Test Matrix
+
+        V = vary memory configurations to include extremes
+        W = use whatever is available
+        X = not tested for s800 releases
+	* = no server memory variation
+        **= no client memory variation
+
+                                 Client
+
+              low     high
+            | 300      300      825      840      850**    SUN
+        ----+---------------------------------------------------
+        825 |  W        W        W        V        V        V 
+            |                                                       
+        840 |  W        W        V        V        V        V 
+Server      |
+        850*|  W        W        V        V        V        V 
+            |                                   
+        SUN |  X        X        V        V        V        X
+.DE
+
+The configurations shown in the test matrix should be sufficient to
+find the defects relating to NFS/YP-RAM/SYSTEM interactions.
+
+
+.DS
+ASSUMPTIONS :   defects found by early invocations of the stress tests 
+                have been found and fixed; the code is somewhat stable
+DEPENDENCIES:   availability of necessary systems and extra memory boards
+.DE
+

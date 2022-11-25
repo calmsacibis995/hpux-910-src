@@ -1,0 +1,148 @@
+#!/bin/ksh
+# @(#) $Revision: 70.4 $
+#
+fileset=UNSUPP
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+/bin/cat <<EOF
+WARNING: *******************************************************************
+	 You have installed the UNSUPP fileset which contains unsupported
+	 software.  If you do not want unsupported software on your system,
+	 you can remove UNSUPP with the following command (run as root):
+	      /etc/rmfn -s300 -l UNSUPP
+         *******************************************************************
+EOF
+
+case "`/bin/getcontext`" in
+	*HP-PA*localroot*|*localroot*HP-PA)
+		/bin/cat <<EOF
+NOTE:    The XNTP software contained in the UNSUPP fileset just installed is
+	 not usable on heterogeneous clusters, where the cluster server is
+	 an HP-PA system.  The /etc/rc file will not be modified to support
+	 invocation of the XNTP services.
+EOF
+		FIX_RC=0
+		;;
+	*)	FIX_RC=1
+		;;
+esac
+
+#======
+# /usr/contrib/bin/unrm was in fileset USRCONTRB in B.09.03.  Make 
+# sure it is no longer owned by that fileset in case USRCONTRB was not
+# reinstalled.
+#======
+if /bin/grep /usr/contrib/bin$CDF/unrm /etc/filesets$CDF/USRCONTRB > /dev/null
+then
+    TMPFILE=/tmp/unsuppcst$$
+    /bin/rm -f $TMPFILE
+    if [ -f /etc/filesets$CDF/USRCONTRB ]; then
+        /bin/grep -v /usr/contrib/bin$CDF/unrm /etc/filesets$CDF/USRCONTRB | 
+                /bin/grep -v /usr/contrib/man/man1/unrm.1 > $TMPFILE
+        /bin/rm -f /etc/filesets$CDF/USRCONTRB
+        /bin/cp $TMPFILE /etc/filesets$CDF/USRCONTRB
+        chmog 644 root other /etc/filesets$CDF/USRCONTRB
+    fi
+    /bin/rm -f $TMPFILE
+    if [ -f /system$CDF/USRCONTRB/pdf ]; then
+        /bin/grep -v ^/usr/contrib/bin/unrm /system$CDF/USRCONTRB/pdf | 
+                /bin/grep -v ^/usr/contrib/man/man1/unrm.1 > $TMPFILE
+        /bin/rm -f /system$CDF/USRCONTRB/pdf
+        /bin/cp $TMPFILE /system$CDF/USRCONTRB/pdf
+        chmog 444 bin bin /system$CDF/USRCONTRB/pdf
+    fi
+    /bin/rm -f $TMPFILE
+
+    /bin/cat <<EOF
+NOTE:    File /usr/contrib/bin/unrm has moved from fileset USRCONTRB
+         to UNSUPP.
+EOF
+fi
+
+#======
+# /etc/rc
+#
+# Add xntpd_start() function from newconfig version if it doesn't
+# already exist.
+#======
+if [ -f /etc/rc ] && \
+   [ "`grep -c xntpd_start < /etc/rc`" = 0 ] && \
+   [ $FIX_RC = 1 ] ; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/xntpdsrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Grab the new definition of xntpd_start() from /etc/newconfig/rc
+    if $awk '/^xntpd_start *\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+        echo "" >> $FUNCTEMP
+        # Make a patched copy of /etc/rc
+        if $awk '
+            # find syslogd_start and insert xntpd_start before it
+            /^syslogd_start *\(\)/,/^}/ { foundfunc=1; }
+            {   if (foundfunc) {
+                    saveline=$0
+                    while ( getline <functemp == 1) { print }
+                    print saveline
+                    foundfunc=0
+                    next
+                }
+            }
+            #
+            # Insert call to "xntpd_start" before "syslogd_start"
+            #
+            ## /remoteroot\)/ {in_case=1} # not for clusters!
+            /localroot\)/  {in_case=1}
+            /standalone\)/ {in_case=1}
+            /;;/           {in_case=0}
+            /^[ \t]*syslogd_start/  {
+                if (in_case)
+                {
+                    printf "###\t%s\n###\t%s\n#\t\t%s\n", \
+                         "Uncomment xntpd_start to enable xntp daemon startup.", \
+                         "Refer to /etc/newconfig/910RelNotes/hpuxsystem for details.", \
+                         "xntpd_start"
+                    print
+                    next
+                }
+            }
+            { print } # print the line if not previously skipped
+            ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+        then
+            cp_set 544 bin bin $RCTEMP $OLDRC
+            cat <<EOF >&2
+NOTE:    Added support in /etc/rc for starting up the xntp daemon.  To
+	 enable enable xntp daemon startup at boot time, you must remove
+	 the comment character (#) at the 2 locations which invoke the
+	 "xntpd_start" function in /etc/rc and you must create an xntpd
+	 configuration file.  For more information, please refer to the
+	 release notes in /etc/newconfig/910RelNotes/hpuxsystem.  Note that
+	 xntpd can only be run on standalone or cluster server systems.
+EOF
+        else
+            cat <<EOF >&2
+ERROR:   Could not replace xntpd_start function in existing $OLDRC
+         Correct error and rerun this customize script with the command,
+         $0 $1, to support xntp daemon startup.
+
+EOF
+            exitval=1
+        fi
+    else
+        cat <<EOF >&2
+ERROR:   Could not extract xntpd_start function from $NEWRC
+         Correct error and rerun this customize script with the command,
+         $0 $1, to support xntp daemon startup.
+EOF
+        exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+exit $exitval

@@ -1,0 +1,11 @@
+:
+# @(#) $Header: Filist1,v 66.1 90/09/20 13:59:40 kb Exp $
+if test $1x != x
+then
+	for file in $*
+	do
+		echo $file
+		$0 `grep \^use\= $file | sed 's/.*use=//'`
+	done
+fi
+

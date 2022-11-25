@@ -1,0 +1,92 @@
+#	   @(#)$Revision: 1.21.109.1 $	$Date: 91/11/19 14:29:07 $
+# 	Because of the change to SEIS to obtain project metrics, there has
+# 	been a change to the module names that should be used to put in the
+#	fixed module field when resolving a DTS report.
+#	The following are module names that should be used:
+
+	nfscmds  (DTS Project Name)
+	   rpc		(User space rpc, rpclib, rpcsvclib defects)
+	   yp		(Any Yellow Pages defects)
+	   nfs		(Defects relating to NFS that are found in user
+			 space code, lockd, statd or nfsd)
+	   rex		(Any rex defects)
+	   util		(Defects in the commands of the nfs product, rpcgen,
+			 showmount, rpc.mountd, spray)
+	   other	(Anything else that won't fit in the names above such
+			 as a documentation defect)
+ 	nfs300   (DTS Project Name)
+	   rpc      	(Kernel rpc defects)
+	   nfs		(Any non NFS3.2 kernel nfs defects)
+	   nfs3_2	(Any NFS3.2 related kernel nfs defects, lockf or 
+			 nfs device files)
+	   other	(Anything else that won't fit in the names above)
+
+# If more specificity is required, it can be used, but the more specific
+# module names need to be added to either the /usr/DTS/SEIS/nfscmds or
+# /usr/DTS/SEIS/nfs300 files.  These files map the more specific name
+# to a name that SEIS understands.
+
+nfscmds:
+
+	biod
+	domainname
+	fsirand
+	libdbm
+	makedbm
+	nfsd
+	nfsstat 
+	portmap
+	revnetgroup
+	stdhosts
+	yp_lib
+	yp_librpcsvc
+	ypbind
+	ypcat
+	ypinit
+	ypmake
+	ypmatch
+	yppasswd
+	yppasswdd
+	yppoll
+	yppush
+	ypserv
+	ypset
+	ypwhich
+	ypxfr
+	inetd
+	libother
+	librpc
+	logging
+	pcnfsd
+	rpc.mountd
+	rpc.rstatd
+	rpc.ruserd
+	rpc.rwalld
+	rpc.sprayd
+	rpcinfo
+	rup
+	rusers
+	rwall
+	script
+	showmount
+	spray
+	rpc.lockd
+	rpc.statd
+	rpcgen
+	rexd
+	on
+	other
+
+--------------
+nfs300
+
+	rpc_client
+	rpc_server
+	rpc_subr
+	rpc_xdr
+	nfs_server
+	nfs_client
+	nfs_lockf
+	nfs_fifos
+	other
+

@@ -1,0 +1,37 @@
+## FacetTerm  es3vtkeys  description file  05/06/88
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: es3vtkeys.FC,v 70.1 92/03/09 15:57:53 ssa Exp $
+## Esprit 3-in-1 function keys in vt100 or vt200 mode.
+function_key-61=\E[31~
+function_key-62=\E[32~
+function_key-63=\E[33~
+function_key-64=\E[34~
+function_key-45=
+function_key-47=\E[17~
+function_key-48=\E[18~
+function_key-49=\E[19~
+function_key-50=\E[20~
+function_key-51=\E[21~
+function_key-53=\E[23~
+function_key-54=\E[24~
+function_key-55=\E[25~
+function_key-56=\E[26~
+function_key-58=\E[28~
+function_key-59=\E[29~
+shift_function_key
+function_key-31=\E[31~
+function_key-32=\E[32~
+function_key-33=\E[33~
+function_key-34=\E[34~
+function_key-15=
+function_key-17=\E[17~
+function_key-18=\E[18~
+function_key-19=\E[19~
+function_key-20=\E[20~
+function_key-21=\E[21~
+function_key-23=\E[23~
+function_key-24=\E[24~
+function_key-25=\E[25~
+function_key-26=\E[26~
+function_key-28=\E[28~
+function_key-29=\E[29~

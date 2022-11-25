@@ -1,0 +1,23 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+fileset=JAPANESE
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# The /usr/lib/nls/japanese/ujis directory is now called
+# /usr/lib/nls/japanese/euc.  So, we remove the old directory, since
+# we have just installed the new one.
+#======
+/bin/rm -rf /usr/lib/nls/japanese/ujis
+
+exit $exitval

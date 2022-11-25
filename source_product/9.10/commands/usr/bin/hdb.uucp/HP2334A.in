@@ -1,0 +1,18 @@
+/ @(#) $Revision: 51.1 $     
+/ was verison 37.1 of old uucp 
+/ program to look for the 'COM' message
+/ from the 2334 that indicates that a virtual
+/ circuit has been established.
+/
+	timeout 120
+/
+/ log numbers in X25LOG
+	set numlog
+/
+/ if no response in 90 seconds, give up.
+	expect 90 "COM"
+	error bad
+	exit 0
+
+bad:
+	exit 1

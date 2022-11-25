@@ -1,0 +1,508 @@
+.\"#	   @(#)$Revision: 1.38.109.1 $	$Date: 91/11/19 14:26:42 $
+.\"The information on this document is being automatically included
+.\" on the ERS document.
+.\"This document is intended to be a bulletin board for listing
+.\"information and comments on a few issues.  Those issues are:
+.\"differences between HP NFS and Sun NFS, and differences between HP-UX
+.\"and HP NFS.  (Other topics may be added, if necessary.)
+.\"
+.\"The text is expected to be organized and edited later for placement in
+.\"an appendix in each of the Management Guide and the Daily Use and
+.\"Programming Guide.
+.\"
+.\"Before any new entries, put the line ".LI" prior to the line describing
+.\"the entry.  .LI will automatically number the entry for you, so we
+.\"could reorder them, if we want.  Also, please include your name after
+.\"the entry's title so you can be contacted for further clarification.
+.\"
+.\"  See "HP-UX Concepts and Tutorials, Text Processing and Formatting,"
+.\"  the MM section, for more information on .AL, .LE and .LI (lists).
+.\"
+.\"=======================================================================
+.\"
+.\"		     HP NFS AND SUN NFS DIFFERENCES
+.\"		     ------------------------------
+.H 2 "Known differences between HP NFS and Sun NFS"
+.sp
+.ad
+.AL
+.LI
+Default of interrupt option on mount command - Mike Shipley
+.sp
+The expected default of the interrupt option on the mount command for
+NFS mounts on HP-UX will be to have NFS calls be interruptable.  The
+default on a Sun is to be not interruptable.  I believe user friendliness
+should override Sun compatibility.  This difference does not alter 
+functionality, it just lets you break out of a hung NFS transaction
+IF you want to.  If you don't want, you don't have to.
+.LI
+HP uses vfsmount() and SUN uses mount() - Mike Shipley
+.sp
+To call the kernel to do a NFS mount, HP-UX provides the system call
+of vfsmount().  SUN changed the format of the mount() system call
+to accept what is needed to do the NFS mount.  HP just provides an
+additional system call rather than lose backward compatibility on
+mount().
+.LI
+Chown difference over NFS - Mike Shipley
+.sp
+Because of the semantic difference between 5.2 chown and BSD4.2 chown,
+the owner of a file can do a chown on a file.  Therefore from a
+HP node to a HP node, the owner of a file can do a chown on a file
+over NFS.  From a Sun to HP or from a HP to Sun situation, chown will
+not work.  This is because BSD4.2 demands that only superuser is
+able to do a chown and there is no superuser over NFS.  Of course,
+files owned by root will still not be able to be chown'ed with NFS
+between HP nodes because of the lack of a superuser over NFS.
+.LI
+Link and unlink ".." - Mike Shipley
+.sp
+There is some scenario proposed from Ching's group, that Debbie 
+and I need to look at.  The results should go here.
+I don't believe that they are all that important.
+.LI
+Utime will act differently - Mike Shipley
+.sp
+On HP-UX there is a system call known as utime(OS).  It is used to
+change the access and modification times on a file.  It can be used
+by the owner of the file and by the superuser.  In a restricted
+manner, someone having write permission can use it.
+The Sun has a similar function known as utimes().  It alters the
+access and modification times on a file.  It can be used only by
+the file's owner or superuser.
+.LI
+HP-UX allows one to unlink a directory and Sun will not - Mike Shipley
+.sp
+HP-UX semantics will allow you to unlink a directory locally.  Sun requires
+you to use the rmdir() system call.  But since only superuser can do this
+unlinking, this will be prohibited over NFS.
+.LI
+HP's NFS has no support for locking files - Mike Shipley
+.sp
+The current implementation of NFS on HP-UX will not have any of the
+file locking features of NFS3.2.  So it will differ from 3.2, but not
+from NFS3.0 which does not have such features.
+.LI
+An HP Yellow Pages domain name can be 64 characters long;
+Sun permits only 31 characters - Dave Erickson
+.sp
+The YP protocol specification declares the maximum YP domain name to be 64
+characters.
+HP's YP permits domain names to be this long.
+Sun, despite its own protocol specification, permits a YP domain name to be at
+most 31 characters long.
+.LI
+The first 14 characters of a Yellow Pages domain name must be unique
+among all YP domains on the network for an HP
+machine that uses short filename filesystems only to function correctly 
+as a YP server - Dave Erickson
+.sp
+YP servers use the YP domain name as the name of a subdirectory of
+/usr/etc/yp where the maps for that domain are stored.
+HP systems can use 14-character filename filesystems. 
+However, YP domain names can be as long as 64 characters, so YP domain names
+longer than 14 characters are truncated before using them as directory names
+for machines in that situation.
+.sp
+YP clients use a broadcast technique to find a YP server that serves a selected
+YP domain.
+If the requested domain is longer than 14 characters, an HP YP server that 
+supports only 14-character filename filesystems will
+respond positively if the first 14 characters match the name of a directory in
+/usr/etc/yp.
+For those mnachines to act correctly as YP server, care should be taken to make
+the first 14 characters of \fBall\fR YP domains on a network unique.
+.sp
+Sun does not have this constraint, but it only supports YP domain names up to
+31 characters long (noted above).
+.LI
+The names of the  standard  Yellow Pages maps differ between Sun
+and HP YP servers - Dave Erickson
+.sp
+Each of the maps on a YP  server is stored as two  files:  <mapname>.dir
+and  <mapname>.pag.  In HP machines that support only 14-character  filename  
+filesystems, the <mapname> cannot exceed ten characters in
+length.  As a result, most of the names of standard maps stored on an HP YP
+server with a short filename system (new as of 6.2 on s300) are different
+from Sun:
+.sp
+.nf
+	Sun Standard	       HP Standard
+	  Map Name		 Map Name
+	==================================
+	ethers.byaddr 		ether.byad
+	ethers.byname 		ether.byna
+	group.bygid 		group.bygi
+	group.byname 		group.byna
+	hosts.byaddr 		hosts.byad
+	hosts.byname 		hosts.byna
+	mail.aliases 		mail.alias
+	netgroup 		netgroup
+	netgroup.byhost 	netgr.byho
+	netgroup.byuser 	netgr.byus
+	networks.byaddr 	netwk.byad
+	networks.byname 	netwk.byna
+	passwd.byname 		passw.byna
+	passwd.byuid 		passw.byui
+	protocols.byname 	proto.byna
+	protocols.bynumber 	proto.bynu
+	rpc.bynumber 		rpc.bynu
+	services.byname 	servi.byna
+	vhe_list		vhe_list
+	ypservers 		ypservers
+.fi
+.sp
+Requests made of an HP YP server for maps of either name are honored,
+but it is best that clients use the Sun standard map names to avoid
+confusion.
+.sp
+This \fIdoes not\fR affect any other vendors' implementations of the
+Yellow Pages.
+It is transparent to all users, but a system administrator will want to
+be aware of the differences.
+.sp
+Since long filenames, with 6.2, are supported on HP s300s, the names of maps
+stored on HP Yellow Pages servers can match the Sun standard names.
+.sp
+Also new to 6.2, is the VHE portion of the HP NFS product.
+This map has been added to the list of mapnames, above.
+.LI
+The \fIethers\fR and \fImail.aliases\fR databases are supported on HP
+slave Yellow Pages servers, but they are not built on HP master YP
+servers - Dave Erickson
+.sp
+.ne 6V
+\fBThe ethers maps\fR
+.sp
+The /etc/ethers file from which the ethers maps are built is not part of
+HP-UX, and no HP software requires it.  Consequently, the code in HP's
+ypinit(ADMIN) which builds the YP ethers maps on master YP servers is not
+present.  Sun machines that are master YP servers build the ethers databases,
+though.  If an HP machine is a slave to a Sun master YP server, the HP slave
+YP server WILL successfully store and serve these databases.
+.sp
+The format of /etc/ethers is like /etc/hosts, except that instead of providing
+an internet address to host name mapping, /etc/ethers contains ethernet
+address-host name pairs.  Sun requires this mapping for its diskless product.
+It is not known whether other NFS vendors share this requirement.
+.sp
+\fBThe mail.aliases map\fR
+.sp
+Sun has made numerous changes to the standard BSD sendmail(ADMIN).  These
+changes are proprietary, and as a result, Sun did not provide its
+sendmail(ADMIN) code to NFS vendors.  Among the changes made, Sun altered its
+sendmail(ADMIN) to
+.ML "\ \ \ \ -"
+.LI
+create the mail.aliases YP map from /usr/lib/aliases
+.LI
+read its aliases from the mail.aliases YP map
+.LE
+.sp
+HP's sendmail(ADMIN) does not have this functionality.  It reads its aliases
+only from the local /usr/lib/aliases.* database and it cannot create a YP map
+usable by Sun's sendmail(ADMIN).  HP master YP servers, therefore, do not
+build and serve the mail.aliases YP map.  As with the ethers maps, if an HP
+machine is a slave to a Sun master YP server, the HP slave YP server WILL
+successfully store and serve the mail.aliases database.
+.sp
+The customers who will be affected by this difference are those who integrate
+HP machines into a Yellow Pages environment with Suns.  The impact is
+summarized as follows.
+.ML "\ \ \ \ -"
+.LI
+If any of the Suns are diskless nodes, the ethers YP maps must be
+available.  If the Suns are not diskless, the ethers YP maps are
+not required.
+.LI
+The sendmail YP map is required by sendmail(ADMIN) running on any
+Sun.  There is a potential system administration problem here.  If
+it is desirable to have the mail aliases consistent among all
+machines whether HP or Sun, this must be ensured manually among
+them.
+.LE
+.sp
+The bottom line:  an HP machine cannot act as the master YP server in a
+heterogeneous environment such as this.
+.LI
+The method for building the Yellow Pages maps differs between HP and
+Sun master YP servers - Dave Erickson
+.sp
+On a Sun, the ypmake(ADMIN) process uses a Makefile to handle the
+creation of Yellow Pages maps;  HP NFS' ypmake(ADMIN) (/usr/etc/yp/ypmake)
+is a shell script, though
+HP also provides a Makefile in /usr/etc/yp that calls /usr/etc/yp/ypmake
+directly.
+.sp
+The primary reason for this divergence is that
+a design defect exists in Sun's Makefile: the *.time files used to
+determine map currency should exist within each of the domain
+subdirectories, not only at the /usr/etc/yp level.
+If this defect remains uncorrected,
+all domains' maps are considered current even if only one domain's
+maps are updated.
+.sp
+To correct this problem within a Makefile would be awkward and not
+"clean."  HP's shell script makes this correction easily.  (Sun's
+Makefile is predominantly shell script between targets, anyway.
+It appears that make's innate ability to test differences between files' ages
+is the only reason for implementing ypmake(ADMIN) as Sun did.)
+.sp
+Some added benefits of HP's shell script are:
+.AL a
+.LI
+The shell script permits detection and handling of errors in arguments
+and execution more easily than make.  Consequently, HP's ypmake(ADMIN) has
+a more user-friendly interface than the Makefile.
+.LI
+The shell script demonstrates significantly shorter user-space and
+system execution times than the Makefile.
+.LI
+The shell script will be more easily modifiable, should the user desire
+to do so.
+.LE
+.sp
+Users of HP's YP can use either the Makefile or execute /usr/etc/yp/ypmake
+directly.
+If the Makefile is used with no mapnames as arguments, /usr/etc/yp/ypmake is
+executed only once, with all mapnames passed as arguments.
+However, if the user uses make(UTIL) with more than one mapname as an
+argument, for example
+.sp
+    cd /usr/etc/yp; make group hosts passwd
+.sp
+/usr/etc/yp/ypmake will be executed three times, once each for group, hosts and
+passwd.
+This is somewhat inefficient; it would be best to execute /usr/etc/yp/ypmake
+like this:
+.sp
+    /usr/etc/yp/ypmake group hosts passwd
+.sp
+The make(UTIL) interface is available if the user is accustomed to using it.
+.LI
+Behavior of RPC servers with respect to portmapper - John A Dilley
+.sp
+The Sun RPC servers (rpc.mountd, rpc.rstatd, rpc.rwalld, etc)
+are registered with
+the portmapper by inetd, and invoked when the first RPC request comes in.
+After that, the servers either stay around forever (in the case of
+mountd) or exit immediately (in the case of rpc.rwalld).  This behavior
+is not configurable by the user.  Those that stay around forever have no
+way of knowing if they are still valid; an example of an invalid server
+is a mountd which is still running and waiting for requests after
+another mountd has been started.  This can happen when the inetd or the
+portmapper are brought down and then up again.  These servers will hang
+around until they are killed or the system is rebooted.
+.sp
+On HP systems, the behavior is configurable by the systems administrator
+via the /etc/inetd.conf file.  The Sun equivalent (/etc/servers)
+does not allow options, but the HP inetd.conf does.  By default (ie.
+without options) the servers will behave similarly to the Sun servers:
+the mountd will never exit, and then rwalld will exit after serving one
+rwall request.  However, those servers which never exit periodically
+check with the portmapper to see if they are still registered on the
+same port upon which they are listening.
+If not (which implies that they will never get another RPC request)
+they immediately exit.
+.sp
+The options to control the behavior of the servers are -e and -n.  The
+-e option means "exit after serving one request" and the -n option means
+"never exit, just periodically check with portmap".  This difference
+will not be visible to most users except in the case where the Sun bug
+is exhibited.
+.LI
+HP's rpc.* et al. daemons offer error logging; Sun's do not - John A Dilley
+and Dave Erickson
+.sp
+Logging code has been added to the daemons which previously wrote to
+/dev/console (pcnfsd and ypbind), as well as to ypserv, rpc.yppasswdd and the
+rpc.* servers started from inetd.  Sun's rpc.* programs write messages to
+stderr, but since they run as daemons, this information is never seen.
+.sp
+The user interfaces for HP's versions of these commands now include an option
+"-l log_file" which turns on logging, using the named log_file as the target.
+Generally, the default is to not log the errors; though log information is
+written to /usr/etc/yp/ypserv.log, if ypserv is started without the -l option
+and the file exists.  Log information is written directly to the system
+console, /dev/console, if ypbind or pcnfsd is started without the -l option.
+.sp
+The information logged to the file includes the date and time of the error,
+the host name, process id and the name of the function generating the error,
+and a message describing what happened.  Note that different services can
+share a single log file (even over NFS) since enough information is included
+to uniquely identify the error.  These changes are in place as of the EB3 code
+freeze (08/17/87).
+.sp
+Note:  the user-space logging is much simpler than the netlog* logging as used
+by the NFS kernel -- there is only one "class" of errors and no netlogmask
+applies.  The logging is either on for the process or off.  A set of new
+routines have been created to handle this:  startlog(), logmsg(), and endlog()
+-- the names are indicative of their functions.
+.LI
+HP-UX utmp entries do not have ut_host field - John A Dilley
+.sp
+Berkeley utmp entries contain a ut_host filed which is used to record
+the host name a remote user logged in from.  SysV does not support this
+field, and determining it would require differences to some non-NFS
+commands as well as the utmp file (which prevents object file
+compatibility).  Therefore, the HP-UX rpc.ruserd will return a NULL
+string for the ut_host field of the utmp entry.  The effect of this will
+be to prevent users from being able to determine whether a user logged
+in from a remote host; this is a minor feature loss.
+.LI
+HP-UX utmp entries have longer ut_line field - John A Dilley
+.sp
+Berkeley utmp entries contain a ut_line field of size 8 characters;
+SysV allows 12 characters.  Therefore, when sending out the ut_line
+field in rpc.ruserd, the field will be truncated to 8 characters.
+This will only be visible when users are logged on to terminals with
+names longer than 8 characters.
+.LI
+Handling of /etc/netgroup file - Cristina Mahon
+.sp
+On a Sun if Yellow Pages is not running it is not possible to access
+the file /etc/netgroup even if that file is presently locally.  This 
+is a different behavior from the way other files like /etc/hosts for
+example are handled.  We made a change so that on HP systems if Yellow
+Pages is not running the routines that access /etc/netgroup will look 
+for a local version of /etc/netgroup.
+.LI
+HP's ypserv, ypbind and rpc.yppasswdd behave differently from Sun's when
+killed - Dave Erickson
+.sp
+HP's ypserv, ypbind and rpc.yppasswdd will unregister themselves from
+portmap's list of registered programs, if any is killed (without using
+SIGKILL).  Sun's versions of these will not unregister themselves.
+It is important that they are removed from portmap's list of programs, so
+client processes will not be misinformed and expect to be able to contact the
+programs when they really cannot.
+.LI
+HP's ypinit has a DOM parameter; Sun's does not - Dave Erickson
+.sp
+New for 6.2, the DOM parameter causes ypinit to construct maps for the
+specified YP domain.
+This makes it easier for a single host to act as the YP server, either master
+or slave, for more than one YP domain.
+DOM defaults to the YP domain shown by domainname(1).
+.na
+.LE
+.bp
+\"		      HP-UX AND HP NFS DIFFERENCES
+\"		      ----------------------------
+.H 2 "Known differences between HP-UX and HP NFS"
+.sp
+.ad
+.AL
+.LI
+yppasswd(UTIL) vs. passwd(UTIL) - Dave Erickson
+.sp
+The HP NFS yppasswd(UTIL) command requires that the user provide a password
+of at least four characters if it is constructed of upper and lower case
+or special  characters.  Otherwise,  the  password  must be at least six
+characters  long  (and if so, can be all  monocase  alpha).  If the user
+tries  repeatedly,  these  rules  are  relaxed,  i.e.,  as  short  as  a
+single-character password may be entered.
+.sp
+HP-UX's  passwd(UTIL), on the other hand, has more  stringent  requirements
+about how a password must be formed:
+.AL a
+.LI
+Each password must have at least six characters.
+.LI
+Each password must contain at least two alpha characters 
+and at least one numeric or special character.
+.LI
+Each password must differ from the user's login name and 
+any reverse or circular shift of that name.
+.LI
+New passwords must differ from the old by at least three
+characters.
+.LE
+.sp
+Two other differences between yppasswd(UTIL) and passwd(UTIL) exist:
+.AL a
+.LI
+With   passwd(UTIL),  the  super-user  can  change  another  
+user's password without knowing his/her password.  
+yppasswd(UTIL) requires the super-user to know that password.
+.LI
+yppasswd(UTIL) has no "password aging" feature like passwd(UTIL).
+.LE
+.LI
+Reading directories - Mike Shipley
+.sp
+A local directory can be read using the read(OS) call, but this
+will fail if used to read a remote directory with NFS.  The new
+getdirentries(OS) call must be used.
+.LI
+Open file removal - Mike Shipley
+.sp
+On a local HP-UX system, if a file is opened and then unlinked, before
+the file is closed, then the file descriptor for the open file will
+still be valid to access the file.  
+Over NFS, the server does not keep state information telling if some
+process has the file open, so if it gets a request to unlink the file,
+it will and subsequent requests about the file will result in an error.
+Since it is a common programming practice in a program to open a file, 
+unlink it, but still use it and just have it go away when the program
+terminates, Sun has a kluge to workaround the problem.  If a process
+opens a file and then unlinks it, the client will rename the file
+so it appears that the file is gone.  When the process terminates,
+the client will then unlink the renamed file.  I am not certain
+if some process on a node opens a file and another unrelated process
+unlinks the file, if the same renaming happens or not.  I am certain
+that if the unlink request comes from a different node than where
+the open came from, that the file will be gone which is a major
+difference from local or even RFA activity.
+.LI
+Anything that needs superuser permission, will probably not
+work over NFS - Mike Shipley
+.AL a
+.LI
+link-ing and unlink-ing directories need superuser 
+capability and this cannot be done over NFS
+.LI
+altering directories such as "/" "/etc" and "/bin" will 
+probably not be able to be done as most are accessible 
+only by the superuser.
+.LI
+chmod over NFS will not be able to set text image or set 
+user id bit(for superuser).
+.LI
+mknod(OS) can only be used to make a fifo when invoked 
+by a non-superuser.
+.LE
+.LI
+Only 8 groups are supported with NFS - Darren Smith
+.sp
+On HP-UX, a user can be a member of as many as 20 groups.  With
+NFS, that number is restricted to 8.  If a person who is a member
+of more than eight groups attempts to access a file, only the
+first eight groups will end up being used for permission checking.
+.LI
+More Differences with utime() - Mike Shipley
+.sp
+If you give utime() a NULL pointer,
+it will set the a_time and m_time to be the current time and
+then set the c_time since the a and m times changed.  When this
+happens locally, all of the times are probably the same since they come
+from the same clock.  With NFS, the value for the a and m times
+are taken from the client node, shipped over to the server which
+changes the inode to reflect the new a and m times.  It then
+gets the current time on the server node and puts that into the
+c_time.  This results in a high probably of differing times between
+the a and m times and the c_time which normally does not happen
+on a local (or RFA ) transaction.  For RFA, all times are taken from 
+the server node.
+.LI
+lockf() - Mike Shipley
+.sp
+File locking is supported locally with HP-UX, but it will not be
+supported with NFS.
+.LI
+setacl(2), getacl(2), settuple(3), lsacls(1) and chacls(1) - Cristina Mahon
+.sp
+These system calls, library routine and commands are not supported over
+NFS except for the -z, -Z and -F options of chacls(1).
+.LE
+.na

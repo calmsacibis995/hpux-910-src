@@ -1,0 +1,33 @@
+#
+#	Config file gated on Achilles
+#	Gated Version 2.0.1.2
+
+traceoptions internal external route rip update ;
+
+interface all passive ;         # don't time out my interfaces!
+
+#rip yes ;
+rip supplier {
+	interface fddi0 noripout ;	#no rip onto CTD FDDI/don't want to be a router
+	trustedgateways 130.202.64.5 ;	# trust sungate
+} ;
+
+# need some static routes
+static {
+# default is via Sungate
+	default gateway 130.202.64.5 ;
+# XMP via FDDI and Network Systems Corp
+	146.137.5.0 gateway 146.137.5.129 ;
+} ;
+
+propagate proto rip interface ie2 {
+	proto static metric 1 {
+		announce default ;
+	} ;
+} ;
+
+propagate proto rip interface ie0 {
+	proto direct {
+		announce 130.202.60 metric 1 ;	# announce path to VISNet
+	} ;
+} ;

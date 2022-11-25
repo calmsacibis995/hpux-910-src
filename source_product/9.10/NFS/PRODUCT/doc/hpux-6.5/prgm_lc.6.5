@@ -1,0 +1,2719 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Program Plan and Life Cycle for s300 release 6.5"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.\ .vs 20
+.ft 3
+.ce 2
+PROGRAM PLAN AND LIFE CYCLE 
+FOR S300 RELEASE 6.5
+.sp 6
+.ps 14
+.\ .vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.\ .vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:33:10 $
+$Revision: 1.4.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Dave Matthews
+Author: Mike Shipley
+.ps 10
+.\ .vs 12
+.sp 6
+.ad
+This document contains the CND s300 release 6.5 program milestones and the
+corresponding deliverables and dependencies.  
+The target dates for the milestones are based on the HP-UX program 
+6.5 release integration cycles. 
+.sp
+The two major objectives of this document are to provide logical 
+checkpoints based on the individual CND project team schedules
+and to centralize a list of major dependencies which the involved project
+teams have on each other or on external entities.  
+.sp
+This document is a working document used by the CND groups involved on
+the s300 6.5 release.  The deliverables listed for each checkpoint are 
+specified for these groups, with other external projects covered under 
+dependencies.
+.sp
+ASSUMPTIONS:  The NS, ARPA and NFS products for the s300 release 6.5 and 
+the NS, ARPA and NFS 800 products for the s800 3.1 release will be nearly 
+identical.  
+.sp
+NOTE:  To get this document out in a timely fashion, there are "???" marks in
+places where a name of something/someone is not known at this
+present time.  These WILL be replaced ASAP.
+.na
+.bp
+.H 1 "PROJECTS INVOLVED"
+.sp 
+.H 2 "Staff"
+.sp 2
+.ad
+The following teams within CND are involved on the s300 release 6.5:
+.nf
+.TS
+tab(#);
+l l l l.
+\fBProject Name\fR#\fBResponsibility\fR#\fBProgram Rep\fR
+PROGRAM#6.5 CND Program#Dave Matthews
+ARSENAL#NS/ARPA/NFS testing#Dan Simula
+CLP#NS/ARPA development#Pierre Rassat
+SMURFS#NFS development#Dave Matthews
+KOWLOON#300 Network Kernel#Dean Thompson
+SOCKETS#Unix Domain Sockets#Eric Okholm
+DOC#User Information#Jerry Day
+NFS_TECH#Technical Support#Chuck Morse
+ARPA_TECH#Technical Support#Alex Barnett
+PROD_MKT#Product Marketing#Joe Grim
+MAN#Manufacturing#Sam Ramos
+QA#Quality Assurance#Bill Mayfield
+.TE
+.fi
+.sp
+The projects in other divisions with which CND will interact for the
+s300 6.5 release are:
+.sp
+.nf
+.TS
+tab(#);
+l l l l.
+\fBDivision\fR#\fBResponsibility\fR#\fBProject Manager\fR#\fBProject Name\fR
+ISD/UKL#File system#Debbie Bartlett#HP-UX
+ISD/UDL#HP-UX commands#Ed Sesek??#SAPPHIRE
+ISD/UKL#HP-UX Security#Joe Cowan#HP-UX
+IND#RPC/XDR kernel#Eric Okholm#RPC
+.TE
+.fi
+This document uses the following abbreviations:
+.sp
+.nf
+IC = Integration Cycle
+FB = Final build of an Integration Cycle
+TC = Test Cycle
+.fi
+.bp
+.H 1 "MILESTONE DATES"
+.sp 2
+The following is a list of the key milestones and their dates.   These
+are VERY preliminary dates and as such are still likey to change.
+But we did want some times to at least get some reference point for.
+.TS
+tab(#);
+l l.
+\fBMilestone\fR#\fBDate\fR#
+Req. Complete#July 14, 1988#
+I/L#Aug 2, 1988#
+IC1#Sept 22, 1988#
+IC2#Nov 3, 1988#
+IC3#Dec 2, 1988#
+IC4#Jan 6, 1989#
+MR#Jan 20, 1989#
+.TE
+.bp
+.H 1 "GENERAL DEPENDENCIES"
+.ad
+.sp
+This section lists general dependencies the CND groups have on
+different partners.   Listed below are the dependencies, which
+groups have to meet those dependencies and a brief explanation of 
+what they consist of:
+.sp
+Lab Dependencies:
+.sp
+.AL
+.LI
+Participation on the SWAT team. 
+A member each of the HP-UX (???), SAPPHIRE (???), SMURFS (CND),
+ARSENAL (CND), CLP (CND) and KOWLOON (CND)
+groups should be part of the SWAT team.  The SWAT representative can be either 
+always the same person or different people on a rotational schedule.
+The SWAT team is called when there is a major defect that is stopping any
+further testing by the Arsenal group.  The resolution of the defect that 
+caused the SWAT team to be called becomes the main task of all members of the 
+team until that defect is characterized and fixed.
+.LI
+Internet available when needed.
+Most of the processes implemented between CND and UKL/IND rely heavily on the 
+Internet.
+If the Internet is not up, the turn-around for some of our deliverables will
+jump from an hour or two to a day or more.  This will become specially
+critical when the integration cycles begin.
+.LE
+.na
+.H 1 "RESPONSIBILITIES"
+.ad
+This section describes the general responsibilities of the different
+development and testing groups involved on the s300 release 6.5 and that
+are partners to CND groups.
+.sp
+.ML o
+.LI
+PROGRAM (CND, Dave Matthews):
+.BL
+.LI
+Maintain progress of the CND components for the 6.5 release.
+.LI
+Run the CND Checkpoints for the 6.5 release.
+.LE
+.LI
+SMURFS (CND, Dave Matthews):
+.BL
+.LI
+NFS/YP/RPC/XDR kernel and user space (hereby known as the NFS code)
+plus VHE user code responsibility including 
+implementation of NFS3.2 features, code submittals
+and defect fixes.
+.LI
+Gather metrics (corporate, CND and program) for the NFS code.
+.LI
+Provide new functional tests.
+.LI
+Provide the user information group the necessary help.
+.LI
+Provide MR documentation for NFS code.
+.LE
+.LI
+CLP (CND, Pierre Rassat):
+.BL
+.LI
+ARPA and NS Services code responsibility including code submittals and 
+defect fixes.
+.LI
+Provide new functional tests.
+.LI
+Gather metrics (corporate, CND and program) for ARPA and NS.
+.LI
+Provide MR documentation for ARPA and NS.
+.LE
+.LI
+KOWLOON (CND, Dean Thompson):
+.BL
+.LI
+Track down defects in the network architecture and transport level.
+.LI
+Provide any MR documentation that might be needed for the networking kernel.
+.LI
+Port the s800 3.1 release for the networking code to the s300.
+.LE
+.LI
+HP-UX (ISD/UKL Debbie Bartlett):
+.BL
+.LI
+File system layer code responsibilities.
+.LI
+Provide consulting/code review/regression testing
+in the areas that CND will be adding to 
+the local file system kernel code in the areas of file locking, device
+files and fifos with NFS.
+.LI
+Provide MR documentation for the areas of kernel code for which they are
+responsible.
+.LE
+.LI
+HP-UX (ISD/UKL Joe Cowan):
+.BL
+.LI
+HP-UX Security (Auditing/TCB/ACL's)     
+.LI
+Provide the necessary functionality to meeting the security requirements
+for the 6.5 release.
+.LI
+Provide MR documentation for the areas of kernel code for which they are
+responsible.
+.LE
+.LI
+RPC (IND, Eric Okholm):
+.BL
+.LI
+Responsible for the RPC/XDR kernel code for the s800.
+.LI
+Perform any performance tuning necessary in the RPC/XDR and network kernel code
+for NFS for the s800.
+.LI
+Keep 300 and 800 RPC/XDR kernel code merged with the NFS 300 kernel group.
+.LE
+.LI
+SAPPHIRE (???, ???Ed Sesek)
+(Do we want a single point of contact for the commands and which group
+would that be?)
+.BL
+.LI
+Serve as main contact for commands defects.
+.LE
+.LI 
+SOCKETS
+.BL
+.LI
+Unix Domain Sockets code responsibilities
+.LI
+Provide the user information group the necessary help.
+.LE
+.LI
+ARSENAL (CND, Dan Simula):
+.BL
+.LI
+Augment and maintain the NFS system test plan.
+.LI
+Maintain and augment the NFS, ARPA and NS test scaffolds.
+.LI
+Maintain, distribute and support the NFS, NS and ARPA test suites.
+.LI
+Perform ARPA, NS and NFS subsystem reliability testing.
+.LI
+Perform NFS, NS and ARPA subsystem stress testing.
+.LI
+Perform NFS, NS and ARPA connectivity testing.
+.LI
+Perform topology, gateway and hardware configuration testing.
+.LI
+Perform isolated, error recovery and destructive testing.
+.LI
+Perform network cross-services testing (i.e., NFS x RFA, NFS x NFT, NFS x A/B,
+A/B x NS).
+.LI
+Perform IC partner regression testing during each IC.
+.LE
+.LI
+DOC (CND, Jerry Day)
+.BL
+.LI
+provide documentation for the user (with help from appropriate lab
+groups) in the area of the NFS/NS/ARPA products.
+.LE
+.LI
+NFS_TECH (CND, Chuck Morse)
+.BL
+.LI
+Provide user support for the NFS product.
+.LI
+Provide SE Training for the NFS product.
+.LE
+.LI
+ARPA_TECH (CND, Alex Barnett)
+.BL
+.LI
+Provide user support for the NS/ARPA product.
+.LI
+Provide SE Training for the NS/ARPA product.
+.LE
+.LI
+PROD_MKT (CND, Joe Grim)
+.BL
+.LI
+Provide pricing, feature selection, alpha/beta test site selection, press
+interaction for NFS/NS/ARPA products.
+.LE
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5   Req. Complete"
+.na
+.bp
+.H 1 "LIFE CYCLE"
+Note: To aid in using this document for program review, it is requested that the
+entries made for the deliverables and dependencies be keep in chronological
+order within each checkpoint section.
+.sp
+.ad
+.H 2 "Checkpoint: Requirements Complete (Phase 1 Exit)"
+.sp
+\fBMilestone Date\fR: July 14, 1988
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: ARSENAL         
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Preliminary System Specification  
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Data Sheet
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Requirements Document  
+.nf
+By: ARSENAL         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: CLP             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: CLP             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary System Specification
+.nf
+By: CLP
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: CLP             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: CLP             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Data Sheet
+.nf
+By: CLP             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Requirements Document  
+.nf
+By: CLP             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Investigation on:
+cost/design compatibility for RFA with regard to C2 Security, POSIX
+and ".." support
+.nf
+By: CLP
+When: July 5, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: SMURFS             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: SMURFS          
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Preliminary System Specification
+.nf
+By: SMURFS
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: SMURFS          
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: SMURFS          
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Data Sheet
+.nf
+By: SMURFS          
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Requirements Document  
+.nf
+By: SMURFS          
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: KOWLOON             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: KOWLOON         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Preliminary System Specification
+.nf
+By: KOWLOON
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: KOWLOON         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: KOWLOON         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Data Sheet
+.nf
+By: KOWLOON         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Requirements Document  
+.nf
+By: KOWLOON         
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: SOCKETS             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: SOCKETS             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Preliminary System Specification
+.nf
+By: SOCKETS
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: SOCKETS             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: SOCKETS             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Data Sheet
+.nf
+By: SOCKETS             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Project Requirements Document  
+.nf
+By: SOCKETS             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: DOC             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: DOC             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Preliminary System Specification
+.nf
+By: DOC
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: DOC             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: DOC             
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: PROD_MKT             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: PROD_MKT        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Product Marketing Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: PROD_MKT        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document
+.nf
+By: PROD_MKT        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: NFS_TECH             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: NFS_TECH        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Support and Training Plans
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: NFS_TECH        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document (Does this make sense here?)
+.nf
+By: NFS_TECH        
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI 
+Dependencies identified for the Lifecycle for requirements complete and I/L
+milestones.  Inputs to program Lifecycle for requirements complete and I/L.
+.nf
+By: ARPA_TECH             
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Statement of the FLURPS objectives
+.nf
+By: ARPA_TECH       
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Support and Training Plans
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: ARPA_TECH       
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Response to the System Requirements Document (Does this make sense here?)
+.nf
+By: ARPA_TECH       
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+Presentation ready for Requirements Complete checkpoint meeting.
+.nf
+By: PROGRAM
+When: July 12, 1988
+Expected: July 12, 1988
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp  
+\fBDependencies\fR:
+.AL
+.LI
+Delivery of the pieces for Requirements Complete and I/L
+from all of the partners that will be put into the Program
+Lifecycle.
+.nf
+By: PROGRAM
+On: ALL PARTNERS
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Delivery of all of the pieces that will go to put together the Requirements
+complete Checkpoint meeting.
+.nf
+By: PROGRAM
+On: ALL PARTNERS
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Decisions made on putting NFS3.2 in 6.5 and if NFS must be POSIX compliant
+.nf
+By: SMURFS
+On: CND/ISD Management Team  
+When: July 14, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Information on how to scaffold'ize tests
+.nf
+By: SMURFS
+On: ARSENAL
+When: July 19, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Decisions made on if RFA must be POSIX compliant
+.nf
+By: CLP
+On: CND/ISD Management Team  
+When: July 14, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Decisions made on if RFA must be C2 Security compliant
+.nf
+By: CLP
+On: CND/ISD Management Team  
+When: July 14, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Decisions made on enhancement for RFA on the ".." support
+.nf
+By: CLP
+On: CND/ISD Management Team  
+When: July 14, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+NS-ARPA, NFS Product Structures
+.nf
+By: DOC
+On: PROD_MKT  
+When: July 11, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Decision on if Unix Domain Sockets will be in 6.5/3.1
+.nf
+By: 6.5 Program Team
+On: CND/IND Management Team  
+When: July 11.1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5   I/L "
+.bp
+.H 2 "Checkpoint: I/L  (Phase 2 Exit) "
+.sp
+\fBMilestone Date\fR: August 2, 1988
+.br
+Note:  Due to schedule conflicts, the I/L meeting will be at the end
+of August.
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed System Specification
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed ERS's
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Test Plans written
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Localization Plan Complete
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Have technology risks eliminated
+.nf
+By: ARSENAL             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed System Specification
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed ERS's
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Test Plans written
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Localization Plan Complete
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Have technology risks eliminated
+.nf
+By: CLP             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed System Specification
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed ERS's
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Test Plans written
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Localization Plan Complete
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Have technology risks eliminated
+.nf
+By: SMURFS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed System Specification
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed ERS's
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Test Plans written
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Localization Plan Complete
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Have technology risks eliminated
+.nf
+By: KOWLOON             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Source branch, Nightly build, acceptance test ring in place
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Updated PDS and PRD  
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed System Specification
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed ERS's
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Preliminary Test Plans written
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Localization Plan Complete
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Have technology risks eliminated
+.nf
+By: SOCKETS             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: DOC             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: DOC             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: DOC             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: DOC             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: PROD_MKT             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Implementation Plan
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: PROD_MKT             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: PROD_MKT             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: PROD_MKT             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: NFS_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Support and Training Plans
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: NFS_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: NFS_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: NFS_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+Any update of the FLURPS objectives
+.nf
+By: ARPA_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Completed Support and Training Plans
+.br
+Milestones, staffing estimates, costs, tools, risks, PERT/ViewPoint
+.nf
+By: ARPA_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Resolve the differences between System Specification and System Requirements
+Document 
+.nf
+By: ARPA_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Dependencies identified for the Lifecycle for the rest of the milestones.
+Inputs to the program lifecycle for the rest of the milestones.
+.nf
+By: ARPA_TECH             
+When: August 2, 1988
+Expected: August 2, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.bp  
+\fBDependencies\fR:
+.AL
+.LI
+All of the pieces that will go to put together the I/L
+complete Checkpoint meeting.
+.nf
+By: PROGRAM
+On: ALL PARTNERS
+When: July 5, 1988
+Expected: July 5, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+The remaining pieces from all of the partners that will be put into the Program
+Lifecycle.
+.nf
+By: PROGRAM
+On: ALL PARTNERS
+When: June 27, 1988
+Expected: June 27, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+TWG Approval of File Locking Additions 
+.nf
+By: SMURFS
+On: TWG
+When: Aug 10, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Nettrace command help
+.nf
+By: SMURFS
+On: IND
+When: Aug 2, 1988 
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Internal Documentation to write manuals from
+.nf
+By: DOC
+On: ALL R&D GROUPS
+When: Aug 2, 1988 
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5   IC1 "
+.bp
+.H 2 "Checkpoint: IC1 "
+.sp
+\fBMilestone Date\fR: September 22, 1988
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI 
+System Test Plans written 
+.nf
+By: ARSENAL             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+??? percentage of the test plan executed
+.nf
+By: ARSENAL             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+Completed IRS's
+.nf
+By: CLP             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Test Plans written 
+.nf
+By: CLP             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Full Functionality including localization
+.nf
+By: CLP             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+??? percentage of the test plan executed
+.nf
+By: CLP             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+Completed IRS's
+.nf
+By: SMURFS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Test Plans written 
+.nf
+By: SMURFS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Full Functionality including localization
+.nf
+By: SMURFS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+??? percentage of the test plan executed
+.nf
+By: SMURFS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+Completed IRS's
+.nf
+By: KOWLOON             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Test Plans written 
+.nf
+By: KOWLOON             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Full Functionality including localization
+.nf
+By: KOWLOON             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+??? percentage of the test plan executed
+.nf
+By: KOWLOON             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+Functionality and code complete
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Performance test plan in place
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+DTS in use
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+QA Metrics Plan in Place/Implemented
+.nf
+By: KOWLOON
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+Completed IRS's
+.nf
+By: SOCKETS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Test Plans written 
+.nf
+By: SOCKETS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+Full Functionality including localization
+.nf
+By: SOCKETS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI 
+??? percentage of the test plan executed
+.nf
+By: SOCKETS             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+First Drafts Out and reviewed 
+.nf
+By: DOC             
+When: September 22, 1988
+Expected: September 22, 1988
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.bp  
+\fBDependencies\fR:
+.AL
+.LI
+6 weeks of Kernel Consulting for File Locking/device files/fifos on the s300
+.nf
+By: SMURFS
+On: IDS/UKL/s300 HP-UX File System
+When: Aug 14, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Integration of the 6.5 System
+.nf
+By: SMURFS
+On: SSIT
+When: Sept 22, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Help on HP-UX Commands for YP Improvements
+.nf
+By: SMURFS
+On: SAPPHIRE 
+When: Aug 22, 1988 
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+2 s300 Machines needed for kernel testing and BFA testing
+.nf
+By: SMURFS
+On: CND
+When: Aug 15, 1988 
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Man pages for first edit
+.nf
+By: DOC
+On: ALL R&D GROUPS
+When: Sept 8, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+First review of manuals Complete
+.nf
+By: DOC
+On: REVIEW GROUPS (R&D, TECH SUPP)
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Auditing/TCB/ACL functionality in 6.5 system
+.nf
+By: SMURFS
+On: ISD's Security Team  (Joe Cowan's group)
+When: Aug 22, 1988 (A month before IC1)
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5  IC2"
+.bp
+.H 2 "Checkpoint: IC2 (Phase 3) "
+.sp
+\fBMilestone Date\fR: November 3, 1988
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBDependencies\fR:
+.AL
+.LI
+Integration of the 6.5 System
+.nf
+By: SMURFS
+On: SSIT
+When: Nov 3, 1988  
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Man pages available for second edit
+.nf
+By: DOC
+On: ALL R&D GROUPS
+When: Oct 24, 1988 
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Second Review of Manuals Complete
+.nf
+By: DOC
+On: REVIEW TEAMS (R&D, TECH SUPP)
+When: Oct 11, 1988
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5  IC3"
+.bp
+.H 2 "Checkpoint: IC3 (Phase 4)"
+.sp
+\fBMilestone Date\fR: December 2, 1988
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBDependencies\fR:
+.AL
+.LI
+Integration of the 6.5 System
+.nf
+By: SMURFS
+On: SSIT
+When: Dec 2, 1988  
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Typesetting of Reference Pages
+.nf
+By: DOC
+On: SPT
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5  IC4"
+.bp
+.H 2 "Checkpoint: IC4 (Middle of Phase 4)"
+.sp
+\fBMilestone Date\fR: January 6, 1989
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBDependencies\fR:
+.AL
+.LI
+Integration of the 6.5 System
+.nf
+By: SMURFS
+On: SSIT
+When: Jan 20, 1988  
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+Integration of the 6.5 System
+.nf
+By: SMURFS
+On: SSIT
+When: Jan 6, 1988  
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.PH "'Program Plan and Life Cycle for s300 release 6.5  MR"
+.bp
+.H 2 "Checkpoint: MR (Phase 4 Exit)"
+.sp
+\fBMilestone Date\fR: January 20, 1989
+.sp 
+\fBMilestone Deliverables ARSENAL\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables CLP\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SMURFS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables KOWLOON\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables SOCKETS\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables DOC\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables PROD_MKT\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables NFS_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp 
+\fBMilestone Deliverables ARPA_TECH\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: DELIVERING GROUP
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+\fBMilestone Deliverables PROGRAM\fR:
+.AL
+.LI
+THE DELIVERABLE ITEM.
+.nf
+By: PROGRAM
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.bp
+\fBDependencies\fR:
+.AL
+.LI
+THE DEPENDENCY
+.nf
+By: WHICH GROUP IS DEPENDENT
+On: WHICH GROUP IS DELIVERING
+When: INITIAL DATE
+Expected: REVISED ESTIMATED DATE
+Actual: DATE DELIVERED
+.fi
+.LE
+.sp
+.TE
+.TC 2 2 3 0 "TABLE OF CONTENTS"	\" Define format for table of contents

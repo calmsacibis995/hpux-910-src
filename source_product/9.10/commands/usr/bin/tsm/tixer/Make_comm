@@ -1,0 +1,88 @@
+# Makefile for	tixer  Facet Terminal Terminfo Exerciser
+## @(#) $Header: Make_comm,v 70.2 92/03/09 16:12:38 ssa Exp $
+
+USR_BIN_DIR=		/usr/bin
+
+USR_FACETTERM_DIR=	/usr/facetterm
+FACETPREFIX=		fct_
+
+FCT_TIXER=	$(FACETPREFIX)tixer
+
+TIXER_OBJ= \
+		tixer.o cl_parse.o tp_sel.o tutils.o utility.o tp_short.o \
+		tixercap.o tp_none.o tp_one.o tc_attr.o tp_all.o tu_cup.o \
+		tc_del.o tc_ins.o tc_curs.o tc_star.o tc_status.o tc_clear.o \
+		tc_tab.o tc_cursor.o tc_init.o tc_scroll.o
+
+
+CFLAGS=	\
+		$(MACH_CFLAGS) \
+		$(MACH_MODEL) -I../include
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+FACETTERM_BIN_DIR=	$(USR_FACETTERM_DIR)/bin
+FACETTERM_BIN_PROG=	\
+			$(FCT_TIXER)
+
+PROG=			\
+			$(FACETTERM_BIN_PROG)
+
+
+all:	$(PROG) done
+
+$(FCT_TIXER):	$(TIXER_OBJ)
+	$(CC) -o $(FCT_TIXER) $(TIXER_OBJ) $(MACH_LIBS) 
+
+$(TIXER_OBJ):	tixermacro.h tixer.h tixerext.h
+
+install:	installtext installprog installown 
+	@echo install TIXER for $(MACH) done
+
+installtext:
+	@echo installtext TIXER for $(MACH) Nothing to do...
+
+installtextcommon:
+	@echo installtextcommon TIXER for $(MACH) Nothing to do...
+
+installprog:
+	$(STRIPERR)strip        $(FACETTERM_BIN_PROG)
+	Cpioinstall $(FTINSTDIR)$(FACETTERM_BIN_DIR)  - $(FACETTERM_BIN_PROG)
+	if [ -z "$(NO_FACETTERM_USR_BIN_LINK)" ] ; then \
+		for file in $(FACETTERM_BIN_PROG); \
+		do \
+			ln $(LNFORCE) $(FTINSTDIR)$(FACETTERM_BIN_DIR)/$$file \
+			              $(FTINSTDIR)$(USR_BIN_DIR); \
+			ls -l $(FTINSTDIR)$(USR_BIN_DIR)/$$file; \
+		done; \
+	fi
+	@echo installprog TIXER for $(MACH) done
+
+installown:
+	cd     $(FTINSTDIR)$(FACETTERM_BIN_DIR); \
+#		chown root $(FACETTERM_BIN_PROG); \
+#		chgrp    0 $(FACETTERM_BIN_PROG); \
+#		chmod  555 $(FACETTERM_BIN_PROG); \
+		ls -l      $(FACETTERM_BIN_PROG)
+	if [ -z "$(NO_FACETTERM_USR_BIN_LINK)" ] ; then \
+		cd     $(FTINSTDIR)$(USR_BIN_DIR); \
+#		chown root $(FACETTERM_BIN_PROG); \
+#		chgrp    0 $(FACETTERM_BIN_PROG); \
+#		chmod  555 $(FACETTERM_BIN_PROG); \
+		ls -l      $(FACETTERM_BIN_PROG); \
+	fi
+	@echo installown TIXER for $(MACH) done
+
+tci.i:		tci.c
+	cc -P tci.c
+
+tci.h:		tci.i tci.sed
+	sed -f tci.sed tci.i >tci.h
+
+tixercap.o:	tci.h
+clean:
+	rm -f $(PROG) *.o tci.i tci.h
+	@echo clean TIXER for $(MACH) done
+
+done:
+	@echo make TIXER for $(MACH) done

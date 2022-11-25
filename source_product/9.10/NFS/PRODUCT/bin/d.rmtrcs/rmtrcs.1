@@ -1,0 +1,254 @@
+.\" $Source: /source/hpux_source/networking/rcs/nfs90_800/bin/d.rmtrcs/RCS/rmtrcs.1,v $
+.\" $Revision: 1.2.109.1 $	$Author: kcs $
+.\" $State: Exp $   	$Locker:  $
+.\" $Date: 91/11/19 14:00:26 $
+.\"
+Revision 1.1  91/11/01  15:27:10  15:27:10  kcs (Kernel Control System)
+Initial revision
+
+Revision 3.1  87/07/10  14:28:17  14:28:17  dds
+Version from ISO.
+
+.\" Revision 1.2  86/01/20  16:54:20  gburns (Greg Burns)
+.\" Added info for hp-ux rmtrcs.
+.\" 
+.\" Revision 1.1  84/09/04  21:40:42  wallace (Kevin G. Wallace)
+.\" Initial revision
+.\" 
+.\" $Endlog$
+.TH RMTRCS 1 "4 September 1984"
+.UC 4
+.SH NAME
+rmtrcs \- remote Revision Control System (RCS)
+.SH SYNOPSIS
+.B rmtrcs
+[
+.B \-n
+] [
+.B \-v
+] rcscmd [ rcsoptions ] file ...
+.SH DESCRIPTION
+.I Rmtrcs
+is a local host front-end command processor that gives access to
+Revision Control System (RCS) commands and files on a remote system.
+See
+.IR rcsintro (1)
+for an introduction to RCS.  For most RCS commands,
+if the RCS file is omitted on the command line,
+or specified without a path, the
+RCS command looks for the RCS file in the directory ./RCS.
+Analogously,
+.I rmtrcs
+looks for the RCS file in the directory ./RMTRCS.  However,
+for
+.I rmtrcs,
+the file ./RMTRCS is not a directory.
+On a Vax, the file ./RMTRCS
+must be a symbolic link to the RCS directory
+on a remote system.
+The contents of the symbolic link must be of the form
+<remote-hostname>:<remote-RCS-directory>.  For example,
+the following command would create such a link.
+.sp
+	/bin/ln -s hpda:/usr/src/bin/RCS ./RMTRCS
+.sp
+On HP-UX, ./RMTRCS
+must be a normal file. 
+The contents of the file must also be of the form
+<remote-hostname>:<remote-RCS-directory>.  
+The following command would create such a file.
+.sp
+	/bin/echo hpda:/usr/src/bin/RCS >./RMTRCS
+.LP
+.I Rmtrcs
+performs several checks before executing the RCS
+command on the remote system.
+If any of the following conditions are true,
+.I rmtrcs
+will
+.B NOT
+execute the command on the remote system,
+but instead, will execute the command, as it is, on the
+local host.
+.sp
+.nf
+	1) There is no ./RMTRCS file.
+	2) The ./RMTRCS file is not a symbolic link.
+	3) The symbolic link cannot be read.
+	4) The contents of the symbolic link are
+	   not of the proper format.
+.sp
+.fi
+On HP-UX, 
+.I rmtrcs 
+checks for a normal file, rather than a symbolic link,
+in conditions 2 - 4.
+.LP
+Of the three ways of specifying a pair of an RCS file
+and a working file,
+.I rmtrcs
+only accepts the third form, in which only the working
+file is specified.
+.LP
+.I Rcscmd,
+in the synopsis above, is one of the following
+RCS or Azure RCS commands.
+Special nuances of each command are noted below.
+.TP
+ci
+Execute
+.IR ci (1)
+on the remote system.
+Because
+.I rmtrcs
+cannot detect the success or failure of a remote
+.I ci
+command, it renames all check-in source files to have
+the .RBK extension.  Because
+.I rmtrcs
+does not necessarily know what the resulting revision number
+will be, 
+.I rmtrcs
+cannot display the resulting revision number
+before prompting for the log message, itself.
+For creating initial branch revisions, that do not differ
+from the associated trunk revision, use the -f option to
+.I ci,
+to forcibly create the revision.  Otherwise,
+.I ci
+on the remote system, will
+.B NOT
+create the branch revision,
+because it is the same as the trunk revision.
+.TP
+co
+Execute
+.IR co (1)
+on the remote system.
+.I Rmtrcs
+will never produce a zero length file as the result of
+a check-out operation.
+.TP
+rcs
+Execute
+.IR rcs (1)
+on the remote system.
+.TP
+rcsdiff
+Execute
+.IR rcsdiff (1)
+on the remote system.
+.TP
+rlog
+.br
+Execute
+.IR rlog (1)
+on the remote system.
+.TP
+locks
+Execute the Azure RCS command
+.IR locks (1)
+on the remote system.
+.I Locks
+identifies all revisions of a file that are locked.
+Note that
+.I locks
+actually accepts the names of RCS files (not working files)
+or directories.  Typically the directory . is specified
+with this command.
+.TP
+markbr
+Execute the Azure RCS command
+.IR markbr(1)
+on the remote system.
+.I Markbr
+associates a symbolic name with the current branch
+number(s) of the file(s).
+.TP
+markrev
+Execute the Azure RCS command
+.IR markrev (1)
+on the remote system.
+.I Markrev
+associates a symbolic name with the current revision
+number(s) of the file(s).
+.TP
+rcscheck
+Execute the Azure RCS command
+.IR rcscheck(1)
+on the remote system.
+.I Rcscheck
+checks the file(s) to see it is(they are)
+up-to-date with respect to the revision(s) at the head
+of the trunk.
+.LP
+.I Rcsoptions,
+in the synopsis above,
+are any of the options accepted by the RCS or Azure RCS
+commands supported by
+.I rmtrcs.
+The
+.I files
+specified are the working files on which the RCS or
+Azure RCS commands operate.
+Syntactically speaking, everything to the right of
+.I rcscmd,
+inclusive, may be thought of as normal RCS or Azure RCS command.
+Since
+.I rmtrcs
+will execute the RCS or Azure RCS command locally
+if it cannot properly access the file ./RMTRCS, it is safe to use
+.I rmtrcs
+for all local RCS operations,
+instead of calling the appropriate RCS or Azure RCS command
+directly.  For those who use
+.IR csh (1)
+the following aliases would be appropriate.
+.sp
+.nf
+	alias ci       "rmtrcs ci"
+	alias co       "rmtrcs co"
+	alias rcs      "rmtrcs rcs"
+	alias rcsdiff  "rmtrcs rcsdiff"
+	alias rlog     "rmtrcs rlog"
+	alias locks    "rmtrcs locks"
+	alias markbr   "rmtrcs markbr"
+	alias markrev  "rmtrcs markrev"
+	alias rcscheck "rmtrcs rcscheck"
+.fi
+.LP
+.I Rmtrcs
+takes a few options itself, which are interpreted
+as follows.
+.TP
+.B \-n
+Trace and print, but
+.B DO
+.B NOT
+execute the calls needed to perform the RCS operation.
+.TP
+.B \-v
+Trace and print the calls needed to perform the
+RCS operation as they are executed.
+.SH FILES
+/tmp/rmtdir<uid>	directory for temporary files
+*.RBK			\fIrmtrcs ci\fP back-up files
+.SH "SEE ALSO"
+ci(1), co(1), rcs(1), rcsdiff(1), rcsintro(1), rlog(1)
+and locks(1), markbr(1), markrev(1), rcscheck(1).
+.SH BUGS
+This program is a real hack, and as such, the author
+disavows any knowledge of origin.
+.LP
+Currently,
+.I rmtrcs
+does not support the
+.I ci
+-t option.
+.SH AUTHOR
+.nf
+Kevin G. Wallace (hpda!wallace)
+Data Systems Division
+Hewlett-Packard Company
+Cupertino, CA 95014
+.fi

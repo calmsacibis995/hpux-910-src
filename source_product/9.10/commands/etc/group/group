@@ -1,0 +1,10 @@
+root::0:root
+other::1:root,hpdb
+bin::2:root,bin
+sys::3:root,uucp
+adm::4:root,adm
+daemon::5:root,daemon
+mail::6:root
+lp::7:root,lp
+users::20:root
+nogroup:*:-2:

@@ -1,0 +1,190 @@
+#! /bin/ksh -p
+#@(#) $Revision: 1.6.62.4 $
+########################################################################
+#                                                                      #
+# hp9000s300   MULT-USER licensing level customize script.             #
+#                                                                      #
+########################################################################
+
+EXIT_STATUS=0		# Default exit status.
+VERBOSE=""		# set non-null for debugging purposes.
+myname=`basename ${0}`	# my name.
+set +o markdirs		# don't suffix directory names with a "/".
+
+########################################################################
+#                                                                      #
+# Variables.                                                           #
+# Warning:  watch the ordering of the statements below!                #
+#                                                                      #
+########################################################################
+
+CMD=${0}			# e.g., "/system/MULT-USER/customize".
+DIRNAME=`dirname ${CMD}`	# e.g., "/system/MULT-USER".
+FILESET=`basename ${DIRNAME}`	# e.g., "MULT-USER".
+
+########################################################################
+#                                                                      #
+# Handle clustered case.  All files that could be CDFs are defined     #
+# below and all references to CDFs use the variables.  Note that we    #
+# assume that if one CDF exists, then all relevant files are CDFs.     #
+#                                                                      #
+########################################################################
+
+if [ -H /system ]
+then
+	CONF=/etc/conf+/HP-MC68020
+	FILESETDIR=/etc/filesets+/HP-MC68020
+	SYSTEM=/system+/HP-MC68020
+else
+	CONF=/etc/conf
+	FILESETDIR=/etc/filesets
+	SYSTEM=/system
+fi
+
+trap "touch ${DIRNAME}/customize" 0 1 2 3 15
+
+########################################################################
+#                                                                      #
+# Remove filesets and system directories for obsolete filesets,        #
+# being careful not to remove libkreq.a or   MULT-USER cnode kernels   #
+# that were just loaded.                                               #
+#                                                                      #
+########################################################################
+
+echo "NOTE:    Removing non-${FILESET} licensing filesets"
+
+OTHER_LEVELS=`cd ${FILESETDIR}; ls 02-USER 2> /dev/null`
+
+for REMOVEME in ${OTHER_LEVELS}
+do
+	rm -rf `cat ${FILESETDIR}/${REMOVEME} | \
+		grep -v 'libkreq.a'           | \
+		grep -v 'cnode.*\.m' `
+
+	rm -rf ${FILESETDIR}/${REMOVEME} ${SYSTEM}/${REMOVEME}
+done
+
+########################################################################
+#                                                                      #
+# Archive   MULT-USER license name.o into libkreq.a                    #
+#                                                                      #
+# ***** Cannot do this if a non-300 runs this customize script *****   #
+# ***** on behalf of a 300 client as HP-PA ar doesn't work     *****   #
+# ***** on 68K archives of object files.                       *****   #
+#                                                                      #
+########################################################################
+
+#
+# Non-300 updating 300 bits, can't use Series 800 /bin/ar to add Series 300 
+# name.o to Series 300 libkreq.a. User must manually convert a 02-USER 
+# Series 300 client of a non-Series 300 server to a MULT-USER system.
+#
+if hp9000s800
+then
+	echo "NOTE:    Automatic license level conversion of Series 3/400"
+	echo "         kernel libraries is not supported on non-Series 3/400"
+	echo "         servers. As the default license level for Series 3/400"
+	echo "         machines is 02-USER, boot the system being updated"
+	echo "         with the kernel that was built. If it does not boot"
+	echo "         as a MULT-USER licensed system, perform the following"
+	echo "         steps on the Series 300 machine that was just updated:"
+	echo ""
+	echo "         1) Log in as user \"root\" "
+	echo "         2) Run \"ar rv ${CONF}/libkreq.a ${DIRNAME}/name.o\" "
+	echo "         3) Generate a new kernel (with SAM, or by hand)"
+	echo "         4) Reboot with the new kernel"
+	echo ""
+	exit ${EXIT_STATUS}
+fi
+
+
+#
+# Otherwise, try to add MULT-USER name.o to libkreq.a
+#
+echo "NOTE:    Converting kernel libraries to ${FILESET} licensing"
+
+if [ ! -f ${CONF}/libkreq.a ]
+then
+	echo "ERROR:   The ${FILESET} customize script (${DIRNAME}/customize)"
+	echo "         encountered a problem while trying to convert"
+	echo "         your kernel libraries to ${FILESET} licensing, because"
+	echo "         it could not find ${CONF}/libkreq.a."
+	echo ""
+	echo "         To complete the license conversion, boot the system"
+	echo "         just updated, and perform the following steps from it:"
+	echo ""
+	echo "         1) Log in as user \"root\" "
+	echo "         2) Restore ${CONF}/libkreq.a"
+	echo "         3) Run \"ar rv ${CONF}/libkreq.a ${DIRNAME}/name.o\" "
+	echo "         4) Generate a new kernel (with SAM, or by hand)"
+	echo "         5) Reboot with the new kernel"
+	echo ""
+	echo "         Until the above steps are taken, your system will"
+	echo "         keep the same license level it currently has."
+	echo "         (default license level is 02-USER.)"
+	echo ""
+	exit ${EXIT_STATUS}
+fi
+
+if [ ! -x /bin/ar ]
+then
+	echo "ERROR:   The ${FILESET} customize script (${DIRNAME}/customize)"
+	echo "         encountered a problem while trying to convert"
+	echo "         your kernel libraries to ${FILESET} licensing, because"
+	echo "         it was unable to execute /bin/ar."
+	echo ""
+	echo "         To complete the license conversion, boot the system"
+	echo "         just updated, and perform the following steps from it:"
+	echo ""
+	echo "         1) Log in as user \"root\" "
+	echo "         2) Restore /bin/ar and/or check file permissions"
+	echo "         3) Run \"ar rv ${CONF}/libkreq.a ${DIRNAME}/name.o\" "
+	echo "         4) Generate a new kernel (with SAM, or by hand)"
+	echo "         5) Reboot with the new kernel"
+	echo ""
+	echo "         Until the above steps are taken, your system will"
+	echo "         keep the same license level it currently has."
+	echo "         (default license level is 02-USER.)"
+	echo ""
+	exit ${EXIT_STATUS}
+fi
+
+/bin/ar r ${CONF}/libkreq.a ${DIRNAME}/name.o 2>&1
+
+if [ ! $? -eq 0 ]
+then
+	echo "ERROR:   The ${FILESET} customize script (${DIRNAME}/customize)"
+	echo "         encountered a problem while trying to convert"
+	echo "         your kernel libraries to ${FILESET} licensing, because"
+	echo "         /bin/ar failed to add ${DIRNAME}/name.o"
+	echo "         to ${CONF}/libkreq.a"
+	echo ""
+	echo "         Check the update log to view any error messages"
+	echo "         /bin/ar may have printed."
+	echo ""
+	echo "         Once any problems have been resolved, complete"
+	echo "         the license conversion by booting the system"
+	echo "         just updated, and performing the following steps"
+	echo "         from it:"
+	echo ""
+	echo "         1) Log in as user \"root\" "
+	echo "         2) Run \"ar rv ${CONF}/libkreq.a ${DIRNAME}/name.o\" "
+	echo "         3) Generate a new kernel (with SAM, or by hand)"
+	echo "         4) Reboot with the new kernel"
+	echo ""
+	echo "         Until the above steps are taken, your system will"
+	echo "         keep the same license level it currently has."
+	echo "         (default license level is 02-USER.)"
+	echo ""
+	exit ${EXIT_STATUS}
+fi
+
+rm -f ${DIRNAME}/name.o > /dev/null 2>&1
+
+#########################################################################
+##                                                                      #
+## Fin.                                                                 #
+##                                                                      #
+#########################################################################
+#
+exit ${EXIT_STATUS}

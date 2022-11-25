@@ -1,0 +1,560 @@
+.H 1 "NFS and POSIX Interactions"
+.ad
+HP-UX will be POSIX compliant starting at releases 6.5 on the s300 and
+3.1 on the s800.  Part of the work to make HP-UX POSIX compliant was
+to introduce two new system calls that deal with the file system, 
+\fBpathconf\fR and \fBfpathconf\fR.  
+.sp
+The current version of the NFS protocol (version 2) is not able to handle
+some of the information requested by the above system calls.  The variables
+passed to the system calls that are not supported over NFS are _PC_LINK_MAX,
+_PC_NAME_MAX, _PC_PATH_MAX, _PC_CHOWN_RESTRICTED and _PC_NO_TRUNC.  
+When the system calls are invoked with those variables over NFS they will 
+return a -1 and set errno to EOPNOTSUPP.
+.sp
+For the other variables, _PC_MAX_CANON, _PC_MAX_INPUT and _PC_VDISABLE, that 
+are not file system specific, we will return the local information.  
+.sp
+Finally, we will support the variable _PC_PIPE_BUF over NFS with the 
+introduction of NFS 3.2 (releases s300 6.5 and s800 4.0).  Before that time 
+(s800 release 3.1) we will return -1 and set errno to EOPNOTSUPP.
+.sp
+Before the s300 6.5 and s800 3.1 releases the test programs that test 
+this functionality will not compile since the system calls being
+tested did not exist.  These tests are designed to run only on HP-UX
+systems.
+.sp
+.na
+.sp 2
+.H 2 "Fpathconf Tests"
+.sp 
+.ad
+The system call \fBfpathconf\fR provides a method for an application to
+determine the current value of a configurable limit or option that
+is associated with a file or a directory.  The synopsis for this
+call is:
+.sp
+.nf
+\fBlong\fR \fBfpathconf\fI(fildes,name)
+\fBint\fI fildes, name\fR;
+.fi
+.sp
+where the \fIfildes\fR argument is an open file descriptor.
+.sp
+The tests in this section will test each one of the variables (\fIname\fR 
+argument) with which fpathconf can be invoked.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:  system call fpathconf has to exist
+ISSUES:
+IMPLEMENT TIME: 1 ed
+PERFORM TIME: ?
+.fi
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_LINK_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a file on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that file and
+_PC_LINK_MAX as arguments.  The system call fpathconf should return -1 and
+set errno to EOPNOTSUPP, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the errno value if
+it failed.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_MAX_CANON with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return CANBSIZ
+.fi
+.sp
+This test opens a character device file (a tty specifically) on an NFS mounted 
+file system and then invokes fpathconf with the open file descriptor for 
+that device file and _PC_MAX_CANON as arguments.  The system call fpathconf 
+should return CANBSIZ, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the errno 
+in the failure case.  CANBSIZ is defined in the header file <sys/param.h>.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_MAX_CANON with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a normal file (not a character device file) on an NFS 
+mounted file system, opens it and then invokes fpathconf with the open file 
+descriptor for that file and _PC_MAX_CANON as arguments.  The system call 
+fpathconf should return -1 and set errno to EINVAL, otherwise the test will 
+fail.  The test will print a message saying whether it succeeded or failed and 
+the value of errno if it failed.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_MAX_INPUT with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return TTYHOG
+.fi
+.sp
+This test opens a character device file (a tty specifically) on an NFS mounted 
+file system and then invokes fpathconf with the open file descriptor for 
+that device file and _PC_MAX_INPUT  as arguments.  The system call fpathconf 
+should return TTYHOG, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno.
+in the failure case.  TTYHOG is defined in the header file <sys/tty.h>.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_MAX_INPUT with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a normal file (not a character device file) on an NFS 
+mounted file system, opnes it and then invokes fpathconf with the open file 
+descriptor for that file and _PC_MAX_INPUT as arguments.  The system call 
+fpathconf should return -1 and set errno to EINVAL, otherwise the test will 
+fail.  The test will print a message saying whether it succeeded or failed 
+and the value of errno.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_NAME_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that directory and
+_PC_NAME_MAX as arguments.  The system call fpathconf should return a -1 and 
+set errno to EOPNOTSUPP, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno.
+We use a directory because that is the required input to fpathconf when
+the system call is invoked with the _PC_NAME_MAX variable.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_PATH_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that directory and
+_PC_PATH_MAX as arguments.  The system call fpathconf should return -1 and
+set errno to EOPNOTSUPP, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno.
+We use a directory because that is the required input to fpathconf when
+the system call is invoked with the _PC_PATH_MAX variable.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_PIPE_BUF"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to 
+                 EOPNOTSUPP before pipes are supported over NFS 
+                 and PIPSIZ once pipes are supported over NFS (NFS 3.2).
+.fi
+.sp
+This test creates a pipe on an NFS mounted file system using the mknod
+command, opens that pipe and invokes fpathconf with the open file descriptor 
+for that pipe and _PC_PIPE_BUF as arguments.  The system call fpathconf should 
+return -1 and set errno to EOPNOTSUPP for the s800 3.1 release and PIPSIZ for 
+the s300 6.5, the s800 4.0 releases and releases after that.  The test will 
+print a message saying whether it succeeded or failed and the value of errno
+in the failure case.  PIPSIZ is defined in the header file <sys/inode.h>.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_CHOWN_RESTRICTED"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a file on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that file and
+_PC_CHOWN_RESTRICTED as arguments.  The system call fpathconf should return
+-1 and set errno to EOPNOTSUPP, otherwise the test will fail.  The test will 
+print a message saying whether it succeeded or failed and the value of errno.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_NO_TRUNC"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that directory and
+_PC_NO_TRUNC as arguments.  The system call fpathconf should return
+-1 and set errno to EOPNOTSUPP, otherwise the test will fail.  The test 
+will print a message saying whether it succeeded or failed and the value of 
+errno if it failed.  We use a directory because that is the required input 
+to fpathconf when the system call is invoked with the _PC_NO_TRUNC variable.
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_VDISABLE with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return 1
+.fi
+.sp
+This test opens a character device file (a tty specifically) on an NFS mounted 
+file system and then invokes fpathconf with the open file descriptor for 
+that device file and _PC_VDISABLE as arguments.  The system call fpathconf 
+should return 1, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno
+in the failure case.  
+.na
+.sp 2
+.H 3  "Fpathconf - _PC_VDISABLE with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a normal file (not a character device file) on an NFS 
+mounted file system, opens it and then invokes fpathconf with the open file 
+descriptor for that file and _PC_VDISABLE as arguments.  The system call 
+fpathconf should return -1 and set errno to EINVAL, otherwise the test will 
+fail.  The test will print a message saying whether it succeeded or failed 
+and the value of errno in the failure case.  
+.na
+.sp 2
+.H 3  "Fpathconf - Bad variable"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: fpathconf should return -1 and set errno to EINVAL 
+.fi
+.sp
+This test creates a file on an NFS mounted file system, opens it and
+invokes fpathconf with the open file descriptor for that file and
+a bad variable as arguments.  The system call fpathconf should return
+-1 and set errno to EINVAL, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed.
+.na
+.sp 2
+.H 2 "Pathconf Tests"
+.sp 
+.ad
+The system call \fBpathconf\fR provides a method for an application to
+determine the current value of a configurable limit or option that
+is associated with a file or a directory.  The synopsis for this
+call is:
+.sp
+.nf
+\fBlong\fR \fBpathconf\fI(path,name)
+\fBchar *\fIpath\fR;
+\fBint\fI name\fR;
+.fi
+.sp
+where the \fIpath\fR argument points to the pathname of a file or directory
+.sp
+The tests in this section will test each one of the variables (\fIname\fR 
+argument) with which pathconf can be invoked.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:  system call pathconf has to exist
+ISSUES:
+IMPLEMENT TIME: 0.5 ed
+PERFORM TIME: ?
+.fi
+.na
+.sp 2
+.H 3  "Pathconf - _PC_LINK_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a file on an NFS mounted file system and
+invokes pathconf with the pathname of that file and _PC_LINK_MAX as 
+arguments.  The system call pathconf should return -1 and set errno to 
+EOPNOTSUPP, otherwise the test will fail.  The test will print a message 
+saying whether it succeeded or failed and the value of errno in the failure 
+case.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_MAX_CANON with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return CANBSIZ
+.fi
+.sp
+This test uses a character device file (a tty specifically) that exists on an 
+NFS mounted file system and then invokes pathconf with the pathname of
+that device file and _PC_MAX_CANON as arguments.  The system call pathconf 
+should return CANBSIZ, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno
+in the failure case.  CANBSIZ is defined in the header file <sys/param.h>.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_MAX_CANON with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EINVAL.
+.fi
+.sp
+This test creates a normal file (not a character device file) on an NFS 
+mounted file system and then invokes pathconf with the pathname of 
+that file and _PC_MAX_CANON as arguments.  The system call pathconf 
+should return -1 and set errno to EINVAL, otherwise the test will fail.  
+The test will print a message saying whether it succeeded or failed and the
+value of errno.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_MAX_INPUT with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return TTYHOG
+.fi
+.sp
+This test uses a character device file (a tty specifically) that exists on an 
+NFS mounted file system and then invokes pathconf with the pathname of
+that device file and _PC_MAX_INPUT  as arguments.  The system call pathconf 
+should return TTYHOG, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno
+in the failure case.  TTYHOG is defined in the header file <sys/tty.h>.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_MAX_INPUT with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a normal file (not a character device file) on an NFS 
+mounted file system and then invokes pathconf with the pathname of
+that file and _PC_MAX_INPUT as arguments.  The system call pathconf 
+should return -1 and set errno to EINVAL, otherwise the test will fail.  
+The test will print a message saying whether it succeeded or failed and the
+value of errno.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_NAME_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system and
+invokes pathconf with the pathname of that directory and
+_PC_NAME_MAX as arguments.  The system call pathconf should return
+-1 and set errno to EOPNOTSUPP, otherwise the test will fail.  The test will 
+print a message saying whether it succeeded or failed and the value of errno.
+We use a directory because that is the required input to pathconf when
+the system call is invoked with the _PC_NAME_MAX variable.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_PATH_MAX"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errnot to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system and
+invokes pathconf with the pathname for that directory and
+_PC_PATH_MAX as arguments.  The system call pathconf should return -1 and
+set errno to EOPNOTSUPP, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno.
+We use a directory because that is the required input to pathconf when
+the system call is invoked with the _PC_PATH_MAX variable.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_PIPE_BUF"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errnot to 
+                 EOPNOTSUPP before pipes are supported over NFS 
+                 and PIPSIZ once pipes are supported over NFS (NFS 3.2)
+.fi
+.sp
+This test creates a pipe on an NFS mounted file system using the mknod
+command and invokes pathconf with the pathname of that pipe and _PC_PIPE_BUF 
+as arguments.  The system call pathconf should return -1 and set errno to 
+EOPNOTSUPP for the s800 3.1 release and PIPSIZ for the s300 6.5, 
+the s800 4.0 releases and releases after that.  The test will print a message 
+saying whether it succeeded or failed and the value of errno in the failure 
+case.  PIPSIZ is defined in the header file <sys/inode.h>.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_CHOWN_RESTRICTED"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a file on an NFS mounted file system and invokes 
+pathconf with the pathname of that file and _PC_CHOWN_RESTRICTED as 
+arguments.  The system call pathconf should return -1 and set errno to 
+EOPNOTSUPP, otherwise the test will fail.  The test will print a message 
+saying whether it succeeded or failed and the value of errno.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_NO_TRUNC"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EOPNOTSUPP 
+.fi
+.sp
+This test creates a directory on an NFS mounted file system and
+invokes pathconf with the pathname of that directory and
+_PC_NO_TRUNC as arguments.  The system call pathconf should return -1 and set
+errno to EOPNOTSUPP, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno in the
+failure case.  We use a directory because that is the required input to 
+pathconf when the system call is invoked with the _PC_NO_TRUNC variable.
+.na
+.sp 2
+.H 3  "Pathconf - _PC_VDISABLE with character device file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return 1
+.fi
+.sp
+This test uses a character device file (a tty specifically) that exists on 
+an NFS mounted  file system and then invokes pathconf with the pathname of
+that device file and _PC_VDISABLE as arguments.  The system call pathconf 
+should return 1, otherwise the test will fail.  The test will print
+a message saying whether it succeeded or failed and the value of errno
+in the failure case.  
+.na
+.sp 2
+.H 3  "Pathconf - _PC_VDISABLE with normal file"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a normal file (not a character device file) on 
+an NFS mounted file system and then invokes pathconf with the pathname of
+that file and _PC_VDISABLE as arguments.  The system call pathconf 
+should return -1 and set errno to EINVAL, otherwise the test will fail.  
+The test will print a message saying whether it succeeded or failed and the 
+value of errno in the failure case.  
+.na
+.sp 2
+.H 3  "Pathconf - Bad variable"
+.ad
+.sp 1
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: pathconf should return -1 and set errno to EINVAL
+.fi
+.sp
+This test creates a file on an NFS mounted file system and invokes pathconf 
+with the pathname of that file and a bad variable as arguments.  The system 
+call pathconf should return -1 and set the errno to EINVAL, otherwise the test 
+will fail.  The test will print a message saying whether it succeeded or 
+failed and the value of errno.
+.na
+.sp 2
+.H 2 "Chown Privgrp"
+.sp 
+.ad
+The FIPS requires that chown(2) be limited to the superuser.  
+We have to make sure that privileged groups do limit the chown
+capability over NFS.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:  
+ISSUES:
+IMPLEMENT TIME: 0.2 ed
+PERFORM TIME: ?
+TYPE OF TEST: isolated
+EXPECTED OUTPUT: EPERM
+.fi
+.sp
+This test creates a file on an NFS mounted file system.  It then
+uses setprivgrp(1M), as superuser, to limit the chown system call
+use to the superuser and it tries to do a chown as the owner of
+the file.  This will fail with EPERM.  The test will then run setprivgrp
+to allow all groups to use chown(2).
+.na
+.sp 2
+.H 2 "Group Inheritance"
+.sp 
+.ad
+One of the changes being made to HP-UX because of POSIX is to allow the group 
+ID of a new file to be inherited from the parent directory.  Currently
+the group ID of a new file is the egid of the creating process.
+This semantic will be maintained for SVID and backward compatibility.
+A file will inherit the group ID of the parent directory if the setgid
+bit is set on the parent directory.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:  
+ISSUES:
+IMPLEMENT TIME: 0.2 ed
+PERFORM TIME: ?
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: 
+.fi
+.sp
+This test will create a remote directory, change the group ownership 
+of that directory to a group (SEC_GROUP) other than the group of the user 
+running the test, change the mode on the directory to have the setgid
+bit set.  After that the test will create a file in that directory
+and check what is the group for that file.
+.sp
+This test has already been developed for the FST (file system testsuite).
+Therefore we do not need to develop a similar test for NFS.
+.na

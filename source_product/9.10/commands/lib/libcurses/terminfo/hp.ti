@@ -1,0 +1,645 @@
+# @(#) $Revision: 72.3 $
+#
+#  			HEWLETT-PACKARD TERMINALS
+#
+# hpsub:
+#	A subset of standard HP terminal capabilities.  May be used for
+# any 80 column, 24 line hp terminal supported on this system,
+# except the 2640a and the 98x6 console, although the termcaps for
+# those devices are dependent (thru use) on this termcap.  No padding has been
+# added, so runover may occur on some terminals at higher baud rates.
+# For best results, use termcap entry for the specific terminal you are using.
+# May not work for some HP terminal emulators.  May not work on HP 2645A
+# under some circumstances.
+#
+hpsub|hewlett-packard terminals -- capability subset,
+	cr=^M, ind=^J, bel=^G,
+	il1=\EL, am, ed=\EJ, el=\EK, hpa=\E&a%p1%dC, clear=\E&a0y0C\EJ,
+	cols#80, da, db, dch1=\EP, dl1=\EM, rmir=\ER, kbs=^H,
+	cuu1=\EA, cud1=\EB, cuf1=\EC, cub1=^H,
+	kcuu1=\EA, kcud1=\EB, kcuf1=\EC, kcub1=\ED, khome=\Eh,
+	rmkx=\E&s0A, smkx=\E&s1A, lines#24, mir, ht=^I,
+	rmso=\E&d@, smso=\E&dB, xhp, xmc#0,
+	sgr=\E&d%?%p7%t%'s'%c%;%p1%p3%|%p6%|%{2}%*%p2%{4}%*%+%p4%+%p5%{8}%*%+%'@'%+%c%?%p9%t%'^N'%c%e%'^O'%c%;,
+#
+#
+# hp:
+#	May be used for most 24 x 80 hp terminals,
+# but has no padding added, so may allow runover in some terminals at high
+# baud rates.  Will not work for 2640a or 2640b terminals, 98x6 and 98x5
+# terminal emulators or 98x6 consoles.
+# 	Adds xy-cursor addressing, vertical cursor addressing, home,
+# last line, and underline capabilities.
+#
+hp|hpex|hewlett-packard extended capabilities,
+	tbc=\E3, hts=\E1, lm#0, sgr0=\E&d@,
+	cup=\E&a%p1%dy%p2%dC, vpa=\E&a%p1%dY,
+	ktbc=\E3, kclr=\EJ, kctab=\E2, kdch1=\EP, kdl1=\EM, krmir=\ER,
+	kel=\EK, ked=\EJ,
+	kf1=\Ep, kf2=\Eq, kf3=\Er, kf4=\Es,
+	kf5=\Et, kf6=\Eu, kf7=\Ev, kf8=\Ew,
+	kich1=\EQ,
+	kil1=\EL, kll=\EF, knp=\EU, kpp=\EV,
+	kind=\ES, kri=\ET, khts=\E1,
+	nlab#8, lw#8, lh#2,
+	pfkey=\E&f%p1%dk%p2%l%dL%p2%s,
+	pfloc=\E&f1a%p1%dk%p2%l%dL%p2%s,
+	pfx=\E&f2a%p1%dk%p2%l%dL%p2%s,
+	pln=\E&f%p1%dk%p2%l%dd0L%p2%s,
+	smln=\E&jB,
+	rmln=\E&j@,
+	smir=\EQ, meml=\El, memu=\Em, rmul=\E&d@, smul=\E&dD, use=hpsub,
+#
+#
+# hp 2622, hp 2623, hp 2624, hp 2625, hp 2627, hp 2628, hp2647, hp 262x series:
+# 	Adds backtab and init sequence; 262x needs no padding;
+# adds scrolling.
+#
+262x|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2622|hp2622|2622a|hp2622a|2622p|hp2622p|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2623|hp2623|2623a|hp2623a|2623p|hp2623p|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2624|hp2624|2624a|hp2624a|2624p|hp2624p|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2625|hp2625|hp 2625|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2627|hp2627|2627a|hp2627A|hp2627a|hp2627A|2627p|hp2627p|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2628|hp2628|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+2647|2647F|hp 262x series,
+	cbt=\Ei, use=hp,
+#
+#
+# hp 2626:
+#	Adds backtab and scrolling.  cv and cm are redefined for
+# 2626 with x instead of c to indicate # horizontal addressing.
+# Some padding added.
+#
+2626|hp2626a|hp2626p|hp2626|2626a|2626p|2626A|2626P|hp 2626,
+	cbt=\Ei, cup=\E&a%p1%dy%p2%dX, clear=\E&a0y0X\EJ,
+	vpa=\E&a%p1%dY, dch1=\EP$<2>, ip=$<2>, ht=^I$<2>,
+	rev=\E&dB, blink=\E&dA, ed@,
+	use=hp,
+#
+# This entry is for sysline.  It allocates a 23 line window with a 115 line
+# workspace for regular use, and a 1 line window for the status line.
+# This assumes port 2 is being used.
+# Turn off horizontal line, Create ws #1 with 115 lines,
+# Create ws #2 with 1 line, Create window #1 lines 1-23,
+# Create window #2 lines 24-24, Attach cursor to workspace #1.
+# Note that this clears the tabs so it must be done by tset before
+# it sets the tabs.
+2626-s|hp 2626 using only 23 lines,
+	tsl=\E&w7f2p2I\E&w4f2I\r\EK\E&a%p1%dC,
+	fsl=\E&d@\E&w7f2p1I\E&w4f1I, eslok, hs,
+	is1=\E&q3t0{0H \E&w0f115n1I \E&w0f1n2I
+	\E&w2f1i0d0u22l0S \E&w2f2i0d23u23l0S \E&w7f2p1I \r,
+	lines#23, use=2626,
+# Force terminal back to 24 lines after being 23.
+2626-ns|hp 2626 using all 24 lines,
+	is1=\E&q3t0{0H \E&w0f118n1I \E&w0f1n2I
+	\E&w2f1i0d0u23l0S \E&w3f2I \E&w7f2p1I \r,
+	use=2626,
+# Various entries useful for small windows on 2626.
+2626-12,
+	lines#12, use=2626,
+2626-12x40,
+	cols#40, lines#12, use=2626,
+2626-x40,
+	cols#40, use=2626,
+2626-12-s,
+	lines#11, use=2626-s,
+#
+#
+# hp 110 portable computer
+#       Adds backtab.
+#       The display is limited to 16 lines but allows a full 80 columns.
+#       Memory lock and underline are disabled.
+#       The softkey labels are turned off.
+#
+110|hp110|nomad|hp110a portable computer,
+	cbt=\Ei, is2=\E&j@, lines#16, meml@, memu@, rmul@, smul@, ul@,
+	cvvis=\E&j@, use=hp,
+#
+#
+# hp portable plus computer
+#       Use 2392 with 23 lines. If customers use the 24 line
+#       configuration (i.e. with only one function-key line),
+#       they should use 2392.
+#
+plus|110plus|hp110plus portable plus computer,
+	lines#23, use=2392,
+#
+#
+# hp 150 personal computer
+#       (Note: same termcap as for 2623)
+#
+150|150a|150A|hp150|hp150a|hp150A|hp 150 rmacs a terminal,
+	use=2392,
+#
+#
+# hp 9836 console:	(HP 9000 Series 200)
+#	Memory lock disabled.  This entry for 9836 consoles only.
+# There is a separate entry for 9836 terminal emulator (9836te).
+#
+9836|hp9836|9836a|hp9836a|9836ite|hp 9836,
+	cbt=\Ei,
+	meml@, memu@, use=hp,
+#
+#
+# Topcat low-res mono bit-mapped display:	(HP 9000 Series 200)
+#	driven by an ITE as system console.
+#
+300l|hp300l|98542|98542a|hp98542|hp98542a|hp 300l,
+	use=9836,
+#
+#
+# Topcat low-resolution color bit-mapped display:	(HP 9000 Series 300)
+#	driven by an ITE as system console.
+#
+98543|98543a|hp98543|hp98543a|hp 98543,
+	use=9836,
+#
+#
+# Topcat display compatibility card mono (bit-mapped):  (HP 9000 Series 300)
+#	driven by an ITE as system console.
+#
+98546|98546a|hp98546|hp98546a|hp 98546,
+	use=9836,
+#
+#
+# composite video card:	(HP 9000 Series 300)
+#	driven by an ITE as system console.
+#
+98204b|hp98204b|hp 98204b,
+	use=9836,
+#
+#
+# hp 9837 console:	(HP 9000 Series 200)
+#	This entry is DELIBERATELY set to 47 lines for use with
+#	older s300 kernels.
+#	This will allow the 98700 entry to REMAIN at 46 lines.
+#
+9837|hp9837|9837a|hp9837a|9837ite|hp 9837,
+	lines#47, cols#128,
+	use=9836,
+#
+#
+# hp 300 console:       (HP 9000 Series 300)
+#
+300h|hp300h|hp 300,
+	lines#46, use=9837,
+#
+# Gatorbox 98700 bit-mapped display
+#
+98700|hp98700|98700a|hp98700a|98710|hp98710|98710a|hp98710a|hp 98700,
+	lines#46, use=9837,
+#
+# Renaissance 98720 color bit-mapped display
+#
+98720|hp98720|98720a|hp98720a|98721|hp98721|98721a|hp98721a|hp 98720,
+	lines#46, use=9837,
+#
+# Davinci 98731 color bit-mapped display
+#
+98730|hp98730|98730a|hp98730a|98731|hp98731|98731a|hp98731a|hp 98730,
+	lines#46, use=9837,
+#
+# Topcat hi-res mono/color 98544/98545 bit-mapped display
+#
+98544|hp98544|98544a|hp98544a|98545|hp98545|98545a|hp98545a|hp 98545,
+	lines#46, use=9837,
+#
+# Topcat 98547 6-plane color bit-mapped display
+#
+98547|hp98547|98547a|hp98547a|hp 98547,
+	lines#46, use=9837,
+#
+# hp 98548 Catseye Mono board
+#
+98548|hp98548|98548a|hp98548a|hp 98548,
+	lines#49, use=9837,
+#
+# hp 98549 Catseye Low Cost Color board
+#
+98549|hp98549|98549a|hp98549a|hp 98549,
+	lines#46, use=9837,
+#
+# hp 98550 Catseye High Resolution Color board
+#
+98550|hp98550|98550a|hp98550a|hp 98550,
+	lines#49, use=9837,
+
+#
+# hp a1416a  Kathmandu High Resolution Color board
+#
+a1416a|hpa1416a|a1416|hpa1416|1416a|hp1416a|hp a1416a,
+	use=98550,
+
+#
+# hp a1096a  Hyperion High Resolution Mono board
+#
+a1096a|hpa1096a|a1096|hpa1096|1096a|hp1096a|hp a1096a,
+	use=98550,
+
+#
+# hp 98705 Tigershark bit mapped display
+#
+98705|hp98705|98705a|hp98705a|98705b|hp98705b|98705c|hp98705c|98706|hp98706|98706a|hp98706a|98707|hp98707|98707a|hp98707a|98708|hp98708|98708a|hp98708a|98704|hp98704|98704a|hp98704a|98702|hp98702|98702a|hp98702a|hp 98705,
+	use=98550,
+
+#
+# hp 98736 Genesis bit mapped display
+#
+98736|hp98736|98736a|hp98736a|98736b|hp98736b|98735|hp98735|98735a|hp98735a|98737|hp98737|98737a|hp98737a|98738|hp98738|98738a|hp98738a|98739|hp98739|98739a|hp98739a|98744|hp98744|98744a|hp98744a|98745|hp98745|98745a|hp98745a|98746|hp98746|98746a|hp98746a|98747|hp98747|98747a|hp98747a|98748|hp98748|98748a|hp98748a|98749|hp98749|98749a|hp98749a|hp 98736,
+	use=98550,
+
+#
+# hp 98541 4-plane color 640x480 Catseye
+#
+98541|hp98541|98541a|hp98541a|vga|VGA|VGA display,
+	lines#28, cols#80, use=9837,
+#
+# hp D1182A color Monitor, 640X480
+#
+D1182A|D1182a|hpD1182A|hpD1182|hpD1182a|hp D1182A,
+	lines#28, cols#80, use=9837,
+
+#
+#
+# hp 9826 console:	(HP 9000 Series 200)
+#	This entry for 9826 consoles only.  Same as 9836 console except for
+# only 23 lines, only 50 columns, and a different init file.
+#
+9826|hp9826|9826ite|hp 9826,
+	lines#23, cols#50,
+	use=9836,
+#
+#
+# hp 9020 console:	(HP 9000 Series 500)
+#	Adds backtab.  Same as 262x series.
+# This entry for 9020 consoles only.
+#
+9020|hp9020|hp 9020,
+	cbt=\Ei,
+	use=hp,
+#
+#
+# hp 98x6 block mode terminal emulator:
+#	Adds backtab.  Same as 262x series.
+# (Hewlett-Packard software part number: 98790)
+#
+9816te|hp9816te|9836te|hp9836te|hp 9816/9836 terminal emulators,
+	cbt=\Ei, use=hp,
+#
+#
+# hp 98x6 terminal emulators (Rev.B):
+#	Adds backtab.  Cancels memory lock.  Keypad cannot transmit.
+# (Hewlett-Packard software part numbers: 09800-10380,09800-10580,09800-10680)
+#
+# NOTE:  This terminal emulator cannot transmit keypad functions.  This
+# means that the arrow keys, roll keys, page keys, typing-aid keys, and
+# user-definable function keys work locally only, and, therefore, cannot
+# be used with the editor.
+#
+9816teb|hp9816teb|9836teb|hp9836teb|hp 98x6 terminal emulator - rev B,
+	cbt=\Ei,
+	rmkx@, smkx@,
+	meml@, memu@,
+	use=hp,
+#
+#
+# hp 700/41 terminal
+#
+#       The 700/41 can  emulate  several  different  terminal  types.  The
+#       entry  constructed  below  attempts  to  combine  and  better  the
+#       capabilities of the individual terminals.  This entry is  intended
+#       for use with the WY 30 compatiblity mode of the 700/41.
+#
+# NOTE: This terminal is NOT to be used as the  system  console.  Some  of
+#       the  administrative  installation/maintenance  functions require a
+#       terminal that supports the  HP  escape  sequences.  This  terminal
+#       supports  NONE  of  the  HP  escape  sequences, and in fact the HP
+#       escape sequences have a tendency to lock up the 700/41 terminal.
+#
+c1003|c1003a|c1003g|1003|1003a|1003g|700-41,
+	am, mir, 
+	cols#80, lines#24, xmc#1, 
+	cbt=\EI, bel=^G, cr=\r, tbc=\E0, 
+	clear=\E;, el=\ET, ed=\EY, cup=\E=%p1%' '%+%c%p2%' '%+%c, 
+	cud1=\n, home=^~, civis=\E`0, cub1=\b, 
+	cnorm=\E`1, cuf1=\f, cuu1=^K, dch1=\EW, 
+	dl1=\ER, dsl=\E{, smacs=\EH^B, blink=\EG2, 
+	smir=\Eq, invis=\EG1, rev=\EG4, smso=\EG4, 
+	smul=\EG8, rmacs=\EH^C, sgr0=\EG0, rmir=\Er, 
+	rmso=\EG0, rmul=\EG0, is2=\E~"\E`1\E\^3\EO\Eu\E'\EC, il1=\EE, 
+	kbs=\b, kclr=^Z, kdch1=\EW, kdl1=\ER, 
+	kcud1=\n, krmir=\Er, kel=\ET, ked=\EY, 
+	kf1=^A@, kf10=^AI, kf2=^AA, kf3=^AB, 
+	kf4=^AC, kf5=^AD, kf6=^AE, kf7=^AF, 
+	kf8=^AG, kf9=^AH, khome=^~, kich1=\Eq, 
+	kcub1=\b, knp=\EK, kpp=\EJ, kcuf1=\f, 
+	kind=\EQ, kri=\EE, kcuu1=^K, rmkx=\Ek, 
+	smkx=\El, pfx=\Ez%p1%'?'%+%c%p2%s, mc0=\EP, mc4=^T, 
+	mc5=^R, ind=\n, ri=\Ej, hts=\E1, 
+	ht=\t, 
+#
+#
+#
+############################################################################
+#									   #
+# IMPORTANT NOTICE!!!!							   #
+#    HP Terminals listed below this point are not officially supported on  #
+# any HP9000 series, due to obselesence and RFI considerations.  They are  #
+# not tested nor are they guaranteed to be correct.  They are included for #
+# your convience only.							   #
+#							   		   #
+############################################################################
+#
+#
+# hp 2621:
+#	Adds backtabs, and init sequences, and some padding.  The labels are
+#       turned off except when function keys are enabled.
+#
+2621|2621a|2621A|hp2621|hp2621a|hp2621A|hp2621-fl|2621-fl|hp 2621,
+	cud1@, is2=\E&j@\r, cbt=\Ei,
+	dch1=\EP$<2>, ip=$<2>, pb#19200,
+	smso=\E&dD, xhp@, meml@, memu@,
+	khome=\Ep\r, kcuu1=\Et\r, kcub1=\Eu\r, kcuf1=\Ev\r, kcud1=\Ew\r,
+	kf1=\Ep\r, kf2=\Eq\r, kf3=\Er\r, kf4=\Es\r, kf5=\Et\r, kf6=\Eu\r,
+	kf7=\Ev\r, kf8=\Ew\r, ht=^I$<2>, xon, use=hp,
+###############################################################################
+#
+# The default 2621 turns off the labels except when it has to to enable the
+# function keys.  If your installation prefers labels on all the time, or off
+# all the time (at the "expense" of the function keys) use 2621-nl or 2621-wl.
+# If you like, you can use 2621-ba ("limited" arrow keys).
+# Note: there are newer ROM's for 2621's that allow you to set strap A
+# so the regular arrow keys xmit \EA, etc, as with the 2645.  However,
+# even with this strap set, the terminal stops xmitting if you reset it.
+2621-ba|hp2621-ba|2621 w/new rom and strap A set,
+	rmkx@, smkx@,
+	kcuu1=\EA, kcub1=\ED, kcuf1=\EC, khome=\Eh, use=2621,
+# 2621 with labels on all the time - normal outside vi, function inside vi.
+2621-wl|hp2621-wl|hp 2621 w/labels,
+	is2=\E&jA\r, rmkx=\E&jA, use=2621,
+# To use 2621p printer, setenv TERM=2621p, PRINTER=2621p
+2621p|hp2621p|2621P|hp 2621 with printer,
+	mc5=\E&p11C, mc4=\E&p13C, use=2621,
+# 2621k45: untested
+2621k45|hp2621k45|k45|hp 2621 with 45 keyboard,
+	kcuu1=\EA, kcub1=\ED, kcuf1=\EC, khome=\Eh,
+	rmkx=\E&s0A, smkx=\E&s1A, use=2621,
+# 2621 using all 48 lines of memory, only 24 visible at any time.  Untested.
+2621-48|48 line 2621,
+	vpa=\E&a%p1%dR, lines#48, home=\EH, cup=\E&a%p2%dc%p1%dR, use=2621,
+# 2621 with no labels ever.  Also prevents vi delays on escape.
+2621-nl|hp2621-nl|hp 2621 with no labels,
+	rmkx@, smkx@, khome@, kcuu1@, kcub1@, kcuf1@, kcud1@, use=2621,
+# Needed for UCB ARPAVAX console, since lsi-11 expands tabs (wrong).
+2621-nt|hp2621-nt|hp 2621 w/no tabs,
+	ht@, use=2621,
+#
+# hp 2382:
+# 	adds backtab and init sequence; 2382 needs no padding
+# adds scrolling.  (Note: same termcap as for 2622)
+#
+2382|hp2382|hp2382a|hp 2382/2622 series,
+	use=2622,
+#
+# hp 2392:
+#
+2392|2392a|2392A|hp2392|hp2392a|hp2392A|hp 2392/2622 series,
+	cbt=\Ei, smacs=^N,
+	blink=\E&dA, bold=\E&dB, dim=\E&dH, rev=\E&dB,
+	rmso=\E&d@, smso=\E&dJ,
+	rmacs=^O,
+	ri=\ET,
+	mc0=\E0, mc4=\E&p11C, mc5=\E&p13C, mc5p=\E&p%p1%dW,
+	ed=\EJ$<1>, use=hp,
+#
+# hp 2393:
+#
+2393|2393a|2393A|hp2393|hp2393a|hp2393A|hp 2393 black & white graphics terminal,
+	rmso=^O, smso=\E)F^N, rmul=^O, smul=\E)E^N,
+	civis=\E*dR, cnorm=\E*dQ, indn=\E&r%dU, rin=\E&r%dD,
+	clear=\E&a0y0C\EJ$<35>,
+	invis=\E&dS, pb#9600,
+	use=2392,
+#
+# hp 2394:
+# (Note: same termcap as for 2392)
+#
+2394|2394a|2394A|hp2394|hp2394a|hp2394A|hp 2394 data entry terminal,
+	use=2392,
+#
+# hp 2397:
+# invis@	(mk) enter_secure_mode, Turn on blank mode (chars invisible)
+# 		     Not supported by the 2397.
+#
+2397|2397a|2397A|hp2397|hp2397a|hp2397A|hp 2397 color graphics terminal,
+	cuu1=\EA, cud1=\EB, cuf1=\EC, cub1=^H,
+	ed=\EJ$<20>,
+	el=\EK$<20>,
+	hpa=\E&a%p1%dC$<14>,
+	vpa=\E&a%p1%dY$<14>,
+	ht=^I$<31>,
+	clear=\E&a0y0C\EJ$<35>,
+	cup=\E&a%p1%dy%p2%dC$<15>,
+	invis@,
+	use=2393,
+
+#
+# hp35714: kanji terminal
+#
+hk|35714|hp35714|35714a|hp35714a|hp 35714x series,
+	cbt=\Ei, ind=\ES, meml@, memu@, use=hp,
+
+#
+#  hp 2645:
+# 	Adds backtabs, scrolling, and much padding to prevent runover.
+#  Turns off underscore capabilities.
+#
+2645|hp2645|hp45|hp 264x series,
+	cbt=\Ei$<20>, ed=\EJ$<20>, el=\EK$<20>, ked=\EJ, kel=\EK,
+	hpa=\E&a%p1%dC$<8>, clear=\E&a0y0C\EJ$<20>,
+	cup=\E&a%p1%dy%p2%dC$<8>, vpa=\E&a%p1%dY$<8>,
+  	dl1=\EM$<20>, dT=20, ht=^I$<20>, rmul@, smul@, ul@,
+	dim=\E&dH, rev=\E&dB, blink=\E&dA,
+	pb#9600, cr=^M$<20>,
+	use=hp,
+#
+# HP9835/45 terminal emulator:
+#	Adds cursor addressing, delete char, enter insert mode (and pad),
+#	initialization, scrolling, tabs, and enter/exit underline.
+#	Overrides number of lines.
+#
+9835|9845|35|45|hp9835|hp9845|terminal emulators,
+	cup=\E&a%p2%dc%p1%dY$<6>, vpa=\E&a%p1%dY, clear=\E&a0y0C\EJ$<6>,
+	dch1=\EP$<2>,
+	smir=\EQ, ip=$<2>,
+	is2=\E3,
+	lines#20,
+	ht=^I$<2>,
+	rmul=\E&d@, smul=\E&dD,
+	rmkx@, smkx@,
+	xmc@, sgr@,
+	use=hpsub,
+#
+# hp 2648 graphics terminal:
+#	Adds backtab and much padding.  Takes out right arrow key definition.
+#       You should use this terminal at 4800 baud or less.
+#
+#	NOT TESTED --------- May 11, 1983
+#
+2648|hp2648a|2648a|2648A|hp2648|HP 2648a graphics terminal,
+	il1=\EL, clear=\E&a0y0C\EJ$<50>,
+	cup=\E&a%p2%dc%p1%dY$<20>,
+	dch1=\EP$<7>, ip=$<5>, is2=\Eg$<130>,
+	kcuf1@, use=2645,
+#
+# hp 2644:
+#       It is not supported by HP-UX systems.
+#
+2644|hp2644|hp44|hp264x series,
+	rmkx@,smkx@,
+	use=2645,
+#
+# hp 2640a:
+# 	Takes out X-Y cursor motion and vertical cursor motion.  No
+# insert mode.  Adds much padding.  Changes home key definition.
+# This terminal is obsolete and cannot always keep up with the editor.
+# It is not supported by HP-UX systems.
+#
+2640|hp2640a|2640a|hp264x series,
+	il1=\EL$<40>, ed=\EJ$<20>, el=\EK$<20>,
+	hpa=\E&a%p1%dC$<40>, cup@, cr=^M$<20>, vpa@, clear=\EH\EJ$<20>,
+	dch1=\EP$<40>, dl1=\EM$<40>, dT=60, smir@, khome=\EH, nel=^M^J$<8>,
+	rmkx@, smkx@,
+	use=hp,
+#
+# hp 2640b:
+# 	Takes out X-Y cursor motion and vertical cursor motion.  No
+# insert mode.  Adds init sequence and much padding.
+#
+#	NOT TESTED --------- May 11, 1983
+#
+2640b|hp2640b|hp 264x series,
+	il1=\EL$<40>, ed=\EJ$<20>, el=\EK$<20>, hpa=\E&a%p1%dC$<8>,
+	cup@, cr=^M$<40>, vpa@, dch1=\EP$<40>, clear=\EH\EJ$<20>,
+	dl1=\EM$<40>, dT=40, smir@, is2=\Eg$<200>, ht=^I$<40>,
+	rmkx@, smkx@,
+ 	use=hp,
+#
+# hp 270x terminal family:
+#	Adds backtab and scrolling.
+#
+#	NOT TESTED ----------- May 19, 1983
+#
+2703|hp2703|2709|hp2709|hp 270x series,
+	cbt=\Ei, use=hp,
+#
+# The 70092 and 70094 terminals are the replacements for the
+# 2392 and 2394 terminals.
+#
+70092|70092a|70092A|70096|hp70092|hp70092a|hp70092A|hp 7009x/239x series,
+	use=2392,
+70092-w|70092a-w|70092A-w|hp70092-w|hp70092a-w|hp70092A-w|hp 7009x/239x series (132 columns),
+	cols#132,if@,use=70092,
+70094|70094a|70094A|hp70094|hp70094a|hp70094A|hp 7009x/239x series,
+	use=2392,
+70094-w|70094a-w|70094A-w|hp70094-w|hp70094a-w|hp70094A-w|hp 7009x/239x series (132 columns),
+	cols#132,if@,use=70094,
+70096|70096a|70096A|hp70096|hp70096a|hp70096A|hp 7009x/239x series,
+	use=2392,
+70098|70098a|70098A|hp70098|hp70098a|hp70098A|hp 7009x/239x series,
+	use=2392,
+70098-w|70098a-w|70098A-w|hp70098-w|hp70098a-w|hp70098A-w|hp 7009x/239x series (132 columns),
+	cols#132,if@,use=70096,
+#
+# hpterm is a terminal emulator for xwindows.  The following entry
+# is designed for the X11 version of hpterm, but should work with the
+# X10 version as well.  It should track the 70092 entry rather than
+# the 2392 entry, but it might break when/if they add new entries
+# to the 70092 one.
+hpterm|X-hpterm|hp X11 terminal emulator,
+	blink@,mc0@,mc4@,mc5@,mc5p@,use=2392
+#
+# HP425E Entry Level VRX Graphics (High Res)
+#
+425e|425e_h|hp425e|hp425e_h|evrx|evrx_h|EVRX|EVRX_H|hp 425e 1280x1024,
+        use=98550,
+#
+# HP425E Entry Level VRX Graphics (Low Res)
+#
+425e_l|hp425e_l|evrx_l|EVRX_L|hp 425e 1024x768,
+        use=300h,
+#
+# hp 98765 Falcon bit mapped display
+#
+98765|98766|hp98765|hp98766|hp98765a|hp98766a|hp 98765,
+        use=98736,
+#
+# hp ELK high resolution color display
+#
+hpa1659a|A1659A|HPA1659A|crx|crx_h|CRX|CRX_H|hp a1659a,
+        use=98550,
+#
+# hp ELK high resolution grey-scale display
+#
+hpa1924a|A1924A|HPA1924A|grx|grx_h|GRX|GRX_H|hp a1924a,
+        use=98550,
+#
+# hp ELK low resolution display
+#
+hpa1940a|HPA1940A|crx_l|CRX_L|hp a1940a,
+        lines#46, use=98550,
+#
+# hp CRX24 (Rattler) display
+#
+hpa1439a|HPA1439A|hpA1439A|a1439a|A1439A|crx24|CRX24|hp a1439a,
+        use=98550,
+#
+# hp CRX24Z (Piranha) display
+#
+hpa1454a|HPA1454A|hpA1454A|a1454a|A1454A|crx24z|CRX24Z|hp a1454a,
+	use=98550,
+
+#
+# hp Tomcat display
+#
+hpa2269a|HPA2269A|hpA2269A|a2269a|A2269A|hp a2269a,
+        use=98550,
+
+#
+# hp 710 high resolution color display
+#
+hpa1991ac19|A1991AC19|a2213a|a2214a|a2215a|hp a1991ac19,
+	use=98550,
+#
+# hp 710 high resolution grey-scale display
+#
+hpa1991agray|A1991AGrayscale|a2208a|a2209a|hp a1991agrayscale,
+	use=98550,
+#
+# hp 710 low resolution color display
+#
+hpa1991ac16|A1991AC16|a2210a|a2211a|a2212a|a2222a|hp a1991ac16,
+	lines#46, use=98550,
+
+#
+# hp a2091a Stinger (CRX48Z) High Resolution Color bit mapped display
+#
+hpa2091a|HPA2091A|a2091a|A2091A|crx48z|CRX48Z|hp a2091a,
+	use=98550,
+###############################################################################

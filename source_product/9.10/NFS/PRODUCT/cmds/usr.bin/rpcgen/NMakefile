@@ -1,0 +1,91 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.bin/rpcgen sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+CSOURCE = rpc_main.c rpc_hout.c rpc_cout.c rpc_parse.c rpc_scan.c rpc_util.c \
+	rpc_svcout.c rpc_cltout.c
+OBJECTS = rpc_main.o rpc_hout.o rpc_cout.o rpc_parse.o rpc_scan.o rpc_util.o \
+	rpc_svcout.o rpc_cltout.o
+HDRS = rpc_util.h rpc_parse.h rpc_scan.h
+
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	=
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+build:		$$(TARGET)
+
+bfa :
+        $(MAKE) -e -f $(MAKEFILE) $(-) build \
+                NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+                CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/rpcgen.B"\
+                CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		$(SDIR)="$(SDIR)"
+
+
+install:;	$(INSTALL) $$(TARGET:/^$/rpcgen/)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET:/^$/rpcgen/)
+
+rpcgen: $(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpcgen $(OBJECTS) $(LIBCA)
+
+rpc_main.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_main.c
+
+rpc_hout.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_hout.c
+
+rpc_cout.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_cout.c
+
+rpc_parse.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_parse.c
+
+rpc_scan.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_scan.c
+
+rpc_util.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_util.c
+
+rpc_svcout.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_svcout.c
+
+rpc_cltout.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_cltout.c
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build

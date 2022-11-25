@@ -1,0 +1,29 @@
+#! /bin/csh -f
+#
+# script to analyze the days gated.log and put it in a readable
+# format.  Then mail to appropriate parties.
+#
+set LOGDIR=/usr/local/gated
+set GATEDLOGS=/gated
+set BINDIR=/usr/local/gated
+set notify=(jch)
+#
+# Rotate the gated.log file
+#
+$BINDIR/rotatelogs
+#
+# Run awk scripts on the log file for the day.
+# Remember, after rotation the day's log file is in gated.log.0
+#
+cd $BINDIR
+gw-mon $GATEDLOGS/gated.log.0 > $LOGDIR/gw-mon.log
+#
+# Mail the appropriate parties the information
+#
+/usr/ucb/Mail -s "Gated Log Routing Summary" $notify < $LOGDIR/gw-mon.log
+
+unset LOGDIR
+unset GATEDLOGS
+unset BINDIR
+unset notify
+

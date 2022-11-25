@@ -1,0 +1,11 @@
+## FacetTerm  vt220ans COMMON description file 10/31/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: vt220ans.FC,v 70.1 92/03/09 16:07:13 ssa Exp $
+### 1=132_col  2=printer_port  6=selective_erase  7=DRCS  8=UDK  9=national
+answer-..vt220_id=\E[?62;1;2;6;7;8;9c
+question-vt220_id=\E[0c
+question-vt220_id=\E[c
+question-vt220_id=\EZ
+### not a wyse
+pass-identify_test_for_wyse=\E ^D
+pass-identify_clean_up=^D

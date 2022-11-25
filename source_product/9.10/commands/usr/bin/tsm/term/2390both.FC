@@ -1,0 +1,64 @@
+## FacetTerm  2390both  COMMON description file 10/02/90
+## common to both hp and ansi modes
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2390both.FC,v 70.1 92/03/09 15:49:00 ssa Exp $
+#################################### \E&p works in both modes ##############
+pass_current-transparent_print=\E&p%l1W%L1
+pass_current-transparent_print=\E&pW%256s1\n
+#################################### \E&k works in both modes ##############
+pass_current-...auto_lf_off.......=\E&k0A
+not_imp-auto_lf_on................=\E&k1A
+pass_current-...block_mode_off....=\E&k0B
+not_imp-block_mode_on.............=\E&k1B
+pass_current-...caps_lock_off.....=\E&k0C
+pass_current-...caps_lock_on......=\E&k1C
+pass_current-...bell_off..........=\E&k0D
+pass_current-...bell_on...........=\E&k1D
+pass_current-...none_8bits_off....=\E&k0I
+pass_current-...none_8bits_on.....=\E&k1I
+pass_current-...auto_keyboard_lock_off....=\E&k0K
+not_imp-auto_keyboard_lock_on.....=\E&k1K
+pass_current-...local_echo_off....=\E&k0L
+not_imp-local_echo_on.............=\E&k1L
+pass_current-...modify_all_off....=\E&k0M
+not_imp-modify_all_on.............=\E&k1M
+pass_current-...spow_latch_off....=\E&k0N
+not_imp-spow_latch_on.............=\E&k1N
+pass_current-...caps_mode_off.....=\E&k0P
+pass_current-...caps_mode_on......=\E&k1P
+not_imp-remote_mode_off...........=\E&k0R
+pass_current-...remote_mode_on....=\E&k1R
+pass_current-...smooth_scroll_off.=\E&k0[
+pass_current-...smooth_scroll_on..=\E&k1[
+pass_current-...select_key_off....=\E&k0]
+pass_current-...select_key_on.....=\E&k1]
+### XmitFctn is cursor_key
+#################################### \E&s works in both modes ##############
+pass_current-...SPOW_off..................=\E&s0B
+not_imp-SPOW_on...................=\E&s1B
+not_imp-Line/Page_off.............=\E&s0D
+not_imp-Line/Page_on..............=\E&s1D
+not_imp-InhHndShk_off.............=\E&s0G
+pass_current-InhHndShk_on.........=\E&s1G
+not_imp-InhDC2_off................=\E&s0H
+pass_current-InhDC2_on............=\E&s1H
+pass_current-...EscXfer_off.......=\E&s0N
+pass_current-...EscXfer_on........=\E&s1N
+pass_current-...DataSpeedSelect_off.......=\E&s0X
+pass_current-...DataSpeedSelect_on........=\E&s1X
+pass_current-...CheckParity_off...=\E&s0Z
+pass_current-...CheckParity_on....=\E&s1Z
+#################################### \E&q works in both modes ##############
+not_imp-unlock_all_config_menus...=\E&q0L
+not_imp-lock_all_config_menus.....=\E&q1L
+pass_current-clear_msg_and_restore_current_key_labels=\E&jC
+pass_current-initiate_execution_of_key....=\E&f-1E
+pass_current-initiate_execution_of_key....=\E&f1E
+pass_current-initiate_execution_of_key....=\E&f2E
+pass_current-initiate_execution_of_key....=\E&f3E
+pass_current-initiate_execution_of_key....=\E&f4E
+pass_current-initiate_execution_of_key....=\E&f5E
+pass_current-initiate_execution_of_key....=\E&f6E
+pass_current-initiate_execution_of_key....=\E&f7E
+pass_current-initiate_execution_of_key....=\E&f8E
+############################################################

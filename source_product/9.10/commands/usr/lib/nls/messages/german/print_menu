@@ -1,0 +1,47 @@
+############################################################################
+# TSM user customizable file: print_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# print menu for TSM
+# @(#) $Header: print_menu,v 70.1 92/06/11 19:40:49 ssa Exp $
+
+# LOCALIZERS
+#  In all the following the items you can localize include: 
+#       item_name  you can localize the string following the = sign.
+#  item_selection  which the letter users can enter to select this item
+#                  when the menu is displayed instead of using arrow keys.
+#                  You can change the character to the right of = sign.
+#
+#   You can change the character after $tsm_hot_key (o in this case) to another
+#   character. But you need to change the key mapping in tsmtext (see
+#   !in_window_mode_prompt in tsmtext).  Do NOT change >p in the second item.
+#   Do NOT change the strings "$tsm_hot_key" and "$current_window_number".
+
+pull_down_menu
+
+item_name=Bildschirm, session $current_window_number auf lp drucken $tsm_hot_keyo
+item_selection=B
+item_type=intrinsic
+item_action=print_window
+
+item_name=Ausschneide-puffer auf lp drucken    $tsm_hot_key>p
+item_selection=A
+item_type=ft_command
+item_action=>p

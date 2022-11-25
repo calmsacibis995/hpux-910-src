@@ -1,0 +1,177 @@
+
+.H 1 "Reading directories in less than 1K Chunks"
+.H 2 Getdirentries
+These tests try to create strange directories and then read them over
+NFS using a read size of 512 bytes.  For each test, I have listed
+the expected result.  The best way to check the validity of the
+tests is to also run the tests and use the local file system
+to read directories created in the same strange fashion.
+You will have
+to use a read size for the directory of at least 1024 bytes as 
+EINVAL will be returned  if less than 1024 is requested for a local
+read.  If a read size is requested of less than 512 for a directory
+to be read over NFS, EINVAL will be returned.
+
+Since these tests use long file names, they need to be run on a
+file system that supports long file names.
+.AL
+.LI
+Create a directory that contains 150 entries.  Remove the first
+120 entries.  Now with a program that uses getdirentries,
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+.nf
+
+
+   Estimates.
+     Implementation: (1 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and the last 30 entries.
+.LI
+Create a directory that contains 150 entries.  Remove the first 
+30 entries.  Then remove the last 30 entries
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and the middle 90 entries.
+.LI
+Create a directory that contains 151 entries. 
+Remove 100 entries starting with entry 51 which will
+leave entry 151
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", "..", the first 50 entries and the last entry.
+.LI
+Create a directory that contains 150 entries. 
+Remove the first 10 entries, 
+leave the next 5, remove the next 10 entries, leave the next 5.
+Repeat this pattern throughout the directory.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and the 10 groups of 5 entries.
+.LI
+Create a directory that contains 150 entries. 
+Remove  every other entry. 
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and then remaining every other entry.
+.LI
+Create a directory that contains 150 entries. Starting with the first
+entry, leave the first entry in the directory and remove the next
+two entries.  Repeat this pattern for the rest of the directory.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see "." and ".." plus entry number 1, entry number 4,
+entry number 7 ...
+.LI
+Create a directory that contains 150 entries.  The length of the name
+of an entry should be one greater than the previous entry.  So if the
+first entry has a name with a length of 5 characters, the second entry
+will have a name with a length of 6 characters, the third entry will
+have a name with a length of 7 characters and so on.
+
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.25 hr)
+
+.fi
+Results:  You should see ".", ".." and then every entry following them.
+.LI
+Make a directory with 30 entries.  Have the length of the name of each
+entry be 255 characters (the maximum allowed with HP-UX).
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and then every entry following them.
+.LI
+Make a directory with 30 entries.  Have the length of the name of each
+entry be 255 characters (the maximum allowed with HP-UX).  
+Remove every other entry.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.10 hr)
+
+.fi
+Results:  You should see ".", ".." and then remaining every other entry.
+.LI
+Create a directory with about 50 entries.  Have the length of the name
+of a entry be a random number.  For example the length of the name for
+the first entry may be 6, for the second entry it could be 38, for the
+third entry it could be 203.  Then remove random numbered entries.
+For example remove the 10th, 31st, 47th ... numbered entry.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+.nf
+
+   Estimates.
+     Implementation: (0.2 hr)
+     Execution:      (.25 hr)
+
+.fi
+Results:  You should see ".", ".." and the remaining entries.
+.LE

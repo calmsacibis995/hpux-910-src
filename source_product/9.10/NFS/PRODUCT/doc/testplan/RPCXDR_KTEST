@@ -1,0 +1,287 @@
+.H 2 "RPC/XDR SYSTEM FUNCTIONALITY"
+This chapter dicusses testing concerns for the kernel level RPC and XDR
+routines.  Because these routines are only called by the NFS layer
+of the kernel (i.e. they are not directly callable by any user level
+process), the discussion here will focus on meeting those requirements
+of the PRD concerning RPC/XDR that are not discussed elsewhere in this
+document.  The main emphasis here will be on meeting the branch coverage
+goals as stated in the PRD.  It is assumed that once the coverage has
+reached those goals, testing to increase branch coverage will stop, and 
+only those areas which need to be especially reliable (noted below) will
+receive any further attention.  Testing areas of reliability, recoverability,
+and stress are assumed to be hit by the specific chapters discussing those
+elements elsewhere in this document.  As much as possible, any test done
+to increase code coverage will be put in the scaffold so as to be easily
+reproducable.
+
+RESPONSIBLE ENGINEER: Darren Smith
+
+.sp 2
+.H 3  "Dependencies on other tests"
+.sp 1
+The main method for obtaining branch flow numbers will be to run various
+subsets of tests discussed elsewhere in this document.  As tests are
+added to these areas, they will be run on a kernel with the appropriate
+RPC/XDR routines compiled using the Branch Flow Analysis (BFA) tool to
+measure any potential increase in coverage.
+.sp 2
+.H 4 "NFS Functional Tests"
+.sp 1
+The first BFA results will be obtained by running one pass of the
+NFS Functional Test suite as described in chapter 13 of this document.  By
+one pass we mean that all the tests shall complete successfully at least
+once, not that the tests shall be run completely for 24 hours.  The tests
+should be run with at least the node that has the BFA version of the
+kernel acting as both a client and as a server.  These tests
+should hit the basic functionality of the RPC/XDR code.  Note that this implies
+that the NFS Functional tests can complete one pass successfully.
+.sp 1
+.nf
+IMPLEMENT TIME: covered by functional tests
+PERFORM TIME: 3 days
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  The functional tests should complete correctly,
+	the BFA data base should be updated, and the major functional
+	areas of RPC/XDR should be covered.
+.fi
+.sp 2
+.H 4  "NFS Stress Tests"
+.sp 1
+A subset of the NFS Stress tests will be used to hit those sections of the
+RPC/XDR code which control buffer access by multiple clients/servers at once.
+In particular, those tests which have concurrent access by multiple processes
+from one machine, and those tests which have multiple clients accessing a
+server will be run. The tests should be run with the system with the BFA
+kernel as both client and server.  Again, this implies that these tests can
+complete at least one pass succesfully.
+.sp 1
+.nf
+IMPLEMENT TIME: covered by NFS stress tests.
+PERFORM TIME: 3 days
+TYPE OF TEST: stress
+EXPECTED OUTPUT: Those areas of the code that control
+	access by multiple processes should be covered,
+	as shown by the BFA database file.
+.fi
+.sp 2
+.H 3  "Increasing code coverage without triggers"
+.sp 1
+In addition to the above tests, there are certain conditions which can
+be used to increase code coverage to acceptable levels, without requiring
+any special kernel changes.  Those areas which in general are most likely
+to increase the code coverage while also providing additional testing
+are discussed here.
+.sp 2
+.H 4  "Interrupt NFSD"
+.sp 1
+Interrupting the NFS daemon (nfsd) will cause several paths to be hit,
+including the exit paths and the routines which unregister the NFS
+service.   This can be accomplished by an interactive script which prompts
+the user to kill the nfsd program on the appropriate machine.
+.sp 1
+.nf
+IMPLEMENT TIME: 0.5 days (to fit in scaffold, document, etc.)
+PERFORM TIME: 0.25 days.
+TYPE OF TEST: recovery??
+EXPECTED OUTPUT: RPC/XDR should exit properly, allowing NFSD to exit
+properly.
+.fi
+.sp 2
+.H 4  "RPC Calling Errors"
+.sp 1
+A great deal of the RPC code deals with detecting various types of errors
+that SHOULD never happen through any normal path  of the NFS code. Decoding
+errors on the server side can easily be hit by writing special purpose test
+programs to be used from the client side.  The server should be running the
+BFA code.  In all of these cases, the client should check that the proper error
+is returned.  It should be verified that after the following tests have
+been executed, normal NFS/RPC transactions can still take place.  To do this,
+it is suggested that the NFS functional tests be run after the tests listed
+below.
+The following is a list of some of these tests cases and the expected results.
+As additional cases in this category are defined they will be added to this
+list.
+.sp 1
+.nf
+       ERROR CONDITION                      EXPECTED RESULT
+
+1)     The incoming UDP packet contains     RPC timeout due to no reply.
+	incomplete RPC header:
+            a) less than 4 bytes. (ID)
+	    b) less than 8 bytes. (DIRECTION)
+            c) various combinations specified
+               later that cause decoding
+               errors in the RPC header.
+
+2)     The "direction" field is	            RPC timeout due to no reply.
+       "REPLY" instead of "CALL"          
+
+3)     The RPC version number is not 2	    RPC timeout due to no reply.
+
+4)     The RPC information is correct,      MSG_ACCEPTED, PROG_UNAVAIL.
+       but the program number is not the
+       NFS program number.
+
+5)     The RPC information is correct,      MSG_ACCEPTED, PROG_MISMATCH
+       but the NFS version number is 0.     
+
+6)     The RPC information is correct,      MSG_ACCEPTED, PROC_UNAVAIL
+       but the NFS procedure number is -1
+
+7)     The RPC information is correct,      MSG_DENIED, AUTH_ERROR
+       but the authorization type is
+       AUTH_SHORT
+
+8)     The RPC information is correct,      MSG_DENIED, AUTH_ERROR
+       but the authorization type is
+       AUTH_NULL and the NFS procedure
+       is not RFS_NULL (0).
+
+9)     The RPC/NFS headers correct, but     MSG_ACCEPTED, no RPC error
+       NFS requests are caused to fail by   NFS generates an error message.
+       having bad or missing NFS arguments 
+.fi
+.sp 1
+.nf
+IMPLEMENT TIME: 5 days
+PERFORM TIME: 2 days
+TYPE OF TEST: recovery
+EXPECTED OUTPUT: RPC/XDR should return appropriate errors. (See above.)
+.fi
+.sp 2
+.H 4  "RPC Replying Errors"
+.sp 1
+Just as the server side contains checks for various errors, the client
+side also does.  However, to produce errors similar to those above 
+implies writing a version of NFSD which would produce
+error returns in a prescribed manner, and which would be executed in
+place of the normal NFSD.  This daemon would essentially produce errors
+from the list for the Server above, ranging from no reply to a
+reply that had mangled data for the NFS return values.  While this is
+possible, the value of the time spent is not clearly worthwhile.  
+Therefore, this set of tests should only be done if necessary to meet
+requirements for branch coverage as specified in the PRD.
+.sp 1
+.nf
+IMPLEMENT TIME: 7 days.
+PERFORM TIME: 2 days.
+TYPE OF TEST: recovery??
+EXPECTED OUTPUT: The client side should log appropriate errors, 
+      but continue functioning correctly on further transmissions.
+.fi
+.sp 2
+.H 3  "Triggers"
+.sp 1
+One way to increase branch coverage and to hit key spots is to use
+"triggers" in the kernel to key some appropriate action in certain
+circumstances.  While there are many areas that are important to hit,
+the areas discussed here are those which will do the most to increase
+branch coverage.  Unless triggers are necessary to meet branch coverage
+requirements as stated in the PRD, these tests will not be implemented.
+.sp 2
+.H 4  "Xdrmbuf_inline()"
+.sp 1
+The xdrmbuf_inline() routine is used to check if there is enough space
+left in the current mbuf to complete a set of operations.  If there is
+not enough space, the code is written to "do it the hard way".  The
+overwhelming majority of time there is enough space, and in many cases
+it is guaranteed by higher levels of code.  However, should this routine
+return a failure, normal operation should continue correctly, with no
+errors.  Therefore a trigger to cause xdrmbuf_inline() to always fail
+should be sufficient to cause a number of extra paths to be covered, and
+at the same time test the backup mechanisms in the code.  To perform
+this test the trigger should be enabled and one pass of the NFS functional
+tests should be executed to a BFA kernel as both client and server.
+.sp 1
+.nf
+IMPLEMENT TIME:  3 days.
+PERFORM TIME: 2 days.
+TYPE OF TEST: functional
+EXPECTED OUTPUT: The system should perform normally.
+.fi
+.sp 2
+.H 4  "M_get()"
+.sp 1
+The m_get() routine is an mbuf routine located in the kernel networking
+architecture code.  It is called in several places both directly and
+through the mclgetx() routine.
+Should m_get() fail it
+means that it was unable to allocate an mbuf, which usually means that it
+was out of memory.  It should be possible to configure various amounts of
+networking memory to cause this routine to fail at various times.  However,
+due to the difficulty of reconfiguring memory, this approach would be both
+very time consuming and tedious.  A better method is to have the m_getx()
+routine fail randomly.  Over a period of time, the majority of cases that
+call mclgetx() or mget() will get a failure.   Some method will need to
+be developed which will only cause failures for RPC calls, and not normal
+networking operation.
+The trigger should be coded to cause this routine to fail at random times,
+with how random being
+a specified value.  To perform this test the trigger should be enabled and one
+pass of the NFS functional tests should be executed to a BFA kernel as both
+client and server. 
+.sp 1
+.nf
+IMPLEMENT TIME: 4 days
+PERFORM TIME: 2 days
+TYPE OF TEST: recovery
+EXPECTED OUTPUT: Different error messages logged with no panics.
+DEPENDENCIES: As the m_get() routine is under the Peking groups' control,
+	any work on this trigger would have to be coordinated with them.
+.fi
+.sp 2
+.H 4  "m_get(), version 2"
+.sp 1
+As an alternative to the previous method, it might be better to have the
+trigger at those places which we wish to be covered.  In this case a
+trigger in mclgetx() plus triggers at the places calling m_get() directly
+might be more appropriate.  Again, to perform this test the trigger should
+be enabled and one pass of the NFS functional tests should be executed to a
+BFA kernel as both client and server.
+.sp 1
+.nf
+IMPLEMENT TIME: 3 days.
+PERFORM TIME: 2 days.
+TYPE OF TEST: Functional
+EXPECTED OUTPUT: Various errors logged at appropriate times.
+.fi
+.sp 2
+.H 3  "Important Modules and Code Reviews"
+.sp 1
+The modules listed below are the areas of the RPC/XDR code which are
+of key importance and/or most prone to bugs.  These areas should be
+subjected to the additional requirement that 100% of their code shall
+either be hit by branch flow coverage or shall be verified as correct
+by special code reviews/readings.  Further, as branch flow coverage is
+being increased these functions should be given special attention, so
+as to increase confidence in these routines.  Any code reviews done
+on  these modules shall be done by at least two engineers besides those
+responsible for the code.  The list below can be considered as a
+priority order for these purposes.
+.sp 1
+.nf
+       Module                    Description
+
+       ku_fastsend()             Special routine to send UPD packets
+                                 "fast" by doing its own routing, IP
+                                 fragmentation, etc.
+
+       ku_recvfrom(),            Routines which do kernel level sends
+       ku_sendto()               and recvs.
+
+       xdrmbuf_*                 XDR routines which manipulate mbufs
+
+       clntkudp_callit()         Main RPC client routine which controls
+                                 remote calls.
+
+       svc_getreq()              Main RPC server routine which controls
+                                 the decoding and dispatching of incoming
+                                 RPC requests.
+.fi
+.sp 1
+.nf
+IMPLEMENT TIME: none
+PERFORM TIME: 5 days (for code reading in addition to BFA testing).
+TYPE OF TEST: Verification
+EXPECTED OUTPUT:  Potential bugs found will be analyzed and fixed.
+.fi

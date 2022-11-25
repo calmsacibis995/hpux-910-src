@@ -1,0 +1,28 @@
+usage: apex [options] files
+	-target <standard> 	check files against the given standard 
+	-origin <platform> 	give porting hints assuming files originated 
+					on "platform"
+	-detail [1-9,min,max] defines amount of reported detail: 1 is least
+	-w<category>	controls which categories of messages are printed
+			<category> is a string of letters.  For a complete
+			list see the man page.  Standards related categories:
+			   A   all lint messages
+			   i   include file checking
+			   s   standards compliance messages
+			   x   C language extensions in named file
+			   X   C language extensions in all files
+			   N   standards summary
+			   H   portability hints
+			   L   call locations
+			Category specifiers toggle message state, so -wAisNH
+			turns on all lint categories and turns off the standards
+			related ones, to produce output similar to lint
+	-show targets 	prints list of available standards
+	-show origins 	prints list of available platforms
+	-c		Produce a .ln file for each source file
+	-lx		include library llib-lx.ln
+	-n		Do not include the standard system library
+	-s		Make stricter checks about structure alignment
+	-A[ac]		Process C files in ANSI-C or compatibility mode
+	Other options accepted for compatibility with lint, lintfor, and the
+	compilers include: [abhuvxoDUIgO]

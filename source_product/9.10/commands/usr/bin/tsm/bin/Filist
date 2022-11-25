@@ -1,0 +1,18 @@
+:
+# @(#) $Header: Filist,v 70.2 92/03/09 15:34:43 ssa Exp $
+# Filist takes a list of .fi format files and produces a list that includes
+#	the input filenames and the names of all of their decendents.
+if [ ! -f $1 ]
+then
+	echo "$0: Cannot open $1" 1>&2
+	exit 1
+fi
+echo $1 >/usr/tmp/$$Filist
+for file in $*
+do
+	echo Processing $file 1>&2
+	Filistsub $file >>/usr/tmp/$$Filist
+done
+sort -u </usr/tmp/$$Filist
+rm /usr/tmp/$$Filist
+

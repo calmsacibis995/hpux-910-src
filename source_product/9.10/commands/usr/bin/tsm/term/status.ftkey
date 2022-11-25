@@ -1,0 +1,40 @@
+# Default function key file for terminals with only status line
+# Include the following in the .facet file: ( remove leading # and tab )
+
+#	function_keys=status.ftkey
+
+## @(#) $Header: status.ftkey,v 70.1 92/03/09 16:56:31 ssa Exp $
+
+status_line_attr_reverse
+status_line_attr_dim_reverse
+* FacetTerm Window %d 
+##### on window 1 only #####
+W1
+*	FacetTerm Window %d:   \p1
+##### on window 2 only #####
+W2
+*	FacetTerm Window %d:   \p2
+##### on window 3 only #####
+W3
+*	FacetTerm Window %d:   \p3
+##### on window 4 only #####
+W4
+*	FacetTerm Window %d:   \p4
+##### on window 5 only #####
+W5
+*	FacetTerm Window %d:   \p5
+##### on window 6 only #####
+W6
+*	FacetTerm Window %d:   \p6
+##### on window 7 only #####
+W7
+*	FacetTerm Window %d:   \p7
+##### on window 8 only #####
+W8
+*	FacetTerm Window %d:   \p8
+##### on window 9 only #####
+W9
+*	FacetTerm Window %d:   \p9
+##### on window 0 only #####
+W0
+*	FacetTerm Window %d:   \p0

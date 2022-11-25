@@ -1,0 +1,568 @@
+.H 2  "Innetgr (Cristina Mahon)"
+
+.PP
+Innetgr returns a zero or a one depending on whether 
+the network group contains the machine, user, domain triple
+as a member.  Any of the three strings machine, user, or 
+domain can be NULL, in which case it signifies a wild card.
+.PP
+The format of the routine is as follows:
+.sp
+.nf
+innetgr(netgroup, machine, user, domain)
+.fi
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  2.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Call innetgr with domainname not set"
+.sp 1
+.PP
+Domainname should not be set on that machine.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: getdomainname system call missing"
+       I will change this message so that it actually says
+       what it means, domainname not set.
+.fi
+.sp 2
+.H 3 "Call innetgr with unknown netgroup"
+.sp 1
+.PP
+The file /etc/netgroup should have been put on a Yellow Pages
+database.  The netgroup we call innetgr with should not be 
+in /etc/netgroup.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns zero.
+.fi
+.sp 2
+.H 3 "/etc/netgroup not in YP"
+.sp 1
+.PP
+The file /etc/netgroup will not have been put into a Yellow
+Pages database.  
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Returns zero.
+.fi
+.sp 2
+.H 3 "Call innetgr with a cycle in /etc/netgroup"
+.sp 1
+.PP
+A cycle is when a network group defines itself based on itself.
+That is, if a member of the group uses the group itself as one
+of its fields.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: netgroup <netgroup> called recursively"
+.fi
+.sp 2
+.H 3 "Call innetgr with only hostname field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with only hostname, username field"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with no separating commas"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname username domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "innetgr: syntax error in /etc/netgroup"
+.fi
+.sp 2
+.H 3 "Call innetgr with all information"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null hostname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null username"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with null domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr with all null fields"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group with more than one triplet"
+.sp 1
+.PP
+Have an entry in /etc/netgroup with all its fields,
+like for example:
+.sp
+group	(hostname, username, domainname) (host1, user1, domain1)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, host1, user1, domain1)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group with spaces between the hostname, username and domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(  hostname , - , domainname ) 
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Have group that points to another group"
+.sp 1
+.PP
+Have entries in /etc/netgroup as follows:
+.sp
+group	group1
+group1	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, NULL, NULL, NULL)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr will NULL username, but with hostname and domainname"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username, domainname)
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, NULL, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.sp 2
+.H 3 "Call innetgr will group missing close parentheses"
+.sp 1
+.PP
+Have an entry in /etc/netgroup as follows:
+.sp
+group	(hostname, username, domainname
+.sp
+Call innetgr as follows:
+.sp
+innetgr(group, hostname, username, domainname)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Innetgr should return a one.       
+.fi
+.H 2  "Ruserok (Cristina Mahon)"
+.sp
+.PP
+Ruserok is a routine used by servers to authenticate clients 
+requesting service with rcmd .
+Ruserok takes a remote host's name, as returned by a gethostent
+routine, two user names and a flag indicating if the local user's 
+name is the super-user.  It then checks the files /etc/hosts.equiv
+and, possibly, .rhosts in the current working directory (normally 
+the local user's home directory) to see if the request for
+service is allowed. 
+Ruserok returns a 0 if the name is listed in /etc/hosts.equiv, 
+or the host and remote user name are found in $HOME/.rhosts;
+otherwise ruserok returns -1.  If the superuser flag is set, 
+/etc/host.equiv is bypassed.
+.PP
+The format for ruserok is:
+.sp
+ruserok(rhost, superuser, ruser, luser)
+.sp 2
+.PP
+This testplan does not intend to verify the full functionality 
+of ruserok.  For that there are already tests that the group SMELTER
+will run on the modified version of ruserok.  Rather, this testplan
+intends to test the added functionality provided by NFS.
+In this case the added functionality involves allowing netgroups
+to be used in /etc/hosts.equiv and ~/.rhosts and making sure that
+ruserok knows how to deal with those groups.
+.sp
+Because these tests modify system wide files they probably cannot be
+run in parallel or with other tests.  It might be better to have them 
+automated but run them by hand, that is not as part of the full testsuite.
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    0.5  md
+.fi
+.sp 2
+.H 3 "Allow netgroup in /etc/hosts.equiv"
+.sp 1
+.PP
+Have an entry in /etc/hosts.equiv as follows:
+.sp
++@netgroup
+.sp
+where netgroup is defined in /etc/netgroup as: 
+.sp
+netgroup  (host1, user1, domainname) (host2, , domainname)
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+and host1 should not be listed explicitly in /etc/hosts.equiv.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a zero.
+.fi
+.sp 2
+.H 3 "Allow netgroup in ~/.rhosts"
+.sp 1
+.PP
+Have an entry in ~/.rhosts as follows:
+.sp
++@netgroup user2
+.sp
+where netgroup is defined in /etc/netgroup as: 
+.sp
+netgroup  (host1, user1, domainname) (host2, , domainname)
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host2, 0, user2, user)
+.sp
+and host2 or netgroup should not be listed explicitly in /etc/hosts.equiv.
+Host2 should not be listed explicitly in ~/.rhosts.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a zero.
+.fi
+.sp 2
+.H 3 "Deny netgroup in /etc/hosts.equiv"
+.sp 1
+.PP
+Have an entry in /etc/hosts.equiv as follows:
+.sp
+-@netgroup
+.sp
+where netgroup is defined in /etc/netgroup as: 
+.sp
+netgroup  (host1, user1, domainname) (host2, , domainname)
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+and host1 should not be listed explicitly in /etc/hosts.equiv.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a one.
+.fi
+.sp 2
+.H 3 "Deny netgroup in ~/.rhosts"
+.sp 1
+.PP
+Have an entry in ~/.rhosts as follows:
+.sp
+-@netgroup user2
+.sp
+where netgroup is defined in /etc/netgroup as: 
+.sp
+netgroup  (host1, user1, domainname) (host2, , domainname)
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host2, 0, user2, user)
+.sp
+and host2 or netgroup should not be listed explicitly in /etc/hosts.equiv.
+Host2 should not be listed explicitly in ~/.rhosts.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a one.
+.fi
+.sp 2
+.H 3 "Allow netgroup followed by netgroup in ~/.rhosts"
+.sp 1
+.PP
+Have an entry in ~/.rhosts as follows:
+.sp
++@netgroup +@netgroup1
+.sp
+where netgroup and netgroup1 are defined in /etc/netgroup as: 
+.sp
+.nf
+netgroup  (host1, user1, domainname) (host2, , domainname)
+netgroup1  ( , user, domainname)
+.fi
+.sp
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+and host1 or netgroup should not be listed explicitly in /etc/hosts.equiv.
+Host1 should not be listed explicitly in ~/.rhosts.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a zero.
+.fi
+.sp 2
+.H 3 "Deny netgroup followed by netgroup in ~/.rhosts"
+.sp 1
+.PP
+Have an entry in ~/.rhosts as follows:
+.sp
++@netgroup -@netgroup1
+.sp
+where netgroup and netgroup1 are defined in /etc/netgroup as: 
+.sp
+.nf
+netgroup  (host1, user1, domainname) (host2, , domainname)
+netgroup1  ( , user, domainname)
+.fi
+.sp
+.PP
+Domainname should be the current domainname.
+Ruserok should be invoked as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+and host1 or netgroup should not be listed explicitly in /etc/hosts.equiv.
+Host1 should not be listed explicitly in ~/.rhosts.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a one.
+.fi
+.sp 2
+.H 3 "Allow all in ~/.rhosts"
+.sp 1
+.PP
+Have an entry in ~/.rhosts as follows:
+.sp
++ +
+.sp
+.PP
+Invoke ruserok as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+Host1 should not be listed explicitly in /etc/hosts.equiv.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a zero.
+.fi
+.sp 2
+.H 3 "Allow all in /etc/hosts.equiv"
+.sp 1
+.PP
+Have an entry in /etc/hosts.equiv as follows:
+.sp
++ 
+.sp
+.PP
+Invoke ruserok as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+Host1 should not be listed explicitly in /etc/hosts.equiv.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a zero.
+.fi
+.sp 2
+.H 3 "Deny host1 in /etc/hosts.equiv"
+.sp 1
+.PP
+Have an entry in /etc/hosts.equiv as follows:
+.sp
+-host1 
+.sp
+.PP
+Invoke ruserok as follows:
+.sp
+ruserok(host1, 0, user, user)
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       Ruserok should return a one.
+.fi
+.sp 2

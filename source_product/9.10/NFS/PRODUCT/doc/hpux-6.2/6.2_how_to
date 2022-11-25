@@ -1,0 +1,393 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'How to Recreate the HP-UX 6.2 NFS release"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'How to Recreate the HP-UX 6.2 NFS release''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+HOW TO RECREATE THE HP-UX 6.2 NFS RELEASE
+S300 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:31:54 $
+$Revision: 1.4.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Dean Thompson
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document describes how to restore the development environment,
+how to modify and rebuild the product and contains an index of what
+is included on the tape provided to manufacturing.
+.na
+.H 1 "How to restore the development environment"
+.ad
+.sp
+To restore the development environment the following steps are
+necessary (perform them as superuser):
+.sp
+.AL
+.LI
+Retrieve the contents of the tape into a directory.  We will
+call that directory from now on MAIN to simplify the examples.
+You can call that directory anything.
+The tape was created by using "cpio -o | tcio -or <device>".
+So, to restore from the tape use:
+.sp
+tcio -ivr <device> | cpio -idmvu 
+.sp
+.LI
+Set the environment variable Nfs to be MAIN.
+For example in Bourne shell:
+.sp
+.nf
+# Nfs=MAIN
+# export Nfs 
+.sp
+.fi
+Make sure that the variable Nfs is always defined.  That can be
+achieved by setting Nfs to MAIN in /etc/profile. 
+.LI
+Copy the files in MAIN/bin/s300/6.2 to their corresponding places on the 
+system were you will build.  For example, MAIN/bin/s300/6.2/cc should be
+copied to /bin/cc on your system.  Another choice you have is to modify
+the MAIN/bin/MAKE script to use look for those executables in other 
+locations.  For example, change CC in MAKE from /bin/cc to 
+MAIN/bin/s300/6.2/cc.  To use the libc.a that was shipped with release
+6.2, make sure to replace MAIN/cmds/libc/libc.a with the libc.a that
+is in the MAIN/bin/s300/6.2 directory.
+.LI
+Make a directory under MAIN/develop with your normal login name.
+Under that directory create a directory called log and touch a file
+called setup.  All those should be owned by the user whose login name
+we have used.
+.sp
+For example,
+.sp
+.nf
+# cd MAIN (or cd $Nfs)
+# mkdir chm (where chm is user on the system)
+# mkdir chm/log
+# touch chm/log/setup
+# chown chm chm chm/log chm/log/setup
+.fi
+.LI
+Login as the normal user and set the environment variable nfs to 
+MAIN/develop/"normal user".
+For example in Bourne shell,
+.sp
+.nf
+% nfs=MAIN/develop/chm
+% export nfs
+.sp
+.fi
+We strongly suggest that the variable nfs always be setup.  That can be
+achieved by setting the variable nfs to MAIN/develop/$LOGNAME in 
+/etc/profile.
+.LI
+Now execute $Nfs/bin/setup as that user.  This will setup a development
+environment with both user and kernel NFS code.  The setup basically links
+all the files and subdirectories in the main directory MAIN to your
+development environment.  You might want to add $nfs/bin or $Nfs/bin to
+your path to simplify executing development environment commands.
+.LI
+For more details about the development environment you can read the
+document DE.Detail.mm kept under $Nfs/doc.
+.LE
+.na
+.sp 2
+.H 1 "How to Remake the NFS kernel archive"
+.sp
+.ad
+To simplify remaking the kernel archive setup your development environment
+as indicated in the previous section.  After your development environment
+has been setup follow these steps:
+.sp
+.AL
+.LI
+Change directory to your development environment (cd $nfs).
+.LI
+Execute the command setup_rel (which resides in $nfs/bin) 
+specifying the release you want to retrieve and what portions of that 
+release.  That command looks for the release tag file specified on the 
+command line and retrieves the files based on the revision level listed 
+on that file.  When trying to rebuild the HP-UX 6.2 NFS kernel archive you 
+should invoke setup_release as follows:
+.sp
+.na
+bin/setup_rel HP-UX_6.2 kernel/300/rpc kernel/300/nfs
+.ad
+.sp
+This will retrieve the files in the kernel/300 rpc and nfs directories
+which are the kernel files for NFS.  The other files that exist under 
+kernel/300 are copies of the files that were used to build a full kernel
+for the HP-UX 6.2 release.  
+.LI
+Once the setup_release command has terminated, change directories to 
+$nfs/kernel/300/NFS (cd $nfs/kernel/300/NFS).
+.LI
+In that directory you will find the kmake command.  Execute it as follows:
+.sp
+kmake configlibsnfs
+.sp
+This will create all the .o files required to build the NFS archive and
+the NFS archive itself, libnfs.a.  
+.LE
+.sp 2
+.na
+.H 1 "How to Remake the NFS commands"
+.sp
+.ad
+To simplify remaking the NFS commands setup your development environment
+as described in section 1 then follow these steps:
+.sp
+.AL
+.LI
+Change directory to your development environment (cd $nfs).
+.LI
+Execute the command setup_rel specifying the release you want to 
+retrieve and what portions of that release.  That command looks
+for the release tag file specified on the command line and retrieves
+the files based on the revision level listed on that file.
+To setup the NFS commands directory for HP-UX release 6.2, execute
+setup_rel as follows:
+.sp
+$nfs/bin/setup_rel HP-UX_6.2 cmds include
+.sp
+.LI
+If you want to rebuild all the NFS commands from the HP-UX 6.2 release,
+once setup_rel has terminated, remove the executables that are built on
+the main directory.  That is done by first changing the OUR_BUILD variable
+in the $nfs/bin/MAKE script to use your hostname and then executing Make_cmd 
+with the clobber option
+.sp
+$nfs/bin/Make_cmd clobber
+.sp
+or by cd'ing to $nfs/cmds and executing $nfs/bin/MAKE clobber.
+.sp
+.LI
+At this point you are ready to rebuild all the commands.  To do that
+execute Make_cmd without any options
+.sp
+$nfs/bin/Make_cmd
+.sp
+or cd to $nfs/cmds and execute $nfs/bin/MAKE.
+.sp
+You might want to redirect the output of this command to a file so that
+you can examine it later.  This command will remake all the NFS commands
+and libraries.  It will not remake the library routines that are part of
+libc.a.  The SSO commands group is in charge of libc.a.  
+.LI
+If you do want to rebuild one of the libc routines that are part of NFS 
+cd to $nfs/cmds/libc (rpc, yp or net) and execute MAKE.
+Also, if you want that build to occur as part of the build of all the
+other commands, you can change the variable PRODUCT in the $nfs/bin/MAKE 
+script to include libc/net, libc/rpc and libc/yp.
+.LE
+.sp 2
+.na
+.H 1 "How to modify kernel files"
+.sp
+.ad
+If you want to modify some of the kernel files and rebuild the NFS 
+kernel archive (libnfs.a).  Follow the same steps as in section 2
+(How to Remake the NFS Kernel Archive) up to the setup_rel step.
+At this point you will like to modify one of the files in the rpc or
+nfs kernel directories.  To do that follow these steps:
+.sp
+.AL
+.LI
+First you should know that the RCS files for the files in the rpc
+and nfs kernel directories reside under:
+.sp
+.BL
+.LI
+$Nfs/rcs/cmds/libc/rpc for the rpc .c files,
+.LI
+$Nfs/rcs/include/rpc for the rpc header files,
+.LI
+$Nfs/rcs/kernel/300/nfs for the nfs .c files and nfs_log.h and
+.LI
+$Nfs/rcs/include/nfs for the other nfs header files.
+.LE
+.sp
+So, to you need to use the real RCS directory when executing the
+next steps.
+.LI
+Retrieve the HP-UX 6.2 release version of the file for editing.
+You should be in the correct directory (if it is an rpc file cd to
+$nfs/kernel/300/rpc and if it is an nfs file cd to $nfs/kernel/300/nfs).
+.sp
+co -l -r"revision number" RCS-file
+.sp
+Look at the release file for 6.2 (HP-UX_6.2) and locate the file
+you want to change.  Check to see what revision level that file
+was at for the 6.2 release.  For example, the svc.c file will have the
+following line in HP-UX_6.2 file:
+.sp
+10.1	/nfs/working/rcs/cmds/libc/rpc/svc.c,v
+.sp
+So what we do is:
+.sp
+co -l -r10.1  $Nfs/rcs/cmds/libc/rpc/svc.c
+.sp
+This will create a branch.
+.LI
+Once you have made the changes you need check the file back in by
+using:
+.sp
+ci RCS-file
+.sp
+For example,
+.sp
+ci $Nfs/rcs/cmds/libc/rpc/svc.c
+.LI
+You know can execute kmake as in section 2.
+.sp
+kmake configlibsnfs
+.LE
+.na
+.sp 2
+.H 1 "How to modify NFS commands"
+.sp
+.ad
+If you want to modify one of the NFS commands or library routines
+follow the steps 1 and 2 in section 3 (How to Remake the NFS commands).
+Then you will be ready to check out the file you need to work on.
+To do that follow these steps:
+.AL
+.LI
+cd to the directory where the file you want to change resides.
+For example, if I want to change domainname.c, I would do:
+.sp
+cd $nfs/bin
+.LI
+Look at the release file for 6.2 (HP-UX_6.2) and locate the file
+you want to change.  Check to see what revision level that file
+was at for the 6.2 release.  For example, the domainname.c file will have the
+following line in HP-UX_6.2 file:
+.sp
+10.1	/nfs/working/rcs/cmds/bin/domainname.c,v
+.sp
+So what we do is:
+.sp
+co -l -r10.1 $Nfs/rcs/cmds/bin/domainname.c,v
+.sp
+This created a branch for that file.
+.LI
+You can now make the changes necessary to that file and check them back
+into RCS.
+.sp
+ci RCS-file
+.sp
+For example,
+.sp
+ci $Nfs/rcs/cmds/bin/domainname.c,v
+.LI
+You can now build the command or library routine by executing a $nfs/bin/MAKE
+in the directory where the file resides.
+.LE
+.na
+.sp 2
+.H 1 "Index of tape contents"
+.sp
+.ad
+The tape delivered to manufacturing for the NFS product released with 
+HP-UX 6.2 contains the following directories:
+.sp
+.BL
+.LI
+bin: 
+.sp
+Contains the tools used by the development environment and build
+process.  Under its subdirectory, s300/6.2, it contains the assembler,
+compiler, loader and other tools used to build this version of the 
+NFS product.
+.LI
+cmds:
+.sp
+Contains all the user level NFS commands and library routines. 
+Replace the libc.a library under $nfs/cmds/libc with the one under 
+$nfs/bin/s300/6.2 to rebuild the NFS commands so that you can be sure
+of using the one that was shipped with 6.2.
+.LI
+develop:
+.sp
+Contains the development environments of all the developers of NFS.
+The only thing that should be in those are the setup files and any 
+files they might have checked out.  
+.LI
+doc:
+.sp
+Contains the documents for the NFS project.  It contains the ERS, IRSs
+and other documents.  See the README file for more details.
+.LI
+include:
+.sp
+Contains the header files used to build the NFS user level code.  The
+files under the rpc, rpcsvc and nfs directories, as well as dbm.h, are
+part of the NFS product (dbm.h is not shipped though).  All the other
+files were obtained from the SSO shared source and are the files that
+were used to build the released product.
+.LI
+kernel:
+.sp
+Contains the files used to build the kernel.  The rpc and nfs directories
+contain the files that are used to build libnfs.a.  The other files 
+exist mainly for reference.
+.LI
+log:
+.sp
+Contains the log files resulting from the build process.  Files of particular
+interest in this directory are the update* files.  Those files show what
+changes have been made to all the files that are part of the NFS product.
+It is a complete log since the beginning of the project.
+.LI
+man:
+.sp
+Contains the most up to date man pages for NFS product.  Some of those man
+pages have already been changed for the NFS 800 product.  The NFS man
+pages for the HP-UX 6.2 NFS release are at level 10.1 and above.
+.LI
+releases:
+.sp
+Contains the tag files used for each release.
+.LI
+rcs:
+.sp
+Contains the RCS files for all the files in the previous directories.
+.LI
+system:
+.sp
+NFS 800 specific.  Contains the customize script for the NFS 800 product.
+.LI
+test:
+.sp
+Contains Sun's test suites for release 3.0 and 3.2.  It also contains 
+some performance tests for NFS.
+.LE
+.na
+.sp 2
+.TC 2 2 4 0 "EXTERNAL REQUIREMENTS SPECIFICATIONS DOCUMENT" "TABLE OF CONTENTS"

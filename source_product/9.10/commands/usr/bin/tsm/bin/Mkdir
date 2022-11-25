@@ -1,0 +1,23 @@
+:
+# @(#) $Header: Mkdir,v 66.2 90/09/20 12:00:07 kb Exp $
+if [ "$1" = "" ]
+then
+	exit 0
+elif [ -d $1 ]
+then
+	exit 0
+elif [ -f $1 ]
+then
+	echo "$1 already exists and is not a directory!"
+	exit 1
+else
+	Mkdir `dirname $1`
+	if [ $? != 0 ]
+	then
+		exit $?
+	else
+		echo "Making directory $1..."
+		mkdir $1
+		exit $?
+	fi
+fi

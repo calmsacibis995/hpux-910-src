@@ -1,0 +1,403 @@
+
+.H 1  "General getdirentries functionality (Mike Shipley)"
+Getdirentries is now the recommended method of getting entries from
+a directory.  The tests here should, in most part, be done for local
+directories and then to NFS directories.  When doing the access to
+NFS directories, the tests should be done to both a HP node and a
+Sun node as directory formats differ a bit between the two machines,
+but results need to be the same.
+
+Another part of the test will be to see how useful the man page is.
+Therefore, there will be no instructions on how to use getdirentries
+or to access the directory entries inside the buffer that is returned
+from the call to getdirentries.
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES: Having a HP-UX kernel that supports getdirentries().
+ISSUES:
+.fi
+
+.sp 2
+
+.H 2 "Invalid file descriptor"
+.sp 1
+Give getdirentries() an invalid file descriptor and try to read from it.
+For example, -1 or a file descriptor for which no file has been opened.
+.nf
+RESULT:  getdirentries() should return -1 and errno should be EBADF
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  1.5  md 
+                   (This is to account for the overhead to
+                    establish the whole series of getdirentries tests.)
+PERFORM TIME:    0.25 md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Valid file descriptor, but for a normal file"
+.sp 1
+.nf
+Give getdirentries() a valid file descriptor, but have the descriptor refer
+to a normal file.  
+RESULT:  getdirentries() should return -1 and errno should be ENOTDIR
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.1  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Bad buffer pointer"
+.sp 1
+When trying to use getdirentries(), give it a bad value for the buffer pointer
+(second parameter).  For example, try -1, 0, 1 and 4761(just some random 
+non-small integer).
+.nf
+RESULT:  getdirentries() should return -1 and errno should be EFAULT
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.1  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Vary the bytes Requested"
+.sp 1
+Getdirentries() should be requested to return at least a block size worth
+of information.  Asking for less gives unknown results, and these results
+need to be identified.  For local directories, some of the values may return
+data.  It is over NFS, that strange behavior may occur.
+So this test will vary the number of bytes requested
+to be returned.
+.nf
+Ask for -1 bytes, should fail with errno=EINVAL (errno 22).
+Ask for 0 bytes, should fail with errno=EINVAL.
+Ask for 1 byte, should fail with errno=EINVAL.
+Ask for 2 bytes, should fail with errno=EINVAL.
+Ask for 8 bytes, should fail with errno=EINVAL.
+Ask for 16 bytes, should fail with errno=EINVAL.
+Ask for 32 bytes(the size of a hp-ux entry), should fail with errno=EINVAL.
+Ask for 40 bytes(the size of a hp-ux entry plus 8 bytes), should fail 
+    with errno=EINVAL.
+Ask for 256 bytes, should fail with errno=EINVAL.
+Ask for 512 bytes, should fail with errno=EINVAL.
+Ask for 1000 bytes(just a bit under the block size of a hp-ux directory),
+    should fail with errno=EINVAL.
+Ask for 1056 bytes(the block size of a hp-ux directory plus 1 entry), 
+    succeeds and returns 1024 for local file,
+    succeeds and returns 624 for remote file,
+    succeeds and returns 744 for remote, long filename file.
+
+
+RESULT:  See above.
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Normal usage Part 1"
+.sp 1
+Create an empty directory and verify that it only contains "." and ".."
+.nf
+RESULT:  should work
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.1  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Normal usage Part 2"
+.sp 1
+Create an empty directory and verify that it only contains "." and ".."
+Now creat(OS) files in the directory until the size of the directory[stat(OS)]
+grows from 1024 to 2048 making sure you are able to always read each
+entry in the directory.
+.sp 1
+.nf
+RESULT:  should work
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Normal usage Part 3"
+.sp 1
+Create a large directory (3K in size).  Read its contents using varying values
+for the number of bytes requested.  Read it in three 1K chunks, in two 1.5K
+chunks and in one 3K chunk.  Make sure you are able to always read each
+entry in the directory.
+.sp 1
+.nf
+RESULT:  should work
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.1  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+
+.H 2 "Long file names"
+.sp 1
+This test will try to read entries that refer to files with long names.  This
+can only be done to a non-HP server over NFS.  A Sun will do.
+On the server, create several files.  The first file will have a name of length
+251 characters.  The subsequent files will have names of lengths 252, 253,
+254 and 255 characters.  Use getdirentries() to make sure that the file
+names can correctly be obtained from the remote server.
+.sp 1
+.nf
+RESULT:  should work
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+.H 2 "CDF's and getdirentries"
+.sp 1
+The test for CDF's and getdirentries will be to run the previous
+tests and to use a CDF directory instead of a normal directory.
+To make a CDF that is a directory, do the following:
+.nf
+
+mkdir       the_dir
+chmod  u+s  the_dir
+mkdir       the_dir
+.fi
+
+After the tests are concluded the CDF directory can be removed with
+the following command:
+.nf
+
+rm -rf the_dir+
+.fi
+.sp 1
+.nf
+RESULT:  The results should be the same as the tests done on normal 
+directories.
+
+.fi
+
+
+.nf
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.0  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+.H 2 "Reading directories in less than 1K Chunks"
+The following applies to Series 300 Release 6.2 and later and Series
+800 Release 2.1 and later.
+These tests try to create strange directories and then read them over
+NFS using a read size of 512 bytes.  For each test, I have listed
+the expected result.  The best way to check the validity of the
+tests is to also run the tests and use the local file system
+to read directories created in the same strange fashion.
+You will have
+to use a read size for the directory of at least 1024 bytes as 
+EINVAL will be returned  if less than 1024 is requested for a local
+read.  If a read size is requested of less than 512 for a directory
+to be read over NFS, EINVAL will be returned.
+
+Since these tests use long file names, they need to be run on a
+file system that supports long file names.
+.AL
+.LI
+Create a directory that contains 150 entries.  Remove the first
+120 entries.  Now with a program that uses getdirentries,
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  1.0  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", ".." and the last 30 entries.
+.LI
+Create a directory that contains 150 entries.  Remove the first 
+30 entries.  Then remove the last 30 entries
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", ".." and the middle 90 entries.
+.LI
+Create a directory that contains 151 entries. 
+Remove 100 entries starting with entry 51 which will
+leave entry 151
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", "..", the first 50 entries and the last entry.
+.LI
+Create a directory that contains 150 entries. 
+Remove the first 10 entries, 
+leave the next 5, remove the next 10 entries, leave the next 5.
+Repeat this pattern throughout the directory.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+
+Results:  You should see ".", ".." and the 10 groups of 5 entries.
+.LI
+Create a directory that contains 150 entries. 
+Remove  every other entry. 
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", ".." and then remaining every other entry.
+.LI
+Create a directory that contains 150 entries. Starting with the first
+entry, leave the first entry in the directory and remove the next
+two entries.  Repeat this pattern for the rest of the directory.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see "." and ".." plus entry number 1, entry number 4,
+entry number 7 ...
+.LI
+Create a directory that contains 150 entries.  The length of the name
+of an entry should be one greater than the previous entry.  So if the
+first entry has a name with a length of 5 characters, the second entry
+will have a name with a length of 6 characters, the third entry will
+have a name with a length of 7 characters and so on.
+
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.25 hr
+.fi
+
+Results:  You should see ".", ".." and then every entry following them.
+.LI
+Make a directory with 30 entries.  Have the length of the name of each
+entry be 255 characters (the maximum allowed with HP-UX).
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", ".." and then every entry following them.
+.LI
+Make a directory with 30 entries.  Have the length of the name of each
+entry be 255 characters (the maximum allowed with HP-UX).  
+Remove every other entry.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.1  hr
+.fi
+
+Results:  You should see ".", ".." and then remaining every other entry.
+.LI
+Create a directory with about 50 entries.  Have the length of the name
+of a entry be a random number.  For example the length of the name for
+the first entry may be 6, for the second entry it could be 38, for the
+third entry it could be 203.  Then remove random numbered entries.
+For example remove the 10th, 31st, 47th ... numbered entry.
+Now with a program that uses getdirentries,  
+read the directory.  Set the number of bytes that you read at one time
+to be 512.
+
+.nf
+IMPLEMENT TIME:  0.2  hr 
+PERFORM TIME:    0.25 hr
+.fi
+
+Results:  You should see ".", ".." and the remaining entries.
+.LE

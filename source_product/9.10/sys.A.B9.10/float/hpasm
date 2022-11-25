@@ -1,0 +1,863 @@
+#!/usr/bin/perl -w
+#
+# $Source: /source/hpux_source/kernel/sys.SWT68K_300/float/RCS/hpasm,v $
+# $Revision: 1.3.84.3 $	$Author: kcs $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/09/17 20:48:50 $
+
+#======================================================================
+#
+# Program: hpasm    (Change Apollo/Motorola/LSD assembler syntax to HP)
+# By: Greg Lindhorst, Colorado Language Lab, greg@hpfcrt.hp.com
+# $Header: hpasm,v 1.3.84.3 93/09/17 20:48:50 kcs Exp $
+#
+# Description:
+#	This is a simple script which attempts to convert Motorola type
+#   assembler formats into HP type formats.  It is very simple minded,
+#   and no doubt contains many bugs (which I would love to hear about).
+#
+#   This package will convert macros and include statments into m4 versions
+#   of the same.  No special knowledge of m4 is needed; everything should
+#   be very easy to understand.
+#
+# Usage:
+#
+#	  1. You must have perl on your system, version 3.0 or higher.
+#        This script expects to find it in /usr/bin/perl.
+#   
+#     2. hpasm [-m | -a | -l] [-c] < infile.asm > outfile.s
+#          -m == Motorola code
+#          -a == Apollo code
+#          -l == LSD code
+#
+#		   -c == Convert to Lower Case 
+#             Some prefer lower case, but this may cause problems if
+#             the original code was case sensitive.  Use with care.
+#             Default for Motorola.
+#
+#     3. At this point, the conversion is completed.  The code you know
+#        have should be the code you modify from then on.
+#
+#     4. If for Motorola or Apollo, you will need to run it through m4,
+#        which can be done with the '-m' flag to as.  If you are using
+#        Apollo code, then the -B flag may need to be used (ie, -B20000).
+#
+#     5. Run it through as.
+#
+#
+
+# Parse the command line, and look for command line switches to tell
+# us which assembly language we are changing from.
+#
+$APOLLO = $MOTOROLA = $LSD = '';
+$t = $#ARGV;						# This is here to keep '-w' happy (above)
+for( @ARGV )
+{ 
+	if( /-a/i )			{ $APOLLO = 1; }
+	elsif( /-m/i )		{ $MOTOROLA = 1; $to_lower = 1; }
+	elsif( /-l/i )		{ $LSD = 1; }
+	elsif( /-c/i )      { $to_lower = 1; }
+}
+if( !($APOLLO || $MOTOROLA || $LSD) )
+	{die "hpasm: Must specify one of: -a (Apollo), -m (Motorola), -l (LSD)";}
+
+# Used to convert the "dc.?" forms to the word equivalents"
+#
+$data_type{"dc.b"} = "byte";
+$data_type{"dc.w"} = "short";
+$data_type{"dc.l"} = "long";
+$data_type{"dcb.b"} = "space";
+$data_type{"dc.x"} = "extend";
+
+# These are special register names which need a '%' added to the beginning.
+#
+$regfix{"pc"} = "pc";				# Program Counter
+$regfix{"sp"} = "sp";				# Stack Pointer 
+$regfix{"fpsr"} = "fpsr";			# Floating Point Status Reg
+$regfix{"fpcr"} = "fpcr";			# Floating Point Control Reg
+$regfix{"fpiar"} = "fpiar";			# Floating Point Instruction Address Reg
+$regfix{"sfc"} = "sfc";				# 680x0 Control Regs
+$regfix{"dfc"} = "dfc";
+$regfix{"cacr"} = "cacr";
+$regfix{"usp"} = "usp";
+$regfix{"vbr"} = "vbr";
+$regfix{"caar"} = "caar";
+$regfix{"msp"} = "msp";
+$regfix{"isp"} = "isp";
+if( $APOLLO )
+{
+	$regfix{"fpstatus"} = "fpsr";
+	$regfix{"fpcontrol"} = "fpcr";
+	$regfix{"sb"} = "fp";
+}
+
+# These are m4 reserved words which may not be used.  If one of these
+# is seen, an '_' is added to the beginning of the name.  Of course, it is
+# possible that someone has a '_' version of the string, in which case this
+# does not work out too good. 
+#
+if( $MOTOROLA || $APOLLO )
+{	
+	$m4reserved{"changequote"} = 1;		$m4reserved{"len"} = 1;
+	$m4reserved{"changecom"} = 1;		$m4reserved{"m4exit"} = 1;
+	$m4reserved{"decr"} = 1;			$m4reserved{"m4wrap"} = 1;
+	$m4reserved{"define"} = 1;			$m4reserved{"maketemp"} = 1;
+	$m4reserved{"defn"} = 1;			$m4reserved{"popdef"} = 1;
+	$m4reserved{"divert"} = 1;			$m4reserved{"pushdef"} = 1;
+	$m4reserved{"divnum"} = 1;			$m4reserved{"shift"} = 1;
+	$m4reserved{"dnl"} = 1;				$m4reserved{"sinclude"} = 1;
+	$m4reserved{"dumpdef"} = 1;			$m4reserved{"substr"} = 1;
+	$m4reserved{"errprint"} = 1;		$m4reserved{"syscmd"} = 1;
+	$m4reserved{"eval"} = 1;			$m4reserved{"sysval"} = 1;
+	$m4reserved{"ifdef"} = 1;			$m4reserved{"traceoff"} = 1;
+	$m4reserved{"ifelse"} = 1;			$m4reserved{"traceon"} = 1;
+	$m4reserved{"include"} = 1;			$m4reserved{"translit"} = 1;
+	$m4reserved{"incr"} = 1;			$m4reserved{"undefine"} = 1;
+	$m4reserved{"index"} = 1;			$m4reserved{"undivert"} = 1;
+}
+
+# These defines provide information on how to rewrite bCC instructions
+# which are outside the current segment.
+#
+if( $MOTOROLA )
+{
+	$bcc_negate{"cc"} = "cs";           $bcc_negate{"cs"} = "cc";
+	$bcc_negate{"eq"} = "ne";           $bcc_negate{"ne"} = "eq";
+	$bcc_negate{"t"} = "f";             $bcc_negate{"f"} = "t";
+	$bcc_negate{"ge"} = "lt";           $bcc_negate{"lt"} = "ge";
+	$bcc_negate{"gt"} = "le";           $bcc_negate{"le"} = "gt";
+	$bcc_negate{"hi"} = "ls";           $bcc_negate{"ls"} = "hi";
+	$bcc_negate{"hs"} = "lo";           $bcc_negate{"lo"} = "hs";
+	$bcc_negate{"mi"} = "pl";           $bcc_negate{"pl"} = "mi";
+	$bcc_negate{"vc"} = "vs";           $bcc_negate{"vs"} = "vc";
+	$bcc_label = 1;
+	$new_label = 0;
+	$bcc_str = '__bfix';
+}
+
+$in_m4_construct = 0;
+
+# These are the floating point numbers that we know about
+# The assembler won't let us put these in directly, so we need to convert
+# them.  In a later release of the assembler, this will not be needed.
+#
+$float{"42800000"} = "0f64.0";             # 64.0 conversion
+$float{"40000000"} = "0f2.0";              # 2.0 conversion
+$float{"3f800000"} = "0f1.0";              # 1.0 conversion
+$float{"3f000000"} = "0f0.5";              # 0.5 conversion
+$float{"3e800000"} = "0f0.25";             # 0.25 conversion
+$float{"3c800000"} = "0f0.015625";         # 1/64 conversion
+$float{"00800000"} = "0f1.1754943e-38";    # TINY conversion
+$float{"00000000"} = "0f0.0";              # 0.0 conversion
+$float{"bf800000"} = "0f-1.0";             # -1.0 conversion
+
+if( !($LSD) )
+{
+	print 'ifdef(`ifndef\',,`define(ifndef,`ifdef(`$1\',`$3\',`$2\')\')\')';
+	print " # HPASM Generated\n";
+}
+
+#----------------------------------------------------------------------
+#
+# Main loop through the input file.
+#
+while( 1 ) {
+
+	# Get a line to process
+	#
+	if( $todo )
+		{ $_ = $todo; $todo = ''; }
+	elsif( $in_include )
+		{ $_ = <include>; 
+		  if( !($_) ) { $in_include = ''; next; } }
+	else
+		{ $_ = <stdin>; last if( !($_) ); }
+
+	# Delete the ending new line (on each line).
+	#	
+	s/\n//;
+	
+	# Change Comments Over.  This does none of the conversions 
+	# below, thus a comment which contains a register reference will 
+	# still appear in the old format.
+	#
+	if( /^\*/ ) 
+	{
+		 if( $in_m4_construct )
+			{ s/\'//g; }
+		 print "#".substr($_,1,length($_)-1)."\n";
+		 next;
+	}
+
+	# Apollo Assembler Directives
+	#
+	if( $APOLLO && /^%/ )
+	{
+		if( /%include[ \t]+\'(.*)\'/ )
+		{
+			$include = $1;
+
+			open include || die "Can't open include file: $include";
+			$in_include = 1;		
+			next;
+		}
+
+		# Since it is bad to have any <'> in m4 expressions, we delete them 
+		s/'//g;
+
+		$elseif = '';
+		if( s/%elseif/\',\' %if/i )
+		 	{ $close_endif = $close_endif."\')"; 
+		      $elseif = 1; }
+
+		# Note that we have to be careful about "NOT" in an if expression.
+		if( s/%if[ \t]+not[ \t]+([a-z0-9_]+)/ifndef\(\`$1\',\`/i ||
+			s/%if[ \t]+([a-z0-9_]+)/ifdef\(\`$1\',\`/i ||
+			s/%ifdef[ \t]+([a-z0-9_]+)/ifdef\(\`$1\',\`/i ||
+			s/%ifndef[ \t]+([a-z0-9_]+)/ifndef\(\`$1\',\`/i )
+				{ 
+				  ($in_m4_construct)++;
+				  if( !($elseif) )
+					  { $close_endif = "\')"; }
+				}
+		s/%then//i;
+		s/%else/\',\`/i;
+		if( s/%endif/$close_endif/i || s/%end/$close_endif/i )
+			{ ($in_m4_construct)--; 
+			  $close_endif = "\')"; }
+
+		s/%var[ \t]+([a-z0-9_]+)/define\($1,1\)/i;
+		s/%exit/m4exit(1)/i;
+#		s/%end//i;
+		if( /%(error)[ \t]+"(.*)"?.*$/i || /%(warning)[ \t]+"(.*)"?.*$/i )
+		{
+			$1 =~ tr/a-z/A-Z/;
+			$2 =~ s/\'//g;
+			$_ = "errprint\(\`".$1.": ".$2."\n\')";
+		}
+
+		print $_."\n";
+		next;
+	}
+
+	# Fix up 'stuff' before we split the line up.  This is so that imbedded
+	# spaces in a string will not be split incorrectly.
+	#
+	$str_num = 1;
+	while( s/'([\00-&\(-\277]*)'/__hpasm_string$str_num/ )
+		{ $hpasm_string[ $str_num++ ] = $1; }
+
+	# End of line comments [All].
+	#   Empty comments are deleted.  If we are in an m4 construct, then we
+	#   don't want any ' to be in there, so we go ahead and delete them.
+	#
+	$comment = '';
+	if(($MOTOROLA||$LSD) && (/(.*)\.\.\.(.*)/ || /(.*);(.*)/ || /(.*)\!(.*)/))
+		{ $_ = $1; $comment = "# ".$2; }
+	elsif( $APOLLO )
+	{
+		# Implicit Apollo End of Line Comments.
+		#	It appears that the fourth field begins a comment.
+		#
+		if( /^([a-zA-Z0-9_\$]+[ \t]+[!-~]+[ \t]+[!-~]+[ \t]+)(.+)/ )
+			{ $_ = $1; $comment = "# ".$2; }
+		elsif( /^([ \t]+[!-~]+[ \t]+[!-~]+[ \t]+)(.+)/ )
+			{ $_ = $1; $comment = "# ".$2; }
+	}
+	if( $comment =~ /^#[ \t]*$/ )	{ $comment = ''; }
+	if( $in_m4_construct )
+		{ $comment =~ s/\'//g; }
+
+	# Break out the line, into label/oper/operand fields.  We put
+	# everything back together right before we print out this line.
+	#
+	($label,$oper,$operand) = split(/[ \t]+/);
+	$oper =~ tr/A-Z/a-z/;
+	$orig_operand = $operand;
+
+	if( $MOTOROLA && $new_label != 0 )
+	{
+		if( $label )
+			{ die "attempt to use a label for a BCC_negate operation"; }
+		$label = sprintf( "%s%d", $bcc_str, $new_label ); 
+		$new_label = 0;
+	}
+
+	# Include Statements [Motorola].
+	#   We need to actually scan the file, to find any MACRO statements.
+	#   If an instruction is later used as a MACRO, it needs to be
+	#   converted to an appropriate m4 version of the macro.
+	#   It is important to do this before the translation to lower-case 
+	#   (so that file names are the same case).
+	#
+	if( $MOTOROLA && $oper eq 'include' )
+	{
+		# Append a '.sa' if one is not already there.
+		$inc = $operand;
+		if( $operand =~ /(.*).sa/ )   
+			{ $inc_file = $1.".s"; }
+		else
+			{ $inc_file = $inc.'.s'; $inc = $inc_file.'a'; }
+
+		open inc || die "Can't open include file: $inc";
+		while( <inc> )
+		{
+			# Blow off whole line comments
+			if( /^\*/ ) { next; }
+
+			# Blow off the end of line comments
+			if( /(.*)\.\.\.(.*)/ || /(.*);(.*)/ )   { $_ = $1; }
+
+			# Search for other include's (which is an error)
+			if( /[ \t]include[ \t]/ ) 
+				 { die "nested include files in $inc, aborting"; }
+
+			# Search for macro definitions
+			if( /([a-z0-9_]+)[ \t]+macro/i )   { push( macros, $1 ); }
+		}
+
+		printf( "\tinclude(%s)\n", $inc_file );
+		next;
+	}
+
+	if( $to_lower )
+	{
+		$operand =~ tr/A-Z/a-z/;
+		$label =~ tr/A-Z/a-z/;
+	}
+
+	#----------------------------------------------------------------------
+	#
+	# Macros [Motorola and LSD].
+	#
+
+	# Macro's substitutions need to be converted to m4 format.
+	#
+	for( @macros )
+	{
+		if( $oper =~ /^$_\.?([a-z0-9_]*)$/ )
+		{
+			$oper = $_."(".$1.","; 
+			$operand = $operand.")";
+		}
+	}
+
+	#   Macro's are converted to m4 type macros, and the name of the
+	#   macro is placed in the 'macros' array so that they will be 
+	#   recognized.
+	#
+	if( $oper eq 'macro' )
+	{
+		$in_macro = 1;
+		($in_m4_construct)++;
+		if( $MOTOROLA )
+		{ 		
+			push( macros, $label );
+			$oper = sprintf( "define(%s,`", $label ); 
+			$label = $operand = '';
+		}
+	}
+	# At the end of macros, we turn off our substituion flag.
+	#
+	elsif( $oper eq 'endm' )	
+	{ 
+		$in_macro = ''; 
+		($in_m4_construct)--; 
+		if( $MOTOROLA )
+			{ $oper = "')"; }
+		elsif( $LSD )
+			{ $oper = $operand = $label = ''; }
+	}
+
+	# For the LSD macros, only one is needed (and that one is substituted
+	# below.  Thus, we simply blow off all macros.
+	#
+	if( $LSD && $in_macro ) 	{ $oper = $operand = $label = ''; }	
+
+	#----------------------------------------------------------------------
+	#
+	# Opcode tranformations.
+	#
+	if( $oper eq 'end' ||				# Motorola and Apollo
+		$oper eq 'cpu' ||				# Apollo
+		$oper eq 'extern' || 			# Apollo
+		$oper eq 'chip' ||				# lsd
+		$oper eq 'name' ||				# lsd
+		$oper eq 'opt' ||				# lsd and Motorola
+		$oper eq 'module' ||			# Apollo
+		$oper eq 'nopage' )				# Motorola 
+	{
+		$oper = $operand = '';
+	}
+	elsif( $oper eq 'idnt' )			# Motorola
+	{
+		$oper = $operand = $label = '';
+	}
+	elsif( $oper eq 'xdef' )		  { $oper = 'global'; }		# Motorola
+	elsif( $oper eq 'proc' )	  	  { $oper = 'text'; }		# Apollo
+	elsif( $oper =~ /^entry\.?.?$/ )  { $oper = 'global'; }		# Apollo
+	elsif( $oper =~ /^ftst(\.?.?)$/ ) { $oper = 'ftest'.$1; }	# Mot/Apollo
+	elsif( $oper =~ /^(dc.?\..)$/ )				# All
+	{ 
+		$oper = $data_type{$1}; 		
+		if( $oper eq 'space' )
+		{
+			$2 = '';
+			$operand =~ s/^(.*),([0-9]+)$/$1/; 
+			if( $2 && $2 ne '0' )
+				{ die "Non-zero space needed (on dcb.? statement)\n"; }
+		}
+		elsif( $oper eq 'extend' )
+		{
+			$operand = "0f".$operand;
+		}
+	}
+	elsif( $oper eq 'xref' ) 				# Motorola and LSD
+	{
+		@xrefs = split(/,/,$operand);
+		for( @xrefs )
+			{ $xref{ $_ } = 1; }		
+		$oper = $operand = '';
+	}
+	elsif( ($oper =~ /^b(sr)/ || $oper =~ /^b(ra)/) 
+		    && $xref{ $operand } )  # Motorola
+	{ 	
+		if( $1 eq 'ra' )  { $oper = 'jmp'; }
+		else              { $oper = 'jsr'; }
+	}
+	elsif($oper =~ /^(f?b)([a-z]+)(.*)$/ && $xref{$operand} && $bcc_negate{$2})
+	{
+		$_ = $1.$bcc_negate{$2}.$3;
+		$label =~ s/^([a-z0-9_]+)$/$1:/i;
+		printf("%-8s %-8s %s%d %s\n",$label,$_,$bcc_str,$bcc_label,$comment);
+		printf("%-8s %-9s %-16s\n", "", "jmp", $operand );
+		$new_label = $bcc_label;
+		$bcc_label++;
+		next;
+	}
+	#
+	# Swap operands on all compare's [All]
+	#
+	elsif( $oper =~ /^f?cmp[ami2]?(\..)?$/ )	
+	{
+		 $operand =~ s/^([!-~]+),([-\.-\}!-+]+)$/$2,$1/; 
+	}
+	#
+	# lsd and Apollo Branch statments have '.s' on them, remove these.
+	#
+	elsif( $oper =~ /^(b..)\.s$/ )	
+	{ 
+		$oper = $1.".b";
+	}
+	# 
+	# ====== APOOLO Specific Tranformations =========
+	#
+	elsif( $APOLLO )
+	{
+		if( $oper eq 'procedure' )
+		{
+			$comment = "# PROCEDURE ".$operand;
+			$return{$label} = 1;
+			$ret_fmovem{$label} = $ret_movem{$label} = '';
+
+			@broken = split( /,/,$operand );
+			for( $t = 1; $t <= $#broken; $t++ )
+			{
+				if( $broken[$t] =~ /^f/ ) 
+					{$ret_fmovem{$label}=$ret_fmovem{$label}.$broken[$t]."/";}
+				elsif( $broken[$t] =~ /^d/ || $broken[$t] =~ /^a/ )
+					{ $ret_movem{$label}=$ret_movem{$label}.$broken[$t]."/"; }
+				elsif( $broken[$t] ne 'nocode' )
+					{ die "unknown type of Procedure save specification '".
+								$operand."'\n"; }
+			}						
+			chop( $ret_fmovem{$label} );
+			chop( $ret_movem{$label} );
+			
+			if( $ret_fmovem{$label} )
+				{ $todo = "\tfmovem.x\t".$ret_fmovem{$label}.",-(sp)"; }
+			if( $ret_movem{$label} )
+				{ $oper = "movem.l"; $operand = $ret_movem{$label}.",-(sp)"; }
+			else
+				{ $operand = $oper = ''; }
+		}
+		elsif( $oper eq 'return' )
+		{
+			if( !($return{$operand}) )
+				{ die "Return for '".$operand."' before Procedure\n"; }
+			$comment = "# RETURN ".$operand;
+			if( $ret_movem{$operand} )
+				{ $todo = "\tmovem.l\t(sp)+,".$ret_movem{$operand}; }
+			if( $ret_fmovem{$operand} )
+				{ $oper = "fmovem.x"; 
+				  $operand = "(sp)+,".$ret_fmovem{$operand}; }
+			else
+				{ $operand = $oper = ''; }		
+		}
+		elsif( $oper eq 'org' )
+		{
+			$oper = 'space'; $operand = '('.$operand.')-.';
+		}
+		elsif( $oper eq 'rts' )
+		{
+			if( $operand )
+			{
+				if( $comment =~ /$#[ ](.*)$/ )	{ $comment="# ".$operand.$1; }
+									else		{ $comment="# ".$operand; }
+				$operand = '';
+			}
+		}
+		elsif( $oper eq 'defs' || $oper eq 'defds' )
+		{
+			if( $oper eq 'defs' )		{ $in_defs = 1; }
+			else						{ $in_defs = 2; }
+			$offset = 0;
+			$defs_reg = $operand;
+			if( $defs_reg =~ /^[0-9]/ )		{ $defs_reg = "+".$defs_reg; }
+			$label = $oper = $operand = '';		
+		}
+		elsif( $in_defs && ($oper =~ /^ds\.(.?)$/) )
+		{
+			if( $1 eq 'l' ) 	 	{ $base = 4; }
+			elsif( $1 eq 'w' )	  	{ $base = 2; }
+			elsif( $1 eq 'b' )	   	{ $base = 1; }
+			else { die "hpasm: unknown ds.? construct: ".$oper."\n"; }
+			$base = $base * $operand;
+	
+			if( $label && ($in_defs == 2) ) 
+				{ $todo=sprintf("%s\tequ\t%s\n", $label, $offset.$defs_reg); }
+			elsif( $label )	  { $oper = 'equ'; $operand = $offset.$defs_reg; }
+			else			  { $oper = $operand = $label = ''; }
+
+			$offset = $offset + $base;
+		}
+		elsif( $in_defs && ($oper eq 'ends') )
+		{
+			$in_defs = '';
+			$label = $oper = $operand = '';
+		}
+	}
+	#
+	# ======= MOTOROLA Specific Transformations ========
+	#
+	elsif( $MOTOROLA )
+	{
+		#
+		# Motorola Section Number Conventions.
+		#
+		if( $oper eq 'section' )		
+		{
+			if( $operand =~ /15/ )		{ $oper = "data"; $operand = ''; }
+			elsif( $operand =~ /8/ )	{ $oper = "text"; $operand = ''; }
+			else						{ $oper = $operand = ''; }
+		}
+	}
+	# 
+	# ====== LSD Specific Transformations ========
+	#
+	elsif( $LSD )
+	{
+		#
+		# LSD Debug Directives.
+		#
+		if( $LSD && $oper =~ /^\?/)
+		{
+			if( $operand =~ /%$/ )
+			{
+				while( ($_ = <stdin>) && /%[ \t\n]*$/ )
+				{
+					print "\n";
+				}
+				print "\n";
+			}
+			$oper = $operand = '';
+		}
+		#
+		# LSD 'pea' and 'jsr' directives include .? at the end, needs to go...
+		#
+		elsif ( $oper eq 'pea' || $oper eq 'jsr' )
+		{
+			$operand =~ s/(.*)\..$/$1/;
+		}
+		#
+		# LSD Uses this to get 'xref' information, which we don't need.
+		#
+		elsif ( $oper eq 'call' )
+		{
+			$oper = 'jsr';
+		}
+		#
+		# LSD Set Directives.
+		#   Notice that since the LSD assembler will allow multiple definitions
+		#   to the same identifier, we need to emulate this with multiple 
+		#   versions of the same string, with a number appended on the end.
+		#
+		elsif ( $oper eq 'set' )
+		{
+			$set_vals{$label}++;
+			$operand = $label."_".$set_vals{$label}.','.$operand;
+			$label = '';
+		}
+		#
+		# LSD Section Directives.
+		#
+		elsif( $oper eq 'sect' )
+		{
+			if( $operand =~ /prog/ )
+				{ $oper = 'text'; }
+			elsif( $operand =~ /data/ || $operand =~ /const/  )
+				{ $oper = 'data'; }
+			else 
+				{ $oper = ''; }
+			$operand = '';
+		}
+		#
+		# LSD Align statmenets really need to be 'lalign's.
+		#
+		elsif( $oper eq 'align' )		{ $oper = 'lalign'; }
+	}
+
+	# This has to be sererate from the huge if statement above, since
+	# the 'defds' form may need to be converted.
+	#
+	if( $oper =~ /^ds.(.)$/ )
+	{
+		if( $1 eq 'l' ) 	 	{ $base = 4; }
+		elsif( $1 eq 'w' )	  	{ $base = 2; }
+		elsif( $1 eq 'b' )	   	{ $base = 1; }
+		elsif( $1 eq 'x' )      { $base = 12; }
+		else			{ die "fell off the if statement with ".$oper; }
+
+		# Change * into . (but only if a operand of another operator)
+		#
+		$operand =~ s/\*([-+])/\.$1/g;		
+		$operand =~ s/([-+])\*/$1\./g;
+		if( $base != 1 )		{ $operand = '('.$operand.')*'.$base; }
+		$oper = 'space';
+	}
+
+	#----------------------------------------------------------------------
+	#
+	# Operand Conversions.
+	#
+
+	# Identifiers may NOT contain '$'. [Apollo]
+	#
+	$label =~ s/([a-z0-9_]+)\$/$1/ig;
+	$operand =~ s/([a-z0-9_]+)\$/$1/ig;
+
+	# HP does not use the standard C versions of these.
+	#
+	$operand =~ s/<</</g;
+	$operand =~ s/>>/>/g;
+
+	# Operand Transformations.
+	#
+	@broken = split(/([\'-\/:-@\[-\^\{-~]+)/,$operand);
+	for( $t = 0; $t <= $#broken; $t++ )
+	{
+		$b = $broken[$t];
+		$lb = $b;
+		$lb =~ tr/A-Z/a-z/;
+
+		if( $b =~ /^[&a-zA-Z]/ )
+		{
+			if( $b =~ /^[ad][0-7]$/i ||			# data/addr regs
+				$b =~ /^fp[0-7]$/i )			# fp regs
+			{
+				$b = '%'.$lb;
+			}
+			elsif( ($r = $regfix{$lb}) )		# Special Registers (see above)
+			{
+				$b = '%'.$r;
+			}
+			elsif( $b =~ /^&?([a-z0-9_]+)$/i )			# Apollo reg subst
+			{											# (see 'equ' below)
+				for( @lowerequ )
+				{
+					if( $1 eq $_ )	{ $b =~ tr/a-z/A-Z/; } 
+				}
+				if( $m4reserved{$b} )
+				{
+					$b = "_".$b;
+				}
+			}
+		}
+		elsif( $b =~ /^#([a-z_][a-z0-9_]*)$/i )			# Motorola 'fequ'
+		{
+			for( @lowerequ )
+			{
+				if( $1 eq $_ )  { $b =~ tr/a-z/A-Z/; }
+			}
+			if( $m4reserved{$b} )   { $b = "_".$b; }
+		}
+		elsif( $b =~ s/^#\$([a-f0-9]+)$/&0x$1/i ||		# Hex constant
+			   $b =~ s/^\$([a-f0-9]+)$/0x$1/i )	 		# Hex number
+		{
+			$b =~ tr/A-Z/a-z/;
+		}
+
+	
+		$broken[$t] = $b;
+	}
+	$operand = join('',@broken);		
+
+	# Take care of m4 reserved label names.
+	#
+	if( $label =~ /^([a-z0-9_]+)\:?$/i && $m4reserved{$1} )
+		{ $label = "_".$label; }
+
+	# Whole Line Operand Tranformations.
+	#
+
+	# Decimal Constants.
+	#	These are seperate, since '-' is assumed to be a seperator below,
+	#   and that would screw this conversion up.
+	#
+   	$operand =~ s/#(-?)0*([a-z0-9_]+)/&$1$2/ig;		# Immediate Data Item
+
+	while( $operand =~ /#:(&?)([a-f0-9]+)/i )			# Floating constant
+	{
+		$t = $2;
+		$t =~ tr/A-Z/a-z/;
+		if( $subst = $float{$t} )    { $operand =~ s/#:$1$2/&$subst/; }
+		else           				 { $operand =~ s/#:$1$2/&0x$t/; }
+	}
+
+	# Bitfield numbers need an '&' in them
+	#
+	$operand =~ s/\{([0-9]+):([&%a-z0-9]+)\}/\{&$1:$2\}/g;
+	$operand =~ s/\{([&%a-z0-9]+):([0-9]+)\}/\{$1:&$2\}/g;
+
+	# The form (%d?*?,xxx)  ==> (xxx,%d?*?).  [Apollo]
+	#
+	$operand =~ s/\((.*\*.*),(.*)\)/\($2,$1\)/g;
+
+	# The form (.L*?) ==> (.l*?).  [Motorola]
+	#
+	$operand =~ s/\.L(\*[01248])/\.l$1/;
+	$operand =~ s/\.W(\*[01248])/\.w$1/;
+	$operand =~ s/\.B(\*[01248])/\.b$1/;
+
+	# The form xxxx(%d?) ==> (xxxx,%za0,%d?).  [Apollo]
+	#
+	$operand =~ s/([a-z0-9_]+)\((%d[0-7\.wblsd]+)\)/\($1,%za0,$2\)/ig;
+
+	# This is a temporary kludge.
+	#
+	if( $oper =~ /^fmove.([sd])?$/ && $operand =~ /^%fp[0-7]?,%fp[0-7]?$/ )
+		{ $oper = 'fmove.x'; }
+	#
+	# This is a temporary kludge until the assembler can handle this.
+	#
+#	elsif( $oper =~ /^fmov[e]?\.x$/ && 
+#		 $operand =~ /^&0x([0-9a-f]+),%fp([0-7]+)$/i )
+#	{
+#		$num = $1;
+#		$comment = '# fmove.x &<num>,%fp'.$2;
+#		$oper = 'long';
+#		if( $num =~ /^[0]*$/ )						    # So that '0' is OK
+#			{ $num = '000000000000000000000000'; }
+#		if( length( $num ) != 24 )
+#			{ die "illegal extended floating point constant: ".$operand."\n"; }
+#		$operand = sprintf( '0xf23c4%x%x0,0x%s,0x%s,0x%s', 8+($2/2), ($2%2)*8,
+#							 substr($num,2,8),
+#							 substr($num,10,8), substr($num,18,8) );
+#	}
+#	elsif( $oper =~ /^fmul\.x$/ &&
+#		   $operand =~ /^&0x([0-9a-f]+),%fp([0-7]+)$/i )
+#	{
+#		$num = $1;
+#		$comment = '# fmul.x &<num>,%fp'.$2;
+#		$oper = 'long';
+#		if( $num =~ /^[0]*$/ )						    # So that '0' is OK
+#			{ $num = '000000000000000000000000'; }
+#		if( length( $num ) != 24 )
+#			{ die "illegal extended floating point constant: ".$operand."\n"; }
+#		$operand = sprintf( '0xf23c4%x%x3,0x%s,0x%s,0x%s', 8+($2/2), ($2%2)*8+2,
+#							 substr($num,2,8),
+#							 substr($num,10,8), substr($num,18,8) );
+#	}
+
+	# Some LSD forms include lots of extra parens.  These rules
+	# attempt to remove them.
+	# 
+	if( $LSD )
+	{
+		$operand =~ s/\(\((.+)\)\..,(.*)/\($1,$2/g;
+		$operand =~ s/#(\-?)\(([\-0-9a-z_]+)\)/&$1$2/ig;
+	}
+
+	# Change equ into set. [Motorola and Apollo]
+	#   This needs to be done after registers have been converted.
+	#
+	elsif( $oper eq 'equ' || $oper eq 'fequ' ) 
+	{
+		# Motorola and Apollo use '*' for the current location
+		#
+		$operand =~ s/\*([-+])/\.$1/g;    
+		$operand =~ s/([-+])\*/$1\./g;    
+		$operand =~ s/^\*$/\./;
+
+		# Believe it or not, Apollo allows:
+		#   happy   equ   %d2
+		#   sad     equ   happy
+		# We handle the top one, but the bottom one needs to 
+		# also be handled.
+		#
+		$found = 0;
+		for( @lowerequ )	{ if( $_ eq $orig_operand )  { $found = 1; } }
+					
+		if( $found || 
+			$oper eq 'fequ' ||                        # Motorola
+		    $operand =~ /%/ || $operand =~ /&/ )	  # Apollo allows this...
+		{ 
+			push( lowerequ, $label );
+			$label =~ tr/a-z/A-Z/;
+			if( $oper eq 'fequ' )        { $operand = '0f'.$operand; }
+			$oper = sprintf( "define(`%s',`%s')", $label, $operand ); 
+			$label = $operand = '';
+		}
+		else
+		{ 
+			$oper = "set";
+			$operand = $label.",".$operand;
+			$label = '';
+		}
+	}
+
+	#----------------------------------------------------------------------
+	#
+	# End Game.
+	#
+
+	# Labels (make sure they are colon terminated)
+	#
+	$label =~ s/^([a-z0-9_]+)$/$1:/i;
+
+	# Begin putting things back together...
+	#
+	$_ = sprintf( "%-8s %-9s %-16s ", $label, $oper, $operand );
+#	$_ = $label."\t".$oper."\t".$operand;
+
+	# While in a macro, we need to fix calls to \0, \1, \2, etc. [Motorola]
+	# This needs to be done after constants are converted.
+	#
+	if( $MOTOROLA && $in_macro )
+		{ s/\\&?0/\$1/g;   s/\\&?1/\$2/g;  s/\\&?2/\$3/g;   s/\\&?3/\$4/g; }
+
+	# Put the strings back in place [All]
+	#
+	for( $str_num--; $str_num >= 1; $str_num-- )
+		{ $b = $hpasm_string[$str_num];	 s/__hpasm_string$str_num/"$b"/; }
+
+	# Print the resulting line
+	#
+	print $_.$comment."\n";
+}
+
+# We need a version stamp to keep the assembler happy
+#
+printf( "\tversion 3\n" );
+
+# <<<<<<<<<<<<<<<<<<<<<<<<<<<< end of hpasm >>>>>>>>>>>>>>>>>>>>>>>>>>>>>>

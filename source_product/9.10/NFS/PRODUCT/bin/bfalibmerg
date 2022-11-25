@@ -1,0 +1,15 @@
+#	@(#)$Revision: 1.4.109.1 $	$Date: 91/11/19 13:53:09 $
+# bfalibmerg is used to merg the bfa library into libc.a. This is required
+# for bfa to work using the Makefiles in the scaffold for the 800. For the 
+# 300 these steps are done in bfatrans.
+
+mkdir /tmp/bfa$$
+cd /tmp/bfa$$
+ar x ../libbfa.a 
+chmod +rw *.o
+chmod +w /lib/libc.a
+ar r /lib/libc.a *.o
+rm *.o
+chmod -w /lib/libc.a
+cd .. 
+rm -r /tmp/bfa$$

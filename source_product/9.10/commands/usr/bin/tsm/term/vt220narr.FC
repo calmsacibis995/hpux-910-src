@@ -1,0 +1,6 @@
+## FacetTerm  vt220narr COMMON (80 column only)  description file  08/11/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt220narr.FC,v 70.1 92/03/09 16:08:11 ssa Exp $
+columns=80
+parm_mode_val-NOTIMP..-IGNORE..=?3
+lines=24

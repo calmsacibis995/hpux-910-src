@@ -1,0 +1,161 @@
+NAME:	John A Dilley
+##	last update:	09/21/87 at 17:53:37 (revision 1.40)
+##
+
+Spent	Left	Orig	Categ	[PRI]	Task Description
+0	2	0	New		Final Doc reviews
+0.5	1.5	0	New		Code Sharing: organize
+8	2	30	Test		RPC commands testing Post-EB3 (TOTAL)
+11	0	9	Test		RPC libraries testing (debug and fix)
+
+##
+#	more major miscellaneous tasks for the duration of the project
+0.5	0.5	1	Dev		Characterize and tune NFS performance
+0.5	0.5	2	Metr		QA metrics ??????
+0	2	0	Doc		Verify examples and code in Draft#3
+3	0	2	Doc		third documentation review
+0.5	0.5	3 	Sup		Administrate test systems and equipment
+0	0	1	SSIT		SSIT activities	and final SSO integ.
+0.5	0.5	0	Tool		Modify "schedule" tool for predictions
+0.5	0	2	Dev		Implementation of installation process
+0	0	1	Test		Release final bits to SSIT
+0	2.5	1	Tool		Dev env support/maintenance
+1	0	1	Tool		Creating and/or Learning tools 
+##
+#	The Date To Watch -- bit release!
+0	5	0	Dev		Code Reviews, remaining code
+0	1	0	Dev		BFA Coverage > 70%
+Checkpoint	BitRel 09/23/87		Complete QA / Release Bits!
+##
+#	The Ultimate Bottom Line ...
+0	0.5	0	Test		Installability testing complete
+0	0.5	0	Sup		Release celebration planned, organized!
+Checkpoint	MR	11/04/87	Manufacturing Release
+
+####
+##	COMPLETED tasks follow ...
+####
+#	From 01/19 until the beginning of this method (02/06)
+#	Interrupt driven tasks are marked with a * in the PRI field
+##
+##	Tasks completed before 03/11
+Spent	Left	Orig	Categ	[PRI]	Task Description
+2.5	0	3	Test	A1	Info for Module/System Test Plan
+2	0	3	Test	A1	Writing Module/System Test Plans
+3	0	2	Dev	A2	Def/doc of install/config process 
+3	0	5	Doc	A3	Manual page reviews, editing
+1.5	0	2	Dev	B	Creating /etc/rc.nfs and /etc/rc.yp
+1.5	0	3	Dev	B	pcnfsd.c port
+4	0	7	Doc	A*	Support for Annette/documentation
+1.5	0	2	Tech	B*	Consulting for rlogin/telnet/etc
+2	0	3	Tech	C*	Consulting for RCS, awk
+5	0	5	Sup	B*	Equipment plans, moves, orders, etc
+
+# Checkpoint		CKP		I-L: Design Complete (02/24/87)
+
+
+##	Tasks completed between 03/11 and 03/26
+1	0	0	Sup		Offloading tasks from Cristina
+# these included adding TRACE() code to the portmapper and taking
+# bogus ifdefs out of my source code.
+1	0	0	Test		Tracking down bugs with mount/mountd
+# transformers were having problems with mount, so added tracing to some
+# of the RPC library calls, and mount.c to track down the problems
+##
+#	Tasks completed before the code complete checkpoint (04/08)
+Spent	Left	Orig	Category	Task Description
+2	0	3	Dev		Clean up include files in dev.  env
+0.75	0	2	Test		Testing /etc/rc.nfs
+0	0	1	Doc		DLWS Installation information
+0	0	1	Doc		Symbolic link information
+0.75	0	1	Doc		Manual pages: diagnostics, section #
+1.5	0	1	Dev		PCNFSD port/test/install/info
+1.5	0	2	Dev		Port and debug rusers[d]
+2.5	0	3	Dev		Port other RPC specific commands
+3	0	10	Dev		Port RPC library code
+2.5	0	2	Doc		first documentation review
+1.2	0	2	Test		quick regression test for RPC commands
+##
+#	Interrupt driven tasks (*) -- the next month's worth.
+0.25	0	1	Tech	*	Consulting for RCS, awk, sed, make
+0.5	0	1	Tech	*	Consulting for rlogin/telnet/etc
+0.5	0	1	Sup	*	Equipment plans, moves, orders, etc
+0.75	0	3	Doc	*	Support for Annette/documentation
+0.5	0	0	Sup	*	Sun system administration, install
+
+##
+#	Stuff done before EB2 ...
+##
+0.7	0	0	Doc		Manual pages complete, approved
+1.5	0	0	Sup		Self Host, update, maintain systems
+##
+# original estimate for BFA/misc tasks: 0d	; incremental cost = 3d
+0.5	0	0	Test		Getting EB1 BFA coverage for all modules
+1.0	0	0	Dev		Wrote script to put BFA into master list
+##
+# original estimate for RPC/XDR test plan: 0d	; incremental cost = 5d
+4	0	0	Test		write RPC/XDR test plan
+# Checkpoint	EB1	05/12/87	Early Bird 1 Complete
+0	0	0	Dev		Performance goals confirmed
+##
+1.5	0	1	Test		Testing /etc/rc.nfs + /etc/npower
+1.2	0	1	Doc		Manual pages: technical changes (notes)
+##
+# original estimate for A/B libraries: 0d	; incremental cost = 3d
+0	0	0	Dev		ARPA/Berkeley libraries, code changes
+0.2	0	0	Dev		Change ifdef NFS --> HP_NFS in user code
+# Checkpoint	EB2	06/15/87	Early Bird 2 Delivery
+
+##	EB3 tasks
+Spent	Left	Orig	Category	Task Description
+4.0	0	0	Dev		BFA Coverage > 50%
+1	0	0	Dev		Changes to "login -r" for new ruserok.
+
+##
+# original estimate for 2nd document review: 2d	; incremental cost = 4d
+1.5	0	2	Doc		verify examples in RPC/XDR chapters
+4	0	4	Doc		second documentation review
+10	0	10	FTO		Vacation	(May 26 - June 05)
+
+2.2	0	0	Sup		Development environment modifications
+1.3	0	0	Doc		Intermediate review of changes
+2	0	0	Train		Time Manager Class (July 23-24)
+2	0	2	Doc		second review of RPC/XDR chapters
+0.5	0	0	Doc		Consulting with Annette ...
+0.5	0	0	Sup		Consulting with Marie, others
+0.5	0	0	DTS		Dealing with (re-)doing DTS reports
+0.7	0	0	Sup		Code Freeze -- issues/implementation
+0.5	0	0	Dev		Change /etc/rc.nfs to /etc/netnfsrc
+
+##
+#	misc tasks
+0.5	0	0	Sup		Equipment area strategy/planning
+2.5	0	0	Dev		Code Reviews, sharing, reading
+1	0	0	Dev		Create/use/test/document logging.c
+##
+# original estimate for PCNFSD test: 3.5d	; incremental cost = 0d
+0.5	0	0.5	Test		PCNFSD test plan
+2.5	0	3	Test		PCNFSD testing
+0.5	0	1	Doc		PCNFSD documentation
+##
+# original estimate for RPC commands test: 16d	; incremental cost = 17d
+#	rpc.mountd, rpc.rstatd, rpc.ruserd, rpc.rwalld, rpc.sprayd,
+#	inetd, rpcinfo, rup, rusers, rwall, showmount, spray
+##
+# Time-Left estimate decreased dramatically -- Mark Kepke took over
+##
+2.5	0	3	Test		RPC commands test plan
+8	0	10	Test		RPC commands testing Pre-EB3
+# 8	2	30	Test		RPC commands testing Post-EB3 (TOTAL)
+##
+# original estimate for RPC libraries test: 12d	; incremental cost = 0d
+1.2	0	1	Test		RPC libraries test plan consulting
+11	0	9	Test		RPC libraries testing (debug and fix)
+#	18 hr for raw RPC; 4 hr TCP/RPC investigate/debug svc_run() hang
+0	0	0	Dev		BFA Coverage > 60%
+5	0	0	Train		KTA Decision Analysis Class (Sept 14-18)
+9.5	0	0	New		Chrysler account support/consulting
+Checkpoint	EB3	08/24/87	Early Bird 3 Delivery
+
+# Checkpoint		CKP		Code Complete (04/08/87)
+Checkpoint	END	11/04/87	The End of everything, all work

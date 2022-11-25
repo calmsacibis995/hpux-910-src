@@ -1,0 +1,23 @@
+$set 1
+1 makedbm: can't open %s\n
+2 makedbm: can't create %s\n
+3 makedbm: can't create %s\n
+4 makedbm: can't init %s\n
+5 makedbm: yikes!\n
+6 problem storing %1$.*s %2$.*s\n
+7 duplicate: %1$.*s %2$.*s\n
+8 makedbm: rename
+9 makedbm: rename
+10 makedbm: can't stat %s\n
+11 usage: makedbm -u file\n       makedbm [-i NIS_INPUT_FILE] [-o NIS_OUTPUT_NAME] [-d NIS_DOMAIN_NAME] [-m NIS_MASTER_NAME] infile outfile\n
+12 makedbm: problem storing %1$.*s %2$.*s\n
+13 makedbm: couldn't init %s\n
+14 YP_LAST_MODIFIED
+15 YP_INPUT_FILE
+16 YP_OUTPUT_NAME
+17 YP_DOMAIN_NAME
+18 YP_MASTER_NAME
+19 makedbm: can't stat %s\n
+20 makedbm: can't stat %s\n
+21 makedbm: the outfile name, %s is too long\n
+22 makedbm: can't unlink temporary file %s\n

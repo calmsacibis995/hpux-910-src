@@ -1,0 +1,19 @@
+$set 1
+1 yppasswd:  getdomainname system call failed\n
+2 yppasswd:  can't get the master server from the NIS passwd map\n
+3 yppasswd:  the NIS passwd map master server, %s, is not\n           running the yppasswd daemon.  Cannot change the NIS passwd.\n
+4 yppasswd:  the yppasswd daemon is not running on a privileged port\n
+5 \nCouldn't change the NIS passwd.\n
+6 \nCouldn't change the NIS passwd.\n
+7 The NIS passwd has been changed on %s, the master NIS passwd server.\n
+8 yppasswd:  you don't have a login name in /etc/utmp.\n           Try entering "yppasswd user_name".\n
+9 Changing NIS password for %s...\n
+10 Not in passwd file.\n
+11 Permission denied.\n
+12 Old NIS password:
+13 New password:
+14 Password unchanged.\n
+15 Please use at least one non-numeric character.\n
+16 Please use a longer password.\n
+17 Retype new password:
+18 Mismatch - password unchanged.\n

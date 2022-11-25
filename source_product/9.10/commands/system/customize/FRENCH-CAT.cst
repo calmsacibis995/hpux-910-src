@@ -1,0 +1,34 @@
+#!/bin/ksh
+# @(#) $Revision: 72.1 $
+#
+fileset=FRENCH-CAT
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+
+#======
+# Remove any fileset related information for an obsolete fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# CFRENCH-CAT and FRENCH-CAT are shipped with identical message
+# catalogues.  Make the effort to create links rather than having two
+# copies of the same file.
+#======
+if [ -d /usr/lib/nls/c-french ]; then
+    cd /usr/lib/nls/french
+    for file in *.cat elm/* mailx/*; do
+	#
+	# "cmp" on the two custdat.cat files should fail
+	# "cmp" on any directories in the list should fail
+	#
+	cmp $file /usr/lib/nls/c-french/$file >/dev/null 2>&1
+	if [ $? -eq 0 ]; then
+	    /bin/ln -f $file /usr/lib/nls/c-french/$file 2>/dev/null
+	fi
+    done
+fi
+
+exit $exitval

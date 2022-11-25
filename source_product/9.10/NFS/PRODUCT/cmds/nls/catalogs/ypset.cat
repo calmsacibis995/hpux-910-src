@@ -1,0 +1,14 @@
+$set 1
+1 Sorry, can't get domainname back from system call.\n
+2 Sorry, the domainname hasn't been set on this machine.\n
+3 ypset:  gethostname system call failed\n
+4 Sorry, the hostname argument is bad.\n
+5 ypset:  NIS domain name exceeds %d characters\n
+6 Sorry, the server_to_use argument is bad.\n
+7 Sorry, I got a garbage address for host %s back from the network information service.\n
+8 Sorry, I can't get an address for host %s from the network information service.\n
+9 Sorry, I can't make use of the network information service.  I give  up.\n
+10 Sorry, I can't set up a udp connection to ypbind on host %s.\n
+11 Sorry, ypbind on host %s has rejected your request.\n
+12 Sorry, I couldn't send my rpc message to ypbind on host %s.\n
+13 Usage:  ypset [-V1] [-h host] [-d domain] server_to_use\n\nwhere   host and server_to_use are either names or internet addresses of the\nform ww.xx.yy.zz\n

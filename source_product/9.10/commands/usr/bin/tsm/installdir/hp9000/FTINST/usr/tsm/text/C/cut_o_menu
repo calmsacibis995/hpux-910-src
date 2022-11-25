@@ -1,0 +1,40 @@
+############################################################################
+# TSM user customizable file: cut_o_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# Cut options menu for TSM 
+# @(#) $Header: cut_o_menu,v 66.6 90/11/21 17:28:57 jag Exp $
+
+pull_down_menu
+
+item_name=Block  cut (a rectangle, paste inserts newlines)  $tsm_hot_keycb
+item_selection=B
+item_type=tsm_cmd_to_user
+item_action=cb
+
+item_name=Text   cut (by lines, paste includes newlines)    $tsm_hot_keyct
+item_selection=T
+item_type=tsm_cmd_to_user
+item_action=ct
+
+item_name=String cut (by lines, paste suppresses newlines)  $tsm_hot_keycs
+item_selection=S
+item_type=tsm_cmd_to_user
+item_action=cs

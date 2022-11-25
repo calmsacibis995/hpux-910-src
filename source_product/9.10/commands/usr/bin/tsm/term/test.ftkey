@@ -1,0 +1,39 @@
+# Function key file that loads the first 16 shifted and unshifted function
+# keys with a test contents.
+
+## @(#) $Header: test.ftkey,v 70.1 92/03/09 16:12:32 ssa Exp $
+
+S1 sF1\040
+S2 sF2\040
+S3 sF3\040
+S4 sF4\040
+S5 sF5\040
+S6 sF6\040
+S7 sF7\040
+S8 sF8\040
+S9 sF9\040
+S10 sF10\040
+S11 sF11\040
+S12 sF12\040
+S13 sF13\040
+S14 sF14\040
+S15 sF15\040
+S16 sF16\040
+1 F1\040
+2 F2\040
+3 F3\040
+4 F4\040
+5 F5\040
+6 F6\040
+7 F7\040
+8 F8\040
+9 F9\040
+10 F10\040
+11 F11\040
+12 F12\040
+13 F13\040
+14 F14\040
+15 F15\040
+16 F16\040
+
+* First 16 function keys type F1-F16 space - shifted type sF1-sF16 space

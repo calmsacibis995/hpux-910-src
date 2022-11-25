@@ -1,0 +1,369 @@
+/* @(#) $Revision: 70.6 $ */    
+# include <stdio.h>
+# include <ctype.h>
+# include "files"
+# include <values.h>
+# include <errno.h>
+
+#if defined( NLS) || defined( NLS16)
+# include <locale.h>            /* for setlocale */
+# include <nl_types.h>          /* for nl_catd */
+# ifdef NLS16
+#  include <langinfo.h>    	/* for nl_langinfo */
+#  include <stdlib.h>
+# endif
+# define MSG_BUFSIZ 256         /* size for error message */
+# define NL_SETN 1              /* message catalog set number */
+  extern nl_catd catopen();	/* open message catalog */
+  extern char *catgets();	/* get message from catalog */
+  extern char *_errlocale();	/* get bad locale settings */
+# if !defined(OSF) || defined(PAXDEV)
+  typedef unsigned char uchar;	/* prevent sign extention */
+# endif
+#else
+# define catgets(i, sn,mn,s)	(s)
+  typedef char uchar;
+#endif
+
+	/*  MANIFEST CONSTANT DEFINITIONS */
+
+	/* internal codes for error and accept actions */
+
+# define ERRCODE  (MAXINT-1)
+# define ACCEPTCODE (MAXINT)
+
+	/* sizes and limits */
+
+#ifdef DOMAIN_OS
+#define ACTSIZE 30000
+#define MEMSIZE 30000
+#define NSTATES 16000 
+#define NTERMS 2000  
+#define NPROD 3000   
+#define NNONTERM 1000 
+#define TEMPSIZE 16000 
+#define CNAMSZ 15000
+#define LSETSIZE 4000
+#define WSETSIZE 4000
+#else
+
+# ifdef HUGE
+# define ACTSIZE 12000
+# define MEMSIZE 12000
+# define NSTATES 1000
+# define NTERMS 2000
+# define NPROD 800
+# define NNONTERM 600
+# define TEMPSIZE 1250
+# define CNAMSZ 5000
+# define LSETSIZE 650
+# define WSETSIZE 650
+# endif
+
+# ifdef MEDIUM
+# define ACTSIZE 4000
+# define MEMSIZE 5200
+# define NSTATES 600
+# define NTERMS 127
+# define NPROD 300
+# define NNONTERM 200
+# define TEMPSIZE 800
+# define CNAMSZ 4000
+# define LSETSIZE 450
+# define WSETSIZE 250
+# endif
+# endif /* DOMAIN_OS */
+
+/*******  NOTE
+ *******  There are several # defines within the the yacc code and yaccpar
+ *******  that contain values that must be related to NTERMS.
+ *******  These are YYFLAG (in yaccpar), YYFLAG1, NOMORE, and a hardcoded
+ *******  constant in a call to "aryfil".  Originally these were all set
+ *******  to -1000.  But examination of the code shows that these defines
+ *******  must be < - (max. token number assigned by yacc), ie,
+ *******  < - (NTERMS + max. char value).  When NTERMS was increased to
+ *******  to 2000, a program with more than 1000 tokens defined caused
+ *******  random syntax errors until these other defines were changed.
+ *******  Here FLAGVAL is intended as a value that will satisfy the
+ *******  needed relationship to NTERMS, and can be used to define the
+ *******  other values.
+ *******  Kathy Harris, Nov. 1986.
+ */
+# define  FLAGVAL  ( - (NTERMS + 1000) )
+
+/* base of nonterminal internal numbers */
+/* NTBASE must be greater than the max. token number assigned by yacc.
+ * i.e., NTBASE > (NTERMS + max. char val.)
+ * Note that NTERMS is not currently resettable.
+ */
+# define NTBASE (NTERMS + 1000)
+
+# define NAMESIZE 50
+# define NTYPES 1023	/* maximum number of types */
+# define NPLEVS  63	/* maximum number of precedence levels */
+
+# ifdef WORD32
+# define TBITSET ((32+NTERMS)/32)
+
+	/* bit packing macros (may be machine dependent) */
+# define BIT(a,i) ((a)[(i)>>5] & (1<<((i)&037)))
+# define SETBIT(a,i) ((a)[(i)>>5] |= (1<<((i)&037)))
+
+	/* number of words needed to hold n+1 bits */
+# define NWORDS(n) (((n)+32)/32)
+
+# else
+
+# define TBITSET ((16+NTERMS)/16)
+
+	/* bit packing macros (may be machine dependent) */
+# define BIT(a,i) ((a)[(i)>>4] & (1<<((i)&017)))
+# define SETBIT(a,i) ((a)[(i)>>4] |= (1<<((i)&017)))
+
+	/* number of words needed to hold n+1 bits */
+# define NWORDS(n) (((n)+16)/16)
+# endif
+
+	/* relationships which must hold:
+	TBITSET ints must hold NTERMS+1 bits...
+	WSETSIZE >= NNONTERM
+	LSETSIZE >= NNONTERM
+	TEMPSIZE >= NTERMS + NNONTERMs + 1
+	TEMPSIZE >= NSTATES
+	*/
+
+	/* associativities */
+
+# define NOASC 0  /* no assoc. */
+# define LASC 1  /* left assoc. */
+# define RASC 2  /* right assoc. */
+# define BASC 3  /* binary assoc. */
+
+	/* flags for state generation */
+
+# define DONE 0
+# define MUSTDO 1
+# define MUSTLOOKAHEAD 2
+
+	/* flags for a rule having an action, and being reduced */
+
+# define ACTFLAG 04
+# define REDFLAG 010
+
+	/* output parser flags */
+# define YYFLAG1 (FLAGVAL)
+
+	/* macros for getting associativity and precedence levels */
+	/* There are several bits not used (between assoc and plevel,
+	 * and between type and end of word -- incase one on these needs to
+	 * be expanded).
+	 */
+
+# define ASSOC(i) ((i)&03)
+# define PLEVEL(i) (((i)>>4)&077)
+# define TYPE(i)  ((i>>10)&01777)
+
+	/* macros for setting associativity and precedence levels */
+
+# define SETASC(i,j) i|=j
+# define SETPLEV(i,j) i |= (j<<4)
+# define SETTYPE(i,j) i |= (j<<10)
+
+	/* looping macros */
+
+# define TLOOP(i) for(i=1;i<=ntokens;++i)
+# define NTLOOP(i) for(i=0;i<=nnonter;++i)
+# define PLOOP(s,i) for(i=s;i<nprod;++i)
+# define SLOOP(i) for(i=0;i<nstate;++i)
+# define WSBUMP(x) ++x
+# define WSLOOP(s,j) for(j=s;j<cwp;++j)
+# define ITMLOOP(i,p,q) q=pstate[i+1];for(p=pstate[i];p<q;++p)
+# define SETLOOP(i) for(i=0;i<tbitset;++i)
+
+	/* I/O descriptors */
+
+extern FILE * finput;		/* input file */
+extern FILE * faction;		/* file for saving actions */
+extern FILE * fdefine;		/* file for # defines */
+extern FILE * ftable;		/* y.tab.c file */
+extern FILE * ftemp;		/* tempfile to pass 2 */
+extern FILE * fdebug;		/* tempfile for two debugging info arrays */
+extern FILE * foutput;		/* y.output file */
+
+	/* structure declarations */
+
+struct looksets {
+	int lset[TBITSET];
+	};
+
+struct item {
+	int *pitem;
+	struct looksets *look;
+	};
+
+struct toksymb {
+	uchar *name;
+	int value;
+	};
+
+struct ntsymb {
+	uchar *name;
+	int tvalue;
+	};
+
+struct wset {
+	int *pitem;
+	int flag;
+	struct looksets ws;
+	};
+
+#if defined(OSF) || defined(PAXDEV)
+	/* special flag for splitting yyparse into many small routines */
+extern SplitFlag;
+#endif
+
+	/* token information */
+
+extern int ntokens ;	/* number of tokens */
+extern int maxterms;	/* limit on number of terms or tokens */
+extern struct toksymb * tokset;   /* tokset[maxterms] */
+extern int * toklev;	/* toklev[maxterms] vector with the precedence
+			 * of the terminals */
+
+	/* nonterminal information */
+
+extern int nnonter ;	/* the number of nonterminals */
+extern int maxnonterm;	/* limit on number of nonterminals */
+extern struct ntsymb * nontrst; /* nontrst[maxnonterm] */
+
+	/* grammar rule information */
+
+extern int nprod ;	/* number of productions */
+extern int maxprod;	/* limit on number of productions */
+extern int **prdptr;	/* prdptr[maxprod] : pointers to descriptions of productions */
+extern int *levprd ;	/* levprd[maxprod]: contains production levels to break conflicts */
+extern uchar *had_act;	/* had_act[maxprod] : set if reduction has associated action code */
+
+	/* state information */
+
+extern int nstate ;		/* number of states */
+extern int maxstates;		/* limit on number of states */
+extern struct item **pstate;	/* pstate[maxstates+2]: pointers to the descriptions of the states */
+extern int *tystate;	/* tystate[maxstates]: contains type information about the states */
+extern int *defact;	/* defact[maxstates]: the default action of the state */
+extern int *tstates;	/* tstates[maxterms]: the states deriving each token */
+extern int *ntstates;	/* ntstates[maxnonterms]: the states deriving each nonterminal */
+extern int *mstates;	/* mstates[maxstates]: the continuation of the chains begun in tstates and ntstates */
+
+	/* lookahead set information */
+
+extern int lsetsize;
+extern struct looksets *lkst; 	/* lkst[lsetsize] */
+extern int nolook;  /* flag to turn off lookahead computations */
+
+	/* working set information */
+
+extern int wsetsize;
+extern struct wset *wsets;	/* wsets[wsetsize] */
+extern struct wset *cwp;
+
+	/* storage for productions */
+
+extern int *mem0;	/* mem0[memsize] */
+extern int memsize;
+extern int *mem;
+
+	/* storage for action table */
+
+extern int actsize;
+extern int *amem;  /* amem[actsize]: action table storage */
+extern int *memp ;	/* next free action table position */
+extern int *indgo;	/* indgo[maxstates]: index to the stored goto table */
+
+	/* temporary vector, indexable by states, terms, or ntokens */
+
+extern int tempsize;
+extern int *temp1;	/* temp1[tempsize] */
+extern int lineno; /* current line number */
+
+extern int fatfl;	/* fatal error flag */
+	/* statistics collection variables */
+
+extern int zzgoent ;
+extern int zzgobest ;
+extern int zzacent ;
+extern int zzexcp ;
+extern int zzclose ;
+extern int zzrrconf ;
+extern int zzsrconf ;
+	/* define functions with strange types... */
+
+extern uchar *cstash();
+extern struct looksets *flset();
+extern uchar *symnam();
+extern uchar *writem();
+
+	/* name of yacc tempfiles */
+extern uchar * tempname;
+extern uchar * actname;
+extern uchar * debugname;
+# define TMPDIR	"/tmp"
+# define TMPFILE "yctm"
+# define ACTFILE "ycac"
+# define DEBUGFILE "ycdb"
+
+	/* output file name suffixes; the output filenames are made by
+	 * concatenating a prefix with these suffixes; the default prefix
+	 * is "y", but can be modified using the -b option
+	 */
+# define BASENAME  "y"
+# define NSUFFIX  8	/* big enough for the largest suffix + 1 */
+# define OFILE ".tab.c"
+# define FILEU ".output"
+# define FILED ".tab.h"
+
+	/* Prefix to use on key external function and variable names,
+	 * need to be able to reset when the -p option is specified
+	 */
+# define YYPREFIX "yy"
+extern uchar * yyprefix;
+
+	/* Storage class for "yy" names not changed by -p option. */
+extern uchar * yystorage_class;
+
+	/* command to clobber tempfiles after use */
+
+# ifndef ZAPFILE
+# define ZAPFILE(x) unlink(x)
+# endif
+
+extern uchar * parser;		/* name of parser file */
+extern uchar * basename;	/* base prefix for output file names */
+extern uchar *infile;		/* name of input file */
+
+	/* NLS16 support */
+#ifdef NLS16
+extern char 	mbuf_[2];  /* Internal buffer used only by IF2BYTE */
+
+extern int 	nls16;
+
+/* IF2BYTE is used to determine if the char "c", combined with the next */
+/* character in the finput stream constitues a valid two byte character  */
+
+#define IF2BYTE(c)	mbuf_[0] = c; ungetc(mbuf_[1]=getc(finput), finput); if (mblen( (char *) &mbuf_[0], 2) == 2)
+
+/* IF2BYTEfact is the same as IF2BYTE except it looks at the faction stream */
+
+#define IF2BYTEfact(c)	mbuf_[0] = c; ungetc(mbuf_[1]=getc(faction), faction); if (mblen( (char *) &mbuf_[0], 2) == 2)
+
+/* IF2BYTEfdbg is the same as IF2BYTE except it looks at the fdebug stream */
+
+#define IF2BYTEdbg(c)	mbuf_[0] = c; ungetc(mbuf_[1]=getc(fdebug), fdebug); if (mblen( (char *) &mbuf_[0], 2) == 2)
+
+#endif
+
+/* error message facilities */
+
+#include "yaccmsg.h"
+
+char *ctos(), *dtos(), *dtos1(), *dtos2(), *dtos3(), *dtos4(); 

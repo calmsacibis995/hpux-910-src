@@ -1,0 +1,278 @@
+############################################################################
+# TSM user customizable file:  .tsm, used for customizing TSM behavior
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./
+#     $HOME/
+#     /usr/tsm/
+#
+# It is recommended that you copy this file to $HOME/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+#
+# Lines that begin with # are treated as comments.
+#############################################################################
+# @(#) $Header: .tsm,v 66.13 90/12/21 11:11:18 kb Exp $
+
+### Application launcher:
+###     To run a program on a window, specify the window number, a tab or a
+###     space, and the program name.  "-ksh" will run .profile "ksh" will not. 
+###     To specify a title for a window, specify the title after
+###     "window_title=".  The title applies to immediately following line.
+###     The title is used in the User Interface select menu and sometimes
+###     on softkeys.  The word respawn may be placed in front of the window
+###     number in the "program name line" to restart the application if it
+###     ever gets killed while TSM is running.
+
+window_title=SHELL 1
+respawn 1 $SHELL
+
+window_title=SHELL 2
+2 $SHELL
+
+window_title=SHELL 3
+3 $SHELL
+
+# window_title=SESSION 5 PROGRAM
+# 4 program
+
+# window_title=SESSION 5 PROGRAM
+# 5 program
+
+# window_title=SESSION 6 PROGRAM
+# 6 program
+
+# window_title=SESSION 7 PROGRAM
+# 7 program
+
+# window_title=SESSION 8 PROGRAM
+# 8 program
+
+### Local lp setup, for if you have an lp printer hooked to your terminal.
+###     Sets the window to "print mode" and reads from a named pipe
+###     The printer must be named in the environment variable TSMLP
+###     before tsm is started or tsm.lpcat will abort.
+window_title=PRINTER CONTROL
+9 /usr/tsm/bin/tsm.lpcat
+
+### TSM User Interface menu program, accessed by "menu_hotkey" (see below)
+window_title=TSM Menu
+0 /usr/tsm/bin/tsm.ui
+
+#############################################################################
+### Below are user preference TSM options that may be customized
+
+### To enable the "screen saver" function, specify "screen_saver=" followed
+###     by the number of seconds. Useful for some terminals. 
+###     To change the default 5 seconds between moving the text, 
+###     specify "screen_saver_interval=" followed by the number of seconds.
+###     To change the default text string, specify "screen_saver_text="
+###     followed by the desired text.
+###     ( You can invoke the screen saver in window command mode with ^Wxs ).
+screen_saver_timer=300
+screen_saver_text=TSM 
+screen_saver_interval=5
+
+### To change the default type of cut for cut and paste, specify one of the
+###     following.
+### "stream_cut" takes characters from the top cursor to the right margin, 
+###     all lines between the top and bottom cursor,
+###     and the left margin to the bottom cursor.
+###     Trailing blanks are eliminated and multiple lines are separated by 
+###     "return".
+### "block_cut" takes characters in a rectangle from the top cursor to
+###     the bottom cursor.
+###     Trailing blanks are eliminated and multiple lines are separated by 
+###     "return".
+### "wrap_cut" takes the same characters as "stream_cut".
+###     No "return"s are added.  Trailing blanks on a line and leading blanks
+###     on the next line, if one of both exist, are collapsed to a single blank.
+### You can change the type of cut in command mode by specifying "s", "b", or
+###     "w" while a cut is active.
+stream_cut
+# block_cut
+# wrap_cut
+
+### The default function key definitions for a terminal can be changed by
+###     specifying the desired contents of each key in a function key file.
+###     A supplied function key file that loads the function keys with
+###     window selection commands, "WINDOWS.ftkey", can be loaded by 
+###     specifying "function_keys=" without a filename.  To load any other
+###     function key file,  specify its filename after "function_keys=".
+###     To load only one window, place a dash and the window number after
+###     function_key and before the equal sign.
+function_keys=.tsmkeys
+# function_keys=
+# function_keys-3=test.ftkey
+
+### To cause the function keys to be programmed to the terminals's default
+###     values as TSM starts, specify "no_assume_default_function_keys".
+# no_assume_default_function_keys
+
+### The default User Interface hotkey is "Control-T". To change this to 
+###     another character specify the character after "menu_hotkey=".
+###     When this entry is present, the hot key is displayed on startup
+###     and "\m" is replaced by the hot key in function key files.
+###     Comment out this entry if you do not use the User Interface.
+menu_hotkey=^T
+
+### The default tsm command line hotkey is "Control-W".  To change this to
+### another character, specify the character after "hotkey=".
+hotkey=^W
+
+### Windows specified as allow_beep_offscreen can cause the terminal to
+###     beep even if they are not on the screen.  This can be specified for
+###     as many windows as desired.
+# allow_beep_offscreen=9
+
+### To indicate that characters should not be sent to a window unless
+###     the window is current, specify "window_blocked=" followed by the
+###     window number.
+###     Any number of windows can be so specified.
+# window_blocked=2
+
+### To prevent TSM from prompting for confirmation before exiting on
+###     a "Control-W  Q" command,  specify "no_quit_prompt".
+# no_quit_prompt
+
+### To override the default number of lines of scroll memory retained on
+###     terminals with scroll memory, specify "scroll_memory_lines=" followed
+###     by the desired number of lines.  
+###     To override the default baud rate at which lines of scroll memory 
+###     are retained specify "min_scroll_memory_baud=" followed by the
+###     baud rate.
+# scroll_memory_lines=25
+# min_scroll_memory_baud=9600
+
+### With TSM, HP terminals can pass 8 bit binary transparent print data in
+###     HP mode but not in ansi mode.  If both modes are to be used and 8 bit
+###     binary data is to be sent, specify "print_only_hp_personality" to
+###     suspend transparent print while in ansi mode.
+# print_only_hp_personality
+
+### When "lock_window_1" is enabled and you are running on a multi-page
+###     terminal, the screen for window 1 will remain in the terminal
+###     whenever possible.
+# lock_window_1
+
+
+#############################################################################
+### Below are TSM options or parameters that should not need customization
+
+### To prevent users from running programs with the "Control-W  R" command,
+###     specify "disable_control_W_r".
+# disable_control_W_r
+
+### To cause a window to automatically be in transparent print mode,
+###     specify "transparent_print_window=" followed by the window number.
+###     To override the default transparent print operation, specify
+###     "transparent_print_buffer_size=" followed by a number of characters
+###     to be sent in a single transparent print sequence.
+###     To set a minimum time for no keystrokes to be received before
+###     transparent print operations are started, specify 
+###     "transparent_print_quiet_timer=" followed by a number of milliseconds.
+###     To set a minimum time for no keystrokes to be received before
+###     continuing transparent print operations, specify 
+###     "transparent_print_idle_timer=" followed by a number of milliseconds.
+###     If one timer is specified but not the other, both timers are set.
+# transparent_print_window=9
+# transparent_print_buffer_size=10
+# transparent_print_quiet_timer=1000
+# transparent_print_idle_timer=100
+transparent_print_buffer_size=20
+transparent_print_quiet_timer=100
+transparent_print_idle_timer=10
+
+### When "clear_window_on_open" is enabled,  an automatic clear of the window
+###     is done when a window goes from idle to active.
+clear_window_on_open
+
+### When "clear_window_on_close" is enabled,  an automatic clear of the window
+###     is done when a window goes from active to idle.  Note that this may
+###     have the effect of erasing a error message explaining why a program
+###     would not run.
+# clear_window_on_close
+
+### To indicate the handling of the break key, specify "send_break_to_window"
+###     or "send_break_to_tsm".   Specify "use_PARMRK_for_break" to
+###     cause the termio "parmrk" setting for break handling or 
+###     "use_NULL_for_break" for settings where "break" is received as a 
+###     "null" and "null" is treated as "break".
+send_break_to_window
+# send_break_to_tsm
+# use_PARMRK_for_break
+# use_NULL_for_break
+
+### When "idle_window" is set to a window number and the current window
+###     goes from active to idle,  an automatic window select is done to the
+###     window specified as the idle_window.  
+###     If the "idle_window" is specified as "A", the next active window is
+###     selected rather than a specific window.
+###     See also the "Control-W  I" command.
+idle_window=0
+# idle_window=A
+
+### When the window specified as the "idle_window" goes from active to idle,
+###     the "idle_window" is automatically set to "none".  When
+###     "idle_window_no_cancel" is enabled, the "idle_window" is not changed.
+# idle_window_no_cancel
+
+### When "windows_window" is set to a window number and TSM receives a
+###     break or a null,  the "windows_window_char_start" is sent to that
+###     window.  See also the  "Control-W  W"  command.
+# windows_window=0
+
+### When the window specified as the "windows_window" goes from active to idle,
+###     the "windows_window" is automatically set to "none".  When
+###     "windows_window_no_cancel" is enabled, the "windows_window" is not
+###     changed.
+# windows_window_no_cancel
+
+### The character sent the "windows_window" when a break or a null is pressed
+###     defaults to "Control-Z".  This can be changed by specifying the 
+###     desired character in "windows_window_char_start".
+# windows_window_char_start=^Z
+
+### To automatically exit TSM when all of the programs on all of the
+###     windows have stopped,  specify "quit_on_all_windows_idle".
+# quit_on_all_windows_idle
+
+### When a program in a window invokes the "pop-up" command, the character
+###     sent to it when leaving the "pop-up" mode defaults to "Control-B".
+###     This can be changed by specifying the desired character in
+###     "windows_window_char_stop".
+# windows_window_char_stop=^B
+
+### The window command  "Control-W  X  N  Y"  allows a program to request that
+###     it be notified when it is the current window.  The notification
+###     character defaults to "Control-Y".  This can be changed by specifying
+###     the desired character in "notify_when_current_char".
+# notify_when_current_char=^Y
+
+### When commands are sent to TSM from a program ( using a facility
+###     such as the "tsm.command" program ), the command is usually canceled
+###     if it ends prematurely.  However, if the command ends with "Control-C"
+###     TSM will prompt the user for the remainder of the command.
+###     This default character can be changed by specifying the desired
+###     character in "window_mode_to_user_char".
+# window_mode_to_user_char=^C
+
+### The default directory for writing capture files is the current working
+###     directory where TSM was started.  To change this default
+###     directory specify the desired directory after "capture_directory=".
+# capture_directory=/usr/tsm/capture
+
+### By default, TSM uses the normal buffering in the "stdio" package
+###     when writing capture files.  To cause the captured characters to
+###     be written to the file without buffering, specify "capture_no_buffer".
+# capture_no_buffer
+
+### Override the default action to be taken when a sequence is not recognized.
+
+# error_ignore
+# error_pass
+error_control_ignore
+# error_control_pass

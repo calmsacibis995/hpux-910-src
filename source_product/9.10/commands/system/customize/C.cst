@@ -1,0 +1,131 @@
+#!/bin/ksh
+# @(#) $Revision: 70.4 $
+#
+fileset=C
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+# Invoke again to export architecture variables.
+getCDF $1 > /dev/null 2>&1
+
+#======
+# Remove any fileset related information for an obsolete fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# These files are old and now obsolete.
+#======
+/bin/rm -f /lib$CDF/c220 /lib$CDF/ccom20
+
+#======
+# Remove obsolete files, we only remove them if:
+#   /lib/fc1 and /lib/fc2 exist  -or-
+#   /usr/bin/fc is missing
+#
+# if /usr/bin/fc exists and /lib/fc1 and /lib/fc2 are missing, it means
+# that the previous version of the fortran compiler is on the system.
+# This compiler uses /lib/c1 and /lib/c2, so we don't remove these
+# files.
+#
+#   /lib/c1	-- now /lib/c.c1
+#   /lib/c2	-- now /lib/c.c2
+#======
+if s300; then
+    #
+    # detect if c.c1 and c.c2 are linked to fc1 and fc2 and break the link,
+    # emitting appropriate warnings and messages
+    #
+
+    set -- lib$CDF/c.c1 lib$CDF/fc1 lib$CDF/c1 \
+	   lib$CDF/c.c2 lib$CDF/fc2 lib$CDF/c2
+
+    while [ $# -gt 0 ]; do
+	if [ ! -f $1 ]; then
+	    echo "ERROR:   $1 NOT PRESENT!" >&2
+	    exitval=1
+	else
+	    if [ -f $2 ]; then
+		inode1="`/bin/ls -i $1 | /usr/bin/awk '{print $1}'`"
+		inode2="`/bin/ls -i $2 | /usr/bin/awk '{print $1}'`"
+		if [ "$inode1" = "$inode2" ]; then
+
+	    	    # The files *are* linked implying that the update of
+		    # this file also updated the file in the FORTRAN
+		    # product which may be an error if both C and FORTRAN
+		    # were not updated to this release
+
+	 	    echo "WARNING: $ROOT/$2 in the FORTRAN product is linked to $ROOT/$1 in"
+		    echo "         the C product.  A version of $ROOT/$2 which may be"
+		    echo "         incompatible with the FORTRAN product has been loaded."
+		    echo "NOTE:    If the FORTRAN product for this release has also been updated,"
+		    echo "         ignore the previous warning; $ROOT/$2 is compatible."
+		    echo "         However, if the FORTRAN product now on the system has not"
+		    echo "         been updated, you must restore the file \"$ROOT/$2\" from"
+		    echo "         a system backup."
+
+
+		    # Now break the link between $2 and $1 by copying 
+		    # $1 to a temp file, removing $1 and then renaming
+		    # the temp file to be $1 -- keeping permissions intact
+	    
+		    /bin/cp -p $ROOT/$1 $ROOT/${1}$$
+		    owner=`/bin/ls -ln "$ROOT/$1" | /usr/bin/awk '{print $3}'`
+		    group=`/bin/ls -ln "$ROOT/$1" | /usr/bin/awk '{print $4}'`
+		    /bin/chgrp $group  $ROOT/${1}$$ 
+		    /bin/chown $owner  $ROOT/${1}$$ 
+		    /bin/rm $ROOT/$1
+		    /bin/mv $ROOT/${1}$$  $ROOT/$1
+		    echo "NOTE:    The link between $ROOT/$1 and $ROOT/$2 has been broken."
+	        fi
+
+		#
+		# check for the presence of obsolete backend pieces
+		# from previous releases
+		if [ -f $3 ]; then
+		    echo "NOTE:    File $3 is obsolete; removing it."
+		    /bin/rm -f $3
+		fi
+	    else
+		if [ -f $3 -a ! -f /usr/bin$CDF/fc ]; then
+		    echo "NOTE:    File $3 is obsolete; removing it."
+		    /bin/rm -f $3
+		fi
+	    fi
+	fi
+	shift 3
+    done
+fi
+
+#======
+# Install the cc driver, /bin/cc
+#======
+/bin/rm -f /bin$CDF/cc
+/bin/ln /bin$CDF/c89 /bin$CDF/cc
+
+#=====
+# Install the C compiler /lib/ccom
+#=====
+if s700 || s800; then
+    /bin/mv /system$CDF/C/accom /lib$CDF/ccom
+    #
+    # handle standalone Code Generator
+    #
+    if [ -s /system$CDF/C/uccom ] ; then
+        cp_set 555 bin bin /system$CDF/C/uccom /usr/lib
+    elif [ -s /usr/lib$CDF/ucomp ] ; then
+        /bin/rm -f /usr/lib$CDF/uccom
+        /bin/ln /usr/lib$CDF/ucomp /usr/lib$CDF/uccom
+    else
+        echo "WARNING: No standalone C code generator installed."
+        echo "         uccom not found on install media and ucomp"
+        echo "         not found on system. +P, +I, +pgm, and +df"
+        echo "         options may not be available with this version"
+        echo "         of C/ANSI C."
+    fi
+fi
+
+exit $exitval

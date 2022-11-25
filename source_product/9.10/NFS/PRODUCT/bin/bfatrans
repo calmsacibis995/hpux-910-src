@@ -1,0 +1,103 @@
+#!/bin/sh
+##	@(#)$Revision: 1.20.109.1 $	$Date: 91/11/19 13:53:39 $
+#	bfatrans	--	transfer BFA commands to some system
+##
+#	input:	name of system to transfer BFA commands (and kernel) to
+#	result:	copies /BFA/* databases to the remote host
+#	result:	copies BFA commands to their desired destinations
+#	exceptions:
+#		kernel	-->  /hp-ux.bfa
+#		inetd	-->  /tmp/inetd.bfa
+##
+#	Note:	the user running this script must have remsh equivalence
+#		to root on the remote host, as it will remsh -l root and
+#		rcp to $HOST.root!
+#	Note:	the target machine should not be running any of the commands
+#		which are being copied over (except inetd).
+#	Note:	after this script runs, login to the remote host, kill
+#		the inetd, copy /tmp/inetd.bfa to /etc/inetd;
+#		then, "ln -f /hp-ux.bfa /hp-ux" and reboot.
+##
+
+if [ $# -lt 1 -o $# -gt 2 ] ; then
+    echo usage: `basename $0` hostname [-bfa]
+    exit 1
+else
+    HOST=$1
+    ROOT=root
+    BFAFLAG=${2:+.b}
+    MACH=${HOST}.${ROOT}
+fi
+
+echo `date "+%y.%m.%d %T"` $0 started
+
+if remsh ${HOST} -l ${ROOT} /bin/echo Proceeding with transfer ; then
+    ##
+    #	if BFAFLAG is set, then copy over all the /BFA files and
+    #	the BFA version of the kernel; otherwise we will only copy
+    #	the commands ... the kernel must be grabbed separately
+    ##
+    if [ $BFAFLAG ] ; then
+	if [ -d /BFA ] ; then
+	    remsh ${HOST} -l ${ROOT} mkdir /BFA 2> /dev/null
+	    echo "rcp /BFA/*.B ${MACH}:/BFA & ..."
+	    rcp /BFA/*.B /BFA/kbfa ${MACH}:/BFA &
+	fi
+	if [ -f $Nfs/kernel/300/BFA/hp-ux.bfa ] ; then
+	    echo "rcp $Nfs/kernel/300/BFA/hp-ux.bfa ${MACH}:/hp-ux.bfa & ..."
+	    rcp $Nfs/kernel/300/BFA/hp-ux.bfa ${MACH}:/hp-ux.bfa &
+	fi
+    fi
+else
+    echo ERROR: cannot transfer to ${HOST} as ${ROOT}
+    exit 1
+fi
+
+# do not send inetd.b because bfa statistics aren't needed for inetd
+
+set -x
+# rcp $nfs/cmds/etc/inetd ${MACH}:/tmp/inetd${BFAFLAG:+.bfa}
+
+rcp $nfs/cmds/bin/domainname${BFAFLAG} ${MACH}:/bin/domainname
+rcp $nfs/cmds/etc/biod${BFAFLAG} ${MACH}:/etc/biod
+rcp $nfs/cmds/etc/fsirand${BFAFLAG} ${MACH}:/etc/fsirand
+rcp $nfs/cmds/etc/nfsd${BFAFLAG} ${MACH}:/etc/nfsd
+rcp $nfs/cmds/etc/pcnfsd${BFAFLAG} ${MACH}:/etc/pcnfsd
+rcp $nfs/cmds/etc/portmap${BFAFLAG} ${MACH}:/etc/portmap
+rcp $nfs/cmds/etc/ypbind${BFAFLAG} ${MACH}:/etc/ypbind
+rcp $nfs/cmds/ucb/rup${BFAFLAG} ${MACH}:/usr/bin/rup
+rcp $nfs/cmds/ucb/rusers${BFAFLAG} ${MACH}:/usr/bin/rusers
+rcp $nfs/cmds/usr.bin/rpcgen/rpcgen${BFAFLAG} ${MACH}:/usr/bin/rpcgen
+rcp $nfs/cmds/usr.bin/ypcat${BFAFLAG} ${MACH}:/usr/bin/ypcat
+rcp $nfs/cmds/usr.bin/ypmatch${BFAFLAG} ${MACH}:/usr/bin/ypmatch
+rcp $nfs/cmds/usr.bin/yppasswd${BFAFLAG} ${MACH}:/usr/bin/yppasswd
+rcp $nfs/cmds/usr.bin/ypwhich${BFAFLAG} ${MACH}:/usr/bin/ypwhich
+rcp $nfs/cmds/usr.etc/nfsstat${BFAFLAG} ${MACH}:/usr/etc/nfsstat
+rcp $nfs/cmds/usr.etc/rexd/on${BFAFLAG} ${MACH}:/usr/bin/on
+rcp $nfs/cmds/usr.etc/rexd/rexd${BFAFLAG} ${MACH}:/usr/etc/rpc.rexd
+rcp $nfs/cmds/usr.etc/rpc.lockd${BFAFLAG} ${MACH}:/usr/etc/rpc.lockd
+rcp $nfs/cmds/usr.etc/rpc.mountd${BFAFLAG} ${MACH}:/usr/etc/rpc.mountd
+rcp $nfs/cmds/usr.etc/rpc.rstatd${BFAFLAG} ${MACH}:/usr/etc/rpc.rstatd
+rcp $nfs/cmds/usr.etc/rpc.rusersd${BFAFLAG} ${MACH}:/usr/etc/rpc.rusersd
+rcp $nfs/cmds/usr.etc/rpc.rwalld${BFAFLAG} ${MACH}:/usr/etc/rpc.rwalld
+rcp $nfs/cmds/usr.etc/rpc.sprayd${BFAFLAG} ${MACH}:/usr/etc/rpc.sprayd
+rcp $nfs/cmds/usr.etc/rpc.statd${BFAFLAG} ${MACH}:/usr/etc/rpc.statd
+rcp $nfs/cmds/usr.etc/rpc.ypassd${BFAFLAG} ${MACH}:/usr/etc/rpc.yppasswdd
+rcp $nfs/cmds/usr.etc/rpcinfo${BFAFLAG} ${MACH}:/usr/etc/rpcinfo
+rcp $nfs/cmds/usr.etc/rwall${BFAFLAG} ${MACH}:/usr/etc/rwall
+rcp $nfs/cmds/usr.etc/showmount${BFAFLAG} ${MACH}:/usr/etc/showmount
+rcp $nfs/cmds/usr.etc/spray${BFAFLAG} ${MACH}:/usr/etc/spray
+rcp $nfs/cmds/usr.etc/yp/makedbm${BFAFLAG} ${MACH}:/usr/etc/yp/makedbm
+rcp $nfs/cmds/usr.etc/yp/stdhosts${BFAFLAG} ${MACH}:/usr/etc/yp/stdhosts
+rcp $nfs/cmds/usr.etc/yp/yppoll${BFAFLAG} ${MACH}:/usr/etc/yp/yppoll
+rcp $nfs/cmds/usr.etc/yp/yppush${BFAFLAG} ${MACH}:/usr/etc/yp/yppush
+rcp $nfs/cmds/usr.etc/yp/ypset${BFAFLAG} ${MACH}:/usr/etc/yp/ypset
+rcp $nfs/cmds/usr.etc/yp/ypxfr${BFAFLAG} ${MACH}:/usr/etc/yp/ypxfr
+rcp $nfs/cmds/usr.etc/ypserv/ypserv${BFAFLAG} ${MACH}:/usr/etc/ypserv
+rcp $nfs/cmds/usr.etc/ypserv/longfiles${BFAFLAG} ${MACH}:/usr/etc/yp/longfiles
+
+if [ ${BFAFLAG} ] ; then
+    rcp $nfs/cmds/usr.etc/yp/revnetgroup/revnetgrp${BFAFLAG} ${MACH}:/usr/etc/yp/revnetgroup
+else
+    rcp $nfs/cmds/usr.etc/yp/revnetgroup/revnetgroup ${MACH}:/usr/etc/yp/revnetgroup
+fi

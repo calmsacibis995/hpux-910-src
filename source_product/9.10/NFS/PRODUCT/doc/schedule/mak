@@ -1,0 +1,103 @@
+NAME:	Mark Kepke
+
+##
+##  Overhead includes
+##	- frequent updating of test system with changes in commands
+##		and scaffold
+##	- reading mail and notes
+##	- meetings and coffee talks
+##	- working with group members 
+##
+
+Time   Time    Orig.    Category        Task Description
+spent  left    Est.
+
+1.5	0.0	0.0	Metr		Learn, install, and test triggers.
+
+3.5 	0.0	0.0	Dev		Write and test bfa kernel programs.
+
+1.0	0.0	0.0	Test		Fold Mike's and my tests into scaffold.
+
+1.5	0.0	0.0	Tool		Work with bfa tools.
+					-modify bfarpt for merge option
+					-find and fix bfarpt defect for kernel
+					-write and test bfamerge program
+
+1.0	0.0	0.0	Sup		Work on bfa process improvement
+					-talk to transformers
+					-talk to PTT
+
+1.0	0.0	0.0	Test		Interact with Smelter to 
+					-discover test defects
+					-discover command defects
+
+1.5	1.0	2.0	Sup		Code Reviews
+
+
+ ===============================================================================
+Checkpoint	BitRel  10/07/87	Complete QA / Bit Release
+ ===============================================================================
+
+0.0	0.0	3.0	Other		Wedding Oct 17th.
+					Will need Oct 15th, 16th, and 19th off.
+
+ ===============================================================================
+Checkpoint	MR	12/02/87	Manufacturing Release
+ ===============================================================================
+
+ ===============================================================================
+Checkpoint	End	12/02/87	To catch completed tasks in summary
+ ===============================================================================
+
+4.5	0.0	0.0	Train		Managing Managment Time
+					Voicemail
+					A closer look at HP-FT Collins
+					Testing Fundamentals
+					HP-UX System Calls
+
+3.0 	0.0	0.0	Test		Bugs Fixes to nfsstat,
+					makedbm, Makefile
+
+5.0	0.0	0.0	Test		Write, and test daemons tests 
+					recommended by chm/jad 
+
+1.0 	0.0	0.0	Sup		Update to EB3.
+
+3.5	0.0	0.0	Sup		Messing with new bfa, and
+					overnight build process.
+
+10.0 	0.0	0.0	Test		Increase BFA coverage.
+
+2.0	0.0	0.0	Metr		Find ways to improve nfs performance.
+
+4.5	0.0	9.0	Test		Write jad's ucb/daemon tests.
+
+2.5	0.0	0.0	Dev		Develop sccs line counting program.
+
+4.0	0.0	6.5	Test            Write NLS scaffold tests.
+
+3.5	0.0	0	Test		Write FSIRAND, NFSSTAT scaffold
+					tests.
+
+6.0 	0.0 	6.0	Train		Network and CND training.
+
+3.0	0.0	0.0	Train		Reading
+
+2.5	0.0	0.0	Train		"Mentoring"
+
+2.0	0.0	2.0	Other		Wedding in Columbus.  
+
+2.0	0.0	2.0	Other		Make up time for vacation above.
+
+1.5	0.0	1.0	Sup		Update test systems to EB2.
+
+2.0	0.0	0.0	Sup		Install new scaffold on hpcnor.
+
+1.0	0.0	0.0	Sup		Install bfa commands on hpcnor.
+
+0.5	0.0	0.0	Test		Test chm's changes to fsirand.
+
+
+ ===============================================================================
+Checkpoint	EB3	08/17/87	Early Bird 3 Delivery
+ ===============================================================================

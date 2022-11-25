@@ -1,0 +1,485 @@
+.H 1 "Connectivity (Dan Simula)"
+
+This section of the system test plan addresses the connectivity requirements 
+of the NFS product.  The specific connectivity requirements are 
+described in the NFS Product Requirements Document [1].
+
+NFS connectivity is defined as "the fully functional, reliable exchange 
+of data, commands, control information and results between an NFS client 
+process and an NFS server process."  The client and server processes may 
+reside separately on one of many multi-vendor NFS systems and must operate 
+reliably regardless of system loads, network loads, or relative performance 
+differences.  NFS connectivity addresses all functional aspects of the
+NFS product including remote file system operations, the YP services, the 
+PC-NFS daemon, and associated NFS/RPC user commands.
+
+In order to demonstrate NFS connectivity, a connectivity test suite will
+be run bi-directionally between a Model 9K system and a selected target system.
+The connectivity test suite will consist of functional tests for commands
+(section 1 of the HP-UX manual), system calls (section 2), libraries (section
+3), and the mount/umount commands (section 1M).  The tests will be
+run for an extended period of time (i.e., 24 hours nonstop), and will be
+be highly leveraged from the following groups of tests;
+
+.nf
+		o the RFA-NFS functional tests,
+		o the Sun NFS connectivity test suite,
+		o the SSO HP-UX/Diskless test suite,
+		o the s300/800 file system tests, and
+		o NFS functional tests developed by 
+		  the Nerfs project group.
+.fi
+
+
+If test cases exist that are not addressed by the leveraged tests, 
+original tests will be designed and written to address those test cases.
+
+The connectivity test suite will reside in the NFS scaffold and will rely 
+on the scaffold environment for its execution environment.  In the event 
+that a target system cannot support the NFS scaffold (e.g., VAX/VMS 
+systems, Vectra (PC)), manual methods will be employed to execute an
+equivalent battery of tests.
+
+Each of the following sub-sections addresses a specific multi-vendor
+NFS system.  In the event that the target system only supports client
+capabilities or server capabilities, the connectivity test suite will
+only be exercised uni-directionally.
+
+.nf
+    RESPONSIBLE ENGINEER: Steve Booth
+
+    IMPLEMENT TIME:  5.0  md
+            Effort required for initial setup of the connectivity 
+            suite.
+                        
+    DEPENDENCIES:
+            1) availability of test systems for dedicated use.
+            2) availability of all functional tests.
+
+
+    ISSUES:
+.fi
+
+
+.H 2  "Sun systems"
+
+Sun Micro Systems, Inc. has set the industry standard for network file
+systems.  The NFS product must be tested against the two latest
+major releases of Sun's NFS product ([1] section 1.4.1).  Since Sun 
+systems define the standard, Sun connectivity testing will be done 
+first.  Once connectivity is verified to the Sun systems, the other 
+multi-vendor implementations will be tested.
+
+To test basic connectivity, the test suite will be run between comparable 
+systems (i.e., comparable SPU performance, disk capacity and performance,
+and system load). An example of comparable systems would be an HP330 w/7945
+and a SUN3/160.  In order to establish basic connectivity, the connectivity
+test suite must be run bi-directionally between the two systems for a period
+of 24 hours without error.  Once basic connectivity is established between 
+comparable systems, systems with dissimilar performance capabilities will 
+be tested against one another (e.g., s310 vs Sun3/260 and s350 vs Sun2/150).  
+Since basic connectivity has already been established, the connectivity 
+test suite will be run for only 12 hours between the dissimilar systems to 
+verify full connectivity.
+
+
+.nf
+    RESPONSIBLE ENGINEER: Steve Booth
+    DEPENDENCIES:
+        1) availability of Sun test systems for dedicated use.
+
+    ISSUES:
+.fi
+
+.sp 2
+.H 3 "Sun release 3.2"
+.sp 1
+
+.nf
+    IMPLEMENT TIME:  0.0  md
+    PERFORM TIME:   15.0  md
+    TYPE OF TEST: connectivity test suite
+    EXPECTED OUTPUT: successful test suite completion
+.fi
+.sp 2
+.H 4 "Comparable Systems"
+.sp 1
+The first part of testing HP to Sun connectivity is to test for basic
+connectivity between comparable systems.
+
+Run the connectivity test suite bi-directionally between the two 
+comparable systems simultaneously.  The test suite must run continuously 
+for a period of 24 hours without error.
+.DS
+ 
+          ________                       ________
+         |        |  -----------------> |        |
+         |  9K    |       24 hours      |  Sun   |
+         |        |  <----------------- |        |
+          --------                       --------
+
+		    comparable systems
+
+.DE
+.sp 2
+.H 4 "High-end HP system vs low-end Sun system"
+.sp 1
+This test case tests connectivity between systems with dissimilar system 
+capabilities.  Testing connectivity between dislike systems will identify
+areas of timing-related connectivity problems.  The test is run between 
+a high-end HP system (e.g., s350 w/7914, s840 w/7935) and a low-end Sun system 
+(e.g., Sun 2/150 w/71Mbyte SCSI disk).
+
+Perform the same tests as were executed between the comparable systems.  
+The test suite must run continuously for a period of 12 hours without error.
+.DS
+
+          ________                       ________
+         |        |  -----------------> |        |
+         |   9K   |     12 hours        |  Sun   |
+         |        |  <----------------- |  2/150 |
+          --------                       --------
+
+	high-end system		       low-end system
+
+.DE
+.sp 2
+.H 4 "Low-end HP system vs high-end Sun system"
+.sp 1
+This test case tests connectivity between systems with dislike system 
+capabilities.  Testing connectivity between dislike systems will identify
+areas of timing-related connectivity problems.  The test is run between 
+a low-end HP system (e.g., s310 w/7945) and a high-end Sun system 
+(e.g., Sun 3/260 w/181Mbyte SCSI disk).
+
+Perform the same tests as were executed between the comparable systems.  
+The test suite must run continuously for a period of 12 hours without error.
+.DS
+
+          ________                       ________
+         |        |  -----------------> |        |
+         |  HP    |     12 hours        |  Sun   |
+         |        |  <----------------- |  3/260 |
+          --------                       --------
+
+	low-end system		       high-end system
+.DE
+.sp 2
+.H 3 "Sun release 3.0"
+.sp 1
+Perform the same test as described for the Sun 3.2 release (see previous
+section).
+
+.nf
+         IMPLEMENT TIME:  0.0  md
+         PERFORM TIME:   15.0  md
+         TYPE OF TEST: connectivity test suite
+         EXPECTED OUTPUT: successful test suite completion
+.fi
+.sp 2
+.H 2  "VAX/VMS systems"
+
+Currently, VAX/VMS systems only provide NFS server capabilities.  Therefore,
+the connectivity test suite need only be run uni-directionally to establish
+connectivity.  Since VAX/VMS systems do not support the YP services, the 
+PC-NFS daemon or many of the associated NFS/RPC commands,  only a subset
+of the connectivity test suite will be run.  This subset will be run 
+continuously for 24 hours without error.
+
+.nf
+    RESPONSIBLE ENGINEER: Jason Zions
+    ASSUMPTIONS:
+        YP tests exist in their own directory under
+        the nfs subdirectory.
+    DEPENDENCIES:
+        Acquisition of the Wollongong NFS software.
+        Access to the VAX/VMS system (NTC).
+    ISSUES:
+.fi
+
+.sp 2
+.H 3 "Wollongong's NFS product (server only)"
+.sp 1
+
+.DS
+         IMPLEMENT TIME:  0.0  md
+         PERFORM TIME:   10.0  md
+         TYPE OF TEST: 
+		Connectivity test suite excluding tests for the
+		YP services, the PC-NFS daemon, and the associated
+		NFS/RPC commands.
+
+         EXPECTED OUTPUT:
+		Successful completion of the connectivity test suite.
+
+.DE
+.DS
+ 
+          ________                       ________
+         |        |       24 hours      |        |
+         |  9K    |  -----------------> |  VAX/  |
+         |        |                     |  VMS   |
+          --------                       --------
+
+	   HP NFS		  VAX/VMS w/ Wollongong NFS
+				    (server only system)
+.DE
+.sp 2
+.H 2  "HP Vectra"
+
+NFS capabilities are provided for the HP Vectra (PC) system by Sun's PC-NFS
+product.  This product provides client-only capabilities.  To establish 
+NFS connectivity between the HP Vectra and the Model 9000 NFS systems, tests
+equivalent to those in the connectivity test suite will be run from
+the Vectra to a Model 9000 target system.  Since the Vectra cannot support
+the NFS scaffold environment, equivalent tests will have to be designed,
+coded and tested by the individual responsible for testing connectivity
+to the Vectra.  If possible, test suites which currently exist for the
+PC will be used to expedite the process.
+
+
+.nf
+    RESPONSIBLE ENGINEER: Marie Dotts
+    ASSUMPTION:
+        The PC section will perform all Vectra - NFS testing.
+        The original efforts estimates for this task were
+        30 days for implementation of the test suite and 20
+        days for the actual connectivity testing.
+
+    DEPENDENCIES:  
+        1) available PC test suites from section II.
+
+    ISSUES: 
+        1) Investigate the PC test suite(s) to determine
+           usability in HPUX/NFS to PC connectivity testing.
+.fi
+
+.sp 2
+.H 3 "Sun's PC-NFS product (client only)"
+.sp 1
+
+.DS
+         IMPLEMENT TIME:  0.0  md
+         PERFORM TIME:    0.0  md
+         TYPE OF TEST: 
+		Connectivity tests equivalent to the tests in the 
+		connectivity test suite.
+         EXPECTED OUTPUT:
+		Successful completion of the equivalent tests.
+
+.DE
+.DS
+          ________                       ________
+         |        |                     |        |
+         | Vectra |  -----------------> |  9K    |
+         |        |                     |        |
+          --------                       --------
+
+    HP Vectra / MS-DOS			  HPUX 
+      running PC-NFS		     running pcnfsd(1m)
+    
+.DE
+.sp 2
+.H 2  "HP-UX Diskless systems"
+
+Multiple configurations of diskless systems will be tested to verify 
+connectivity between NFS systems and diskless nodes. As with multi-vendor
+connectivity testing, connectivity will be verified by running the 
+connectivity test suite continuously for 24 hours without error.
+.nf
+    RESPONSIBLE ENGINEER: Dan Simula
+    ASSUMPTION:  
+        SSO is responsible for all NFS-Diskless testing except the
+        basic connectivity testing described in this previous section.
+    
+    DEPENDENCIES:
+        1) Availability of HP-UX 6.0 / diskless systems.
+        2) Availability of a Model 9000 diskless node.
+
+    ISSUES:
+
+.fi
+In addition to basic connectivity, special cases exist that involve 
+system interactions between the NFS and HP-UX Diskless implementations.
+The following testing areas cover these special cases and will be 
+tested by SSO.  For a detailed description of the testing areas,
+test cases, and testing scenarios, see "NFS - HPUX Diskless:Interactions 
+and Testing Scenarios" [5].
+.sp 1
+.nf
+Testing Areas
+
+    1) File system mounts (NFS vs diskless)
+
+    2) Guaranteed single system view within a diskless cluster
+
+    3) Synchronization of NFS and HP-UX diskless file system cacheing
+
+    4) Guaranteed file consistency throughout a diskless cluster
+
+.nf
+.sp 2
+.H 3 "HP-UX 6.0 running as a discless node (config I)"
+.sp 1
+
+For the first discless configuration, the discless node will use a 
+server that is different from the NFS server system (i.e., requires 3 systems;
+1 - discless node, 1 - HPUX/discless server system and one NFS server system).
+As with all previous tests involving both client and server capabilities, the
+test suite will be run bi-directionally between the target systems 
+simultaneously.
+
+.DS
+         IMPLEMENT TIME:  0.0  md
+         PERFORM TIME:   10.0  md
+         TYPE OF TEST: 
+		connectivity test suite
+         EXPECTED OUTPUT:
+		Successful completion of test suite.
+
+.DE
+.DS
+	Diskless node		      NFS server system
+          ________                       ________
+         |        |  -----------------> |        |
+         |  9K    |      24 hours       |  9K    |
+         |        |  <----------------- |        |
+          --------                       --------
+	     ^
+             |           ________ 
+             |          |        |
+             +--------> |  9K    |
+                        |        |
+                         --------
+		    
+		  HP-UX / Diskless server
+ 
+.DE
+.sp 2
+.H 3 "HP-UX 6.0 running as a discless node (config II)"
+.sp 1
+
+.DS
+In the second configuration, a single system will act both as the
+HP-UX/discless server and as the NFS server.
+
+         IMPLEMENT TIME:  0.0  md
+         PERFORM TIME:   10.0  md
+         TYPE OF TEST: 
+		connectivity test suite
+         EXPECTED OUTPUT:
+		successful completion of the test suite
+
+.DE
+.DS
+ 
+      NFS server/client	             NFS server/client
+	Diskless node                 Diskless server
+          ________                       ________
+         |        |  -----------------> |        |
+         |  9K    |       24 hours      |  9K    |
+         |        |  <----------------- |        |
+          --------                       --------
+	     ^                              ^
+	     |        HP-UX Diskless        |
+	     +------------------------------+
+ 
+    
+.DE
+.sp 2
+.H 2  "VAX/UN*X systems"
+
+VAX/UN*X systems also support NFS capabilities.  Mt. Xinu provides an 
+NFS product for 4.3 BSD systems and DEC supports NFS on their VAX/ULTRIX
+systems.  Both of these products provide full NFS capabilities.
+
+According to the Product Requirements Document, connectivity to these 
+systems are listed as a HIGH WANT.  Given current schedule pressure, 
+connectivity testing to these systems is highly unlikely.  Testing
+will only be done if the schedule allows.
+
+
+.nf
+    RESPONSIBLE ENGINEER: Jeff Elison
+    DEPENDENCIES:
+        1) MT.Xinus's NFS product
+        2) DEC VAX/ULTRIX
+    ISSUES:
+        1) This testing will NOT be done due to lack of time
+           and resources. 
+		
+        2) Actual time to complete connectivity to these systems 
+           would be approximately 10.0 md per system.
+.fi
+
+.sp 2
+.H 3 "Mt Xinu's NFS product for 4.3BSD systems"
+.sp 1
+.nf
+    IMPLEMENT TIME:  0.0  md
+    PERFORM TIME:    0.0  md
+
+    TYPE OF TEST: 
+        connectivity test suite
+
+    EXPECTED OUTPUT:
+        Successful completion of the test suite.
+.fi
+.sp 2
+.H 3 "VAX/ULTRIX NFS product"
+.sp 1
+.nf
+    IMPLEMENT TIME:  0.0  md
+    PERFORM TIME:    0.0  md
+    TYPE OF TEST: 
+        connectivity test suite
+    EXPECTED OUTPUT:
+        Successful completion of the test suite.
+.fi
+.sp 2
+
+
+.H 2  "Multiple YP domains/single server
+
+Yellow Pages allows for a single machine to service multiple YP domains.
+In the following test scenarios, the functional tests should be run for
+12 hours with no failures attributable to incorrectly-forwarded YP messages;
+YP-connectivity should be maintained.  The scenario requires an HP machine
+to be the server; however, useful comparative information might be obtained
+by (also) running a SUN as the server.
+
+
+.nf
+    RESPONSIBLE ENGINEER: 
+    DEPENDENCIES:
+        1) 2 HP machines (+2 for setup note 2b)
+        2) one SUN machine
+    PERFORM TIME:    5.0  md
+    ASSUMPTIONS: functional tests are working (e.g. debugged)
+    SETUP NOTES:
+        1) the server machine should be setup to service 2 domains,
+           domain X and domain Y
+        2) try the server machine with 3 scenarios:
+           a.  server is the "master" machine for both domains
+           b.  server is a "slave" machine for both domains
+           a.  server is the master machine for domain X, and
+               a slave for domain Y
+        3) run the functional tests bidirectionally between the
+           non-server nodes
+
+                ------------------------------------------
+                |                                        |
+                |                                        v
+           ------------        ------------         ------------
+           |          |        |          |         |          |
+           | machine A|        | YP server|         | machine B|
+           | in domain|<-------| for both |-------->| in domain|
+           | X        |        | domains  |         | Y        |
+           | HP node  |        | X and Y  |         | SUN node |
+           |          |        | HP node  |         |          |
+           |          |        |          |         |          |
+           ------------        ------------         ------------
+                ^                                        |
+                |                                        |
+                ------------------------------------------
+.fi

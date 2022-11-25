@@ -1,0 +1,11 @@
+/ @(#) $Revision: 51.1 $       
+/ was version 27.2 of old uucp
+/
+/ opx25 script to set up outgoing line for f-protocol
+/
+	send "set 1:0,2:0,3:0,4:2,5:1,6:5,7:8,8:0,"
+	send "9:0,12:1,13:0,14:0,15:0,16:0,17:0\r"
+/ flush garbage
+	expect 2 "**++**++**++**++**++**++**++**++"
+
+	exit 0

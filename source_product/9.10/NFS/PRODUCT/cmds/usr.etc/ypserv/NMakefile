@@ -1,0 +1,102 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/ypserv sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS) $(SRCDIR:/^
+
+CSOURCE = ypserv.c ypsrvancil.c ypserv_map.c ypsrv_proc.c trans_map.c yp_cache.c
+OBJECTS = ypserv.o ypsrvancil.o ypserv_map.o ypsrv_proc.o trans_map$(USCORE).o\
+	 logging$(USCORE).o yp_cache.o
+TARGETS = ypserv longfiles
+
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	=
+DCFLAGS = -g -y -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		DBM_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/libdbm/libdbm.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+
+longfiles:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o longfiles $(SDIR)/longfiles.c $(DBM_LIB) $(LIBCA)
+
+ypserv:		$(OBJECTS) 
+	LDOPTS="-a archive"
+	export LDOPTS
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o ypserv $(OBJECTS) $(NRES_LIB) $(DBM_LIB) $(LIBCA)
+
+ypserv.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/ypserv.c $(DBM_LIB) $(LIBCA)
+
+ypsrvancil.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/ypsrvancil.c $(DBM_LIB) $(LIBCA)
+
+ypserv_map.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/ypserv_map.c $(DBM_LIB) $(LIBCA)
+
+ypsrv_proc.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/ypsrv_proc.c $(DBM_LIB) $(LIBCA)
+
+yp_cache.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/yp_cache.c $(DBM_LIB) $(LIBCA)
+
+trans_map.o:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN -c $(SDIR)/trans_map.c $(DBM_LIB) $(LIBCA)
+
+trans_map_.o:     /source/NFS/$(USER)/cmds/usr.etc/ypserv/trans_map.c
+	$(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/trans_map.B $(LDFLAGS) -o trans_map_.o -c /source/NFS/$(USER)/cmds/usr.etc/ypserv/trans_map.c
+
+logging.o:	/source/NFS/$(USER)/cmds/usr.etc/logging.c
+	$(CC) $(NMCFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/logging.c $(LIBCA)
+
+logging_.o:     /source/NFS/$(USER)/cmds/usr.etc/logging.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+
+all:		build
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build

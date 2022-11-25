@@ -1,0 +1,13 @@
+## FacetTerm  wysemon  description file 07/17/89
+## monitor mode characters for qoffice
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wysemon.FC,v 70.1 92/03/09 16:10:32 ssa Exp $
+magic=\EU^A\Eu
+magic=\EU^B\Eu
+magic=\EU^C\Eu
+magic=\EU^D\Eu
+magic=\EU^I\Eu
+magic=\EU^L\Eu
+magic=\EU^M\Eu
+magic=\EU^K\Eu
+magic=\EU^P\Eu

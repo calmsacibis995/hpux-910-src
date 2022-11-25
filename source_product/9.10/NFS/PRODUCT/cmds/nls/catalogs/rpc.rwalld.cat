@@ -1,0 +1,8 @@
+$set 1
+1 rwalld: getsockname
+2 svc_rpc_udp_create: error\n
+3 svc_rpc_register: error\n
+4 Error: svc_run shouldn't have returned\n
+5 rwalld: svc_sendreply failed
+6 rwalld: svc_sendreply failed
+7 %s

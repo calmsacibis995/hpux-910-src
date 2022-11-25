@@ -1,0 +1,6 @@
+The CRYPT-specific portion of ed.c now exists in the new file ed_crypt.c
+beneath the crypt subdirectory of the shared source.  This new file is
+necessary to compile ed with CRYPT defined.  (An empty ed_crypt.c is
+sufficient for non-CRYPT makes.)
+
+Mark Egeland	egeland@hpfcla

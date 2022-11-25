@@ -1,0 +1,525 @@
+#!/bin/sh
+# @(#) $Revision: 62.1 $     
+
+# This was the customized script used in s300 
+# now used as conversion tool to convert to HDBuucp
+# This file obsolete the functions of the old awk* HDBuucp conversion
+# tools
+
+
+fileset="PSYSCOM"
+partition="PSYSCOM"
+
+PATH=/bin:/etc:/usr/bin
+export PATH
+
+# commands required
+
+awk="/usr/bin/awk"
+cat="/bin/cat"
+cp="/bin/cp"
+echo="/bin/echo"
+ln="/bin/ln"
+ls="/bin/ls"
+mknod="/etc/mknod"
+mv="/bin/mv"
+mvdir="/etc/mvdir"
+rm="/bin/rm"
+rmdir="/bin/rmdir"
+
+# assume an install from root.
+ROOT=""
+
+#  Set up list of user configurable files.
+
+#           FROM                                   TO
+    set --  /etc/newconfig/mailx.rc                /usr/lib/mailx/mailx.rc     \
+ 	    /usr/lib/uucp/newconfig/Devices        /usr/lib/uucp/Devices       \
+ 	    /usr/lib/uucp/newconfig/Dialcodes      /usr/lib/uucp/Dialcodes     \
+ 	    /usr/lib/uucp/newconfig/Dialers        /usr/lib/uucp/Dialers       \
+ 	    /usr/lib/uucp/newconfig/Maxuuscheds    /usr/lib/uucp/Maxuuscheds   \
+ 	    /usr/lib/uucp/newconfig/Maxuuxqts      /usr/lib/uucp/Maxuuxqts     \
+ 	    /usr/lib/uucp/newconfig/Permissions    /usr/lib/uucp/Permissions   \
+ 	    /usr/lib/uucp/newconfig/Poll           /usr/lib/uucp/Poll          \
+ 	    /usr/lib/uucp/newconfig/Systems        /usr/lib/uucp/Systems       \
+ 	    /usr/lib/uucp/newconfig/dialit         /usr/lib/dialit             \
+ 	    /usr/lib/uucp/newconfig/dialit.c       /usr/lib/dialit.c           \
+ 	    /usr/lib/uucp/newconfig/remote.unknown /usr/lib/uucp/remote.unknown \
+	    /usr/lib/uucp/newconfig/uudemon.poll   /usr/lib/uucp/uudemon.poll  \
+	    /usr/lib/uucp/newconfig/uudemon.hour   /usr/lib/uucp/uudemon.hour  \
+	    /usr/lib/uucp/newconfig/uudemon.admin  /usr/lib/uucp/uudemon.admin \
+	    /usr/lib/uucp/newconfig/uudemon.cleanu  /usr/lib/uucp/uudemon.cleanu
+
+# move a default configurable file into place if it doesn't
+# exist on the users file system.
+
+    while [ $# -gt 0 ]
+    do
+	    if [ ! -f "$ROOT$2" ]
+	    then
+		origd=`dirname $ROOT$1`
+		origf=`basename $ROOT$1`
+		destd=`dirname $ROOT$2`
+		destf=`basename $ROOT$2`
+		cd $origd
+		echo $origf | cpio -pmu $destd 2> /dev/null
+		if [ $? != 0 ]
+		then
+		    $echo "NOTE:   cannot cpio $ROOT$1 to $ROOT$2"
+		    # don't bomb here; it can be fixed by hand
+		fi
+		if [ $origf != $destf ]
+		then
+			mv -f $destd/$origf $ROOT$2
+			if [ $? != 0 ]
+			then
+			    	$echo "NOTE:   cannot move $destd/$origf to $ROOT$2"
+		    		# don't bomb here; it can be fixed by hand
+			fi
+		fi
+	    fi
+	    shift
+	    shift
+    done
+
+#   exit 0
+#
+#
+UUCPDIR=/usr/lib/uucp
+SPOOLDIR=/usr/spool/uucp
+LIBDIR=/usr/lib
+OLDCONFIG=$UUCPDIR/OLDCONFIG
+#
+cd $UUCPDIR
+#
+LSYS=L.sys
+LCMDS=L.cmds
+LDEVICES=L-devices
+LVTDEVICES=L-vtdevices
+LDIALCODES=L-dialcodes
+USERFILE=USERFILE
+ORIGFILE=ORIGFILE
+FWDFILE=FWDFILE
+SEQF=SEQF
+SYSTEMS=Systems
+DEVICES=Devices
+PERMISSIONS=Permissions
+DIALERS=Dialers
+DIALCODES=Dialcodes
+MAXUUXQTS=Maxuuxqts
+MAXUUSCHEDS=Maxuuscheds
+POLL=Poll
+REMUNK=remote.unknown
+UUDADMIN=uudemon.admin
+UUDCLEANU=uudemon.cleanu
+UUDHOUR=uudemon.hour
+UUDPOLL=uudemon.poll
+DIALIT=dialit
+DIALITC=dialit.c
+NDIALIT=newconfig/dialit
+NDIALITC=newconfig/dialit.c
+AUDIT=AUDIT
+ERRLOG=ERRLOG
+LOGDEL=LOGDEL
+LOGFILE=LOGFILE
+SYSLOG=SYSLOG
+NLDEVICES=newconfig/L-devices
+NLDIALCODES=newconfig/L-dialcodes
+NLCMDS=newconfig/L.cmds
+NLSYS=newconfig/L.sys
+NUSERFILE=newconfig/USERFILE
+NUUDAY=newconfig/uudemon.day
+NUUDHR=newconfig/uudemon.hr
+NUUDWK=newconfig/uudemon.wk
+OLD=.OLD
+XQTDIR=.XQTDIR
+#
+if [ -f $LSYS -a -f $LDEVICES ];
+then
+    #Begin by converting the L-devices file to Devices
+    cp $DEVICES $DEVICES.old
+    IFILES="$LSYS $LDEVICES"
+    awk 'BEGIN {dirarr["FOOBAR"] = ""} 
+    { if ( FILENAME == "L.sys" )
+            { if ( ( $0 == "" ) || ( substr($1,1,1) == "#" ) ) next
+              if ( substr($3,1,3) != "ACU" ) dirarr[$3] = dirarr[$3] " " $1
+                next 
+            }
+    }
+    
+    {   if ( ( $0 == "" ) || ( substr($1,1,1) == "#" ) ) { print; next }
+    }
+
+    {
+        type = "# Unknown_type-$1"
+        dialer = "unknown"
+
+        line = $2
+        line2 = $3
+        class = $4
+    }
+    
+    $1 == "DIR"     { type = "Direct" ; dialer = "direct" }
+    $1 ~ /ACUDEVELCON/ { type = $1; dialer = "develcon" }
+    $1 ~ /ACUVADIC/    { type = $1; dialer = "vadic" }
+    $1 ~ /ACUHAYES/    { type = $1; dialer = "hayes" }
+    $1 ~ /ACUHP2334A/  { type = $1; dialer = sprintf("PROG/usr/lib/dialit %s /dev/%s \T \S \P",$1,$2)} 
+    $1 ~ /ACUHP92205A/ { type = $1; dialer = "hp92205A" }
+    $1 ~ /ACUHP35141A/ { type = $1; dialer = "hp35141A" }
+    $1 ~ /ACUHP37212A/ { type = $1; dialer = "hp37212A" }
+    $1 ~ /ACUMICOM/    { type = $1; dialer = "micom" }
+    $1 ~ /ACUPENRIL/   { type = $1; dialer = "penril" }
+    $1 ~ /ACUVENTEL/   { type = $1; dialer = "ventel" }
+    { if (type == "# Unknown_type-$1" )
+    	{ type = $1; dialer = sprintf("PROG/usr/lib/dialit %s /dev/%s \T \S \P", $1, $2) } }
+    
+    $3 == "-" { line2 = "0" }
+    
+    { printf "%s %s %s %s %s\n", type, line, line2, class, dialer;
+      if ( ( dirarr[line] != "" ) && ( $1 == "DIR" ) ) {
+          nbr = split(dirarr[line],tmparr," ");
+          for (i = 1; i <= nbr; i++)
+            printf "%s %s %s %s %s\n", tmparr[i], line, line2, class, dialer
+      } }' $IFILES > $DEVICES
+
+    if [ -f $LDIALCODES ];
+    then
+        cp $DIALCODES $DIALCODES.old
+        cp $LDIALCODES $DIALCODES
+    fi
+
+    if [ -f $ORIGFILE -o -f $LCMDS -o -f $USERFILE ];
+    then
+        cp $PERMISSIONS $PERMISSIONS.old
+        IFILES="$LSYS"
+        if [ -f $ORIGFILE ];
+        then
+            IFILES="$IFILES $ORIGFILE"
+        fi
+        if [ -f $LCMDS ];
+        then
+            IFILES="$IFILES $LCMDS"
+        fi
+        if [ -f $USERFILE ];
+        then
+            IFILES="$IFILES $USERFILE"
+        fi
+        awk '{ if ( FILENAME == "L.sys" )
+            {   
+                if (( $0 == "" ) || ( substr($1,1,1) == "#" )) next
+                cmdlist[$1] = ""
+                next
+            }
+            if ( FILENAME == "ORIGFILE" )
+            {
+                if (( $0 == "" ) || ( substr($1,1,1) == "#" )) next
+                cmdlist[$1] = "uucp"
+                next
+            }
+            if ( FILENAME == "L.cmds" )
+            {
+                if (( $0 == "" ) || ( substr($1,1,1) == "#" )) next
+        
+                n = split($1,tmp,",");
+	        if ( n == 1 )
+                    for (i in cmdlist)
+	              if ( cmdlist[i] == "") cmdlist[i] = $1
+                      else cmdlist[i] = cmdlist[i] ":" $1
+	        else
+                    for (i=2; i <= n; i++)
+	              if ( cmdlist[tmp[i]] == "") cmdlist[tmp[i]] = tmp[1]
+                      else cmdlist[tmp[i]] = cmdlist[tmp[i]] ":" tmp[1]
+        
+                next
+            }
+            if ( FILENAME == "USERFILE" )
+            {
+	        {
+                    if ( $0 == "" ) next
+	            if ( substr($1,1,1) == "#" )
+	            {
+		        print ; next
+	            }
+        
+	            split($1, parts, "," )
+        
+	            user = parts[1]
+	            system = parts[2]
+        
+	            if ( $2 == "c" )
+	            {
+		        callback = "yes"
+		        n = 3
+	            }
+	            else
+	            {
+		        callback = "no"
+		        n = 2
+	            }
+        
+	            paths = $n
+        
+	            for (i = n+1; i <= NF; i++)
+		        paths = paths ":" $i
+        
+        
+	            if ( user != "" )
+	            {
+		        printf "LOGNAME=%s \\\n", user
+		        printf "\tREQUEST=yes SENDFILES=yes \\\n"
+		        printf "\tREAD=%s WRITE=%s \\\n", paths, paths
+		        printf "\tCALLBACK=%s\n\n", callback
+	            }
+        
+	            if ( system != "" )
+	            {
+		        printf "MACHINE=%s \\\n", system
+		        printf "\tREQUEST=yes \\\n"
+		        printf "\tREAD=%s WRITE=%s \\\n", paths, paths
+		        printf "\tCOMMANDS=%s\n\n", cmdlist[system]
+	            }
+	        }
+            }
+        }' $IFILES > $PERMISSIONS
+    fi
+
+    cp $SYSTEMS $SYSTEMS.old
+    IFILES="$LDEVICES $LSYS"
+    if [ -f $LVTDEVICES ];
+    then
+        IFILES="$LVTDEVICES $IFILES"
+    fi
+    
+    awk 'BEGIN {vtarr["FOOBAR"] = ""}
+    {   if ( FILENAME == "L-vtdevices" ) 
+            { if ( ( $0 == "" ) || ( substr($1,1,1) == "#" ) ) next
+              split($1,tmp,","); vtarr[tmp[1]] = vtarr[tmp[1]] " " $2; next }
+    }
+    
+    {   if ( FILENAME == "L-devices" ) 
+            { if ( ( $0 == "" ) || ( substr($1,1,1) == "#" ) ) next
+              for (i in vtarr) if ( ( i == $2 ) && ( substr($1,1,3) == "ACU" ) )
+                vtarr[$1] = vtarr[i]; next }
+    }
+    
+    {   if ( ( $0 == "" ) || ( substr($1,1,1) == "#" ) ) { print ; next }
+        system = $1
+        time = $2
+        type = $3
+        class = $4
+        phone = $5
+        protocol = " "
+    
+        login = $6
+    
+        n = split(vtarr[type],tmp," ");
+        vtstr = "";
+        for (i = 1; i <= n; i++) 
+            if ( (tmp[i] == system) || (tmp[i] == "DIALOUT") ) vtstr = "\\n\c";
+        for ( i = 7; i <= NF; i+=2 )
+        {
+	    login = login " " $i vtstr;
+            if ( (i+1) <= NF )
+                login = login " " $(i+1);
+        }
+    }
+    
+    time ~ /\,/	{ if ( split(time, parts, "," ) != 2 )
+		          { printf "# Bad time specifier - %s\n", 0 ; next }
+		      else
+		          { time = parts[1] ";" parts[2] }
+		    }
+    
+    phone ~ /\//	{ if ( split(phone, parts, "/" ) != 2 )
+		          { printf "# Bad protocol specifier - %s\n", 0 ; next }
+		      else
+		          { protocol = parts[1] ; phone = parts[2] }
+		    }
+    
+    $3 !~ /ACU/ { type = system ; phone = "-" }
+    
+    { if ( protocol == " " )
+        printf "%s %s %s %s %s %s\n", system, time, type, class, phone, login
+      else
+        printf "%s %s %s,%s %s %s %s\n", system, time, type, protocol, class, phone, login
+    }' $IFILES > $SYSTEMS
+
+    awk '{if (($0 == "") || (substr($1,1,1) == "#")) next}
+    $3 !~ /ACU/ { next }
+    $3 ~ /ACUDEVELCON/ { next }
+    $3 ~ /ACUVADIC/    { next }
+    $3 ~ /ACUHAYES/    { next }
+    $3 ~ /ACUHP2334A/  { next }
+    $3 ~ /ACUHP92205A/ { next }
+    $3 ~ /ACUHP35141A/ { next }
+    $3 ~ /ACUHP37212A/ { next }
+    $3 ~ /ACUMICOM/    { next }
+    $3 ~ /ACUPENRIL/   { next }
+    $3 ~ /ACUVENTEL/   { next }
+    { missing = 1;
+      n = split($3,tmp,",");
+      y = tmp[1];
+      n = split(x,tmp," ");
+      for (i=1; i <= n; i++) if (tmp[i] == y) missing = 0;
+      if (missing == 1) if ( x == "" ) x = y; else x = x ", " y }
+    END { if (x != "") print "NOTE:   The new /usr/lib/dialit needs to be modified to include " x }' $LSYS
+
+    if [ ! -d $OLDCONFIG ];
+    then
+      if [ -f $OLDCONFIG ];
+      then
+        mv $OLDCONFIG $OLDCONFIG.old
+      fi
+      mkdir $OLDCONFIG
+    fi
+    if [ -d $OLDCONFIG ];
+    then
+      mv $LDEVICES $OLDCONFIG/$LDEVICES
+      mv $LSYS $OLDCONFIG/$LSYS
+      if [ -f $USERFILE ];
+      then
+        mv $USERFILE $OLDCONFIG/$USERFILE
+      fi
+      if [ -f $LCMDS ];
+      then
+        mv $LCMDS $OLDCONFIG/$LCMDS
+      fi
+      if [ -f $ORIGFILE ];
+      then
+        mv $ORIGFILE $OLDCONFIG/$ORIGFILE
+      fi
+      if [ -f $FWDFILE ];
+      then
+        mv $FWDFILE $OLDCONFIG/$FWDFILE
+      fi
+      if [ -f $LDIALCODES ];
+      then
+        mv $LDIALCODES $OLDCONFIG/$LDIALCODES
+      fi
+      if [ -f $SEQF ];
+      then
+        mv $SEQF $OLDCONFIG/$SEQF
+      fi
+      if [ -f $LIBDIR/$DIALIT ];
+      then
+        mv $LIBDIR/$DIALIT $OLDCONFIG/$DIALIT
+      fi
+      if [ -f $LIBDIR/$DIALITC ];
+      then
+        mv $LIBDIR/$DIALITC $OLDCONFIG/$DIALITC
+      fi
+    else
+      if [ -f $LIBDIR/$DIALIT ];
+      then
+        mv $LIBDIR/$DIALIT OLD$DIALIT
+      fi
+      if [ -f $LIBDIR/$DIALITC ];
+      then
+        mv $LIBDIR/$DIALITC OLD$DIALITC
+      fi
+    fi
+      
+    cp $NDIALITC $LIBDIR/$DIALITC
+    cp $NDIALIT $LIBDIR/$DIALIT
+    rm -rf $NLDEVICES $NLDIALCODES $NLCMDS $NLSYS $NUSERFILE $NUUDDAY $NUUDHR $NUUDWK $OLD $XQTDIR
+    
+    
+    cd $SPOOLDIR
+    if [ -d $OLDCONFIG ];
+    then
+      X="`ls | grep -v \^C\\\. | grep -v \^D\\\. | grep -v \^X\\\. | grep -v \^\\\. `"
+      if [ ! -z "$X" ]
+      then
+        for i in `echo $X`
+        do
+          if [ `echo $i | awk '{print substr($1,1,1)}'` = "." ]
+          then
+            continue
+          fi
+          mv -f $i $OLDCONFIG 2>/dev/null
+        done
+      fi
+    fi
+      
+
+    #   This portion of the customize attempts to move and convert old
+    #   C.* and X.* files to new ones.
+    #	It does not take care of X. files yet.
+    
+    set +e
+    SPOOL=/usr/spool/uucp
+    TMP=/tmp/CVT
+    
+    NX=`ls $SPOOL | grep -c "^X."`
+    NC=`ls $SPOOL | grep -c "^C."`
+    if [ $NX -gt 0 ]
+    then
+
+        cd $SPOOL
+        for i in X.*
+        do
+        
+        # S is the 7 character system name
+        # E is the last 5 characters of X. name
+        
+          S=`echo $i | sed "s/..\(.*\)......./\1/"`
+          E=`echo $i | sed "s/.*\(.....\)/\1/"`
+          DIR=
+          DIR=`uuname | grep "^$S"` 
+          if [ -z "$DIR" ]
+          then
+	        echo "NOTE:   There is no system=$S in the /usr/lib/uucp/Systems file."
+	        DIR=$S
+          fi
+          DIR=`echo $DIR | sed "s/ .*//"`
+          if [ ! -d $SPOOL/$DIR ]
+	        then
+	            mkdir $SPOOL/$DIR
+	            chmod 755 $SPOOL/$DIR
+	            chown uucp $SPOOL/$DIR
+          fi
+            S=`echo $DIR | sed "s/\(........\).*/\1/"`
+            mv $i $DIR/X.$S$E
+        
+        done
+        
+    fi
+
+    if [ $NC -gt 0 ]
+    then
+        cd $SPOOL
+        for i in C.*
+        do 
+        # S is the 6 character system name
+        # E is the last 5 characters of C. name
+        
+          S=`echo $i | sed "s/..\(.*\)......./\1/"`
+          E=`echo $i | sed "s/.*\(.....\)/\1/"`
+          DIR=
+          DIR=`uuname | grep "^$S"` 
+          if [ -z "$DIR" ]
+          then
+	        echo "NOTE:   There is no system=$S in the /usr/lib/uucp/Systems file."
+	        DIR=$S
+          fi
+          DIR=`echo $DIR | sed "s/ .*//"`
+          if [ ! -d $SPOOL/$DIR ]
+	        then
+	            mkdir $SPOOL/$DIR
+	            chmod 755 $SPOOL/$DIR
+	            chown uucp $SPOOL/$DIR
+          fi
+        
+            cat $i | while read AA ; do
+	        D=`echo $AA | cut -d" " -f6`
+	        if [ -n "$D" -a -f "$D" ]
+	            then mv $D $DIR/$D
+	        fi
+            done
+            S=`echo $DIR | sed "s/\(........\).*/\1/"`
+            mv $i $DIR/C.$S$E
+        
+        done
+    fi
+fi
+

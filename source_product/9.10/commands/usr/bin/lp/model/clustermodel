@@ -1,0 +1,83 @@
+#!/bin/sh
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lp/model/clustermodel,v $
+# $Revision: 72.1 $
+
+# lp model script for spooling to printer attached to cluster clients
+
+#====================================================================
+# NOTE: This script is the cluster server side of a CDF'd interface.
+#====================================================================
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+# Handle disable and cancel traps.
+
+    trap "trap 15;kill -15 0;exit 0" 15
+
+# Make sure we're running on the rootserver of a cluster.
+
+    if [ -x /bin/cnodes ] && cnodes -s ; then
+	Server=`cnodes -r`
+	if [ "`cnodes -m`" != "$Server" ] ; then
+	    echo "$0: may only be run on the rootserver" >&2
+	    exit 1
+	fi
+    else
+	echo "$0: may only be run in a clustered environment" >&2
+	exit 2
+    fi
+
+# This script is the default element of a CDF.  This script is the default
+# (rather than $Server) element so that this CDF may be seen on all cnodes.
+# The name of the proper cnode for this printer is the name of the only
+# other element of $CDF.
+
+    CDF="${0}+"
+    if [ ! -H $CDF ] ; then
+	echo "$0: $CDF is not a CDF" >&2
+	exit 3
+    fi
+    PrintNode=`ls $CDF | grep -v "^default$"`
+
+# Wait until $PrintNode is able to accept remsh's.
+
+    until remsh $PrintNode true 2>/dev/null ; do sleep 20 ; done
+
+# Read the name of the device file that the actual interface will talk to.
+# Note that (pre-8.0) lpsched requires the existence of a device file with
+# this name on the server as well; a symlink to /dev/null should serve just
+# fine.  The real device file(s) must be created on $PrintNode; but beware
+# of cnode-specific device files when making it(them) (read mknod(1m))!
+# The LP destination name is the basename of this script's invocation name.
+
+    Dest=`basename $0`
+    read DeviceFile < /usr/spool/lp/member/$Dest
+
+# Regenerate arguments for the interface; arguments that might be null or
+# multi-word (title, $3, and options, $5) must be quoted.
+
+    Command="$0 $1 $2 '$3' $4 '$5'"
+
+# Add the file arguments.
+
+    shift 5
+    Command="$Command $*"
+
+# Connect output streams as lpsched would.
+
+    Command="$Command < /dev/null > $DeviceFile 2>&1"
+
+# Run the interface on $PrintNode.
+
+    CommandStatus=`remsh $PrintNode -n "$Command ; echo \\$?"`
+
+# First check to see if remsh failed (if so, disable this destination).
+
+    if [ $? -ne 0 ] ; then
+	disable -r"$0: remsh to $PrintNode failed" $Dest
+    fi
+    
+# Return to lpsched the exit status of the actual interface.
+
+    exit $CommandStatus

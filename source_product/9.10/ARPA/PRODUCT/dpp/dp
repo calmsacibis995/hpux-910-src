@@ -1,0 +1,36 @@
+# @(#) $Revision: 1.1.109.2 $
+#
+# Standard configuration file for DTC Device File Access program.
+#  Copyright (C) 1992 by HEWLETT-PACKARD.
+#
+#
+#  This file contains association between  physical terminal server ports
+#  and  device file name. The device name is used by the end-user
+#  application to identify a port or access a remote port using
+#  device file access interface.
+#
+#
+#  The remote identification is composed of a single IP address
+#  (associated to a port) or an IP address (specifying the remote client)
+#  and a board number/port number for terminal server.
+#
+#  That file is used by the DDFA parser (/etc/dpp).
+#
+# The following format must be  used:
+#
+#  IP_address   board/port device_file_name  port_config_file
+#
+#  EX:
+#  11.234.87.123  00/00   /dev/dtcportO0    /etc/newconfig/ddfa/pcf
+#  11.234.87.123  00/00   /dev/dtcportI0   
+#  11.234.87.124  XX/279  /dev/dtcportI1    /etc/newconfig/ddfa/pcf 
+# 
+#  NOTE:
+#
+#   first and third entries are used for DDFA purpose. The last one is used
+#   for PAD SUP accessing PAD port through a DTC.
+#
+#   second entry is used for port identification.
+#
+#
+#

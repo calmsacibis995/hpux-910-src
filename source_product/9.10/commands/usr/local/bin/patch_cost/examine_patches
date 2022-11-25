@@ -1,0 +1,305 @@
+#! /bin/ksh
+#
+# This script examines the patches available on PA systems and produces 
+# a report about patches that should be examined.  In the future, it
+# will identify any new patches that have been placed on  the patch hub
+# between now and the last time this script was run.
+#
+
+#
+# varialbles
+#
+S800CAT=/hp-ux_patches/s800/9.X
+S700CAT=/hp-ux_patches/s700/9.X
+S700_800CAT=/hp-ux_patches/s700_800/9.X
+S700=cat.700
+S800=cat.800
+S700_800=cat.700_800
+S700SUM=cat.700.sum
+S800SUM=cat.800.sum
+S700_800SUM=cat.700_800.sum
+S700PATCH=patch.700
+S800PATCH=patch.800
+S700_800PATCH=patch.700_800
+REPORT=patch.rep
+S700REP=report.700
+S800REP=report.800
+S700_800REP=report.700_800
+S700EXIST=exist.700
+S800EXIST=exist.800
+S700_800EXIST=exist.700_800
+S700CUR=cur.700
+S800CUR=cur.800
+S700_800CUR=cur.700_800
+homedir=/tmp/cmds_patches
+tfile=$homedir/ftpscript
+OPN="open hpatlse.atl"
+USR="user ftp `whoami`@`hostname`"
+LCD="lcd $homedir"
+
+
+create_summary()
+{
+    for catalog in $S700 $S700_800 $S800
+    do
+	if [ "$catalog" = "$S700" ]
+	then
+	    sumfile=$S700SUM
+	fi
+	if [ "$catalog" = "$S800" ]
+	then
+	    sumfile=$S800SUM
+	fi
+	if [ "$catalog" = "$S700_800" ]
+	then
+	    sumfile=$S700_800SUM
+	fi
+	grep PHCO $catalog | grep "^hp-ux_patches" > $sumfile 2>&1
+    done
+}
+
+eliminate_obsolete()
+{
+    for file in $S700SUM $S800SUM $S700_800SUM
+    do
+	if [ "$file" = "$S700SUM" ]
+	then
+	    patchfile=$S700PATCH
+	fi
+	if [ "$file" = "$S800SUM" ]
+	then
+	    patchfile=$S800PATCH
+	fi
+	if [ "$file" = "$S700_800SUM" ]
+	then
+	    patchfile=$S700_800PATCH
+	fi
+	rm -f $patchfile
+	cat $file |
+	while read catalog
+	do
+	    # get the patch
+	    pf=`echo $catalog | awk ' { print $1 }`
+	    pf="/$pf"
+    	    echo $OPN > $tfile
+    	    echo $USR >> $tfile
+    	    echo $LCD >> $tfile
+	    echo "cd `dirname $pf`" >> $tfile
+	    echo "get `basename $pf`" >> $tfile
+	    echo "bye" >> $tfile
+	    cat $tfile | ftp -i -n > /dev/null 2>&1
+	    head -1 `basename $pf` | grep OBSOLETE > /dev/null 2>&1
+	    if [ $? -eq 1 ]
+	    then			# patch isn't obsolete
+		echo $catalog | sed -e "s,/,:,g" >> $patchfile
+	    fi
+	    rm -f `basename $pf`
+	done
+    done
+}
+
+get_catalogs()
+{
+    catnum=0
+    for catalog in $S700CAT $S700_800CAT $S800CAT
+    do
+    	echo $OPN > $tfile
+    	echo $USR >> $tfile
+    	echo $LCD >> $tfile
+	echo "cd $catalog" >> $tfile
+	echo "get catalog" >> $tfile
+	echo "bye" >> $tfile
+	cat $tfile | ftp -i -n > /dev/null 2>&1
+	if [ $catnum -eq 0 ]
+	then
+	    mv catalog $S700
+	fi
+	if [ $catnum -eq 1 ]
+	then
+	    mv catalog $S700_800
+	fi
+	if [ $catnum -eq 2 ]
+	then
+	    mv catalog $S800
+	fi
+	catnum=`expr $catnum + 1`
+    done
+}
+
+id_new()
+{
+    rm -f $S700CUR $S800CUR $S800_800CUR
+    co -rSWT/9_03 /hpux/src.rcs/usr/local/bin/patch_cost/exist.* > /dev/null 2>&1
+    cat $S700PATCH |
+    while read line
+    do
+	echo $line | awk -F : ' { print $4 } ' >> $S700CUR
+    done
+
+    cat $S800PATCH |
+    while read line
+    do
+	echo $line | awk -F : ' { print $4 } ' >> $S800CUR
+    done
+
+    cat $S700_800PATCH |
+    while read line
+    do
+	echo $line | awk -F : ' { print $4 } ' >> $S700_800CUR
+    done
+    sort -u $S700CUR > t1
+    sort -u $S700EXIST > t2
+    diff t1 t2 > t3
+    if [ -s t3 ]
+    then
+	/usr/bin/mailx -s "s700 new patch(s) arrived" \
+			elaine \
+			lkc    \
+			tomm < t3
+	co -l -rSWT/9_03 /hpux/src.rcs/usr/local/bin/patch_cost/$S700EXIST,v
+	mv $S700CUR $S700EXIST
+	echo "" | ci -NSWT/9_03 -m"new rev" /hpux/src.rcs/usr/local/bin/patch_cost/$S700EXIST,v
+    fi
+
+    sort -u $S800CUR > t1
+    sort -u $S800EXIST > t2
+    diff t1 t2 > t3
+    if [ -s t3 ]
+    then
+	/usr/bin/mailx -s "s800 new patch(s) arrived" \
+			elaine \
+			tomm   \
+			lkc < t3
+	co -l -rSWT/9_03 /hpux/src.rcs/usr/local/bin/patch_cost/$S800EXIST,v
+	mv $S800CUR $S800EXIST
+	echo "" | ci -NSWT/9_03 -m"new rev" /hpux/src.rcs/usr/local/bin/patch_cost/$S800EXIST,v
+    fi
+
+    sort -u $S700_800CUR > t1
+    sort -u $S700_800EXIST > t2
+    diff t1 t2 > t3
+    if [ -s t3 ]
+    then
+	/usr/bin/mailx -s "s700_800 new patch(s) arrived" \
+			elaine \
+			tomm   \
+			lkc < t3
+	co -l -rSWT/9_03 /hpux/src.rcs/usr/local/bin/patch_cost/$S700_800EXIST,v
+	mv $S700_800CUR $S700_800EXIST
+	echo "" | ci -NSWT/9_03 -m"new rev" /hpux/src.rcs/usr/local/bin/patch_cost/$S700_800EXIST,v
+    fi
+}
+
+id_similar()
+{
+    echo "Series 700 specific and related patches to be examined:\n" > $S700REP
+    cat $S700PATCH |
+    while read line
+    do
+	pnum=`echo $line | awk -F : ' { print $4 } '`
+	pid=`echo $line | awk -F : ' { print $5 } '`
+	echo "Examine patch: $pnum\t$pid" >> $S700REP
+	for pfile in $S800PATCH $S700_800PATCH
+	do
+	    if [ "$pfile" = "$S800PATCH" ]
+	    then
+		rel=S800
+	    else
+		rel=S700_800
+	    fi
+	    cat $pfile |
+	    while read pline
+	    do
+		pfilepid=`echo $pline | awk -F : ' { print $5 } '`
+		if [ "$pid" = "$pfilepid" ]
+		then
+		    pfilepnum=`echo $pline | awk -F : ' { print $4 } '`
+		    echo "\tand related patch: $pfilepnum from $rel" >> $S700REP
+		fi
+	    done # pline loop
+	done # for pfile
+    done # read line
+
+    echo "Series 800 specific and related patches to be examined:\n" > $S800REP
+    cat $S800PATCH |
+    while read line
+    do
+	pnum=`echo $line | awk -F : ' { print $4 } '`
+	pid=`echo $line | awk -F : ' { print $5 } '`
+	echo "Examine patch: $pnum\t$pid" >> $S800REP
+#	echo "Examine patch: $pnum" >> $S800REP
+	for pfile in $S700PATCH $S700_800PATCH
+	do
+	    if [ "$pfile" = "$S700PATCH" ]
+	    then
+		rel=S700
+	    else
+		rel=S700_800
+	    fi
+	    cat $pfile |
+	    while read pline
+	    do
+		pfilepid=`echo $pline | awk -F : ' { print $5 } '`
+		if [ "$pid" = "$pfilepid" ]
+		then
+		    pfilepnum=`echo $pline | awk -F : ' { print $4 } '`
+		    echo "\tand related patch: $pfilepnum from $rel" >> $S800REP
+		fi
+	    done # pline loop
+	done # for pfile
+    done # read line
+
+    echo "Series 700/800 specific and related patches to be examined:\n" > $S700_800REP
+    cat $S700_800PATCH |
+    while read line
+    do
+	pnum=`echo $line | awk -F : ' { print $4 } '`
+	pid=`echo $line | awk -F : ' { print $5 } '`
+	echo "Examine patch: $pnum\t$pid" >> $S700_800REP
+#	echo "Examine patch: $pnum" >> $S700_800REP
+	for pfile in $S700PATCH $S800PATCH
+	do
+	    if [ "$pfile" = "$S700PATCH" ]
+	    then
+		rel=S700
+	    else
+		rel=S800
+	    fi
+	    cat $pfile |
+	    while read pline
+	    do
+		pfilepid=`echo $pline | awk -F : ' { print $5 } '`
+		if [ "$pid" = "$pfilepid" ]
+		then
+		    pfilepnum=`echo $pline | awk -F : ' { print $4 } '`
+		    echo "\tand related patch: $pfilepnum from $rel" >> $S700_800REP
+		fi
+	    done # pline loop
+	done # for pfile
+    done # read line
+    cat $S700REP $S800REP $S700_800REP > $REPORT
+    echo "Examine file $homedir/$REPORT"
+}
+
+initialize()
+{
+    rm -rf $homedir
+    mkdir -p $homedir
+    cd $homedir
+}
+
+OPT=$1
+if [ "$OPT" = "-?" ]
+then
+    echo "usage: examine_patches [sim]"
+    exit 1
+fi
+initialize
+get_catalogs
+create_summary
+eliminate_obsolete
+if [ "$OPT" = "sim" ]
+then
+    id_similar
+fi
+id_new

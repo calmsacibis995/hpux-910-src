@@ -1,0 +1,268 @@
+ifdef(`MACRO_COMMENTS',`
+# @(#) $Revision: 66.5 $
+#
+# macros.mh -- Various macros used to create system call stubs on
+#              the Series 800.
+#
+# The following macros may be used, for the various classes of system
+# calls:
+#
+#   SYSCALL()    -- For system calls returning -1 or a value
+#		    Ex: open(), read(), write()
+#
+#   BOOLEAN()   -- For system calls that return 0 or -1
+#		    Ex: close(), stat()
+#
+#   NOFAIL() -- For system calls that dont return anything.
+#		    Ex: sync()
+#
+#
+# HOWEVER -- the s800 doesnt have the various classes, so all of these
+#            are identical for the Series 800.
+#
+# An optional second argument may be supplied to these macros which
+# will be used as an alternate entry point for the routine.
+#
+# The following defines may be used to control the behavior of the
+# macros:
+#
+#  _NAMESPACE_CLEAN  -- Make primary name for call "_name", define
+#                       secondary symbol "name".
+#  NOSECDEF	     -- Disable _NAMESPACE_CLEAN flag, even if defined
+#  DSECDEF	     -- Make primary name for call "__name", define
+#			secondary symbol "name".  Only effective when
+#			_NAMESPACE_CLEAN is defined
+#
+#  PIC		     -- Generate Position Independent Code
+#  PROFILE	     -- Generate code for profiling (cc -p)
+#  ALTERNATE_RET_REG -- Return value is in ret1 instead of ret0
+#
+#  Currently there is no difference if you have PIC defined or not.
+#  This code is not PIC code, but supposedly works anyway.  -- rsh
+#
+#')
+
+include(`defines.mh')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _strip_underscores(string) --
+#    strips 1 or 2 leading underscores from its first argument
+#
+#')
+define(`_strip_underscores',`translit(`
+define(`_var',$1)
+ifelse(substr(_var,0,1),`_',`
+define(`_var',substr(_var,1))')
+ifelse(substr(_var,0,1),`_',`
+define(`_var',substr(_var,1))')
+defn(`_var')
+',`
+')')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _declarations(name, alias)
+#    Generates the symbol declaration stuff (space, subspace, entry,
+#    secondary defs)
+#
+#')
+define(`_declarations',`
+	.space	$TEXT$
+	.subspa	$CODE$
+ifdef(`_NAMESPACE_CLEAN',`
+ifdef(`NOSECDEF',`
+	.export	$1,entry
+ifelse($2,`',`',`
+	.export	$2,entry')',`
+ifdef(`DSECDEF',`
+	.export	__$1,entry
+	.export	$1,SEC_DEF
+ifelse($2,`',`',`
+	.export	__$2,entry
+	.export	$2,SEC_DEF')',`
+	.export	_$1,entry
+	.export	$1,SEC_DEF
+	ifelse($2,`',`',`
+	.export	_$2,entry
+	.export	$2,SEC_DEF')
+')
+')',`
+	.export	$1,entry
+ifelse($2,`',`',`
+	.export	$2,entry')
+')
+	.proc
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _callinfo() --
+#     Setup ".callinfo" and parameters.  Define DO_IENTRY to
+#     get the special case for "_sigreturn".
+#
+#')
+define(`_callinfo',`
+ifdef(`DO_IENTRY',`
+ifdef(`PROFILE',`
+	.callinfo hpux_int, save_sp, frame=600',`
+	.callinfo hpux_int, save_sp, save_rp, frame=600')',`
+ifdef(`PROFILE',`
+	.callinfo save_rp',`
+	.callinfo')
+')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _labels(call, alias) --
+#    Generates the entry point labels
+#
+#')
+define(`_labels',`
+	.entry
+ifdef(`_NAMESPACE_CLEAN',`
+ifdef(`NOSECDEF',`',`
+ifdef(`DSECDEF',`
+__$1
+ifelse($2,`',`',`
+__$2')',`
+_$1
+ifelse($2,`',`',`
+_$2')
+')')')
+$1
+ifelse($2,`',`',`
+$2')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _profdata() --
+#    Generates a data location for profiling
+#
+#')
+define(`_profdata',`
+ifdef(`PROFILE',`
+	.space	$PRIVATE$
+	.subspa	$DATA$
+cnt
+	.word 0')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _profcall(call) --
+#    Generates code to call mcount for this routine
+#    (i.e.  _mcount(frompcindex, selfpc, cntp))
+#')
+define(`_profcall',`
+ifdef(`PROFILE',`
+	stw	rp,-20(sp)
+	stw	arg0,-36(sp)
+	stw	arg1,-40(sp)
+	stw	arg2,-44(sp)
+	stw	arg3,-48(sp)
+	ldo	48(sp),sp
+	copy	rp,arg0
+ifdef(`_NAMESPACE_CLEAN',`
+ifdef(`NOSECDEF',`
+	ldil	L%$1,arg1
+	ldo	R%$1`('arg1`)',arg1',`
+ifdef(`DSECDEF',`
+	ldil	L%__$1,arg1
+	ldo	R%__$1`('arg1`)',arg1',`
+	ldil	L%_$1,arg1
+	ldo	R%_$1`('arg1`)',arg1
+')
+')
+')
+	ldil	L%cnt,arg2
+	ldo	R%cnt`('arg2`)',arg2
+	.import	_mcount
+	ldil	L%_mcount,r31
+	.call
+	ble	R%_mcount,`('4,r31`)'
+	copy	r31,rp
+	ldo	-48(sp),sp
+	ldw	-20(sp),rp
+	ldw	-36(sp),arg0
+	ldw	-40(sp),arg1
+	ldw	-44(sp),arg2
+	ldw	-48(sp),arg3
+')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _dotrap(num, name) --
+#    Generates code to call the system call
+#
+#')
+define(`_dotrap',`
+	stw	r19,-28(sp)		; kernel trashes it
+	.call
+	ldil	L%SYSCALLGATE,r1
+	ble	R%SYSCALLGATE`('sr7,r1`)'
+ifelse($1, `', `
+	ldi	@,SYS_CN		; Force a syntax error',`
+	ldi	$1,SYS_CN')
+	or,=	r0,RS,r0
+	.call
+	.import	$cerror
+	b  	$cerror
+	ldw	-28(sp),r19		; kernel trashes it
+ifdef(`ABORT_AFTER_TRAP',`
+	break	4,10	; BI1_AZURE,BI2_AZURE_EXIT')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _doreturn() --
+#    Generates code to return to the caller
+#
+#')
+define(`_doreturn',`
+ifdef(`ALTERNATE_RET_REG',`
+	copy	ret1,ret0')
+	bv,n	(rp)
+	nop
+	.procend
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _docall(entry_name, sysent_name, alias) --
+#    Generate a system call stub
+#
+#')
+define(_docall,`
+define(`_call_num',defn(`SYS_'_strip_underscores($2)))
+_profdata
+_declarations($1,$3)
+_callinfo
+_labels($1,$3)
+_profcall($1)
+_dotrap(_call_num,$2)
+_doreturn
+')
+
+define(`_entry',`
+_profdata
+_declarations($1,$2)
+_callinfo
+_labels($1,$2)
+_profcall($1)
+')
+
+define(`_dothecall',`
+define(`_call_num',defn(`SYS_'_strip_underscores($1)))
+_dotrap(_call_num,$1)
+')
+
+define(SYSCALL,`_docall($1,$1,$2)')
+define(BOOLEAN,`_docall($1,$1,$2)')
+define(NOFAIL,`_docall($1,$1,$2)')
+define(SYSCALL2,`_docall($1,$2,$3)')
+define(BOOLEAN2,`_docall($1,$2,$3)')
+define(NOFAIL2,`_docall($1,$2,$3)')

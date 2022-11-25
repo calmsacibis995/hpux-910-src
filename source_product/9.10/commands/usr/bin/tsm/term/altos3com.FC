@@ -1,0 +1,96 @@
+## FacetTerm  altos3com  description file  9/10/90
+## Common file altos3com for altos3 80 and 132 column modes.
+###			G.Clark.B  9/10/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: altos3com.FC,v 70.1 92/03/09 16:10:56 ssa Exp $
+xon_xoff
+lines=24
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+### cursor_on=
+cursor_on=\E[?25h
+cursor_on=\E[>5l
+### cursor_off=
+cursor_off=\E[?25l
+cursor_off=\E[>5h
+### cursor_on_mode_bit-00800000
+### parm_mode_val-CURSORON-00000000=
+parm_mode_val-CURSORON-00000000=?25
+parm_mode_val-00000000-CURSORON=>5
+### cursor_type=
+### cursor_type=
+### cursor_type_turns_cursor_on
+enter_ca_mode=
+### NOTE: split_divider must be 77 char starting with blank
+### split_divider= qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+*split_divider= JJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJJ
+### NOTE: split_divider_end must reverse split_divider_start to default
+##--- PARM_MODE ---##
+### parm_mode_on=\E[%10M?h
+parm_mode_on=\E[%10M?h
+### parm_mode_off=\E[%10M?l
+parm_mode_off=\E[%10M?l
+### parm_mode_private_propogates
+parm_mode_private_propogates
+### mode-bits_on.-bits_off=
+##  ?4 smooth_scroll smooth=\E[?4h off=\E[?4l (default)
+### mode-00000000-00000001=\E[?18l
+mode-00000000-00000001=\E[?4l
+### mode-00000001-00000000=\E[?18h
+mode-00000001-00000000=\E[?4h
+### parm_mode_val-h.bitson-l.bitson=
+##   1 guarded_area_transfer P-on(all_char)=\E[1h P-off(prot_only)=\E[1l
+parm_mode_val-PASS....-PASS....=1
+##   2 keyboard lock I-on=\E[2h P=off=\E[2l
+parm_mode_val-IGNORE..-PASS....=2
+###  4 is INSERTON
+##   6 erasure_mode P-off=\E[6h( default) N-on_erase_unprotected_only=\E[6l
+parm_mode_val-PASS....-NOTIMP..=6
+##  12 local_echo P-off=\E[12h I-on=\E[12l
+parm_mode_val-PASS....-NOTIMP..=12
+##  20 newline_on_lf I-on=\E[20h P-off=\E[20l
+parm_mode_val-NOTIMP..-PASS....=20
+### ?1 is CURKEY
+##  ?2 ansi_mode P-on=\E[?2h N-off=\E[?2l
+parm_mode_val-PASS....-NOTIMP..=?2
+parm_mode_val-00000001-00000000=?4
+##  ?5 reverse_screen reverse=\E[?5h normal=\E[?5l (default)
+mode-00000000-00000002=\E[?5l$<200/>
+mode-00000002-00000000=\E[?5h$<200/>
+parm_mode_val-00000002-00000000=?5
+##  ?6 origin_mode I-on_in_scroll_region=\E[?6h P-off_full_screen=\E[?6l
+parm_mode_val-NOTIMP..-IGNORE..=?6
+### ?7 is AUTOWRAP
+##  ?8 auto repeat P-on=\E[?8h P_off=\E[?8l
+parm_mode_val-PASS....-PASS....=?8
+## ?10 editing mode N-block=\E[?10h P-interactive=\E[?10l
+parm_mode_val-NOTIMP..-PASS....=?10
+## ?13 space suppression on=\E[?13h off=\E[?13l
+parm_mode_val-PASS....-PASS....=?13
+## ?14 immediate transmit immediate=\E[?14h deferred=\E[?14l
+parm_mode_val-PASS....-NOTIMP..=?14
+## ?16 edit key execution N-immediate=\E[?16h P-deferred=\E[?16l
+parm_mode_val-NOTIMP..-PASS....=?16
+## >1 user line mode
+parm_mode_val-PASS....-PASS....=>1
+## =1 printer echo mode
+parm_mode_val-PASS....-PASS....==1
+## =2 unfomatted print mode
+parm_mode_val-PASS....-PASS....==2
+### ?25 is CURSORON
+## protected field attributes 0=none 1=bold 2=under 3=blink 7=reverse 254=all
+### parm_mode_val-h.bitson-l.bitson=
+### multi_mode-bitmask.-bitvalue=
+### multi_mode-0000000C-00000000=\E`6$<20>
+### multi_mode-0000000C-00000004=\E`A$<20>
+### multi_mode-0000000C-00000008=\E`7$<20>
+### ignore_mode_bit-80000000
+### parm_mode_val-80000000-IGNORE..=?10
+### pass_mode_bit-40000000
+### parm_mode_val-40000000-PASS....=?11
+### notimp_mode_bit-20000000
+### parm_mode_val-20000000-NOTIMP..=?12
+### ignore=
+### ignore_parm=
+### pass=
+### NOTE reset_2string=\E>\E[?3l\E[?4l\E[?5l\E[?7h\E[?8h
+use=a3w7d1com.fc

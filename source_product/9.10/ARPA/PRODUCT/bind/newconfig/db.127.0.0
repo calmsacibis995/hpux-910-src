@@ -1,0 +1,9 @@
+@       IN	SOA	foo.cnd.hp.com. root.foo.cnd.hp.com. (
+					1	; Serial
+					10800	; Refresh every 3 hours
+					3600	; Retry every hour
+					604800	; Expire after a week
+					86400 )	; Minimum ttl of 1 day
+	IN	NS	foo.cnd.hp.com.
+
+1	IN	PTR	localhost.

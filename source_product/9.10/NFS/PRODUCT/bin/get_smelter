@@ -1,0 +1,62 @@
+#!/bin/sh
+##	@(#)get_smelter	$Revision: 1.12.109.1 $	$Date: 91/11/19 13:55:18 $
+#	get_smelter	--	get shared sources from smelter
+##
+#	SOURCE_MACHINE	is the RFA name of the machine with the RCS source,
+#	TARGET_MACHINE	is the RFA name of the machine to receive the files
+##
+#	SMELTER		is the base directory for the smelter sources
+#	NFS_SRC		is the base directory for the NFS commands sources
+#	FILE_LIST	is the file containing the shared source paths...
+##
+SOURCE_MACHINE=/net/hpcndm			# name of source machine
+TARGET_MACHINE=					# name of destination machine
+FILE_LIST=${1:-$Nfs/log/smelter_files}		# list of src and dest files
+SMELTER=$SOURCE_MACHINE/usr/src/arpa/		# base dir for source files
+NFS_SRC=$TARGET_MACHINE/nfs/working/cmds/	# base dir for dest files
+Name=`basename $0`				# command invocation name
+CO=/usr/bin/co					# RCS checkout command
+
+echo `date "+%y.%m.%d %T"` $Name $nfs begin
+##
+#	set up RFA to SOURCE or TARGET machine(s)
+##
+if [ "$SOURCE_MACHINE" ] ; then
+	MACHINE=`basename $SOURCE_MACHINE`
+	if val=`$Nfs/bin/do_netunam $MACHINE`
+	then
+		eval $val
+	else
+		echo `date "+%y.%m.%d %T"` $Name $nfs abort
+		exit 1
+	fi
+fi
+if [ "$TARGET_MACHINE" ] ; then
+	MACHINE=`basename $TARGET_MACHINE`
+	if val=`$Nfs/bin/do_netunam $MACHINE`
+	then
+		eval $val
+	else
+		echo `date "+%y.%m.%d %T"` $Name $nfs abort
+		exit 1
+	fi
+fi
+
+sed	-e 's/#.*//' -e 's/[ 	]*$//' -e '/^$/d'		\
+	-e "s,@SMELTER,$SMELTER," -e "s,@NFS_SRC,$NFS_SRC,"	\
+	$FILE_LIST						|
+while read SOURCE TARGET Revision ; do
+	TEMP=/tmp/,`basename $TARGET`
+	rm -f $TEMP
+	$CO -p$Revision $SOURCE > $TEMP 2>/dev/null
+	if cmp -s $TEMP $TARGET ; then
+		rm -f $TEMP
+	else
+		chmod 640 $TARGET
+		cp $TEMP $TARGET && rm -f $TEMP
+		chmod 444 $TARGET
+		ll $TARGET | sed -e "s,$NFS_SRC/,,"
+	fi
+done
+
+echo `date "+%y.%m.%d %T"` $Name $nfs end

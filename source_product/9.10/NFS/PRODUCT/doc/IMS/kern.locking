@@ -1,0 +1,1366 @@
+.\"	Format using "nroff -mm"
+.nr Cl 4	\"	save 4 levels of headings for table of contents
+.sp 4
+.ce 1
+Internal Maintenance Specification
+.sp 2
+.ce 3
+NFS 3.2 FILE LOCKING -- KERNEL SEGMENT
+.sp 2
+.ce 1
+Darren D. Smith
+.sp 2
+.ce 2
+$Date: 91/11/19 14:27:30 $
+$Revision: 1.3.109.1 $
+.sp 4
+.H 1 "Abstract"
+.ad
+Sun Microsystem's NFS 3.2 release introduced System-V style file locking
+support with NFS.  This support is for advisory locking only.  The process
+of locking a remote NFS file involves both kernel and user space interaction.
+However, the kernel implementation is the primary thrust of this document,
+with only enough information about the user space to understand what is
+going on being presented.  For more information about the user level code
+and protocol, see the Lock Manager IMS (not yet written).
+.sp
+Since HP-UX already supported local file locking, the implementation 
+discussed here is a merge of the existing HP-UX code with the Sun NFS 3.2
+code, and presented some unique problems to resolve to produce a workable
+system.  To handle this, a phased implementation was used in which the
+different portions of the code necessary to support the NFS 3.2 file locking
+were implemented.  This document mirrors that approach by breaking the
+discussion up into sections about the vnode level, the NFS client code,
+and the NFS server code, and various problems associated with these areas.
+Specifically not discussed here is the local implementation, except where
+it was impacted by the addition of NFS 3.2 file locking.
+.PH "'IMS -- NFS 3.2 kernel file locking'"
+.PF "'HP Internal Use ONLY' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.bp
+.H 1 "Introduction"
+.ad
+The 3.2 release of Sun Microsystem's Network File System (NFS) supported
+several new features, including support for System V remote file locking
+with NFS.  A major goal of the NFS development effort for the HP-UX 6.5
+and 7.0 releases was to incorporate this support into HP-UX.  Since HP-UX
+already supported local file locking, a second, though just as important,
+goal was to not change any interface or behavior of the local file locking
+code.  To accomplish the these goals, a strategy was adopted that relies
+on changing the local file locking code in a minimal manner to support NFS
+file locking, and yet at the same time porting the majority of the NFS code
+from Sun's implementation.  The resulting design discussed here is a mixture
+of Sun, already existing HP-UX, and newly designed code that bridges the
+gap between the two implementations.
+.sp
+As far as the NFS portion of the code is concerned, the implementation
+involves both kernel and user space code.  When a user process calls
+.I lockf()
+or
+.I fcntl()
+to lock the file, the NFS kernel code ends up calling
+the lock manager (LM,
+.IR rpc.lockd ,
+or just 
+.IR lockd )
+process on the local machine.
+After checking for locks and conflicts on the local machine, the request
+is then propagated to the remote node, which handles it and sends back
+a response.  Interestingly, Sun's implementation also has the LOCAL
+file system calls going to the lock manager, with the only difference
+being that the local calls do not get propagated to a remote system.
+Finally, to handle the statefulness required with file locking (we have
+to keep track of locks on the server), Sun has also introduced another
+daemon called the Status Monitor, which monitors which systems are being
+rebooted which are currently involved in locking operations.  These
+structures are shown in the figure below.  This document deals mainly
+with the details of the kernel implementation.  See the Lock Manager
+IRS (in progress) for more details.
+.sp
+Since HP-UX already supported local file locking and fairly extensive
+changes were going to be made to support NFS file locking, the implementation
+was broken up into three parts.  First, the existing 
+.I lockf()
+and 
+.I fcntl()
+code supported only 
+.B UFS
+and 
+.B DUX
+type file systems, assuming the availability
+of an inode.  These routines were rearranged into vnode operations to allow
+support of arbitrary file systems.  This gave the hooks for supporting NFS
+without actually doing it yet.  This code is a mixture of Sun code and
+existing HP code.  Second, the NFS client code was added.
+After the vnode operations had been added, this was largely just porting
+the Sun code to our implementation.  There were a few key exceptions that
+will be talked about in the detailed sections below.  Finally, the NFS
+server code was added.  Since Sun's implementation does no communication between
+the lock manager and the kernel on the server side, this is largely new
+code, but makes use of many of the hooks provided by the addition of the
+vnode operations in phase one.  Each of these areas presented special 
+problems that had to be dealt with and overcome.
+.nf
+
+                       +-----------+   RPC  +--------------+
+                       | rpc.statd | <----> | remote statd |
+                       +-----------+        +--------------+
+        +------+             ^                      ^
+        | user |             | RPC              RPC |
+        | prog.|       +-----------+  RPC   +--------------+
+        +------+   +-->| rpc.lockd | -----> | remote lockd |
+           |       |   +-----------+        +--------------+
+           |       |                                |
+user       V       |                                V
+<---------------------------------------------------------->
+kernel     |       ^                      (HP ONLY) |
+         lockf()   |                                |
+           |       |                                |
+     VOP_LOCKCTL() |                                V
+           |       |                         +-------------+
+           V       |(RPC call)               | nfs_fcntl() |
+    +------------+ |                         +-------------+
+    | NFS kernel |-+
+    +------------+
+
+    FIGURE 1.  Overview of NFS file locking communication.
+
+.fi
+.bp
+.H 1 "Converting to Vnode Operations"
+.ad
+The first phase of support NFS 3.2 file locking was to change the
+existing file locking code structures to be supported via vnode operations.
+This phase involved mostly a rearrangement of the code, with the exception
+of how locks were cleaned up on close and exit.
+.H 2 "Existing Structure"
+.ad
+The existing HP-UX code was designed to work only with 
+.B UFS
+and 
+.B DUX
+file systems, returning errors for other file systems (namely NFS).  The 
+.I fcntl()
+and 
+.I lockf()
+shared a common set of functions for manipulating the locking
+structures that were attached to the inode.  Thus, the code structure
+looked something like that shown in figure 2.
+.nf
+
+        +-----------+                   +-----------+
+        |  lockf()  |                   |  fcntl()  |
+        +-----------+                   +-----------+
+	       \\                             /
+                \\     +----------------+    /
+                 +--> | INODE SPECIFIC | <-+
+                      |  ROUTINES FOR  |
+                      |  UFS AND DUX   |
+		      +----------------+
+
+	FIGURE 2.  Code structure before vnodes were added.
+
+.fi
+Both 
+.I lockf()
+and 
+.I fcntl()
+directly handled calling of the inode specific
+routines, and also contained a large amount of code for handling the 
+.B DUX
+specific case where the inode was remote.
+.H 2 "Adding Vnode Operations to fcntl() and lockf()"
+.ad
+In order to support NFS 3.2 file locking, 
+.I fcntl()
+and 
+.I lockf()
+needed to be changed to support
+the file locking operations via vnode calls.  There were several possible
+ways to do this.  First, we could "shoehorn" in NFS by having a special
+check for NFS, with the default being to do the way it currently does it.
+Second, we could rewrite from scratch, using vnode operations, and redesigning
+the local code to work with vnodes.  Third, we could take a compromise 
+approach where we kept most of the local code intact, but moved it into
+file system specific routines.  This results in a few changes to the local
+existing code, but not a complete redesign, and also
+makes it easier to add support for more file systems (e.g. CD-ROMs) in the
+future.  Thus, the way the new code is structured is shown in Figure 3.
+.nf
+
+
+        +-----------+                   +-----------+
+        |  lockf()  |                   |  fcntl()  |
+        +-----------+                   +-----------+
+             |                                |
+        +-----------+                  +-------------+
+        |VOP_LOCKF()|                  |VOP_LOCKCTL()|
+        +-----------+                  +-------------+
+           /     \\                       /         \\
+         /         \\                   /             \\
+   nfs_lockf()   ufs_lockf()      ufs_lockctl()     nfs_lockctl()
+        |        dux_clockf()      dux_lockctl()         |
+ NFS/LM routines      \\              /             NFS/LM routines
+                     +----------------+
+                     | INODE SPECIFIC |
+                     |  ROUTINES FOR  |
+                     |  UFS AND DUX   |
+                     +----------------+
+
+       FIGURE 3.  Code structure after vnodes were added.
+
+.fi
+.H 3 "VOP_LOCKCTL()."
+.ad
+The 
+.I VOP_LOCKCTL()
+macro is used to switch to the appropriate file system
+routine to handle file locking of the type given via 
+.IR fcntl() ,
+i.e.  via the flock structure.  The inode specific routines that 
+.B UFS
+and 
+.B DUX
+use take more specific parameters, such as a lower and upper bound (\fBLB\fR
+and 
+.BR UB ),
+and the flags associated with the file structure.  The NFS code
+from Sun, on the other hand, deals almost exclusively with the flock
+structure.  To handle both of these cases easily, we pass in BOTH types
+of parameters.  The 
+.B LB
+and 
+.B UB
+were already being computed as part of the
+parameter checking done by 
+.IR fcntl() ,
+and so cost us very little to pass
+around.  The result is that the 
+.I VOP_LOCKCTL()
+macro we use for HP-UX
+has extra parameters beyond what Sun uses:
+.nf
+
+#define VOP_LOCKCTL(VP,LD,CMD,C,FP,LB,UB)  \\
+	 (*(VP)->v_op->vn_lockctl)(VP,LD,CMD,C,FP,LB,UB)
+
+.fi
+.I VP
+points to the vnode (of course), 
+.I LD
+is the lock descriptor (in Sun
+terminology) which is really just a pointer to the flock structure for
+this request, 
+.I CMD
+is what type of lock request it is, 
+.I C
+is a pointer to
+the credential structure to use for this request (i.e. 
+.BR u.u_cred ),
+.I FP
+is
+a pointer to the file structure for this request, and 
+.I LB
+and 
+.I UB
+are the lower and upper bounds. 
+.sp
+Note that having both 
+.I LD
+and
+.I LB
+and
+.I UB
+specified
+is redundant.  However, this gives the routine being called the choice of
+how to handle the request.  Thus,
+.B ALL
+callers of this macro MUST fill in valid values for both the flock structure
+and the 
+.I LB
+and 
+.I UB
+values.  Also, the 
+.B f_flag
+field of the file structure
+must be valid (most likely zero), since the 
+.B UFS
+and 
+.B DUX
+routines use this
+field, and the routines called must insure that they return zero on
+success or a valid errno on failure.  If the command is 
+.BR F_GETLK ,
+then
+.I fcntl()
+will copyout the result to user-space, so a final requirement is
+that the 
+.I VOP_LOCKCTL()
+requests modify the flock structure as a side effect
+of the 
+.B F_GETLK
+request.
+.H 3 "VOP_LOCKF()."
+.ad
+Just as 
+.I VOP_LOCKCTL()
+is used with 
+.I fcntl()
+requests, 
+.I VOP_LOCKF()
+is used with 
+.I lockf()
+requests.  This is substantially different from Sun's 
+implementation, in which 
+.I lockf()
+is apparently implemented as a library
+routine on top of the 
+.I fcntl()
+system call.  The HP-UX implementation could
+have translated the 
+.I lockf()
+request into 
+.I VOP_LOCKCTL()
+requests in much
+the same manner, but this was felt to be too much of a redesign of the local
+code.  Instead, the 
+.I VOP_LOCKF()
+macro was created which gives sufficient
+hooks for other file systems, but requires less changes in the design of
+the local existing code.
+.sp
+The 
+.I VOP_LOCKF()
+macro looks very similar to the 
+.I VOP_LOCKCTL()
+macro:
+.nf
+
+#define VOP_LOCKF(VP,CMD,SIZE,C,FP,LB,UB) \\
+	 (*(VP)->v_op->vn_lockf) (VP,CMD,SIZE,C,FP,LB,UB)
+
+.fi
+Where 
+.I VP
+is a pointer to the vnode for the file, 
+.I CMD
+is what 
+.I lockf()
+command (e.g. 
+.BR F_LOCK , 
+.BR F_TEST ),
+.I SIZE
+is the size of the segment to be locked,
+.I C
+is a pointer to the credential structure (i.e. 
+.BR u.u_cred ), 
+.I FP
+is a pointer
+to the file structure, and 
+.I LB
+and 
+.I UB
+are the lower and upper bound of the requested segment.  As before, 
+.I LB
+and 
+.I UB
+could be computed from the 
+.I SIZE
+and the
+.I FP
+parameters, but are passed in for convenience.  
+.H 2 "Releasing the locks with vno_lockrelease()"
+.ad
+The 
+.I fcntl()
+and 
+.I lockf()
+system calls are used to set, release and query
+locks on files.  However, they are not the only way that changes to the
+status of locks on a file can occur.  In particular, when the file is closed,
+or a process exits that is holding a lock (also resulting in a close of the
+file), then the locks held by that process are released.  In the existing
+code this was done with a routine called 
+.IR unlock() . 
+.I Unlock()
+was an inode specific routine that was called upon the close of the file to 
+release all locks held by the calling process, and operates by walking
+the linked list of lock structures associated with the inode.  Clearly,
+this strategy would not work for releasing locks held with NFS files,
+since there is no inode or linked list in the kernel.
+.sp
+The answer to this is a new routine called 
+.IR vno_lockrelease() . 
+Like 
+.IR unlock() ,
+it is responsible for freeing all locks held by this process.  However,
+instead of operating in file system specific manner, it instead formulates
+an unlock request with the range of [0, infinity), which results in all locks
+being freed.  While this routine is derived from Sun code, which has a 
+radically different implementation for the local code, it works just
+as effectively with the local HP-UX file system.  Thus, 
+.I vno_lockrelease()
+is called from the same routines that called 
+.I unlock()
+before.
+.sp
+It is worth noting that doing an 
+.B F_UNLOCK
+request for every file, particularly
+in Sun's implementation where the client must make a call to user space, is
+not an operation you want to do for every close of every file.  Thus, two
+flags were added to short circuit this.  The first is a
+flag added to the 
+.B p_flag2
+field of the proc structure called 
+.BR SLKDONE ,
+which says that a lock has been done by this process.  If this flag is not
+set, then no further processing is done.  Second, a flag was added to the
+Per-Open-File flags, 
+.BR UF_FDLOCK ,
+indicating that a lock had been done on
+the given file descriptor for that process.  
+.B SLKDONE
+and
+.B UF_FDLOCK
+are set in 
+.I fcntl()
+and 
+.IR lockf() ,
+and are then cleared in 
+.IR vno_lockrelease() .
+Finally, since 
+.I vno_lockrelease()
+requires the Per-Open-File flags from
+.BR u.u_pofile[] ,
+it was necessary that all callers of 
+.I closef()
+in the kernel did not clear those flags until AFTER the 
+.I closef()
+was complete, and also
+to insure that the flags were cleared on 
+.IR fork() .
+.bp
+.H 1 "NFS Kernel CLIENT Code"
+.ad
+The NFS kernel code supporting NFS 3.2 file locking can be broken down
+into several layers, including the vnode calls, the kernel lock manager
+routines, and the routines for talking to the portmapper.  With the
+exception of
+.IR nfs_lockf() ,
+which was created for HP-UX, this code is largely
+based on Sun's algorithms and code structure.  
+.H 2 "NFS vnode layer"
+.ad
+As was described above, two new vnode operations were added  to support
+NFS 3.2 file locking, and thus we have two new NFS vnode layer functions,
+.I nfs_lockctl()
+and 
+.IR nfs_lockf() ,
+associated with 
+.I VOP_LOCKCTL()
+and 
+.I VOP_LOCKF()
+respectively.  Both of these routines are relatively simple, relying
+largely on the kernel lock manager routines to work.  However, there are
+a couple of points to make about each of these routines.
+.H 3 "nfs_lockctl()."
+.ad
+The 
+.I nfs_lockctl()
+routine is fairly simple, with the main work it does
+being to convert the flock structure into a standard form, calling the
+kernel lock manager functions, and then interpreting the results and
+doing a translation back.  The "conversion" of the flock structure is
+actually just the normalization of the whence value to a value of zero.
+This makes it easy for the lock manager to compute the boundaries.  This
+normalization process is done via a routine called 
+.IR rewhence() .
+Since 
+both the local and NFS code called the lock manager in Sun's implementation,
+Sun has this routine in the 
+.I fcntl()
+function.  However, in HP-UX this is
+needed only with NFS, and thus appears only in the 
+.I nfs_lockctl()
+function.
+.H 3 "nfs_lockf()."
+.ad
+The 
+.I nfs_lockf()
+routine is entirely new code written for HP-UX, since Sun
+implements 
+.I lockf()
+as a library call.  To make it work with the lock
+manager routines, which expect a flock structure to work with, 
+.I nfs_lockf()
+must do the appropriate translations from 
+.I lockf()
+requests to 
+.I fcntl()
+type requests.  Since 
+.I lockf()
+does not return any structures (only
+success or failure via the return value), the remainder of the work is
+simply calling the kernel lock manager functions and returning.  Thus, the
+main issue is correctly mapping the 
+.I lockf()
+functions into 
+.I fcntl()
+functions.
+The only tricky one is 
+.BR F_TEST ,
+which must be translated into an 
+.B F_GETLK
+request.  If the 
+.B F_GETLK
+succeeds, then we check the returned flock structure
+to see if the requested region is locked.  If so, we return 
+.BR EACCES ,
+otherwise success.
+.H 3 "The RNOCACHE flag."
+.ad
+The 
+.I nfs_lockf()
+and 
+.I nfs_lockctl()
+functions have very little interaction
+with the rest of the NFS vnode operations.  The one exception to this was
+the addition of the 
+.B RNOCACHE
+flag to the rnode.  Sun, in their infinite
+wisdom, decided that requests for file locking should turn off file system
+caching on the client, guaranteeing that all requests get the most recent
+contents from the server.  To do this, the 
+.B RNOCACHE
+flag was added to the
+rnode, and is checked in 
+.IR rwvp() .
+If 
+.B RNOCACHE
+is set, then instead of
+calling the 
+.I bread()
+functions, 
+.I nfsread()
+is called directly, and instead of
+calling the 
+.I bwrite()
+functions, 
+.I nfswrite()
+is called directly.  Once
+.B RNOCACHE
+is set, it is not turned off until the rnode is released, since it
+is very difficult to detect when the last close on the rnode happens.
+.H 2 "Kernel Lock Manager routines"
+.ad
+The next layer below the NFS vnode layer is the kernel lock manager layer.
+This layer has two primary functions, 
+.I klm_lockctl()
+and 
+.IR talk_to_lockmgr() .
+.I Klm_lockctl()
+handles the logic of setting up the parameters for the lock
+manager, and interpreting the results.  
+.I Talk_to_lockmgr()
+is responsible
+for the interaction with the RPC layer, making sure we have the port
+number of the local lock manager, and retransmitting requests until a
+reply is received.  In addition to these two functions, there is also a
+whole set of XDR functions for the lock manager calls.  These functions are
+straight forward XDR routines, and will not be discussed further here.
+.H 3 "Klm_lockctl() and the LM protocol."
+.ad
+The 
+.I klm_lockctl()
+function is responsible for the high level protocol
+exchanges with the lock manager.  It takes fcntl-style requests, packages
+the arguments up into one structure, calls 
+.I talk_to_lockmgr()
+to do the
+actual communication, and then translates and interprets the results.  There
+are 3 basic types of request for the lock manager: 
+.BR KLM_LOCK ,
+.BR KLM_UNLOCK ,
+and 
+.BR KLM_TEST .
+.B KLM_LOCK
+supports both blocking and non-blocking requests.
+The function of 
+.B KLM_UNLOCK
+is obvious, and 
+.B KLM_TEST
+is used with 
+.B F_GETLK
+and
+.B F_TEST
+requests.  To each of these functions there are three possible replies:
+.BR klm_granted ,
+which means that the request succeeded as expected, 
+.BR klm_denied ,
+which means ONLY that the request was blocked by another lock, and
+.BR klm_denied_nolocks .
+The latter case has the obvious meaning of indicating
+that there are no lock structures available.  However, because these are
+the only three return values allowed by the Lock Manger protocol, and
+since Sun's implementation goes into an infinite loop if you return
+.B klm_denied
+for blocking locks, the value 
+.B klm_denied_nolocks
+is also used
+by the lock server to indicate a variety of other errors as well.
+.sp
+In addition to the three values above, 
+.I talk_to_lockmgr()
+can also return
+two other values: 
+.BR ENOLCK ,
+and 
+.BR EINTR .
+The value 
+.BR ENOLCK ,
+when returned
+directly from 
+.I talk_to_lockmgr(),
+means there was some error establishing
+communication with the local lock manager,
+including inability to create a client
+structure, the lockd not being registered, portmap not being up, or lockd
+not being bound at the port portmap indicated.  This means that there is
+no way the request could have gotten off the local system, and it is safe
+to return an error immediately. 
+The value 
+.B EINTR
+means that some operation
+that was sleeping was interrupted, and the transaction with the lock
+manager did not complete.  The request may or may not have been sent
+to the lock manager.  How interrupts are handled is discussed more below.
+.sp
+Thus, the basic structure of 
+.I klm_lockctl()
+is a large switch structure,
+handling the 3 basic requests and the 5 return values.  It is not clear
+whether all return values can indeed be generated for each request.  For
+example, is there anyway that 
+.B KLM_TEST
+could get 
+.BR klm_denied_nolocks ?
+That's not clear from the protocol, but at the very least it is highly unlikely.
+Never the less, the code is there to handle this case.
+One thing worth noting here is that the return value from 
+.I talk_to_lockmgr()
+is a mixture errno values and enum values, a bad practice, but one we
+follow by default when we port Sun's code.
+.H 3 "Talk_to_lockmgr()."
+.ad
+The 
+.I talk_to_lockmgr()
+routine does the equivalent of what 
+.I rfscall()
+does for the normal vnode ops routines.  That is, it handles making
+sure that a transaction was exchanged with the local lock manager and
+interfacing with the RPC layer.  There are two main parts, one dealing
+with calling the portmapper and one with talking to the lock manager.
+The portmapper is contacted the first time a lock request is made to
+get the port number of the lock manager (via the function 
+.IR getport_loop() ).
+Thereafter the system only talks to the port mapper again if it 
+receives an 
+.B RPC_TIMEDOUT
+from 
+.IR clnt_call() .
+In this case, the assumption
+is that rpc.lockd may have been restarted, so recheck with the portmapper.
+If 
+.I talk_to_lockmgr()
+is unable to create a client structure, or if it is
+unable to get a valid port number (either the portmapper or rpc.lockd is
+not running), the 
+.I talk_to_lockmgr()
+will return 
+.BR ENOLCK ,
+indicating that
+a local failure occurred and there is no way the lock manager could have
+gotten a message.
+.sp
+Once a valid port number is gotten, 
+.I talk_to_lockmgr()
+tries to call the
+lock manager.  There are five special cases to be handled.  The first
+case, of course, is that 
+.I clnt_call()
+worked (return 
+.BR RPC_SUCCESS ).
+In
+this case the status of the lock manager request is returned (i.e. 
+.BR klm_granted ,
+.BR klm_denied ,
+or 
+.BR klm_denied_nolocks ).
+The only exception to
+this case is if 
+.B klm_working
+is returned from the lock manager.  This is
+a signal from the lock manager that it received the request, but had not
+yet received a reply from the server.  In this case 
+.I talk_to_lockmgr()
+simply continues to send out the request.  (NOTE: Is there a problem
+here?  This results in a tight loop of requests being sent out.  Seems like
+it should sleep a little...???)  If the 
+.I clnt_call()
+timed out,
+then 
+.I talk_to_lockmgr()
+attempts to reverify the port number with the
+portmapper.  If an interrupt occurred, then the return value
+is set to 
+.B EINTR
+and 
+.I talk_to_lockmgr()
+returns.  (Interrupts are discussed further below.)  Finally, the 
+.I clnt_call()
+could fail for some other reason.
+In this case it is assumed to be because of some transient error (like out
+of networking memory), and the code sleeps for a while before trying
+again.
+.H 3 "Interrupts, KLM_CANCEL, and the dark side of statelessness."
+.ad
+The statelessness of NFS causes some problems in the case
+of the lock manager, particularly when interrupts become involved.  Consider
+the following case:  System A sends out a request for a lock on a file.
+Before the server can respond, the process requesting the lock gets an
+interrupt, and exits the kernel, and thus does not think that it has a lock.
+The server however, receives the request, grants the lock to the client
+(which doesn't know it has it), and continues on.  Since there is no way
+for the server to know that the client doesn't have the lock, the server
+holds the lock forever in the name of the client.  To prevent this the Sun
+implementation essentially does not allow interrupts to happen until it
+has successfully completed a transaction with the server.  Instead, the
+routine 
+.I klm_lockctl()
+will reissue the request despite the fact that
+the lower level routines (i.e. 
+.IR talk_to_lockmgr() )
+returned 
+.BR EINTR .
+.sp
+There is an exception to the above case.  If the request is for a blocking
+lock, the request is changed from 
+.B KLM_LOCK
+to 
+.B KLM_CANCEL
+before being
+reissued.  This has the effect of trying to cancel the lock on both the
+local rpc.lockd's queues and the remote rpc.lockd's queues.  If the 
+.B KLM_CANCEL
+succeeds in canceling the request, it will receive 
+.B klm_denied
+from the server,
+causing 
+.I klm_lockctl()
+to exit with 
+.BR EINTR .
+However, it is possible that
+the lock had already been granted.  In that case the return value will
+be 
+.BR klm_granted ,
+and 
+.I klm_lockctl()
+will behave as if the call had not
+been interrupted.  Again, this applies ONLY to blocking locks; all other
+requests simply retry until a valid response is received.  The reason that
+blocking locks are treated differently is because a blocking lock could
+be blocked by another process for an indefinite period, but the other 
+requests will not be blocked for extended periods under normal conditions.
+.sp
+The algorithms described above work fine as long as both the client and
+server are up and their respective rpc.lockd's are executing.  However,
+suppose the server went down?  In that case the client lock requests will
+not be able to complete.  Since 
+.I klm_lockctl()
+does not return until a
+response is received, there is no way to interrupt or kill the calling
+process.  This is 
+.BR bad .
+.H 3 "HP changes to interrupt code."
+.ad
+To handle the above conditions, the NFS code will be changed to allow
+interrupts.  To handle the first case sited above, changes will need to
+be made to both the kernel and user-level lock manager code.  You will
+recall from above that when sending a request to the local lock manager,
+one of the possible return values was 
+.BR klm_working .
+This tells the lock
+manager that the rpc.lockd received his message, but doesn't know the
+result yet.  We can take advantage of this to shift some of the burden
+from the kernel to the lock manager.  There are four cases we need to
+worry about: blocking and non-blocking locks, unlocks, and test requests.
+.H 4 "Blocking lock requests."
+.ad
+Blocking locks are already somewhat handled by the 
+.B KLM_CANCEL
+function.
+However, these requests will still hang if the remote server is down.
+To handle this, 
+.I klm_lockctl()
+will be changed to exit once it knows the
+local rpc.lockd has received the 
+.B KLM_CANCEL
+request.  This will require
+that 
+.I talk_to_lockmgr()
+be changed to pass 
+.B klm_working
+back up to 
+.I klm_lockctl()
+in some manner.  Rpc.lockd will then continue to transmit the cancel 
+request until it receives a response.  If it receives 
+.B klm_denied
+as a
+result, then it can remove the request and continue with no problem.  However,
+if it receives 
+.B klm_granted
+there is a problem.  The kernel function has
+already returned 
+.B EINTR
+to the calling process.  Thus, rpc.lockd must take
+the request for the lock, and turn it into an 
+.B KLM_UNLOCK
+request.  This
+request must be transmitted to the server until an answer is received
+indicating the unlock succeeded.
+.H 4 "Non-blocking lock requests."
+.ad
+Currently non-blocking locks simply keep retransmitting until a valid
+response is received.  To handle this case, we will simply have the 
+request turned into a 
+.B KLM_CANCEL
+request in the same manner as with
+blocking locks.  The local rpc.lockd will handle the cancel the same
+way, unlocking the lock if it was granted, and the local kernel can
+exit once it know the local lock manager has received the cancel request.
+.H 4 "Unlock requests."
+.ad
+While it would seem that unlock requests should be able to be interrupted
+with no problem, this is not true.  We must be sure that the unlock
+completes so that no locks are left on the server that the client doesn't
+know it has.  Again, we will use the 
+.B klm_working
+as a signal that the
+local rpc.lockd has received the request and is processing it.  The local
+rpc.lockd will continue to send the request until it is successfully
+communicated to the server, freeing the kernel to return 
+.BR EINTR .
+.H 4 "Test requests."
+.ad
+Sun, in there infinite wisdom, also made 
+.B KLM_TEST
+requests continue
+to try forever.  There seems to be no good reason for this, and thus
+the code will be changed to allow these calls to be interrupted.
+.H 4 "Local lockd down."
+.ad
+You will notice that the changes to handles interrupts described here all
+rely on the local lock manager being up.  But what if the local lock manager,
+or even the portmapper, is down?  This case is unlikely, but we have some
+control over it.  If we get a timeout in attempting to contact the
+portmapper, we can check in the kernel to see if the well-known port for
+the portmapper is bound to by some other process.  If it is, the portmapper
+must be up, and we keep trying, otherwise we can return immediately with
+an error since the request cannot succeed.  Similarly, once we have a
+port number for the lock from the portmapper, we can verify that that
+port is indeed bound.  If it is, we continue to try to contact the lockd.
+If it isn't, then the rpc.lockd must have died without telling the 
+portmapper.  Since the next time the rpc.lockd restarts, it's locks will
+get released on the server side, we can also immediately exit with an
+error.  Thus, we do not need to worry about handling interrupts in the
+case where the local lockd is not responding.
+.H 3 "Talking to the portmapper -- getport_loop()."
+.ad
+The majority of the code added for NFS file locking was changes to the NFS
+level.  However, there was one set of routines added to the RPC level for
+communicating with the lock manager.  The NFS protocol (currently) assumes
+that the server is always at a well-known port.  The Lock Manager protocol,
+however, requires the use of the portmapper.  Thus, two routines were added
+for dealing with the portmapper in the RPC code, 
+.I getport_loop()
+and
+.IR pmap_kgetport() .
+The latter, 
+.I pmap_kgetport()
+is the kernel equivalent of
+the user level routine 
+.IR pmap_getport() ,
+and simply allocates a client structure
+and calls the portmapper asking for the port of the lock manager.  It 
+returns 
+.B 0
+on success, also filling in the port number, otherwise it
+returns one of 
+.BR -1 ,
+.BR 1 ,
+or 
+.BR 2 .
+A return of 
+.B -1
+indicates that it completed
+talking to the portmapper, but the lock manager was not registered.  A
+return greater than 
+.B 0
+means the transaction was not completed, with 
+.B 1
+indicating some general RPC error, and 
+.B 2
+indicating the request was
+interrupted.  
+.I Getport_loop()
+is exactly that, a loop calling 
+.I pmap_kgetport()
+until the request succeeds or is interrupted, additionally logging information
+about the status of contacting the portmapper.
+.nf
+
+                 +-------+              +-------+
+                 | lockf |              | fcntl |
+                 +-------+              +-------+
+                     |                      |
+                     |VOP_LOCKF()           | VOP_LOCKCTL()
+                     |                      |
+                     V                      V
+              +-------------+       +---------------+
+              | nfs_lockf() |       | nfs_lockctl() |
+              +-------------+       +---------------+
+                     |                       |
+                     +-------+      +--------+
+                             |      |
+                             V      V
+                         +---------------+
+                         | klm_lockctl() |
+                         +---------------+
+                                 |
+                                 V
+                       +-------------------+
+                       | talk_to_lockmgr() |
+                       +-------------------+
+                           |            |
+                           V            |
+                    +----------------+  |
+                    | getport_loop() |  |
+                    +----------------+  |
+                             |          |
+                             V          |
+                    +-----------------+ |
+                    | pmap_kgetport() | |
+                    +-----------------+ |
+                             |          |
+                             V          V
+                           +--------------+
+                           | RPC routines |
+                           +--------------+
+
+      FIGURE 4.  Calling sequence of NFS lock manager routines.   
+.bp
+.H 1 "NFS kernel SERVER code"
+.ad
+The NFS kernel code for the lock manager as a client, while not trivial,
+was relatively straight forward.  We simply used Sun's design at the vnode
+layer and the HP code for the local file system.  The NFS server code for
+the lock manager is different.  With Sun machines, all interaction of the
+local file system occurs IN the lock manager code in user space.  With
+HP machines, local locks are still held in the kernel.  To make the lock
+manager be able to act as a NFS server and correctly identify and interact
+with local locks, required that HP servers have some kernel interaction.
+However, the normal methods of locking files (i.e. 
+.I lockf()
+and 
+.IR fcntl() ),
+are not available because they require an open file descriptor as an
+argument.  All the lock manager has available to identify the file is
+the file handle.  Thus, we have a need for a new system call that would
+allow the lock manager to do locking correctly in the kernel.  This new
+call is entirely new and unique to HP.
+.sp
+The new call, 
+.IR nfs_fcntl() ,
+acts essentially as 
+.I fcntl()
+would, except it
+takes as an argument a pointer to the file handle instead of a file
+descriptor.  The file handle is used to get a vnode, through 
+.IR fhtovp() ,
+which can then be used to do 
+.I VOP_LOCKCTL()
+operations.  This allows the
+lock manager to lock, unlock, and test for locks on files without having
+an open file descriptor.  However, it also has a number of problems
+associated with it, including problems with blocking locks, needing to
+keep the inode around, what to do when the lock manager dies or is
+restarted, and how to handle enforcement mode locks.  Each of these 
+is discussed more below.  
+.sp
+Finally, 
+.I nfs_fcntl()
+has been structured to allow future used for purposed
+other than file locking.  Thus, 
+.I nfs_fcntl()
+does high level checks on
+whether the requested command is valid, and file locking specific operations
+happen in 
+.IR nfs_fcntl_lock() .
+For purposes of the discussion here, however, we shall simply refer to 
+.I nfs_fcntl()
+for both functions.
+.H 2 "Blocking Locks and F_SETLK_NFSCALLBACK"
+.ad
+The first problem with the 
+.I nfs_fcntl()
+routine is that of how to handle
+blocking locks.  If the kernel actually blocked in 
+.IR nfs_fcntl() ,
+the lock
+manager would be hung.  This would mean that the lock manager could not 
+service further requests until it was granted the lock, which could
+potentially be a relatively long time, or even lead to deadlock.  On the
+other hand, if we made the lock manager play games by forking or some
+similar mechanism, the kernel would not recognize the lock manager as
+the same process every time, and we would have to work around that.  Thus,
+it seems most desirable to simply have 
+.I nfs_fcntl()
+never block, and instead
+return a specific error for blocking locks that would block.
+.sp
+We then have another problem.  The lock manager needs to know when that
+lock becomes available.  There are two ways to do this.  Either the lock
+manager can do polling, retrying the request at periodic intervals, or
+the kernel can somehow notify the lock manager when the lock becomes
+free.  Because polling introduces overhead into the system, it was 
+decided that the kernel make note of the fact that a given lock blocked
+a lock manager request, and when the lock became free or its status 
+changed the lock manager would be notified, at which time the lock
+manager would retry the lock request.
+.sp
+To handle this a new type of file locking command is supported,
+.BR F_SETLK_NFSCALLBACK ,
+which is only available inside of the kernel.
+When 
+.I nfs_fcntl()
+sees a 
+.B F_SETLKW
+request, it changes the command
+to 
+.BR F_SETLK_NFSCALLBACK .
+The handling is the same as 
+.B F_SETLKW
+until the process would normally be put to sleep.  At that point the local
+code returns 
+.B EINVAL
+instead, and sets a flag in the locklist structure
+of the lock that blocked the request.  Sometime in the future that
+local lock will become freed or change status.  When this happens either
+.IR lockfree() ,
+which frees the locklist structure, or 
+.IR check_lock_sleep() ,
+which wakes up people sleeping on the locklist structure, will be called.
+These two routines have been modified to check for the 
+.B NFS_WANTS_LOCK
+flag, and if set, call the function 
+.IR free_lock_with_lm() .
+This function sets up an unlock request in the format required for 
+.IR klm_lockctl() ,
+and notifies the lock manager that the lock is free.  This is the only
+case in which the local file system code can end up calling the NFS
+lock manager.
+.sp
+One final problem with this solution is that the lock manager needs a
+file handle to identify the file the lock dealt with.  Since the local
+file system code does not deal in file handles, 
+.I free_lock_with_lm()
+must create one for the request.  This still requires a vnode to do,
+which must be passed in from the local file locking routines.  Unfortunately,
+the locklist structure did not contain a back pointer to the inode, and
+this had to be added to the structure and set up appropriately in the
+local file locking code.  Thus, whenever a new lock is allocated, the
+pointer is initialized to point to the inode.
+.H 2 "Lack of an open file and F_QUERY_ANY_LOCKS"
+.ad
+One of the reasons that 
+.I nfs_fcntl()
+was created in the first place was
+because the lock manager had no open file descriptor to work with.  This
+lack of an open file descriptor leads to another problem.  Since there is
+no open file descriptor, there is nothing to hold the vnode/inode around
+after 
+.I nfs_fcntl()
+exits, which could result in lock information being lost.
+The obvious solution is to have 
+.I nfs_fcntl()
+do a 
+.I VN_HOLD()
+on the vnode when a lock occurs, and a 
+.I VN_RELE()
+when the lock gets released.  The problem
+with this is that the number of lock requests does not always exactly match
+the number of unlock requests.  Thus, 
+.I nfs_fcntl()
+would essentially have
+to duplicate the logic of figuring out what locks were added and deleted.
+.sp
+As an alternative to this, it is sufficient for 
+.I nfs_fcntl()
+to know if the
+status has changed.  That is, did it hold locks before it did the request,
+did it hold locks after it did the request, and did the status change?  
+The algorithm is then
+.nf
+
+	compute locks held at start
+	VOP_LOCKCTL()
+	compute locks held at end
+	if ( did not hold locks at start and held locks at end )
+		hold the vnode (VN_HOLD)
+	else
+		release the vnode (VN_RELE)
+	fi
+
+.fi
+Note that the 
+.I VN_HOLD()
+and 
+.I VN_RELE()
+done here are independent of whatever
+operation was done to get the vnode in the first place, with the purpose
+being to insure the vnode stays locked in memory whenever there are
+active locks on it by the lock manager.  We do have to be careful to
+insure that we are not causing any vnodes to be held forever, or released
+too soon.
+.sp
+The final question here is how to compute whether any locks are held
+by the lock manager at a give point in time for a given vnode/inode.
+Again, this could have been done by coding the 
+.I nfs_fcntl()
+function
+to go look at the inode lock lists, but this violates the goal of keeping
+the code abstracted to the vnode layer.  Thus, another possible command
+was added to those that could be passed to 
+.IR VOP_LOCKCTL() ,
+again kernel
+only, called 
+.BR F_QUERY_ANY_LOCKS .
+The arguments to 
+.B F_QUERY_ANY_LOCKS
+are
+the vnode, and a pointer to an integer that gets set to one (TRUE) if
+any locks are held by the current process, and to zero (FALSE) if no
+locks are held by the current process (i.e. the lock manager).  At the
+inode level, this simply involves walking the inode chain, comparing
+the pid in the lock structure with the current pid.
+.H 2 "Death of a traveling lock manager"
+.ad
+We discussed earlier the function 
+.IR vno_lockrelease() .
+This function is
+called to release the locks a process holds on a file when the file gets
+closed.  When a process exits, all its open files get closed, and thus
+the locks it owns get cleaned up.  This process is keyed off of the 
+exiting process' open file table.  Again, we are caught by the lack of
+an open file descriptor associated with the locks the lock manager
+holds.  Note that not only do we need to release any locks the lock
+manager might hold, but we also need to release any vnodes the lock manager
+is holding via 
+.IR VN_HOLD() .
+These two issues are really tied together, since
+any vnode the lock manager is referencing must also contain a lock, and
+any lock held must also have it's vnode held.  Thus, we can solve both
+these problems in one solution.
+.sp
+The answer is to keep track of which vnodes are held by creating a linked
+list of vnodes.  Whenever a vnode is held via 
+.IR VN_HOLD() ,
+it also gets added
+to the linked list.  Whenever a vnode gets released via 
+.I VN_RELE() ,
+the vnode gets removed from the linked list.  Then, if the lock manager dies
+while holding locks, we can run the linked list, releasing all locks on
+each vnode hold (by issuing an unlock request for zero to end-of-file), and
+then freeing the vnode.  To make this happen, a hook was added to the
+.I exit()
+code that checks a flag is the proc structure call 
+.BR SISNFSLM .
+.B SISNFSLM
+gets set for the lock manager the first time it does a
+.IR nfs_fcntl_lock() .
+.I Exit()
+then checks this flag, and if set, calls 
+the function 
+.I clean_up_lm()
+to run the linked list of vnodes and release
+the locks held by the lock manager.  Thus, we provide essentially the
+same functionally provided by the 
+.I vno_lockrelease()
+function.
+.H 2 "Starting another lock manager"
+.ad
+The NFS lock manager, rpc.lockd, should typically be started at system
+boot time, stay running until shutdown, and only have one running at any
+given time.  However, we still must handle the case of a second rpc.lockd
+getting started by accident.  When the second rpc.lockd starts up, it
+will override the first lockd's entries with portmap, causing all new
+lock requests to go to it.  Also, because the new rpc.lockd just came up,
+those systems that held locks will try to reclaim them with the new lockd,
+which will in turn try to issue a lock request to the kernel.  However,
+unless we somehow free the locks held by the old lockd, the new lock
+requests will not succeed.  Thus, we must somehow clean up locks held
+by the old, still running, rpc.lockd.
+.sp
+We can do this by taking advantage of the routine 
+.IR clean_up_lm() ,
+which was created for when the lock manager exited.  When the first 
+.I nfs_fcntl()
+is done on a system, we set the 
+.B SISNFSLM
+flag in the proc structure of the 
+calling process.  At that time, we store into global variables the pid
+of the calling process and a pointer to its proc structure.  Then, if
+at any time in the future we get an 
+.I nfs_fcntl()
+request from a process
+whose pid does not match that stored in the global variables, we assume
+that a new lock manager has started.  At that time, we call 
+.I clean_up_lm()
+to release the locks held by the previous lock manager, and then store
+the pid of the new lock manager, continuing on as before.
+.sp
+While this was the original reason for storing the pid of the lock manager,
+it has other uses.  One case will come up when we talk about enforcement
+mode locks below.  The other place where the pid is useful is in
+.IR free_lock_with_lm() .
+You will recall that this is the routine that 
+the local file locking code calls when it frees a lock that the lock manager
+wants.  Since 
+.I clean_up_lm()
+will set the pid to zero when the lock manager
+exits, when can check to make sure the pid is non-zero in 
+.IR free_lock_with_lm() ,
+which will prevent local code from even trying to talk to the lock manager
+if the lock manager has died.
+.H 2 "Enforcement mode locks"
+.ad
+Sun's design for file locking supports advisory mode locks only.  That is,
+it relies on cooperating processes to work.  Complete System V style file
+locking, such as HP-UX supports, also supports an enforcement mode, in
+which reads and writes will block if a file lock would conflict with the
+attempted operation.  This mode is enabled by changing the mode of the
+file such that the set-group-id bit is set, but no group execution is allowed.
+This is known as having enforcement mode set.
+.H 3 "Enforcement mode and nfs_fcntl()."
+.ad
+With the lock manager, we cannot allow enforcement mode locks.  This is
+because the process that will hold the lock on the server,
+namely the lock manager, would not be the same process doing the read
+or write (i.e. nfsd), and the local kernel has no way to relate the two,
+even though they may both be acting on behalf of the same remote process.
+The result is that writes to a section of a file that had enforcement mode
+set would result in a deadlock involving the nfsd.  Thus, 
+.I nfs_fcntl()
+returns 
+.B EINVAL
+to attempts to lock a file that has enforcement mode set.
+.H 3 "Enforcement mode and read/write requests."
+.ad
+Even if 
+.I nfs_fcntl()
+disallows enforcement mode locks, it is still possible
+that an NFS request is made to read or write a file that a local process
+has locked with enforcement mode set.  Currently, if this happens, read
+requests go ahead and complete, and write requests block the nfsd.  Neither
+of these behaviors is desirable:  the first is violating a lock, the second
+is blocking a daemon for an indefinite period.  Thus, changes were made 
+to 
+.I rfs_read()
+and 
+.I rfs_write()
+to check the mode on the file (in both cases
+the mode was already available).  If enforcement mode is set, a 
+.B F_GETLK
+request is made via 
+.I VOP_LOCKCTL()
+to see if there are any locks on the
+segment being requested, and if they conflict with the type of request.
+If so, then a special status, 
+.BR EDROPPACKET ,
+is returned from 
+.I rfs_read()
+and
+.I rfs_write()
+to 
+.IR rfs_dispatch() ,
+which tells 
+.I rfs_dispatch()
+to not generate
+a reply to the request, essentially simulating a dropped packet.  Since the
+remote will not receive a reply, it will eventually timeout and retransmit,
+eventually getting through.  This keeps nfsd from hanging, without causing
+an abort on the client.  It is not possible to send back an errno like
+.BR EDEADLK ,
+since current NFS clients would not know how to handle that response.
+.H 3 "A special case of a weird interaction."
+.ad
+As a weird case, it is possible that the lock manager granted a lock on
+a file, THEN some process changed the mode to enforcement mode, and then
+the process that has the lock attempts to read or write the file.  If we
+do not handle it special, then the read or write request will be dropped
+(because of the situation above), even though the process could never
+unlock the offending lock, resulting in deadlock.  Thus, a special case
+in the previous checks is to see if the lock is held by the lock manager.
+In that case, an error is returned, since the request can never complete.
+.H 2 "Deadlock and interactions with the LM"
+.ad
+The local file locking code contains support for detecting deadlock, and
+checks are made whenever a process that is issuing a blocking lock really
+would block.  However, with the Lock Manager, it is making requests on
+behalf of several clients, and it is possible that the system will think
+that deadlock has occurred when it really has not.  As an example, consider
+processes A, B, and C.  Processes A and C live on NFS client N, while
+process B is a local process.  If process A has a lock on a file from
+0 to 10, process B has a lock from 11 to 20, and WANTS a lock from 0 to 10,
+then process B would be blocked by process A, which as far as the local
+kernel is concerned is the lock manager.  If process C then wants a lock
+on bytes 11 to 20, it would be blocked by B which is blocked by A.  This
+is not deadlock.  However, the local kernel only sees another request
+by the lock manager, and thinks that deadlock has occurred, and returns
+.BR EDEADLK .
+.sp
+There is no way to handle this completely without adding a great deal
+of code to allow the local kernel to check for locks with the lock manager.
+We are left with the choice then of not checking at all, in which case
+deadlock situations involving the lock manager will not be detected, or
+of checking for deadlock and sometime returning 
+.B EDEADLK
+to the lock manager
+when deadlock does not exist.  We decided to be conservative, and do the
+check for deadlock.  Note that neither case effects the behavior of local
+code.
+.H 2 "Configuration and references to LM code"
+.ad
+There were two routines on the server side that could be called from
+local code: 
+.IR free_lock_with_lm() ,
+called from the file locking code, and 
+.IR clean_up_lm() ,
+called from 
+.IR exit() .
+Since the LM code is configured
+into the kernel as part of NFS, we can not have direct references to these
+routines.  Instead, we use the mechanism that were set up for 
+.B DUX
+for
+calling NFS routines, and use the macro 
+.BR NFSCALL .
+Thus, to call 
+.I free_lock_with_lm()
+you would call 
+.BR NFSCALL(NFS_INFORMLM)() ,
+and to call
+.I clean_up_lm()
+you would call 
+.BR NFSCALL(NFS_LMEXIT)() .
+.TC 1 1 4        \"        create the table of contents, 4 levels

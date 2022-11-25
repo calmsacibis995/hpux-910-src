@@ -1,0 +1,37 @@
+/* -*-C-*-
+********************************************************************************
+*
+* File:         Makefile
+* RCS:          $Revision: 1.4.109.1 $
+* Description:  NMakefile for the NFS-RUN fileset.
+* Author:       Lew Gaiter, CLP
+* Created:      Mon Dec 18 16:48:13 1989
+* Modified:     Thu Dec 21 17:05:14 1989 (Lew Gaiter) lew@hpcndbt
+* Language:     C
+* Package:      N/A
+* Status:       Experimental (Do Not Distribute)
+*
+* (c) Copyright 1989, Hewlett-Packard Company, all rights reserved.
+*
+********************************************************************************
+*/
+
+.OPTIONS:
+.MAIN: build
+
+SRC=$(SRCDIR:/^$/./)
+
+install: $(SRC)/copyright $(SRC)/customize $(SRC)/decustomize $(SRC)/nfsrc.cdf
+	$(INSTALL) -f NFS-RUN copyright customize decustomize nfsrc.cdf
+
+rinstall: $(SRC)/copyright $(SRC)/customize $(SRC)/decustomize $(SRC)/nfsrc.cdf
+	$(RINSTALL) -f NFS-RUN copyright customize decustomize nfsrc.cdf
+
+
+
+build:
+
+clean:
+
+clobber:
+

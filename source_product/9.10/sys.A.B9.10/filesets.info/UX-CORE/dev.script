@@ -1,0 +1,1027 @@
+#!/bin/ksh
+#@(#) $Revision: 1.7.83.3 $
+
+export VERBOSE=""		# set non-null for debugging purposes
+export PATH=/bin:/usr/bin:/etc
+
+export fileset=UX-CORE
+export COMMAND=${0##*/}
+export DEBUG=false
+export exitval=0
+
+################################# Abort ###############################
+#
+# This routine just prints an error and aborts the dev.script.
+#
+#######################################################################
+function Abort
+{
+    echo "ERROR:   $1."			>&2
+    echo "ERROR:   Aborting $COMMAND."	>&2
+    exit 1
+}
+
+################################# chmog ###############################
+#
+# change mode, owner and group on the specified files
+# If mode is 0, the mode is left unchanged
+# If any value is the null string, that value is not changed.
+#
+#######################################################################
+function chmog
+{
+    if [ $# -lt 4 ]; then
+	echo "Usage: chmog mode owner group files..." >&2
+	exitval=1
+	return
+    fi
+
+    typeset mode="$1"
+    typeset owner="$2"
+    typeset group="$3"
+    shift 3
+
+    if [ -n "$group" ]; then
+	chgrp $group $* || exitval=1
+    fi
+
+    if [ -n "$owner" ]; then
+	chown $owner $* || exitval=1
+    fi
+
+    if [ -n "$mode" -a "$mode" != 0 ]; then
+	chmod $mode  $* || exitval=1
+    fi
+}
+
+########################### Create300Devs #############################
+#
+# This function creates device files for a series 300 machine in the
+# specified directory.	Pre-existing device files are not changed.
+#
+#######################################################################
+function Create300Devs
+{
+    #
+    # Device files for the Series 300.  These are very similar to
+    # the Series 700 devices, but some differ in the major and/or
+    # minor number.
+    #
+    C3Ddevs="
+      console root other 0622 c   0 0x000000
+      mem     root sys   0640 c   3 0x000000
+      kmem    root sys   0640 c   3 0x000001
+      null    root other 0666 c   3 0x000002
+      swap    root other 0600 c   8 0x000000
+      tty     root other 0666 c   2 0x000000
+      rhil    root other 0666 c  23 0x000000
+      hilkbd  root other 0666 c  25 0x000080
+      hil1    root other 0666 c  24 0x000010
+      hil2    root other 0666 c  24 0x000020
+      hil3    root other 0666 c  24 0x000030
+      hil4    root other 0666 c  24 0x000040
+      hil5    root other 0666 c  24 0x000050
+      hil6    root other 0666 c  24 0x000060
+      hil7    root other 0666 c  24 0x000070
+      crt     root other 0666 c  12 0x000000
+      ocrt    root other 0666 c  12 0x000001
+      fpa     root other 0644 c  10 0x200010
+    "
+
+    $DEBUG && set -x
+
+    C3Dpath=$1
+    C3Dnode=$2
+
+    if [ ! -d $C3Dpath ]; then
+	mkdir $C3Dpath
+	chmog 555 bin bin $C3Dpath
+    fi
+
+    #
+    # if this is a standalone system then make devices for the local
+    # system which are "root" specific devices (cnode id=1).
+    #
+    if [ "$C3Dnode" = "standalone" -o "$C3Dnode" = "localroot" ]; then
+	C3Dnode=1
+
+	#
+	# Always force create /dev/root and /dev/rroot so we are sure
+	# that they are correct.
+	#
+	rm -f $C3Dpath/root $C3Dpath/rroot
+	mknod $C3Dpath/root  b 255 0xffffff 1
+	mknod $C3Dpath/rroot c 255 0xffffff 1
+	chmog 640 root sys $C3Dpath/root $C3Dpath/rroot
+    else
+	#
+	# Diskless nodes don't need (and shouldn't have) /dev/root
+	# and /dev/rroot.
+	#
+	rm -f $C3Dpath/root $C3Dpath/rroot
+    fi
+
+    #
+    # then create the basic devices (excluding ptys)
+    #
+    set -- $C3Ddevs
+    while [ $# -gt 0 ]; do
+	if [ ! -c $C3Dpath/$1 ]; then
+	    mknod $C3Dpath/$1 $5 $6 $7 $C3Dnode
+	    chmog $4 $2 $3 $C3Dpath/$1
+	fi
+	shift 7
+    done
+
+    #
+    # Now make some directories and devices that are common to both
+    # the Series 300 and Series 700.
+    #
+    Create300or700Devs $C3Dpath $C3Dnode
+
+    #
+    # Finally, create all of the ptys
+    #
+    Create300or700Ptys $C3Dpath $C3Dnode
+}
+
+######################## Create300or700Devs ###########################
+#
+# This function creates directories and device files that are needed
+# for both the Series 300 and Series 700.
+#
+# This function also creates a default set of disk device files.
+#
+#######################################################################
+function Create300or700Devs
+{
+    $DEBUG && set -x
+
+    CXDpath=$1
+    CXDnode=$2
+
+    #
+    # create any needed subdirectories in the device directory
+    #
+    for CXDdir in pty ptym dsk rdsk rmt screen; do
+	if [ ! -d $CXDpath/$CXDdir ]; then
+	    mkdir $CXDpath/$CXDdir
+	    chmog 555 bin bin $CXDpath/$CXDdir
+	fi
+    done
+    chmod 777 $CXDpath/screen
+
+    #
+    # then make sure we have a locator, syscon, and systty
+    #
+    if [ ! -c $CXDpath/locator ]; then
+	ln $CXDpath/hil2 $CXDpath/locator
+    fi
+
+    if [ ! -c $CXDpath/syscon ]; then
+	ln $CXDpath/console $CXDpath/syscon
+    fi
+
+    if [ ! -c $CXDpath/systty ]; then
+	ln $CXDpath/console $CXDpath/systty
+    fi
+
+    #
+    # Create a standard set of disk device files.  Find out the major
+    # and minor numbers of the root block and character device using
+    # the special # file /dev/root, and then create standard device names
+    # for the range of possible bus addresses.
+    # For example:
+    #     700 systems:
+    #         minor number 0x201600 gives us a device name c201d6s0
+    #         minor number 0x410500 gives us a device name c41d5s0
+    #     300 systems:
+    #         minor number 0x0e0400 gives us a device name cEd4s0
+    #         minor number 0x080100 gives us a device name c8d1s0
+    #
+    if [ -b $CXDpath/root -a -c $CXDpath/rroot ]; then
+	#
+	# /dev/root exists, get the major and minor numbers
+	#
+	set -- `ls -lL $CXDpath/root`
+	Bmajor=$5
+	minor_num=$6
+	set -- `ls -lL $CXDpath/rroot`
+	Cmajor=$5
+
+	#
+	# Determine what the base of the minor number will be by stripping
+	# off the last 3 digits of the original minor number.
+	#
+	base_minor=${minor_num%???}
+
+	#
+	# Determine the name for the device file.  If we are
+	# creating a device on a Series 300, then we strip
+	# a leading 0.  If we are creating devices on a Series
+	# 700, then we strip a trailing 0.  We also translate
+	# any lower-case hex number to upper-case.
+	#
+	if hp9000s300; then
+	    typeset -u controller=`echo $base_minor | cut -c3-4`
+	    base_device=c${controller#0}d
+        else
+	    typeset -u controller=`echo $base_minor | cut -c3-5`
+	    base_device=c${controller%0}d
+	fi
+
+	#
+	# Check if major number is an HP-IB driver.  HP-IB devices
+	# all have a major number of 0.  If it is an HP-IB device,
+	# then we need to create devices at addresses 0-7, otherwise
+	# we create devices at addresses 0-6.
+	#
+	if [ "$Bmajor" = "0" ]; then
+	    bus_address_range="0 1 2 3 4 5 6 7"
+	else
+	    bus_address_range="0 1 2 3 4 5 6"
+	fi
+
+	#
+	# Now loop through all of the possible bus addresses
+	#
+	for bus_address in $bus_address_range; do
+	    #
+	    # fill out the minor number we will use to create the device
+	    #
+	    minor="$base_minor${bus_address}00"
+	    device="$base_device${bus_address}s0"
+
+	    #
+	    # Make the disk device files
+	    #
+	    if [ ! -b $CXDpath/dsk/$device ]; then
+		mknod $CXDpath/dsk/$device b $Bmajor $minor $CXDnode
+		chmog 640 root sys $CXDpath/dsk/$device
+	    fi
+	    if [ ! -c $CXDpath/rdsk/$device ]; then
+		mknod $CXDpath/rdsk/$device c $Cmajor $minor $CXDnode
+		chmog 640 root sys $CXDpath/rdsk/$device
+	    fi
+	done
+    fi
+}
+
+######################## Create300or700Ptys ###########################
+#
+# This function creates "pty" device files that are needed for both
+# the Series 300 and Series 700.
+#
+#######################################################################
+function Create300or700Ptys
+{
+    $DEBUG && set -x
+
+    CXDpath=$1
+    CXDnode=$2
+
+    typeset letters="p q r s t u v w x y z a b c e f g h i j k l m n o"
+    typeset numbers_16="0 1 2 3 4 5 6 7 8 9 a b c d e f"
+    typeset numbers_10="0 1 2 3 4 5 6 7 8 9"
+
+    typeset -i max_ptys=2900
+    typeset -i num_link_ptys=48
+    typeset -i num_ptys=$NUM_PTYS
+    typeset group=other
+
+    typeset -i pty_counter=0
+    typeset -i minor=0
+    typeset link_em=true
+    typeset letter
+    typeset number
+    typeset number2
+
+    #
+    # Preserve the old umask, and set the umask to 0 so that all files
+    # are created with mode 666.
+    #
+    typeset old_umask=`umask`
+    umask 0
+
+    if [ $num_ptys -gt $max_ptys -o $num_ptys -le 0 ]; then
+	Abort "Invalid number of ptys requested"
+    fi
+
+    for letter in $letters; do
+	for number in $numbers_16; do
+	    CXDtty=$CXDpath/pty/tty$letter$number
+	    CXDpty=$CXDpath/ptym/pty$letter$number
+	    CXDlinktty=$CXDpath/tty$letter$number
+	    CXDlinkpty=$CXDpath/pty$letter$number
+
+	    if [ ! -c $CXDtty ]; then
+		mknod $CXDtty c 17 $minor $CXDnode
+		chgrp $group $CXDtty
+
+		#
+		# Regardless of wether we will create a link to
+		# this tty or not, we want to ensure that we
+		# delete the corresponding link name.
+		#
+		# We then create the link if necessary.
+		#
+		[ -c $CXDlinktty ] && rm -f $CXDlinktty
+		$link_em && ln $CXDtty $CXDlinktty
+	    else
+		if $link_em && [ ! -c $CXDlinktty ]; then
+		    ln $CXDtty $CXDlinktty
+		fi
+	    fi
+
+	    if [ ! -c $CXDpty ]; then
+		mknod $CXDpty c 16 $minor $CXDnode
+		chgrp $group $CXDpty
+
+		#
+		# Regardless of wether we will create a link to
+		# this pty or not, we want to ensure that we
+		# delete the corresponding link name.
+		#
+		# We then create the link if necessary.
+		#
+		[ -c $CXDlinkpty ] && rm -f $CXDlinkpty
+		$link_em && ln $CXDpty $CXDlinkpty
+	    else
+		if $link_em && [ ! -c $CXDlinkpty ]; then
+		    ln $CXDpty $CXDlinkpty
+		fi
+	    fi
+
+	    let "minor = minor + 1"
+	    let "pty_counter = pty_counter + 1"
+
+	    if (( pty_counter >= num_link_ptys )); then
+		link_em=false
+	    fi
+
+	    if (( pty_counter >= $num_ptys )); then
+		break 2
+	    fi
+	done
+    done
+
+    if (( pty_counter < $num_ptys )); then
+	for letter in $letters; do
+	    for number in $numbers_10; do
+		for number2 in $numbers_10; do
+		    CXDtty=$CXDpath/pty/tty$letter$number$number2
+		    CXDpty=$CXDpath/ptym/pty$letter$number$number2
+		    CXDlinktty=$CXDpath/tty$letter$number$number2
+		    CXDlinkpty=$CXDpath/pty$letter$number$number2
+
+		    if [ ! -c $CXDtty ]; then
+			mknod $CXDtty c 17 $minor $CXDnode
+			chgrp $group $CXDtty
+
+			#
+			# Regardless of wether we will create a link to
+			# this tty or not, we want to ensure that we
+			# delete the corresponding link name.
+			#
+			# We then create the link if necessary.
+			#
+			[ -c $CXDlinktty ] && rm -f $CXDlinktty
+			$link_em && ln $CXDtty $CXDlinktty
+		    else
+			if $link_em && [ ! -c $CXDlinktty ]; then
+			    ln $CXDtty $CXDlinktty
+			fi
+		    fi
+
+		    if [ ! -c $CXDpty ]; then
+			mknod $CXDpty c 16 $minor $CXDnode
+			chgrp $group $CXDpty
+
+			#
+			# Regardless of wether we will create a link to
+			# this pty or not, we want to ensure that we
+			# delete the corresponding link name.
+			#
+			# We then create the link if necessary.
+			#
+			[ -c $CXDlinkpty ] && rm -f $CXDlinkpty
+			$link_em && ln $CXDpty $CXDlinkpty
+		    else
+			if $link_em && [ ! -c $CXDlinkpty ]; then
+			    ln $CXDpty $CXDlinkpty
+			fi
+		    fi
+
+		    let "minor = minor + 1"
+		    let "pty_counter = pty_counter + 1"
+
+		    if (( pty_counter >= num_link_ptys )); then
+			link_em=false
+		    fi
+
+		    if (( pty_counter >= num_ptys )); then
+			break 3
+		    fi
+		done
+	    done
+	done
+    fi
+
+    umask $old_umask
+}
+
+########################### Create800Devs #############################
+#
+# This function creates device files for a series 800 machine in the
+# specified directory.  Pre-existing device files are not changed.
+#
+#######################################################################
+function Create800Devs
+{
+    $DEBUG && set -x
+
+    C8Dpath=$1
+    C8Dnode=$2
+
+    #
+    # if this is a standalone system then make devices
+    # which are "root" specific devices (cnode id=1).
+    #
+    if [ "$C8Dnode" = standalone -o "$C8Dnode" = localroot ]; then
+	C8Dnode=1
+	Other_flags=""
+    else
+	#
+	# For 800 clients, we want the server to only create client
+	# device files for pseudo drivers so we use the the "-C pseudo"
+	# insf option.  If we allowed the server to create non-pseudo
+	# device files for clients, then the client's device files
+	# would incorrectly look like the servers.  It is OK to create
+	# client device files for pseudo drivers on the server because
+	# these device files will look  the same on the client as on
+	# the server.  Device files for non-pseudo devices will be
+	# created at boot time via the "ioinit -i" inittab entry.
+	Other_flags="-C pseudo"
+    fi
+
+    #
+    # Make the devices in the appropriate device directory.  The
+    # following is not necessary when performing an update because
+    # the update process (KERN-BLD/customize) will have added a
+    # temporary inittab entry which will invoke insf at boot time.
+    # The following is probably necessary for SAM though.
+    #
+    ( cd $C8Dpath; /etc/insf -e -N $C8Dnode -n $NUM_PTYS $Other_flags )
+}
+
+########################### Create700Devs #############################
+#
+# This function creates device files for a series 700 machine in the
+# specified directory.  Pre-existing device files are not changed.
+#
+#######################################################################
+function Create700Devs
+{
+    #
+    # Device files for the Series 700.  These are very similar to
+    # the Series 300 devices, but some differ in the major and/or
+    # minor number.
+    #
+    C7Ddevs="
+      console 	    root other 0622 c   0 0x000000
+      mem     	    root sys   0640 c   3 0x000000
+      kmem    	    root sys   0640 c   3 0x000001
+      null    	    root other 0666 c   3 0x000002
+      tty     	    root other 0666 c   2 0x000000
+      rhil    	    root other 0666 c  23 0x203000
+      hilkbd  	    root other 0666 c  25 0x203080
+      hil1    	    root other 0666 c  24 0x203010
+      hil2    	    root other 0666 c  24 0x203020
+      hil3    	    root other 0666 c  24 0x203030
+      hil4    	    root other 0666 c  24 0x203040
+      hil5    	    root other 0666 c  24 0x203050
+      hil6    	    root other 0666 c  24 0x203060
+      hil7    	    root other 0666 c  24 0x203070
+      crt     	    root other 0666 c  12 0x100000
+      ocrt    	    root other 0666 c  12 0x100001
+      tty00   	    root other 0666 c   1 0x204004
+      tty01   	    root other 0666 c   1 0x205004
+      lan0    	    root other 0666 c  52 0x202000
+      ieee0   	    root other 0666 c  52 0x202000
+      ether0  	    root other 0666 c  52 0x202001
+      nettrace 	    root other 0666 c  46 0x0
+      netlog  	    root other 0666 c  46 0x1
+      netman  	    root other 0666 c  60 0x0
+      ptr_parallel  lp   bin   0644 c  11 0x206002
+      scn_parallel  lp   bin   0666 c  11 0x206003
+      ptr_rs232_a   lp   bin   0644 c   1 0x204004
+      ptr_rs232_b   lp   bin   0644 c   1 0x205004
+      eeprom	    root other 0644 c  64 0x0
+    "
+
+    $DEBUG && set -x
+
+    C7Dpath=$1
+    C7Dnode=$2
+
+    if [ ! -d $C7Dpath ]; then
+	mkdir $C7Dpath
+	chmog 555 bin bin $C7Dpath
+    fi
+
+    #
+    # if this is a standalone system then make devices for the local
+    # system which are "root" specific devices (cnode id=1).
+    #
+    if [ "$C7Dnode" = "standalone" -o "$C7Dnode" = "localroot" ]; then
+	C7Dnode=1
+
+	#
+	# Always force create /dev/root and /dev/rroot so we are sure
+	# that they are correct.
+	#
+	rm -f $C7Dpath/root $C7Dpath/rroot
+	mknod $C7Dpath/root  b 255 0xffffff 1
+	mknod $C7Dpath/rroot c 255 0xffffff 1
+	chmog 640 root sys $C7Dpath/root $C7Dpath/rroot
+    fi
+
+    #
+    # then create the basic devices (excluding ptys)
+    #
+    set -- $C7Ddevs
+    while [ $# -gt 0 ]; do
+	if [ ! -c $C7Dpath/$1 ]; then
+	    mknod $C7Dpath/$1 $5 $6 $7 $C7Dnode
+	    chmog $4 $2 $3 $C7Dpath/$1
+	fi
+	shift 7
+    done
+
+    #
+    # Now make some directories and devices that are common to both
+    # the Series 300 and Series 700.
+    #
+    Create300or700Devs $C7Dpath $C7Dnode
+
+    #
+    # Create the tape device files
+    #
+    if [ ! -c $C7Dpath/rmt/0m ]; then
+	mknod $C7Dpath/rmt/0m   c 121 0x201306 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/0m
+    fi
+
+    if [ ! -c $C7Dpath/rmt/0mn ]; then
+	mknod $C7Dpath/rmt/0mn  c 121 0x201307 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/0mn
+    fi
+
+    if [ ! -c $C7Dpath/rmt/3m ]; then
+	mknod $C7Dpath/rmt/3m   c 121 0x201306 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/3m
+    fi
+
+    if [ ! -c $C7Dpath/rmt/3mn ]; then
+	mknod $C7Dpath/rmt/3mn  c 121 0x201307 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/3mn
+    fi
+
+    if [ ! -c $C7Dpath/rmt/3hc ]; then
+	mknod $C7Dpath/rmt/3hc   c 121 0x20130e $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/3hc
+    fi
+
+    if [ ! -c $C7Dpath/rmt/3hcn ]; then
+	mknod $C7Dpath/rmt/3hcn  c 121 0x20130f $C7Dnode
+	chmog 666 bin bin $C7Dpath/rmt/3hcn
+    fi
+
+    #
+    # Create the floppy device files
+    #
+    if [ ! -d $C7Dpath/floppy ]; then
+	mkdir $C7Dpath/floppy
+	chmog 555 bin bin $C7Dpath/floppy
+    fi
+
+    if [ ! -b $C7Dpath/floppy/c201d0s0 ]; then
+	mknod $C7Dpath/floppy/c201d0s0  b  23 0x201000 $C7Dnode
+	chmog 640 root sys $C7Dpath/floppy/c201d0s0
+    fi
+
+    if [ ! -d $C7Dpath/rfloppy ]; then
+	mkdir $C7Dpath/rfloppy
+	chmog 555 bin bin $C7Dpath/rfloppy
+    fi
+
+    if [ ! -c $C7Dpath/rfloppy/c201d0s0 ]; then
+	mknod $C7Dpath/rfloppy/c201d0s0  c 106 0x201000 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rfloppy/c201d0s0
+    fi
+
+    if [ ! -c $C7Dpath/rfloppy/spc201d0s0 ]; then
+	mknod $C7Dpath/rfloppy/spc201d0s0  c 106 0x201001 $C7Dnode
+	chmog 666 bin bin $C7Dpath/rfloppy/spc201d0s0
+    fi
+
+    #
+    # Create the changer device files
+    #
+    if [ ! -d $C7Dpath/changer ]; then
+	mkdir $C7Dpath/changer
+	chmog 555 bin bin $C7Dpath/changer
+    fi
+
+    #
+    # Create the scsi_ctl device files
+    #
+    if [ ! -d $C7Dpath/scsi ]; then
+	mkdir $C7Dpath/scsi
+	chmog 555 bin bin $C7Dpath/scsi
+    fi
+
+    for i in 0 1 2 3 4 5 6; do
+	if [ ! -c $C7Dpath/scsi/${i} ]; then
+	   mknod $C7Dpath/scsi/${i}  c  105 0x201${i}00 $C7Dnode
+	   chmog 600 root sys $C7Dpath/scsi/${i}
+	fi
+    done
+
+    #
+    # Other miscellaneous devices
+    #
+    if [ ! -c $C7Dpath/plt_parallel ]; then
+	ln  $C7Dpath/ptr_parallel  $C7Dpath/plt_parallel
+    fi
+
+    if [ ! -c $C7Dpath/plt_rs232_a ]; then
+	ln  $C7Dpath/ptr_rs232_a  $C7Dpath/plt_rs232_a
+    fi
+
+    if [ ! -c $C7Dpath/plt_rs232_b ]; then
+	ln  $C7Dpath/ptr_rs232_b  $C7Dpath/plt_rs232_b
+    fi
+
+    #
+    # Finally, create all of the ptys
+    #
+    Create300or700Ptys $C7Dpath $C7Dnode
+}
+
+########################### ProcessorType #############################
+#
+# This routine prints two values.  The first is the "context" string
+# that should be used for any architecture specific CDFs for the
+# given node.  The second string is the CPU model of the given node.
+#
+# Possible combinations are currently:
+#     HP-MC68020 300
+#     HP-PA      700
+#     HP-PA      800
+#
+# The command cnode_arch is only used to determine the type of cnodes
+# (quicker to find the architecture of the system being run on
+# directly).
+#
+# If cnode_arch does not exist then /hp-ux+ is used to determine the
+# architecture (this catches cases when the SAM-MIN fileset does not
+# exist on the system.
+#
+#######################################################################
+function ProcessorType
+{
+    $DEBUG && set -x
+
+    #
+    # Beware: hp9000s800 may be true on S700 machines as well
+    # as S800 machines.  Always use hp9000s700 first.
+    #
+    PTnode=$1
+
+    if [ "$PTnode" = standalone -o "$PTnode" = localroot ]; then
+	if hp9000s300; then
+	    echo $SERIES300 300
+	    return
+	fi
+
+	if hp9000s700; then
+	    echo $SERIES700 700
+	else
+	    echo $SERIES800 800
+	fi
+	return
+    fi
+
+    if [ -x /usr/sam/bin/cnode_arch ]; then
+	PTarch=`/usr/sam/bin/cnode_arch -s $PTnode`
+
+	case "$PTarch" in
+	300)
+	    echo $SERIES300 300
+	    ;;
+	700)
+	    echo $SERIES700 700
+	    ;;
+	800)
+	    #
+	    # If we (the rootserver) are a Series 700, the client must
+	    # really be a Series 700 too.  Otherwise, the client must
+	    # be a Series 800.
+	    #
+	    if hp9000s700; then
+		echo $SERIES700 700
+	    else
+		echo $SERIES800 800
+	    fi
+	    ;;
+	*)
+	    echo UNKNOWN UNKNOWN
+	    exitval=1
+	    ;;
+	esac
+	return
+    fi
+
+    #
+    # For some reason, SAM isn't present.  Try to make an educated
+    # guess.
+    #
+    if [ ! -d $HPUX+ -o ! -s $HPUX+/$PTnode ]; then
+	#
+	# For robustness, we can assume the the client is a Series 300
+	# if we are a Series 300.  Otherwise, we don't know and can't
+	# even guess, so we return UNKNOWN.
+	#
+	if hp9000s300; then
+	    echo $SERIES300 300
+	    return
+	fi
+
+	echo UNKNOWN UNKNOWN
+	exitval=1
+	return
+    fi
+
+    if [ -n "`file $HPUX+/$PTnode | grep 's[23]00'`" ]; then
+	echo $SERIES300 300
+	return
+    fi
+
+    #
+    # If we (the rootserver) are a Series 700, the client must
+    # really be a Series 700 too.  Otherwise, the client must
+    # be a Series 800.
+    #
+    if hp9000s700; then
+	echo $SERIES700 700
+    else
+	echo $SERIES800 800
+    fi
+}
+
+############################## CreateDevs #############################
+#
+# This routine creates a device directory at the specified path for
+# the specified node name of the specified architecture.
+#
+# Pre-existing device files are not changed.
+#
+#######################################################################
+function CreateDevs
+{
+    $DEBUG && set -x
+
+    path=$1
+    node=$2
+    ctxt=$3
+    arch=$4
+
+    if [ ! -d "$path" ]; then
+	mkdir $path || Abort "Cannot mkdir $path"
+	chmog 555 bin bin $path
+    fi
+
+    case "$arch" in
+    300)
+	if [ -n "${VERBOSE}" ]; then
+	    echo "NOTE:    Creating s300 devices for $node in $path."
+	fi
+	Create300Devs $path $node
+	;;
+    700)
+	if [ -n "${VERBOSE}" ]; then
+	    echo "NOTE:    Creating s700 devices for $node in $path."
+	fi
+	Create700Devs $path $node
+	;;
+    800)
+	if [ -n "${VERBOSE}" ]; then
+	    echo "NOTE:    Creating s800 devices for $node in $path."
+	fi
+	Create800Devs $path $node
+	;;
+    *)
+	Abort "Cannot determine processor type of $node"
+	;;
+    esac
+}
+
+############################# Update ##################################
+#
+# For a standalone system, this routine just causes any devices
+# missing in /dev to be re-created.
+#
+# For a cluster, it causes any devices missing from any of /dev+/*
+# whose processor type is being updated to be recreated.
+#
+#######################################################################
+function Update
+{
+    $DEBUG && set -x
+
+    Unode=$1
+    Umedia=$2
+
+    if [ "$Unode" = "standalone" ]; then
+	CreateDevs $DEV $Unode `ProcessorType $Unode`
+	return
+    fi
+
+    if [ ! -H $DEV ]; then
+	Abort "$DEV not a CDF -- cannot update non-standalone system"
+    fi
+
+    for Unode in `ls $DEV+`; do
+	set -- `ProcessorType $Unode`
+	ctxt=$1
+	arch=$2
+
+	if [ "$ctxt" = "$Umedia" ]; then
+	    CreateDevs $DEV+/$Unode $Unode $ctxt $arch
+	fi
+    done
+}
+
+############################# Duxify ##################################
+#
+# This routine just converts /dev into the CDF /dev+/localroot and
+# then recreates any missing device files.
+#
+#######################################################################
+function Duxify
+{
+    $DEBUG && set -x
+
+    Dserver=$1
+
+    if [ ! -H $DEV ]; then
+	makecdf -c localroot $DEV
+    fi
+
+    CreateDevs $DEV+/localroot $Dserver `ProcessorType $Dserver`
+}
+
+############################ AddCnode #################################
+#
+# This routine just adds a new cnode directory to the /dev+ CDF and
+# fills in all of its device files for that cnode.
+#
+#######################################################################
+function AddCnode
+{
+    $DEBUG && set -x
+
+    node=$1
+
+    if [ ! -H $DEV ]; then
+	Abort "$DEV not a CDF -- cannot add device files for cnode $node"
+    fi
+    CreateDevs $DEV+/$node $node `ProcessorType $node`
+}
+
+############################# Usage ###################################
+#
+# This routine just prints a usage error message.
+#
+#######################################################################
+
+function Usage
+{
+    cat <<@usageEOF >&2
+ERROR:   Usage: $COMMAND  -u standalone   <mediaarch> [<num_ptys>]
+                $COMMAND  -u <rootserver> <mediaarch> [<num_ptys>]
+                $COMMAND  -a <cnode> [<num_ptys>]
+                $COMMAND  -d <rootserver> [<num_ptys>]
+ERROR:   Aborting $COMMAND.
+@usageEOF
+}
+
+############################### main ##################################
+#
+# This is the main body of the script.  It just checks to see if we
+# were called for an update, addition of a cnode, or a conversion to
+# a root-server and calls the appropriate processing routine.
+#
+# The following options are recognized:
+#
+#   -u standalone <mediaarch>
+#       update a standalone system, figure out the cpu type and then
+#       (re-)create the appropriate devices in /dev
+#
+#   -u <rootserver> <mediaarch>
+#       update a cluster, for all nodes in /dev+, figure out their
+#       cpu type and if it is the same as the media we are updating,
+#       (re-)create the appropriate devices in their /dev+.
+#
+#   -a <cnode>
+#       add a cnode to a cluster, figure out its cpu type, then make
+#       a new directory in /dev+ and create the appropriate device
+#       files.
+#
+#   -d <rootserver>
+#       make a diskless server, turn /dev into a CDF and move the
+#       original files into the "localroot" context.  Then figure
+#       out the rootserver's cpu type and (re-)create the appropriate
+#       device files in /dev+.
+#
+# This script is called on the following occasions:
+#
+#  - by the UX-CORE customize during an update with one of
+#    the -u options
+#  - by "sam" when creating a diskless server with the -d option
+#  - by "sam" when adding a c-node to a cluster with the -a option
+#
+#######################################################################
+
+set -u
+umask 022
+
+DEFAULT_PTYS=112
+DEV=/dev
+HPUX=/hp-ux
+
+#
+# Possible contexts for the Series 300, 700 and 800.
+# For now, both SERIES700 and SERIES800 are HP-PA.
+# This may have to change later.
+#
+SERIES300=HP-MC68020
+SERIES700=HP-PA
+SERIES800=HP-PA
+
+$DEBUG && set -x
+
+case "X${1:-error}" in
+X-u)
+    if [ "$#" -eq 3 ]; then
+	NUM_PTYS=$DEFAULT_PTYS
+	Update $2 $3
+	exit $exitval
+    fi
+
+    if [ "$#" -eq 4 ]; then
+	NUM_PTYS=$4
+	Update $2 $3
+	exit $exitval
+    fi
+    Usage
+    exit 1
+    ;;
+
+X-a)
+    if [ "$#" -eq 2 ]; then
+	NUM_PTYS=$DEFAULT_PTYS
+	AddCnode $2
+	exit $exitval
+    fi
+
+    if [ "$#" -eq 3 ]; then
+	NUM_PTYS=$3
+	AddCnode $2
+	exit $exitval
+    fi
+    Usage
+    exit 1
+    ;;
+
+X-d)
+    if [ "$#" -eq 2 ]; then
+	NUM_PTYS=$DEFAULT_PTYS
+	Duxify $2
+	exit $exitval
+    fi
+
+    if [ "$#" -eq 3 ]; then
+	NUM_PTYS=$3
+	Duxify $2
+	exit $exitval
+    fi
+    Usage
+    exit 1
+    ;;
+*)
+    Usage
+    exit 1
+    ;;
+esac

@@ -1,0 +1,6 @@
+$set 1
+1 usage: %s -h (by host), %s -u (by user)\n
+2 Cycle detected in /etc/netgroup: %s.\n
+3 syntax error in /etc/netgroup\n
+4 --- %s %s\n
+5 fatal error: %s\n

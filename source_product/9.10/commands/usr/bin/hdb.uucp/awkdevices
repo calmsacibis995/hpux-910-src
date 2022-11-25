@@ -1,0 +1,29 @@
+{   if ( substr($1,1,1) == "#" )
+	{ print ; next }
+}
+
+{
+    type = "# Unknown_type-$1"
+    dialer = "unknown"
+
+    line = $2
+    line2 = $3
+    class = $4
+}
+
+$1 == "DIR"     { type = "Direct" ; dialer = "direct" }
+$1 ~ /ACU/      { type = "ACU" ; dialer = substr($1,4) }
+$1 ~ /DEVELCON/ { dialer = "develcon" }
+$1 ~ /VADIC/    { dialer = "vadic" }
+$1 ~ /HAYES/    { dialer = "hayes" }
+$1 ~ /HP2334A/	{ dialer = sprintf("PROG/usr/lib/dialit ACUHP2334A /dev/%s \T \S \P", $2) }
+$1 ~ /HP92205A/ { dialer = "hp92205A" }
+$1 ~ /HP35141A/ { dialer = "hp35141A" }
+$1 ~ /HP37212A/ { dialer = "hp37212A" }
+$1 ~ /MICOM/    { dialer = "micom" }
+$1 ~ /PENRIL/   { dialer = "penril" }
+$1 ~ /VENTEL/   { dialer = "ventel" }
+
+$3 == "-" { line2 = "0" }
+
+{ printf "%s %s %s %s %s\n", type, line, line2, class, dialer }

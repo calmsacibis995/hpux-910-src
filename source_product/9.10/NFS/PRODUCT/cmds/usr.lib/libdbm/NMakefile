@@ -1,0 +1,72 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.lib/libdbm sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+OCFLAGS	= -O $(NMCFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+CSOURCE = dbm.c version.c
+OBJECTS = dbm.o version.o
+
+SDIR = $(SRCDIR:/^$/./)
+
+all:		build
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) libdbm.a \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/libdbm.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+build:		$(TARGET)
+
+install:;	/bin/echo "$$(TARGET) is not a delivered product"
+
+rinstall:	install
+
+libdbm.a:	$(OBJECTS)
+	$(AR) r $(TARGET) $(OBJECTS)
+	$(CHMOD) 664 $(TARGET)
+
+dbm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/dbm.c 
+
+version.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/version.c
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $(OBJECTS)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(TARGET) make?a*
+
+debug:		build
+
+

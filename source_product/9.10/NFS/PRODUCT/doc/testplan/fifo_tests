@@ -1,0 +1,2055 @@
+.H 1 "Named Pipes and Device Files"
+The tests in this chapter cover the addition of named pipe and device
+file support to NFS, also known as NFS 3.2.  Unless otherwise referenced
+here, these tests will only work on those systems supporting the NFS 3.2
+features, including Series 300 6.5 release and beyond, Series 800 4.0
+release and beyond, and Sun release 3.2 and beyond.
+.sp
+In many cases, these test cases can be found in other tests that will be 
+executed already, or which can be ported from other test suites.
+As test development progresses and these cases are discovered, the
+testplan will be updated to reflect these cases. In other cases these
+tests will either be ports of the NFS and FST tests to also test named pipes
+and device files, or the NFS and FST tests can be modified to also test
+these file types.  You will probably get tired of reading the phrase
+"It is assumed that the full functionality is tested elsewhere...".
+.sp
+The device file tests represent a tricky situation in which
+we will not be able to test all devices and device files completely.
+We will try to provide some tests based on device files as appropriate,
+and will rely on being able to get device file tests to port to work
+with NFS.  We will also have some isolated, configuration dependent tests
+that will require a disk be attached to the system that can be tested
+for mounting, etc.
+.sp
+Finally, these tests will also test support of UNIX domain sockets, IF (and
+only IF) they become supported in the local case.  In this case, many
+tests will require the creation of UNIX domain sockets.  Since there is
+no user level command to do this, it may become necessary to write a tool
+to do this.  Note that this will need to be carefully written to work
+on Sun's also.
+.nf
+
+	RESPONSIBLE ENGINEER:	Darren Smith
+	DEPENDENCIES:	Special hardware for device file tests?
+	ISSUES:	 Amount of testing necessary for device files.
+
+.fi
+.sp 3
+.H 2 "CTS Tests"
+The Connectivity Test Suite (CTS)
+tests are those tests which should also be tested with Sun to
+verify functionality.  Those tests in this chapter to which this applies
+will be designated by having a "yes" in the CTS field below, possibly with
+conditions.
+.sp 3
+.H 2 "Unix Section 1 Tests"
+This section lists tests relating to common commands which should be tested
+with Named Pipes and Device Files.  In the table below, the commands are
+listed alphabetically, with an indication of whether they are Musts, High Wants,
+or Wants.  Must level commands are those command which take some direct
+specific action due to the presense of named pipes or device files,
+which must work for named pipes to be considered functional, or which are
+necessary to test a basic functionality on named pipes or device files.  High
+Wants are those commands which may be effected by named pipes and are most
+likely to show indications of problems.  Want level commands are included as
+ones which should not be effected by named pipes or device files, but which
+it would be nice to have tests for completeness sake, or which are only
+testing returned error codes.  Any command not
+listed is assumed to either not deal with files at all, or deals with them
+only through open/read/write.  Some examples of the latter case have been
+included as representative ways to test that functionality (e.g. cat.1).
+NOTE: Some of the section 1 tests will instead be listed under the "Named
+pipe specific tests" or the "Device file specific tests" if they are testing
+behaviour for only one of the two cases.
+.nf
+
+	RESPONSIBLE ENGINEER:	Darren Smith
+	DEPENDENCIES:	Many tests will require the existence of a 
+		named pipe ($PIPE), a block special file ($BDEV),
+		a character special file ($CDEV), a UNIX domain
+		socket ($SOCKET) and a network special file
+		($NETWORK)  (HP-UX clients and servers only)
+		before the tests are executed.  In some cases this
+		will have to refer to an actual device.
+
+.fi
+.nf
+
+COMMAND		LEVEL	COMMENTS
+-------		-----	--------
+
+cat.1		  M	Basic functionality only.
+chacl.1		  M	Hits special functions in code.
+chgrp.1		  M	Hits set-attributes paths
+chmod.1		  M	Hits set-attributes paths
+chown.1		  M	Hits set-attributes paths
+cpio.1		  M	Special cases for fifos/device files only.
+file.1		  M	Special cases for fifos/device files only.
+find.1		  M	Special cases for fifos/device files only.
+getacl.1	  M	Hits special cases in code.
+ls.1 (et.al.)     M	Special cases for fifos/device files only.
+tar.1		  M	Special cases for fifos/device files only.
+test.1		  M	Special cases for fifos/device files only.
+shar.1		  HW	Special cases for fifos/device files only.
+tail.1		  HW	Seems to show errors easily.
+touch.1		  HW	Check update of times on fifos/device files.
+cd.1		  W	Error tests only.
+ln.1		  W	Completeness plus error cases.
+mkdir.1		  W	Error tests only.
+mv.1		  W	Completeness plus error cases.
+rm.1		  W	Completeness plus error cases.
+.fi
+.sp 2
+.H 3 "Cat.1 tests"
+The cat command performs no special action for pipes or device files, and
+is included as a generic test of functionality.  As such, we will test
+transfers to and from named pipes and device files, with files of size 1,
+1K, 8K, 64K, and 256K.  These tests assume that $PIPE represent a
+named pipe over NFS, and $BADDEV? refers to a "bad" device file (the 
+device does not exist), and that $DEVNULL represents the equivalent of
+/dev/null over an NFS mount point.  The following tests
+will be executed for each file size:
+.nf
+
+COMMAND LINE					RESULT
+------------					------
+
+cat T1 >$PIPE & cat $PIPE >T2			T1 == T2
+cat <T1 >$PIPE & cat <$PIPE >T2			T1 == T2
+cat $PIPE >T2 & cat T1 >$PIPE			T1 == T2
+cat <$PIPE >T2 & cat <T1 >$PIPE			T1 == T2
+cat $DEVNULL >T2				T2 == 0
+cat t2 >$DEVNULL				no error
+cat T1 >$BADDEV1 # DEV1 = bad major number	"$BADDEV1: cannot open"
+cat <$BADDEV1					"$BADDEV1: cannot open"
+cat $BADDEV1					"cat: cannot open $BADDEV1"
+cat T1 >$BADDEV2 # DEV2 = bad minor number	"$BADDEV2: cannot open"
+cat <$BADDEV2					"$BADDEV2: cannot open"
+cat $BADDEV2					"cat: cannot open $BADDEV2"
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Cd.1 tests"
+These tests are error checking only for the purpose of verifying that 
+correct errors are returned.  It assumes that $PIPE, $BDEV, $CDEV, $SOCKET,
+and $NETWORK exist.
+.nf
+
+COMMAND			RESULT
+
+cd $PIPE		$PIPE: bad directory
+cd $BDEV		$BDEV: bad directory
+cd $CDEV		$CDEV: bad directory
+cd $SOCKET		$SOCKET: bad directory
+cd $NETWORK		$NETWORK: bad directory
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chacl.1 tests"
+Similar to lsacl.1 tests, the chacl.1 tests are only intended to hit
+error cases and additional paths in the code.  NOTE: HP only tests.  Actual
+results need to be filled in when commands are available.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+chacl $PIPE 	 $ACL		Error: no acls????
+chacl $BDEV	 $ACL		Error: no acls????
+chacl $CDEV	 $ACL		Error: no acls????
+chacl $SOCKET	 $ACL		Error: no acls????
+chacl $NETWORK	 $ACL		Error:
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chgrp.1 tests"
+The entire functionality of chgrp with NFS is assumed to be tested elsewhere,
+and these tests are intended only to verify that the basic functionality
+does indeed work.  We assume we are the owner of the file.
+.nf
+
+COMMAND LINE				RESULT
+------------				------
+
+oldgrp=`ls $PIPE | sed, etc"		saves oldgrp
+chgrp newgrp $PIPE			group becomes newgrp
+chgrp newgrp $BDEV			group becomes newgrp
+chgrp newgrp $CDEV			group becomes newgrp
+chgrp newgrp $SOCK			group becomes newgrp
+chgrp oldgrp $PIPE			group becomes oldgrp
+chgrp oldgrp $BDEV			group becomes oldgrp
+chgrp oldgrp $CDEV			group becomes oldgrp
+chgrp oldgrp $SOCK			group becomes oldgrp
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chmod.1 tests"
+The entire functionality of chmod with NFS is assumed to be tested in the
+regular NFS test suite.  These tests assume that we are the owner of the
+files and are only intended to verify basic functionality.
+.nf
+
+COMMAND LINE					RESULT
+------------					------
+
+oldmode = `ll | sed/awk`
+chmod 000 $PIPE					mode = 000
+chmod 000 $BDEV					mode = 000
+chmod 000 $CDEV					mode = 000
+chmod 000 $SOCK					mode = 000
+chmod 7777 $PIPE				mode = 6777 *
+chmod 7777 $BDEV				mode = 6777 *
+chmod 7777 $CDEV				mode = 6777 *
+chmod 7777 $SOCK				mode = 6777 *
+chmod $oldmode $PIPE				mode = $oldmode
+chmod $oldmode $BDEV				mode = $oldmode
+chmod $oldmode $CDEV				mode = $oldmode
+chmod $oldmode $SOCK				mode = $oldmode
+
+.fi
+NOTE: With Sun servers, mode may be 7777.  This is because setting the
+sticky bit requires an ID of root.
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Chown.1 tests"
+The enire functionality of chown with NFS is assumed to be tested elsewhere,
+and these tests are intended only to verify that the basic functionality
+does indeed work with named pipes and device files.
+.nf
+
+COMMAND LINE				RESULT
+------------				------
+
+#assume we are owner
+chown newown $PIPE			owner becomes newown	(HP)
+chown newown $BDEV			owner becomes newown	(HP)
+chown newown $CDEV			owner becomes newown	(HP)
+chown newown $SOCK			owner becomes newown	(HP)
+chown <me> $PIPE			Permission denied.
+chown <me> $BDEV			Permission denied.
+chown <me> $CDEV			Permission denied.
+chown <me> $SOCK			Permission denied.
+
+.fi
+NOTE: These tests should get errors on Sun/BSD if not run as super-user.
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Cpio.1 tests"
+Cpio has special cases for pipes and device files.  These need to be tested
+with the -i, -o, and -p options, as super-user and non-superuser.  This
+test will need to create a directory structure to work with for testing
+purposes as follows:
+.nf
+
+FILE					MODE	OWNER	GROUP
+
+pipe					 000	nfsbb	nfs
+bdev					 000	nfsbb	nfs
+cdev					 000	nfsbb	nfs
+socket					 000	nfsbb	nfs
+network_special_file			 000	nfsbb	nfs
+regularfile				 000	nfsbb	nfs
+dir1					d555	nfsbb	nfs
+dir1/pipe				 444	nfsbb	nfs
+dir1/bdev				 444	nfsbb	nfs
+dir1/cdev				 444	nfsbb	nfs
+dir1/socket				 444	nfsbb	nfs
+dir1/network_special_file		 444	nfsbb	nfs
+dir1/regularfile			 444	nfsbb	nfs
+dir1/dir2				d777	nfsbb	nfs
+dir1/dir2/pipe				 777    nfsbb   nfs
+dir1/dir2/bdev				 777    nfsbb   nfs
+dir1/dir2/cdev				 777    nfsbb   nfs
+dir1/dir2/socket			 777    nfsbb   nfs
+dir1/dir2/network_special_file		 777    nfsbb   nfs
+dir1/dir2/regularfile			 777	nfsbb	nfs
+
+.fi
+Note that to create the devices may require becoming root on the server
+machine.
+.sp
+The expected behavour depends on what type of machines are clients and
+servers as shown by the table below:
+.nf
+
+
+
+
+			     SERVER
+		     |   HP     |    SUN  |
+		---------------------------
+		HP   | P X S N  |P D X S N|
+     CLIENT     ---------------------------
+		SUN  | P S N    |  P D S N|
+                ---------------------------
+
+	where:
+		P == Pipes can be created
+		D == Devices can be created as super-user on client,
+			but not by normal users.
+		X == The "-x" option is necessary to copy devices/pipes
+		S == UNIX domain sockets get copied as regular files.
+		N == Network special files will not be created.
+
+.fi
+In all cases attempts to cpio the UNIX domain sockets should fail, though
+the error message may be different on Suns.  Network special files
+will not be able to be created if the server is a Sun machine.
+The commands to be run are:
+.nf
+
+COMMAND LINE					RESULT
+------------					------
+
+find . -print | cpio -ov[x] >cpio.out		cpio.out created
+cpio -it <cpio.out				Table of contents = find.
+mkdir t; ( cd t ; cpio -ixvd ) <cpio.out	Heirarchy copied.(See above)
+mkdir t; find . -print | cpio -padv t		Heirarchy copied (See above)
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 4 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "File.1 tests"
+File.1 has special cases for recognizing named pipes and device files.
+This tests will need to assume the existence of $PIPE, $BDEV, $CDEV,
+and $SOCKET.
+.nf
+
+COMMAND LINE			RESULT
+------------			------
+
+file $PIPE			"$PIPE:		fifo"
+file $BDEV			"$BDEV:		block special (?/?)"
+file $CDEV			"$CDEV:		character special (?/?)"
+file $SOCKET			"$SOCKET:	socket"
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Find.1 tests"
+These tests are intended only to guarantee find will correctly
+recognize NFS named pipes and device files, and not attempt a complete
+interaction test.  This tests will need a directory structure similar 
+to that used for the cpio.1 test, namely:
+
+.nf
+pipe
+bdev
+cdev
+socket
+network
+regularfile
+dir1/pipe
+dir1/bdev
+dir1/cdev
+dir1/socket
+dir1/network
+dir1/regularfile
+dir1/dir2/pipe
+dir1/dir2/bdev
+dir1/dir2/cdev
+dir1/dir2/socket
+dir1/dir2/network
+dir1/dir2/regularfile
+.fi
+.nf
+
+COMMAND				RESULT
+-------				------
+
+find . -print			ALL files
+find . -type p -print		pipe, dir1/pipe, dir1/dir2/pipe
+find . -type b -print		bdev, dir1/bdev, dir1/dir2/bdev
+find . -type c -print		cdev, dir1/cdev, dir1/dir2/cdev
+find . -type s -print		socket, dir1/socket, dir1/dir2/socket
+find . -type n -print		network, dir1/network, dir1/dir2/network
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Lsacl.1 tests"
+Lsacl should only return an error condition with NFS files, and is included
+here as a must because it hits paths that will not otherwise be hit in
+the code.  NOTE: HP only tests.  Actual error values need to be filled in
+when commands are available.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+lsacl $PIPE			Error: no acls????
+lsacl $BDEV			Error: no acls????
+lsacl $CDEV			Error: no acls????
+lsacl $SOCKET			Error: no acls????
+lsacl $NETWORK			Error:
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Ln.1 tests"
+While ln(1) does not perform any specific action with named pipes or device
+files, it should function correctly on them.  We also need to test error
+conditions where the target should be a directory, but instead is a named
+pipe, etc.  This tests will
+assume the existence of $PIPE, $BDEV, $CDEV, $SOCKET, $NETWORK.
+.nf
+
+COMMAND				RESULT
+
+$i = $PIPE, $BDEV, etc.
+ln $i $i.2			ll $i == ll $i.2
+
+mkdir d1
+ln $i d1			ll $i == ll d1/$i
+
+touch t1 t2
+ln t1 t2 $i			Usage: ln [-f] ....
+				(becuase $i is not directory)
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Ls.1 tests"
+The ls.1 command (also known as ll, lsf, etc.) recognizes name pipes,
+device files, network special files and UNIX domain sockets.  These
+tests are only intended to verify that ls does indeed recognize these
+objects over NFS, and not to test the entire functionality and all
+combinations of ls.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+ls -l $PIPE			prw-rw-rw- etc.
+ls -l $BDEV			brw-rw-rw- etc.
+ls -l $CDEV			crw-rw-rw- etc.
+ls -l $SOCKET			srw-rw-rw- etc.
+ls -l $NETWORK			nrw-rw-rw- etc.
+ll $PIPE			Same as ls -l
+ll $BDEV			Same as ls -l
+ll $CDEV			Same as ls -l
+ll $SOCKET			Same as ls -l
+ll $NETWORK			Same as ls -l
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Mkdir.1 tests"
+Since mkdir(1) only creates directories, this is an error test case
+only.  This test assumes the existence of $PIPE $BDEV, $CDEV, $SOCKET, and
+$NETWORK.
+.nf
+
+COMMAND			RESULT
+
+$i = $PIPE, etc
+mkdir $i		mkdir: cannot make directory $i
+mkdir $i/testit		mkdir: cannot access $i/.
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Mv.1 tests"
+The move command in general takes no specific action with Named pipes or
+device files, and thus we would assume that it would work as with normal
+files.  In addition, however, we need to verify that crossing of file
+system boundaries is handled correctly.  Mv will handle device files by
+trying a mknod() on the target file system.  Since (with HP systems) the
+user must be super-user this will fail.  Additionally, mv SHOULD be able
+to handle moving Named Pipes, although it currently fails with an error.
+Finally, it SHOULD attempt to move a Network Special File, but will fail.
+In the cases listed here, $LOCAL means a directory on the local system,
+and $REMOTE means a directory on the NFS mounted file systems.  Correct
+values should be filled in that match the NFS scaffold environment.
+.nf
+
+COMMAND				RESULT
+
+$i = $PIPE, etc.
+mv $i $i.2			$i.2 == ll $i (before move)
+
+mkdir d1
+mv $i d1/$i			d1/$i == ll $i (before move)
+
+touch t1 t2
+mv t1 t2 $i			Usage: mv [-f] ...... (rest of usage message)
+
+mv $LOCAL/$PIPE $REMOTE       *	mv: $PIPE: unknown file type 10666
+mv $REMOTE/$PIPE $LOCAL       *	mv: $PIPE: unknown file type 10666
+
+mv $LOCAL/$BDEV $REMOTE		mv: $REMOTE/$BDEV: Not owner
+mv $REMOTE/$BDEV $LOCAL		mv: $LOCAL/$BDEV: Not owner
+
+mv $LOCAL/$CDEV $REMOTE		mv: $REMOTE/$CDEV: Not owner
+mv $REMOTE/$CDEV $LOCAL		mv: $LOCAL/$CDEV: Not owner
+
+! mv $LOCAL/$BDEV $REMOTE    **	mv: $REMOTE/$BDEV: Not owner
+! mv $REMOTE/$BDEV $LOCAL	$LOCAL/$BDEV created
+
+! mv $LOCAL/$CDEV $REMOTE    **	mv: $REMOTE/$CDEV: Not owner
+! mv $REMOTE/$CDEV $LOCAL	$LOCAL/$CDEV created
+
+mv $LOCAL/$NETWORK $REMOTE  *** mv: $NETWORK: unknown file type 10444
+mv $REMOTE/$NETWORK $LOCAL  *** mv: $NETWORK: unknown file type 10444
+
+
+NOTES:
+	* Correct response should be that the pipe gets moved.
+	  This works correctly on Sun.
+	** Because mknod() can work with Sun servers, we expect no errors in
+	  these cases
+        *** This behavior is an error.  In the case of the target being
+	  remote, the error should be EINVAL.  In the case of the target
+	  being local, the network special file should be created.
+	  NOTE: Network special files are not supported on Suns
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes, except for test for Network special files
+	
+.fi
+.H 3 "Rm.1 tests"
+Again, the rm.1 command should not be effected by Named pipes or device files,
+and this test is merely to verify that fact.  Since NFS behaves differently
+depending on whether the file is open, we will have cases of the file being
+open to verify that all works correctly.
+.nf
+
+COMMAND				RESULT
+
+$i = $PIPE, etc.
+
+rm $i/test			rm: $i/test non-existent
+
+rm $i				$i removed
+
+mknod $PIPE p
+cat $PIPE &
+CATPID=$!
+rm $PIPE			$PIPE removed while cat still there
+				(NOTE. .nfs???? may be created)
+kill $CATPID
+
+! mknod $DEVNULL c 3 2
+tail -f $DEVNULL &
+TAILPID=$!
+rm $DEVNULL			$DEVNULL removed while cat still there
+				(NOTE. .nfs???? may be created)
+kill $TAILPID
+
+wait
+ls .nfs*			.nfs* not found
+				(NOTE:  Makes sure NFS cleaned up
+				correctly after possible renames.)
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 4 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Shar.1 tests"
+Shar is a shell archive facility that will take special action when given
+named pipes and device files.  Similar to tar or cpio, except it only produces
+output, and does not directly write to device files, these tests will
+require the same directory setup as the cpio tests.  NOTE: HP only tests.
+.nf
+
+COMMAND LINE					RESULT
+------------					------
+
+FILES="pipe bdev, etc"
+shar -mo $FILES >shar.out			shar.out created with no
+						errors NOTE: can't have a
+						"standard" shar.out
+						because times will be 
+						different on files?
+
+mkdir t; cd t ; sh ../shar.out			Heirarchy copied.
+				
+.fi
+NOTE: Creation of device files should fail unless the NFS server is a Sun
+system or unless the NFS server has the value of "nobody" set to 0.  Non-super
+user restoration of device files should get "Permission denied" on device
+files.
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Tail.1 tests"
+The tail command takes no specific action for named pipes or device files.
+However, it performs unusual actions and seems to show problems of unusual
+natures, and does behave slightly differently with named pipes.
+This test will require the existence of a named pipe $PIPE, and
+a character special file equivalent to /dev/null, $DEVNULL, that are over
+NFS mount points.
+.nf
+
+COMMAND				RESULT
+
+tail $DEVNULL >tail.out		tail.out empty.
+
+tail $PIPE  >tail.out &		tail will block waiting for input.
+cat /etc/passwd >$PIPE		tail gets last 10 lines of /etc/passwd.
+
+tail -f $PIPE >tail.out &	tail will block waiting for input.
+TAILPID=$!
+cat /etc/passwd >$PIPE		tail gets last 10 lines of /etc/passwd,
+echo "TESTING" >$PIPE		followed by "TESTING".
+
+kill $TAILPID			NOTE: Have to wait until "TESTING"
+				shows up in tail.out, but also have
+				to timeout eventually.
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Touch.1 tests"
+These tests will assume the existence of $PIPE, $BDEV, $CDEV, $SOCKET, and
+$NETWORK, since touch will only create regular files.  Otherwise, the behavior
+should be the same as regular NFS files.  NOTE: It might be easiest for some
+of these tests if the test was written in a C-program that does stat's.
+.nf
+
+COMMAND				RESULT
+
+$i = $PIPE, $BDEV, etc.
+curdate=`date`
+touch $i			Mod. Time >= $curdate.
+				Access Time >= $curdate.
+sleep 5
+touch $i			Mod. Time >= $curdate + 5
+				Access Time >= $curdate + 5
+
+touch $newdate $i		Mod. Time = $newdate
+				Access Time = $newdate
+
+touch -m $newdate2 $i		Mod. Time = $newdate2
+				Access Time = $newdate
+
+touch -a $newdate3 $i		Mod. Time = $newdate2
+				Access Time = $newdate3
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Tar.1 tests without device access"
+These tests describe the basic tests done to be sure that tar can 
+correctly save and restore named pipes and device files to a tar archive,
+WITHOUT actually writing the archive to a disk.  These tests will require
+a structure be set up in the same manner as the cpio tests.  The
+following variations will be tested:
+.nf
+
+COMMAND LINE				RESULT
+------------				------
+
+tar cvf - . >tar.out			tar.out created with no errors
+					NOTE: can't have a "standard"
+					tar.out because times will
+					be different on files?
+
+cpio -it <tar.out			Table of contents = find.
+
+mkdir t;
+( cd t ; tar xvf - ) <tar.out		Heirarchy copied.(See above)
+
+.fi
+NOTE: Super-user ability on Client and Server is required to restore 
+device special files.
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Test.1 tests"
+The test command is a shell built-in command, and exists in two forms in
+the shell (as "test" and as pairs of "[" and "]").  Both forms shall be tested
+to verify correct execution and recognition of named pipes and device files.
+NOTE: There is currently no way to test for network special files or sockets.
+.nf
+COMMAND						RESULT
+-------						------
+
+$i = $PIPE, $BDEV, $CDEV, etc.
+test -p $PIPE					$? = 0
+test -p $i (!= $PIPE)				$? = 1
+[ -p $PIPE ]					$? = 0
+[ -p $i ]					$? = 1
+
+test -b $BDEV					$? = 0
+test -b $i (!= $BDEV)				$? = 1
+[ -b $BDEV ]					$? = 0
+[ -b $i ]					$? = 1
+
+test -c $CDEV					$? = 0
+test -c $i (!= $CDEV) 				$? = 1
+[ -c $CDEV ]					$? = 0
+[ -c $i ]					$? = 1
+
+test -f $REGULARFILE				$? = 0
+test -f $i (!= $REGULARFILE)			$? = 1
+[ -f $REGULARFILE ]				$? = 0
+[ -f $i ]					$? = 1
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.sp 3
+.H 2 "Unix Section 1m Tests"
+Similar to Section 1 tests, these tests attempt to address only those
+areas which may effected by the addition of Named Pipes and Device Files,
+and are ranked in a similar manner.
+.nf
+
+SYSTEM		LEVEL		COMMENTS
+------		-----		--------
+
+cron.1m		  M	      *	Named pipe tests
+lpsched.1m	  M	      *	Named pipe tests
+mknod.1m	  M		Create named pipes, errors on others
+mount.1m	  M	      +	New options, access to NFS device files.
+
+bdf.1m		  HW	      +	NFS device file tests
+df.1m		  HW	      +	NFS device file tests
+fsck.1m		  HW	      +	NFS device file tests
+fsclean.1m	  HW	      +	NFS device file tests
+
+fsirand.1m	  W	      +	NFS device file tests
+newfs.1m	  W	      +	NFS device file tests
+swapon.1m	  W	      + NFS device file tests
+
+NOTES:
+	* These tests are discussed in the Named pipe
+	      specific tests.
+        + These tests are discussed in the device file
+	      specific tests.
+.H 3 "Mknod.1m tests"
+The mknod(1m) command is used to make named pipes,  device files, and
+network special files.  Named pipes can be created by anybody,
+device files and network special files only by the super-user.  Network
+special files cannot be supported over NFS, and hence should return errors.
+Since super-user access is not supported over NFS, mknod(1m) would not be
+expected to work with device files.  However, Sun failed to add a check
+in their code to prevent this.  Since this is a security hole, HP will have
+such a check, resulting in a difference in results between HP and Sun.
+Further, pre-NFS3.2 systems may not handle mknod() requests correctly,
+so these tests should not be run to pre-NFS3.2 systems. NOTE: UNIX domain
+sockets are created by the socket(2) system call. NOTE 2: mknod does not
+require that the major and minor numbers of device files refer to valid
+devices.
+.nf
+
+COMMAND					RESULT
+
+! mknod $NEWBDEV b $BMAJOR $BMINOR	Not super-user (HP server)
+						$NEWBDEV created (Sun server)
+! mknod $NEWCDEV c $CMAJOR $CMINOR	Not super-user (HP server)
+						$NEWCDEV created (Sun server)
+! mknod bogus n bogus	 		Operation not supported.
+! mknod $NEWPIPE p			$NEWPIPE gets created
+
+mknod $NEWBDEV b $BMAJOR $BMINOR	mknod: must be super-user
+mknod $NEWCDEV c $CMAJOR $CMINOR	mknod: must be super-user
+mknod bogus  n bogus			mknod: must be super-user
+mknod $NEWPIPE p			$NEWPIPE gets created
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.sp 3
+.H 2 "Unix Section 2 Tests"
+The tests in this section address system calls that operate on pipes or
+device files which  have special functionality in the case of named pipes or
+device files.  These calls have been broken down into Must, High Want
+and Want categories as above.
+.nf
+
+SYSTEM		LEVEL		COMMENTS
+------		-----		--------
+
+chmod.2		  M		Pipes and device files only.
+chown.2		  M		Pipes and device files only.
+close.2		  M	      *	Wakeup sleepers on close, error cases.
+creat.2		  M		Requires pipe/dev. file exists, error cases.
+fcntl.2		  M	      *	Basic tests, O_NDELAY, error cases.
+fstat.2		  M		Identify as pipe, device files, socket.
+getacl.2	  M		Returns EOPNOTSUPP
+lockf.2		  M		Requires lock daemon with NFS.basic tests only
+lseek.2		  M	      *	Returns error (special case in code)
+mknod.2		  M		Pipes always work, devs. only if root
+open.2		  M	      *	Blocking/non-blocking, complete functionality.
+pipe.2		  M           * Port existing tests to test named pipes.
+read.2            M	      *	Complete functionality test.
+select.2	  M	      *	Reader/writer interactions for pipes
+setacl.2	  M		Returns EOPNOTSUPP
+signal.2	  M	      *	Recieve SIGPIPE when reader gone.
+socket.2 (et.al)  M	      &	Basic tests only of UNIX domain sockets.
+stat.2            M		Indicate its a pipe/device files,etc.
+statfs.2	  M		Completeness, hits additional paths.
+umask.2		  M		Verify setting on creation/mknod.
+write.2		  M	      *	Full functionality tests.
+fchmod.2	  HW		Completeness test.
+fchown.2	  HW		Completeness test.
+fstatfs.2	  HW		Completeness.
+fsync.2		  HW		Completeness, hits additional paths.
+ftruncate.2	  HW		Correctness, error cases.
+truncate.2	  HW		Basic correctness, error cases.
+access.2	  W             Add cases to existing tests
+chdir.2		  W 		Error cases only.
+chroot.2	  W		Error cases only.
+dup.2		  W	      *	Basic functionality only.
+dup2.2		  W	      *	Basic functionality only.
+getaccess.2	  W		Add cases to existing tests
+getdirentri.2	  W		Error cases only.
+mkdir.2		  W		Error cases only.
+prealloc.2	  W		Error cases only.
+readlink.2	  W		Error cases only.
+rename.2	  W		Add cases to existing tests
+rmdir.2		  W		Error cases.
+
+NOTES:
+	* These are Named pipe specific tests, covered in that section
+	+ These are Device file specific tests, covered in that section
+	& These are UNIX socket specific tests, covered in that section
+
+.fi
+.H 3 "Access.2 tests"
+Access(2) should behave the same for named pipes and device files as for
+regular NFS files, therefore this test shall consist of modifying the
+NFS test to also tests named pipes and device files.  We will assume
+the existence of $PIPE, $SOCKET, $BDEV, $CDEV, $NETWORK.
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chdir.2 tests"
+This is an error condition test only.  All cases are expected to return
+ENOTDIR.
+.nf
+
+CALL				RESULT
+----				------
+
+chdir($PIPE)			ENOTDIR
+chdir($BDEV)			ENOTDIR
+chdir($CDEV)			ENOTDIR
+chdir($SOCKET)			ENOTDIR
+chdir($NETWORK)			ENOTDIR
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chroot.2 tests"
+This is an error condition test only.  All cases are expected to return
+ENOTDIR or EPERM (When not superuser).
+.nf
+
+CALL				RESULT
+----				------
+
+chroot($PIPE)			EPERM
+chroot($BDEV)			EPERM
+chroot($CDEV)			EPERM
+chroot($SOCKET)			EPERM
+chroot($NETWORK)		EPERM
+! chroot($PIPE)			ENOTDIR
+! chroot($BDEV)			ENOTDIR
+! chroot($CDEV)			ENOTDIR
+! chroot($SOCKET)		ENOTDIR
+! chroot($NETWORK)		ENOTDIR
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Chown.2 tests"
+This test shall consist of porting the NFS chown.2 tests to also test
+named pipes, device files, and UNIX domain sockets.  All results, including
+error conditions, should be the same as for regular NFS files.  This
+test will require the existence or creation of $PIPE, $BDEV, $CDEV, $SOCKET.
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Creat.2 tests"
+This test tests simple and error conditions only.  Complete tests with NFS
+are assumed to happen as part of the NFS tests suites.  Note that creat()
+will NOT create a device file or named pipe, and hence we can only test
+conditions on attempting to open existing files.
+.sp
+WARNING: Do not use values for the device files that will be successful in
+opening a device.  Creat() will truncate the device file, perhaps
+destroying the contents of the device.
+.nf
+
+CONDITIONS			TEST/RESULT
+----------			-----------
+
+chmod +w $PIPE $BDEV, etc
+creat($PIPE, mode)		Creat() blocks until a reader 
+					(e.g. cat.1) also opens the pipe.
+creat($BADBDEV, mode)		ENXIO (No such device) (Assuming there is
+					no such device.)
+creat($BADCDEV, mode)		ENXIO (No such device) (Assuming there is
+					no such device.)
+creat($NETWORK, mode)		EINVAL
+creat($SOCKET, mode)		EOPNOTSUPP (Operation not supported)
+
+chmod -w $PIPE, etc
+creat($PIPE, mode)		EACCESS
+creat($BDEV, mode)		EACCESS
+creat($CDEV, mode)		EACCESS
+creat($NETWORK, mode)		EINVAL
+creat($SOCKET, mode)		EOPNOTSUPP
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Fchmod.2 tests"
+This test shall consist of porting the NFS fchmod.2 tests to also test
+named pipes, device files, and UNIX domain sockets.  All results, including
+error conditions, should be the same as for regular NFS files.  This
+test will require the existence or creation of $PIPE, $BDEV, $CDEV, and
+$SOCKET.
+.sp
+Note that the test will need to actually be able to open the device files,
+but no reading or writing will occur to the file.
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: openable device special files
+	CTS: no
+	
+.fi
+.H 3 "Fchown.2 tests"
+These tests shall be modifications of the existing NFS file system tests to
+also test Named pipes and device files.  In this case, the tests will need
+to be modified to create $PIPE, $BDEV, $CDEV, and $SOCKET.  It should
+then test these the same way the regular file was tested.  The result should
+be the same as for a regular file.  In the case of the device files, the
+values given will have to refer to devices that can actually be opened, and
+thus should be created with legal values (which can be gotten from existing
+devices on the client system).
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Fsync.2 tests"
+These tests shall involve opening a file and doing the fsync() on the file.
+Thus, these tests require a file that can actually be opened and written
+to.  For fifos, the file can be opened O_RDWR to act as both reader and writer.
+For device files, the device /dev/null should be sufficient for testing
+device files, and will require being created in the server's directory.
+Note that sockets cannot be opened like regular files, and thus cannot have
+fsync() performed on them.  Note also, that fsync() actually has no 
+effect when run on non-regular files, except for blocked device files.
+.nf
+
+TEST				RESULT
+----				------
+
+fd = open($DEVNULL, O_RDWR)
+fsync(fd)			No error.
+
+write(fd, "some data", cnt)
+fsync(fd)			No error.
+close(fd)
+
+fd = open($PIPE, O_RDWR)
+fsync(fd)			No error.
+write(fd, "some data", cnt)
+fsync(fd)			No error.
+close(fd)
+
+sd = socket(AF_UNIX, $SOCKET)
+fsync(sd)			EINVAL
+close(sd);
+
+fd = open($NETWORK, O_RDWR)
+fsync(fd)			ENET, NE_NOSERV
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes, except for Network special files.
+	
+.fi
+.H 3 "Getdirentries tests"
+This is an error test case only.  All cases should return an error because
+they are not directories.  Getdirentries should be tried on $PIPE, $BDEV,
+$CDEV, and $SOCKET.  
+.nf
+
+CALL					RESULT
+----					------
+
+$i = $PIPE,$BDEV, $CDEV
+fd = open($i, O_RDWR)
+getdirentries(fd, buf, 1024, basep)	ENOTDIR
+
+sd = socket(AF_UNIX, $SOCKET)
+getdirentries(sd, buf, 1024, basep)	ENOTDIR
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: openable device files.
+	CTS: no
+	
+.fi
+.H 3 "Lockf.2  and fcntl.2 file locking tests"
+Strangely enough, it seems to be legal to perform locks on both named
+pipes and device files.  With NFS Named Pipe and Device files, all
+requests act just like local NFS regular files.  There are several things
+to note here.  First, locks on Named Pipes are meaningless, since there is
+no way to lseek() on the file or pick out specific portions of the data.
+Second, device files and named pipes are interpretted with respect to the
+client, but locks happen on the server, even though the processes doing
+locks are not really related.  Third, even on the same machine, a lock
+on a device may not mean anything.  For example, one process' /dev/tty is
+probably different than another process'.   Therefore, these tests will only
+tests a bare minimal subset to verify that you can indeed place a lock on
+named pipes and device files, though it may not be meaningful.  Again, full
+functionality with NFS is expected to be tested in the lock
+manager test suites.
+.nf
+
+CONDITION			RESULTS
+---------			-------
+
+$i = $PIPE, $BDEV, $CDEV
+fd = open($i, O_RDONLY)
+lockf(fd, F_LOCK, 0)		EBADF (File wasn't opened for writing).
+lockf(fd, F_TEST, 0)		Successful, no one has file locked.
+fcntl(fd, F_GETLK, &flock)      Successful, no one has file locked.
+fcntl(fd, F_SETLK, <read>)      Successful.
+fcntl(fd, F_SETLK, <write)	EBADF
+fcntl(fd, F_SETLK, <unlock)     Successful.
+
+fd = open($i, O_WRONLY)
+lockf(fd, F_TEST, 0)		Success, no one has file locked.
+lockf(fd, F_LOCK, 0)		Successful.
+lockf(fd, F_ULOCK, 0)		Successful
+fcntl(fd, F_GETLK, &flock)	Successful, no one has file locked.
+fcntl(fd, F_SETLK, <read>)	EBADF
+fcntl(fd, F_SETLK, <write>)	Successful.
+fcntl(fd, F_SETLK, <unlock>)	Successful.
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: lockf tests and locktest tool.
+	CTS: no
+	
+.fi
+.H 3 "Getacl.2 and setacl.2 tests"
+Access Control Lists are not supported with NFS.  Therefore this tests
+consists of checking for the correct returned errno.  It assumes the
+existence of $PIPE, $BDEV, $CDEV, $SOCKET.
+.nf
+
+COMMAND				RESULT
+
+fd = open($PIPE, O_RDWR)
+getacl(fd)			EOPNOTSUPP
+setacl(fd)			EOPNOTSUPP
+fd = open($BDEV, O_RDONLY)
+getacl(fd)			EOPNOTSUPP
+setacl(fd)			EOPNOTSUPP
+fd = open($CDEV, O_RDONLY)
+getacl(fd)			EOPNOTSUPP
+setacl(fd)			EOPNOTSUPP
+sd = socket(AF_UNIX, $SOCKET)
+getacl(sd)			EOPNOTSUPP
+setacl(fd)			EOPNOTSUPP
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Mkdir.2 tests"
+This is an error condition test only.  All cases are expected to return
+ENOTDIR.
+.nf
+
+CALL				RESULT
+
+mkdir($PIPE)			ENOTDIR
+mkdir($BDEV)			ENOTDIR
+mkdir($CDEV)			ENOTDIR
+mkdir($SOCKET)			ENOTDIR
+mkdir($NETWORK)			ENOTDIR
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Mknod.2  and umask.2 tests"
+Mknod(2) is used to create named pipes, device files, and network special
+files.  Creation of named pipes will work over NFS, since any user can do
+this.  Creation of device files requires super-user capability, and as such
+will work only to Sun systems, or to HP systems which have the kernel
+variable "nobody" set to 0.  Creation of network special files over NFS will
+be disallowed, since we cannot support this with Sun systems.  This test
+will create various files.  Since mknod() is creating file system entries,
+the resulting modes should be modified by the umask.
+.nf
+
+CALL				RESULT
+----				------
+umask 124
+mknod(PIPE1,0010000,0)		PIPE1 created with mode 000
+mknod(PIPE2,0010444,0)		PIPE2 created with mode 440
+mknod(PIPE3,0017777,0)		PIPE3 created with mode 6653
+					NOTE: Sun's mode will be 7653
+mknod(PIPE3,0017777,0)		EEXIST (Just created)
+mknod(CDEV,0020000,0)		EPERM
+mknod(DIR,0040000,0)		EPERM
+mknod(BDEV,0060000,0)		EPERM
+mknod(NETWORK,0110000,0)	EPERM
+
+umask 124
+! mknod(PIPE4,0010000,0)	PIPE4 created with mode 000
+! mknod(PIPE5,0010444,0)	PIPE5 created with mode 440
+! mknod(PIPE6,0017777,0)	PIPE6 created with mode 6653
+				NOTE: Sun's (server) mode will be 7653
+! mknod(PIPE6,0017777,0)	EEXIST (Just created)
+! mknod(CDEV,0020000,0)		EPERM
+				NOTE: CDEV will be created on Suns
+				or if nobody = 0
+! mknod(DIR,0040000,0)		EINVAL (May be different on Sun's)
+! mknod(BDEV,0060000,0)		EPERM
+				NOTE: BDEV will be created on Suns
+				or if nobody = 0
+! mknod(NETWORK,0110000,0)	EINVAL
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 4 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Prealloc.2 tests"
+This is an error condition test only.  All cases are expected to return
+ENOTEMPTY.
+.nf
+
+CALL				RESULT
+----				------
+
+$i = $PIPE, $BDEV, $CDEV
+fd = open($i, O_RDWR)
+prealloc(fd, 10)		ENOTEMPTY
+
+sd = socket(AF_UNIX, O_RDWR)
+prealloc(sd, 10)		ENOTEMPTY
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Readlink.2 tests"
+This is an error condition test only.  All cases are expected to return
+EINVAL.
+.nf
+
+CALL				RESULT
+----				------
+
+readlink($PIPE,buf,1024)	EINVAL
+readlink($BDEV,buf,1024)	EINVAL
+readlink($CDEV,buf,1024)	EINVAL
+readlink($SOCKET,buf,1024)	EINVAL
+readlink($NETWORK,buf,1024)	EINVAL
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Rename.2 tests"
+Rename should have no special cases for named pipes or device files.  As such,
+all operations should behave the same with these as with regular NFS files.
+The following tests will use the "rename" command tool used to test regular
+NFS files, and the following tests will be performed.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+$i = $PIPE, $BDEV, $CDEV,
+	$SOCKET, $NETWORK
+rename($i, $i.2)		No error
+
+mkdir d1
+rename($i, d1)			EISDIR		(Not both directories)
+
+rename($i,bogus/$i)		ENOENT		(Bogus doesn't exist)
+
+rename($i, $i/$i)		ENOTDIR		($i isn't a directory)
+
+mkdir d2
+rename( d2, $i)			ENOTDIR		($i isn't a directory)
+
+rename($LOCAL/$i, $REMOTE/$i)   EXDEV		(files on different devices)
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Rmdir.2 tests"
+This is an error condition test only.  All cases are expected to return
+ENOTDIR.
+.nf
+
+CALL				RESULT
+----				------
+
+rmdir($PIPE)			ENOTDIR
+rmdir($BDEV)			ENOTDIR
+rmdir($CDEV)			ENOTDIR
+rmdir($SOCKET)			ENOTDIR
+rmdir($NETWORK)			ENOTDIR
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Stat.2, lstat.2, and fstat.2 tests"
+Again, the complete functionality of the of stat(), et.al., is expected
+to tested in the NFS tests suites.  These tests are only intended to verify
+that stat(), lstat(), and fstat() do indeed work with named pipes, et.al.  These
+tests assume the existence of $PIPE, $BDEV, $CDEV, $SOCKET, $NETWORK.  
+Also assume that $SYMLINK is a symbolic link that points to $PIPE.
+.nf
+
+TEST				RESULT
+----				------
+
+stat($PIPE,&stbuf)		st_mode & S_IFMT == S_IFIFO
+stat($BDEV,&stbuf)		st_mode & S_IFMT == S_IFBLK	
+stat($CDEV,&stbuf)		st_mode & S_IFMT == S_IFCHR	
+stat($SOCKET,&stbuf)		st_mode & S_IFMT == S_IFSOCK	
+stat($NETWORK,&stbuf)		st_mode & S_IFMT == S_IFNWK
+stat($SYMLINK,&stbuf)		st_mode & S_IFMT == S_IFIFO
+
+lstat($PIPE,&stbuf)		st_mode & S_IFMT == S_IFIFO
+lstat($BDEV,&stbuf)		st_mode & S_IFMT == S_IFBLK	
+lstat($CDEV,&stbuf)		st_mode & S_IFMT == S_IFCHR	
+lstat($SOCKET,&stbuf)		st_mode & S_IFMT == S_IFSOCK	
+lstat($NETWORK,&stbuf)		st_mode & S_IFMT == S_IFNWK
+lstat($SYMLINK,&stbuf)		st_mode & S_IFMT == S_IFLNK
+
+$i = $PIPE, $BDEV, etc.
+fd = open($i, O_RDWR)
+fstat(fd, &stbuf)		st_mode & S_IFMT == S_IF{IFO, etc.}
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 4 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Statfs.2 and fstatfs.2 tests"
+Currently there does not exist a test for statfs() or fstatfs() in the
+NFS or file system tests suites.  This functionality currently only
+is tested by the df.1m tests.  However, due to the variable nature of the
+statfs() values that are returned, all that can be meaningfully done is to
+test that the call returns without error or with error as appropriate.
+.nf
+
+CALL				RESULTS
+----				-------
+
+$i = regularfile, $PIPE, $BDEV,
+    $CDEV, $SOCKET, $NETWORK
+statfs($i, &buf)		No error.
+
+mkdir d1
+<create files, etc.>
+statfs(d1/$i, &buf)		No error.
+chmod 000 d1
+statfs(d1/$i, &buf)		EACCESS
+chmod 777 d1
+rm -rf d1
+
+statfs($i, NULL)		EFAULT
+statfs(badfile, &buf)		ENOENT
+statfs(<MAXPATHNAME+1name>,&buf) ENAMETOOLONG
+statfs($i/file, &buf)		ENOTDIR
+
+fd = open($i, O_RDWR)
+fstatfs(fd, &buf)		No error.
+fstatfs(-1, &buf)		EBADF
+fstatfs(fd, NULL)		EFAULT
+.fi
+.nf
+
+	IMPLEMENT TIME: 3 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Truncate.2 and ftruncate.2 tests"
+Truncate(2) and ftruncate(2) both will truncate files to a given length,
+provided that length is less than the current length.  For Named pipes and
+device files the length of the file is always zero.  Note that with Named
+pipes the system might keep other values internally when data is written
+to the pipe.  Thus, we should check the behavior when data is in the pipe.
+In this case, no data should be destroyed.
+There should be no error if a request is made to increase the size of 
+the files, but the size should still show as zero (e.g. with stat()
+or fstat()).  This test will require the existence of $PIPE, $BDEV, $CDEV,
+and $SOCKET.  In the case of the device files, the target files
+must be openable in order to produce a file descriptor for ftruncate.  Ftruncate
+on UNIX sockets should return an error.
+.nf
+
+COMMAND				RESULT
+
+$i = $PIPE, $BDEV, etc.
+
+chmod +w $i
+fd = open($i, O_WRONLY)		$i != $SOCKET
+
+truncate($i, 0)			No error.
+ftruncate(fd, 0)		No error.
+
+truncate($i, 1)			No error and size still == 0.
+ftruncate(fd, 1)		No error and size still == 0.
+
+truncate($i, unsigned -1)	No error and size still == 0.
+ftruncate(fd, unsigned -1)	No error and size still == 0.
+
+chmod -w $i
+fd = open($i, O_RDONLY)		$i != $SOCKET
+
+truncate($i,0)			EINVAL
+ftruncate(fd,0)			EINVAL
+
+sd = socket(AF_UNIX, $SOCKET)
+ftruncate(sd, 0)		EINVAL
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+.fi
+.sp 3
+.H 2 "Unix Section 3 Tests"
+Similar to Section 2 tests, these tests attempt to address only those
+areas which may be affected by the addition of Named Pipes and Device Files.
+Note that since the stdio libraries only interact with named pipes and
+device files through reads and writes, and are thus assumed to act only
+as filters and do not need extensive testing.
+.nf
+
+SYSTEM		LEVEL		COMMENTS
+------		-----		--------
+
+netunam.3n	  M		Must fail gracefully.
+mkfifo.3	  M          (1)Complete function test, POSIX only.
+isatty.3c	  HW		Should fail on pipes, work with devices.
+
+NOTES:  (1) Listed under "named pipe specific tests"
+.fi
+.H 3 "Isatty.3 tests"
+Isatty identifies if a device file descriptor refers to a terminal device.
+Therefore isatty() should return false on named pipes, blocked devices,
+and sockets.  Additionally, it should return false on a character special
+file that is not a tty (e.g. /dev/null), but true on one that IS a tty
+(e.g. /dev/console).  This test will require the creation of a named
+pipe, a blocked device file THAT CAN BE OPENED, a UNIX domain socket,
+a character special file that is not a tty that can be opened, and a
+character special device that IS a tty that can be opened.  NOTE:
+While they need to be opened, nothing will be read or written to them,
+so any devices that actually exist should be fine.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+fd = open($CDEVTTY, O_RDWR)
+isatty(fd)			true
+
+$i = $PIPE, $BDEV, $CDEVNOTTTY
+fd = open($i, O_RDWR)
+isatty(fd)			false
+
+sd = socket(AF_UNIX, $SOCKET)
+isatty(sd)			false
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Netunam.3n tests"
+The netunam command will not be supported with NFS file systems.
+Therefore this test is simply executing the command
+.nf
+
+netunam("$NETWORK", "nfsbb")
+
+.fi
+and expecting the errno to be EINVAL.
+.nf
+
+	IMPLEMENT TIME: 2 hours
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.sp 3
+.H 2 "Named Pipe Specific Tests"
+.H 3 "Cron.1m function tests"
+These tests shall consist of NFS mounting /usr/lib/cron (and hence,
+/usr/lib/cron/FIFO) and running whatever validation suites the commands
+group has for cron.  All tests should pass with no problems, except for
+those cases where a user must be root to perform some action.  In this case,
+it may be necessary to set the value of "nobody" in the kernel on the
+NFS server to zero to allow remote root access.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: functional, one-time only per release.
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Cron.1m self-host tests"
+This test assumes that the NFS 3.2 features will be self-hosted on some
+development machine.  In that case, the directory /usr/lib/cron will be
+NFS mounted and the machine shall proceed as normal.  NOTE: It may be
+necessary to set the value of "nobody" in the kernel of the NFS server
+for cron to function properly.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 0.5 days
+	TYPE OF TEST: configuration
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Lpsched.1m function tests"
+These tests shall consist of NFS mounting /usr/spool/lp (and hence,
+/usr/spool/lp/FIFO) and running whatever validation suites the commands
+group has for the lp spool system.  All tests should pass with no problems,
+except for those cases where a user must be root to perform some action.
+In this case it may be necessary to set the value of "nobody" in the kernel
+on the NFS server to zero to allow remote root access.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: functional, one time only per release
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Lpsched.1m self-host tests"
+This test assumes that the NFS 3.2 features will be self-hosted on some
+development machine.  In that case, the directory /usr/spool/lp will be
+NFS mounted and the machine shall proceed as normal.  NOTE: It may be
+necessary to set the value of "nobody" in the kernel of the NFS server
+for the lp spool system to function properly.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: self-host
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.H 3 "Port of pipe(2) tests"
+Part of the current file system tests is a test program that tests many
+of the features of pipes created by the pipe(2) system call.  Once created,
+pipes should behave the same way as named pipes.  Thus, this test should
+provide an excellent starting point for testing many of the features of
+named pipes.  The pipe(2) test tests the following conditions:
+.nf
+
+SYSTEM CALL(S)		TEST
+--------------		----
+
+pipe()		    (1) Creation of two pipe file descriptors.
+fcntl()			Getting, setting, clearing of O_NDELAY
+fcntl()		    (1)	Verify RDONLY and WRONLY conditions
+fstat		    (1) Verifies that reader/writer have same inode
+fstat		    (1) Verifies that inodes owned by current uid/gid
+fstat			Verifies that mode indicates it is a PIPE.
+read, write, fstat	Verifies that reads/writes update various
+				times on the file.
+read/write	    (2)	Determination of PIPE buffer size
+write			Write < pipesize to empty doesn't block.
+lseek			Lseek on read/write pipes doesn't work.(ESPIPE)
+write			No partial writes when O_NDELAY clear.
+dup			Verify dup returns identical fd's
+signal,write	    (3)	Receipt of SIGPIPE on broken pipe
+read			Read from empty pipe blocks.
+read			Read from empty with O_NDELAY doesn't block.
+write			Write to full with O_NDELAY returns error.
+write			Partial writes with O_NDELAY don't occur.
+read,write		Verify that no data corruption occurs.
+pipe()		    (3) Verify generation of EMFILE at >NOFILE fd's
+
+NOTES:
+	(1)  Not applicable to named pipes
+	(2)  Should verify the PIPE buffer size = PIPE_BUF in limits.h?
+	(3)  Will require modification to work with named pipes
+
+.fi
+In addition, the following tests conditions should be added to this test.
+Tests for open apply only to named pipes.  All other tests apply to both
+named pipes and pipes created via pipe(2).
+.nf
+
+SYSTEM CALL(S)		TEST
+--------------		----
+
+open, read, write   (4) Setting O_NDELAY on open, should behave the
+				same as when set with fcntl() as above.
+write			With SIGPIPE ignored, write with no reader
+				returns EPIPE.
+write,close	        Blocked write, reader closes file, causes
+			writer to get EPIPE and/or signaled SIGPIPE.
+read		        Read with writer gone returns EOF.
+read		        Blocked read, writer closes pipe, read should
+				get EOF.
+close		        All closes should check to make sure no error
+				is returned.
+dup2		        Verify that dup2 returns identical fd's as dup()
+select			Select for reading returns when writer writes
+select			Select for writing when pipe empty returns.
+select			Select for writing when pipe full blocks.
+select			Select for writing when pipe part full - returns
+select			Select for read when no write, should return 
+				immediately with read selected?
+select			Select for write when no read, should return
+				immediately with write selected?
+
+NOTES: (4)  All open() tests assume the existence of a named pipe.
+	
+.fi
+When POSIX semantics become supported on the local system, the following
+tests  should also be added:
+.nf
+
+SYSTEM CALL(S)		TEST CASE
+--------------		---------
+
+read			O_NONBLOCK, pipe empty, returns EAGAIN
+read			O_NONBLOCK, all other cases same as O_NDELAY
+write			O_NONBLOCK, >PIPSIZ write, some room exists
+				in the pipe, partial write occurs.
+write			O_NONBLOCK, >PIPSIZ write, no room in pipe,
+				returns -1 and errno=EAGAIN
+write			O_NONBLOCK, <PIPSIZ write, but not enough
+				room to complete write, returns EAGAIN.
+write			O_NONBLOCK, all other cases act like O_NDELAY
+
+.fi
+NOTE: POSIX O_NONBLOCK semantics will not be supported on Sun clients.
+.sp
+Finally, we may wish to merge these tests into a single test that tests
+both pipes and named pipes to avoid duplicate coding.
+.nf
+
+	IMPLEMENT TIME: 3.0 days
+	TYPE OF TEST: functional
+	DEPENDENCIES: existing named pipe tests
+	CTS: YES! (Except for POSIX tests that are not supported on SUN.
+	
+.fi
+.H 3 "Open.2 pipe tests"
+These tests are tests for conditions with named pipes that are not tested
+in other cases where open() is tested.  They require an existing named
+pipe $PIPE.
+.nf
+
+CONDITIONS			TEST
+----------			----
+
+open($PIPE,O_WRONLY)       	Block waiting for reader to open,
+open($PIPE,O_WRONLY|O_NDELAY) 	ENXIO if no reader, otherwise works.
+open($PIPE,O_RDONLY)		Block waiting for writer.
+open($PIPE,O_RDONLY|O_NDELAY)   Open doesn't block if no writer.
+open($PIPE,O_CREATE|O_EXCL)	Should return EEXIST.
+open($PIPE,O_RDWR)	 	Should complete OK, able to read/write.
+open($PIPE,O_RDONLY)		Should support multiple opens for read.
+open($PIPE,O_WRONLY)		Should support multiple opens for write.
+open($PIPE,O_RDONLY)		EACCESS if no read permission.
+				NOTE: Super-user should always be able.
+open($PIPE,O_WRONLY)		EACCESS if no write permission.
+				NOTE: Super-user should always be able.
+open($PIPE,O_WRONLY)		No reader, intr., catch signal, get EINTR.
+open($PIPE,O_RDONLY)		No writer, intr., catch signal, get EINTR.
+
+.fi
+NOTE: Add to other named pipe tests?
+.nf
+
+	IMPLEMENT TIME: 1 day
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: yes
+	
+.fi
+.H 3 "Mkfifo.3 tests"
+The mkfifo() call is a new library routine added with support of POSIX.
+This routine can only be tested on POSIX compliant machines.  It is 
+essentially the same as doing a mknod() and designating a named pipe.
+Hence, these tests are modeled after the mknod.2 tests.
+.nf
+
+COMMAND				RESULT
+-------				------
+
+umask 124
+mkfifo(FIFO1,000)		FIFO1 created with mode 000
+mkfifo(FIFO2,444)		FIFO2 created with mode 440
+mkfifo(FIFO3,7777)		FIFO3 created with mode 6653
+mkfifo(FIFO3,0000)		EEXIST (Just created it above)
+rm FIFO1 FIFO2 FIFO3
+umask 124
+! mkfifo(FIFO4,000)		FIFO4 created with mode 000
+! mkfifo(FIFO5,444)		FIFO5 created with mode 440
+! mkfifo(FIFO6,7777)		FIFO6 created with mode 6653
+! mkfifo(FIFO6,0000)		EEXIST (Just created it above)
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 hour
+	TYPE OF TEST: functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.sp 3
+.H 2 "Device Specific Tests"
+.H 3 "Port of some device file tests"
+This test assumes that some device file test suite can be found that can be
+ported to run over NFS, e.g. the pty test suite. 
+.sp
+NOTE: This test is yet to be
+determined.
+.H 3 "Tar.1 device file tests"
+The tests perform the same functionality as the tar basic tests, but instead
+of writing to an output file, they will write to various device files.  These
+files will include at least a cartridge tape and one other character device
+file that can store archives (e.g. raw disk).
+.nf
+
+	IMPLEMENT TIME: 2 hours
+ 	PERFORM TIME: 0.5 days
+	TYPE OF TEST: interactive, configuration.
+	DEPENDENCIES: Setup of device to be used with tar.
+	CTS: no
+	
+.fi
+.H 3 "Mount.1m new options"
+This test involves mounting NFS file systems with both the
+"nodevs" and "devs" option (mount -o nodevs), and both interactively
+and via /etc/checklist, and then verifying that no device file access
+(e.g. reads and writes) is supported with the "nodevs" option.  Note that
+the "nodevs" option is not supported on Sun clients.  This tests assumes
+that $DEVNULL is a device file that is equivalent to /dev/null.
+Note also that no device file support means you CANNOT READ OR WRITE the file.
+.nf
+
+COMMAND*			RESULT
+-------				------
+
+mount -o nodevs $SERVER:/ $MNTPT	No error.
+
+cd $REMOTE
+cp $devnull t1			cp: bad copy to t1
+
+cat >$DEVNULL			cat: output error
+
+unmount $MNTPT
+mount $SERVER:/ $MNTPT		No error.
+
+cd $REMOTE
+cp $devnull t1			t1 is zero-sized.
+
+cat >$DEVNULL			No error.
+
+umount $MNTPT
+
+.fi
+* NOTE: All tests should also be done substituting a mount
+using /etc/checklist instead of explicit options.
+.nf
+
+	IMPLEMENT TIME: 1 day
+ 	PERFORM TIME: 0.5 hours
+	TYPE OF TEST: isolated functional
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi
+.sp 3
+.H 2 "Block and Mountable Device Tests."
+.H 3 "SVVS configuration tests."
+This shall be a configuration test in which a disk containing the SVVS
+is mounted via an NFS device file.  The validation suite will then be
+run with no errors expected to occur.  This will be a non-scaffold test.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: configuration
+	DEPENDENCIES: Being able to access the SVVS tests.
+	CTS: no
+	
+.fi
+.H 3 "Discless test suite."
+This shall be a configuration test in which a disk containing the
+diskless test suites is mounted via an NFS device file.  The test suites
+will then be run with no error expected.
+.nf
+
+	IMPLEMENT TIME: none
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: Configuration.
+	DEPENDENCIES: Being able to access the diskless test suites.
+	CTS: no
+	
+.fi
+.H 3 "Mountable disk tests."
+These tests will be one of the primary tests of being able to access a block
+device and mount a device represented by the blocked device.  The assumption
+here is that blocked devices are primarily used as a mounted file system.
+These test will be isolated tests, and some may need to be interactive
+to interpret output.  At the very least, some environment variables will
+need to be set specifying the major and minor numbers of the device to
+be mounted, and what type of disk device it is.  The expectation is that
+the commands should work the same as a local command.  For purposes of
+this testplan, $NEWBDEV is expected to be a a block special file representing
+the disk to be mounted, while $NEWCDEV is the character special file
+representing the same device.  Additionally, the kernel will have to 
+be configured to support the specified disk as a swap device.
+.nf
+
+COMMAND					RESULT
+-------					------
+
+mediainit -i 1 $REMOVE/$NEWCDEV		Device initialized
+					NOTE: MAY TAKE A LONG TIME.
+
+newfs $REMOTE/$NEWCDEV $DISKTYPE	No errors.
+fsck -n $REMOTE/$NEWBDEV		No errors reported.
+fsclean $REMOTE/$NEWBDEV		$? = 0 (File system is clean)
+fsirand $REMOTE/$NEWBDEV		No errors.
+fsck -p $REMOTE/$NEWBDEV		No errors reported.
+swapon $REMOTE/$NEWBDEV			Disk added as a swap device.
+
+mount $REMOTE/$NEWBDEV $localmntpt	Mount succeeds
+
+df $REMOTE/$NEWBDEV			Reasonable output with no error.
+bdf $REMOTE/$NEWBDEV			Reasonable output with no error.
+
+mkdir $localmntpt/d1			No error.
+touch $localmntpt/d1/t1			No error.
+<various things to make sure the
+	fs works.>
+
+umount $REMOTE/$NEWBDEV			No error, fs unmounted.
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 1 day
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: isolated interactive tests.
+	DEPENDENCIES: mountable disk attached to system for use by test
+	CTS: no
+	
+.fi
+.sp 3
+.H 2 "UNIX Domain Socket Tests"
+Assuming that with the support of UNIX domain sockets a test suite is made
+available for testing, this tests shall involve running these tests in a
+manner that would involve testing UNIX domain sockets over NFS.  This tests
+shall include creating, connecting to, and communicating over
+UNIX domain sockets.
+.nf
+
+	IMPLEMENT TIME: 4 hours (may be necessary to port tests)
+ 	PERFORM TIME: 1 day
+	TYPE OF TEST: functional
+	DEPENDENCIES: Existing UNIX domain socket test suite.
+	CTS: no
+	
+.fi
+.sp 3
+.H 2 "Stress Tests"
+.H 3 "Named pipe stress test"
+Stress could be put on named pipes in several ways.  First, we should
+simply try to access several NFS named pipes simultaneously.  Second,
+we should have several readers and several writers open the same
+named pipe simultaneously.  Finally, we should pump a single contigous
+large amount of data through the named pipe in a single write.
+.nf
+
+TEST CASE 1:
+
+    # SHOULD BE NO OUPTPUT
+    mk_tfile testfile 100000
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+	cat testfile >pipe.$i & cmp pipe.$i testfile >pipe.out.$i &
+    done
+    wait
+    rm testfile
+
+TEST CASE 2:
+    
+    #NOTE: output will be mixed up, can't verify output,
+    # other than to verify that all characters got through
+    mk_tfile testfile 100000
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+	cat testfile >pipe &
+    done
+    for i in 1 2 3 4 5 6 7 8 9 10
+    do
+	cat pipe >cat.out.$i &
+    done
+    wc -c cat.out* | tail -1
+    # OUTPUT should be "1000000 total"
+
+TEST CASE 3
+    
+    # Write a program to do the following:
+    # NOTE: Really should figure out max malloc space and use that
+    fd = open("pipe", O_RDWR);
+    buf = malloc(1000000);
+    for(i=0, i<1000000, i++)
+	buf[i] = i % 10;
+    fork()
+    if child
+    then
+	write(fd, buf, 1000000);
+    else
+        for (i=0; i <1000000; i++) {
+	    read(fd, &c, 1)
+            if ( c != buf[i] )
+			error();
+	}
+    fi
+
+.fi
+.nf
+
+	IMPLEMENT TIME: 4 hours
+ 	PERFORM TIME: 0.5 hours
+	TYPE OF TEST: stress
+	DEPENDENCIES: none
+	CTS: no
+	
+.fi

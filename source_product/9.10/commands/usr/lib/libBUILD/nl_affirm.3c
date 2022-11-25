@@ -1,0 +1,233 @@
+.\" $Header: nl_affirm.3c,v 66.1 90/09/28 14:12:43 georg Exp $
+.TH nl_affirm 3C
+.SH NAME
+nl_affirm \- determine user response
+.SH SYNOPSIS
+.nf
+.B int nl_affirm (userInput, yesExpr, noExpr)
+.B unsigned char *userInput;
+.B unsigned char *yesExpr;
+.B unsigned char *noExpr;
+.fi
+.SH DESCRIPTION
+Determine if 
+.I userInput 
+contains an acceptable 
+.IR yes " or " no " expression"
+according to the current locale.  
+For example, in the 
+.I C 
+(aka POSIX) locale several response strings
+would be affirmative(
+.RB ( y " or " ye " or " yes
+.RB "or " Y " or " YE " or "
+.BR YES " or " Yes " or " YEs
+.RB "or " YeS )
+and several response strings
+would be negative
+.RB ( n " or " no " or " N
+.RB "or " NO " or " No " or "
+.BR nO ).
+.PP
+The 
+.I userInput
+passed to 
+.I nl_affirm
+is a user response to some 
+.IR yes " or " no " query."
+.P
+If regular expressions for affirmative
+and negative responses are not available from
+the current locale,
+.I nl_affirm
+uses the expressions passed to it in
+.IR yesExpr " and " noExpr .
+If these are NULL pointers then 
+.I nl_affirm
+uses default expressions from the
+.IR C " locale."
+.SH RETURN VALUE
+.TP 5
+0
+The 
+.I userInput 
+is NEGATIVE.
+.TP 5
+1
+The 
+.I userInput 
+is AFFIRMATIVE.
+.TP 5
+2
+The 
+.I userInput 
+is AMBIGUOUS.  That is, it matched
+both the affirmative and negative expressions.
+.TP 5
+3
+The 
+.I userInput 
+is NEITHER affirmative or negative.
+.TP 5
+-1
+The
+.I nl_affirm 
+routine could not obtain both the affirmative
+and negative regular expressions from the current locale
+information (or from the parameters passed to it if the
+locale information was not available at all).
+.SH ERRORS
+If errors occur while compiling the regular expression
+or while using it, these are returned unchanged from
+the 
+.I regcomp (3C) 
+and 
+.I regexec (3C) 
+routines.  (The header file 
+.I <regex.h> 
+can be used to decode these error conditions.)
+.P
+If 
+.I nl_affirm
+cannot obtain both regular expressions from whichever
+source it decides to use (the locale or the parameters
+passed to it) this is treated as an error and 
+.I -1 
+is returned.
+.SH EXAMPLES
+The calling routine must set up the language
+environment, or the default C environment will be
+used.
+.PP
+.nf
+.in +5
+/*  For fgets and stdin and NULL:
+*/
+#include <stdio.h>
+
+/*  For setlocale (3C):
+*/
+#include <locale.h>
+
+ ...
+
+unsigned char userInput [1024];
+int userAns;
+
+if ((setlocale (LC_ALL, "")) == NULL)
+  {
+    (void) fprintf (stderr, "Error setting language.");
+    (void) fprintf (stderr, "-- Continuing in C.");
+  }
+
+/*  Print out a question to the user, 
+    including acceptable responses. 
+*/
+ ...
+
+/*  Read in the user input. 
+*/
+(void) fgets (userInput, 1023, stdin);
+
+/*  Call nl_affirm to figure out if the input is 
+    affirmative, negative or neither.  Request
+    that the routine get the regular expressions 
+    from the locale or from its default C locale
+    by using NULL for yesExpr and noExpr.
+*/
+userAns = nl_affirm (userInput, NULL, NULL);
+
+/*  Take action based on the user input.
+*/
+switch (userAns)
+  {
+    case 0:   /*  The user input was negative.
+              */
+                     ...
+    
+    case 1:   /*  The user input was affirmative.
+              */
+                     ...
+
+    case 2:   /*  The user input was ambiguous.
+                  Print another query, this time 
+                  requesting the user to be more
+                  specific in their input.  Read
+                  in the input and call nl_affirm
+                  again.
+              */
+                     ...
+
+    case 3:   /*  The user input was neither YES
+                  or NO. 
+              */
+                     ...
+
+    default:  /*  An error occurred, either in getting
+                  the expressions or in regcomp (3C) or
+                  in regexec (3C).  This might warrent
+                  trying again.  This time specify
+                  strings for the regular expressions
+                  if they can't be obtained from the
+                  locale.
+              */
+
+              userAns = nl_affirm (userInput, 
+                                   "y|ye|yes", "n|no");
+                     ...
+  }
+
+ ...
+.fi
+.in -5
+.PP
+.SH WARNINGS
+The 
+.I nl_langinfo 
+routine is used to obtain the affirmative
+and negative expressions.  If these are not
+available in the current locale, then the
+parameters passed to 
+.I nl_affirm
+are used.  If these are NULL, then default
+C locale expressions are used.  These
+defaults are
+.BR "y|ye|yes" " and " "n|no" .
+.PP
+The 
+.I regcomp (3C)
+routine is used to compile the regular
+expressions.  Flags used for this routine
+cause it to ignore case, so regular
+expressions used in 
+.I nl_affirm
+don't have to have to take case into account.
+The
+.I regexec (3C)
+routine is used to compare the regular
+expressions to the 
+.IR userInput string.
+.SH EXTERNAL INFLUENCES
+.SS Locale
+The
+.SM LC_MESSAGES
+category determines the values of 
+the regular expression for affirmative and
+negative responses.
+.SS International Code Set Support
+.PP
+Single-byte and multi-byte character code sets
+are supported.
+.SH AUTHOR
+.IR nl_affirm (3C)
+was developed by HP.
+.SH SEE ALSO
+setlocale(3C), nl_langinfo(3C), LANG(5).
+.SH "STANDARDS CONFORMANCE"
+???
+.\" index	\fInl_affirm\fR \- determine user response \fBnl_affirm(3C)\fR
+.\" index	determine user response 	 \fBnl_affirm(3C)\fR
+.\"
+.\" toc	\fBnl_affirm(3C)\fR:\0\0	 determine user response
+.\"
+.\" fileset_database	nl_affirm.3c PROG-AUX-MAN

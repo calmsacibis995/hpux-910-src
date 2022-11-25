@@ -1,0 +1,38 @@
+#! /bin/ksh
+#
+# this script builds a directory and is invoked as:
+# builddir dir_to_build
+# e.g. builddir /usr/include
+# This script must reside as a single file to give chroot something to
+# execute.
+#
+destloc=$1
+tfile="/tmp/build.nbp.$$"
+REP="REPS"
+CCOPTS="-DCRYPT -DSHARED_LIBS -DSYMLINKS -DHP_NFS -DNFS -DHPNFS -DNFS3_2 -DDISKLESS -DDUX -DCNODE_DEV -DLONGFILENAMES -DLONGFILENAME -DBSDJOBCTL -DQUOTA -DOLD_RFA -DSWFS -DHDBuucp -DNLS -DNLS8 -DNLS16 -DHFS -DCDROM -DPSTAT -D_NAMESPACE_CLEAN -DUT_HOST -DACLS -DAUDIT -DSHADOWPWD -DGETMOUNT -DLOCAL_DISK -DGT_64_FDS -DEUC -DAES -O -s -s -O"
+export CCOPTS
+
+cd /src/$destloc
+#
+# make the target
+#
+echo "--------------- target: $destloc ---------------" > $tfile
+make default >> $tfile 2>&1
+if [ $? -ne 0 ]
+then
+    cat $tfile >> /$REP/compile.err
+fi
+cat $tfile >> /$REP/compile
+rm -f $tfile
+
+#
+# install the target
+#
+echo "--------------- target: $destloc ---------------" > $tfile
+make install >> $tfile 2>&1
+if [ $? -ne 0 ]
+then
+    cat $tfile >> /$REP/install.err
+fi
+cat $tfile >> /$REP/install
+rm -f $tfile

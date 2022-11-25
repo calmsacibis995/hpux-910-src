@@ -1,0 +1,208 @@
+#!/bin/sh
+##	@(#)transfer	$Revision: 1.40.109.1 $	$Date: 91/11/19 13:58:07 $
+#	transfer	--	transfer use commands from us to them
+# Created by Cristina Mahon for the NFS project
+# This script transfers the user level commands from the
+# NFS's development machine to the machine that distributes
+# everything to all other machines.
+##
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# I need to define $Nfs because the machine/account this script will
+# be run from might not have $Nfs defined
+Nfs=/nfs/working
+DMACH=hpcndhf			# machine that distributes commands to others
+DDIR=source/newfs		# destination directory for transfer files
+XDIR=/source/NET/bin		# location of executables (eg. sush).
+
+if val=`$Nfs/bin/do_netunam hpcndhf`
+then
+ 	eval $val
+else
+	echo `date "+%y.%m.%d %T"` $0 $nfs abort
+	exit 1
+fi
+
+cd $Nfs/cmds
+for DIR in etc bin usr.etc usr.etc/yp usr.etc/vhe usr.bin ucb 
+do	
+	cd $DIR
+	DIRN=$DIR
+	echo "\nCommands in $DIR:"
+	if [ $DIR = "ucb" ]; then
+	   DIRN="usr/bin"
+	fi
+	if [ $DIR = "usr.etc" ]; then
+	   DIRN="usr/etc"
+	fi
+	if [ $DIR = "usr.bin" ]; then
+	   DIRN="usr/bin"
+	fi
+	if [ $DIR = "usr.etc/yp" ]; then
+	   DIRN="usr/etc/yp"
+	fi
+	if [ $DIR = "usr.etc/vhe" ]; then
+	   DIRN="usr/etc/vhe"
+	fi
+	for CMD in `ls`
+	do
+	   if [ -x $CMD -a ! -d $CMD ]; then
+	       	if [ ! -d /net/$DMACH/$DDIR/$DIRN ] ; then
+		    remsh $DMACH -l sca "mkdir /$DDIR/$DIRN"
+		    remsh $DMACH -l sca "chmod 777 /$DDIR/$DIRN" 2>/dev/null
+	    	fi
+
+		case $CMD
+		in
+		inetd)
+			continue	# handled later ...
+			;;
+		netnfsrc)
+			continue	# handled next ...
+			;;
+		*.b) 
+			continue	# don't transfer these
+			;;
+		*)
+			echo "$CMD"
+			remsh $DMACH -l sca "$XDIR/sush rm -f /$DDIR/$DIRN/$CMD"
+			rcp $CMD $DMACH.sca:/$DDIR/$DIRN/$CMD
+			remsh $DMACH -l sca "chmod 555 /$DDIR/$DIRN/$CMD"
+			remsh $DMACH -l sca "chgrp other /$DDIR/$DIRN/$CMD"
+			remsh $DMACH -l sca "chown root /$DDIR/$DIRN/$CMD"
+			if [ "$CMD" = "rup" -o "$CMD" = "rusers" ] ; then
+			    remsh $DMACH -l sca "$XDIR/sush chmod 4555 /$DDIR/$DIRN/$CMD"
+			fi
+			;;
+
+		esac	
+	   fi
+	done
+	cd $Nfs/cmds
+done
+echo "\nSpecial commands:"
+remsh $DMACH -l sca "$XDIR/sush mv /$DDIR/usr/etc/rpc.ypassd /$DDIR/usr/etc/rpc.yppasswdd"
+##
+#	move the special files from cmds/etc to newconfig
+##
+for FILE in rpc netnfsrc netgroup
+do
+    echo $FILE
+    remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/etc/newconfig/$FILE"
+    rcp $Nfs/cmds/etc/$FILE $DMACH.sca:/$DDIR/etc/newconfig/$FILE
+    remsh $DMACH -l sca "chmod 644 /$DDIR/etc/newconfig/$FILE"
+    remsh $DMACH -l sca "chgrp bin /$DDIR/etc/newconfig/$FILE"
+    remsh $DMACH -l sca "chown root /$DDIR/etc/newconfig/$FILE"
+done
+##
+#	copy over the YP transfer files (not executable, crontab format)
+##
+for CMD in ypxfr_1perda ypxfr_2perda 
+do
+    echo "${CMD}y" 
+    remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/etc/yp/${CMD}y"
+    rcp $Nfs/cmds/usr.etc/yp/$CMD $DMACH.sca:/$DDIR/usr/etc/yp/${CMD}y
+    remsh $DMACH -l sca "chmod 544 /$DDIR/usr/etc/yp/${CMD}y"
+    remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/yp/${CMD}y"
+    remsh $DMACH -l sca "chown root /$DDIR/usr/etc/yp/${CMD}y"
+done
+##
+#	and some other special stuff
+##
+echo "yp_Makefile"
+remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/etc/yp/Makefile"
+rcp $Nfs/cmds/usr.etc/yp/make.script $DMACH.sca:/$DDIR/usr/etc/yp/Makefile
+remsh $DMACH -l sca "chmod 444 /$DDIR/usr/etc/yp/Makefile"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/yp/Makefile"
+remsh $DMACH -l sca "chown root /$DDIR/usr/etc/yp/Makefile"
+
+echo "ypxfr_1perhour" 
+remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/etc/yp/ypxfr_1perhour"
+rcp $Nfs/cmds/usr.etc/yp/ypxfr_1perhr $DMACH.sca:/$DDIR/usr/etc/yp/ypxfr_1perhour
+remsh $DMACH -l sca "chmod 544 /$DDIR/usr/etc/yp/ypxfr_1perhour"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/yp/ypxfr_1perhour"
+remsh $DMACH -l sca "chown root /$DDIR/usr/etc/yp/ypxfr_1perhour"
+
+echo "ypserv"
+remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/etc/ypserv"
+rcp $Nfs/cmds/usr.etc/ypserv/ypserv $DMACH.sca:/$DDIR/usr/etc/ypserv
+remsh $DMACH -l sca "chmod 544 /$DDIR/usr/etc/ypserv"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/ypserv"
+remsh $DMACH -l sca "chown root /$DDIR/usr/etc/ypserv"
+
+echo "revnetgroup"
+remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/etc/yp/revnetgroup"
+rcp $Nfs/cmds/usr.etc/yp/revnetgroup/revnetgroup $DMACH.sca:/$DDIR/usr/etc/yp/revnetgroup
+remsh $DMACH -l sca "chmod 544 /$DDIR/usr/etc/yp/revnetgroup"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/yp/revnetgroup"
+remsh $DMACH -l sca "chown root /$DDIR/usr/etc/yp/revnetgroup"
+
+echo "rpc.lockd"
+remsh $DMACH -l sca "$XDIR/sush rm -f /$DDIR/etc/rpc.lockd"
+rcp $Nfs/cmds/etc/rpc.lockd/rpc.lockd $DMACH.sca:/$DDIR/etc/rpc.lockd
+remsh $DMACH -l sca "chmod 500 /$DDIR/etc/rpc.lockd"
+remsh $DMACH -l sca "chgrp other /$DDIR/etc/rpc.lockd"
+remsh $DMACH -l sca "chown root /$DDIR/etc/rpc.lockd"
+
+echo "rpc.statd"
+remsh $DMACH -l sca "$XDIR/sush rm -f /$DDIR/etc/rpc.statd"
+rcp $Nfs/cmds/etc/rpc.statd/rpc.statd $DMACH.sca:/$DDIR/etc/rpc.statd
+remsh $DMACH -l sca "chmod 500 /$DDIR/etc/rpc.statd"
+remsh $DMACH -l sca "chgrp other /$DDIR/etc/rpc.statd"
+remsh $DMACH -l sca "chown root /$DDIR/etc/rpc.statd"
+
+echo "rpcgen"
+remsh $DMACH -l sca "$XDIR/sush rm -f /$DDIR/usr/bin/rpcgen"
+rcp $Nfs/cmds/usr.bin/rpcgen/rpcgen $DMACH.sca:/$DDIR/usr/bin/rpcgen
+remsh $DMACH -l sca "chmod 555 /$DDIR/usr/bin/rpcgen"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/bin/rpcgen"
+remsh $DMACH -l sca "chown root /$DDIR/usr/bin/rpcgen"
+
+echo "rexd"
+remsh $DMACH -l sca "$XDIR/sush rm -f /$DDIR/usr/etc/rpc.rexd /$DDIR/usr/etc/on"
+rcp $Nfs/cmds/usr.etc/rexd/rexd $DMACH.sca:/$DDIR/usr/etc/rpc.rexd
+rcp $Nfs/cmds/usr.etc/rexd/on $DMACH.sca:/$DDIR/usr/etc/on
+remsh $DMACH -l sca "chmod 500 /$DDIR/usr/etc/rpc.rexd"
+remsh $DMACH -l sca "chmod 555 /$DDIR/usr/etc/on"
+remsh $DMACH -l sca "chgrp other /$DDIR/usr/etc/rpc.rexd /$DDIR/usr/etc/on"
+remsh $DMACH -l sca "chown root /$DDIR/usr/etc/rpc.rexd /$DDIR/usr/etc/on"
+##
+#	Transfer libraries
+#	Only the ones that are not in libc.a
+cd $Nfs/cmds
+#LIBLIST="libc/net/libnet.a libc/rpc/librpc.a libc/yp/libyp.a \
+#	 libc/hooks/libnfshooks.a usr.lib/libdbm/libdbm.a    \
+#	 usr.lib/librpcsvc/librpcsvc.a"
+LIBLIST="usr.lib/libdbm/libdbm.a usr.lib/librpcsvc/librpcsvc.a"
+for LIB in $LIBLIST
+do
+	echo $LIB
+	NAME=`basename $LIB`
+	remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/lib/$NAME"
+	rcp $LIB $DMACH.sca:/$DDIR/usr/lib/$NAME
+	remsh $DMACH -l sca "chmod 444 /$DDIR/usr/lib/$NAME"
+	remsh $DMACH -l sca "chgrp bin /$DDIR/usr/lib/$NAME"
+	remsh $DMACH -l sca "chown bin /$DDIR/usr/lib/$NAME"
+done
+
+#Transfer include files
+cd $Nfs/include
+INCLIST="nfs/nfs.h nfs/nfs_clnt.h nfs/rnode.h rpc/auth.h \
+	 rpc/auth_unix.h rpc/clnt.h rpc/pmap_clnt.h rpc/pmap_prot.h \
+	 rpc/rpc.h rpc/rpc_msg.h rpc/svc.h rpc/svc_auth.h rpc/types.h \
+	 rpc/xdr.h rpcsvc/mount.h rpcsvc/rstat.h rpcsvc/rusers.h \
+	 rpcsvc/rwall.h rpcsvc/spray.h rpcsvc/yp_prot.h rpcsvc/ypclnt.h \
+	 rpcsvc/yppasswd.h rpcsvc/ypv1_prot.h rpcsvc/klm_prot.h \
+	 rpcsvc/nlm_prot.h rpcsvc/sm_inter.h rpcsvc/rex.h"
+
+for INC in $INCLIST
+do
+	echo $INC
+	remsh $DMACH -l sca "$XDIR/sush rm /$DDIR/usr/include/$INC"
+	rcp $INC $DMACH.sca:/$DDIR/usr/include/$INC
+	remsh $DMACH -l sca "chmod 444 /$DDIR/usr/include/$INC"
+	remsh $DMACH -l sca "chgrp bin /$DDIR/usr/include/$INC"
+	remsh $DMACH -l sca "chown bin /$DDIR/usr/include/$INC"
+done
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

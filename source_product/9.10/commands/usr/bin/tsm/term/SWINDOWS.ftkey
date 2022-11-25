@@ -1,0 +1,53 @@
+# Default function key file for terminals without a specified default
+# Include the following in the .facet file: ( remove leading # and tab )
+
+#	function_keys=SWINDOWS.ftkey
+
+## @(#) $Header: SWINDOWS.ftkey,v 70.1 92/03/09 16:12:20 ssa Exp $
+
+L1	 Win 1
+S1	\h1
+L2	 Win 2
+S2	\h2
+L3	 Win 3
+S3	\h3
+L4	 Win 4
+S4	\h4
+L5	Win-Last
+S5	\hl
+L6	Win-Next
+S6	\h+\040
+L7	Hot-Key
+S7	\h
+L8	Menu
+S8	\m
+labels_on
+label_attr_reverse
+label_attr_dim_reverse
+status_line_attr_reverse
+status_line_attr_dim_reverse
+* Win %d sF1-sF4: Select  sF5: Win-Last  sF6: Win-Next  sF7: Hot-key sF8: Menu
+##### on window 1 only #####
+W1
+L1	*Win 1
+S1	\h1
+* Win %d  sF1-sF4: Select  sF5: Win-Last  sF6: Win-Next  sF7: Hot-key  sF8: Menu
+labels_on
+##### on window 2 only #####
+W2
+L2	*Win 2
+S2	\h2
+* Win %d  sF1-sF4: Select  sF5: Win-Last  sF6: Win-Next  sF7: Hot-key  sF8: Menu
+labels_on
+##### on window 3 only #####
+W3
+L3	*Win 3
+S3	\h3
+* Win %d  sF1-sF4: Select  sF5: Win-Last  sF6: Win-Next  sF7: Hot-key  sF8: Menu
+labels_on
+##### on window 4 only #####
+W4
+L4	*Win 4
+S4	\h4
+* Win %d  sF1-sF4: Select  sF5: Win-Last  sF6: Win-Next  sF7: Hot-key  sF8: Menu
+labels_on

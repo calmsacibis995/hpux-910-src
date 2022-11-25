@@ -1,0 +1,11 @@
+## FacetTerm  vt220-7 COMMON (80 column only)  description file  05/17/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt220-7.FC,v 70.1 92/03/09 16:06:47 ssa Exp $
+use=vt220mode7.fc
+use=vt220narr.fc
+use=vt220mode.fc
+use=vt220ans.fc
+use=vt220com.fc
+use=vt220attr.fc
+use=vt220func.fc
+use=vt220keys.fc

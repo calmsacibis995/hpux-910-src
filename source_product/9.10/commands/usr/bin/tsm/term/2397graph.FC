@@ -1,0 +1,13 @@
+## FacetTerm  2397graph COMMON  description file 04/02/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2397graph.FC,v 70.1 92/03/09 15:49:46 ssa Exp $
+graph_mode_start-graphics_display_control....=\E*d%H1
+graph_mode_start-graphics_text_defaults_lines=\E*m%H1
+graph_mode_start-perform_action..............=\E*p%H1
+graph_mode_start-compatibility...............=\E*t%H1
+graph_mode_start-............................=\E*l%s1\r
+graph_mode_start-............................=\E*l%s1\n
+graph_mode_start-............................=\E&k1O
+graph_mode_clear=\E*daceT
+### alpha_on graphics_clear graphics_on grapics_cursor_off graphics_text_off
+out_graph_mode_clear=\E*dacelT\E&k0O

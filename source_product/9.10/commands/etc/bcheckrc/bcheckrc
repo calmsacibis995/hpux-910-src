@@ -1,0 +1,234 @@
+#!/bin/sh
+# @(#) $Revision: 70.10 $
+#
+# This file has those commands necessary to check the file
+# system, and anything else that should be done before mounting
+# the file systems.
+#
+# NOTE: This script is not configurable!  Any changes made to this
+#       scipt will be overwritten when you upgrade to the next release
+#       of HP-UX
+
+trap "" 2
+
+#
+# The variable DOECHO controls the echoing of NON-error messages
+# from bcheckrc.  To turn off these "progress" messages set DOECHO=FALSE.
+#
+DOECHO=TRUE
+
+
+if [ "$DOECHO" = "TRUE" ]
+then
+   echo "/etc/bcheckrc:\n"
+fi
+
+# Disk Mirroring...
+#
+# If /etc/mirrorrc exists and /etc/bcheckrc is invoked without
+# any argument (i.e. when run by init), execute /etc/mirrorrc.
+# Tasks performed by /etc/mirrorrc include: configuring mirrors,
+# running fsck, invoking mirrorlog and then reimaging mirrors.
+#
+if hp9000s800 && [ -x /etc/mirrorrc -a -z "$1" ]; then
+	exec /etc/mirrorrc fsck
+	exit 1 #should never get here
+fi
+
+
+#
+# Activate LVM volume groups.
+# Each logical volume will be activated according to its mirror
+# consistency recovery policy.
+#
+if hp9000s800 && [ -x /etc/lvmrc ]
+then
+	if [ "$DOECHO" = "TRUE" ]
+	then
+	   echo "Checking for LVM volume groups and Activating (if any exist)"
+	fi
+	/etc/lvmrc
+fi
+
+#
+# Run eisa_config in automatic mode on the series 700s (if appropriate).
+#
+machine=`/bin/uname -m`
+if hp9000s700 && [ "$machine" != 9000/705 -a "$machine" != 9000/710 ]; then
+
+    #
+    # Figure out if we should run eisa_config. There are three cases:
+    #    o  the root file system is already clean -- run eisa_config
+    #    o  /dev/rroot is not there (this is a client) -- run eisa_config
+    #    o  the root file system is not clean -- don't run eisa_config
+    #       (we will reboot again after the root file system is fixed) 
+    #
+    if [ -c /dev/rroot ]; then
+        /etc/fsclean /dev/rroot
+        status=$?
+    else
+	status=0
+    fi
+
+    if  [ $status = 0 ]; then
+
+	# Set the timezone (if the script is there)
+	if [ -r /etc/src.sh ]; then
+	   . /etc/src.sh
+	fi
+
+	# Run the eisa_config program if it is present
+	if [ -x /etc/eisa_config ]; then
+	    /etc/eisa_config -a
+	    # Now handle the return code from eisa_config. Most codes mean
+	    # go on with the boot. A few of the codes, however, mean reboot
+	    # the system or halt the system. All error messages are
+	    # displayed by the eisa_config program.
+	    case $? in
+		1 | 10)		/etc/reboot ;;
+		11 | 12)	/etc/reboot -h ;;
+	    esac
+	else
+	    echo "eisa_config is not present -- cannot check eisa configuration"
+	fi
+
+    fi
+
+fi
+
+
+#
+# Load the appropriate keymap.  If the interface_type is HIL, query the 
+# keyboard for its language.  If the interface type is PS2, install 
+# the mapping specified by "-l <map_name>".
+#
+itemap_option=""
+if [ -f /etc/kbdlang ]
+then
+   read MAP_NAME filler < /etc/kbdlang
+   itemap_option="-l $MAP_NAME"
+fi
+
+if [ -x /etc/itemap ] && [ -f /usr/lib/X11/XHPKeymaps ]
+then
+   itemap -i -L $itemap_option -w /etc/kbdlang
+fi
+
+
+#
+# Check the file systems, if necessary.
+# The kernel will mark the file systems clean if the disk was unmounted
+# before system shutdown or the system was shutdown cleanly.  If the
+# file system marked clean, we don't need to run fsck.
+#
+status=0
+stty clocal icanon echo opost onlcr ienqak ixon icrnl ignpar erase "^h"
+
+trap "echo Interrupt" 2
+
+if [ "$DOECHO" = "TRUE" ]
+then
+   /etc/fsclean -v
+else
+   /etc/fsclean 
+fi
+clean_status=$?
+case $clean_status in
+0)
+    if [ "$DOECHO" = "TRUE" ]; then 
+       echo "File system is OK, not running fsck"
+    fi
+    ;;
+1|3)
+    if [ $clean_status = 3 ]; then
+	echo "\007fsclean RETURNED AN ERROR, CHECK /etc/checklist FILE"
+	status=3
+    fi
+    echo "\007\007FILE SYSTEM(S) NOT PROPERLY SHUTDOWN, BEGINNING FILE SYSTEM REPAIR"
+    /etc/fsck -P -F
+    case $? in
+    0)
+	echo "FILE SYSTEM IS FIXED"
+	;;
+    4)
+	echo "\007\n\n"
+	echo "ROOT FILE SYSTEM MODIFIED"
+	echo "\007\007REBOOTING SYSTEM TO UPDATE KERNEL DATA STRUCTURES"
+	exec /etc/reboot -n -q
+	;;
+    8)
+	echo "\007\n\n"
+	echo "COULD NOT FIX FILE SYSTEM WITH  fsck -P, RUN fsck INTERACTIVELY!"
+	echo "STARTING A SHELL FOR MANUAL fsck, ^D WHEN FILE SYSTEM FIXED"
+	if [ $clean_status = 3 ]; then
+	    echo "THIS COULD BE DUE TO A BAD /etc/checklist FILE"
+	    echo "IF SO, FIX /etc/checklist AND ^D WHEN FINISHED"
+	fi
+
+	PS1="(in bcheckrc)# "
+	export PS1
+	/bin/sh
+	echo "CONTINUING bcheckrc"
+	;;
+    12)
+	echo "\007\n\n"
+	echo "FSCK INTERRUPTED"
+	echo "STARTING A SHELL FOR MANUAL fsck, ^D WHEN FILE SYSTEM FIXED"
+	PS1="(in bcheckrc)# "
+	export PS1
+	/bin/sh
+	echo "CONTINUING bcheckrc"
+	;;
+    *)
+	echo "\007\n\n"
+	echo "UNEXPECTED ERROR DURING fsck -P, RUN fsck INTERACTIVELY!"
+	echo "STARTING A SHELL FOR MANUAL fsck, ^D WHEN FILE SYSTEM FIXED"
+	PS1="(in bcheckrc)# "
+	export PS1
+	/bin/sh
+	echo "CONTINUING bcheckrc"
+	;;
+    esac
+    ;;
+*)
+    echo "/etc/bcheckrc:\n"
+    echo "\007fsclean RETURNED AN ERROR, CONTINUING, BUT CHECK /etc/checklist FILE"
+    status=2
+    ;;
+esac
+
+#
+# Make sure /lib is not mounted.  /lib must not be a mounted volume
+# or improper system operation may be observed.
+#
+if [ -s /etc/checklist ]; then
+    error=0
+    case "`/bin/getcontext`" in
+    *localroot*|*)
+	if [ -h /lib -o ! -d /lib ]; then
+	    error=1
+	else
+	    error=`while read device dir type junk; do
+		if [ "$dir" = /lib -a "$type" != ignore -a \
+		      "$type" != swap -a "$type" != swapfs ]; then
+		    echo 1
+		fi
+	    done < /etc/checklist`
+	fi
+	;;
+    esac
+
+    case "$error" in
+    1*)
+	echo "\007ERROR:   /lib must be a regular directory on the root partition." >&2
+	echo "\t Your system has an unsupported configuration for /lib." >&2
+	echo "\t Improper system operation may be observed when /lib is" >&2
+	echo "\t not a regular directory on the root partition.\007" >&2
+	echo >&2
+	echo "\007WARNING: mounting all local file systems so that /lib is available." >&2
+	/etc/mount -a -t hfs && echo "local file systems mounted"
+	;;
+    esac
+fi
+
+exit $status

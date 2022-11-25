@@ -1,0 +1,20 @@
+############################################################################
+# TSM user customizable file: .tsmprint, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./
+#     $HOME/
+#     /usr/tsm/
+#
+# It is recommended that you copy this file to $HOME/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+#
+# .tsmprint - script run to output TSM screen to printer
+# $1 is the name of a temporary file containing the screen image
+############################################################################
+# @(#) $Header: .tsmprint,v 66.9 90/11/21 18:55:59 jag Exp $
+lp -c -s $1

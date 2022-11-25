@@ -1,0 +1,24 @@
+#!/bin/ksh
+# @(#) $Revision: 66.3 $
+#
+fileset=PROG-AUX
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $1
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they dont already exist
+# or were not customized.
+#======
+cksum_cp $newconfig/termcap /etc/termcap "3774 84"
+
+exit $exitval

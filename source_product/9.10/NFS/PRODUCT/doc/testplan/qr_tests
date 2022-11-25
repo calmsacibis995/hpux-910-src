@@ -1,0 +1,46 @@
+
+.H 1 "Quick Regression (Jeff Elison)"
+
+.H 2 "Goals"
+.nf
+
+a) effective set of tests
+b) easy to run
+c) runs fairly quickly - approx. 20 minutes
+
+.fi
+.H 2 "Basic Test Configuration"
+.nf
+               ________                  ________
+              |        | -------------> |   9K   |
+              |  9K    |                |   or   |
+              |        | <------------- |  SUN   |
+               --------                  --------
+.fi
+
+.H 2 "Vital Statistics"
+.nf
+
+RESPONSIBLE ENGINEER: Jeff Elison
+IMPLEMENT TIME:  9.0  md 
+PERFORM TIME:    6.0  md
+
+
+TYPE OF TESTS: shortened versions of a subset of the functional tests
+EXPECTED OUTPUT: no failed messages in ...scaf/RESULTS/<resultsfile>
+
+.fi
+.H 2 "Development Strategy"
+.nf
+
+a) Will start by porting rfa test suite. 20md
+b) Modify tests for differing file system functionality.  (e.g.
+   cd does not behave the same with NFS) 2md
+c) Add tests for NFS specific functionality.  (mount, umount) 3md
+d) Add appropriate tests from the NerFS functional tests. 2md
+
+Most of the tests chosen for the Quick Regression Test Suite will
+be from section 2 of the brick pages.  Since the commands in section
+1 and section 3 rely on the commands in section 2, this will be the
+more efficient set of tests for exercising the system.
+.fi

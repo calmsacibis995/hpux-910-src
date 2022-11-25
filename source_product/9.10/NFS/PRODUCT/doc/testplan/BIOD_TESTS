@@ -1,0 +1,136 @@
+.H 2  "Biod (Cristina Mahon)"
+
+.PP
+Biod is the NFS asynchronous block I/O daemon.  It is used by the
+NFS client to buffer cache handle read-ahead and write-behind.  It is possible
+to start several biod's in parallel.
+.PP
+The command line for biod is:
+.sp
+           biod [nservers]
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  2.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Run biod without being superuser"
+.sp 1
+.PP
+Verify that biod cannot be started if you are not the superuser. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "You must be root to run biod"
+.fi
+.sp 2
+.H 3  "Test biod with extra arguments"
+.sp 1
+.PP
+Biod should only accept one argument, a positive number.  This test invokes biod
+with more than one argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a negative argument"
+.sp 1
+.PP
+This test invokes biod with a negative number as an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with zero for an argument"
+.sp 1
+.PP
+This test invokes biod with an argument that is zero.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Sun returns no error message, but does not start biod.
+       We currently do the same.  An enhancement may be added
+       to return:
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a non-numeric argument"
+.sp 1
+.PP
+This test invokes biod with an argument that is not a number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Sun returns no error message, but does not start biod.
+       We currently do the same.  An enhancement may be added
+       to return:
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a large number for an argument"
+.sp 1
+.PP
+This test invokes biod with a very large number for an argument.
+The purpose of this test is to create a condition so that biod will be
+unable to fork.  The number to be used should be large enough to provoke 
+that problem.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "biod cannot fork"
+.fi
+.sp 2
+.H 3  "Start biod when another one already running"
+.sp 1
+.PP
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       The second batch of biod daemons should start.
+.fi
+.sp 2
+.H 3  "Test biod without arguments"
+.sp 1
+.PP
+This test invokes biod without an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       one biod should start running.
+.fi
+.sp 2
+.H 3  "Kill biod with signal 15"
+.sp 1
+.PP
+This test kills biod by doing a "kill pid".
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       Biod dies properly.
+.fi
+.sp 2
+

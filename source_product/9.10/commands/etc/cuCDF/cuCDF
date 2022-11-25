@@ -1,0 +1,4 @@
+#!/bin/sh
+# Remote version of cu
+echo "cu must be run on the root server"
+

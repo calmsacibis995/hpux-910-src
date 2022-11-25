@@ -1,0 +1,59 @@
+# $Source: /source/hpux_source/networking/rcs/arpa90_800/xntp/ntptrace/RCS/Makefile.in,v $
+# $Revision: 1.2.109.1 $	$Author: mike $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/10/27 10:45:32 $
+
+#
+# Makefile.in,v 3.1 1993/07/06 01:09:36 jbj Exp
+#
+PROGRAM=	ntptrace
+#
+# ntptrace - private mode query program for ntptrace
+#
+COPTS=		@COPTS@
+BINDIR=		@bindir@
+DEFS=		@DEFS@
+RESLIB=		@RESLIB@
+ADJLIB=		@ADJLIB@
+COMPAT=		@COMPAT@
+#
+INCLUDE=	@INCLUDE@
+CFLAGS=		$(COPTS) $(DEFS) $(INCLUDE)
+CC=		@CC@
+LIB=		@LIB@
+LINTLIB=	../lib/llib-llibntp.ln
+MAKE=		make
+#
+OBJS=	ntptrace.o
+SOURCE=	ntptrace.c
+
+all:	$(PROGRAM)
+
+$(PROGRAM): $(OBJS) version.o $(LIB)
+	$(CC) $(COPTS) -o $@ $(OBJS) version.o $(LIB) $(RESLIB) \
+		$(ADJLIB) $(COMPAT)
+
+install:	$(PROGRAM)
+	install -c -m 0755 $(PROGRAM) $(BINDIR)
+
+tags:
+	ctags *.c *.h
+
+depend:
+	mkdep $(CFLAGS) $(SOURCE)
+
+clean:
+	rm -f $(PROGRAM) *.o *.out tags make.log Makefile.bak lint.errs
+
+distclean:	clean
+	rm -f Makefile
+
+lint:	$(LINTLIB)
+	lint -x -u $(DEFS) $(INCLUDE) $(LINTLIB) $(SOURCE) >lint.errs
+
+../lib/llib-llibntp.ln:
+	cd ../lib ; $(MAKE) $(MFLAGS) lintlib
+
+../libc/libntp.a:
+	cd ../libntp ; $(MAKE) $(MFLAGS)
+

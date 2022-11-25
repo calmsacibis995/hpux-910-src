@@ -1,0 +1,37 @@
+
+*
+* 
+* @(#) $Revision: 1.7 $
+* CD-ROM fs, for support of a single CD media.
+* Comment out the shmem line, as it does not currently work
+* cards
+* drivers
+* networking for network installs
+* options
+* shmem 0
+* with the IF3 300 kernel.
+* would like to say '0' for num_lan_cards, but ld fails if we do that
+98624
+98625
+98626
+98642
+cdfs
+cs80
+fpa 0
+inet
+lan01
+maxusers 1
+mesg 0
+nbuf 20
+ncallout 88
+ndilbuffers 1
+nflocks 2
+nproc 10
+npty 1
+num_lan_cards 1
+option NOSWAP
+ramdisc
+scsi
+scsitape
+sema 0
+uipc

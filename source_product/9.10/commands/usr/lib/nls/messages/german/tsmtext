@@ -1,0 +1,770 @@
+# 
+# LOCALIZERS:
+#  This file contains almost all the messages displayed by TSM. Any line 
+#  starting with "#" character in its first column (such as this one) is a
+#  comment and is ignored. 
+#  Lines beginning with "!" charactre are special and should not be modified.
+#  Many of such these lines (beginning with ! character) are commented out.
+#  This means that a built-in message will be displayed by TSM. The built-in
+#  message is included as a comment. If you wish to localize such messages,
+#  uncomment the line beginning with "!" character and then insert your 
+#  translation after the line.
+#
+#  Make sure you read all the comments below; especially the steps for
+#  changing key mappings.  Also, read the README.localize file before you
+#  continue with this file.
+#
+#############################################################################
+### /usr/tsm/text/C/tsmtext   10/25/90
+#############################################################################
+### Changing TSM text strings.
+### 
+###     Any of the text strings output to the terminal by TSM such
+###     as prompts or user errors can be redefined.  An example of
+###     the use of this feature would be changing the language to something
+###     other than English.
+### 
+###     When TSM starts, it will search for this data file "tsmtext" in the 
+###     following sequence:
+###
+###     ./.tsmtext/$LANG/tsmtext
+###     ./.tsmtext/$C/tsmtext
+###     ./.tsmtext/tsmtext
+###     $HOME/.tsmtext/$LANG/tsmtext
+###     $HOME/.tsmtext/C/tsmtext
+###     $HOME/.tsmtext/tsmtext
+###     /usr/tsm/text/$LANG/
+###     /usr/tsm/text/C/
+###     /usr/tsm/text/
+###
+###     It is recommended that you copy this file to $HOME/.tsmtext/
+###     for customization.
+###
+###     If tsm has not been installed in the standard path, /usr/tsm,
+###     then set the environment variable, $TSMPATH to the location of
+###     tsm directory on your system.
+### 
+###     If this file exists, TSM will read it
+###     looking for lines of the form:
+### 
+###             !text_string_name
+### 
+###     where the  "!"  must be in column 1, and the "text_string_name" 
+###     matches one of the names of the strings that can be redefined.
+### 
+###     Upon finding such a line, the contents of the next line that does
+###     not begin with a "#" replaces the default contents of the text
+###     string.
+### 
+###     For example, a file that contains the following:
+### 
+###             !facet_activating
+###             #Facet process: activating\r\n
+###             FACET/TERM is now activating its windows...\r\n
+### 
+###             !facetterm_window_label
+###             #FACET/TERM Window %d\n
+###             This is FACET/TERM Window Number %d \n
+### 
+###     will change the default messages shown on the lines starting with
+###     the '#' to the new contents shown on the line after them.
+### 
+###     The file "/usr/tsm/text/C/tsmtext" contains all of the valid
+###     text string names and the default contents of the strings
+### 
+###     The processor for these strings understands:
+### 
+###             \r      for carriage return
+###             \n      for line feed
+###             \s      for space
+###             \\      for backslash
+### 
+###     Since the terminal is in raw mode when most of these strings are
+###     output, you will see the combination "\r\n" used for going to the
+###     beginning of the next line. "\s" is used for trailing spaces to
+###     make them visible.
+### 
+###     As you can see by the default contents of the text strings, most
+###     of them are input to printf or sprintf with parameters to fill
+###     in window numbers, etc.  Changing the "%" fields of the strings
+###     should be done only by programmers aware of the consequences of
+###     making an invalid call to sprintf.
+###
+###     Names that begin "in_" are for remapping keys at the corresponding
+###     input prompt.  The syntax is:
+###             key repl_key [repl_key ...] [ \0 key repl_key [repl_key ...] ]
+###     For example:
+###
+###             !get_command_capture_active
+###             #Capture active on '%s' - N=stop Y=new file
+###             Capture active on '%s' - X=stop J=new file
+###
+###             !in_get_command_capture_active
+###             XN\0xn\0JY\0jy
+###             
+###     means X maps to N
+###           x maps to n
+###           J maps to Y
+###           j maps to y
+###             
+###     Y and N would still work unless they were mapped to invalid keys.
+###     This remapping affects the keyboard only - not commands through
+###     ioctls.
+#############################################################################
+
+# LOCALIZERS:
+#  The following 19 entries are innformative and error messages TSM displays 
+#  at various times during its execution. When translating, minimize the
+#  length of the translated string.
+
+!number_of_windows
+#\nNumber of windows set to %d\n
+\nAnzahl der Sessions ist %d\n
+
+!facet_line_available
+#Facet process: Facet line # %d is available.\n
+TSM-Prozeﬁ: TSM-Leitung %d ist verfœgbar.\n
+
+!all_facet_busy
+#Facet process: All Facet lines are busy. (%d)\n
+#Facet process: All psuedo ttys are busy.\n
+TSM-Prozeﬁ: Alle pseudo ttys sind belegt.\n
+
+!driver_not_installed
+#Facet process: Facet driver not properly installed. (%d)\n
+TSM-Prozeﬁ: TSM-Treiber nicht korrekt installiert. (%d)\n
+
+
+!assign_facet_busy
+#Facet process: Assigned Facet line is busy.\n
+TSM-Prozeﬁ: Zugewiesene TSM-Leitung belegt.\n
+
+!assign_facet_exist
+#Facet process: Assigned Facet line does not exist. (%d)\n
+TSM-Prozeﬁ: Zugewiesene TSM-Leitung existiert nicht. (%d)\n
+
+!cannot_open_dev_facet
+#Facet process: can't open %s, error %d\n
+TSM-Prozeﬁ: %s nicht zu Œffnen, Fehler %d\n
+
+!facet_activating
+#Facet process: activating\r\n
+TSM-Prozeﬁ: Aktivierung\r\n
+
+!sender_wait_close
+#Facet process: sender waiting for windows to close...\n
+TSM-Prozeﬁ: Sender wartet auf Ende der Sessions...\n
+
+!facet_attempt_kill
+#Facet process: attempting to kill processes that would not hang up...\n
+TSM-Prozeﬁ: Versuch, unbeendete Prozesse zu beenden...\n
+
+!facet_attempt_list
+#Facet process: attempting to list processes that would not hang up...\n
+TSM-Prozeﬁ: Versuch, unbeendete Prozesse aufzulisten...\n
+
+!sender_term_wait_close
+#Facet process: sender terminating - waiting for windows to close...\n
+TSM-Prozeﬁ: Sender endet - wartet auf Ende der Sessions...\n
+
+!sender_term
+#Facet process: sender terminating...\n
+TSM-Prozeﬁ: Sender endet...\n
+
+!window_is_active
+#\r\n>>>Window %d is active.<<<\r\n
+\r\n>>>Session %d ist aktiv<<<\r\n
+
+!window_is_idle
+#\r\n>>>Window %d is idle.<<<\r\n
+\r\n>>>Session %d passiv, œber Menœ "Ausfœhren" aktivieren<<<\r\n
+
+!user_number
+#FACET/TERM user # %d of %d  - \s
+TSM-Benutzer # %d von %d  - \s
+
+!too_many_users
+#Sorry - %d FACET/TERM users already active\n
+Bereits %d TSM-Benutzer aktiv\n
+
+!facetterm_window_label
+#FACET/TERM Window %d\n
+TSM-Session %d\n 
+
+!window_printer_mode
+#Transparent print mode\n
+Modus fœr nicht œberwachtes Drucken\n
+
+!window_mode_prompt
+# >>> FACET/TERM Window %2d %s<<<\s
+>>> TSM-Session %2d %s  '?' fœr Hilfe <<<\s
+
+#   LOCALIZERS:
+# The following entry can be used to change the mapping of letters recognized
+# with the ^W (control-W) hot key.  Default, English recognized letters are:
+#       '/" to change session title
+#       C/c for the cut operation
+#       G/g to load softkey labels for all sessions
+#       K/k to load softkey labels for a single session
+#       L/l switch to last session
+#       O/o to print the screen
+#       P/p for the paste operation
+#       Q/q to quit TSM
+#       R/r to run a program
+#       S/s to start a shell
+#       X/x to access extra commands (see !get_command_extra_commands)
+# To change any of these, uncomment the "!in_window_mode_prompt" line below
+# and follow the normal key mapping steps described at the beginning of this
+# file.
+
+#!in_window_mode_prompt
+#
+
+# LOCALIZERS:
+#  Do NOT localize the following 6 keywords; i.e.: window_mode_prompt_bottom,
+#  window_mode_prompt_top, window_mode_prompt_full, window_mode_prompt_popup,
+#  in_window_mode_prompt_popup, window_mode_prompt_default.
+
+#!window_mode_prompt_bottom
+#bottom\s
+
+#!window_mode_prompt_top
+#top   \s
+
+#!window_mode_prompt_full
+#full  \s
+
+#!window_mode_prompt_popup
+#popup \s
+
+#!in_window_mode_prompt_popup
+#
+
+#!window_mode_prompt_default
+#
+
+# LOCALIZERS:
+#   The following 15 entries are more diagnostic messages used by TSM. 
+#   Some are completely commented out. To localize such messages, uncomment 
+#   the lable (line starting with !) and insert your translation after the
+#   lable.
+
+!full_switch_window
+#Switching to FACET/TERM Window %d
+Wechsel zu TSM-Session %d
+
+!full_refresh_window
+#Refreshing FACET/TERM Window %d
+Anzeige erneuern %d
+
+!screen_saver
+#FACET/TERM - press any key to continue
+TSM - mit beliebiger Taste fortfahren
+
+!cannot_open_terminal_desc
+#Cannot open %s\n
+kann %s nicht Œffnen\n
+
+!term_not_set
+#Cannot determine terminal type. Environment variable TERM must be set.\r\n
+Terminaltyp nicht bestimmbar. Umgebungsvariable TERM muﬁ gesetzt werden.\r\n
+
+!term_type_is
+#Terminal type is: %s.     FACET/TERM Terminal type is: %s.\r\n\n
+Terminaltyp: %s.     TSM-Terminaltyp: %s.\r\n\n
+
+!reading_terminal_desc
+#Reading terminal description file...\n
+Terminal-Beschreibungsdatei wird gelesen...\n
+
+!menu_hotkey_is_control
+#FACET/TERM 'menu hot key' is Control-%c\n
+TSM-Menœmodus-Taste ist KTRL-%c\n
+
+!menu_hotkey_is_char
+#FACET/TERM 'menu hot key' is '%c'\n
+TSM-Menœmodus-Taste ist '%c'\n
+
+!hotkey_disabled
+#FACET/TERM 'window mode key' is disabled -  Press Return to start:\s
+TSM-Befehlsmodus-Taste gesperrt\r\n\nStarten mit [Return]:\s
+
+!hotkey_is_control
+#FACET/TERM 'window mode key' is Control-%c  -  Press Return to start:\s
+TSM-Befehlsmodus-Taste ist KTRL-%c\r\n\nStarten mit [Return]:\s
+
+!hotkey_is_char
+#FACET/TERM 'window mode key' is '%c'  -  Press Return to start:\s
+TSM-Befehlsmodus-Taste ist '%c'\r\n\nStarten mit [Return]:\s
+
+!press_return_to_exit
+#Press RETURN to exit.\r\n
+Verlassen mit [Return].\r\n
+
+#!split_screen_disabled
+#Notice: Split screen is disabled.\r\n
+
+!sender_removing_utmp
+#Facet process: sender removing /etc/utmp entries...\n
+TSM-Prozeﬁ: Sender lŒscht EintrÃge in /etc/utmp...\n
+
+######################################################################
+### NOTE: The cursor for "name_input" is placed at 
+###       the offset of the second % - 2 + the length of the first parameter.
+
+# LOCALIZERS:
+# Do not translate/uncomment the following two entries.
+
+#!name_input
+# >>> %s: %-*.*s <<<\s
+
+#!in_name_input
+#
+
+### NOTE: the text strings beginning with "name_input" are inserted as
+###       the first parameter of "name_input".
+
+# LOCALIZERS:
+#  The following 12 entries (most of which are uncommented) are used for
+#  prompting during interaction with TSM. To localize these prompts, 
+#  uncomment the lable field (the line beginning with the ! character) and
+#  insert your translation after the lable line.
+
+!name_input_capture_file
+#Capture file name
+Erfassungsdatei
+
+!name_input_keystroke_file
+#Keystroke cap file
+Eingabe-Erfassungsdatei
+
+!name_input_keystroke_play
+#Keystroke play file
+Eingabe-Wiederholungsdatei
+
+!name_input_run_program
+#Run Program
+Programm-Name
+
+!name_input_key_file
+#Key File
+Funktionstastendatei
+
+!name_input_global_key_file
+#Gl. Key File
+Datei fœr globale Funktionstasten
+
+!name_input_paste_eol_type
+#Paste eol type
+Neues Zeichen fœr Zeilenumbruch
+
+!name_input_window_title
+#Window title
+Sessiontitel
+
+!name_input_mapped_key
+#Key and mapping
+Taste und Belegung
+
+!name_input_mapped_key_unmap
+#Key to unmap
+Freizugebende Taste
+
+!name_input_paste_script
+#Paste to script
+Einfœgen in Skript
+
+!name_input_paste_filename
+#Paste to File
+Einfœgen in Datei
+
+######################################################################
+### NOTE: The cursor for "get_command" is placed at 
+###       the offset of the second % - 2 + the length of the first parameter.
+
+# LOCALIZERS:
+#  Do not localize/uncomment the next entry:
+
+#!get_command
+# >>> %s: %s  <<<\s
+
+### NOTE: the text strings beginning with "get_command" are inserted as
+###       the first parameter of "get_command".
+
+# LOCALIZERS
+#  The following 4 entries are used during interactions for activating and
+#  deactivating capture mode.
+#  Uncomment the lable lines (those beginning with the ! character) and insert
+#  your translation after these lines (if you wish to localize this interaction)
+#
+
+!get_command_capture_active
+#Capture active on '%s' - N=stop Y=new file
+Erfassung aktiv in '%s'- N=Stop Y=neue Datei
+
+#!in_get_command_capture_active
+
+!get_command_capture_inactive
+#Capture stopped on '%s' - Y=capture
+Erfassung beendet in '%s' - Y=Erfassen
+
+#!in_get_command_capture_inactive
+
+# LOCALIZERS
+#  The following 4 entries are used for interactions during activation and
+#  deactivation of key stroke capture mode (^WXK). To localize, uncomment the
+#  lable lines (lines starting with !) and insert your translation following
+# these lines.
+
+!get_command_keystroke_active
+#Keystroke active on '%s' - N=stop Y=new file
+Tasteneingabe aktiv in '%s' - N=Stop Y=neue Datei
+
+#!in_get_command_keystroke_active
+
+!get_command_keystroke_inactive
+#Keystroke stopped on '%s' - Y=capture
+Tasteneingabe beendet in '%s' - Y=Erfassung
+
+#!in_get_command_keystroke_inactive
+
+# LOCALIZERS
+#  The following 5 entries can be localized.
+
+!get_command_redirect
+#Redirect to Window
+Umleiten zu Session
+
+#!in_get_command_redirect
+#
+
+!get_command_quit_active
+#WARNING! Windows active. QUIT FACET/TERM ? (Y or N)
+WARNUNG! Sessions aktiv. TSM VERLASSEN? (Y oder N)
+
+#!in_get_command_quit_active
+
+!get_command_quit_idle
+#QUIT FACET/TERM ? (Y or N)
+TSM VERLASSEN? (Y oder N)
+
+#!in_get_command_quit_idle
+
+# LOCALIZERS:
+# The following entry can be used to change mapping of keys used to select 
+# extra commands (^WX sequence). Default extra commands include:
+#         B/b  ????
+#         C/c activate/deactivate capture mode
+#         H/h send a hang-up signal 
+#         I/i make a session invisible to scan
+#         K/k turn key capture mode on
+#         M/m activate/deactivate monitor mode
+#         N/n notify program when a session is current
+#         P/p  ????
+#         R/r replay keystrokes saved from the previous capture (see K/k)
+#         S/s activate/deactivate screen saver mode
+#         T/t activate/deactivate transparent mode
+# To change any of these, uncomment the !get_command_extra_commands line below
+# and its definition so the new letters are displayed when a user enters ^WX.
+# Also, uncomment !in_get_command_extra_commands entry and follow the normal
+# key mapping change steps described at the beginning of this file.
+
+#!get_command_extra_commands
+#Cap Inv Mon Notify Trsp Hang Blk Keys Repl Scr Prt
+
+#!in_get_command_extra_commands
+#
+
+# LOCALIZERS
+#  Do not translate the following 4 entries.
+
+#!get_command_control_chars
+#Break  q=Control-Q  s=Control-S  @=Control-@
+
+#!in_get_command_control_chars
+#
+
+#!get_command_mapped
+#Hotkey Map Filename Unmap
+
+#!in_get_command_mapped
+#
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during paste operation.
+#  To localize, uncomment the lable line (the one beginning with the ! 
+#  character) and insert your translation of the lable line.
+
+!get_command_paste_commands
+#paste to Printer Script File Append Overwrite
+P-Drucker, S-Skript, F-Datei, A-Anfœgen, O-€berschreiben
+
+#!in_get_command_paste_commands
+#
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during activation and 
+#  deactiviation of monitor mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_monitor line).
+
+!get_command_window_monitor
+#Window %2d monitor mode (window #, Y or N)
+Session %2d €berwachungsmodus (Session-Nr#, Y oder N)
+
+#!in_get_command_window_monitor
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during setup of "invisible
+#  to scan" mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_invisible line).
+
+!get_command_window_invisible
+#Window %2d invisible to scan (window #, Y or N)
+Session %2d unsichtbar fœr Durchlaufen (Session-Nr, Y oder N)
+
+#!in_get_command_window_invisible
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during setup of "send
+#  notify when activiated" mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_notify line).
+
+!get_command_window_notify
+#Window %2d notify when current (window #, Y or N)
+Session %2d benachrichtigen wenn aktuell (Session-Nr, Y oder N)
+
+#!in_get_command_window_notify
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during activating and
+# deactivating transparent mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_transparent line).
+
+!get_command_window_transparent
+#Window %2d transparent mode (window #, Y or N)
+Session %2d Transparentmodus (Session-Nr, Y oder N)
+
+#!in_get_command_window_transparent
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during activating and
+#  deactivating "blocked session"  mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_blocked line).
+
+!get_command_window_blocked
+#Window %2d blocked (window #, Y or N)
+Session %2d geblockt (Session-Nr, Y oder N)
+
+#!in_get_command_window_blocked
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during activating and
+#  deactivating "print session"  mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_window_printer line).
+
+!get_command_window_printer
+#Window %2d printer mode (window #, Y or N)
+Session %2d Druckmodus (Session-Nr, Y oder N)
+
+#!in_get_command_window_printer
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during setup of 
+#  "sned hangup signal" mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_send_hangup line).
+
+!get_command_send_hangup
+#SEND HANGUP ? (N=No Y=Current A=All K=Kill)
+HANGUP SENDEN? (N=Nein Y=Aktuelle A=Alle K=Kill)
+
+#!in_get_command_send_hangup
+
+# LOCALIZERS
+#  The following 2 entries are used for interactions during activating and
+#  deactivating "screen saver" mode. Mapping of Yes and No characters can be
+#  changed as described at the beginning of the file (don't forget to uncomment
+#  the !in_get_command_screen_saver line).
+
+!get_command_screen_saver
+#Activate screen saver ? (Y or N)
+Bildschirmabschaltung aktivieren? (Y oder N)
+
+#!in_get_command_screen_saver
+
+######################################################################
+### NOTE: the None in "get_window_none" should line up with the second digit 
+###       in the second parameter of "get window".  The cursor is placed at
+###       the offset of the second % - 2 + the length of the first parameter
+###       + 1.  That is, the second digit of the window number.
+###  
+### Alex, June 8: Don't localize "None"      Uschi
+
+
+# LOCALIZERS
+#  Be careful with the spacing of localized strings for the next 5 entries, 
+#  as described directly above. (Best strategy is to just change it and 
+#  see what happens)
+
+!get_window
+ >>> %s %2d      <<<\s
+
+#!in_get_window
+#
+
+#!get_window_none
+# >>> %s  None   <<<\s
+
+!get_window_menu
+# >>> %s %2d Menu <<<\s
+ >>> %s %2d Menœ <<<\s
+
+!get_window_next_active
+# >>> %s  Active <<<\s
+ >>> %s  Aktiv  <<<\s
+
+### NOTE: the text strings beginning with "get_window" are inserted as
+###       the first parameter of "get_window".
+
+!get_window_idle_window
+#Idle Window
+Passive Session
+
+!get_window_windows_window
+#Windows Window
+Sessions Session
+
+######################################################################
+# LOCALIZERS
+#  Do not localize strings of the type %xxxx in the following entry. The "<"
+#  and ">" characters are used only for visual effects. You can omit them, or
+#  use your own character (be carefule of spacing).
+
+!cut_and_paste
+# >>> Window %2d %-44.44s <<<\s
+>>> Session %2d %-43.43s <<<\s
+
+#   LOCALIZERS:
+# This is the entry for mapping of keys for the type of cut command: Block,
+# String, and Text cuts. If you don't wish to translate existing names (block,
+# string, and text) don't change anything. If you wish to change the letters
+# to match a local language, comment out the existing mapping (TS\0ts\0SW\0sw) 
+# and use the following mapping:
+#  
+# For Block mode cut use this mapping: <new_char_upper>B\0<new_char_lower>b
+# For Text mode cut use this mapping: <new_char_upper>S\0<new_char_lower>s
+# For String mode cut use this mapping: <new_char_upper>W\0<new_char_lower>w
+#  
+!in_cut_and_paste
+TS\0ts\0SW\0sw
+
+### NOTE: the text strings beginning with "cut_and_paste" are inserted as
+###       the second parameter of "cut_and_paste".
+
+# LOCALIZERS
+#  The following 7 entries contain messages displayed during cut and paste
+#  operations. 
+
+!block_cut_and_paste_first
+#Block  CUT  [Return]=corner 1  SPACE=quit
+Block schneiden: Cursor in Ecke 1 [Return]
+
+!block_cut_and_paste_second
+#Block  CUT  [Return]=corner 2  SPACE=quit
+Block schneiden: Cursor in Ecke 2 [Return]
+
+!stream_cut_and_paste_first
+#Stream CUT  [Return]=corner 1  SPACE=quit
+Text schneiden: Cursor an Anfang  [Return]
+
+!stream_cut_and_paste_second
+#Stream CUT  [Return]=corner 2  SPACE=quit
+Text schneiden: Cursor an Ende    [Return]
+
+!wrap_cut_and_paste_first
+#Wrap   CUT  [Return]=corner 1  SPACE=quit
+String schneiden: Cursor an Anfang [Return]
+
+!wrap_cut_and_paste_second
+#Wrap   CUT  [Return]=corner 2  SPACE=quit
+String schneiden: Cursor an Ende   [Return]
+
+!cut_and_paste_paste
+#PASTING
+EINF€GEN
+
+######################################################################
+# LOCALIZERS
+#  Do not localize the following 6 entries.
+
+#!get_mode_input
+# >>> %-15.15s %-15.15s RETURN=set SPACE=cancel <<< \s
+
+#!in_get_mode_input
+#
+
+### NOTE: the text strings "terminal_modes" and "transparent_print" are
+###       inserted as the first parameter of "get_mode_input".
+
+#!terminal_modes
+#Terminal modes:
+
+#!transparent_print
+#Trans print:
+
+### NOTE: the text strings "transparent_print_off" and "transparent_print_on"
+###       are inserted as the second parameter of "get_mode_input".
+###       The entries "control_8_bit_on_identifier" and 
+###       "control_8_bit_off_identifier" from the terminal description 
+###       file can also be the second parameter.
+
+#!transparent_print_off
+#OFF
+
+#!transparent_print_on
+#ON
+
+######################################################################
+# LOCALIZERS
+#  To localize the following two error messages, uncomment the lable line
+#  (the one beginning with the ! character) and insert your translation 
+#  after the lable line.
+
+#!register_within
+#Please register # %ld within %d days.\n\n
+
+!registration_expired
+#Sorry - registration of # %ld was not done within %d days of installation.\n
+Anmeldung von Nr %ld nicht innerhalb von %d Tagen nach Installation.\n
+
+!receiver_terminating
+#\r\nFacet process: receiver terminating\r\n
+\r\nTSM-Prozeﬁ: EmpfÃnger endet\r\n
+
+
+# LOCALIZERS
+#  To localize the following two error messages, uncomment the lable line
+#  (the one beginning with the ! character) and insert your translation 
+#  after the lable line.
+
+!printer_program_name
+#(Printer)
+(Drucker)
+
+!printer_mode_terminated
+#\nPrinter mode terminated by break.\n
+\nDruckermodus mit "break" beendet.\n
+
+!printer_mode_on
+#\nPrinter mode on.\n
+\nDruckermodus an.\n
+
+!printer_mode_off
+#\nPrinter mode off.\n
+\nDruckermodus aus.\n

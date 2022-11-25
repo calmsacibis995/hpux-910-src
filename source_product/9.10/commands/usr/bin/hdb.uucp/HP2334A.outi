@@ -1,0 +1,10 @@
+/ @(#) $Revision: 51.1 $       
+/ Was version 27.2 of old uucp
+/
+/ opx25 script to set up outgoing line for interactive session
+/
+	send "set 13:4\r"
+/ flush garbage
+	expect 2 "**++**++**++**++**++**++**++**++"
+
+	exit 0

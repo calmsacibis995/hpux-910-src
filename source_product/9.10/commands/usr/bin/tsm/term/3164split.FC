@@ -1,0 +1,10 @@
+## FacetTerm  3164split  description file 04/25/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+##--- SPLIT SCREEN ---##
+### NOTE: split_divider must be 77 char starting with blank
+### split_divider= qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+split_divider= qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq
+### NOTE: split_divider_end must reverse split_divider_start to default
+### split_divider_start=
+split_divider_start=\E<A\E4(D
+split_divider_end=\E<@\E4 @

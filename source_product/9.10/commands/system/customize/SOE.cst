@@ -1,0 +1,4 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+#
+exit 0

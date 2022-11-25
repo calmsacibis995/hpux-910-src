@@ -1,0 +1,27 @@
+## FacetTerm Menu Capabilities for a qvtpct 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: qvtpct.FM,v 70.1 92/03/09 16:49:09 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=^Z
+##-menu-cap-clr_eol=\Et
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\E$
+##-menu-cap-exit_alt_charset_mode=\E%
+##-menu-cap-acs_chars=``a1fxgqh0jYk?lZm@nEooppqDrrsstCu4vAwBx3yyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\EG0
+##-menu-cap-shadow_attr=\EG0
+##-menu-cap-item_attr=\EG0
+##-menu-cap-box_attr=\EG4
+##-menu-cap-title_attr=\EG4
+##-menu-cap-highlight_attr=\EG4
+##-menu-cap-highlight_blink_attr=\EG6
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^K
+## ##-menu-cap-key_down=
+##-menu-cap-key_right=^L
+## ##-menu-cap-key_left=
+##-menu-cap-key_home=^^
+## ##-menu-cap-key_ignore=

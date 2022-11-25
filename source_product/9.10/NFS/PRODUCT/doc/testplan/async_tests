@@ -1,0 +1,148 @@
+.H 1 "Asynchronous Write Option Via /etc/exports"
+This chapter describes the test plan for the -async option for file 
+systems which are exported to remote machines via NFS. The option 
+allows a server to specify that asynchronous writes will be done over
+NFS for the given file system instead of synchronous
+writes (the NFS default).
+
+The option is  specified in the /etc/exports file following the name
+of the file system which is being exported. The option may appear 
+before, after or inbetween any host names or netgroups specified on
+the export line. For example
+.nf
+
+/  -async
+/mnt -async user1 netgroup1
+/extra user1 -async netgroup1 
+/foo/bar user1 netgroup1 -async 
+
+.fi
+are all valid /etc/exports lines which specify that asynchronous writes
+will be done over NFS for the given file system.
+
+The tests to be done are divided into four types: functional tests,
+connectivity tests, white box tests and normal usage. Each of these 
+types are defined in detail below.
+
+.H 2 "Functional Tests"
+.nf
+
+RESPONSIBLE TEAM: Arsenal Project Team
+DEPENDENCIES: A stable kernel
+ISSUES: The setup for these tests will require the /etc/exports 
+        file to modified on the NFS servers within the ring.
+
+.fi
+The functional tests for the -async option will consist of running the 
+NFS regression tests in the scaffold for various configurations. In this
+case the configurations consist of modifications to the /etc/exports
+file on each server.
+
+Running these tests will consist of modifying the /etc/exports entries
+used by the NFS regression tests and running the regression tests in
+a regular ring. These tests should execute faster than normal runs of
+the tests since all writes to remote file systems will be done 
+asynchronously. Other than this fact, the -async option is transparent
+to the tests and hence the output of the tests should be the same as for 
+any normal run of the test ring.
+
+The /etc/export files should be set up to test all of the variations
+of the syntax allowed for the -async option in the /etc/exports file.
+The -async option may appear any place following the name of the file 
+system in a non-comment line of the /etc/exports file. That is, -async
+can appear before, after or intermixed with host names and netgroup names 
+listed on the line. 
+.nf
+
+/  -async
+/mnt -async user1 netgroup1
+/extra user1 -async netgroup1 
+/foo/bar user1 netgroup1 -async 
+
+.fi
+A configuration should also be run in which the same file system is
+exported to two different clients with different options. That is,
+one client will have the file system exported to it with the -async
+option and the other client will have the file system exported to
+it without the -async option. Exporting the same file system to 
+two clients with different options is done by placing two entries
+in /etc/exports.
+.nf
+
+/foo client1
+/foo -async client2
+
+.fi 
+
+.H 2 "Connectivity Tests"
+.nf
+
+
+RESPONSIBLE TEAM: Arsenal Project Team
+DEPENDENCIES: A stable kernel
+
+.fi
+The purpose of connectivity testing is to
+ensure that no connectivity problems were introduced by adding the
+-async option. This will be done by running the following machines as
+clients to a 6.2 server which is exporting file systems with -async.
+.nf
+
+     a) S300 6.0 clients and S800 2.0 clients.
+
+     b) Sun3/260 client.
+
+     c) Sun4/260 client (if available).
+ 
+     d) Any other available clients (list here).
+
+.fi
+.H 2 "White Box Testing"
+.nf
+
+RESPONSIBLE TEAM: Smurfs Project Team
+DEPENDENCIES: A stable kernel
+
+.fi
+The purpose of white box testing is to ensure that the file handle 
+is propagated properly by calls which create new file handles. Failure
+to propagate a file handle correctly could cause synchronous writes 
+to a file system exported with the -async option and asynchronous 
+writes to a file system exported without the -async option. The tests
+are executed as part of the nfs functional tests and should pass in 
+both the case where the target file system is exported without -async
+and the case where the target file system is exported with -async.
+
+These tests are located in the following files:
+.nf
+
+   /scaf/nfs/nfs.bb/nfs_specific/kernel/fhandle
+   /scaf/nfs/nfs.bb/nfs_specific/kernel/nfstests
+   /scaf/nfs/nfs.bb/nfs_specific/kernel/stdout.fu
+
+.fi
+The calls which need to be executed and have the returned file handle
+checked are:
+.nf
+
+   rfs_create
+   rfs_mkdir 
+   rfs_lookup
+
+.fi
+After making these calls, the rfs_write call should be made to ensure
+that writes are done either asynchronously or synchronously depending
+on the exported file system.
+
+.H 2 "Normal Usage"
+.nf
+
+RESPONSIBLE TEAM: Arsenal Project Team
+DEPENDENCIES: A stable kernel
+
+.fi
+The arsenal project team plans to use the -async option with the 
+scaffold server in order to gain exposure to the feature as well 
+improving the performance of the scaffold server. Their use of 
+this option should also provide feedback about the performance 
+increase resulting from use of the -async option.

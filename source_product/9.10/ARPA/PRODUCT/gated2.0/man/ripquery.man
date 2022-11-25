@@ -1,0 +1,69 @@
+.\" tbl gated.8 | troff -man -
+.TH RIPQUERY 8 LOCAL
+.SH NAME
+ripquery \- query RIP gateways
+.SH SYNOPSIS
+.B ripquery
+.RB [ " \-n " ]
+.RB [ " \-p " ]
+.RB [ " \-r " ]
+.RB [ " \-v " ]
+.RB [ " \-w time" ]
+.I gateway \&.\|.\|.
+.SH DESCRIPTION
+.I Ripquery
+is used to request all routes known by a RIP gateway by sending a RIP
+request or POLL command.  The routing information in any routing packets
+returned is displayed numerically and symbolically.
+.I Ripquery
+is intended to be used as a tool for debugging gateways, not for network
+management.  SNMP is the prefered protocol for network management.
+.PP
+.I Ripquery
+by default uses the RIP POLL command, which is an undocumented extension
+to the RIP specification supported by
+.I routed
+on SunOS 3.x and later and by
+.I gated
+1.4 and later.
+The RIP POLL command is prefered over the RIP REQUEST
+command because it is not subject to Split Horizon and/or Poisioned
+Reverse.  See the RIP RFC for more information.
+.SH OPTIONS
+.IP \fB\-n\fP
+Normally network and host numbers are displayed both symbolically
+and numerically. 
+When this option is specified, network and host numbers are only
+displayed numerically. 
+.IP \fB\-p\fP
+Uses the RIP POLL command to request information from the routing table. 
+This is the default, but is an undocumented extension supported only by
+some versions of SunOS 3.x and later versions of
+.I gated.
+If there is no response to the RIP POLL command, the RIP REQUEST command
+is tried.
+.IP \fB\-r\fP
+Used the RIP REQUEST command to request information from the gateway's
+routing table.  Unlike the RIP POLL command, all gateways should support
+the RIP REQUEST.  If there is no response to the RIP REQUEST command,
+the RIP POLL command is tried.
+.IP \fB\-v\fP
+Version information about
+.I ripquery
+is displayed before querying the gateways.
+.IP \fB\-w\fP
+Specifies the time in seconds to wait for the initial response from a gateway. 
+The default value is 5 seconds.
+.SH EXAMPLES
+.SH "SEE ALSO"
+.IR routed (8)
+.IR gated (8)
+.br
+.nf
+RFC1058 - Routing Information Protocol
+.fi
+.SH BUGS
+Some versions of SunOS do not allow looking up the symbolic name of a
+subnet.
+
+

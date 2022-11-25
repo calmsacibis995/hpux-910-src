@@ -1,0 +1,632 @@
+#! /bin/sh
+# @(#) $Revision: 70.11.1.3 $
+
+#
+# Definitions of functions used within this script
+#
+# The initialize() and localrc() functions below contain
+# most of what must be customized in this script.
+# This structure has been adopted to minimize the number
+# and difficulty of changes required to adopt new functionality
+# in future releases of /etc/rc for HP-UX.
+#
+# Other portions of this script may be customized also, but HP
+# recommends that changes be minimized to simplify future updates.
+#
+
+initialize()
+{
+	# The following parameters may be modified for the specific
+	# needs of your local system.
+
+	#
+	# Set the device file(s) used by /etc/rbootd
+	# If no device is specified, /etc/rbootd will
+	# use the device corresponding to the ethernet
+	# address of the machine.
+	#
+	RBOOTD_DEVICES=""
+
+	# Set the system's network name:
+	# This is done automattically at the first bootup
+	# by the /etc/set_parms script.  The system name is
+	# written to the /etc/src.sh file for subsequent bootups.
+	# The /etc/src.sh file is sourced by this script to set
+	# the SYSTEM_NAME variable.
+
+	if [ "$SYSTEM_NAME" = "" ]
+	then
+	   SYSTEM_NAME=unknown
+	   export SYSTEM_NAME
+	fi
+
+	# set the timeout length for date setting:
+	# TIMEOUT=0  # skips date setting
+	TIMEOUT=20
+
+	# setup for the optional vt gateway, see vtdaemon(1m)
+	vtgateway=""		# name of system acting as the gateway
+	vtgopts=""		# vtdaemon options
+	vtginterfaces=""	# gateway devices
+}
+
+localrc()
+{
+	# This function is intended for adding local initialization
+	# functions to rc.  This function is called after all other
+	# system initialization is completed.
+
+	# The following line is required for function syntax.
+	: # do nothing instruction (a function must contain some command)
+
+	# For example:
+	# For HP-IB printers:
+	#	Uncomment the 'slp' line below to
+	#	set indentation to 0 for /dev/lp.
+	#	Similar lines should be added for additional printers.
+	#		/usr/bin/slp -i0 > /dev/lp &
+}
+
+# The following functions should require no additional customization:
+
+set_date()
+{
+  if [ $SET_PARMS_RUN -eq 0 ] ; then
+	if [ $TIMEOUT -ne 0 ] ; then
+		# This section confirms that the date and time are
+		# correct.
+		# Systems with battery-backed real-time clock will
+		# be correct.  Therefore, the default answer is yes.
+		# The question will timeout in $TIMEOUT seconds.  If the
+		# question is not answered within the specified timeout,
+		# the default answer will be returned.  To increase the
+		# timeout, change the value assigned to TIMEOUT (above).
+		# TIMEOUT of 0 will skip this question.
+
+		echo "\007Is the date `date` correct? (y or n, default: y) \c"
+		reply=`line -t $TIMEOUT`
+		echo ""
+
+		if [ "$reply" = y -o "$reply" = "" -o "$reply" = Y ]
+		then
+			return
+		else
+			if [ -x /etc/set_parms ]; then
+				/etc/set_parms time_only
+			fi
+		fi
+	fi
+
+   fi	# if SET_PARMS_RUN
+}
+
+hfsmount()
+{
+	# create /etc/mnttab with valid root entry
+	/etc/mount -u >/dev/null
+
+	# enable quotas on the root file system
+	# (others are enabled by mount)
+	[ -f /quotas -a -x /etc/quotaon ] && /etc/quotaon -v /
+
+	# Mount the HFS volumes listed in /etc/checklist:
+	/etc/mount -a -t hfs -v
+	# (NFS volumes are mounted via net_start() function)
+
+	# Uncomment the following mount command to mount CDFS's
+	/etc/mount -a -t cdfs -v
+
+	# Preen quota statistics
+	[ -x /etc/quotacheck ] && echo checking quotas && /etc/quotacheck -aP
+}
+
+map_keyboard()
+{
+#
+# Load the appropriate keymap.  If the interface_type is HIL, query the
+# keyboard for its language.  If the interface type is PS2, install
+# the mapping specified by "-l <map_name>".
+#
+# This is done here as well as in /etc/bcheckrc. 
+
+itemap_option=""
+if [ -f /etc/kbdlang ]
+then
+   read MAP_NAME filler < /etc/kbdlang
+   itemap_option="-l $MAP_NAME"
+fi
+
+if [ -x /etc/itemap ]
+then
+   itemap -i -L $itemap_option -w /etc/kbdlang
+fi
+}
+
+syncer_start()
+{
+	# Syncer helps minimize file system damage in the event
+	# of a power failure or other system crash.
+	# run at rtprio to avoid being swapped out
+	if /usr/bin/rtprio 127 /etc/syncer
+	then
+		echo syncer started
+	fi
+}
+
+lp_start()
+{
+	#
+	# Start lp printer scheduler, if configured.
+	#
+	# NOTE:
+	# For RS-232 printers:
+	#     If your line printer interface is RS232 and not set
+	#     to 300 baud, then change the 'lp' line in
+	#     /etc/inittab from 'off' to 'once' and make sure the
+	#     baud rate set there is correct for your printer.
+	#
+	if [ -s /usr/spool/lp/pstatus ]
+	then
+		lpshut > /dev/null 2>&1
+		rm -f /usr/spool/lp/SCHEDLOCK
+		lpsched
+		echo line printer scheduler started
+	fi
+
+}
+
+clean_ex()
+{
+	if [ -x /usr/bin/ex ]
+	then
+		echo "preserving editor files (if any)"
+		( cd /tmp; expreserve -a )
+	fi
+}
+
+clean_uucp()
+{
+	if [ -x /usr/lib/uucp/uuclean ]
+	then
+		echo "cleaning up uucp"
+		/usr/lib/uucp/uuclean -pSTST -pLCK -n0
+	fi
+}
+
+net_start()
+{
+	if [ -x /etc/netlinkrc ] && /etc/netlinkrc
+	then
+		echo NETWORKING started.
+	fi
+}
+
+swap_start()
+{
+	# Turn on swapping on alternate swap devices.
+	# /etc/checklist "swap" entries configured in the kernel are used.
+	if /etc/swapon -a
+	then
+		echo 'swap device(s) active'
+	fi
+}
+
+cron_start()
+{
+	if [ -x /etc/cron ]
+	then
+		if [ -f /usr/lib/cron/log ]
+		then
+			mv /usr/lib/cron/log /usr/lib/cron/OLDlog
+		fi
+		/etc/cron && echo cron started
+	fi
+}
+
+pty_start()
+{
+	# Not supported on all systems
+	# ptydaemon allocates pty's to various processes
+	if [ -x /etc/ptydaemon ]
+	then
+		echo "starting the ptydaemon"
+		/etc/ptydaemon
+	fi
+}
+
+vt_start()
+{
+	# Not supported on all systems
+	# vtdaemon responds to vt requests from other systems
+	#  See vtdaemon(1m) for more information about the vtdaemon.
+
+	if [ -x /etc/vtdaemon ] && [ -c /dev/ieee ]
+	then
+		case `hostname` in
+		    $vtgateway)	echo "starting the gateway vtdaemon"
+				/etc/vtdaemon $vtgopts $vtginterfaces
+		    ;;
+		    *)		echo "starting the vtdaemon"
+				/etc/vtdaemon
+		    ;;
+                esac
+	fi
+}
+
+list_tmps()
+{
+	for dir in /tmp /usr/tmp /lost+found
+	do
+		if [ "`ls -A $dir`" ]
+		then
+			echo "NOTE:  Files in $dir:"
+			ls -lA $dir
+		fi
+	done
+}
+
+clean_adm()
+{
+	mask=`umask`
+	umask 022
+	for LOG in sulog diaglog messages syslog
+	do
+		if [ -f /usr/adm/$LOG ]
+		then
+			mv /usr/adm/$LOG /usr/adm/OLD$LOG
+			if [ $LOG != sulog ]
+			then
+				> /usr/adm/$LOG
+			fi
+		fi
+	done
+	umask $mask
+}
+
+switch_over()
+{
+	if [ -x /etc/switch/switchsetlan ] && ([ ! -x /bin/getcontext ] || 
+	    (/bin/getcontext | /bin/egrep "localroot|standalone" > /dev/null))
+	then
+	    . /etc/switch/switchrc
+	    SWITCH_INFO="${SWITCH_INFO:-/etc/switch/Switchinfo}"
+	    if [ $SYSTEM_NAME != "unknown" ]; then
+		if [ -f $SWITCH_INFO ]; then
+		    /etc/switch/switchsetlan -f $SWITCH_INFO $SYSTEM_NAME
+		else
+		    echo "SwitchOver/UX: $SWITCH_INFO not found"
+		fi
+	    else
+		echo "SwitchOver/UX: SYSTEM_NAME unknown"
+	    fi
+	fi
+}
+
+envd_start()
+{
+	if [ -x /etc/envd ] && [ -f /etc/envd.conf ]
+	then
+		set -- `ps -e | grep envd` || 
+		(/etc/envd && echo "Environmental daemon started")
+	fi
+}
+
+sam_init()
+{
+	# Initialize SAM kernel data structures
+	if [ -x /etc/samrc ] && /etc/samrc
+	then
+		echo "SAM initialized"
+	fi
+}
+
+set_state()
+{
+	# Determine what kind of system this is
+	# (standalone, cluster server or client)
+	# Set hostname to cnode name if diskless,
+	# otherwise use the value from initialize()
+	if [ -x /bin/getcontext ] &&  set -- `getcontext` && cnodename=$1 &&
+		[ "$cnodename" != standalone ]
+	then
+		cnodes -s || /etc/cluster
+		SYSTEM_NAME=$cnodename
+		rootname=`cnodes -r`
+		if [ ! "$rootname" ]
+		then
+			# something is wrong, emit a warning and come up standalone
+			echo "\007ERROR: cannot determine name of DISKLESS ROOTSERVER"
+			echo "\tCorrect, then reboot."
+			echo "\tBringing system up STANDALONE."
+			state=standalone
+		elif [ "$SYSTEM_NAME" = "$rootname" ]
+		then
+			state=localroot
+		else
+			state=remoteroot
+		fi
+	else
+		state=standalone
+	fi
+}
+
+csp_start()
+{
+	if ncsp=`/etc/csp`
+	then
+		echo "$ncsp cluster server process(es) started"
+		return 0
+	else
+		return 1
+	fi
+}
+
+rbootd_start()
+{
+    if [ -x /etc/rbootd -a -n "$RBOOTD_DEVICES" ] || \
+       [ -x /etc/rbootd -a -s /etc/clusterconf -a -x /bin/cnodes ]; then
+	#
+	# rbootd is started if we are the rootserver.
+	#
+	# rbootd is also started if we are a cnode with local swap
+	# and >0 csp's running (this is so that cnodes who swap to
+	# this cnode can boot).
+        #
+	case $state in
+	localroot|standalone)
+	    if /usr/bin/rtprio 64 /etc/rbootd $RBOOTD_DEVICES; then
+		echo "remote boot daemon started"
+	    else
+		echo "Could not start remote boot daemon"
+	    fi
+	;;
+	remoteroot)
+	    ncsps=`/usr/bin/awk -F: '$3 == name && $1 !~ /#/ \
+		{ i = $NF+0; print i }' name=$SYSTEM_NAME /etc/clusterconf`
+	    set -- `cnodes -l -m`
+	    if [ "`cnodes -m`" = "$3" -a "$ncsps" -gt 0 ]; then
+		if /usr/bin/rtprio 64 /etc/rbootd; then
+		    echo "remote boot daemon started"
+		else
+		    echo "Could not start remote boot daemon"
+		fi
+	    fi
+	;;
+	esac
+    fi
+}
+
+save_core()
+{
+	# Not supported on all systems
+	# save old kernel core dumps
+	if [ -x /etc/savecore ] && [ -d /tmp/syscore ]
+	then
+		/etc/savecore /tmp/syscore
+	fi
+}
+
+diag_start()
+{
+	# Supported on Series 700 and 800 only
+	if [ -x /usr/diag/bin/DIAGINIT ] && /usr/diag/bin/DIAGINIT
+	then
+		echo "Diagnostic system started"
+	fi
+}
+
+audit_start()
+{
+	# Start up the auditing subsystem
+	if [ -x /etc/auditrc ] && /etc/auditrc
+	then
+		echo "Audit subsystem started"
+	fi
+}
+
+audio_start ()
+{
+	# Start up the audio server
+	if [ -x /etc/audiorc ] && /etc/audiorc
+	then
+		echo "Audio server started"
+	fi
+}
+
+xntpd_start ()
+{
+	# Start up the xntp daemon, if it exists
+	if [ -x /usr/contrib/bin/xntpd -a -r /usr/contrib/etc/ntp.conf ]
+	then
+		case `/bin/uname -r` in
+		A.* | B.07* | B.08* | B.09.00 )
+			# echo release is pre B.09.03 (S300/400 only): need adjtimed
+			if [ ! -x /usr/contrib/bin/adjtimed ]
+			then
+			    echo "adjtimed is missing/not executable -- cannot start xntpd\n"
+			    return 1
+			fi
+			echo "Starting adjtimed\n"
+			/usr/contrib/bin/adjtimed -r
+			sleep 4
+			;;
+		* ) 	# echo release is B.09.03 or later: no dependence on adjtimed
+			;;
+		esac
+		/usr/contrib/bin/xntpd && echo "xntp daemon started\n"
+	fi
+}
+
+syslogd_start()
+{
+    #
+    # Start up the system message logger, see syslogd(1M).
+    #
+    # The system logger is only started here if networking is not
+    # installed.  If networking is installed, syslogd is started by
+    # /etc/netlinkrc
+    #
+    if [ -x /etc/syslogd -a -f /etc/syslog.conf ]
+    then
+	#
+	# If syslogd is already running, we do nothing
+	#
+	[ -s /etc/syslog.pid ] &&
+	kill -0 "`cat /etc/syslog.pid`" 2>/dev/null &&
+	    return
+
+	if [ -f /usr/adm/syslog ]
+	then
+	   mv /usr/adm/syslog /usr/adm/OLDsyslog
+	   mask=`umask`
+	   umask 022
+	   > /usr/adm/syslog
+	   umask $mask
+	fi
+	/etc/syslogd && echo "System message logger started"
+    fi
+}
+
+set_privgrp()
+{
+    if [ -f /etc/privgroup ]
+    then
+	/etc/setprivgrp -f /etc/privgroup
+    fi
+}
+
+setparms()
+{
+	#
+	# Set system configuration values
+	#
+	if [ ! -f /etc/src.sh -a -x /etc/set_parms ]
+	then	# set the system name, IP addr., TZ, time/date.
+	   /etc/set_parms
+	   SET_PARMS_RUN=1 
+	else
+	   SET_PARMS_RUN=0
+	fi
+
+	if [ -r /etc/src.sh ]
+	then
+	   . /etc/src.sh
+	else
+	   echo "\nWARNING: /etc/src.sh not created by /etc/set_parms."
+	   echo "Time zone and system name not set.\n"
+	fi
+}
+
+#
+# Here is the heart of the rc script:
+#
+
+# Where to find commands:
+PATH=/bin:/usr/bin:/usr/lib:/etc
+
+# Set termio configuration for output device.
+stty clocal icanon echo opost onlcr ixon icrnl ignpar
+
+# Announce start of rc script
+echo "\n/etc/rc:\n"
+
+if [ ! -f /etc/rcflag ]		# Boot time invocation only
+then
+	# /etc/rcflag is removed by /etc/brc at boot and by shutdown
+	touch /etc/rcflag
+
+	hfsmount
+	map_keyboard
+	setparms
+	initialize
+	switch_over
+	set_state	# determine if standalone, diskless server or
+			# client.  Also sets SYSTEM_NAME for diskless
+
+	uname -S $SYSTEM_NAME
+	hostname $SYSTEM_NAME
+
+	# Actions based on system type:
+	case $state in
+	standalone)	# Not a member of a diskless cluster
+		echo "Starting up standalone system"
+		set_privgrp
+		set_date
+		save_core
+		swap_start
+		syncer_start
+		lp_start
+		clean_ex
+		clean_uucp
+		net_start
+		rbootd_start
+		cron_start
+		pty_start
+		vt_start
+		list_tmps
+		clean_adm
+		diag_start
+		syslogd_start     # must be invoked after net_start
+		envd_start	  # must be invoked after syslogd_start
+		audit_start
+		audio_start
+		xntpd_start
+		sam_init
+		;;
+
+	localroot)	# This is a root server in a Diskless system
+		echo "Starting up CLUSTER SERVER: $rootname"
+		set_privgrp
+		set_date
+		save_core
+		swap_start
+		syncer_start
+		lp_start
+		clean_ex
+		clean_uucp
+		net_start
+		csp_start
+		rbootd_start
+		cron_start
+		pty_start
+		vt_start
+		list_tmps
+		clean_adm
+		diag_start
+		syslogd_start     # must be invoked after net_start
+		envd_start	  # must be invoked after syslogd_start
+		audit_start
+		audio_start
+		xntpd_start
+		sam_init
+		;;
+
+	remoteroot)	# This is a client in a Diskless system
+		SWAP_SITE=`awk -F: '{if (substr($1,1,1)!="#" && $3==sn) print $5}' sn=$SYSTEM_NAME /etc/clusterconf`
+		SWAP_SERVER=`awk -F: '{if (substr($1,1,1)!="#" && $2==ss) print $3}' ss=$SWAP_SITE /etc/clusterconf`
+
+		echo "Starting up CLUSTER CLIENT: $SYSTEM_NAME"
+		echo "\troot server: $rootname"
+		echo "\tswap server: $SWAP_SERVER"
+		set_privgrp
+		save_core
+		swap_start
+		net_start
+		csp_start
+		rbootd_start
+		cron_start
+		pty_start
+		vt_start
+		list_tmps
+		clean_adm
+		diag_start
+		syslogd_start     # must be invoked after net_start
+		envd_start	  # must be invoked after syslogd_start
+		audio_start
+		xntpd_start
+		sam_init
+		;;
+	esac
+	localrc
+fi
+date

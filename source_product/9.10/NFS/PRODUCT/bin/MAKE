@@ -1,0 +1,178 @@
+#!/bin/sh
+#	@(#)MAKE	$Revision: 1.61.109.1 $	$Date: 91/11/19 13:51:58 $
+# make program for NFS services in development environment
+
+CYCLE="IC1"
+ST_NFS=$nfs
+SHELL=/bin/sh
+SOURCE=/source/newfs
+HOSTNAME=`hostname`
+CENTRAL_MACH=hpcndhf
+DHF_DIR=/source/NFS
+TOOL_DIR=
+
+OFLAGS=""
+LDFLAGS="-s"
+mydebugflag=false
+
+while [ $# -gt 0 ]
+do
+	case $1 in
+
+		-d) OFLAGS="-g $OFLAGS"
+		    LDFLAGS="-g"
+		    mydebugflag=true
+		    ;;
+		-t) OFLAGS="$OFLAGS -DTRACEON"
+		    ;;
+		-dt) OFLAGS="-g -DTRACEON $OFLAGS"
+		    LDFLAGS="-g"
+		    mydebugflag=true
+		    ;;
+		-D*) OFLAGS="$OFLAGS $1"
+		    ;;
+		*) break;;
+	esac
+	shift
+done
+
+if [ "$mydebugflag" = "false" ] ; then
+    OFLAGS="-O $OFLAGS"
+fi
+
+# If we are dealing with an s800 define the following variables
+
+if "hp9000s800" ; then
+# ST_ variables used by the compile/ld environment
+
+	ST_SHELL=/bin/sh
+	ST_LIBC=
+	ST_CC=$TOOL_DIR/bin/cc
+	ST_CPP=$TOOL_DIR/lib/cpp
+	ST_CCOM=$TOOL_DIR/lib/ccom
+	ST_ASSEM=$TOOL_DIR/bin/as
+	ST_LD=$TOOL_DIR/bin/ld
+
+# Additional variables used in the compilation environment
+
+	AR=$TOOL_DIR/bin/ar
+	CC=$TOOL_DIR/bin/cc
+	CC2=$TOOL_DIR/bin/cc
+	CPP=$TOOL_DIR/lib/cpp
+	CCOM=$TOOL_DIR/lib/ccom
+	AS=$TOOL_DIR/bin/as
+	ASSEM=$TOOL_DIR/bin/as
+
+	INS=ls
+
+	RPCSVC_LIB="$nfs/cmds/usr.lib/librpcsvc/800/librpcsvc800.a"
+	DBM_LIB="$nfs/cmds/usr.lib/libdbm/800/libdbm800.a"
+	LIBC=
+	LBSD=$TOOL_DIR/usr/lib/libBSD.a
+	LCURSES=$TOOL_DIR/usr/lib/libcurses.a
+
+	BFACC=$TOOL_DIR/usr/local/bin/bfacc2
+
+# libc with bfacode
+
+	BLIBC=$nfs/cmds/libc/libc800b.a
+
+# libraries with bfa code 
+
+	BLIBRPC=$nfs/cmds/usr.lib/librpcsvc/800/librpcsvc800b.a
+	BLIBDBM=$nfs/cmds/usr.lib/libdbm/800/libdbm800b.a
+
+	CFLAGS="${OFLAGS} -DNFS3_2 -DHP_NFS -DNFS -DNLS -DDUX -DCLEANENV -D_NAMESPACE_CLEAN -D__hp9000s800 -D_HPUX_SOURCE"
+	IDIRS="-I/usr/include -I$nfs/include"
+	LIBS=
+
+# PRODUCT includes libc routines that we build here but that integration
+# builds in CA
+
+	PRODUCT="libc/net/800 libc/rpc/800 libc/yp/800 usr.lib/libdbm/800 \
+		 usr.lib/librpcsvc/800 bin/800 etc/800 ucb/800 usr.bin/800 \
+		 usr.etc/800 usr.etc/yp/800 usr.etc/yp/revnetgroup/800 \
+		 usr.etc/ypserv/800 usr.etc/vhe/800 usr.etc/rpc.statd/800 \
+		 usr.bin/rpcgen/800 usr.etc/rexd/800 usr.etc/rpc.lockd/800"
+
+	ROOT="/tmp/nfs.800"
+
+	export ST_NFS ST_SHELL ST_LIBC ST_CC ST_CPP ST_CCOM ST_ASSEM ST_LD AR CC CC2 CPP CCOM ASSEM LDFLAGS INS LIBS PRODUCT ROOT IDIRS RPCSVC_LIB DBM_LIB CFLAGS BFACC BLIBC BLIBRPC BLIBDBM LIBC LCURSES LBSD
+
+	if [ $# -gt 0 ] ; then
+		$TOOL_DIR/bin/make "MAKE=${0}" "PRODUCT=${PRODUCT}" "IDIRS=${IDIRS}" "RPCSVC_LIB=${RPCSVC_LIB}" "DBM_LIB=${DBM_LIB}" "CFLAGS=${CFLAGS}" "$@"
+	else	
+		$TOOL_DIR/bin/make "MAKE=${0}" "PRODUCT=${PRODUCT}" "IDIRS=${IDIRS}" "RPCSVC_LIB=${RPCSVC_LIB}" "DBM_LIB=${DBM_LIB}" "CFLAGS=${CFLAGS}"
+	fi
+
+elif "hp9000s300" ; then
+# If we are using an s300 then define the following variables
+
+TOOL_DIR=
+
+# Additional variables used in the compilation environment
+
+	AR=${TOOL_DIR}/bin/ar
+	CC=${TOOL_DIR}/bin/cc
+	CPP=${TOOL_DIR}/lib/cpp
+	CCOM=${TOOL_DIR}/lib/ccom
+	AS=${TOOL_DIR}/bin/as
+	ASSEM=${TOOL_DIR}/bin/as
+	LIBS=
+
+
+	BFACC=/usr/local/bin/bfacc1
+
+# libc with bfacode
+
+	BLIBC=$nfs/cmds/libc/libcb.a
+
+# libraries with bfa code 
+
+	BLIBRPC=$nfs/cmds/usr.lib/librpcsvc/librpcsvcb.a
+	BLIBDBM=$nfs/cmds/usr.lib/libdbm/libdbmb.a
+
+	CFLAGS="${OFLAGS} -DNFS3_2 -DHP_NFS -DNFS -DNLS -DDUX -DCLEANENV -D_NAMESPACE_CLEAN"
+	CFLAGS2="-Wc,-Nd3000,-Ns3000"
+	if [ "$HOSTNAME" = "$CENTRAL_MACH" ] ; then
+		INS="/source/NET/bin/local/linstall"
+# To make sure we get the right dbm.h
+		IDIRS="-I$DHF_DIR/include -I$SOURCE/usr/include"
+		LIBC="/lib/libc.a"
+		LCURSES="/usr/lib/libcurses.a"
+		LBSD="/usr/lib/libBSD.a"
+		RPCSVC_LIB="$DHF_DIR/cmds/usr.lib/librpcsvc/librpcsvc.a"
+		DBM_LIB="$DHF_DIR/cmds/usr.lib/libdbm/libdbm.a"
+		PRODUCT="usr.lib/libdbm usr.lib/librpcsvc \
+			 bin etc usr.etc/rpc.statd \
+			 ucb usr.bin usr.bin/rpcgen usr.etc usr.etc/yp \
+			 usr.etc/yp/revnetgroup usr.etc/ypserv usr.etc/rexd \
+			 usr.etc/rpc.lockd usr.etc/vhe"
+	else 
+# All other machines try to build in DE
+		INS=ls
+		IDIRS="-I${TOOL_DIR}/usr/include -I$nfs/include"
+	   	LIBC="${TOOL_DIR}/lib/libc.a"
+		LCURSES="${TOOL_DIR}/usr/lib/libcurses.a"
+		LBSD="${TOOL_DIR}/usr/lib/libBSD.a"
+		RPCSVC_LIB="$nfs/cmds/usr.lib/librpcsvc/librpcsvc.a"
+		DBM_LIB="$nfs/cmds/usr.lib/libdbm/libdbm.a"
+		PRODUCT="usr.lib/libdbm usr.lib/librpcsvc \
+			 bin etc usr.etc/rpc.statd \
+			 ucb usr.bin usr.bin/rpcgen usr.etc usr.etc/yp \
+			 usr.etc/yp/revnetgroup usr.etc/ypserv usr.etc/rexd \
+			 usr.etc/rpc.lockd usr.etc/vhe"
+	fi
+
+
+	export AR CC CPP CCOM ASSEM LDFLAGS INS LIBS PRODUCT IDIRS RPCSVC_LIB DBM_LIB CFLAGS CFLAGS2 BFACC BLIBC BLIBRPC BLIBDBM LIBC LCURSES LBSD
+
+	if [ $# -gt 0 ] ; then
+		/bin/make "MAKE=${0}" "PRODUCT=${PRODUCT}" "IDIRS=${IDIRS}" "RPCSVC_LIB=${RPCSVC_LIB}" "DBM_LIB=${DBM_LIB}" "CFLAGS=${CFLAGS}" "$@"
+	else	
+		/bin/make "MAKE=${0}" "PRODUCT=${PRODUCT}" "IDIRS=${IDIRS}" "RPCSVC_LIB=${RPCSVC_LIB}" "DBM_LIB=${DBM_LIB}" "CFLAGS=${CFLAGS}" 
+	fi
+
+else 
+	echo "The system is not an 800 or a 300"
+fi

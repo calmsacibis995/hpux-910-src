@@ -1,0 +1,285 @@
+.\" .PH "''''"
+.\" .PF "''\\\\nP''"
+.\" .ds HF 3 3 3 3 3 3 3	\" all headings are bold
+.\" .nr Hb 7
+.\" .nr Hs 7
+.\" .pl 66
+.\" .ll 70
+.\" .po -5
+.\" .ad b
+.de TI   \"THIS CREATES THE TITLES AND TABS USED FOR THE RESULT TABLES
+.sp 1
+.ta 10 21 62
+	test#	description	expect\ response
+.sp 1
+.nf
+..
+.sp 2
+.H 1 "NFS Stress Plan (Jim Hunter)"
+.sp 1
+.H 2 "DISCUSSION"
+.sp 2
+.H 3 "Introduction"
+.sp 1
+The objective of the stress tests is to isolate defects in the NFS code by
+subjecting it to a wide variety of simultaneous activities.
+The existing functional
+tests for NFS are single threaded and test one functionality at a time. The
+goal of this chapter is to outline a plan to generate tests, under the common
+umbrella of stress tests, to test the robustness of the NFS service.  
+.sp 1
+It should be noted that the stress tests are being ported from the IND
+stress tests for RFA on the Indigo.  The estimated implementation times 
+are the times needed for each port.
+.sp 2
+.H 3 "Scope of the tests"
+.sp 1
+The success or failure of the tests will be determined using the following
+criteria outlined below and if appropriate, an analysis of the end state
+of the system.
+.sp 1
+.BL
+.LI
+The system should not crash or hang.
+.LI
+The service integrity should be preserved.
+.LI
+The networking state of the involved nodes should be equivalent to the
+start state.
+.LE
+.sp 2
+.H 3 "Model for stress testing"
+.sp 1
+The model adopted to stress test the NFS service characterizes the NFS 
+service along the following dimensions:
+.BL
+.LI
+concurrent use of NFS
+.LI
+resources utilized by NFS
+.LI
+asynchronous interaction of programs and processes with NFS
+.LI
+load on the nodes
+.LE
+.sp 1
+.RL
+.LI
+Concurrent use of NFS would be invoking multiple user processes to the same
+or different destination(s).
+.LI
+The resources utilized by NFS are processes, networking memory, vnodes,
+cpu cycles and paged-out RAM.
+.LI
+The focus of the asynchronous tests is on timing-related dependencies.
+These tests will build and tear down NFS "connections" at varying speeds.
+.LI
+The load on the nodes is varied by controlling the amount of background
+NFS activity.
+.LE
+.sp 1
+The stress environment will be a subset of the points in this four
+dimensional space.  We may add a fifth dimension to vary how long
+these tests are run.  The choice of the points in the model will be made
+in a controlled random manner.
+.sp 2
+.H 4 "Reference Frame"
+.sp 1
+The precise definition of the stress environment necessitates a list of
+system parameters that would be initialized or fixed outside the scope
+of the tests.  This assumes a two node model for stress testing.
+.sp 1
+The parameters to consider are:
+.BL
+.LI
+Memory size
+.LI
+The initial load on the node, i.e., no activity on the node other than the
+standard daemons
+.LI
+The predefined or default values of the sizes of the file table, vnode table,
+and maximum number of processes
+.LI
+the activity on the coax and the noise on the coax
+.LE
+.sp 2
+.H 3 "Implementation Goals"
+.sp 1
+In order to implement the model outlined above, the following are identified
+as desirable goals:
+.BL
+.LI
+Ability to measure results and detect failures.
+.LI
+Flexibility to integrate with the scaffold.
+.LI
+Ability to choose the dimension or dimensions in which the tests are to be
+run.  This would make it easier to implement and debug than a monolithic
+approach.
+.LI
+Leverage off the existing software as much as possible.
+.LE
+.sp 2
+.H 4 "Concurrency"
+.sp 1
+.BL
+.LI
+Tests that will initiate NFS activity (i.e. reads and writes) in parallel
+to the same node and from the same file(s). 
+.LE
+.sp 2
+.H 4 "Load"
+.sp 1
+.BL
+The load on the nodes will be varied. This is done by
+.LI
+running NFS functional tests
+.LI
+Doing intensive reads and writes using cp and/or cmp over NFS.
+.LE
+.sp 2
+.H 4 "Time dependencies"
+.sp 1
+The tests in this dimension are designed to subject the service to fixed
+and random delays.  This will be accomplished in the following ways:
+.BL
+.LI
+A fixed or random time delay between mounting a remote file system and
+using the file system.
+.LI
+Mount and unmount remote file systems at fixed or random time intervals.
+.LE
+.sp 2
+.H 4 "Resource Utilization"
+.sp 1
+.BL
+.LI
+Behavior of a node which mounts many file systems
+exported by the same remote node.
+.LI
+Behavior of a node which is a server for many client nodes.
+.LI
+Behavior of a node which is a client of many server nodes.
+.LE
+.sp 2
+.H 2 "Ported Test Scenarios"
+.sp 1
+.nf
+RESPONSIBLE ENGINEER: Jim Hunter
+IMPLEMENT TIME:  7.0  md 
+PERFORM TIME:    6.0  md
+.fi
+.sp 1
+The test sections (concurrency, load, and time dependencies) are designed to be
+run independently, serially, or concurrently.
+.sp 2
+.H 3 "Concurrency"
+.sp 1
+.TI
+	1	Initiate 10 simultaneous cp's from same	no error
+		source file to different remote files and
+		cmp to original.
+	2	Same as 1 except reverse local and remote	no error
+	3	Initiate 10 simultaneous cp's from different	no error
+		sized source files to different remote
+		target files and cmp to originals.
+	4	Same as 3 except reverse local and remote	no error
+	5	Initiate 10 ls -R's or remote file system	no error
+	6	Initiate 10 simultaneous instances of the	no error
+		NFS functional tests.
+.sp 2
+.H 3 "Load"
+.sp 1
+The real objective of concurrent activities is to create a varied CPU load
+of 40% to 95% on the local node or remote node or both nodes, depending on the
+individual test case.  The actual number of concurrent activities will need to
+be tuned to provide the desired loads.  The numbers indicated here are based
+on the current values used for the Indigo RFA stress tests.
+.sp 1
+.nf
+TEST CONFIGURATION: Each machine will act as a client and a server.
+
+                   ----------          ----------
+                   | NODE A |<-------->| NODE B |
+                   ----------          ----------
+
+.fi
+.sp 1
+.TI
+	1	One instance of NFS function tests while:	no error
+		[1] concurrently copying 5 different sized
+		    files over NFS from node A.
+		[2] concurrently performing ls -R of local
+		    root and remote machine. 
+	2	One instance of NFS functional tests while:	no error
+		[1] concurrently copying 10 different sized
+		    files over NFS (5 initiated on each 
+                    node)
+		[2] concurrently performing ls -R of remote
+		    root (running on both nodes)
+	3	One instance of NFS functional tests while:	no error
+		[1] concurrently copying 10 different sized
+		    files over NFS (5 initiated on each 
+                    node)
+		[2] concurrently performing ls -R of remote
+		    root (running on both nodes)
+		[3] concurrently performing ls -R of local
+		    root (running on both nodes)
+.sp 1
+.nf
+.fi
+.sp 2
+.H 3 "Time dependencies"
+.sp 1
+.TI
+	1	Mount a remote file system and run NFS	no error
+		functional tests after random intervals
+		of time.
+	2	Mount and unmount remote file systems at	no error
+		random intervals of time.
+	3	Mount and unmount remote file systems in	no error
+		quick succession.
+.sp 2
+.H 2 "New Test Scenarios"
+.sp 1
+The following are test scenarios not covered in IND's Indigo stress tests.
+Because of their nature, these tests will not be automated nor will they
+be executed from the standard scaffold structure.
+.sp 2
+.H 3 "Too many mounts"
+.sp 1
+While copying a large block of data (e.g., a cp of duration greater than
+1 minute) from a client 9000 which has mounted as many servers as it can
+(dependent on available network memory, etc), attempt to
+mount one additional server.  The mount should fail and all of the copy
+operations should complete without errors.
+.sp 1
+.nf
+RESPONSIBLE ENGINEER: Jim Hunter
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    2.0  md
+.fi
+.sp 2
+.H 3 "Maximum mounts with stress"
+.sp 1
+Mount as many NFS servers as memory allows, then run one instance of
+the NFS functional tests (for 24 hours) to each server simultaneously.
+All tests should complete without errors.
+.sp 1
+.nf
+RESPONSIBLE ENGINEER: Jim Hunter
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    3.0  md
+.fi 
+.sp 2
+.H 3 "Many Clients to One Server"
+.sp 1
+Have 5 clients mount the same server.  Run one instance of the NFS functional
+tests (for 24 hours) from each client simultaneously.   All tests should
+complete without errors.
+.sp 1
+.nf
+RESPONSIBLE ENGINEER: Jim Hunter
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    3.0  md
+.sp 2

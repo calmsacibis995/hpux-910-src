@@ -1,0 +1,21 @@
+
+S-50969-90300-5		DOCUMENTATION MEDIA ARCHIVE
+
+This tape is for an HP-UX OS; it is a backup of the 6.2 release of NFS source
+code and associated documents and tools.  The tape was created this way:
+
+	find . -print | cpio -o | compress | tcio -or /dev/rct
+
+For a description of the directory structure on the tape and the method for
+reconstructing the "development environment," see the document (formattable
+using nroff -cm) doc/how_to.  A general description of special NFS/300
+documents may be found in doc/README.
+
+This tape contains the following:
+
+S-50969-90301-4		NFS/300 Special Utilities and Software Tools
+				(including the development environment)
+S-50969-90301-10	NFS/300 Source Code
+S-50969-90301-7		NFS/300 Man Pages
+S-50969-90301-8		NFS/300 Documentation (including the NLS Cookbook,
+				NFS System Test Plan, etc.)

@@ -1,0 +1,877 @@
+#!/bin/sh 
+# Source: /usr/spool/lp/model/hpC1208A                           
+
+# Printer Command Language level V model, including support for hpC1208
+#language switching.
+
+# This script contains enhancements to the /usr/spool/lp/model/laserjet
+# interface script.  Enhancements include:
+#       lp option to change primary and secondary character point size height
+#       lp option for paper tray selection
+#       lp option to print HPGL2 files
+#       modified font typeface option to allow support for both one and two
+#         byte typefaces
+#       lp option to select PostScript as printer language (assuming default
+#         printer language is PCL)
+
+#=======================================================================#
+# OPTIONS RECOGNIZED: ( all may be preceded by a "-" )                  #
+#                                                                       #
+# Horizontal Pitch Selection                                            #
+#       10              10 characters/inch (cpi)                        #
+#       12              12 cpi                                          #
+#       c               compressed print pitch                          #
+#       e               expanded print pitch                            #
+#       fp#             set primary font pitch to # cpi                 #
+#       sfp#            set secondary font pitch to # cpi               #
+#                           ( # may be floating point )                 #
+#                           ( e.g. 16.66 = compressed )                 #
+#       hsi#            set horizontal spacing increment (#/120's inch) #
+#                           ( e.g. hsi10 is the same as 12 cpi)         #
+#                           ( See your printer reference manual)        #
+#                                                                       #
+# Print Quality Selection                                               #
+#       q#              set primary print quality to #                  #
+#       sq#             set secondary print quality to #                #
+#                           ( possible values for quality # )           #
+#                           ( 0 = draft, 1 = near letter quality )      #
+#                           ( 2 = letter quality )                      #
+#       nlq             set primary print quality to near letter quality#
+#       lq              set primary print quality to letter quality     #
+#       dq              set primary print quality to draft quality      #
+#                                                                       #
+# Print Spacing Selection                                               #
+#       ps              set primary font to proportional spacing        #
+#       sps             set secondary font to proportional spacing      #
+#       fs              set primary font to fixed spacing               #
+#       sfs             set secondary font to fixed spacing             #
+#                                                                       #
+# Vertical Pitch Selection                                              #
+#       lpi#            print at # lines per inch                       #
+#                           ( default is 6 lpi)                         #
+#       vsi#            set vertical spacing increment to (#/48's in)   #
+#                           (  e.g. vsi4 is the same as 12 lpi )        #
+#                           ( See your printer reference manual)        #
+#                                                                       #
+# Font Selection                                                        #
+#       cs#$            set primary character set to #$                 #
+#       scs#$           set secondary character set to #$               #
+#                           ( See your printer reference manual )       #
+#                           ( for possible character sets. )            #
+#                           ( e.g. cs8U sets Roman 8 character set )    #
+#       r8              Roman 8 character set                           #
+#       k8              Kana 8 character set                            #
+#       height#         set primary height to #                         #
+#       sheight#        set secondary height to #                       #
+#       style#          set primary font style to #                     #
+#       sstyle          set secondary font style to #                   #
+#                           ( possible values for style # )             #
+#                           ( 0 = upright, 1 = italic, 2 = slant )      #
+#       i | italics     set primary font style to italic                #
+#       si | sitalics   set secondary font style to italic              #
+#       upright         set primary font style to upright               #
+#       supright        set secondary font style to upright             #
+#       slant           set primary font style to slant                 #
+#       sslant          set secondary font style to slant               #
+#       type#           set primary font typeface to #                  #
+#       stype#          set secondary font typeface to #                #
+#       weight#         set primary font stroke weight to #             #
+#       sweight#        set secondary font stroke weight to #           #
+#                           ( <0 = light, 0 = medium, >0 = bold )       #
+#                           ( typical range is -7 to +7         )       #
+#                           ( consult printer reference manual  )       #
+#       b | bold        set font stroke weight to bold ( # = 1 )        #
+#                                                                       #
+# Page Length Selection                                                 #
+#       lnnn            set absolute length of page to nnn lines        #
+#                           ( default is 66 )                           #
+#       tlnnn           set text length of page to nnn lines            #
+#                           ( default is 60 in portrait mode, )         #
+#                           ( 45 in landscape mode )                    #
+#                                                                       #
+# Margin Selection                                                      #
+#       lm#             set left margin in column #                     #
+#       rm#             set right margin in column #                    #
+#                           ( left most column = 0 )                    #
+#                                                                       #
+# Page Orientation: (Default portrait)                                  #
+#       portrait        portrait mode orientation                       #
+#       landscape       landscape mode orientation                      #
+#                                                                       #
+# Output filtering: (Default Cooked)                                    #
+#       r  | raw        raw mode for plotting mode etc.                 #
+#       n  | nroff      set up to properly print output from nroff      #
+#       pr              set up to properly print output from pr         #
+#       nb              do not output banner page (to save paper)       #
+#       yb              do output banner page                           #
+#       rev             output pages in reverse order                   #
+#                                                                       #
+# Paper Control: (Default single sided feed from paper cassette)        #
+#       m | man         set up for manual sheet feed                    #
+#       d | double      do automatic double sided printing              #
+#               * If your printer is not capable of duplex printing,    #
+#                 use 'md' or 'mdouble' option.                         #
+#       md | mdouble    do manual double sided printing                 #
+#       ub | ubin       feed paper from upper cassette                  #
+#       lb | lbin       feed paper from lower cassette                  #
+#
+# Paper Control for Banner Page:
+#       ubb | ubbin       feed banner page from upper cassette          #
+#       lbb | lbbin       feed banner page from lower cassette          #
+#                                                                       #
+# Dividing page: (Default normal)                                       #
+#       half | 2        double page with half size printing             #
+#       quarter | 4     four times page with quarter size printing      #
+#               * Use of these options will negate the effects of       #
+#                 the other options except for 'portrait', 'landscape', #
+#                 'm', 'man', 'nb', 'd' or 'double'.                    #
+#                                                                       #
+# Page Size: (Default Letter)                                           #
+#       a3 | A3         set page size to A3                             #
+#       a4 | A4         set page size to A4                             #
+#       b4 | B4         set page size to B4                             #
+#       letter          set page size to Letter                         #
+#                                                                       #
+# Options for hpgl2-files:                                              #
+#       hpgl2   set the printer to hpgl2-mode and reset it after        #
+#                printing to pcl-mode (Orientation in landscape mode)   #
+#                                                                       #
+#       hpgl2_p set the printer to hpgl2-mode, change the orientation   #
+#               to protrait and reset after printing to pcl-mode        #
+#                                                                       #
+# Options for PostScript:                                               #
+#       postscript      set the printer language to PostScript and      #
+#                       reset it after printing to pcl-mode             #
+#                                                                       #
+#=======================================================================#
+
+
+# USER CAUTION: This model is linked to several other models and should
+# not be modified directly. If any changes are desired, including the
+# enhancements described below, you should first make a copy of this
+# model under a new name. Changes can then be made to the copy and the
+# copy used as the model for the desired printer.
+
+# POSSIBLE USER ENHANCEMENT:  This model does not output pages in reverse
+# order by default. To make reversing the default, insert a '#'  before
+# the first line below and remove the leading '#' from the second line.
+# Note that the "rev" option can be used to reverse pages of individual
+# jobs. Be sure to read the above USER CAUTION before modifying this model. 
+
+reverse=""              # Use this line if page reversing IS NOT desired
+#reverse="yes"          # Use this line if page reversing IS desired
+
+# POSSIBLE USER ENHANCEMENT: By default the laserjet printer will
+# print 60 lines of text per page. It is possible to get 66 lines of
+# text on the printable portion of the page when using the letter size
+# (8.5 by 11 inches) paper cartridge or 70 lines per page when using
+# the A4 size (297 by 210 mm) paper cartridge. The instructions for
+# modifying this model to get either of these capabilities by default
+# are given below under the heading "POSSIBLE USER ENHANCEMENT".
+# NOTE: Use of the 'vsi', 'lpi', 'pr', 'nroff', 'l', 'orientation'
+# 'half' or 'quarter' options will negate the effects of this enhancement.
+# Be sure to read the above USER CAUTION before modifying this model. 
+
+
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+# Save the arguments to the model
+printer=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+options=$5
+
+
+# Definitions of functions used within this script
+
+do_banner()
+{
+        # Print the standard header
+        x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+        echo "\r\c"
+        echo "$x\n$x\n$x\n$x\n"
+        banner `echo $user`
+        echo "\n"
+        user=`pwget -n $user | line | cut -d: -f5`
+        if [ -n "$user" ]
+        then
+                echo "User: $user\n"
+        else
+                echo "\n"
+        fi
+        echo "Request id: $reqid    Printer: `basename $0`\n"
+        echo "Options: $options\n"
+        date
+        echo "\n"
+        if [ -n "$title" ]
+        then
+                banner "$title" 
+        fi
+        echo "\f\c"
+}
+
+
+# Set up interface
+if [ -t 1 ]
+then
+        stty raw 9600 -parenb cs8 ixon -istrip clocal <&1 2>/dev/null
+else
+        slp -r 2>/dev/null
+fi
+
+# Handle disable and cancel traps.
+trap "echo '\nCANCELLED!!\033E\c';trap 15;kill -15 0;exit 0" 15
+
+# Set up printer default modes -- Assume PCL mode on entry
+echo "\033E\c"          # Reset Printer
+echo "\033)0B\c"        # Secondary character set line draw
+echo "\033&k2G\c"       # Set line termination mode.
+
+
+# Initialize option variables to default values
+length="def"
+pitch="def"
+spitch="def"
+hsi="def"
+quality="def"
+squality="def"
+spacing="def"
+sspacing="def"
+lpi="def"
+vsi="def"
+charset="def"
+scharset="def"
+height="def"
+sheight="def"
+style="def"
+sstyle="def"
+typeface="def"
+stypeface="def"
+weight="def"
+sweight="def"
+pagelen="def"
+tpagelen="def"
+lmargin="def"
+rmargin="def"
+outputmode="cooked"
+banner="yes"
+orientation="def"
+pagemode="def"
+bannerpagemode="def"
+duplex="def"
+nroff=""
+italics=""
+dividing=""
+format=""
+page_size="def"
+
+# Determine which options have been invoked
+
+for i in $5
+do
+        case "$i" in
+
+        -postscript | postscript )
+                format="PS"      
+                outputmode="raw";;
+
+        -hpgl2 | hpgl2)
+                format="HPGL2"
+                outputmode="raw";;
+
+        -hpgl2_p | hpgl2_p)
+                format="HPGL2_P"
+                outputmode="raw";;
+
+        -10 | 10)       # font pitch set to 10.00 cpi
+                pitch="10";;
+
+        -12 | 12)       # font pitch set to 12.00 cpi
+                pitch="12";;
+
+        -c | c)         # font pitch set to compressed print 
+                pitch="c";;
+
+        -e | e)         # font pitch set to expanded print
+                pitch="e";;
+
+                        # set primary font pitch to value following fp
+        -fp[0-9]* | fp[0-9]* | -fp.[0-9]* | fp.[0-9]*) 
+                pitch="`echo "$i" | sed 's/^[-]*fp//'`";;
+
+                        # set secondary font pitch to value following sfp
+        -sfp[0-9]* | sfp[0-9]* | -sfp.[0-9]* | sfp.[0-9]*) 
+                spitch="`echo "$i" | sed 's/^[-]*sfp//'`";;
+
+                        # set horizontal spacing increment to #/120 in.
+        -hsi[0-9]* | hsi[0-9]*)
+                hsi="`echo "$i" | sed 's/^[-]*hsi//'`";;
+
+                        # set primary font quality to 0,1, or 2
+        -q[0-2] | q[0-2])
+                quality="`echo "$i" | sed 's/^[-]*q//'`";;
+
+                        # set secondary font quality to 0,1, or 2
+        -sq[0-2] | sq[0-2])
+                squality="`echo "$i" | sed 's/^[-]*sq//'`";;
+
+        -nlq | nlq)             # set font quality to near letter quality
+                quality=1
+                squality=1;;
+
+        -lq | lq)       # set font quality to letter quality
+                quality=2
+                squality=2;;
+
+        -dq | dq)       # set font quality to draft quality
+                quality=0
+                squality=0;;
+
+        -ps | ps)       # set primary font to proportional spacing
+                spacing=prop;;
+
+        -sps | sps)     # set secondary font to proportional spacing
+                sspacing=prop;;
+
+        -fs | fs)       # set primary font to fixed spacing
+                spacing=fixed;;
+
+        -sfs | sfs)     # set  secondary font to fixed spacing
+                sspacing=fixed;;
+
+                        # set lines per inch to value following lpi
+        -lpi[0-9]* | lpi[0-9]*) 
+                lpi="`echo "$i" | sed 's/^[-]*lpi//'`";;        
+
+                        # set vertical spacing increment to #/48 inch
+        -vsi[0-9]* | vsi[0-9]*)
+                vsi="`echo "$i" | sed 's/^[-]*vsi//'`";;
+
+                        # set primary character set to value following cs
+        -cs[0-9]* | cs[0-9]*)
+                charset="`echo "$i" | sed 's/^[-]*cs//'`";;
+
+                        # set secondary character set to value following scs
+        -scs[0-9]* | scs[0-9]*)
+                scharset="`echo "$i" | sed 's/^[-]*scs//'`";;
+
+        -r8 | r8)       # primary character set is Roman8 
+                charset="8U";;
+
+        -k8 | k8)       # primary character set is Kana8 
+                charset="8K";;
+
+                        # set height to value after height
+        -height[0-9]* | height[0-9]*)
+                height="`echo "$i" | sed 's/^[-]*height//'`";;
+                        # set sheight to value after sheight
+        -sheight[0-9]* | sheight[0-9]*)
+                sheight="`echo "$i" | sed 's/^[-]*sheight//'`";;
+
+                        # set font style accordingly
+        -style[0-2] | style[0-2])
+                style="`echo "$i" | sed 's/^[-]*style//'`";;
+
+        -sstyle[0-2] | sstyle[0-2])
+                sstyle="`echo "$i" | sed 's/^[-]*sstyle//'`";;
+
+        -i | i | -italics | italics)
+                style=italic;;
+
+        -si | si | -sitalics | sitalics)
+                sstyle=italic;;
+
+        -upright | upright)
+                style=upright;;
+
+        -supright | supright)
+                sstyle=upright;;
+
+        -slant | slant)
+                style=slant;;
+
+        -sslant | sslant)
+                sstyle=slant;;
+
+                        # set primary typeface to value after type
+        -type[0-9]* | type[0-9]*)
+                typeface="`echo "$i" | sed 's/^[-]*type//'`";;
+        
+                        # set secondary typeface to value after stype
+        -stype[0-9]* | stype[0-9]*)
+                stypeface="`echo "$i" | sed 's/^[-]*stype//'`";;
+
+                        # set primary font weight to +- #
+        -weight[0-9]* | weight[0-9]* | -weight-[0-9]* | weight-[0-9]*)
+                weight="`echo "$i" | sed 's/^[-]*weight//'`";;
+
+                        # set secondary font weight to +- #
+        -sweight[0-9]* | sweight[0-9]* | -sweight-[0-9]* | sweight-[0-9]*)
+                sweight="`echo "$i" | sed 's/^[-]*sweight//'`";;
+
+                        # set font weight to bold
+        -b | b | -bold | bold)
+                weight=1
+                sweight=1;;
+
+                        #set absolute length of page to the value following l
+        -l[0-9]* | l[0-9]*) 
+                pagelen="`echo "$i" | sed 's/^[-]*l//'`";;
+
+                        #set text length of page to the value following tl
+        -tl[0-9]* | tl[0-9]*)   
+                tpagelen="`echo "$i" | sed 's/^[-]*tl//'`";;
+
+                        # set left margin in column given by value after lm
+        -lm[0-9]* | lm[0-9]*)   
+                lmargin="`echo "$i" | sed 's/^[-]*lm//'`";;
+
+                        # set right margin in column given by value after rm
+        -rm[0-9]* | rm[0-9]*)   
+                rmargin="`echo "$i" | sed 's/^[-]*rm//'`";;
+
+                        # raw mode for binary output to printer
+        -r | r | -raw | raw)    
+                outputmode="raw";;
+
+        nb | -nb)       # Do not output banner page
+                banner="";;
+
+        yb | -yb)       # Do not output banner page
+                banner="yes";;
+
+        -rev | rev)             # output pages in reverse order
+                reverse="yes";;
+
+        -portrait | portrait) # select portrait orientation
+                orientation="portrait";;
+
+        -landscape | landscape) # select landscape orientation
+                orientation="landscape";;
+
+        -d | d | -double | double)      # set up for automatic double sided copy
+                duplex="yes";;
+
+        -md | md | -mdouble | mdouble)  # set up for manual double sided copy
+                outputmode="mdouble";;
+
+        -m | m | -man | man) # set up printer for manual sheet feed
+                pagemode="man";;
+
+        -ub | ub | -ubin | ubin) # set up printer to feed from upper cassette
+                pagemode="ubin";;
+
+        -lb | lb | -lbin | lbin) # set up printer to feed from lower cassette
+                pagemode="lbin";;
+        
+        -ubb | ubb | -ubbin | ubbin) # set up printer to feed banner page from upper cassette
+                bannerpagemode="ubbin";;
+
+        -lbb | lbb | -lbbin | lbbin) # set up printer to feed banner page from lower cassette
+                bannerpagemode="lbbin";;
+        
+                        # set up printer to properly print output from nroff    
+        -n | n | -nroff | nroff) 
+                nroff="-n"
+                length="-l66";;
+                        
+        -pr | pr)       # set up printer to properly print output from pr
+                nroff="-p"
+                length="";;
+
+                        # dividing page, double page with half size printing
+        -half | half | -2 | 2)
+                dividing="-h";;
+
+                        # dividing page, four times page with quarter size
+        -quarter | quarter | -4 | 4)
+                dividing="-q";;
+
+	-A3 | A3 | -a3 | a3)
+		page_size="a3";;
+
+	-A4 | A4 | -a4 | a4)
+		page_size="a4";;
+
+	-B4 | B4 | -b4 | b4)
+		page_size="b4";;
+
+	-letter | letter)
+		page_size="letter";;
+
+        esac
+done
+
+# Assume that the rest of the arguments are files
+shift; shift; shift; shift; shift
+files="$*"
+
+# print the banner if no banner not specified and reversing is not specified
+if [ -n "$banner" -a -z "$reverse" ]
+then
+
+                case "$bannerpagemode" in
+                        def);;
+                        ubbin)   echo "\033&l1H\c";;
+                        lbbin)   echo "\033&l4H\c";;
+                esac
+                do_banner
+                echo "\033E\c"          # Reset Printer
+                echo "\033)0B\c"        # Secondary character set line draw
+                echo "\033&k2G\c"       # Set line termination mode.
+fi
+
+
+# If raw mode and RS232 interface used turn off output processing
+if [ "$outputmode" = "raw" ]
+then
+        if [ -t 1 ]
+        then
+        stty raw 9600 -opost -parenb cs8 ixon -istrip clocal tab0 <&1 2>/dev/null
+        fi
+
+        case "$format" in
+        PS) ;;
+        *) echo "\033&k0G\c";;       # Reset line termination mode
+        esac
+fi
+
+
+# download font if dividing is "half" or "quarter"
+if [ -n "$dividing" ]
+then
+        reverse=""
+        pitch="def"
+        spitch="def"
+        hsi="def"
+        quality="def"
+        squality="def"
+        spacing="def"
+        sspacing="def"
+        lpi="def"
+        vsi="def"
+        charset="def"
+        scharset="def"
+        style="def"
+        sstyle="def"
+        typeface="def"
+        stypeface="def"
+        weight="def"
+        sweight="def"
+        pagelen="def"
+        tpagelen="def"
+        lmargin="def"
+        rmargin="def"
+        nroff=""
+        italics=""
+        reverse=""
+        length="def"
+        outputmode="divide"
+
+        case "$orientation" in
+                portrait | def)
+                        orientation="portrait"
+                        case "$dividing" in
+                                -h);;
+                                -q)     fontdl /usr/spool/lp/fonts/lp4p;;
+                        esac;;
+                landscape)
+                        case "$dividing" in
+                                -h)     fontdl /usr/spool/lp/fonts/lp2l;;
+                                -q)     fontdl -l /usr/spool/lp/fonts/lp4l;;
+                        esac;;
+        esac
+fi
+
+
+# Print the spooled files
+i=1
+while [ $i -le $copies ]
+do
+        for file in $files
+        do
+		case "$page_size" in
+			def);;
+			a3)     echo "\033&l27A\c";;
+			a4)     echo "\033&l26A\c";;
+			b4)     echo "\033&l46A\c";;
+			letter) echo "\033&l2A\c";;
+		esac
+
+                case "$orientation" in
+                        def);;
+                        portrait)       echo "\033&l0O\c";;
+                        landscape)      echo "\033&l1O\c"
+					case "$page_size" in
+						a3)     length="-l70";;
+						a4)     length="-l45";;
+						b4)     length="-l60";;
+						def | letter) length="-l45";;
+					esac;;
+                esac
+
+                case "$vsi" in
+                        def);;
+                        *)      echo "\033&l${vsi}C\c";;
+                esac
+
+                case "$lpi" in
+                        def);;
+                        *)      echo "\033&l${lpi}D\c";;
+                esac
+
+                case "$pagelen" in
+                        def)    if [ "$length" = "def" ]
+                                then
+					case "$page_size" in
+						a3)     length="-l100";;
+						a4)     length="-l70";;
+						b4)     length="-l86";;
+						def | letter)   length="-l60";;
+					esac
+                                fi
+#
+# POSSIBLE LASERJET ENHANCEMENT:
+# To set the default output on the laserjet printer to be 66 lines
+# per page and 80 characters per line with a 4 character left
+# margin and a 2 line top margin remove the leading '#' from the
+# following 7 lines.
+#                               if [ "$vsi" = "def" -a "$lpi" = "def" -a "$orientation" != "landscape" -a "$nroff" = "" -a "$dividing" = "" ]
+#                               then
+#                                       echo "\033&l66p2e7.6c66F\c"
+#                                       echo "\033&a4L\c"
+#                                       echo "\033&k11H\c"
+#                                       length="-l66"
+#                               fi
+# If you are using A4 size paper (297 x 210 mm) and desire 70 lines per
+# page instead of 66 along with the other characteristics described
+# above replace the three occurrences of '66' in the above lines with
+# '70' and remove the leading '#' as described. 
+                                ;;
+                        *)      echo "\033&l${pagelen}P\c"
+                                length="-l$pagelen";;
+                esac
+
+                case "$tpagelen" in
+                        def);;
+                        *)      echo "\033&l${tpagelen}F\c"
+                                length="-l$tpagelen";;
+                esac
+
+                case "$charset" in
+                        def);;
+                        *)      echo "\033(${charset}\c";;
+                esac
+
+                case "$scharset" in
+                        def);;
+                        *)      echo "\033)${scharset}\c";;
+                esac
+
+                case "$spacing" in
+                        def);;
+                        prop)   echo "\033(s1P\c";;
+                        fixed)  echo "\033(s0P\c";;
+                esac
+                
+                case "$sspacing" in
+                        def);;
+                        prop)   echo "\033)s1P\c";;
+                        fixed)  echo "\033)s0P\c";;
+                esac
+                
+                case "$pitch" in 
+                        def);;
+                        c)      echo "\033&k2S\c";;
+                        e)      echo "\033&k1S\c";;
+                        *)      echo "\033(s${pitch}H\c";;
+                esac
+
+                case "$spitch" in 
+                        def);;
+                        *)      echo "\033)s${spitch}H\c";;
+                esac
+
+                case "$hsi" in
+                        def);;
+                        *)      echo "\033&k${hsi}H\c";;
+                esac
+
+                case "$quality" in
+                        def);;
+                        *)      echo "\033(s${quality}Q\c";;
+                esac
+
+                case "$squality" in
+                        def);;
+                        *)      echo "\033)s${squality}Q\c";;
+                esac
+
+                case "$height" in
+                        def);;
+                        *)      echo "\033(s${height}V\c";;
+                esac
+
+                case "$sheight" in
+                        def);;
+                        *)      echo "\033)s${sheight}V\c";;
+                esac
+
+                case "$style" in
+                        def);;
+                        italic) echo "\033(s1S\c"
+                                italics="-i";;
+                        slant)  echo "\033(s2S\c";;
+                        *)      echo "\033(s${style}S\c";;
+                esac
+                
+                case "$sstyle" in
+                        def);;
+                        italic) echo "\033)s1S\c";;
+                        slant)  echo "\033)s2S\c";;
+                        *)      echo "\033)s${sstyle}S\c";;
+                esac
+
+                case "$weight" in
+                        def);;
+                        *)      echo "\033(s${weight}B\c";;
+                esac
+
+                case "$sweight" in
+                        def);;
+                        *)      echo "\033)s${sweight}B\c";;
+                esac
+
+                case "$typeface" in
+                        def);;
+                        *)      echo "\033(s${typeface}T\c";;
+                esac
+
+                case "$stypeface" in
+                        def);;
+                        *)      echo "\033)s${stypeface}T\c";;
+                esac
+                
+                case "$lmargin" in
+                        def);;
+                        *)      echo "\033&a${lmargin}L\c";;
+                esac
+        
+                case "$rmargin" in
+                        def);;
+                        *)      echo "\033&a${rmargin}M\c";;
+                esac
+
+                case "$pagemode" in
+                        def);;
+                        man)    echo "\033&l2H\c";;
+                        ubin)   echo "\033&l1H\c";;
+                        lbin)   echo "\033&l4H\c";;
+                esac
+
+                case  "$duplex" in
+                        def);;
+                        *)      echo "\033&l1S\c";;
+                esac
+
+                case "$format" in
+                        PS) echo "\033%-12345X@PJL enter language=postscript";;
+                        *) ;;
+                esac
+
+                    case "$outputmode" in
+                            raw)    case "$format" in        
+                                    HPGL2)
+                                      echo "\033E\c"
+                                      echo "\033&l3O\033%1B\c";;
+                                    HPGL2_P)
+                                      echo "\033E\c"
+                                      echo "\033%1B\c";;
+                                    *) ;;
+                                    esac
+                                    cat "$file" 2>/tmp/sh$$
+                                    if [ -s /tmp/sh$$ ]
+                                    then
+                                        case "$format" in
+                                        HPGL2 | HPGL2_P | PS)
+                                            cat /tmp/sh$$ >> /usr/spool/lp/log;;
+                                         *) cat /tmp/sh$$   # output any errors
+                                        esac
+                                    fi
+                                    rm /tmp/sh$$;;
+                            cooked) echo "\r\c"
+                                    if [ -n "$reverse" ]
+                                    then
+                                        lprpp $italics $length $nroff < "$file" 2>&1 | reverse $length
+                                    else
+                                        lprpp $italics $length $nroff < "$file" 2>&1
+                                    fi ;;
+                            mdouble) if [ -n "$reverse" ]
+                                     then
+                                        lprpp $italics $length $nroff -o < "$file" 2>&1 | reverse $length
+                                     else
+                                        lprpp $italics $length $nroff -o < "$file" 2>&1
+                                     fi
+                                    echo "\033&l2H\c"
+                                    lprpp $italics $length $nroff -e < "$file" 2>&1;;
+                            divide) case "$orientation" in
+                                    portrait)
+                                         divpage -p "$dividing" "$file" 2>&1;;
+                                    landscape)
+                                         divpage -l "$dividing" "$file" 2>&1;;
+                                    esac;;
+                    esac
+                
+                case "$format" in
+                PS) echo "\004\c";;
+                *)
+                  echo "\033E\c"        # Reset Printer
+                  echo "\033)0B\c"      # Secondary character set line draw
+                  echo "\033&k2G\c";;   # Set line termination mode.
+                esac
+        done
+        i=`expr $i + 1`
+done
+
+# Reset printer
+
+case "$format" in
+HPGL2)
+  echo "\033%1A\c";;
+HPGL2_P)
+  echo "\033%1A\c";;
+PS)
+  echo "\033%-12345X@PJL enter language=pcl";;
+*) ;;
+esac
+
+echo "\033E\c"  # Reset Printer
+echo "\033)0B\c"        # Secondary character set line draw
+echo "\033&k2G\c"   # Set line termination mode.
+
+if [ -n "$banner" -a -n "$reverse" ]
+then
+        case "$bannerpagemode" in
+                def);;
+                ubbin)   echo "\033&l1H\c";;
+                lbbin)   echo "\033&l4H\c";;
+        esac
+
+        do_banner
+
+        echo "\033E\c"  # Reset Printer
+        echo "\033)0B\c"        # Secondary character set line draw
+        echo "\033&k2G\c"   # Set line termination mode.
+fi
+
+# RS-232 interface insure all buffers are flushed to printer
+if [ -t 1 ]
+then
+stty raw 9600 -parenb cs8 ixon -istrip clocal <&1 2>/dev/null
+fi
+
+exit 0
+

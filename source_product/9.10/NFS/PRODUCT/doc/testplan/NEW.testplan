@@ -1,0 +1,196 @@
+
+.\" nroff -mm -rB3 -rW68 -rN2 NEW_NFS.testplan
+.\"
+.nr Ej 1
+.nr P 1
+.nr Cl 3   \" At least for now
+.ds HF 3 3 3 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'NFS 3.2/POSIX/ACL System Test Plan'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'NFS 3.2/POSIX/ACL System Test Plan' 'Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 5
+SYSTEM TEST PLAN
+.sp 1
+NETWORK FILE SYSTEM 3.2
+NFS and POSIX CONFORMANCE
+NFS and ACCESS CONTROL LISTS
+.sp 3
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.sp 3
+.ce 1
+First Edition - January 1989
+.ps 10
+.vs 12
+.sp 2
+.ce 3
+Editor
+Toni Atkinson, CND
+Fort Collins  CO
+.sp 2
+.ce 3
+Current Maintenance
+Toni Atkinson, CND
+Fort Collins  CO
+.sp 1
+.ce 2
+HPUX mail: toni@hpcndm
+Telnet 229-4641
+
+.PH " 'NFS 3.2/POSIX/ACL System Test Plan' 'Introduction' "
+.H 1 "Introduction"
+.H 2 "Project Data"
+
+.in 0.5i
+Program Name:     NFS Services/300
+.in 0i
+
+
+.in 0.5i
+Project Manager:  Dave Matthews 
+
+
+Project Engineers: Prabha Chadayammuri, Jeff Elison, Mark Kean, Cristina Mahon,
+Dominic Ruffatto, Mike Shipley, Darren Smith
+.in 0i
+
+.H 2 "Document Information"
+.in 0.5i
+Revision History:
+
+.nf
+First Version.....................................January, 1989
+      Created for Series 300 - Release HP-UX 6.5
+.fi
+
+.PH " 'NFS 3.2/POSIX/ACL System Test Plan' 'Preface' "
+.H 1 "Preface"
+
+This document is a supplement to the 
+.I
+SYSTEM TEST PLAN - NETWORK FILE SYSTEM.
+.R
+That document contains the test plans as well as the testing assumptions
+and objectives which were originally formulated for the NFS project. 
+For information about general strategy, planned configurations, 
+and the scaffold environment for testing NFS, see the original test plan,
+.I
+SYSTEM TEST PLAN - NETWORK FILE SYSTEM.
+.R
+
+
+This document,
+.I
+SYSTEM TEST PLAN - NFS 3.2/POSIX/ACL,
+.R
+provides the test plans for the functionality which
+was first added to the NFS product in the Series 300 - Release HP-UX 6.5. As 
+indicated by the title, these additions include NFS 3.2 features (HP's
+implementation of Sun Corporation's NFS 3.2), changes in NFS for POSIX 
+compliance, and changes necessitated by the addition of Access Control Lists 
+to HP_UX.
+
+A short introductory section precedes the section containing the test plans.  
+Its purpose is to provide a very brief introduction to NFS 3.2 features.
+
+.PH " 'NFS 3.2/POSIX/ACL System Test Plan' 'Overview of NFS 3.2' "
+.H 1 "Overview of NFS 3.2"
+.P
+The following information describes the major changes to the NFS Services
+product since the Series 300, HP-UX Release 6.2. With Series 300, HP-UX
+Release 6.5 the NFS 3.2 features were first supported. For Series 800 systems
+the first release with NFS 3.2 support is HP-UX Release 7.0.
+
+The major features in NFS 3.2 are remote file locking, rpcgen, rex, and NFS
+support for named pipes and device files.  Each feature is described below.
+.sp 2
+.H 2 "Remote File Locking"
+.P
+The Lock Manager (rpc.lockd) and Status Monitor (rpc.statd)
+provide System V compatible file and record locking (fcntl(2)
+and lockf(2) calls) for NFS files.  Only advisory locks are
+supported for NFS files.
+
+File locking requests go to the local node's rpc.lockd first.
+It then checks with the local statd, and then calls the remote
+lockd to service the request.  The local lock request will block
+and cannot be killed until a response is received from the remote
+rpc.lockd.
+.sp 2
+.H 2 "RPCGEN"
+.P
+RPCGEN is a tool that takes high level (C-like) descriptions of
+server and client programs and produces skeleton programs.
+These programs have the appropriate rpc calls inserted to allow
+the two programs to exist on separate machines and use rpc to
+communicate with each other.  The skeleton programs have stub
+functions which call the user-supplied server and client
+functions that perform the actual processing.  RPCGEN was created to
+take the tediousness out of remote procedure programming.
+.sp 2
+.H 2 "Remote Execution Service"
+The Remote Execution Service, REX, is similar to remsh(1) in
+that it allows execution of processes on remote machines.
+However, it is based on RPC instead of just TCP.  Also, REX adds
+the following features beyond remsh(1):
+.SP
+.BL
+.LI
+Capability   to  handle  interactive   processes,  including
+propagation  of  the  current  terminal/tty driver  settings,
+such as interrupt character, etc.
+.LI
+Determination of the current  directory,  and the ability to
+NFS mount that  directory from the machine acting as the REX
+server.
+.LI
+Passing  of  ALL environment  variables  from  the currently
+executing process.
+.LI
+Propagation of the current window size.
+.LI
+Propagation of the interrupt signal to the remote process.
+.LE
+.sp 2
+.H 2 "Named Pipes and Device Files"
+.P
+Access to named pipes and device files is now supported with
+NFS.  All access is relative to the client, so only processes on
+the same NFS client will be able to communicate using a named
+pipe with NFS. A device file is interpreted to mean a
+device attached to the client system.
+.PH " 'NFS 3.2/POSIX/ACL System Test Plan' 'Test Plans' "
+.H 1 "Test Plans - Introduction"
+.P
+This section of the document includes one chapter for each of the NFS 3.2
+features and one each for POSIX and ACLs. Each chapter contains the test plan 
+for that feature.
+
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' 'Remote File Locking' "
+.so lock_tests
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' 'RPCGEN' "
+.so rpcgen_tests
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' 'Remote Execution Service' "
+.so rex_tests
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' 'Named Pipes & Device Files' "
+.so fifo_tests
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' ' NFS and POSIX' "
+.so posix_tests
+.PH " 'NFS 3.2/POSIX/ACL Test Plan' 'NFS and ACLs' "
+.so acl_tests
+.TC 2 2 3 0 "NFS 3.2/POSIX/ACL TEST PLAN" "TABLE OF CONTENTS"	\" table of contents

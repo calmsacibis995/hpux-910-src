@@ -1,0 +1,112 @@
+#!/bin/sh
+# @(#) $Revision: 70.2 $    
+#
+# NOTE: This script is not configurable!  Any changes made to this
+#       scipt will be overwritten when you upgrade to the next release
+#       of HP-UX
+
+# Where to find commands:
+PATH=/bin:/usr/bin:/usr/local/bin:/usr/contrib/bin:/usr/lib:/etc
+export PATH
+
+#
+# The variable DOECHO controls the echoing of NON-error messages
+# from brc.  To turn off these "progress" messages set DOECHO=FALSE.
+#
+DOECHO=TRUE
+
+if [ "$DOECHO" = "TRUE" ]
+then
+   echo "\n/etc/brc:"
+fi
+
+#
+# Download the microcode to the FPA (Series 300 only):
+#
+if hp9000s300 && [ -x /etc/fpaload ] && [ -c /dev/fpa ]; then
+    if [ "$DOECHO" = "TRUE" ]
+    then
+        echo "\tInitializing Floating Point Accelerator."
+    fi
+    /etc/fpaload /etc/fpacode /dev/fpa
+fi
+
+#
+# Remove /etc/rcflag, used by /etc/rc to test if system startup is
+# occuring:
+#
+if [ "$DOECHO" = "TRUE" ]
+then
+   echo "\tRemoving /etc/rcflag."
+fi
+rm -f /etc/rcflag
+
+#
+# Remove /etc/mnttab unless this is a client in a DISKLESS system:
+#
+if [ -x /bin/getcontext ]; then
+    case "`/bin/getcontext`" in
+    *localroot*)
+	if [ "$DOECHO" = "TRUE" ]
+	then
+	   echo "\tRemoving /etc/mnttab."
+	fi
+	rm -f /etc/mnttab
+	;;
+    esac
+else
+    if [ "$DOECHO" = "TRUE" ]
+    then
+        echo "\tRemoving /etc/mnttab."
+    fi
+    rm -f /etc/mnttab
+fi
+
+#
+# Create new /dev/crt if needed (Series 300 & 700 only)
+#
+if hp9000s300; then
+    #
+    # Internal address, select codes 132-140, SGC slots 0-3
+    #
+    MINORS="000000 840200 850200 860200 870200 880200 890200 8a0200
+	    8b0200 8c0200 000300 010300 020300 030300 840300"
+elif hp9000s700; then
+    #
+    # Slots 1 & 0 (ITE picks slot 1 first, so try that first too)
+    #
+    MINORS="100000 000000"
+else
+    #
+    # Not s300 or s700, do nothing
+    #
+    MINORS=""
+fi
+
+if [ -n "$MINORS" ]; then
+    if ( : 2>/dev/null </dev/crt ); then
+	: /dev/crt worked
+    else
+	#
+	# Let's try some popular places for crts
+	#
+	if [ "$DOECHO" = "TRUE" ]
+	then
+	   echo "\tSetting up /dev/crt."
+	fi
+	TMP=/tmp/_tmp_crt$$
+	trap "rm -f $TMP; exit 1" 0 1 2 3 15
+	for minor in $MINORS; do
+	    /etc/mknod $TMP c 12 0x${minor}
+	    if ( : 2>/dev/null <$TMP ); then
+		mv -f $TMP /dev/crt
+		chmod 666 /dev/crt
+		break
+	    else
+		rm -f $TMP
+	    fi
+	done
+    fi
+fi
+
+exit 0

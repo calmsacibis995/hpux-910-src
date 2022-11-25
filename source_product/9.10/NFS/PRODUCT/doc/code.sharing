@@ -1,0 +1,509 @@
+
+
+.\ Leave the first line of the file blank as the .TL and .AS
+.\ macros do not work otherwise.  Don't ask me why.
+
+.TL
+.ce 1
+CODE SHARING FOR THE NFS/RPC KERNEL CODE
+
+
+
+
+
+
+.ce 3
+Darren Smith
+CND 1-229-2536 
+hpfcla!d_smith
+
+.ce 3
+Eric Wilford
+IND 1-447-2910
+wilford@hpda
+
+.ce 3
+Stacy Martelli
+ISO 1-447-6746
+stacy@hpda
+
+
+
+
+
+
+
+
+.AS
+This paper discusses the proposed method for sharing the NFS/RPC kernel code
+associated with the NFS/300 and NFS/800 products under development at CND, IND
+and ISO.  Included is a discussion of the actual administration 
+process plus discussion of various concerns that have been raised and how they
+will be addressed.  This agreement covers ONLY the NFS/RPC kernel code, and does
+not include the remainder of the two implementation's kernels.
+
+.AE
+
+
+
+
+
+.ce
+July 1987  
+.nr P 1
+.SA 1
+.PF " 'HP Internal Use Only' ' \\\\n(H1-\\\\nP'  "
+
+
+.PH " 'NFS CODE SHARING' 'History' "
+.bp
+
+.nr P 1
+.H 1 "Revision History"
+.nf
+First Version.....................................July, 1987
+
+
+
+.PH " 'NFS CODE SHARING' 'Management Summary' "
+.fi
+.bp
+.nr P 1
+.H 1 "Management Summary"
+This Management Summary has been placed at the beginning to provide an
+overview of the NFS code sharing proposal and the conclusions reached.  It
+does not go into any of the details of the proposal or the reasons why 
+certain decisions were made.  Note that this code sharing agreement applies
+only to the NFS/RPC kernel code for the NFS/300 and NFS/800 products.
+Please read the entire proposal for more details.
+
+The basic method chosen was a model of having a shared source tree that was
+separate from either of the "official" build trees for the Series 800 and
+the Series 300.  Partners (the teams working on the NFS kernel at CND, IND,
+and ISO) will have equal access to the code.  Before making changes to the
+shared source the changed code must pass acceptance test on the Series that
+the partner making the change is responsible for.  Thus, the NFS 300
+team must pass the acceptance test on the Series 300, and the NFS 800 must
+pass the acceptance test on the Series 800.  Partners then periodically pick
+up the modified sources from the shared source tree and verify that they
+work on the appropriate series before checking the new versions into their
+official build source.  It is planned that a large portion of this be
+automated.  Since the tools for remote access are already in place for the
+Series 800, ISO was chosen as the location of the shared source.  Access to
+the source by CND will be via the HP-Internet and the remote access tools
+provided by ISO.  Finally, their will be a major emphasis on communication
+between the partners, both for coordinating changes and to avoid duplicate
+efforts.
+
+As of this writing, an initial code merge has already taken place.  The
+shared source tree has been setup, and access verified by CND.  There still
+remains the writing of some scripts and tools for automatically doing some
+of the key processes, but the shared source is ready to be used.  Communication
+has already been taking place concerning the shared code.  Once this process
+is in place, all of the networking code (with the exception of some hardware
+drivers) will be shared between the Series 300 and the Series 800.
+.PH " 'NFS CODE SHARING' 'Preface' "
+.fi
+.bp
+.nr P 1
+.H 1 "Preface"
+This paper discusses the proposed NFS code sharing agreement between
+CND (Colorado Networks Division), IND (Information Networks Division), and
+ISO (Information Software Operation).  Note that this agreement applies only
+to the NFS kernel code consisting of the NFS layer of the file system plus the
+RPC/XDR protocol layers.  The remainder of
+the kernel networking code is already covered by an agreement between CND and
+IND, while the NFS user-level code will be entirely developed by CND for both
+the Series 800 and the Series 300.  However, some aspects of this agreement
+are effected by code that currently is not shared between the implementations,
+and this will be discussed as appropriate.
+
+In designing this proposal, it was important to keep in mind the real goals
+of sharing the NFS code.  In deciding which particular approach to take and
+whether it is even worth code sharing, the following were the two main goals
+considered.  (1) To encourage a "functional convergence" between the 
+Series 800 and the Series 300.  By this we mean to reduce the differences as
+perceived by the customer between the two Series.  To do this we need to 
+insure that the same defect fixes and added features are made in the same
+way on both Series.  (2) To maximize HP's efficiency and productivity in
+making the same defect fixes and adding the same features to the two Series.
+This goal includes many related "sub-goals".  If we recognize that any code
+sharing method will have some overhead involved, then we must balance the
+cost in terms of implementation versus what it would cost us to NOT share
+code or in using a different method.  Thus, the second goal leads to secondary
+goals such as automating the process as much as possible to ease the burden
+on the developer, and trying to impose as little as possible on the current
+build processes already setup.  Finally, we must consider these goals over
+both the short term and the long term.  In this case the short term means the
+current efforts to release NFS on the Series 300 and the Series 800, with the
+time frame under consideration being approximately the next year.  The long
+term would mean future CPE efforts plus added future features for both
+Series over the next two to three years.
+
+.bp
+With the addition of the NFS kernel code, the entire networking source code,
+with the exception of some hardware drivers, will be shared between the two
+implementations.  The following table summarizes this information:
+.nf
+
+  CODE SEGMENT		       CODE RESPONSIBILITY     STATUS
+  ------------                 -------------------     ------
+
++*Kernel networking code       IND (800), CND (300)    Shared
+
+  RPC/XDR (used by NFS)        IND (800), CND (300)    In progress
+
+  NFS file system              ISO (800), CND (300)    In progress
+
+  NFS specific commands        CND (300/800)           Shared
+
+ +Networking commands          CND (300/800)           Shared
+
+**VNODE layer of file system   ISO (800), SSO (300)    Not Shared
+  plus the remainder of the
+  kernel implementations
+
+  Commands.                    ISO (800), SSO (300)    Shared
+  
+
+
+ +Covered by the CND/IND networking code sharing agreement
+
+ *Includes most of the networking architecture, with the
+  exception of hardware specific drivers.
+
+**While not shared, the VNODE layer is closely related to
+  the NFS layer.
+
+.fi
+.PH " 'NFS CODE SHARING' 'The Administrative Model' "
+.bp
+.nr P 1
+.H 1 "The Administrative Model"
+.fi
+In the process of negotiating an agreement on how to share code, several
+concerns were raised by the kernel teams involved, including such issues as
+getting quick turn around time on checkins to the shared source and how to
+handle changes that might be necessary for the Series 300 discless
+implementation.  These issues fall into two basic categories:  how to do the
+physical code sharing process (administration), and issues that need
+to be resolved independent of the type of code-sharing method chosen.  
+This chapter discusses the method chosen for the administration of the shared
+source and why it was chosen.  The next chapter will discuss related and
+also more general issues.
+.H 2 "The Model"
+Consideration of the various issues, and keeping in mind the overall goals
+discussed above, led to a model in which the shared source tree is actually
+separate from either of the Series 300 or Series 800 main development code.
+This separate tree will be equally accessible by all partners as much as
+possible.  To make a change to the shared source, the partner wishing to make
+a change must first verify that the code change is appropriate and works on
+the Series he/she is working on.  That is, the code passes some acceptance test
+on the Series 800 for the NFS/800 team and on the Series 300 for the NFS/300
+team.   The changed code can then be checked into the shared source tree.
+Partners then periodically (e.g. nightly or weekly) pick up the modified
+versions of the code from the shared source tree, validate that it works on
+their system, and check the code into the "official" source for their Series.
+This process should be largely automated to avoid the extra burden of double
+validations/checkins on the development teams.  Of course, any code change
+SHOULD be communicated as a matter of habit between those partners affected
+by the change.  Because it is separate from either of the "official" sources,
+code freezes should not affect the shared source code.  (Code freezes will
+be discussed more later.)  Access to the code will be done via the 
+HP-Internet as discussed below.
+.H 2 "Advantages"
+This method of sharing code has several advantages:
+.H 3 "Same Features on Both Series."
+Of course, the major benefit of actually sharing code, whatever the mechanism
+used, is that virtually all of the code changes for defect fixes and/or features
+added only have to be made to one set of code to apply to BOTH machines,
+saving time in implementation on one Series, and guaranteeing that the two
+Series have the same feature set.
+.H 3 "Direct Checkin."
+By giving partners direct access to the shared source for making changes, it
+minimizes the possibility that a change will be miscommunicated or 
+mishandled because of going through a third person, besided making it 
+easier for partners to get a change into the shared source.  NOTE:  this is only
+an advantage if this access is not abused by those having access; an 
+assumption which we feel is valid given the relatively limited distribution
+of code responsibility for this code.
+.H 3 "Easy Code Freeze."
+Because the shared source is separate, the shared source itself should never
+be frozen, meaning that one partner should not be affected by another partner
+being in a code freeze.  Thus, for one partner to go into code freeze, that
+partner merely stops updating from the shared source tree.  More on code
+freezes later.
+.H 3 "Quick Turn-around."
+Partners frequently want to get a high priority change back from the shared
+source as quick as possible.  By having direct access to the shared source
+this allows a partner to check a change in and immediately check it back
+out again.
+.H 3 "Validate Only One Series."
+Using this method, a partner only has to validate (pass the acceptance tests)
+on one machine before checking in code.  This avoids one partner or the other
+having to do both validations, since the modified code will be validated by
+the appropriate partners.  This means that the code only has to be validated
+for one Series to get in the shared source, but the official build source of
+each Series has always been validated.
+.H 3 "No Overburdening of One Partner."
+If all changes have to go through one partner to get into the shared source,
+then that partner can effectively become a bottleneck.  If the responsible
+partner is busy tracking down some high priority problem or dealing with a
+code release, he or she may not have time to stop and validate a code change
+and get it checked in, possibly to multiple source trees.  At the very
+least, this can cause undesirable delays in getting changes into the code
+(see above).  Thus, by having direct access for partners, we avoid a
+potential bottleneck, and avoid overburdening one partner.
+.H 3 "Few Changes in Current Processes."
+While tools may need to be developed to access the shared source for
+automatically getting the latest code, this should not affect the normal
+processes used for building and integrating kernels on the different Series.
+In particular, little involvement by the Series 800 kernel integration team
+should be necessary, since this process will essentially be a "front end" to
+that process.
+.H 3 "Automation."
+A large portion of the processes used for accessing the shared source should
+be able to be automated, making the main cost of the code sharing process
+the time spent to do the initial automation.
+.H 2 "Disadvantages"
+Of course, this method also has some disadvantages:
+.H 3 "Increased Communication."
+Like most methods of code sharing, there is an increased number of communication
+paths necessary.  Also, there may be more in this scenario than others 
+because of the partner relationship, implying that changes are communicated
+both directions as much as possible, as opposed to a situation in which one
+side actually "owns" the code and makes all changes for both Series.  However,
+by increasing the communication we should also be able to increase the 
+teamwork between divisions as well as increase the likelihood of the success
+of both Series.
+.H 3 "Validate Twice and Checkin Twice."
+While much of the process should be able to be automated, this does not negate
+the fact that the partner doing the checkin must essentially validate and
+checkin the code twice:  once into the shared source, and once into the
+official source for the appropriate Series.  However, if the automation is
+done correctly, enough of this process should be automated to avoid a
+significant overhead in this area.
+.H 3 "No One Expert."
+By allowing changes to be made by more than one person to a particular piece
+of code, we are opening ourselves up to the fact that we may not have one
+person who understands everything about how one piece of code works.  On the
+other hand, if changes are communicated properly (possibly with "assists" in
+the automation process by automatically mailing differences, etc.) then we
+may actually end up with more than one "expert" on that piece of code.
+.H 2 "Other Methods Considered"
+Before agreeing on the method discussed here,
+several other methods were also considered in the course of discussing the
+code sharing proposal.  Obviously, we felt that the method discussed here was
+the best.  Here are some of the other methods and the factors that were
+considered for each of them.
+.H 3 "One Side Responsible."
+Under this method, one team would be responsible for making the changes to
+the actual shared source for both Series (similar to the current situation
+with the shared networking code).  Each piece of code would be assigned to
+a particular person on that team, and all changes to that piece of code would
+have to go through that person.  This has the advantage of having one person
+who is an expert on each piece of code.  Also, since that person would have
+total responsibility for the code, changes could essentially be made with less
+communication necessary.  However, this can also lead to the bottleneck
+situation discussed above, where one partner is waiting for other to make
+the change.  Thus, since one of the main concerns of some partners was 
+being able to get a fairly quick turn around on changes, this is a major
+drawback to this method.  Also, all partners expressed a strong desire to be
+able to access the source directly, which is directly contradicted by this
+model.
+.H 3 "Periodic Merges."
+Rather than actually sharing code, one possibility was to simply do periodic
+merges between the two implementations.  In this case, the day-to-day impact
+is virtually nil, since changes made affect only the particular implementation
+a partner is working on.  Done on a regular basis, this may actually be the
+best method over the short term.  However, over the long term, the code grows
+increasingly different as small changes creep into the code, increasing the
+length of time it takes to do the merge.  Also, while there are tools to help
+do code merges, it is a manual process that must be done over and over again.
+Thus, over the long term it does not seem to make sense.  Finally, experience
+with code merges at HP has shown that the process tends to be neglected over
+time exactly BECAUSE of the manual process it involves.
+.H 3 "No Sharing at All."
+A final possibility would be to not share the code in any way, and simply
+let the implementations go their own way.  This would lead to a divergence in
+the two implementations (again, as shown by HP's own experience with the
+kernels on the Series 300 and Series 800).  It also might be possible to not
+share the code, but simply communicate about the problems encountered and their
+solutions.  Again, experience has shown that there will be some things that
+will be miscommunicated or done differently on the two implementations.  Major
+features would either have to be implemented on both machines or extensive
+code merges would have to take place.
+.H 2 "Location"
+Since the shared source does not reside in either of the official build 
+source trees for the Series 800 or 300, the question of location essentially
+boils down to who had the appropriate tools available and which was the
+easiest to use for all partners.  Both Series already have tools which
+support some form of remote access.  Since the Series 300 implementation
+relies on RFA using internet addresses, which is not supported on the 
+Series 800, and since the Series 800 integration group was willing to
+administer the shared source, it was decided that the actual physical 
+location of the shared source would be at ISO. Access will be via the remote
+access tools already in use there, and which work over the HP-internet. 
+However, it is worth noting again that this in no way reflects who the "owners"
+of the code are:  both the Series 300 and Series 800 teams are equal partners
+with equal responsibility for the code.
+.PH " 'NFS CODE SHARING' 'Concerns and Issues' "
+.bp
+.nr P 1
+.H 1 "Code Sharing Concerns and Issues"
+Once the administrative model has been decided on, there are several other
+issues and concerns that still need to be addressed.  While these are 
+affected by the method chosen, they are somewhat independent in that these
+issues would be raised with any code sharing method.  Finally, some of the
+issues raised have no clear resolution, nor do they necessarily need one, other
+than a continued awareness of the issue and the associated problems.
+.H 2 "Communication"
+Obviously, communication will play a big factor in the success of the NFS code
+sharing.  There are several areas where communication will be very important,
+and we discuss here some of those areas.  The following people should be the
+main contacts for the various pieces of the NFS code:
+.nf
+
+Section of code      Series 300              Series 800
+---------------      ----------              ----------
+
+NFS file system      Mike Shipley (CND)      Stacy Martelli (ISO)
+
+RPC/XDR protocol     Darren Smith (CND)      Eric Wilford (IND)
+.H 3 "Problems Encountered."
+The standard method for keeping track of problems encountered that need to
+be worked on is via DTS.  To avoid having to submit a defect report for both
+the Series 300 and the Series 800, some special tools are being setup to 
+automatically inform the appropriate people when a defect is submitted to
+either of the NFS kernel DTS projects.
+This should insure that problems found on one Series get attention
+on the other also.
+.H 3 "Changes to the Shared Source."
+Changes to the shared source should be the result of either a defect report or
+a new feature being added.  In either case, the partner making the change 
+should communicate with her/his appropriate counterpart on the other teams,
+preferably BEFORE the change is made to shared source.  The only time that
+communication of the change may not be required will be in emergency situations
+where the appropriate contact for the code change can not be reached.  In the
+case of vacation and/or extended periods where a partner may be unreachable,
+arrangements should be made between the concerned parties about how to handle
+code changes that need to be made.  There is also the possibility that the
+same problem may be being investigated by the both the Series 800 team and
+the Series 300 team, causing duplicate effort to be spent.  This can be avoided
+by good communication between the appropriate people.
+.H 3 "Changes to the VNODE layer."
+Since the VNODE layer of the file system is not shared, there is the
+possibility that a change may be made to the VNODE layer that affects the
+NFS layer.  While the VNODE layer has been periodically merged between
+SSO and ISO, the code is sufficiently different to make this a difficult
+manual process.  In particular, picking out which changes are necessary for
+NFS may be difficult.  Thus, it is VERY important that when partners know of
+changes to the VNODE layer that affect the NFS layer that they communicate as
+accurately as possible the nature and extent of the change, and why it is
+necessary.  However, beyond being very aware of this potential problem area,
+there does not seem to be a solution to this problem (other than having the
+VNODE layer also be shared).
+.H 3 "Changes in ifdefs."
+Because we are dealing with two implementations, there may be areas in the
+code that need to be ifdefed because of differences between the Series.  In
+particular, the Series 300 will have extra code for the Discless implementation
+of SSO.  Changes that go inside of ifdefs must be checked carefully to insure
+that they really belong in the ifdef, and do not apply to both Series.  Again,
+this is an area where communication among the involved parties can help 
+greatly.  Also, as much as possible, whenever a defect is fixed a test should
+be added to the NFS test suite to verify that the problem is fixed.  Since the
+NFS test suite will be shared between the two implementations, this should 
+help insure that fixes are applied to both Series as appropriate.
+.H 3 "Coordinated Changes."
+Situations will arise where changes may need to be made to multiple sections
+of the kernel at the same time to fix some defect or add a new feature.  
+Depending on the extent of the change, this can be handled multiple ways.  If
+the changes are to only the NFS/RPC/XDR code, then the changes simply need to
+be made AT THE SAME time to the shared source.  That is, the shared source
+should always have a consistent set of sources to as great an extent as
+possible.
+
+A more sticky situation arises when a change must be made to the VNODE layer
+of the kernel at the same time as to the NFS layer.  Since the VNODE layer of
+code is not shared, there are essentially two ways to handle this.  First, the
+change can be coordinated between ISO/SSO/CND so that changes occur to all
+sources at the same time.  This may be viable if the changes are relatively
+small and localized.  The other alternative is for the change to be added to
+one Series inside of some appropriate "#ifdef".  Then, when the partners 
+working on the other Series are ready to pick up the change, the "#ifdef"
+can be removed from the code.  The symbolic name chosen for the "#ifdef"
+should NOT be one of the standard ifdefs used, e.g. hp9000s200, hp9000s800.
+The reason for this is to make the change stand out in some way so that it
+does not seem like something that should stay.  Also, it is mandatory that
+changes of this nature be communicated between the appropriate partners.
+
+The final situation that may arise is a change that needs to be made to
+the lower level networking code and the RPC layer of NFS at the same time.
+While both sets of code are shared, they are not shared in the same way.  Thus,
+this situation is similar to the VNODE layer above, in that changes will need
+to be communicated and coordinated.  However, because the networking code is
+shared, it makes the first option of simply coordinating the change more
+feasible and likely to occur.
+.H 2 "Validation of Checkins."
+One of the requirements stated is that changed code passes some form of
+acceptance test before being checked into the shared source.  This test must
+be passed ONLY on the Series the partner is working on, though the partner
+should also be confident that the code will work on the other Series also.
+For the purposes of the NFS projects, the acceptance test will be at least
+the acceptance tests (also known as the "quicky regression" tests) as specified
+by the NFS 300/800 testing teams' shared test scaffold.  The partner should also
+validate that the change in question actually functions as desired.
+.H 2 "Code Freezes"
+Since the shared source does not reside in any of the official build sources,
+the shared source will never be in code freeze.  When a partner wishes to enter
+a code freeze period, the partner simply stops checking changes to the 
+shared source into the official build source.  Essentially, the partner stops
+pulling from the shared source.  During a code freeze, it is the responsibility
+of the frozen partners to insure that changes made to their official build
+source get reflected via appropriate changes to the shared source.  Also,
+even during code freezes, partners should periodically (e.g. nightly or
+weekly) pull the latest sources from the shared source and verify that they
+still work on their Series.  This will help prevent a build up of problems
+waiting to occur when the code unfreezes, particularly during extended code
+freezes.
+.H 2 "Shared Test Scaffold"
+The NFS/300 and NFS/800 test groups will be sharing the same test scaffold
+and tests for the NFS projects.  The kernel groups will be using and updating
+regularly this scaffold.  Additionally, as the kernel groups develop
+special tests for corner cases in the code, these tests will also be added
+to the shared test scaffold, thus increasing the coverage on both Series.
+.H 2 "HP-Internet Reliability"
+Use of the HP-Internet is a key factor in the making the NFS code sharing
+possible.  Without it, the code sharing process would be much more difficult,
+if not impossible.  Other groups are also relying on the HP-Internet for 
+various purposes, including the converged network architecture.  Thus, it
+is more important than ever that the HP-Internet be totally supported and
+relatively reliable.  While this does not seem to be a problem at the present
+time, it is worth noting how much we will be relying on it.
+.H 2 "User Level RPC Code"
+Under the original SUN code, some files were shared between the user level
+RPC library code, and the kernel level RPC code.  Up to this point in time,
+this source has continued to be shared between user level and kernel
+level code by the CND NFS team.  This code will continue to be shared.  Since
+all user level RPC code responsibility is currently owned by CND, the 
+person responsible for that code will coordinate any changes to shared code
+with the appropriate kernel person at CND.  Similarly, if a change in the
+kernel RPC code will affect the user level RPC code, that code change will
+be coordinated by the people at CND.  Thus, the rest of the discussions about
+shared source and the processes used also apply to this code.
+Again, communication will be key to making this work.  
+.H 2 "Initial Merge"
+An initial merge must occur for the code sharing process to begin.  This merge
+has essentially already taken place, the shared source tree setup, and access
+verified by the Series 300 team.  However,
+some tools and scripts still need to be developed to ease the burden of 
+accessing the shared source.  Other than this, however, the shared source is
+ready to be used.
+.H 2 "Implementation"
+An implementation plan is currently being defined to meet various schedules.
+It has been agreed that even though the automatic tools are not in place for
+the automatic building from the shared source, etc., we can still begin using
+the shared source, with an agreement to update the shared source with changes
+and periodically pull the latest code from the shared source.
+.\ Now this will produce a table of contents
+.TC  

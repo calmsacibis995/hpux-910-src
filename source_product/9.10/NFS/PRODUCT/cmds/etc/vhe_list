@@ -1,0 +1,6 @@
+#	@(#)vhe_list:	$Revision: 1.4.109.1 $	$Date: 91/11/19 14:02:21 $
+#
+# Template for the vhe_list file
+# Each line should contain the following information
+# remote_node_name   remote_file_system   mount_point   <optional_mount_options>
+#

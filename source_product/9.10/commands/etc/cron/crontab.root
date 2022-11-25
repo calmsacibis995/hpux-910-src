@@ -1,0 +1,11 @@
+# @(#) $Revision: 64.1 $    
+#
+# This is a sample crontab file for the super-user.
+#
+
+# log kernel diagnostic messages every 10 minutes
+05,15,25,35,45,55 * * * * /etc/dmesg - >>/usr/adm/messages
+
+# Sample nightly invocation of calendar.  If you wish to run calendar,
+# just uncomment the next line.
+#0   4	* * *	exec /usr/bin/calendar -

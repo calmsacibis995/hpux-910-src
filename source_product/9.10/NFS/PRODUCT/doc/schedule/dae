@@ -1,0 +1,105 @@
+NAME:	Dave Erickson
+	@(#)last update:	10/12/87 at 08:49:14 (revision 1.31)
+
+Time   Time    Orig.    Category        Task Description
+spent  left    Est.
+
+1.1     0.2     0       Dev		Code review
+					Performed  code  reading of yp_bind and
+					ypbind.  Will discuss  review with Mark
+					Kepke.
+0.1     0.9     1       A/B             support of Alpha/Beta and B.O. sites
+0.9     0.8     1.7     SSIT            SSIT activities
+					Changed  customize scripts to meet SSIT
+					request   for    format;    coordinated
+					resolution  of NFS  problems of concern
+					to   SSIT.  I  need  to   work  on  the
+					update_info  document for SSIT.
+7.0     8.7     15.7    Test            Module test module I code 
+					Testing and defect  fixing;  changes to
+					messages for clarity.
+1.4     0.2     0       Tech            Various tech support
+					Need to provide  SEs info on  potential
+					fix to ypmake, should customers ask for
+					it (comments in hosts.byname map).
+1.7     0.2     0       Coord           Coordinating with partners
+					Change control team stuff, etc.
+17.4    0       5       Doc             modify brick pages and provide examples 
+					Corrected  some  defects  in man pages:
+					incorrect formatting, text modification
+					for clarity, missing info and errors in
+					SEE ALSO lists.
+1.7	0	0	Sup		General support of others' efforts
+					Helping with various 800 work:  working
+					with  Cristina  on long file  names and
+					YP;  helping  with some  YP/800  defect
+					resolution.
+
+ ===============================================================================
+Checkpoint	BitRel  10/09/87	Complete QA / Bit Release
+ ===============================================================================
+
+0       1.0     0       Doc             documentation signoff
+					Time  needed  to  check  over   advance
+					copies of manuals.
+0       1       1       A/B             support of Alpha/Beta and B.O. sites
+0       1       1       SSIT            Release final bits to SSIT  
+					Need to write  brief  test plan for our
+					part  of   partner   testing.  Want  to
+					thoroughly  critique the SSIT  delivery
+					document and promote the delivery  tool
+					I developed.
+0       1.5     1.5     SSIT            Archival of all code, docs and tools
+10      2       6       FTO             Vacation
+
+ ===============================================================================
+Checkpoint	MR	12/10/87	Manufacturing Release
+ ===============================================================================
+
+   Completed tasks:
+
+8.0     0       8.8     Test            Module test module I code 
+0.7	0       1       Dev             Provide NLS (i.e., localizibility)
+7.5     0       5       SSIT            SSIT activities (EB1)
+0.1     0       0       Test            Comparative performance evaluation
+3.6     0       5       Test		Write testplans (taken out of testing)
+0.7     0	1       Dev             Def/doc of install/config process 
+0.2	0	0	Iss		Display of Sun copyright in manuals
+4.2	0       3       Doc             first documentation review 
+0.2     0       0.5     Dev             NFS/RFA/DUX/A-B interactions 
+1.2     0       3       Tool            Learning tools
+0       0       4       Test            Reliability testing (done by Xformers)
+0       0       1       Dev             Implementation of installation process
+					(historical - unsure of meaning)
+1.9     0       1       A/B             support of Alpha/Beta sites (EB1)
+4.5     0       4.1     Train           Courses
+4.8     0       5       Test            Module test module I code (EB2)
+2.3     0       3       SSIT            SSIT activities (EB2)
+0.5	0  	0	Tech		Tech support (up to EB2)
+2.9     0       3       Doc             providing tech info (up to EB2)
+2.0     0       0       Train           Network Training Class for new hires
+6.1     0       5       Doc             second documentation review
+1.1     0       4       Doc             Programming with NFS - second review
+2.8     0       1.7     SSIT            EB3 SSIT activities
+1.6     0       0	Iss		Work on ERS
+3.0     0       1       A/B             EB2 support of Alpha/Beta and B.O. sites
+0.4     0       2       Tech            SE class review/edit
+31.4    0       15      Dev             Port module I code
+10      0       10      Test            Module test module I code (EB3)
+1.0     0       0       Train           Managing Management Time videos
+0.5     0       0       Train           A Closer Look at HP-Fort Collins
+0.5     0       0       Train           Satisfying our Customers
+4.5     0       0       Train           KTA Problem Solving and Decision Making
+2.8     0       4       Doc             third documentation review
+
+ ===============================================================================
+Checkpoint	End	12/10/87	To catch completed tasks in summary
+ ===============================================================================
+
+  Overhead tasks:
+
+	o  HP-UX team meeting attendance in Jeff's stead.
+	o  Regular events: progress report; team meetings; coffee talks.
+	o  Voice mail training.
+	o  Reading mail, notes.
+	o  Labor Day.

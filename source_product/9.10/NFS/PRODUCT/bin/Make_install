@@ -1,0 +1,32 @@
+#!/bin/sh
+##	$Revision: 1.12.109.1 $	$Date: 91/11/19 13:52:28 $
+#	Make_install	--	makes and installation directory
+##
+DESTDIR=${DESTDIR:-/tmp/release}
+DIRS="
+$DESTDIR
+$DESTDIR/bin
+$DESTDIR/etc
+$DESTDIR/usr
+$DESTDIR/usr/bin
+$DESTDIR/usr/etc
+$DESTDIR/usr/etc/yp
+$DESTDIR/usr/include
+$DESTDIR/usr/include/rpcsvc
+$DESTDIR/usr/lib
+"
+
+echo	"destination directory is $DESTDIR"
+##
+#	create any directories needed for the installation process ...
+##
+for DIR in $DIRS ; do
+    mkdir $DIR 2>/dev/null && echo created $DIR
+done
+echo	'all target directories made\n'
+
+##
+#	now call Make_cmd to do the installation,
+#	use -k option to keep going if possible
+##
+Make_cmd -k install

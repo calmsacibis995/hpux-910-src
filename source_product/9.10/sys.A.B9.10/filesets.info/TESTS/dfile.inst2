@@ -1,0 +1,28 @@
+
+*
+* @(#) $Revision: 1.5 $
+* DAT
+* The intent is that this kernel be basically functional for the non-networked
+* cards
+* dil hpib driver (includes plotters)
+* disk drivers
+* networking for network installs
+* printer drivers
+* pseudo terminal drivers
+* user.  Notice that X-11 support is not present.
+*filesystem (For CD-ROM)
+98624
+98625
+98626
+98642
+cdfs
+cs80
+hpib
+inet
+lan01
+printer
+ptymas
+ptyslv
+scsi
+scsitape
+uipc

@@ -1,0 +1,27 @@
+## FacetTerm Menu Capabilities for kt7ix 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: kt7ix.FM,v 70.1 92/03/09 16:49:58 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=\E+
+##-menu-cap-clr_eol=\ET
+## ##-menu-cap-ena_acs=
+## ##-menu-cap-enter_alt_charset_mode=
+## ##-menu-cap-exit_alt_charset_mode=
+## ##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\EG@
+##-menu-cap-shadow_attr=\EG@
+##-menu-cap-item_attr=\EG@
+##-menu-cap-box_attr=\EGD
+##-menu-cap-title_attr=\EGD
+##-menu-cap-highlight_attr=\EGD
+##-menu-cap-highlight_blink_attr=\EGF
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\E[B
+##-menu-cap-key_down=\E[A
+##-menu-cap-key_right=\E[C
+##-menu-cap-key_left=\E[D
+##-menu-cap-key_home=^^
+## ##-menu-cap-key_ignore=

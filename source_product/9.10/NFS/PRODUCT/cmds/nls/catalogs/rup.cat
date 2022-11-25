@@ -1,0 +1,27 @@
+$set 1
+1 collecting responses... 
+2 %*.*s: 
+3 \n
+4 %*.*s: 
+5 \n
+6 %*.*s  
+7   up
+8  %1$2d %2$s
+9 days,
+10 day, 
+11          
+12  %1$2d:%2$02d,  
+13  %1$2d %2$s
+14 mins,
+15 min, 
+16   load average:
+17 ,
+18  %.2f
+19 \n
+20   0x%08.8x: 
+21 %*.*s  
+22 0x%08.8x
+23 %.*s
+24 \n
+25 %12.12s  
+26 Usage: rup [-h] [-l] [-t] [host ...]\n

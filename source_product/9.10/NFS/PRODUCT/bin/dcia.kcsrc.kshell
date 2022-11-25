@@ -1,0 +1,183 @@
+#! /bin/ksh
+#
+# $Revision: 1.1.109.4 $
+#
+# Name: kcsrc.kshell
+#
+# KCS environment setup for korn shell users.
+#
+# Korn-Shell user: dot this file to set KCS variables.  ". kcsrc.kshell"
+#
+# Syntax:  kcsrc.kshell [[-]database] 
+#    where database is: L   - lanlink partner command files for 8.0 and after
+#                       O   - old lanlink partner cmd files for 7.0 and before
+#                       C   - NXL networking all kernel files except 8.3
+#                       C83 - NXL networking 8.3 (aka 9.0 WS) kernel files
+#                       K   - UKL/UDL kernel files
+#                       A   - ARPA Services files
+#                       N   - NS Services files
+#                       F   - NFS Services files
+#                       P   - OPUS-K kernel files
+#                       S   - OPUS-K command files
+#                       R   - STREAMS command files for 9.0
+#                       T   - tests
+#                       H   - Shared source files
+
+
+if [ $# -eq 0 ] ; then
+    print "Possible choices for sources:"
+    print
+    print " L   - lanlink partner command files for 8.0 and after"
+    print " O   - old lanlink partner command files for 7.0 and before"
+    print " C   - NXL networking all kernel files except 8.3"
+    print " C83 - NXL networking 8.3 (aka 9.0 WS) kernel files"
+    print " K   - UKL/UDL kernel files"
+    print " A   - ARPA Services files"
+    print " N   - NS Services files"
+    print " F   - NFS Services files"
+    print " P   - OPUS-K kernel files"
+    print " S   - OPUS-K command files"
+    print " R   - STREAMS command files for 9.0"
+    print " T   - tests"
+    print " H   - Shared source files"
+    print
+    print "Which sources are you working on?"
+
+    read DATABASE
+    set -- "${DATABASE}"
+fi
+
+#
+# Given a parameter go set the KCS environment variables.
+#
+
+i=1
+while [ ${i} -le $# ] ; do
+    eval parm=\${$i}
+    case ${parm} in
+        l*|L*|-l|-L)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/lanlink.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.lanlinkrev # lanlink is trunk (0)
+        KCSTRUNK=LANLINK
+	export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+	unset DTKCS
+	;;
+	o*|O*|-o|-O)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/ind.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.indrev # link is trunk (0)
+	export KCSDB KCSHOSTPATH KCSREVTBL
+	unset DTKCS KCSTRUNK
+	;;
+	c83*|C83*|-c83|-C83)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/kernel.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.kernelrev
+        KCSTRUNK=KERNEL
+	export DTKCS=/usr/local/kcs/etc/dt.kernel8.3
+	export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK 
+	;;
+	c*|C*|-c|-C)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/kernel.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.kernelrev
+        KCSTRUNK=KERNEL
+	export DTKCS=/usr/local/kcs/etc/dt.kernel90
+	export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK 
+	;;
+	k*|K*|-k|-K)
+	KCSDB=/usr/local/kcs/etc/kcs.db
+	KCSHOSTPATH=/usr/local/kcs/hosts/
+	KCSREVTBL=/usr/local/kcs/etc/.newrev
+	export KCSDB KCSHOSTPATH KCSREVTBL 
+        unset DTKCS KCSTRUNK
+	;;
+        a*|A*|-a|-A)
+        KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/arpa.db
+        KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+        KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.arparev
+        KCSTRUNK=ARPA
+        export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+        unset DTKCS
+        ;;
+        n*|N*|-n|-N)
+        KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/ns.db
+        KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+        KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.nsrev
+        KCSTRUNK=NS
+        export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+        unset DTKCS
+        ;;
+        f*|F*|-f|-F)
+        KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/nfs.db
+        KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+        KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.nfsrev
+        KCSTRUNK=NFS
+        export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+        unset DTKCS
+        ;;
+	p*|P*|-p|-P)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/otskern.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.otskernrev #otskern is trunk (0)
+        KCSTRUNK=OTSKERN
+	export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+	unset DTKCS
+	;;
+        r*|R*|-r|-R)
+        KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/strcmds.db
+        KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+        KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.strcmdsrev #strcmds is trunk (0)
+        KCSTRUNK=STRCMDS
+        export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+        unset DTKCS
+        ;;
+	s*|S*|-s|-S)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/otscmds.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.otscmdsrev #otscmds is trunk (0)
+        KCSTRUNK=OTSCMDS
+	export KCSDB KCSHOSTPATH KCSREVTBL KCSTRUNK
+	unset DTKCS
+	;;
+	t*|T*|-t|-T)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/nettest.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.nettest # scaffold is trunk (0)
+	export KCSDB KCSHOSTPATH KCSREVTBL
+	unset DTKCS KCSTRUNK
+	;;
+	h*|H*|-h|-H)
+	KCSDB=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/sharesrc.db
+	KCSHOSTPATH=/nfs/hpindgr/dcia1/KCS.cm/kcs/hosts/
+	KCSREVTBL=/nfs/hpindgr/dcia1/KCS.cm/kcs/etc/.sharerev # shared_src is trunk (0)
+	export KCSDB KCSHOSTPATH KCSREVTBL
+	unset DTKCS KCSTRUNK
+	;;
+        *)
+        print "ERROR: $@ is undefined.  One of the following must be entered:"
+	print
+        print "       L   - lanlink partner command files for 8.0 and after"
+        print "       O   - old lanlink partner command files for 7.0 and before"
+        print "       C   - NXL networking all kernel files except 8.3"
+        print "       C83 - NXL networking 8.3 (aka 9.0 WS ) kernel files"
+        print "       K   - UKL/UDL kernel files"
+        print "       A   - ARPA Services files"
+        print "       N   - NS Services files"
+        print "       F   - NFS Services files"
+        print "       P   - OPUS-K kernel files"
+        print "       S   - OPUS-K command files"
+        print "       R   - STREAMS command files for 9.0"
+        print "       T   - tests"
+        print "       H   - Shared source files"
+	;;
+    esac
+    i=`expr $i + 1`
+done
+
+#
+# Unset all positional parameters.
+#
+
+set --

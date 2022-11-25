@@ -1,0 +1,14 @@
+#!/bin/sh
+###
+#
+# make script for the s800
+#
+###
+
+/etc/chroot /usr/src/tools.7.0/TOOLS /bin/su sca -c "
+    cd $Nfs
+    if [ -f log/make_800_cmd -a -w log/make_800_cmd ] ; then
+	date \"+%y.%m.%d %T $Name Make_cmd800 clobber all $Nfs\"
+	Make_cmd800 clobber all > log/make_800_cmd 2>&1
+    fi"
+

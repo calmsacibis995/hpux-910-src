@@ -1,0 +1,35 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS include headers.
+#
+#	Created By:	David Wetchler
+#	Date:		1/23/92
+##
+*/
+
+.OPTIONS:	
+
+SDIR = $(SRCDIR:/^$/./)
+
+NMCFLAGS = $(CCFLAGS) $(CFLAGS)
+OCFLAGS	= -O $(NMCFLAGS)
+OLFLAGS = $(LDFLAGS)
+TCFLAGS	= -DTRACEON $(CFLAGS)
+TLFLAGS	=
+DCFLAGS	= -g -DDEBUG -DTRACEON $(CFLAGS)
+DLFLAGS	= -g
+
+$$(TARGET):	$(SDIR)/$$(TARGET)
+	$(CP) $(SDIR)/$$(TARGET) $$(TARGET)
+
+build:;
+
+install:;	$(INSTALL)  $$(TARGET)
+
+rinstall:	install
+	$(RINSTALL) $$(TARGET)
+
+clean:;
+
+clobber:;
+

@@ -1,0 +1,36 @@
+## FacetTerm  cit101keys   description file  06/29/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: cit101keys.FC,v 70.1 92/03/09 15:57:21 ssa Exp $
+function_key-21=\E[17~
+function_key-22=\E[18~
+function_key-23=\E[19~
+function_key-24=\E[20~
+function_key-25=\E[22~
+function_key-26=\E[23~
+function_key-27=\E[24~
+function_key-28=\E[25~
+function_key-29=\E[27~
+function_key-30=\E[28~
+function_key-31=\E[29~
+function_key-32=\E[31~
+function_key-33=\E[32~
+function_key-34=\E[33~
+function_key-35=\E[34~
+function_key-36=\E[35~
+shift_function_key
+function_key-37=
+function_key-38=
+function_key-39=
+function_key-40=
+function_key-41=
+function_key-42=
+function_key-43=
+function_key-44=
+function_key-45=
+function_key-46=
+function_key-47=
+function_key-48=
+function_key-49=
+function_key-50=
+function_key-51=
+function_key-52=

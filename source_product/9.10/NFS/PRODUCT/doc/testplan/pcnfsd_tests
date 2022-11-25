@@ -1,0 +1,107 @@
+.H 1 "PC NFS Test Plan (John Dilley)"
+
+This chapter briefly covers the testing needed for the PC NFS product;
+this chapter covers mainly the UNIX side of it, the pcnfsd.  It is
+assumed that the PC section will be testing the PC to UNIX
+functionality.
+
+.H 2  "PC side PC/NFS testing"
+.nf
+     RESPONSIBLE ENGINEER: Marie Dotts
+     ASSUMPTIONS:          The PC section will do PC/NFS testing
+     DEPENDENCIES:         A UNIX system and pcnfsd must be available
+.fi
+
+The PC/NFS testing should include testing of all PC/NFS functionality.
+We are assuming that someone in the PC section will write and run all of
+these tests; they will need aid from someone on the UNIX side.  John
+Dilley would be the appropriate engineer, since he has responsibility
+for the pcnfsd module.
+
+.sp 2
+.H 3 "NET NAME command"
+.sp 1
+
+The PC/NFS testing should include testing of the PC authorization
+command,
+.B "NET NAME user [password]".
+This command allows a PC user to authenticate himself on
+the UNIX NFS server system, causing future accesses to proceed as the
+.I user
+named in the command.  Before entering this command, the PC/NFS user
+should be able to access the UNIX system as
+.I nobody
+(UNIX userid -2).  After entering the command, the PC/NFS user should be
+able to access the UNIX system as
+.I user.
+
+.sp 2
+.H 3 "Remote Print Spooling"
+.sp 2
+
+The PC/NFS user should be able to spool print jobs to the printers
+available on the UNIX NFS host.  The print spooling will use the
+standard HP-UX "lp" interface.  The commands which the PC/NFS user must
+be able to use are:
+.B pr_init :
+returns the name of the spool directory
+.B pr_start :
+spools the given file
+
+The test for this will probably have to be manual.
+
+.sp 2
+.H 3 "PC/NFS print spooling"
+.sp 1
+
+This test should probably be done manually.  It is designed to exercise
+the different options available for printing.  The test should verify
+that the
+.B PR_INIT
+command creates the appropriate directory, and returns
+the correct results.  It should also verify that the
+.B PR_START
+command accepts the printer name, user name, and client name options,
+and spools the print file correctly.
+If the file name is not found, PR_START should return PR_RES_NO_FILE.
+If it finds the name with the
+.I .spl
+suffix, then it should return PR_RES_ALREADY, indicating that the file
+is already being printed.  In both cases, no new file should be spooled.
+If the user names an empty file (0 bytes), it should be removed,
+not spooled, and PR_RES_NULL should be returned.
+If all the above passes, the file should have the
+.I .spl
+suffix appended to it, and the file should be spooled using lp.
+
+.H 2  "UNIX side pcnfsd testing"
+.nf
+     RESPONSIBLE ENGINEER: John A Dilley
+     DEPENDENCIES:         PC/NFS client availabile
+     ISSUES:               Who will do PC/NFS testing,
+                           How much will they do?
+.fi
+
+The pcnfsd can be most easily tested from a PC; if the PC/NFS testing
+includes all of the major functionality of the pcnfsd, then few
+additional tests will be necessary.  
+
+.sp 2
+.H 3 "pcnfsd spool directory option"
+.sp 1
+.nf
+      IMPLEMENT TIME:  1.0 md
+      PERFORM TIME:    2.0 md
+      TYPE OF TEST:    functional
+      EXPECTED OUTPUT: no output if the test passes
+.fi
+
+This test will exercise the only option that the pcnfsd has -- the name
+of the print spool directory.  Without any options, pcnfsd will default
+to
+.I /usr/spool/lp;
+with options, pcnfsd takes the first option as the
+path name to the spool direcotry.  If given a bogus path name, pcnfsd
+should report an error message and exit with a non-zero exit status.  In
+all other cases, it should not report any errors and should exit with a
+zero exit status.

@@ -1,0 +1,217 @@
+.H 1  "Native Language Support (NLS) (Cristina Mahon)"
+
+.PP
+.ad
+Native Language Support involves primarily two steps.  Prelocalization
+is the modifcation to make use of resources which are limited to seven
+bit characters.  Localization is taking the prelocalized command and
+providing the necessary message catalogs and tables to make it run in a
+particular language such as French.
+We will only do the prelocalization step.
+.PP
+The following features of Native Language Support (NLS) will be supported:
+.ML o
+.LI
+Filename support:
+.DL 
+.LI
+We will support 8-bit filenames
+.LI
+We will support 16-bit filenames to the extent allowed by the HP-UX kernel.
+.LE
+.LI
+Support for message catalogues
+.LI
+Support for local customs
+.LI
+Support for language dependent features (if any)
+.LI
+Support eight and sixteen bit characters
+.LE
+.na
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME: 2 md 
+PERFORM TIME:   1 md
+.fi
+.sp 2
+.H 2 "8-bit filename support"
+.sp 1
+.PP
+.ad
+Create files with names that contain among themselves all possible
+8-bit characters.  Copy those files from an NFS-mounted directory 
+to a local directory.  Do an ls of both directories and compare their 
+contents.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       All the files will have been transferred.
+.fi
+.na
+.sp 2
+.H 2 "16-bit filename support"
+.sp 1
+.ad
+.PP
+Full support for 16-bit filenames is not incorporated in the HP-UX
+kernel, but many 16-bit filenames will be correctly interpreted. 
+Problems occur if one of the 16-bit characters in the filename happens to have
+as a second byte the byte value equal to "/". In that case the HP-UX kernel 
+will not correctly interpret the 16-bit character because it will see the "/".
+.PP
+This test will just try a few filenames that do not use a second byte of
+byte value equal to "/".  It is not intended to be a complete test of
+all possible 16-bit filenames.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+.ad
+       All files that do not have a second byte of value "/" will be 
+correctly interpreted.
+.na
+.fi
+.na
+.sp 2
+.H 2 "Message catalog support: catalog present"
+.sp 1
+.PP
+.ad
+A message catalog for a language will be created for an NFS program that
+was prelocalized.
+The environment language variable will be set for that language and 
+an output message will be produced.  The message produces should be 
+the corresponding message in the database.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The message should match the database message.
+.fi
+.na
+.sp 2
+.H 2 "Message catalog support: catalog missing"
+.sp 1
+.PP
+.ad
+The environment language variable will be set for a different language than 
+n-computer and an output message will be produced.  Since the
+message catalog for the specific language and program will be
+missing the message output should be the original hard-coded 
+message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The message should match the hard-coded message.
+.fi
+.na
+.sp 2
+.H 2 "Message catalog support: no language defined"
+.sp 1
+.PP
+.ad
+The environment language variable will not be set. 
+Since there will be no language defined the message output should be 
+the original hard-coded message.
+All tests that have run so far using the scaffold have performed
+this test by default.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The message should match the hard-coded message.
+.fi
+.na
+.sp 2
+.H 2 "Local customs support: code reading"
+.sp 1
+.PP
+.ad
+Code read all the modules to make sure that any messages that use
+times, dates, numbers or yes/no prompts have been modified to
+support local customs.
+.sp
+.nf
+TYPE OF TEST: 
+       code review
+.fi
+.na
+.sp 2
+.H 2 "Local customs support: execution"
+.sp 1
+.PP
+.ad
+Set the environment language variable to a certain language and 
+produce a message containing a date from an NFS program that has been 
+prelocalized.  The date should match the format expected for the 
+language variable defined in the environment.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The date should match the format for the language.
+.fi
+.na
+.sp 2
+.H 2 "Language dependent features support: code reading"
+.sp 1
+.PP
+.ad
+Code read all the modules to make sure that any messages that use
+type analysis, shifting, or sorting of characters have been modified to
+use the conventions of the native language.
+I can't think of any NFS command that uses any of the above.
+.sp
+.nf
+TYPE OF TEST: 
+       code review
+.fi
+.na
+.sp 2
+.H 2 "8-bit character support"
+.sp 1
+.PP
+.ad
+Produce a file containing all possible 8-bit characters and cat the file
+from an NFS mounted directory to another file in the local system.
+Compare the two files.  They should be identical.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The two files should be identical.
+.fi
+.na
+.sp 2
+.H 2 "16-bit character support"
+.sp 1
+.PP
+.ad
+Produce a file containing all possible 16-bit characters for the Japanese
+language and cat the file
+from an NFS mounted directory to another file in the local system.
+Compare the two files.  They should be identical.
+16-bit characters are restricted according to the HP-15 standard to characters
+with a first byte in the ascci reange of 129 to 254, and a second byte in the
+range of 34 to 126 and 128 to 254.
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       The two files should be identical.
+.fi
+.na

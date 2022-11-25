@@ -1,0 +1,11 @@
+# $Revision: 70.7 $
+1	ANSIC,ansic,Ansic
+2	POSIX.1,posix.1,Posix.1
+3	POSIX.2,posix.2,Posix.2
+4	XPG3,xpg3,Xpg3
+5	XPG4,xpg4,Xpg4
+6	FIPS151_1,fips151_1,Fips151_1
+7	OSF_AES,osf_aes,Osf_aes
+8	OSF1,osf1,Osf1
+10	HPUX,hpux,Hpux
+# Begin user-defined targets at 96

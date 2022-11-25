@@ -1,0 +1,259 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_800/analyze/manpage/RCS/analyze.more,v $
+# $Revision: 1.8.83.3 $	$Author: root $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/09/17 16:27:36 $
+
+.lg 0
+.TH ANALYZE internals
+.UC 4
+.SH NAME
+analyze \- Virtual UNIX postmortem crash analyzer
+.SH DESCRIPTION
+.I Analyze
+is the post-mortem analyzer for the state of the paging system.
+In order to use
+.I analyze
+you must arrange to get an image of the memory of the system after 
+it crashes. This can be done using rdb, or through the use of 
+.IR savecore (8).
+.PP
+The
+.I analyze
+program reads the relevant system data structures from the core
+image file and indexing information from 
+.B /hp-ux
+(or the specified system file)
+to determine the state of the paging subsystem at the point of the crash.
+It looks at each process in the system, and the resources used by
+each in an attempt to determine inconsistencies in the paging system
+state. 
+The basic control flow is as follows.
+.PP
+I). Scan the proc table. For each process dump the proc entry. Read in
+the data and stack ptes. Account for swap space of uarea, and ptes if
+swapped. Get the Uarea. Do a kernel stack trace.  Account for 
+swap space used by the data and stack. Check for shared memory.
+Scan over ptes and memory resources allocated to attached shared
+memory segments. Scan over ptes and memory resources of the shared text
+segment. Scan over ptes and memory resources of the data segment. Scan over
+ptes and memory resources of the stack segment. 
+.PP
+In each case the scanning of ptes involves logging what pages are
+being used by each process (as claimed in the ptes). In addition 
+the type and protection id information is logged away. This info will
+be cross-checked later in the pdir phase. Pages which are no longer
+mapped are cross checked with the PDIR to make sure that they do NOT
+have a valid translation. Pages which are claimed more then once and are
+private (ie CDATA or CSTACK), are flagged and reported.
+Resident set sizes are computed and compared against
+the values stored in the proc table (there is a possible bug here!).
+Lastly the pages allocated to the processes kernel stack and Uarea
+are logged.
+.PP
+The U flag controls whether a stack trace is performed and gives
+open file pointers from uarea. The active proc table entries, and 
+ptes are checked regardless of the flags.
+.PP
+II). Scan the text table. For each active text entry the text structure
+is dumped. The x_caddr chain pointer is followed,
+and each proc entry on it is checked to make sure that its p_textp pointer
+points back to the current text table entry. In addition the number of
+entries on this chain is compared against the x_count field to make sure
+it does not exceed the value. Finally the swap space used by the segment
+is logged. Remember that the ptes and pages were scanned earlier when
+processing the proc entry.
+.PP
+III).
+Scan the buffer clean list. This involves running down the paging systems
+cleanlist of buffer headers. This table contains all paging requests
+made by the paging system that have been completed, and are waiting to be
+processes and added to the freelist by cleanup(). When going down the
+buffer cleanlist each buffer header located is logged (checked for
+duplicates). In addition the forward links are checked to
+make sure that they are valid. Any bad pointers cause the current 
+table scan to be aborted. Next the swap buffer header pool is scanned. This
+pool contains the available swap buffers that can be used by the system
+to perform paging or swapping I/O. They are useful when you want to
+know what recent activity might have occured. Remember however that this
+is a last in first out queue! Each of the entries in this list are
+logged, and the pointers are checked. Lastly the unlinked swap buffer 
+headers are listed. These are buffer headers that have been handed off to the
+disc driver and represent outstanding I/O.  
+.PP
+The b flag specifies to search through all the buffer tables. Without
+this flag, the program will bypass all buffer checks. The B flag controls
+whether you want each entry displayed.
+.PP
+IV).
+Scan file system buffer headers. These include the four available queues
+(BLOCKED, BLRU, BAGE, BEMPTY) and the hash chains. In each case, pointers
+are checked and duplicates reported. If the buffer is on the LOCKED list
+then the B_LOCKED flag must be set. If the buffer is on the freelist then 
+B_BUSY must not be set.
+.PP
+V).
+Scan the inode hash chains. Each inode is logged, and duplicates are
+reported. Unlinked inodes are also listed. The chain links are checked
+for legality.  Mutually exclusive flags are reported.
+.PP
+The i flag specifies that you want the inode table checked. The I flag 
+specifies that you want each entry displayed.
+.PP
+VI).
+The shared memory table is scanned to account for the 
+shared memory resources not yet accounted for. This includes both
+global, and non-global pte pages, and swap space. In addition memory
+resources held by segments which are not attached to any processes are
+logged here.
+.PP
+The S flag causes the shared memory table entries to be printed.
+.PP
+VII).
+The text hash chains are scanned if given the H flag. This checks
+for chain consistency, and that all pages on the chain are of type
+CTEXT.
+.PP
+VIII)
+For the IO message system processing analyze steps through each Port, and
+decends down its data structures looking to account for all of the
+systems message frames. In addition it prints out information
+about each port. Message frame pointers are checked, and duplicates
+reported. At the end the free message pool is scanned, and lost
+message frames are printed.
+.PP
+The o flag specifies to scan the Ports, and the O flag specifies to
+print out each port. Note when scanning the io subsystem all other
+kernel checks will be bypassed regardless of the flags.
+.PP
+IX).
+The PDIR scanning involves alot of cross checks with information
+gathered prior to this phase. It includes checking space, virtual address,
+and protection info in the pdir, against what we think it should have.
+In addition the basic consistency of the PDIR is checked. Hash links
+are followed, (looking for looping chains, or collisions) and
+address aliasing is detected.
+.PP
+X).
+The Run queues, mount table and file table can be dumped if wanted.
+The Q flag controls dumping of the run queue. The M flag controls
+dumping of the file table and mount table.
+.PP
+XI).
+Once all active swap space has been accounted for, the program scans
+the free swap space map. It then sorts all the swap space that it has
+detected, and checks for missing chunks (this happens), and overlaps(
+this should not happen). Note there are some range checking rules
+enforced on disc block addresses.
+.PP
+The d flag controls whether the swap space is logged and checked, and the
+D flag controls whether it is printed out.
+.PP
+XII).
+The freelist is scanned to determine all the free pages. Pages on
+the freelist are checked to see that they are marked free in the coremap.
+In addition the links are checked to make sure that they are in a 
+valid range.
+.PP
+The F flag controls whether the freelist is dumped. It is always scanned
+for errors.
+.PP
+XIII).
+Finally a scan is made of the coremap. Any page that was claimed by a
+process, but not mapped in the PDIR is detected at this point. Unaccounted
+for pages which are not owned by the system are detected. Lastly pages
+which are locked but not of type CSYS are displayed. Usually these are
+pages which have DMA currently going on, and do not necessarily mean
+that something is wrong. 
+.PP
+The C flag specifies whether each core map entry is dumpped. The table is
+always scanned and errors reported. It is not usually necessary to dump
+the coremap as it can be quite large.
+.PP
+Note that the system does not keep track of pages requested
+by various subsystems, like the MUX driver, or networking code. It
+is possible that these systems may push up the unaccounted for pages
+number over the threshold where analyze complains. This does not
+necessarily indicate a problem.
+.PP
+XIV).
+The n flag specifies that the network subsystem should be scanned.
+No other kernel checks are performed when choosing this option.
+Currently the following networking areas are scanned when the
+"n" scan option is envoked.
+.IP
+First the Buffer manager tables are
+checked. This includes mbufs. The mbufs are checked for valid offsets,
+lengths, alignment, and type. If the mbuf points to a cluster, the cluster
+is checked for a positive reference count. In addition the mfree and
+mclfree chains are followed and counts are checked. 
+Cluster referance counts are compared
+against the mclrefcnt.
+.IP
+The next major networking area scanned is the networking interface. 
+The ifnet chain is followed. A check is made to see if the ifqueue is full,
+and if the length of the queue equals ifq_len. All mbuf pointers in the
+ifqueue are verified, and the if_macct mbuf is checked to see
+if it is valid. The last check on the ifnet structure is that the function
+pointers are valid. Next the sap_active (sap_log) is checked. Two things 
+are verified here. The pointer to the ifqueue, and the pointer to the input
+routine. The xsap_link structure has the following checks performed. All
+forward and backward links are verified, as well as the mbuf pointers. 
+The last networking interface structure checked is the lan_ift structure.
+Here the mbuf pointers, xtofree, and mbuf_rd fields are scanned to see
+if they contain valid pointers. The arpcom ifnet structure (is_ac.ac_if),
+and arpcom next link (is_ac.ac_ac), and m_acct fields are checked for
+valid pointers. Finally the driver statistics are displayed and we are warned
+if the LAN card died.
+.IP
+The following checks are made on the IP structures. The ipintrq is
+scanned to check for ifqueue full. The length of the queue is compared
+against ifq_len, and mbuf pointers in the ifqueue are checked to
+see that they are correct.
+.IP
+Finally all processes which were waiting on networking memory, or
+which referance open sockets are dumped.
+.IP 
+Additional checks recently added are:
+sockets:
+
+	o Warn if so_refcnt == 0.
+	o Verify that so_pcb points to a pcb contained in an MT_PCB.
+	       o Verify	that so_proto points to	a valid	protosw	entry.
+	       o Check that so_head, so_q0, and	so_q point to valid socket
+		 structures.
+	       o Check links in	queues so_q0, and so_q.
+	       o Warn if length	of so_qlen + length of so_q0len	== so_qlimit.
+	       o Verify	that sb_sel points to a	process	structure.
+	       o Warn if sb_msgsqd == sb_maxmsgs.
+	       o Warn if sb_cc <> 0.
+
+inpcb:
+
+	       o Verify	next and prev links to inpcbs.
+	       o Verify	head points to inpcb.
+	       o Verify	socket pointer is valid.
+	       o Verify	inp_ppcb points	to a pcb in an MT_PCB mbuf.
+	       o Warn if time to live == 0.
+
+
+tcpcb:
+
+	       o Verify	pointers to next and prev tcpiphdrs.
+	       o Warn if any TCP timers	== 0.
+	       o Verify	mbuf pointers to TCP options, IP options, and message mode
+		 table.
+	       o Verify	pointer	to inpcb is valid.
+
+
+pr_ntab:
+
+	       o Verify	nt_path	points to a MT_PATH_REPORT mbuf.
+
+
+pr_vnatab:
+
+	       o Verify	that vt_if points to a valid ifnet structure.
+	       o Verify	vt_packet mbuf.
+
+
+

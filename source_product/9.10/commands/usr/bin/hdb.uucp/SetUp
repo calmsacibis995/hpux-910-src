@@ -1,0 +1,166 @@
+#!/bin/sh
+
+# @(#) $Revision: 56.1 $
+#
+# This shell tries to set up all needed uucp system files.
+# Since the names changed from previous versions, it copies those.
+# For the Permissions, it will generate one if none exists
+
+cd $ROOT/usr/lib/uucp
+PERM=Permissions
+LPERM=PERMISSIONS
+DEVICES=Devices
+DIAL=Dialcodes
+DIALERS=Dialers
+SYSTEM=Systems
+LSYS=L.sys
+LDIAL=L-dialcodes
+LDEVICES=L-devices
+LDIALERS=L-dialers
+POLL=Poll
+UUCP=uucp
+
+if [ ! -f $SYSTEM ]
+then
+	if [ -f $LSYS ]; then
+		cp $LSYS $SYSTEM
+	else
+		cat <<-! > ${SYSTEM}
+			nwuxd Any ACU 1200 NWd2162 in:--in: nuucp word: panzer
+			nwuxd Any ACU 1200 chicago2600776 in:--in: nuucp word: panzer
+		!
+	fi
+	chown $UUCP $SYSTEM
+	chmod 400 $SYSTEM
+fi
+
+if [ ! -f $DIAL ]; then
+	if [ -f $LDIAL ]; then
+		cp $LDIAL $DIAL
+	else
+		cat <<-! > ${DIAL}
+			MH 8=231
+			NWd 8=340
+			chicago 9=312
+		!
+	fi
+	chown $UUCP $DIAL
+	chmod 444 $DIAL
+fi
+
+if [ ! -f $DIALERS ]; then
+	if [ -f $LDIALERS ]; then
+		cp $LDIALERS $DIALERS
+	else
+		cat <<-! > ${DIALERS}
+penril	=W-P	"" \d > s\p9\c )-W\p\r\ds\p9\c-) y\c : \E\DP > 9\c OK
+ventel	=&-%	"" \r\p $-\r\p-$-\r\p-$ <K\D%%\r>\c ONLINE!
+hayes   =,-,    "" \dATZ\d\r OK\r \dAT\r\c OK\r \EATDT\T\r\c CONNECT
+rixon	=&-%	"" \r\p $-\r\p-$-\r\p-$ <K\D%%\r>\c ONLINE!
+vadic	=K-K	"" \005\p *-\005\p-*\005\p-* D\p BER? \E\D\e \r\c LINE
+develcon ""	"" \pr\ps\c est:\007 \D \007
+micom	""	"" \s\c NAME? \D\r\c GO
+
+direct
+		!
+
+
+	fi
+	chown $UUCP $DIALERS
+	chmod 444 $DIALERS
+fi
+
+if [ ! -f $DEVICES ]; then
+	if [ -f $LDEVICES ]; then
+		cp $LDEVICES $DEVICES
+	else
+		cat <<-! > ${DEVICES}
+# ---Standard modem line
+# ACU cul02 cua02 1200 801
+# ACU contty - 1200 penril
+# ACU contty - 1200 penril \T
+#
+# ---A direct line so 'cu -lculd0' will work
+# Direct culd0 - 4800 direct
+#
+# ---A ventel modem on a develcon switch (vent is the token given to
+#	the develcon to reach the ventel modem)
+# ACU culd0 - 1200 develcon vent ventel
+# ACU culd0 - 1200 develcon vent ventel \T
+# ---A ventel modem on a develcon switch (vent is the token given to
+#	the develcon to reach the ventel modem)
+# ACU culd0 - 1200 develcon vent ventel
+# ACU culd0 - 1200 develcon vent ventel \T
+#
+# ---To reach a system on the local develcon switch
+#	NOTE - the \D is required on this line
+# Develcon culd0 - Any develcon \D
+#
+# ---Access a direct connection to a system
+# systemx tty00 - Any direct
+#
+# where the Systems file looks like
+# systemx 9600 systemx 1200 unused  "" in:-\r\d-in: nuucp word: nuucp
+#	(The third field in Systems matches the first field in Devices)
+#
+# ---To connect to a system on the local Datakit
+# DK - uucp Any DK \D
+#
+# ---To connect to a system on a Datakit in nj/ho
+# DKho - uucp Any DK /nj/ho/\D
+#
+# ---To use an ACU that is connected to Datakit that DK does not understand
+#	how to talk to directly
+# ACU - 0 Any DK vent ventel \T
+#
+# ---To the a dialer that the Datakit understands how to chat with
+# ACU - 0 Any DK dial.\T
+#
+# NOTE: blank lines and lines that begin with a <space>, <tab>, or # are ignored
+		!
+
+
+	fi
+	chown $UUCP $DEVICES
+	chmod 444 $DEVICES
+fi
+
+if [ ! -f $POLL ]; then
+	cat <<-! > ${POLL}
+		# This file (Poll) contains a list of
+		#  "system <tab> hour1 hour2 hour3 ..." lines for polling remote systems.
+		# See examples below
+		#
+		# Lines starting with # are ignored.
+		# NOTE a tab must follow the machine name
+		#raven	2  6  10
+		#quail	0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23
+	!
+	chown $UUCP $POLL
+	chmod 644 $POLL
+fi
+
+if [ ! -f $PERM ]; then
+	if [ -f $LPERM ]; then
+		cp $LPERM $PERM
+		chown $UUCP $PERM
+		chmod 400 $PERM
+	fi
+fi
+
+if [ -f $PERM ]; then
+	exit
+fi
+
+# Try to generate a Permissions file using uucp entries in /etc/passwd
+
+> $PERM
+set - `sed -n "/uucico/s/:.*//p" /etc/passwd`
+
+for i
+do
+	echo "\tLOGNAME=$i\n"
+done > $PERM
+
+chown $UUCP $PERM
+chmod 400 $PERM

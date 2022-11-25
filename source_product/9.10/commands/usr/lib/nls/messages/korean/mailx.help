@@ -1,0 +1,22 @@
+		mailx 명령
+type [msglist]		메세지를 인쇄
+next			다음 메세지로 가서 입력
+edit [msglist]		메세지 편집
+from [msglist]		메세지의 헤더 행 제공
+delete [msglist]	메세지 삭제
+undelete [msglist]	삭제된 메세지 복원
+save [msglist] file	파일에 메세지 추가
+reply [message] 	모든 수신인을 포함하여 메세지에 대하여 회신
+Reply [msglist] 	메세지를 보낸 사람에게 응답
+preserve [msglist]	우편함의 메세지를 보관
+mail user		지정한 사용자에게 메세지 보냄
+quit			읽혀지지 않은 메세지를 보관하고 마침
+xit			모든 메세지를 보관하고 마침
+header			유효 메세지 헤더의 페이지을 인쇄
+!			쉘로 잠시 나감
+cd [directory]		directory로, directory가 없으면 home으로 chdir
+list			모든 명령을 나열(설명 없음).
+top [msglist]		메세지의 상단 5행을 인쇄
+z [-]			다음 [이전] 페이지의 10개 헤더를 화면에 출력
+
+[msglist]는 생략할 수 있으며, 메세지를 번호별, 저자별, 제목별, 또는 유형별로 지정합니다. 생략하면 현재의 메세지를 뜻합니다.

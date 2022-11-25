@@ -1,0 +1,990 @@
+.H 1 "Remote File Locking - Lock Manager and Status Monitor"
+
+
+FILE LOCKING OVERVIEW:
+The remote file locking functionality provided by the Lock
+Manager (rpc.lockd) and Status Monitor (rpc.statd) was first
+provided by Sun with NFS version 3.2.  This feature will be
+included with HP-UX for the first time in the s300 6.5 release
+and the s800 7.0 release.  For s300 releases before
+6.5 and s800 releases before 7.0 an attempt to lock a remote
+(NFS) file will result in an error and errno is set to 22 (EINVAL).
+To perform remote file locking, it is necessary to be running
+rpc.statd and rpc.lockd on all nodes involved.
+
+Locks are set, modified, tested, and released by either the
+lockf(2) or fcntl(2) system calls.  Locks obtained through fcntl
+and lockf interact.  That is, a write lock set by fcntl will 
+correctly block a lock attempted via lockf.  In addition to the effect
+that locks have on other fcntl and lockf calls, they also affect
+open(2), close(2), creat(2), read(2), and write(2) calls.  See the
+man pages for these calls for more specific information.
+
+
+TEST OVERVIEW:
+These tests will attempt to test the interactions between these
+system calls.  The majority of the functional tests are dedicated
+to testing virtually every combination of two operations.  Some of
+the functional tests test operation sequences where more than two
+locks are present.  All two operation test cases can be described
+by the following:
+.nf
+
+    TEST == ( OP1, OP2, ENF, SEG, LOC, FTYP )
+
+    OP1 == { FCNTL(F_SETLK:RD)  | FCNTL(F_SETLK:WR) | 
+	     FCNTL(F_SETLKW:RD) | FCNTL(F_SELKW:WR) |
+	     LOCKF(F_LOCK) | LOCKF(F_TLOCK) }
+
+    OP2 == { FCNTL(F_GETLK:RD) |  FCNTL(F_GETLK:WR) |
+             FCNTL(F_SETLK:RD) |  FCNTL(F_SETLK:WR) |
+	     FCNTL(F_SETLK:UN) |  FCNTL(F_SETLKW:RD) |
+	     FCNTL(F_SETLKW:WR) | FCNTL(F_SETLKW:UN) |
+    	     LOCKF(F_TEST) | LOCKF(F_LOCK) | LOCKF(F_TLOCK) |
+	     LOCKF(F_UNLOCK) | read(O_NDELAY) | read(DELAY) |
+	     write(O_NDELAY) | write(DELAY) | creat | open }
+
+    ENF == { ENFORC | NOENF }
+
+    SEG == { SAME | DIFF | OVERLAP }
+
+    LOC == { (LOC,LOC) | (LOC,REM) | (REM,LOC) | (REM,REM) }
+
+    FTYP == { REG, DIR, PIPE, SPEC }
+
+.fi
+OP1 is the initial lock operation, performed by process P1.  OP2 is the
+second operation, performed by P2.  P1 and P2 are different in most tests.
+ENF is the enforcement mode, on or off.  SEG is the relation of the file
+segments to be locked.  This can be the same segment, disjoint segments,
+or overlapping segments.  The file being locked is always the same for
+both P1 and P2.  Location specifies whether the file is local or remote
+to P1, P2.  FTYP is the file type.  The majority of the functional tests
+operate on regular files only.
+Other variables include:
+.nf
+
+    PROCESSES: { (P1 = P2) | (P1 <> P2) }
+
+    OPEN MODE: { read | write | read & write }
+.fi
+
+
+THE LOCKTEST TOOL:
+Most of the tests use the tool "locktest".  The following details are
+probably not of interest to you unless you want to write new tests or
+you want to manually set up a test case.  Note that the section "FAILURE
+ANALYSIS", which appears below, describes an easier way to reproduce
+single test cases.  If you choose to skip this section, the next section
+of interest is "EXPECTED RESULTS".
+
+The C program, locktest, allows you to perform any single operation
+from the OP2 list above.  The 9 parameters are described in the
+locktest usage message as follows:
+.nf
+
+locktest : need 8 or 9 parameters :
+ <filename>  - name of the file to be locked
+ <start>     - start of lock (offset from beginning of file)
+ <length>    - number of bytes to be locked
+ <test #>    - integer from 0 - 17 (type 'locktest LIST' for help)
+ ENF/NOENF   - lock with enforcement mode or not
+ <waittime>  - wait for a lock <waittime (>0)> seconds
+ <holdtime>  - if (-1) => hold lock until killed
+               if (>0) => hold lock <holdtime> seconds
+	       if (0)  => continue without pause
+ <pid>       - pid of the process that would block this request (if any)
+ <synchfile> - name of the file to use for synchronization (optional)
+
+.fi
+Typing "locktest LIST" gives you the following explanation of <test #>.
+.nf
+
+      TEST       number
+  FCNTL_GET_RD     0
+  FCNTL_GET_WR     1
+  FCNTL_SET_RD     2
+  FCNTL_SET_WR     3
+  FCNTL_SET_UN     4
+  FCNTL_SETW_RD    5
+  FCNTL_SETW_WR    6
+  FCNTL_SETW_UN    7
+  LOCKF_TEST       8
+  LOCKF_LOCK       9
+  LOCKF_TLOCK     10
+  LOCKF_UNLOCK    11
+  READ_NDELAY     12
+  READ_DELAY      13
+  WRITE_NDELAY    14
+  WRITE_DELAY     15
+  CREAT           16
+  OPEN            17
+
+.fi
+By invoking locktest multiple times it is possible to set up complex
+combinations of file locking related operations.  For example, look at
+the situation where P1 sets a write lock and we want to verify that if
+P2 uses lockf(F_LOCK) to set a lock on an overlapping segment that P2
+will block.  In addition let's verify that P2 is granted its lock when
+P1 exits.  This can be done using locktest with the following steps:
+.nf
+
+1) locktest testfile 0 12 3 NOENF 30 60 0 synchfile  &
+9292
+       # This specifies to use FCNTL_SET_WR to set a write lock
+       # on bytes 0-11 and then hold the lock for 60 seconds.
+       # The process will try to get the lock for 30 seconds.
+       # Note that this is run in the background since it holds
+       # the lock for 60 seconds.
+       # The shell will print the background process number.
+       # Let's use 9292.  The parameter "synchfile" is the
+       # filename used by locktest to handle synchronization.
+       # It will create this file AFTER it obtains the lock and
+       # BEFORE it executes pause().
+2) ls synchfile
+       # This should be repeated until synchfile is listed.
+       # At that point we know locktest got its lock.
+3) locktest testfile 6 10 9 NOENF 90 0 9292
+       # This specifies to use LOCKF_LOCK to set a write lock on
+       # bytes 6-15.  A holdtime of 0 is used because we want to test
+       # the blocking behavior.  The final parameter is 9292, the PID
+       # of the process that should block this request.
+       # No synchfile is needed.
+
+TIMED OUT - with lock
+OK
+
+.fi
+After invoking locktest the second time, it should not return until
+the first lock is released.  About 60 seconds after the first lock is
+set the "TIMED OUT - with lock" message should appear.  This indicates
+that the first lock was successful and that the 60 seconds have expired.
+The "OK" message should appear within a couple of seconds.  This indicates
+that the second lock was gotten and released correctly.  Immediately after
+the "OK" message, control should return to the shell.
+
+For this example, a -1 could have been substituted for the 60 in the first
+invocation.  This would have caused locktest to hold the lock until a
+signal was received.  "ps" could have been used to verify the blocking of
+P2 and "kill" could have been used to terminate P1 which causes the lock
+to be released.
+
+
+EXPECTED RESULTS:
+The expected results are too numerous to define here,
+but here is an example of 3 test cases.  Each line of
+stdout.fu contains the 4 test parameters and then the result.
+The fields are:
+.nf
+
+    OPERATION 1   OPERATION 2  ENFORCE SEGMENT         RESULT
+
+    FCNTL_SET_RD, FCNTL_GET_WR, NOENF, SAMESEG,        BLOCKED
+    FCNTL_SET_RD, FCNTL_GET_WR, NOENF, OVERLAP,        BLOCKED
+    FCNTL_SET_RD, FCNTL_GET_WR, NOENF, DIFFSEG,        OK
+
+.fi
+In the event of a failure, only the RESULT column will differ.
+
+.nf
+This is the list and meaning of all possible locktest output:
+
+1)  "BLOCKED" - operation was fcntl(F_GETLK) and a blocking lock exists.
+2)  "ERROR : BLOCKED, BUT PID IS WRONG" - operation was fcntl(F_GETLK)
+	     and a blocking lock exists.  However, the pid of the process
+	     holding the blocking lock is different than expected.
+3)  "LOCKPID=<pid1>, FLOCK.L_PID=<pid2>" - This message always follows #2.
+	     It prints the expected PID supplied by the caller and the
+	     unexpected PID returned by fcntl.
+4)  "TIMED OUT - no lock" - operation not complete after <waittime> 
+	     seconds - giving up.
+5)  "TIMED OUT - with lock" - operation was successful - <holdtime> has
+	     expired - lock has been released.
+6)  "EACCES" - operation returned EACCES - this may be expected.
+7)  "EAGAIN" - operation returned EAGAIN - this may be expected.
+8)  "ENOLCK" - operation returned ENOLCK - this may be expected.
+9)  "ERROR : errno=<errno>" - unexpected errno was returned.
+10) "OK" - operation was successful - lock has been released - locktest
+	     has exited.
+11) "ERROR : READ returned wrong number of bytes =<integer>" - the 
+	     operation was some type of read - no error was returned - 
+	     but the number of bytes read does not equal the number
+	     requested.
+12) "ERROR : WRITE returned wrong number of bytes =<integer>" - the
+             operation was some type of write - no error was returned - 
+	     but the number of bytes written does not equal the number
+	     requested.
+.fi
+
+FAILURE ANALYSIS:
+The easiest way to reproduce a test case failure is
+to modify the lines that define OP1, OP2 and ENF_MODE.  These
+appear at the beginning of the test script, prog.fu.  The
+script then merely iterates through these values using the
+same file segment, an overlapping segment, and a disjoint
+segment.
+FOR EXAMPLE, assume stdout.fu differs from the resout.fu in
+the following way:
+.nf
+
+  -----------------------------------------------------------------
+  <      FCNTL_SET_RD, FCNTL_GET_WR, NOENF, SAMESEG,        BLOCKED
+  <      FCNTL_SET_RD, FCNTL_GET_WR, NOENF, OVERLAP,        BLOCKED
+  ---
+  >      FCNTL_SET_RD, FCNTL_GET_WR, NOENF, SAMESEG,        OK
+  >      FCNTL_SET_RD, FCNTL_GET_WR, NOENF, OVERLAP,        OK
+  -----------------------------------------------------------------
+             ^^^           ^^^       ^^^^^
+             OP1           OP2      ENF_MODE
+
+.fi
+To repeat just these cases, simply set OP1, OP2, and ENF_MODE
+in prog.fu to the following:
+.nf
+    OP1="FCNTL_SET_RD"
+    OP2="FCNTL_GET_WR"
+    ENF_MODE="NOENF"
+.fi
+Then re-run the test.
+
+An alternate way to reproduce lock sequences is to use the
+C tool locktest directly, as described above.  Using this
+tool directly will allow you to create almost any diabolical
+condition.
+.sp 3
+.H 2  "2-Operation Tests"
+
+The general description of these tests appears above.
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES:  All of these tests use the tool locktest which will
+be provided in the $TOOLS directory.
+.fi
+.sp 2
+.H 3 "LOC-REM"
+.sp 1
+This test is for the 2-operation combinations where the file being
+locked is local to process 1 and remote to process 2. 
+
+         IMPLEMENT TIME:  2.5 md for locktest and 1.5 md
+			  for LOC-REM
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: See "EXPECTED OUTPUT" section
+			  in the overview above.
+.sp 2
+.H 3 "LOC-REM-ENF"
+.sp 1
+This test is for the 2-operation combinations where the file being
+locked is local to process 1 and remote to process 2.  This is the
+same as the LOC-REM test with the addition of having the file in
+enforcement mode.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: See "EXPECTED OUTPUT" section
+			  in the overview above.  In addition
+			  the "SETLK" requests will return ENOLCK.
+.sp 2
+.H 3 "REM-LOC"
+.sp 1
+This test is for the 2-operation combinations where the file being
+locked is remote to process 1 and local to process 2. 
+
+         IMPLEMENT TIME:  1.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: See "EXPECTED OUTPUT" section
+			  in the overview above.
+.sp 2
+.H 3 "REM-REM"
+.sp 1
+This test is for the 2-operation combinations where the file being
+locked is remote to process 1 and remote to process 2. 
+
+         IMPLEMENT TIME:  1.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: See "EXPECTED OUTPUT" section
+			  in the overview above.
+.sp 2
+.H 3 "BLOCK-LOC-REM"
+.sp 1
+This test is for the 2-operation combinations where:
+.nf
+   1) P1 locks the (local) test file.
+   2) P2 attempts a lock, read, or write, on the
+      same (remote) test file - this may cause P2
+      to block.
+   3) P1 terminates or somehow releases its lock.
+   4) P2 should then complete its operation.
+
+         IMPLEMENT TIME:  1.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: All test cases will be in the usual
+			  format, and the RESULT field should
+			  be "OK" in all cases.
+.nf
+
+    OPERATION 1   OPERATION 2  ENFORCE  SEGMENT         RESULT
+
+    FCNTL_SET_WR, FCNTL_SETW_WR, NOENF, SAMESEG,        OK
+.fi
+.sp 2
+.H 3 "BLOCK-REM-LOC"
+.sp 1
+This test is for the 2-operation combinations where:
+.nf
+   1) P1 locks the (remote) test file.
+   2) P2 attempts a lock, read, or write, on the
+      same (local) test file - this may cause P2
+      to block.
+   3) P1 terminates or somehow releases its lock.
+   4) P2 should then complete its operation.
+
+         IMPLEMENT TIME:  1.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: All test cases will be in the usual
+			  format, and the RESULT field should
+			  be "OK" in all cases.
+.nf
+
+    OPERATION 1   OPERATION 2  ENFORCE  SEGMENT         RESULT
+
+    FCNTL_SET_WR, FCNTL_SETW_WR, NOENF, SAMESEG,        OK
+.fi
+.sp 2
+.H 3 "BLOCK-REM-REM"
+.sp 1
+This test is for the 2-operation combinations where:
+.nf
+   1) P1 locks the (remote) test file.
+   2) P2 attempts a lock, read, or write, on the
+      same (remote) test file - this may cause P2
+      to block.
+   3) P1 terminates or somehow releases its lock.
+   4) P2 should then complete its operation.
+
+         IMPLEMENT TIME:  1.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: All test cases will be in the usual
+			  format, and the RESULT field should
+			  be "OK" in all cases.
+.nf
+
+    OPERATION 1   OPERATION 2  ENFORCE  SEGMENT         RESULT
+
+    FCNTL_SET_WR, FCNTL_SETW_WR, NOENF, SAMESEG,        OK
+.fi
+.sp 3
+.H 2  "Miscellaneous Functional Tests"
+
+These tests are for cases that do not fit the 2-operation
+model described above.  Like the 2-operation tests, these
+tests rely heavily on the locktest tool.
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES:
+.fi
+.sp 2
+.H 3 "AAA-PRIME"
+.sp 1
+This test exists for the purpose of "priming" the lockd and statd.
+When the statd and lockd are first started they perform some initialization.
+They do more of this for the FIRST lock request between nodes.  This can
+take a bit of extra time.  This extra time was throwing off the timing
+for the first test case in what would normally be the first test.  Since
+this test is named "aaa-prime", it will run first and take care of this
+without worrying about time.
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .25 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: "OK" should be returned for both
+			  locks.
+.sp 2
+.H 3 "TRI-OP"
+.sp 1
+This test is for sequences of 3 or more locks on the same file.
+It basically tests cases where 2 locks are set on a file by two
+different processes, making the file look like this:
+.nf
+ 
+        |   SEG1   |   SEG2   |   SEG3   |   SEG4
+        |  LOCK A  | UNLOCKED |  LOCK B  | UNLOCKED
+  BYTE              1111111111 2222222222 3333333333
+ NUMBER  0123456789 0123456789 0123456789 0123456789
+
+.fi
+and then a third process performs lock operations that overlap
+zero, one, or both of the first two locks.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: 
+.nf
+ 
+1: FCNTL_SET_WR(0-9), FCNTL_SET_WR(20-29), FCNTL_SET_WR(10-19), OK
+2: FCNTL_SET_WR(0-9), FCNTL_SET_WR(20-29), FCNTL_SET_WR( 9-20), EACCES
+3: FCNTL_SET_WR(0-9), FCNTL_SET_WR(20-29), FCNTL_GET_WR( 9-19), BLOCKED
+4: FCNTL_SET_WR(0-9), FCNTL_SET_WR(20-29), FCNTL_SETW_WR( 9-20),TIMED OUT
+5: FCNTL_SET_WR(0-9), FCNTL_SET_WR(20-29), FCNTL_SET_WR(10-19), OK
+6: FCNTL_SET_WR(20-29), FCNTL_SET_WR(10-19),                    OK
+7: FCNTL_SETW_WR(9-20), FCNTL_SET_WR(10-19),                    EACCES
+8: FCNTL_GET_WR(10-19),                                         OK
+.fi
+.sp 2
+.H 3 "OVERLAP2"
+.sp 1
+This tests the cases where 2 locks set by the same process:
+.nf
+     1) are of the same type (READ)
+	=> Overlapping locks should be combined into one
+	   READ lock.
+     2) are of the same type (WRITE)
+	=> Overlapping locks should be combined into one
+	   WRITE lock.
+     3) are of different types (READ,WRITE)
+	=> This should result in 2 or 3 locks.  The type of
+	   the modified Lock A is still READ, but it loses
+	   the overlapped section.  Lock B should be
+	   unchanged, it includes the overlapped section.
+     4) are of different types (WRITE,READ)
+	=> This should result in 2 or 3 locks.  The type of
+	   the modified Lock A is still WRITE, but it loses
+	   the overlapped section.  Lock B should be
+	   unchanged, it includes the overlapped section.
+
+        Lock A will start at byte 10 and end at byte 20.
+	Lock B will be set according to the following matrix:
+
+          Stop =  0   8   9   10   11   15   19   20   21   25   30
+
+       Start  0   D   D   2    2    2    2    2    1    1    1    1
+
+	      8       D   2    2    2    2    2    1    1    1    1
+
+              9           2    2    2    2    2    1    1    1    1
+
+             10                2    2    2    2    1    1    1    1
+
+	     11                     3    3    3    2    2    2    2
+
+	     15                          3    3    2    2    2    2
+
+	     19                               3    2    2    2    2
+
+	     20                                    2    2    2    2
+
+	     21                                         2    2    2
+
+	     25                                              D    D
+
+	     30                                                   D
+
+        KEY:
+	 1  => Locks A and B should be combined into one lock.
+	 2  => If Locks A and B are of the same type they should be
+	       combined into one lock of the same type.  If A and B
+	       are of different types they should be set as 2 locks
+	       of different types.
+	 3  => If Locks A and B are of the same type they should be
+	       combined into one lock of the same type.  If A and B
+	       are of different types they should be set as 3 locks
+	       of different types.
+	 D  => The locks should exist as 2 different locks.
+	" " => Not tested
+
+.fi
+For each case, this will be done in the following combinations:
+.nf
+     LOCK A        LOCK B
+     fcntl(2)      fcntl(2)
+     fcntl(2)      lockf(2)
+     lockf(2)      fcntl(2)
+     lockf(2)      lockf(2)
+
+         IMPLEMENT TIME:  2.5 md
+         PERFORM TIME:    1.5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  No error.
+.sp 2
+.H 3 "LOCK-ENF"
+.sp 1
+This tests the case where after a remote lock is set the mode of
+the file is changed to enforcement mode.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+.nf
+         EXPECTED OUTPUT: 1) READ lock:  a) remote read  => OK
+					 b) remote write => EINVAL
+			  2) WRITE lock: a) remote read  => EINVAL
+					 b) remote write => EINVAL
+.fi
+.sp 2
+.H 3 "LOCK-DIR"
+.sp 1
+This tests the cases where a directory is locked.  This will
+be done with read locks on remote files.  Note that write locks
+cannot be done on a directory because you need to open a file
+with write access before you can write lock it.  However, it is
+not possible to open a directory with any mode but O_RDONLY.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: See "EXPECTED OUTPUT" section
+			  in the overview above.
+.sp 2
+.H 3 "WHENCE"
+.sp 1
+This tests the cases where a lock is set:
+.nf
+     1) using fcntl(2) and a negative l_start
+	with l_whence set to 1 and 2.
+     2) using fcntl(2) and a positive l_start
+	with l_whence set to 1 and 2.
+.fi
+This will be done with read and write locks on local and 
+remote files.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  No error.
+.sp 2
+.H 3 "PAST-EOF"
+.sp 1
+This tests the cases where a lock is set past the End-Of-File.
+This will be done with read and write locks on local and 
+remote files using fcntl(2) and lockf(2).  In the cases using
+fcntl(2), this will be tested with the start of the lock before
+and after the End-Of-File.
+
+         IMPLEMENT TIME:  0 md
+         PERFORM TIME:    0 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  No error.
+.nf
+NOTE: This is tested indirectly by about a dozen other tests.
+      Therefore, a separate test will not be written.
+.fi
+.sp 2
+.H 3 "NEG-SIZE"
+.sp 1
+This tests the cases where a lock is set using a negative
+value for size.  This will be done with read and write locks
+on local and remote files using fcntl(2) and lockf(2).
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  This should work for lockf(2) and
+			   fail with EINVAL for fcntl(2).
+.sp 2
+.H 3 "SIZE-ZERO"
+.sp 1
+This tests the cases where a lock is set using a size of 0.
+This will be done with read and write locks on local and 
+remote files using fcntl(2) and lockf(2).  The lock should
+extend through the present or any future End-Of-File.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  No error.
+.sp 2
+.H 3 "SPLIT-LOCK"
+.sp 1
+This tests the cases where a lock is split by unlocking a
+section in the middle.  This should leave two locks.  This
+will be done with read and write locks on local and remote
+files using fcntl(2) and lockf(2).
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  No error.
+.sp 2
+.H 3 "NULLPROC"
+.sp 1
+This test verifies that the rpc.statd and rpc.lockd respond to
+NULLPROC requests (rpcinfo) correctly.
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .25 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT:  "program <PROGNO> version 1 ready
+			   and waiting" for all requests.
+.sp 2
+.H 3 "USAGE"
+.sp 1
+This test verifies that the usage message is correct for both rpc.statd
+and rpc.lockd.
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .25 hours
+         TYPE OF TEST:    functional
+         EXPECTED OUTPUT: Correct usage messages.
+.sp 3
+.H 2  "Error Tests"
+
+These tests are for error cases.
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES:
+.fi
+.sp 2
+.H 3 "OPEN-MODE"
+.sp 1
+This tests the cases where:
+.nf
+     1) local and remote files are opened with O_RDONLY
+	and write locks are attempted.  This will be done
+	with lockf(2) and fcntl(2).
+     2) local and remote files are opened with O_WRONLY
+	and read locks are attempted.  This can only be
+	done with fcntl(2).
+.fi
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  EBADF should be returned in all
+			   cases.
+.sp 2
+.H 3 "NEG-ZERO"
+.sp 1
+This tests the cases where locks are attempted with fcntl(2)
+and lockf(2) using an offset that would lock a segment before
+the beginning of the file.  This will be done with both local
+and remote files.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  EINVAL should be returned in all
+			   cases.
+.sp 2
+.H 3 "BAD-FILE-D"
+.sp 1
+This tests the cases where locks are attempted with fcntl(2)
+and lockf(2) using an invalid file descriptor.  There is no
+such thing as a local or remote bad file descriptor.
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  EBADF should be returned in all
+			   cases.
+.sp 2
+.H 3 "EINVAL"
+.sp 1
+This tests the cases where locks are attempted with:
+.nf
+     1) lockf(2) using an invalid function parameter
+     2) fcntl(2) using an invalid command parameter
+     3) fcntl(2) using an invalid l_type ( > 3 ) field
+     4) fcntl(2) using an invalid l_whence ( > 2 ) field
+.fi
+This will be done with both local and remote files.
+
+         IMPLEMENT TIME:  .25 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  EINVAL should be returned in all
+			   cases.
+.sp 3
+.H 2  "Destructive Tests"
+
+These tests are for cases where memory or table space is
+all used up, or the daemons are not running, or they have
+died, or they die while a lock is held.
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES:  These must be run as isolated tests.
+.fi
+.sp 2
+.H 3 "NO-DAEMONS-LOC"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+are not running locally and locks on a local and a remote file
+are attempted.  This requires that the local node be rebooted
+and that the daemons are not started during the reboot.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  On Sun nodes, both locks would
+	    hang forever or until the statd and lockd were
+	    started.  This test will not be run on Sun.
+	    On HP-UX, the local lock will work and the
+	    remote lock will fail with ENOLCK.
+.sp 2
+.H 3 "NO-DAEMONS-REM"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+are not running on the remote node and a lock on a remote file
+is attempted.  This requires that the local and remote nodes be
+rebooted and that the daemons are not started on the remote 
+during the reboot.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  On Sun nodes, both locks would
+	    hang forever or until the statd and lockd were
+	    started.  This test will not be run on Sun.
+	    On HP-UX, the local lock will work and the
+	    remote lock will fail with ENOLCK.
+.sp 2
+.H 3 "EX-DAEMONS-LOC"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+were running on both the local and remote nodes, locks were
+established and then released, then the local daemons are killed,
+and finally locks on a local and a remote file are attempted.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  On Sun nodes, both locks would
+	    hang forever or until the statd and lockd were
+	    started.  This test will not be run on Sun.
+	    On HP-UX, the local lock will work and the
+	    remote lock will fail with ENOLCK.
+.sp 2
+.H 3 "EX-DAEMONS-REM"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+were running on both the local and remote nodes, locks were
+established and then released, then the remote daemons are killed,
+and finally locks on a local and a remote file are attempted.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  On Sun nodes, both locks would
+	    hang forever or until the statd and lockd were
+	    started.  This test will not be run on Sun.
+	    On HP-UX, the local lock will work and the
+	    remote lock would hang forever.  To prevent
+	    this the remote daemons will be re-started
+	    after 2 minutes at which point the remote
+	    lock should succeed.
+.sp 2
+.H 3 "DAEMON-DEATH-L"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+were running locally and on the remote node, local and remote locks
+are established and held, and then the local daemons are killed
+and re-started.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  This should have no effect on
+	    the local lock.  The remote lock should be lost.
+	    When re-started, the statd on NODE0 will notify
+	    NODE1.  NODE1 will then release all locks held
+	    by NODE0.  To verify this we will try the same
+	    remote lock again and should get it (OK).
+.sp 2
+.H 3 "DAEMON-DEATH-R"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+were running locally and on the remote node, local and remote locks
+are established and held, and then the daemons on the remote 
+are killed and re-started.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  This should have no effect on
+	    the local lock.  The remote lock should be
+	    reclaimed.  Another lock will be attempted
+	    on the remote file.  This should be blocked
+	    (EACCES) by the reclaimed lock.
+.sp 2
+.H 3 "NO-STATD"
+.sp 1
+This tests the case where the rpc.lockd is started on the local
+node with no rpc.statd daemon running.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  The lockd will try to contact the
+	    statd and loop forever.  A logfile will be used
+	    and will be checked for the correct "Cannot
+	    contact status monitor!" error message.
+.sp 2
+.H 3 "NO-SM-DIR"
+.sp 1
+This tests the case where the rpc.statd daemon is started, but no
+/etc/sm, /etc/sm.bak directories or /etc/state file exist.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  /etc/sm, /etc/sm.bak, /etc/state
+	    will be created.
+.sp 2
+.H 3 "SIGLOST"
+.sp 1
+This tests the case where the rpc.lockd and rpc.statd daemons
+were running locally and on the remote node, a remote lock is 
+established and held, and then the daemons on the remote 
+are killed and re-started, but the local rpc.lockd cannot
+reclaim the lock, in which case it should send a SIGLOST to
+the local process holding the lock.
+
+         IMPLEMENT TIME:  2.0 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    destructive
+         EXPECTED OUTPUT:  The process holding the remote
+	    lock should receive a SIGLOST signal.  This
+	    should kill the process.
+.sp 2
+.H 3 "NO-SPACE1"
+.sp 1
+This tests the error returned when the system lock table becomes
+full.  This will be done locally and remotely using lockf(2) and
+fcntl(2).
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  The error should be EDEADLK when
+	    using lockf(2) and ENOSPC when using fcntl(2)
+	    prior to HP-UX 6.5.  From 6.5 on, the error
+	    should be EDEADLK for lockf(2) and ENOLCK for
+	    fcntl(2).  
+.sp 2
+.H 3 "NO-SPACE2"
+.sp 1
+This tests the limit at which the system lock table becomes full.
+This will be done locally and remotely using lockf(2) and fcntl(2).
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  HP-UX guarantees the limit to
+	    be atleast 50.  On Sun the limit is based on
+	    available memory.  Therefore, the default for
+	    this test is to not run if either node is a
+	    Sun.
+.sp 2
+.H 3 "L-OPTION"
+.sp 1
+This tests the rpc.lockd daemon options.  lockd will be started with
+various options and a logfile will be used to capture these.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  The logfile should contain a
+			   message for each option used.
+.sp 2
+.H 3 "S-OPTION"
+.sp 1
+This tests the rpc.statd daemon options.  statd will be started with
+various options and a logfile will be used to capture these.
+
+         IMPLEMENT TIME:  .5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  The logfile should contain a
+			   message for each option used.
+.sp 2
+.H 3 "LGRACE"
+.sp 1
+This tests the case where the rpc.lockd is re-started on the local node
+with the -g (graceperiod) option set to a high value.  This allows time
+to make a number of requests during the graceperiod.
+
+         IMPLEMENT TIME:  2.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  The requests should be rejected
+	       until the graceperiod expires.  At this
+	       point, the requests should be satisfied.
+.sp 2
+.H 3 "RGRACE"
+.sp 1
+This tests the case where the rpc.lockd is re-started on the remote node
+with the -g (graceperiod) option set to a high value.  This allows time
+to make a number of requests during the graceperiod.
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  The requests should be rejected
+	       until the graceperiod expires.  At this
+	       point, the requests should be satisfied.
+.sp 2
+.H 3 "DEADLOCK"
+.sp 1
+This tests the deadlock detection mechanism.  This will be done
+locally and remotely using lockf(2) and fcntl(2).
+
+         IMPLEMENT TIME:  1.5 md
+         PERFORM TIME:    .5 hours
+         TYPE OF TEST:    error
+         EXPECTED OUTPUT:  Locally, the deadlock should be
+	    detected and EDEADLK returned in errno.
+	    Remotely, the deadlock will not be detected.
+.sp 3
+.H 2  "Connectivity Tests"
+
+.nf
+For connectivity testing, the following tests will be ported from
+the set of functional tests:
+aaa-prime,  block-loc-rem,  block-rem-rem,  loc-rem,  loc-rem-enf,
+lock-dir,  overlap2,  rem-rem,  split-lock,  tri-op,  and whence.
+
+For descriptions of these tests see the section above on functional
+tests.  When delivered these tests will have been run in both
+directions between HP-UX 6.5 and Sun 3.5 and 4.0.1.  Each of these
+four configurations will be covered by a stdout or xfailout file.
+
+Changes will be kept to a minimum.  These will include:
+1) addition of special output files for various configurations.
+2) changes to the sh scripts and C tools to handle Sun idiosyncracies.
+3) removal of local and HP-UX special cases.
+
+The "lock" directory will contain a README file with general usage 
+information.  For individual tests which require multiple output files,
+a README file will be provided in the test directory which will explain
+the different output files and the defects that make them necessary.
+.fi
+
+.nf
+RESPONSIBLE ENGINEER: Jeff Elison
+DEPENDENCIES:  Many of these tests use the tool locktest which will
+be provided in the $TOOLS directory.
+.fi
+.sp 2
+.H 3 "Connectivity Suite"
+.sp 1
+A general description of these tests appear above in the "Functional Tests"
+section.
+
+         IMPLEMENT TIME:  10 md
+         PERFORM TIME:    4 hours for each configuration
+         TYPE OF TEST:    connectivity
+         EXPECTED OUTPUT:  See the individual test     
+	    desriptions under the functional tests.  For
+	    specific differences, see the README files in
+	    each test directory.

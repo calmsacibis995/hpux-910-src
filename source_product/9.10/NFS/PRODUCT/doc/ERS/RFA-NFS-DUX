@@ -1,0 +1,357 @@
+
+.\" #	   @(#)$Revision: 1.12.109.1 $	$Date: 91/11/19 14:26:28 $
+
+.\ Leave the first line of the file blank as the .TL and .AS
+.\ macros do not work otherwise.  Don't ask me why.
+.sp 7
+
+.ce 2
+.TL
+REMOTE FILE SYSTEMS INTERACTIONS      
+
+
+
+
+
+
+
+
+
+.ce 4
+Mike Shipley
+COLORADO NETWORKS DIVISION
+1-229-2131 
+hpfcla!m_shipley
+
+
+
+
+
+.nr P 1
+.PH " 'Interactions between Diskless, RFA and NFS' "
+.PF " 'HP Internal Use Only' ' \\\\n(H1-\\\\nP'  "
+.SA 1
+.H 1 "Introduction"
+This paper will summerize the interactions between the three remote
+file access methods that will be available on the HP3XX and HP8XX.
+They are Diskless (formerly DUX, Distributed HP-UX)
+NFS (Network File System) and RFA (Remote File Access).
+The HP8XX will still have DUX with members of the cluster able to mount
+devices, so areas that refer to a node being unable to mount a disk
+will apply to the HP3XX only.
+
+This paper, as mentioned above, will deal with interactions between
+the three remote file access methods.  It does not intend to be 
+an analysis of the relative goodness or badness of the three methods.
+Nor will it try to do into implementation details of the three methods.
+
+It is assumed that the readers of this are previously knowledgeable
+about Diskless, NFS and RFA.
+.bp
+.H 1 "Diskless vs. NFS"
+As DUX was originally proposed, there would be little use to use NFS between
+members of a DUX cluster.  DUX gave at least the same file transparency as
+NFS with the addition of remote device files.  NFS would be allowed
+between cluster members, but it would make little sense.
+
+Now with DUX being revised to produce a quick diskless solution for
+workstations, there is still little reason to use NFS within a cluster.
+This is because each diskless site will have no file systems of their
+own(this is for the HP3XXX), so having one diskless mount another
+diskless node buys
+you nothing.  Again using NFS to and from other machines outside the
+cluster will be the areas of major interest.
+
+The information about Diskless and NFS was obtained from a paper written
+by Joel Tesler at ISO.  For a more complete view, I would refer
+readers to it.
+.bp
+.H 2 "Diskless Cluster as a Client"
+This situation involves a member of a Diskless cluster doing a mount of
+another machine outside the cluster.  With diskless nodes, normal
+mounts of device files are prohibited, but NFS mounts to a remote
+system are allowed.
+
+This brings up the problem of how to get NFS requests to the NFS
+server.  After one diskless node does a mount, all members of the
+Diskless cluster will have access to the NFS mount.  To get a request from
+any node in the cluster to the NFS server, there
+are two models that have been proposed.  They are the CGM (Client Gateway
+Model) and the CIAM (Client Independent Access Model).  Briefly the
+CGM would have one or more nodes designated as gateways and all
+requests from the cluster members would go through these gateways
+to reach a NFS server.  The CIAM would have each member of the cluster
+able to send their requests directly to the NFS server.
+
+The CIAM has been recommended
+as the way that Diskless as a client will work with NFS because of greater
+simplicity and improved performance.  
+For more details on reasons for this recommendation, see Joel's paper.
+
+The use of the CIAM will require
+all cluster members to see the NFS mount in their
+mount table since each member will be talking directly to a
+NFS server.  Joel's paper discusses the implementation of having all
+members' mount tables updated.  Something that is not covered is the
+effect of having these NFS mounts propagated to every mount table and
+using up most of the available slots in the mount table.  This was
+a problem reported on the net, but with mount table entries being dynamic,
+this should not be a problem for HP-UX kernels.
+.bp
+.H 2 "Diskless Cluster as a Server"
+This is a scenario involving a node doing an NFS mount to a member of
+a Diskless cluster.  There are two models proposed for granting this manner
+of access.  They are the Server Direct Access Model (SDAM) and the
+Server Gateway Model (SGM).
+
+The SDAM would have a client go directly to a server to access its
+disc.  This should only have an effect when the mount is done.  The 
+client must know which site in the Diskless cluster has the file system.
+This causes a violation of the one system view of Diskless, but it 
+happens only at mount time.  For subsequent accesses of the remote file system
+through NFS, the use of the mount point will suffice and the request
+will automatically go to the site specified in the mount.
+
+The SGM would have a request able to be made to any site.  The site
+would then forward the request to the appropriate site.  This model
+would fully preserve Diskless semantics, but this is only evident during 
+a mount.
+
+The SDAM has been recommended as the means by which a NFS client
+will access a Diskless cluster.  This is because of the easier
+implementation and better performance offered by SDAM.  For more 
+details, see Joel's paper.
+.bp
+.H 1 "Diskless vs. RFA"
+The relationship between Diskless and RFA is more straightforward.  There
+are two situations to discuss.  They are a Diskless member acting as a
+RFA requestor and a Diskless cluster member acting as a RFA server.
+
+The situation of a Diskless node acting as a RFA requestor can be set up
+with the following commands:
+
+.nf
+         NODE A  (Diskless member)             NODE X                         
+                                                                  
+         netunam /net/x                                           
+
+         ls /net/x/users                                          
+           <lists the users                                       
+            directory of NODE X>                                  
+
+.fi
+When the "/" is parsed from the ls command, the rest of the path will be
+sent to the root server.  When the network special file ("x") is seen, the path
+will then be given back to NODE A.  NODE A's RFA requestor code will then
+make RFA requests to the RFA server on NODE X and things will proceed
+normally.
+
+The second situation has a node making RFA requests to a Diskless cluster member.
+This will cause a RFA server to be executed in user space on the 
+Diskless member.  From then, a file name given to the RFA server by the RFA
+requestor will be processed in a normal fashion for the Diskless kernel and the
+correct operations will be done.
+
+Diskless and RFA should operate together with little problem.
+.bp
+.H 1 "NFS vs. RFA"
+Between HP 9000 Series machines, there should be little advantage
+of NFS over RFA.  Both give a similar level of access transparency
+(although there is something to be said that prefixing a remote file with a
+mount point directory (in the case of NFS) is more "transparent"
+then prefixing a network special file to a remote file (in the case of
+RFA) ).
+Neither methods support device files.  Probably the method that the
+user is most comfortable with will be the method of choice.
+.bp
+.H 2 "RFA to a Client"
+In order to set up the proper frame of mind for the reader, I will
+give this diagram of the situation of RFA to an NFS client.
+
+.nf
+    NODE A              NODE B              NODE C                  
+                                                                    
+                        mount C:/  /mnt                             
+    netunam /net/B                                                  
+
+    ls /net/B/mnt                                                   
+     <gives ls of C's                                               
+      root>                                                         
+                                                                    
+.fi
+
+Node B does an NFS mount to Node C.  Node A then does an netunam
+to Node B.  When an "ls /net/B/mnt" is done, it will list the
+contents of the root directory on Node C.
+
+This situation has been tested and after some alterations of the
+RFA server, this is what now happens.  The other RFA functions are
+also operational through a NFS gateway.
+.bp
+.H 2 "RFA through a Server"
+The circumstances of trying to do RFA through a NFS serving node
+are a bit more unusual.  It involves the inheritance of a netunam
+by a NFS daemon process.  For this to be done, the process that
+starts the NFS daemon processes must first do a netunam before
+initiating the daemons.  The following diagram will show the
+necessary events:
+
+.nf
+                                                                 
+    NODE A              NODE B              NODE C                  
+                                                                 
+                        netunam /net/C                  
+
+                        nfsd                            
+
+
+    mount B:/  /mnt                                              
+
+    ls /mnt/net/C                                                
+                                                                 
+.fi
+In this case, NODE A is trying to go through NODE B to reach
+NODE C by using NFS to get to the NFS daemon process and
+use the inherited netunam to access NODE C using RFA.  The
+only problem is that pathnames are parsed by different means
+when they are given to NFS as compared to a path coming from
+a normal user process and therefore the path is not passed to
+the RFA requestor.  This prevents the connection to NODE C.
+.bp
+.H 1 "RFA Alterations"
+There were three main changes that were needed to get RFA and
+NFS to function together.  There was change in the requestor,
+the server and a library routine to access directories.
+
+The requestor needed a change in the getdirentries() routine.
+This is a kernel routine added for NFS.  Since directories can have
+different formats, NFS requires that it knows when a directory
+is being read so it can format it into a standard format.
+In the case of the directory format on the HP3XX and HP8XX, the
+native format of the directory matches that of the standard format.
+Therefore for a getdirectories done on a local directory, the kernel
+simply does a read of the directory file.  If a request is made, through
+RFA, to do a getdirectories on a remote directory, it will not
+work as there was no code
+to handle that case.  The change was to recognize that the file
+given to getdirectories was an RFA file and then to call a rfa_read
+instead of a read for local files.  This allows getdirectories to
+work for RFA files now which lets a Diskless/NFS kernel to act as a
+RFA requestor.
+
+The next change involved the RFA server.  This code executes as a
+user process and therefore is able to access a NFS mount point.
+There was a problem and it involved reading a directory through
+a NFS mount point.  This was because the RFA server used the
+read() system call to get the contents of a directory file.
+When this happens to a NFS server, the request is rejected with the
+error of EISDIR.  Therefore the RFA server had to be altered to
+use the readdir library routine, which uses getdirentries(), to
+read a directory.  This causes a READDIR request to be given to the
+NFS server which can then service the request properly.
+
+The entries returned by readdir() can now be of variable size
+and can contain file names longer that the current maximum of
+14 characters(this could happen if RFA is used through a gateway
+to access a SUN machine).  This brought up a problem as the
+server was written to handle a maximum file name length of 14
+The decision was made to truncate
+long file names to 14 characters with the RFA server.  This was
+done because the packet that RFA uses to access any named file
+contains an array that is 14 characters wide to hold a path
+name.  It would not be possible to alter this and maintain
+compatibility with the HP500 RFA.  So since RFA requestor could not be used to
+access a file with a long name, it did not seem to be much of a loss
+to have the RFA server not able to return any more than 14 characters
+of a file's name.
+
+The last code to be changed was the readdir library routine.
+There were several small changes in that function.  First was the
+substitution of getdirentries() in place of read() to obtain
+the contents of a directory.  Next since these directory entries
+can be of variable size (HP-UX entries are always 32 bytes long,
+but this is not true of other machines),
+there was a change to find the beginning of the next entries by
+using the size of the current entry.  Finally there was some
+changes made to pass long file names up to the user instead of
+truncating them to be a maximum of 14 characters.
+.bp
+.H 2 "New calls for NFS"
+There have been several new system calls added to support NFS
+on the HP3XX and HP8XX.  They are statfs(), fstatfs(), rename(), 
+getdirentries(), symlink(), readlink(), lstat() and
+configstatus().  In addition
+there will be a change in the kernel to not truncate file
+names to 14 characters.
+.sp 3
+.H 3 "statfs and fstatfs"
+The statfs call returns information about a mounted file system.
+The information consists of things like the number of blocks
+and inodes in the system or the number of free blocks and inodes
+in the system.  The fstatfs call has the same function as statfs
+except that it operates with an previously opened file.  These
+calls will not be supported by RFA.  They are mostly used for system
+adminstration and were put in to help the df command.
+.sp 3
+.H 3 "rename"
+This call performs what the mv command does.  It changes a file's
+name, but it does it in one "atomic" call as compared to doing
+a link and then an unlink as the mv command currently does.
+This call will be supported by RFA.
+.sp 3
+.H 3 "getdirentries"
+Getdirentries returns a buffer that contains directory entries.
+These entries should be in a standard form regardless of the
+type of machine the directory is located on.  This is of great
+importance when trying to do remote file access among heterogeneous
+machines.  This call will be supported by RFA.
+.sp 3
+.H 3 "symlink"
+This call creates a symbolic link to another file.  This will
+make a special file that contains the name of the file that
+the link is made to.  Then future references to the new
+special file will cause the actions to be done to the file
+whose name is contained in the special file.  This function is
+not absolutely required for NFS operations, but the NFS standard contains
+the symlink function, so to be a complete NFS server, we should have it.
+We don't want HP to look only "NFS like" in the marketplace with other
+vendor flouting complete NFS implementations.
+This call will be supported by RFA.
+.sp 3
+.H 3 "readlink"
+Readlink will list the name of the file that is written in the
+special symbolic link file.  It is not required for NFS operation, but
+it makes HP good NFS citizens.
+This call will be supported by RFA.
+.sp 3
+.H 3 "lstat"
+The lstat call will return file statistics about the special symbolic
+link file.  It differs from the normal stat function which would go
+through the symbolic link file and return file statistics about the
+file whose name is written in the link file.  Again, lstat is not
+required for NFS, but HP will be incomplete without it.
+This call will be supported by RFA.
+.sp 3
+.H 3 "configstatus"
+This call was added on behalf of the commands that interface with 
+the Yellow Pages(YP).  Since we can have a kernel that has Remote Procedure
+Call (RPC) configured out of it, the commands that work with YP would
+like to know if the call to YP will fail because the kernel was configured
+without RPC.  This call will return with information that describes how
+the kernel is configured.
+.sp 3
+.H 3 "long path names"
+Since other machines that support NFS can have files with names of up
+to 255 characters in length, it would be very useful to be able to 
+access such a file.  Therefore the kernel will not try to truncate
+the length of a file name to 14 characters if it is a NFS file.
+This will allow an HP machine to access a file on another vendor's
+machine which has a long file name.  This will cause some problems as
+some commands, such as ls, truncate file names to 14 characters regardless
+of the size of the file name that was returned by readdir().  Such commands
+will need some alteration to take this into consideration.
+It is not proposed that the local HP-UX file system support long file names.
+In other words, a local user or a remote NFS user could not create a file
+with a name longer than 14 characters on an HP machine.
+.sp 3
+

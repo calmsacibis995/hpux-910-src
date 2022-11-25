@@ -1,0 +1,28 @@
+#!/bin/sh
+##	@(#)make_all	$Revision: 1.14.109.1 $	$Date: 91/11/19 13:56:12 $
+#	make_all	--	make everything from checkout
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+SHELL=/bin/sh		# Make "csh" and "make" play together properly
+export PATH SHELL
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+umask 022
+cd $nfs
+if [ -d checkout -a -s checkout ] ; then
+    CHECKED_OUT=`cd checkout ; find * -type f -print`
+fi
+if [ "$CHECKED_OUT" ] ; then
+    MAKEFILES=`find $nfs -name Makefile -print`
+    for REMAKE in `fgrep -l "$CHECKED_OUT" "$MAKEFILES"`
+    do  
+	cd `dirname $REMAKE`
+	make $*
+    done
+else
+    echo No files are checked out.
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

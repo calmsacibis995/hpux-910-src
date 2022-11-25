@@ -1,0 +1,571 @@
+/* file mfile2 */
+/*	SCCS	REV(64.1);	DATE(92/04/03	14:22:14) */
+/* KLEENIX_ID @(#)mfile2	64.1 91/08/28 */
+
+# include "macdefs"
+# include "mac2defs"
+# include "manifest"
+
+
+# ifdef ONEPASS
+/*	bunch of stuff for putting the passes together... */
+# 	define where where2
+
+# 	ifdef DEBUGGING
+# 		define xdebug x2debug
+# 		define edebug e2debug
+# 		define tdebug t2debug
+# 		define eprint e2print
+#	endif
+
+# 	define deflab def2lab
+# 	define filename ftitle
+# endif	/* ONEPASS */
+
+/*	cookies, used as arguments to codgen */
+
+# define FOREFF 01 /* compute for effects only */
+# define INAREG 02 /* compute into a register */
+# define INTAREG 04 /* compute into a scratch register */
+# define INBREG 010 /* compute into a lvalue register */
+# define INTBREG 020 /* compute into a scratch lvalue register */
+# define FORCC 040 /* compute for condition codes only */
+# define INTEMP 010000 /* compute into a temporary location */
+# define FORARG 020000 /* compute for an argument of a function */
+# define FORREW 040000 /* search the table, looking for a rewrite rule */
+# 	define INFREG  010000000 /* compute into a flt register */
+# 	define INTFREG 020000000 /* compute into a scratch flt register */
+# 		define INDREG  0100000000 /* compute into a dragon flt register */
+# 		define INTDREG 0200000000 /* compute into a scratch dragon flt register */
+
+	/* OP descriptors */
+	/* the ASG operator may be used on some of these */
+
+# define OPSIMP 010000    /* +, -, &, |, ^ */
+# define OPCOMM 010002  /* +, &, |, ^ */
+# define OPMUL 010004  /* *, / */
+# define OPDIV 010006 /* /, % */
+# define OPUNARY 010010  /* unary ops */
+# define OPLEAF 010012  /* leaves */
+# define OPANY 010014  /* any op... */
+# define OPLOG 010016 /* logical ops */
+# define OPFLOAT 010020 /* +, -, *, or / (for floats) */
+# define OPSHFT 010022  /* <<, >> */
+# define OPLTYPE 010024  /* leaf type nodes (e.g, NAME, ICON, etc. ) */
+
+	/* match returns */
+
+# define MNOPE 010000
+# define MDONE 010001
+
+	/* shapes */
+
+# define SANY 01	/* same as FOREFF */
+# define SAREG 02	/* same as INAREG */
+# define STAREG 04	/* same as INTAREG */
+# define SBREG 010	/* same as INBREG */
+# define STBREG 020	/* same as INTBREG */
+# define SCC 040	/* same as FORCC */
+# define SNAME 0100
+# define SCON 0200
+# define SFLD 0400
+# define SOREG 01000
+# define STARNM 02000
+# define STARREG 04000
+# define SADRREG 040000
+# define SPECIAL 0100000	/* 0100000 through 04000000 */
+# 	define SFREG   010000000	/* same as INFREG */
+# 	define STFREG  020000000	/* same as INTFREG */
+# 		define SDREG   0100000000	/* same as INDREG */
+# 		define STDREG  0200000000	/* same as INTDREG */
+# define SWADD   040000000	/* this shape never used on MC68000 */
+/* additional specials defined in mac2defs */
+
+	/* FORARG and INTEMP are carefully not conflicting with shapes */
+
+	/* types */
+
+# define TCHAR 01
+# define TSHORT 02
+# define TINT 04
+# define TLONG 010
+# define TFLOAT 020
+# define TDOUBLE 040
+# define TPOINT 0100
+# define TUCHAR 0200
+# define TUSHORT 0400
+# define TUNSIGNED 01000
+# define TULONG 02000
+# define TPTRTO 04000  /* pointer to one of the above */
+# define TANY 010000  /* matches anything within reason */
+# define TSTRUCT 020000   /* structure or union */
+# define TVOID 040000
+# define TLONGDOUBLE 0100000
+
+	/* reclamation cookies */
+
+# define RNULL 0    /* clobber result */
+# define RLEFT 01
+# define RRIGHT 02
+# define RESC1 04
+# define RESC2 010
+# define RESC3 020
+# define RESC4 040
+# define RESC5 0100
+# define RESCC 04000
+# define RNOP 010000   /* DANGER: can cause loops.. */
+
+	/* needs */
+
+# define NAREG 01		/* need an A reg */
+# define NACOUNT 03		/* a mask */
+# define NAMASK 017		/* a mask */
+# define NASL 04  		/* share left A register */
+# define NASR 010 		/* share right A register */
+# define NBREG 020		/* need a B reg */
+# define NBCOUNT 060		/* a mask */
+# define NBMASK 0360		/* a mask */
+# define NBSL 0100		/* share left B reg */
+# define NBSR 0200		/* share right B reg */
+# define NTEMP 0400
+# define NTMASK 07400		/* a mask */
+# define REWRITE 010000
+# define NFREG 020000		/* need an F reg */
+# define NFCOUNT 060000		/* a mask */
+# define NFMASK 0360000		/* a mask */
+# define NFSL 0100000		/* share left F reg */
+# define NFSR 0200000		/* share right F reg */
+# 	define NDREG 01000000		/* need an D reg */
+# 	define NDCOUNT 03000000	/* a mask */
+# 	define NDMASK 017000000	/* a mask */
+# 	define NDSL 04000000		/* share left D reg */
+# 	define NDSR 010000000		/* share right D reg */
+
+
+# define MUSTDO 010000   /* force register requirements */
+# define NOPREF 020000  /* no preference for register assignment */
+
+
+	/* register allocation */
+
+extern unsigned rstatus[];
+extern short busy[];
+
+extern struct respref { int cform; int mform; } respref[];
+
+# define ISAREG(r) (rstatus[r]&SAREG)
+# define ISBREG(r) (rstatus[r]&SBREG)
+
+# 	define ISFREG(r) (rstatus[r]&SFREG)
+
+# define ISTNODE(p) (p->in.op==REG && ISTREG(p->tn.rval))
+# define ISFNODE(p) (p->in.op==REG && ISFREG(p->tn.rval))
+
+# 	define ISTREG(r) (rstatus[r]&(STBREG|STAREG|STFREG|STDREG))
+# 		define ISDREG(r) (rstatus[r]&SDREG)
+# 		define ISFDREG(r) (rstatus[r]&(SFREG|SDREG))
+#		define ISTFNODE(p) (p->in.op==REG && ISTREG(p->tn.rval) \
+					&& ISFREG(p->tn.rval))
+#		define ISTDNODE(p) (p->in.op==REG && ISTREG(p->tn.rval) \
+					&& ISDREG(p->tn.rval))
+#		define ISTFDNODE(p) (p->in.op==REG && ISFDREG(p->tn.rval) \
+					&&ISTREG(p->tn.rval))
+#		define NOT_DRAGON_FMONADIC(p) (strcmp(p->in.name,"fpabs"))
+#		define ISFMONADIC_NOT_DRAGON(p) (p->in.op==FMONADIC \
+					&& NOT_DRAGON_FMONADIC(p->in.left))
+# 	define ISDNODE(p) (p->in.op==REG && ISDREG(p->tn.rval))
+# 	define ISFDNODE(p) (p->in.op==REG && ISFDREG(p->tn.rval))
+
+		/* Position Indep. Code (pic) option handling */
+			/* Note, picoption defined in file: "common"*/
+			/*       other pic names defined in file: "local2.c"*/
+extern short picoption;	
+extern short picreg;
+extern short noreg_dragon;
+extern short noreg_PIC;
+extern short must881opseen; 	/* 1 == seen op that must be done on 881 */
+extern short fpaside;		/* true iff working on DRAGON fpa code */
+extern NODE *fopseen;	/* pts to '?' node for fhw iff float simple op seen (+,-,*,/) */
+
+# define PIC_GOT_NAME "DLT"	/* PIC table base name (GOT) */
+
+		/* Is expr a transformed Position Indep. Code opd.? */
+		/* These are created in pictrans(), as canonical form */
+
+# define ISPIC_OREG(p) (picoption&&p->tn.rval==picreg&&p->in.name!=NULL)
+
+
+# define TBUSY 01000
+# define REGLOOP(i) for(i=0;i<REGSZ;++i)
+
+# define SETSTO(x) setsto(x)
+# define DELAYS 20
+
+extern int stocook;
+extern NODE *deltrees[DELAYS];
+extern int deli;   /* mmmmm */
+
+extern NODE *stotree;
+extern short callflag;
+extern short fcallflag;			/* used in sucomp() */
+
+extern int fregs;			/* # available type A temp regs */
+extern int afregs;			/* # available type B temp regs */
+extern int ffregs;			/* # available type F scratch regs */
+extern int dfregs;			/* # available type D scratch regs */
+
+
+#ifdef C0
+
+#ifdef NEWC0SUPPORT
+#define C0_TYPES_PER_NDU 4
+#endif /* NEWC0SUPPORT */
+
+union c1stuff {
+    struct {
+	unsigned char 	isarray:1 ;
+	unsigned char 	isstruct:1 ;
+	unsigned char 	iselement:1 ;
+	unsigned char 	isprimaryref:1 ;
+	} c1flags;
+    long  c1word;
+    };
+
+typedef union c1stuff C1DATA;
+
+#endif /* C0 */
+
+
+# if !(defined(ONEPASS)) && defined(FORT)
+	union ndu {
+
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+# ifdef C0
+		C1DATA c1data;
+		long arraybase;
+# endif /* C0 */
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag flagfill;
+		char *name;
+		int nameunused;		/* spacer added to prevent left-stsize overlap */
+		NODE *left;
+		NODE *right;
+		}alloc; 		/* talloc filler */
+
+		struct {
+			short op;
+			int rall;
+			TWORD type, tattrib;
+# ifdef C0
+			C1DATA c1data;
+			long arraybase;
+# endif /* C0 */
+			unsigned char su;
+			unsigned char fsu;	/* su for flt pt regs */
+			flag fpaside:1;	/* true iff on side of tree for fpa */
+			flag tassign:1;
+			char *name;
+			int nameunused;	/* spacer to prevent overlap of left/stalign */
+			NODE *left;
+			NODE *right;
+			}in; /* interior node */
+		
+		struct {
+			short op;
+			int rall;
+			TWORD type, tattrib;
+# ifdef C0
+			C1DATA c1data;
+			long arraybase;
+# endif /* C0 */
+			unsigned char su;
+			unsigned char fsu;
+			flag fpaside:1;	/* true iff on side of tree for fpa */
+			flag tassign:1;
+			char *name;
+			int nameunused;	/* spacer to prevent overlap of left/stalign */
+			CONSZ lval;
+			int rval;
+			}tn; /* terminal node */
+		
+		struct {
+			short op;
+			int rall;
+			TWORD type, tattrib;
+# ifdef C0
+			C1DATA c1data;
+			long arraybase;
+# endif /* C0 */
+			unsigned char su;
+			unsigned char fsu;
+			flag fpaside:1;	/* true iff on side of tree for fpa */
+			flag tassign:1;
+			int label;  /* for use with branching */
+			}bn; /* branch node */
+	
+		struct {
+			short op;
+			int rall;
+			TWORD type, tattrib;
+# ifdef C0
+			C1DATA c1data;
+			long arraybase;
+# endif /* C0 */
+			unsigned char su;
+			unsigned char fsu;
+			flag fpaside:1;	/* true iff on side of tree for fpa */
+			flag tassign:1;
+			int stsize;  /* sizes of structure objects */
+			int stalign;  /* alignment of structure objects */
+			}stn; /* structure node */
+
+		struct {
+			short op;
+			int rall;
+			TWORD type, tattrib;
+# ifdef C0
+			C1DATA c1data;
+			long arraybase;
+# endif /* C0 */
+			unsigned short su_total;
+			}rn; /* register counter node */
+
+# ifdef C0
+		struct {
+			short op;
+			unsigned short rettype;
+			short nargs;
+			TWORD type, tattrib;
+			C1DATA c1data;
+			long arraybase;
+			unsigned char su;
+			unsigned char fsu;	/* su for flt pt regs */
+			flag fpaside:1;	/* true iff on side of tree for fpa */
+			char *name;
+			int nameunused;	/* spacer to prevent overlap of left/stalign */
+			NODE *left;
+			NODE *right;
+#ifdef NEWC0SUPPORT
+			TWORD argtype[C0_TYPES_PER_NDU];
+#else
+			unsigned short argtype[8]; /* need better integr/ndu */
+#endif /* NEWC0SUPPORT */
+			}cn; /* call record node -- only in c0 */
+# endif /* C0 */
+		};
+# endif /* !ONEPASS && FORT */
+	
+extern NODE *node;
+extern NODE resc[];
+
+extern struct optab {
+	short op;
+	int visit;
+	int lshape;
+	int ltype;
+	int rshape;
+	int rtype;
+	int needs;
+	int rewrite;
+	char * cstring;
+	}
+	table[];
+
+extern OFFSZ tmpoff;
+extern OFFSZ treetmpoff;
+extern OFFSZ maxoff;
+extern OFFSZ baseoff;
+extern OFFSZ maxtemp;
+extern int maxtreg;
+	extern int maxtfdreg;
+extern int ftnno;
+
+# ifndef ONEPASS
+	OFFSZ tmpoff_c1; /* offset of first temp before c1 adds more */
+# endif /* ONEPASS */
+#ifdef FORT
+	extern NODE *topnode;
+#endif
+
+extern NODE
+	*talloc(),
+	*tcopy(),
+	*makety2(),
+	*getlr();
+#ifdef FORT
+extern NODE *cbranch_rm_sconvs();
+#endif
+
+# if 0	/* 2-pass version of the compiler only */
+	extern CONSZ rdin();
+	extern NODE *eread();
+# endif /* 0 */
+
+#ifdef DEBUGGING
+extern int eprint();
+#endif
+
+extern int hardops();		/* in local2.c */
+extern int optim2();		/* in local2.c */
+extern void setsto();		/* in order.c */
+
+extern char *rnames[];
+extern char *addtreeasciz();	/* in common or comm1.c */
+
+extern int lineno;
+extern char filename[];
+extern int fldshf, fldsz;
+extern flag lflag;
+
+	extern short fposrel[];
+	extern short fnegrel[];
+	extern short frevrel[];
+
+
+
+	extern flag profiling;	/* generate profile code? */
+	extern int incoming_flt_perms; /* flt perm regs alloc'ed before cdg? */
+
+# ifdef DEBUGGING
+	extern flag ddebug;
+	extern flag d2debug;	/* pass 2 */
+	extern flag edebug;
+	extern flag fdebug;
+	extern flag odebug;
+	extern flag radebug;
+	extern flag rdebug;
+	extern flag sdebug;
+	extern flag tdebug;
+	extern flag udebug;
+	extern flag xdebug;
+# endif /* DEBUGGING */
+
+#ifndef callchk
+#	define callchk(x) allchk()
+#endif /* callchk */
+
+#ifndef PUTCHAR
+#ifdef FLINT
+#	define PUTCHAR(x) 0
+#else
+# 	define PUTCHAR(x) putchar(x)
+#endif /* FLINT */
+#endif /* PUTCHAR */
+
+	/* macros for doing double indexing */
+# define R2PACK(x,y) (0200*((x)+1)+y)
+# define R2UPK1(x) ((((x)>>7)&0177)-1)
+# define R2UPK2(x) ((x)&0177)
+# define R2TEST(x) ((x)>=0200)
+
+# define MAXFFREGS 8		/* # float hw regs */
+
+# 	define MAXFDREGS 16		/* # float hw regs (DRAGON fpa) */
+
+/* # ifdef LCD */
+# 	define HWFLAG 	"float_soft"
+# 	define FPANAME 	"flag_fpa"
+# 	define FHWCARDADDR 	"float_loc"
+# 	define BOGUS4		"float_loc+0x18"
+# 	define BOGUS4S	"float_loc+0x16"
+# 	define FCHECKOFF	"&3,float_loc+0x21"	/* offset for fhw status */
+# 	define FHWERROR	"asm_flpt_error"/* fhw error handler in libraries */
+/* # endif	/* LCD */
+
+#define setincr(x)	0	/* don't bother */
+
+union indexpacker
+{
+	int rval;
+	struct
+		{
+		unsigned char indexed:1;
+		unsigned char mode:4;
+		unsigned char  pad:3;
+		unsigned char addressreg:8;
+		unsigned char xreg:8;
+		unsigned char scale:8;
+		} i;
+};
+
+/* mode values --- not yet interrogated */
+# define ADDIND 0	/* address reg indirect w/index (2.8.3.2) */
+# define MEMIND_POST 1 /* memory indirect post indexed  (2.8.4.1) */
+# define MEMIND_PRE  2 /* memory indirect pre indexed (2.8.4.2) */
+# define PCIND 3	/* PC indirect w/index (2.8.6.1) */
+# define PCMEM_POST 4 /* PC memory indirect post indexed (2.8.7.1) */
+# define PCMEM_PRE 5  /* PC memory indirect pre indexed (2.8.7.2) */
+
+# ifdef DEBUGGING
+# 	define ncopy(x,y) ncopy2(x,y)
+#	define szty(t) szty2(t)
+# else
+#	define szty(t) ((t)==DOUBLE? 2:1)
+#		define ncopy(x,y) (*(x) = *(y))
+# endif /* DEBUGGING */
+
+/* macro to see if p is an <ea> suitable for direct access in an instruction */
+# define FLT_EA(p) ( daleafop(p->in.op) || \
+		     ( p->in.op == UNARY MUL && \
+		       p->in.left->in.fsu == 0 && \
+		       p->in.left->in.su == 0 ) )
+
+
+
+#ifndef FORT
+/* The C symbol table is used only in the first pass.
+ * The declaration of struct symtab is repeated here to keep lint happy
+ * about the name pointer in manifest's ndu.
+ */
+
+union  cdb_symtab_info  {
+
+	int  label_slt;		/* save sltindex where LABEL defined */
+	int  extvar_isdefined;	/* set to tell if an EXTERN was defined in
+				 * the current file.  Needed because global,
+				 * unitialized vars are marked as EXTERN
+				 * rather than as EXTDEF.
+				 */
+	int  word;		/* generic access -- clear the word on allocation
+				 * of a symtab entry, etc.
+				 */
+};
+
+struct symtab {
+	struct symtab * shash_link_forw; /* forward link to next entry 
+					  * with same hash value */
+	struct symtab * shash_link_back;
+	char *sname;	/* ptr into asciz table for name (0 terminated) */
+	TWORD stype;  /* type word */
+	TWORD sattrib; /* type attributes */
+	char sclass;  /* storage class */
+	char slevel;  /* scope level */
+	short sflags;  /* flags for set, use, hidden, mos, etc. */
+	int offset;  /* offset or value */
+	short dimoff; /* offset into the dimension table */
+	short sizoff; /* offset into the size table */
+	short suse;  /* line number of last use of the variable */
+# ifdef HPCDB
+	union cdb_symtab_info  cdb_info;  /* misc. info for cdb support */
+# endif /* HPCDB */
+	struct symtab * slev_link;  /* used to chain symbol table entries with
+				 * the same slevel.
+				 */
+	};
+
+struct sw {		/* structure defining vals for switch and case stmts */
+	CONSZ sval;	/* value of particular case constant */
+	int slab;
+	TWORD stype;	/* type of switch variable */
+	};
+
+# endif /* FORT */
+
+
+
+# define MAXINLINERS 1	 /* number of routines recognized for inlining */
+extern char *inliners[]; /* holds names of routines recogn. for inlining */

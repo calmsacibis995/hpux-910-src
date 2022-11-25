@@ -1,0 +1,40 @@
+## FacetTerm  wy30keys  description file 12/05/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy30keys.FC,v 70.1 92/03/09 16:49:04 ssa Exp $
+pkey_key=\Ez%p1%c%s1^?$<80/>
+function_key-@=^A@\r
+function_key-A=^AA\r
+function_key-B=^AB\r
+function_key-C=^AC\r
+function_key-D=^AD\r
+function_key-E=^AE\r
+function_key-F=^AF\r
+function_key-G=^AG\r
+shift_function_key
+function_key-`=^A`\r
+function_key-a=^Aa\r
+function_key-b=^Ab\r
+function_key-c=^Ac\r
+function_key-d=^Ad\r
+function_key-e=^Ae\r
+function_key-f=^Af\r
+function_key-g=^Ag\r
+function_key-+=
+function_key-,=
+function_key-45=
+function_key-.=
+function_key-/=
+function_key-p=
+function_key-q=
+function_key-r=
+function_key-s=
+function_key-t=
+function_key-u=
+function_key-v=
+function_key-w=
+function_key-x=
+function_key-y=
+function_key-z=
+function_key-{=
+function_key-|=
+function_key-}=

@@ -1,0 +1,38 @@
+## FacetTerm  wy150keys  COMMON description file 11/12/90
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: wy150keys.FC,v 70.1 92/03/09 16:53:31 ssa Exp $
+not_imp-150_does_not_have_function_key_default=\EcU
+pkey_key=\Ez%p1%c%s1^?
+function_key-@=
+function_key-A=
+function_key-B=
+function_key-C=
+function_key-D=
+function_key-E=
+function_key-F=
+function_key-G=
+function_key-H=
+function_key-I=
+function_key-J=
+function_key-K=
+function_key-L=
+function_key-M=
+function_key-N=
+function_key-O=
+shift_function_key
+function_key-`=
+function_key-a=
+function_key-b=
+function_key-c=
+function_key-d=
+function_key-e=
+function_key-f=
+function_key-g=
+function_key-h=
+function_key-i=
+function_key-j=
+function_key-k=
+function_key-l=
+function_key-m=
+function_key-n=
+function_key-o=

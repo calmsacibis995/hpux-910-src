@@ -1,0 +1,23 @@
+                mailx ㄩ
+type [msglist]                  モ嵛带
+next                            锌τ〔モピ〃、Ｃ嵛带
+edit [msglist]                  赠驵嵛带
+from [msglist]                  跟Ⅶ澌窥嵛带哕
+delete [msglist]                ュ燧嵛带
+undelete [msglist]              矗珐ュ燧踢嵛带
+save [msglist] file             埃嵛带煜αレ窥襟
+reply [message]                 洋帙 (服珐荚踢核⒍△) 嵛带
+Reply [msglist]                 洋帙嵛带
+preserve [msglist]              ／硪栩夜踢嵛带
+mail user                       越全踢㈧术铸
+quit                            缘件, ／兼懔踢嵛带
+xit                             缘件, ／珐荚踢嵛带
+header                          モ尚哕嵛带澌窥
+!                               shell 骝盅
+cd [directory]                  术 chdir 後头贻. 诰瘤荚越头贻, レ头贻
+list                            モピ珐荚踢ㄩ (々煜峒轲)
+top [msglist]                   モ嵛带 5 哕
+z [-]                           锛侠〃[] 、铄 10 Ｃ澌窥
+
+[msglist] 会璐郭醋踢, ǐ庶蓦西, ⑥铸, ±锃遏锏㈩斧嵛带. りＲ会头
+踢嵛带.

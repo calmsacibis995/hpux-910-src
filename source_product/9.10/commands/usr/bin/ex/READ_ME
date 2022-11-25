@@ -1,0 +1,62 @@
+# @(#) $Revision: 64.2 $    
+This is version 3 (3.9) of the editor.
+
+Version 2 corresponds to version 3 without the enhancements in 3.
+There is no reason to use 2 unless you have a pdp-11 that does not have
+overlay software, since 3 contains all the bug fixes and some new features.
+
+The include file local/uparm.h should be installed, as ex_tune.h needs it.
+The contents of this include file can be modified if you wish to place
+the editor in a nonstandard location.
+
+Conditional compilation flags:
+	-DTRACE		for debugging
+	-DVFORK		for UCB Vax/Unix with the vfork system call.
+	-DCRYPT		-x option to edit encrypted files
+
+
+*******************************************************************************
+
+The CRYPT-specific portions of ex have extracted from ex_temp.c into a new
+source file ex_crypt.c.  This file resides in the crypt subdirectory of the
+shared source.  When compiling with CRYPT defined, this new file must be
+present.
+
+Mark Egeland	egeland@hpfcla
+
+*******************************************************************************
+There are two non HP-UX editors that are ifdef'd into the ex/vi source.
+One is ed1000 (ifdef ED1000) and the other is vi for MPE (ifdef HPE).
+We agreed to allow these ifdef's into vi on the condition that we have
+absolutely no responsibility for maintaining the ifdef'd code.
+Moreover, when we make a bug fix to vi not only do we not make the
+corresponding fix to the ifdef'd code but we also make no attempt to
+verify that the fix doesn't break the ifdef'd code.
+
+Alex Leontiev (1-746-5949) is the contact for this code.  Their project
+does not use DTS but does use STARS.  Since we cannot forward STARS
+defects from Fort Collins to Cupertino (forwarding between STARS sites
+is impossible) of defects against ed1000 show up in our DTS database, we
+must do the following:
+
+BEFORE THE MERGE OF THE FORT COLLINS HP-UX STARS DATABASE WITH CUPERTINO
+
+ Send Alex a copy of the defect.
+ Resolve the defect as "fs" which will close it on DTS and put
+   it into "ad" status on STARS.
+ Request Diane Kallas (3149) to close it on STARS.
+ Ask Alex to either have his STARS people or the submitter
+   enter the defect against the product number 92562A, which is in
+   Cupertino.
+
+
+AFTER THE MERGE OF THE FORT COLLINS HP-UX STARS DATABASE WITH CUPERTINO
+
+ Send Alex a copy of the defect.
+ Resolve the defect as "fs" which will close it on DTS and put
+   it into "ad" status on STARS.
+ Request Diane Kallas (3149) to change the product number
+   in the STARS defect to 92562A.
+
+This information provided by Wayne Krone and Lois Gerber
+6-89

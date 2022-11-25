@@ -1,0 +1,1103 @@
+/* file common */
+/* SCCS common    REV(64.2);       DATE(92/04/03        14:21:57) */
+/* KLEENIX_ID @(#)common	64.2 91/11/30 */
+
+#if( defined CPASS2 || defined FORT )
+#      define CPASS2orFORT
+#endif
+
+#ifdef BRIDGE
+cerror(_s) char *_s;               { u_panic(CERROR, _s); }
+cerror1(_s,_p) char *_s; void *_p; { u_panic(CERROR, _s, _p); }
+uerror(_s) char *_s;               { u_panic(CERROR, _s); }
+werror(_s) char *_s;               { u_warning(CERROR, _s); }
+# define debugp stdout
+#else  /*BRIDGE*/
+#include <malloc.h>
+#include <string.h>
+#include "messages.h"
+#endif /*BRIDGE*/
+
+#include "commonb"
+
+#ifdef LINT_TRY
+extern char *strip();
+#endif
+
+extern void exit();
+extern void dexit();
+
+# ifndef EXIT
+# define EXIT exit
+# endif
+
+#ifndef NONAME
+#	define NONAME	040000	/* must be the same as in mfile1 */
+#endif /* NONAME */
+
+#ifdef FORT1PASS
+#	define ckalloc	chkalloc
+#	define many	toomany
+#endif /* FORT1PASS */
+
+/* There are numerous tables that are allocated dynamically, and when a
+ * table overflows multiple blocks of space are chained.  The implementation
+ * chains these by using the first word of a malloced block for a pointer
+ * to the next block, and then using the rest of this space for the actual
+ * table.  To get to the usable space (past the chaining pointer), an
+ * increment (TABLE_ADJUST) is added to the malloc pointer.  This increment
+ * must account both for the pointer size, and guarantee that alignment
+ * requirements are still preserved.
+ * In native 300 mode, the increment is 4 (pointer size).
+ * In cross compile environment on s800, the increment must be 8 to
+ * preserve alignment for tree nodes which have a double field.  Note that
+ * if nodes were rewritten to have a quad field (quads are currently
+ * stored as a pair of doubles), the s800 would then require a 16 alignment.
+ * Also note, that for minimum waste, an increment could be defined for
+ * each table type separately.  But here, all tables are working with an
+ * increment guaranteed to work in all cases.
+ */
+#ifdef xcomp300_800
+# define TABLE_ADJUST  8
+#else
+# define TABLE_ADJUST  4
+# endif
+
+#ifdef MSG_COVERAGE
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <errno.h>
+#include "msgdb.h"
+
+extern char *msgdb_filename;      /* in scan.c */
+extern flag msg_coverage;         /* in scan.c */
+
+struct msgdb_record msgdb, msgdb_dsk;
+
+void count_msg( message ) char *message; {
+	int i;
+   	for( i=0; i<NUMMSGS; i++ ) {
+   		if( msgtext[i] == message ) break;
+	}
+	if( i < NUMMSGS ){
+		msgdb.msg_count[i]++;
+	}
+}
+
+void update_msgdb() {
+	int msgdb_file;
+	int bytes_read;
+	int i;
+
+	char *io_error = "panic in update_msgdb (message coverage): %s error for db file \"%s\", errno = %d\n";
+
+	if( ( msgdb_file = open( msgdb_filename, O_RDWR )) == -1 ) {
+		stderr_fprntf( io_error, "open", msgdb_filename, errno );
+		return;
+	}
+	if( ( bytes_read = 
+		  read( msgdb_file, (char *)&msgdb_dsk, MSGDB_BUFFER_SIZE )) 
+			== -1 ) {
+		close( msgdb_file );
+		stderr_fprntf( io_error, "read", msgdb_filename, errno );
+		return;
+	}
+	if( bytes_read != MSGDB_BUFFER_SIZE ) {
+		close( msgdb_file );
+		stderr_fprntf( "panic in update_msgdb (message coverage): inconsistent data in msgdb file \"%s\"\n",
+			msgdb_filename );
+		return;
+	}
+	
+	/* file ready for update ... */
+
+	for( i=0; i <= MAX_MSG_NUMBER; i++ ) {
+
+		if( (msgdb.msg_count[i] > 0 )) { /* needs update */
+			if( msgdb_dsk.msg_count[i] < 0 ) {
+				/* message added since database built */
+				msgdb_dsk.msg_count[i] = 0;
+			}
+			msgdb_dsk.msg_count[i] += msgdb.msg_count[i];
+		}
+	}
+	msgdb_dsk.is_new = 0;
+
+	if( lseek( msgdb_file, 0, SEEK_SET ) == -1 ) {
+		stderr_fprntf( io_error, "seek", msgdb_filename, errno );
+		close( msgdb_file );
+		return;
+	}
+	errno = 0;
+	if( write( msgdb_file, (char *)&msgdb_dsk, MSGDB_BUFFER_SIZE ) != MSGDB_BUFFER_SIZE ) {
+		close( msgdb_file );
+		stderr_fprntf( io_error, "write", msgdb_filename, errno );
+		return;
+	}
+	return;
+}
+#endif /* MSG_COVERAGE */
+
+
+NODE *node;
+
+unsigned int maxtascizsz = TASCIZSZ;
+
+unsigned int maxnodesz = TREESZ;
+
+unsigned int fzerolabel = 0;	/* label for common ftp zero */
+short nerrors;  	/* number of errors */
+
+#ifndef FORT
+flag wflag = 0;         /* true for warnings suppressed */
+char	ftitle[FTITLESZ] = "";   	/* title of the file */
+char ftnname[FTNNMLEN];
+#ifdef NEWC0SUPPORT
+#ifndef ONEPASS
+int c0flag;
+int c0forceflag;
+#endif /* ONEPASS */
+#endif /* NEWC0SUPPORT */
+#endif  /* FORT */
+
+int maxrecur = NRECUR;
+int nrecur;
+
+#ifdef FORT
+	unsigned int crslab = 10000;
+	unsigned int fstacksz = NSTACKSZ;
+	NODE **fstack;
+
+# else
+	unsigned int crslab = 10;
+	unsigned int maxbcsz = BCSZ;
+	unsigned int maxdimtabsz = DIMTABSZ;
+	unsigned int maxparamsz = PARAMSZ;
+	unsigned int maxswitsz = SWITSZ;
+#  ifndef BRIDGE
+	int *asavbc;		/* alloced in inittabs() */
+	int *dimtab;		/* alloced in inittabs() */
+	int *paramstk;		/* alloced in inittabs() */
+	struct sw *swtab;		/* alloced in inittabs() */
+	int *psavbc;
+#  endif /*BRIDGE*/
+	flag singleflag;	/* true iff 32 bit float ops for C */
+# endif	/* FORT */
+
+int minrvarb = MINRVAR;
+
+
+short picoption = 0;	/* 0 => Position Indep. Code option OFF
+			   1 => PIC option on, 16 bit (word) offset forms
+			   2 => PIC option on, 32 bit (long) offset forms */
+
+	flag flibflag;
+		/* true iff user desires library float routines */
+#	ifndef FORT1PASS
+#ifdef FORTY
+		short fortyflag = 1; /* indicates 40 code */
+#endif
+		short fpaflag;	
+			/* indicates type of fpa code gen 1=both; 0=881; */
+			/*   -1 == FPA */
+		int compatibility_mode_bitfields = 0;
+#	endif /* FORT1PASS */
+
+
+flag froundflag;	/* true for undocumented rounding mode extension */
+
+
+#ifdef FORT1PASS
+unsigned maxascizsz = ASCIZSZ;
+#else
+unsigned maxascizsz = ASCIZSZ;
+#endif /* FORT1PASS */
+
+char	*taz;
+char	*treeasciz;		/* asciz table for syms in tree nodes */
+char	*lasttac;		/* ptr to first free char in treeasciz */
+
+NODE *lastfree;  /* pointer to last free node; (for allocator) */
+
+#ifndef BRIDGE
+#ifndef CPASS2orFORT
+
+/*
+ * STDERR_BUFFER_SIZE needs to be larger than the maximum size of
+ *	o	the message plus all of its %-arguments (up to 3) plus
+ *	o	the size of the file name (FTITLESZ) plus
+ *	o	the size of other prefix information
+ * 
+ *      <= 256 * 6
+ */ 
+#define STDERR_BUFFER_SIZE 256*8
+char *stderr_buffer;         /* pointer to malloc'ed space */
+
+extern flag display_line;    /* in scan.c: error msg includes source line */
+extern void display_error(); /* in scan.c */
+
+#if defined(IRIF) || defined(OSF)
+
+int stderr_fprntf( s, a, b, c ) char *s; {
+        return( fprntf( stderr, s, a, b, c ));
+}
+
+#else /* IRIF || OSF */
+
+#include <sys/types.h>
+#include <sys/inode.h>
+
+#define STDERR_FUDGE       16
+#define WERROR_SIGNOFF    "ccom/cpass1 (warning): too many warnings - additional warning diagnostics suppressed; for complete listing recompile with 'cc' option '+s'\n"
+#define UERROR_SIGNOFF    "ccom/cpass1: too many diagnostics - additional diagnostics suppressed; recompile with 'cc' option '+s'\n"
+#define SIGNOFF_SIZE       PIPSIZ - STDERR_FUDGE                     \
+	- ( sizeof( WERROR_SIGNOFF ) < sizeof( UERROR_SIGNOFF ) ?    \
+		sizeof( UERROR_SIGNOFF ) : sizeof( WERROR_SIGNOFF ))
+
+extern stderr_piped;         /* in scan.c: 'stderr' piped if set */
+static stderr_signoff_signal = 0; 
+static stderr_blocked = 0;   /* suppress further 'stderr' messages if set */
+static stderr_threshold =    /* threshold for suppressing 'stderr' messages */
+		SIGNOFF_SIZE;
+static stderr_output = 0;    /* total bytes output to 'stderr' so far */
+
+static char *werror_signoff = WERROR_SIGNOFF;
+static char *uerror_signoff = UERROR_SIGNOFF;
+
+/*****************************************************************************
+ * stderr_fprntf () : filter for 'fprntf()' calls using 'stderr'
+ *
+ * parameters are those appropriate ( ... ) for 'fprntf( stderr, ... )'
+ *
+ * returns number of bytes emitted to 'stderr'
+ */
+int stderr_fprntf( s, a, b, c ) char *s; {
+
+	if( !stderr_piped ) {
+		return( fprntf( stderr, s, a, b, c ));
+	}	
+	if( stderr_blocked ) return( 0 );
+	else {
+		/* ensure enough room in pipe before 'fprntf()' call;
+		 * if not, suppress further output to 'stderr'
+		 */
+		if( stderr_buffer == NULL )
+			stderr_buffer = malloc( STDERR_BUFFER_SIZE );
+		stderr_output += sprntf( stderr_buffer, s, a, b, c );
+		if( ( stderr_blocked = stderr_output > stderr_threshold ))
+			return( 0 );
+		else return( fprntf( stderr, "%s", stderr_buffer ));
+	}
+}
+/*****************************************************************************
+ * stderr_signoff () : prints signoff messages indicating blocked 'stderr'
+ */
+void stderr_signoff() {
+	if( !stderr_piped || !stderr_blocked ) return;
+	stderr_signoff_signal++;
+	ftitle[0] = lineno = ftnname[0] = 0;
+	print_error_line( 'u', nerrors ? UERROR_SIGNOFF : WERROR_SIGNOFF );
+	stderr_signoff_signal = 0;
+}
+
+#endif /* IRIF || OSF */
+
+#ifdef MULTI_LINE
+
+#define DEFAULT_PRINT_LINE_SIZE 79
+
+int print_line_size = 0;
+
+#define FILLER_SIZE 3
+char filler[ FILLER_SIZE+1 ];
+
+extern char* getenv();		/* in libc */
+
+print_error_line( type, s, a, b, c ) 
+    char type; /* type is 'u' or 'w' */ 
+    char *s;
+	{
+
+	int size = 0;
+     	int space_left;
+	int next_line_size;
+	char *buffer;
+	char *fill_ptr = "";    /* no filler for first line */
+#ifdef LINT_TRY
+	char *filename;
+#endif
+
+	if( print_line_size == 0 ) {
+		int i;
+		char *columns;
+		/* initializations 
+		 *
+		 * set print_line_size to one less than the COLUMNS 
+		 *                                environment variable;
+		 *      use default if not available
+		 */
+		if( ( ( columns = getenv( "COLUMNS" )) == NULL ) ||
+		    ( ( print_line_size = atoi( columns )) == 0 ))
+
+			print_line_size = DEFAULT_PRINT_LINE_SIZE;
+		else 
+			print_line_size--;
+		/*
+		 * set up filler
+		 */
+		for( i=0; i<FILLER_SIZE; i++ ) {
+			filler[ i ] = ' ';
+		}
+		filler[ FILLER_SIZE ] = '\0';
+		/*
+		 * set up buffer
+		 */
+		if( stderr_buffer == NULL )
+			stderr_buffer = malloc( STDERR_BUFFER_SIZE );
+	}	
+
+	space_left = print_line_size;
+	next_line_size = print_line_size - FILLER_SIZE;  /* space_left for 
+							    subsequent lines */
+	if( next_line_size < 0 ) next_line_size = 0;
+	buffer = stderr_buffer;
+
+	/*
+	 * build buffer
+	 */
+#ifdef LINT_TRY
+	filename = strip(ftitle);
+	if (iscfile(filename) )
+		size += sprntf( buffer + size, "(%d)  ", lineno );
+	else
+		size += sprntf( buffer + size, "%s(%d)  ", filename, lineno);
+#else
+#ifndef IRIF
+#ifndef OSF
+	if( !stderr_signoff_signal )
+#endif /* not OSF */
+#endif /* not IRIF */
+	{
+        	if (ftitle[0] )
+                	size += sprntf( buffer + size, "%s, ", ftitle);
+        	if (lineno) 	
+                	size += sprntf( buffer + size, "line %d: ", lineno );
+        	else if ( ftnname[0] ) 	
+                	size += sprntf( buffer + size, "function %s: ", ftnname );
+	}
+#endif
+	if( type == 'w' )
+		size += sprntf( buffer + size, "warning: " );
+	size += sprntf( buffer + size, s, a, b, c );
+
+	/*
+	 * print lines
+	 */
+	for(;;) {
+
+		if( size <= space_left ) 
+	       		space_left = size;
+		else {
+			for( ; space_left > 0; space_left-- ) {
+				if( *( buffer + space_left ) == ' ' ) break;
+			}
+			if( space_left == 0 ) {
+				/* unable to find a spot to break the line -
+				 *    line overflow will occur
+				 * find someplace to break overflow line
+				 */	
+				for( ; space_left < size; space_left++ ) {
+					if( *( buffer + space_left ) == ' ' ) 
+						break;
+				}
+			}
+	  	}
+		*( buffer + space_left ) = '\0';
+#if defined(IRIF) || defined(OSF)
+		(void)fprntf( stderr, "%s%s", fill_ptr, buffer );
+#else /* not IRIF */		
+		if( !stderr_piped || stderr_signoff_signal ) {
+			(void)fprntf( stderr, "%s%s", fill_ptr, buffer );
+		}
+		else if( !stderr_blocked ) {
+			/* ensure enough room in pipe before 'fprntf()' call;
+			 * if not, suppress further output to 'stderr'
+			 */
+			stderr_output += strlen( buffer ) + 
+				( fill_ptr == filler ? FILLER_SIZE : 0 );
+			if( !( stderr_blocked = stderr_output > stderr_threshold ))
+				(void)fprntf( stderr, "%s%s", fill_ptr, buffer );
+		}
+#endif /* not IRIF */		
+			
+
+		if( ( size -= space_left ) > 0 ) {
+#if defined(IRIF) || defined(OSF)
+			(void)fprntf( stderr, "\n" ) ;
+#else /* not IRIF or OSF */
+			if( !stderr_blocked || stderr_signoff_signal ) {
+				/* if 'stderr' is not blocked, it won't block
+				 * on one more character, thanks to STDERR_FUDGE
+				 */
+				stderr_output++;
+				(void)fprntf( stderr, "\n" ) ;
+			}
+#endif /* not IRIF or OSF */
+			buffer += space_left+1;
+			fill_ptr = filler;  /* filler for additional lines */
+			space_left = next_line_size;
+		}
+		else break;
+     	}
+}
+#endif /* MULTI_LINE */
+#endif /* not CPASS2orFORT */
+
+	/* VARARGS1 */
+
+uerror( s, a, b, c ) char *s; { /* nonfatal error message */
+	/* the routine where is different for pass 1 and pass 2;
+	/*  it tells where the error took place */
+	
+#ifdef MSG_COVERAGE
+	count_msg( s );
+#endif /* MSG_COVERAGE */
+
+#ifdef IRIF
+	if( nerrors == 0 ) ir_abort_codegen();
+#endif /* IRIF */
+	++nerrors;
+
+#ifdef CPASS2orFORT
+
+	where('u');
+        (void)fprntf( stderr, s, a, b, c );
+        (void)fprntf( stderr, "\n" );
+
+#else /* not CPASS2orFORT */
+
+#ifdef MULTI_LINE
+	print_error_line( 'u', s, a, b, c );
+#else  /* not MULTI_LINE */
+	where('u');
+        (void)stderr_fprntf( s, a, b, c );
+#endif /* not MULTI_LINE */
+
+	if( display_line ) display_error();
+	else {
+		(void)stderr_fprntf( "\n" );
+	}
+#endif /* not CPASS2orFORT */
+
+	if( nerrors > MAXUSEFULERRS ) cerror( "too many errors");
+	}
+
+
+
+
+	/* VARARGS1 */
+#ifndef CPASS2orFORT
+
+cerror( s, a, b, c ) char *s; { /* compiler error: die */
+	where('c');
+	if( nerrors && nerrors <= MAXUSEFULERRS ){ 
+		/* give the compiler the benefit of the doubt */
+		(void)stderr_fprntf( "cannot recover from earlier errors: goodbye!\n" );
+		}
+	else {
+# ifdef LINT
+		(void)stderr_fprntf( "\n\t**** cannot recover from this error ****\n\n");
+# else
+		(void)stderr_fprntf( "compiler error: " );
+# endif /* LINT */
+		(void)stderr_fprntf( s, a, b, c );
+		(void)stderr_fprntf( "\n" );
+		}
+	EXIT(1);
+	}
+
+#else /* CPASS2orFORT */
+
+        /* VARARGS1 */
+cerror( s, a, b, c ) char *s; { /* compiler error: die */
+	where('c');
+	if( nerrors && nerrors <= MAXUSEFULERRS ){ 
+		/* give the compiler the benefit of the doubt */
+		(void)fprntf( stderr, "cannot recover from earlier errors: goodbye!\n" );
+		}
+	else {
+# ifdef LINT
+		(void)fprntf( stderr, "\n\t**** cannot recover from this error ****\n\n");
+# else
+		(void)fprntf( stderr, "compiler error: " );
+# endif /* LINT */
+		(void)fprntf( stderr, s, a, b, c );
+		(void)fprntf( stderr, "\n" );
+		}
+	EXIT(1);
+	}
+
+#endif /* CPASS2orFORT */
+
+
+	/* VARARGS1 */
+werror( s, a, b, c ) char *s; {  /* warning */
+
+#ifdef MSG_COVERAGE
+	count_msg( s );
+#endif /* MSG_COVERAGE */
+
+# ifndef CXREF
+# ifndef FORT
+	if (!wflag)
+	{
+# endif /* FORT */
+
+#ifdef CPASS2orFORT
+
+                where('w');
+		(void)fprntf( stderr, "warning: " );
+		(void)fprntf( stderr, s, a, b, c );
+                (void)fprntf( stderr, "\n" );
+
+#else /* not CPASS2orFORT */
+
+#ifdef MULTI_LINE
+		print_error_line( 'w', s, a, b, c);
+#else /* MULTI_LINE */
+		where('w');
+		(void)stderr_fprntf( "warning: " );
+		(void)stderr_fprntf( s, a, b, c );
+#endif /* MULTI_LINE */
+		
+		if( display_line ) display_error();
+		else {
+			(void)stderr_fprntf( "\n" );
+		}
+#endif /* CPASS2orFORT */
+# ifndef FORT
+        }
+# endif /* FORT */
+# endif /* CXREF */
+}
+
+#endif /*BRIDGE*/
+
+
+
+
+
+tinit(){ /* initialize expression tree search */
+
+	register NODE *p, *end;
+
+	for( p=node, end = &node[maxnodesz-1]; p<= end; ++p ) p->in.op = FREE;
+	lastfree = node;
+	treeasciz = taz;
+	lasttac = treeasciz;
+
+	}
+
+
+tcheck(){ /* ensure that all nodes have been freed */
+
+#ifdef DEBUGGING
+	register NODE *p, *end;
+
+#ifndef BRIDGE
+	if( !nerrors )
+#endif /*BRIDGE*/
+		for( p=node, end= &node[maxnodesz-1]; p<=end; ++p )
+			if( p->in.op != FREE )
+#ifdef BRIDGE
+				cerror1("wasted space: %x", p );
+#else  /*BRIDGE*/
+				cerror( "wasted space: %x", p );
+#endif /*BRIDGE*/
+#endif /* DEBUGGING */
+	tinit();
+	}
+
+
+# define TNEXT(p) (p== end?node:p+1)
+
+NODE *
+talloc(){
+	register NODE *p, *q;
+ 	register NODE *end;
+
+	q = lastfree;
+ 	end= &node[maxnodesz-1];
+	for( p = TNEXT(q); p!=q; p= TNEXT(p))
+		if( p->in.op ==FREE )
+			{
+#ifndef IRIF
+			p->alloc.flagfill = 0;
+#endif /* not IRIF */
+#ifdef ANSI
+			p->in.not_lvalue = 0;
+#endif /*ANSI*/
+#ifdef C1_C
+#ifndef IRIF
+			p->in.fixtag = 0;
+#endif /* not IRIF */
+#endif  /* C1_C */
+			return(lastfree=p);
+			}
+
+	{
+	/* We can't reallocate the existing table, so allocate
+	 * an overflow table.  The two (or more) will be
+	 * coalesced after the current expression tree is finished.
+	 */
+	char *newnode;
+	register NODE *pn,*nend;
+
+	maxrecur += NRECUR;
+	newnode = (char *) malloc( maxnodesz * sizeof(NODE) + TABLE_ADJUST);
+	if (newnode == NULL)
+	    {
+	    cerror( "out of tree space; simplify expression or try +Ne option");
+	    /*NOTREACHED*/
+	    return(lastfree);
+	    }
+	else
+	    {
+	    *((char **) newnode) = (char *)node;  /* save ptr to old table */
+	    node = (NODE *)(newnode + TABLE_ADJUST);	/* table start after pointer */
+	    for( pn=node, nend = &node[maxnodesz-1]; pn<= nend; ++pn )
+		pn->in.op = FREE;
+	    lastfree = node;
+#ifndef IRIF
+	    lastfree->alloc.flagfill = 0;
+#endif /* not IRIF */
+	    return(lastfree);
+	    }
+	}
+}
+
+
+
+
+LOCAL tfree1(p)  NODE *p; {
+	if( p == 0 ) cerror( "freeing blank tree!");
+	else p->in.op = FREE;
+	}
+
+
+
+tfree( p )  NODE *p; {
+	/* free the tree p */
+
+	if( p->in.op != FREE ) walkf( p, tfree1 );
+
+	}
+
+
+
+/* make a constant node with value i */
+NODE *
+bcon( i, t )	register int i; TWORD t;
+{
+	register NODE *p;
+
+	p = block( ICON, NIL, NIL, INT, 0, INT );
+	if (t) p->tn.type = t;
+	else
+		{
+		p->tn.type = !(i & 0xffffff80)? CHAR :
+			!(i & 0xffff8000)? SHORT : INT;
+
+#if defined(ONEPASS) || defined(C1_C)
+		p->fn.csiz = p->tn.type;
+#endif  /* ONEPASS || C1_C */
+		}
+	p->tn.lval = i;
+	p->tn.rval = NONAME;
+#if (defined(ONEPASS) || defined(FORT))
+	p->in.name = NULL;
+#endif
+	return( p );	/* used to call clocal - but that doesn't do anything */
+}
+
+
+
+
+NODE * block( o, l, r, t, d, s ) short o; NODE *l, *r; TWORD t; {
+
+	register NODE *p;
+
+	p = talloc();
+	p->in.op = o;
+	p->in.rall = d;
+	p->in.left = l;
+	p->in.right = r;
+	p->in.type = t;
+#ifdef FORT
+	p->in.fpaside = 0;
+#else
+	p->fn.csiz = s;
+	p->in.tattrib = 0;
+	p->nn.sym = 0;
+#endif	/* FORT */
+#ifdef C1_C
+	p->in.c1tag = NULL_C1_TAG;
+#endif  /* C1_C */
+#if defined(HPCDB) || defined(APEX)
+	p->in.nameunused = 0;
+#endif
+#ifdef LINT
+	p->in.cast_flg = 0;
+	p->in.promote_flg = 0;
+#endif /* LINT */
+	return(p);
+	}
+
+
+
+/* incref inserts a type into the type word while doing an expanded check for
+   type overflow.
+*/
+incref(x) register TWORD x;
+{
+	if (LTMASK & x)
+		{
+		uerror("type too complex");
+		return(0);
+		}
+	else
+		return( INCRF( x, PTR ));
+}
+
+
+
+#if !defined(BRIDGE) || defined(ONEPASS)
+#ifndef LINT_TRY
+
+
+/* addtreeasciz adds an asciz symbol to the treeasciz array after first
+   checking for overflow. It updates lasttac to point to the next free
+   char. The routine is typically used to fill tree node names in the
+   second pass routines.
+*/
+
+char	*addtreeasciz(cp)	char	*cp;
+{
+	register short i;
+	register char	*lcp = cp;
+
+	for (i=1; *lcp++; i++) /* NULL */ ;	/* count the chars */
+	if (i > maxtascizsz - (lasttac-treeasciz))
+		{
+		/* We can't reallocate the existing table, so allocate
+		 * an overflow table.  The two (or more) will be
+		 * coalesced after the current expression tree is finished.
+		 */
+		char *newtaz;
+		newtaz = (char *) malloc( maxtascizsz * sizeof(char) + TABLE_ADJUST);
+		if (newtaz == NULL)
+		    many("Tree asciz", 't');
+		else
+		    {
+		    *((char **) newtaz) = taz;	/* save pointer to old table */
+		    taz = newtaz + TABLE_ADJUST;/* table start after pointer */
+		    treeasciz = taz;
+		    lasttac = treeasciz;
+		    }
+		}
+	lcp = lasttac;				/* save it */
+	lasttac += i;
+	return ( strcpy(lcp, cp) );
+}
+
+#endif  /* LINT_TRY */
+#endif /* !defined(BRIDGE) || defined(ONEPASS) */
+
+
+nncon( p ) NODE *p; {
+	/* is p a constant without a name */
+	return( p->in.op == ICON && p->tn.rval == NONAME );
+	}
+
+
+many(s, c)
+char *s, c;
+{
+#ifdef CPASS2orFORT
+	fprintf(stderr,"%s table overflow. Try the +N%c option.\n", s, c);	
+#else
+#ifdef LINT
+	(void)stderr_fprntf( "%s table overflow. Try the -N%c option.\n", s, c);
+#else
+	(void)stderr_fprntf( "%s table overflow. Try the -Wc,-N%c option.\n", s, c);
+#endif
+#endif /* CPASS2orFORT */
+	EXIT(1);
+}
+
+
+
+
+#if !defined(BRIDGE) || defined(ONEPASS)
+resettablesize(cp, newsize)	char *cp; int newsize;
+{
+	unsigned int *up;
+
+	switch (*cp)
+		{
+		case 'a':
+			up = &maxascizsz;
+			break;
+		case 'e':
+			up = &maxnodesz;
+			break;
+		case 's':
+			/* silently ignore this */
+			/* up = &maxsymtsz; */
+			up = NULL;
+			break;
+		case 't':
+			up = &maxtascizsz;
+			break;
+# ifndef FORT
+		case 'b': 
+			up = &maxbcsz;
+			break;
+		case 'd':
+			up = &maxdimtabsz;
+			break;
+		case 'p':
+			up = &maxparamsz;
+			break;
+		case 'w':
+			up = &maxswitsz;
+			break;
+# endif /* FORT */
+		default:
+#ifndef OSF
+			werror("Unknown table specifier (ignored)");
+#endif
+			up = (unsigned int *)NIL;
+			break;
+		}
+
+	if (up) *up = newsize;
+}
+#endif /* !defined(BRIDGE) || defined(ONEPASS) */
+
+
+ptr ckalloc(n)
+unsigned n;	/* total # of bytes needed in the contiguous space */
+{
+	register ptr p;
+
+	if (p = (ptr) malloc(n))
+	  {
+	  (void) memset((void *)p,'\0',n);
+	  return (p);
+	  }
+	cerror("out of space - unable to allocate memory for internal use");
+	/*NOTREACHED*/
+	return(p);
+}
+
+#ifndef FORT
+#ifndef BRIDGE
+
+#ifndef LINT_TRY
+/*ARGSUSED*/
+where(c){ /* print location of error  */
+	/* c is either 'u', 'c', or 'w' */
+	if (ftitle[0] )
+		(void)fprntf( stderr, "%s, ", ftitle);
+	if (lineno)
+		(void)fprntf( stderr, "line %d: ", lineno );
+	else if ( ftnname[0] )
+		(void)fprntf( stderr, "function %s: ", ftnname );
+	}
+#endif /* LINT_TRY */
+#endif /* BRIDGE */
+
+/*ARGSUSED*/
+void
+dexit( v ) {
+
+#ifdef YYCOVERAGE
+       if(record_reductions)
+           yy_update_rfile( yy_rfile, yy_rtable);
+#endif /* YYCOVERAGE */
+
+#ifdef MSG_COVERAGE
+	if( msg_coverage ) {
+		update_msgdb();
+	}		
+#endif /* MSG_COVERAGE */
+#ifdef HPCDB
+	/* since we are going down, clean up the silly SA files */
+	(void) remove_vt_tempfile();
+# if (defined (SA)) && (! defined (ANSI))
+	(void) sa_macro_file_remove();
+# endif
+#endif /* HPCDB */
+
+#ifdef IRIF
+	ir_abort_codegen();
+	ir_terminate();
+#endif /* IRIF */
+
+#if( !defined CPASS2 && !defined IRIF )
+#ifndef OSF
+	stderr_signoff();
+#endif /* OSF */
+#endif /* not CPASS2 && not IRIF */
+	exit(1);
+	}
+#endif  /* not FORT */
+
+#ifdef	DEBUGGING	/* otherwise a macro */
+getlab()
+	{
+	/* return a number usable for a label */
+#ifdef FORT1PASS
+	return (++lastlabno);
+#else
+	return (crslab++);
+#endif /* FORT1PASS */
+	}
+#endif	/* DEBUGGING */
+
+
+inittaz()
+{
+	node = (NODE *) ckalloc ( maxnodesz * sizeof (NODE) + TABLE_ADJUST);
+	*((char**) node) = (char*) 0;	/* no previous tables */
+	node = (NODE *)(((char *)node) + TABLE_ADJUST);  /* table starts after pointer */
+
+	taz =  (char *) ckalloc ( maxtascizsz * sizeof(char) + TABLE_ADJUST);
+#ifndef BRIDGE
+	*((char**) taz) = (char*) 0;	/* no previous tables */
+	taz += TABLE_ADJUST;		/* table starts after pointer */
+
+# ifdef FORT
+	fstack = (NODE **) ckalloc( fstacksz * sizeof(NODE *) );
+# endif /* ifdef FORT */
+#endif /* BRIDGE */
+}
+
+
+
+
+#ifndef BRIDGE
+/* resettreeasciz() coalesces the current tree asciz tables into one
+ * contiguous table.  It also resets the table pointers (clears it).
+ * Called after every expression tree is finished.
+ */
+resettreeasciz()
+{
+   	long ntables = 0;
+	char *oldtaz;
+	oldtaz = *((char **) (taz - TABLE_ADJUST));
+	if (oldtaz != NULL)
+		{			/* free old tables */
+		do
+			{
+			oldtaz = *((char **) (taz - TABLE_ADJUST));
+			free ((void *)(taz - TABLE_ADJUST));
+			taz = oldtaz;
+			ntables++;
+			}
+		while (taz != NULL);
+
+		/* allocate new table */
+		maxtascizsz *= ntables;
+		taz =  (char *) malloc ( maxtascizsz * sizeof(char) + TABLE_ADJUST);
+		if (taz == NULL)
+			many("Tree asciz", 't');
+		else
+			{
+			*((char**) taz) = (char*) 0;	/* no previous tables */
+			taz += TABLE_ADJUST;	/* table starts after pointer */
+			}
+		}
+
+	/* reset current table pointers to beginning */
+	treeasciz = taz;
+	lasttac = treeasciz;
+}  /* resettreeasciz */
+#endif /*BRIDGE*/
+
+
+/* treset() coalesces the current NODE tables into one
+ * contiguous table.  It also resets the table pointers (clears it).
+ * Called after every expression tree is finished.
+ */
+treset()
+{
+   	long ntables = 0;
+	char *oldnode;
+	char *currnode = (char *) node;
+	register NODE *p,*end;
+
+	oldnode = *((char **) (currnode - TABLE_ADJUST));
+	if (oldnode != NULL)
+		{			/* free old tables */
+		do
+			{
+			oldnode = *((char **) (currnode - TABLE_ADJUST));
+			free ((void *)(currnode - TABLE_ADJUST));
+			currnode = oldnode;
+			ntables++;
+			}
+		while (currnode != NULL);
+
+		/* allocate new table */
+		maxnodesz *= ntables;
+		currnode = (char *) malloc( maxnodesz * sizeof(NODE) + TABLE_ADJUST);
+		if (currnode == NULL)
+	cerror( "out of tree space; simplify expression or try +Ne option");
+		else
+			{
+			*((char**) currnode) = (char*) 0; /* no prev tables */
+			node = (NODE *) (currnode + TABLE_ADJUST);   /* start after ptr */
+		        for( p=node, end = &node[maxnodesz-1]; p<= end; ++p )
+			    p->in.op = FREE;
+			}
+		}
+
+	lastfree = node;
+} /* treset */
+
+
+
+#if !defined(BRIDGE) || defined(ONEPASS)
+int rm_paren(p) register NODE *p;
+{
+	register NODE *temp;
+	if (p->in.op == PAREN) {
+		temp = p->in.left;
+		*p = *(temp);
+		temp->in.op = FREE;
+	}
+}
+#endif /* !defined(BRIDGE) || defined (ONEPASS) */
+
+
+
+/* haseffects() checks the operand of a "sizeof" call or the left side of a
+   assignment operator to determine if possible side effects are requested.
+   It returns 0 if no side effects and 1 otherwise.
+*/
+int haseffects(p)	NODE *p;
+{
+	register short o = p->in.op;
+	register short ty = (short)optype(o);
+
+	if (ty == LTYPE) return (0);
+	if ( asgop(o) || callop(o) ) return (1);
+	if ( haseffects(p->in.left) ) return (1);
+	if (ty == UTYPE) return (0);
+	return( haseffects(p->in.right) );
+}

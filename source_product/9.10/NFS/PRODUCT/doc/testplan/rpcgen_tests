@@ -1,0 +1,1713 @@
+.H 1 "RPCGEN Test Plan Overview"
+.sp
+Rpcgen is a compiler that will take C-like input (in a .x file)
+and produce skeleton .c files and a .h file that can be used to
+create a RPC server/client program pair.  For more information
+on using rpcgen, please see the rpcgen chapter in the Programming
+and Protocols for NFS Services manual.
+
+Rpcgen will be part of the NFS3.2 release on the 300 and the 800.
+The latest intelligence says that this will happen on the 6.5
+release on the 300 and 4.0 on the 800.
+
+The tests are separated into several categories.  The first deals
+with the syntax of actual execution of the rpcgen program.  The
+second is concerned with the syntax of the text in
+the source file that is given to rpcgen.  The third section will
+test the correctness of  the contents of the files produced by rpcgen.
+The last part will be to execute the programs found in the demo
+directory of the rpcgen source received from Sun and to execute
+the examples given in the rpcgen chapter of our manuals.  These
+two pieces will probably not be distinct as the examples in the
+manual were taken from the demo code.
+
+These tests could be run on Sun machines, but it would not prove
+anything as most of the tests have nothing to do with data
+communications.  We are not interested if Sun's code has defects.
+Of course tests will informally get run on the Sun if only to see
+what the expected behavior is.
+Most of the tests will be run on just HP machines.
+There are some differences in the .c files produced on an HP machine
+(to handle such things as different names for some library functions).
+These changes are compatible with compiling on a Sun.
+And although we could create special std.out files, it does not
+seem to be worth it.
+There will be a section of tests that will create
+the files from rpcgen, compile them and run them between a server
+and a client.  These will need to be run between HP and Sun and
+there should be no problems in doing this.
+
+The expected behavior of running these tests on a system without
+NFS3.2 will be to get the infamous message of:
+.nf
+
+   rpcgen: Command not found.
+.fi
+.sp 1
+For ALL tests that will actually communicate between the server
+and client machines, code will have to be added to insure the following:
+1) that the client and server agree to use the same unique program
+number 2) that the client knows what the pid of the remote server program
+is so that it is able to kill the server after the test is finished.
+This is needed in order to be able to run the tests under stress
+conditions of concurrent execution.
+.sp 3
+.H 2 "RPCGEN Command Line Syntax"
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES:
+        ISSUES:
+
+.sp 2
+.H 3 "Correct options for rpcgen command"
+.sp 1
+Execute the various forms of the rpcgen command to test out the option
+parsing ability.  The .x file should have different portions of it
+inclosed in #ifdef constructs.  The names to use are RPC_HDR, RPC_XDR,
+RPC_SVC and RPC_CLNT.  These are defined by rpcgen and can be used
+to selectively add code to specific files created by rpcgen.
+Output files should be examined by hand when the test is first
+put into the scaffold and then when it is run, all output files
+should be cat'ed to output so they can be compared to the cat'ed
+files in the std.out file.  If a file should have the same contents
+as another file, it will be enough to do a diff on it to insure its
+proper contents and then to blow it away without doing a cat.
+.nf
+
+Usage				Expected Results
+
+rpcgen  file.x			file.h, file_clnt.c, file_svc.c
+				and file_xdr.c are created
+rpcgen -h -o head.h file.x	head.h is created and is the
+				same as file.h
+rpcgen -o head.h -h file.x	head.h is created and is the
+				same as file.h
+rpcgen file.x -o head.h -h 	head.h is created and is the
+				same as file.h
+rpcgen -h file.x >temph		temph should be the same as head.h
+rpcgen -c -o xdr.c file.x	xdr.c is created and is the
+				same as file_xdr.c
+rpcgen -c file.x >tempx		tempx should be the same as xdr.c
+rpcgen -s udp -o sudp.c file.x	sudp.c is created and is not the
+				same as any other file.
+rpcgen -s udp x	>tempsu 	tempsu is created and is the
+				same as sudp.c.
+rpcgen -s tcp -o stcp.c file.x	stcp.c is created and is not the
+				same as any other file.
+rpcgen -s tcp 	>tempst	 	tempst is created and is the
+				same as stcp.c.
+rpcgen -s tcp -s udp -o stcpudp.c file.x
+				stcpudp.c is created and is not the
+				same as any other file.
+rpcgen -s tcp -s udp file.x >tempstsu
+				tempstsu is created and is the 
+				same as stcpudp.c
+rpcgen -s udp -s tcp -o sudptcp.c file.x
+				sudptcp.c is created and is not the
+				same as any other file.
+rpcgen -s udp -s tcp file.x >tempsust
+				tempsust is created and is the 
+				same as sudptcp.c
+rpcgen -l -o client.c file.x	client.c is created and is the same
+				as file_clnt.c
+rpcgen -l file.x >tempcl	tempcl is created and is the same
+				as file_clnt.c
+rpcgen -m -o server.c file.x	server.c is created and is not the 
+				same as any other file.
+rpcgen -m file.x >temps		temps is created and is the 
+				same as server.c.
+rpcgen -u file.x		the file_svc.c file will look like the
+				old version of file_svc.c except it
+				will have the signal handler code in it
+rpcgen -u -s udp -s tcp file.x >tempsustsig
+				the tempsustsig will be the same as
+				tempsust except that is will have the
+				signal handler code in it
+.fi
+.nf
+         IMPLEMENT TIME: 6 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: See Above
+.fi
+.sp 2
+
+.H 3 "Taking input from stdin and use of %"
+.sp 1
+This test will insure that rpcgen is able to accept input reading from
+stdin.  It will also use an input file that has code in which the lines
+are preceded by "%".  This will cause those lines to be placed directly
+into the output files.
+
+Execute the following:
+.nf
+
+cat file2.x | rpcgen -h -o file2.h
+cat file2.x | rpcgen -l -o file2_clnt.c
+cat file2.x | rpcgen -m -o file_svc.c
+cat file2.x | rpcgen -c -o file_xdr.c
+
+.fi
+.nf
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The files file2.h, file2_clnt.c, file2_svc.c
+			  and file2_xdr.c are created and will have the
+			  code from the "%" in each file.
+.fi
+.sp 2
+.H 3 "Bad syntax for the options"
+.sp 1
+These tests will examine the ability of rpcgen to handle bad options
+on the command line.
+.nf
+Execute the following:
+
+rpcgen -- file.x
+rpcgen -ho out.h file.x
+rpcgen -s -o svc.c file.x
+rpcgen -sudp -o svc.c file.x
+rpcgen -s xxx -o svc.c file.x
+rpcgen -h -ofile.h file.x
+rpcgen -h -u file.x
+rpcgen -u -m file.x
+rpcgen -h -m file.x
+
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: All cases should get an error message like
+			  this:
+usage: rpcgen [-u] infile
+       rpcgen [-c | -h | -l | -m] [-o outfile] [infile]
+       rpcgen [-s udp|tcp]* [-u] [-o outfile] [infile]
+
+.fi
+.sp 3
+.H 2 "RPCGEN Input Language Parsing"
+These tests give rpcgen input of the rpcgen language that consists
+of bad syntax cases.  
+When rpcgen finds a syntax error, it will stop at that point and will
+not try to continue to find possibly more errors (such as the C compiler
+will attempt to do).  This means that multiple bad parse errors cannot
+be placed in one file.  Each syntax error must be in a separate file
+and have its own invocation of rpcgen.
+.nf
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES:
+        ISSUES:
+.fi
+
+.sp 2
+.H 3 "Parsing non-declarations in a struct"
+.sp 1
+This test will show the effects of having something inside a struct
+that is not legal.  This is basicly anything except what was tested
+in the previous test case.  For this test, a different struct needs
+to be placed in separate .x files and then to have rpcgen operate
+on each file.
+.nf
+
+Erroneous struct			The defect
+
+struct bad_struct_1 {			/* has an imbedded "struct" */
+	int something_good;
+	struct bad {
+		int ok;
+	} worse;
+}
+----------------------------------------------------------------------
+
+struct bad_struct_2 {			/* has an imbedded "union" */
+	int something_good;
+	union bad switch (int err) {
+		case 0:	int ok;
+	};
+}
+----------------------------------------------------------------------
+
+struct bad_struct_3 {			/* has an imbedded "const" */
+	int something_good;
+	const NO_GOOD = 8;
+}
+----------------------------------------------------------------------
+
+struct bad_struct_4 {			/* has an imbedded "enum" */
+	int something_good;
+	enum bad {
+	   a = 1;
+	   b = 2;
+	};
+}
+----------------------------------------------------------------------
+
+struct bad_struct_5 {			/* has an embedded "program" */
+	int something_good;
+	program PROG {
+		version VERS {
+		   int proc(int) = 1;
+		} = 1;
+	} = 1;
+}
+         IMPLEMENT TIME: 3 hours
+         PERFORM TIME: 1 hours
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In all of the cases, an error will be returned.
+			  The error should be  "expected type specifier".
+.fi
+.sp 2
+.H 3 "Parsing bad struct definitions"
+.sp 1
+The syntax of the struct definition will be tested here.  Again each
+test example will have to go into a separate .x file and have rpcgen
+executed for each file.
+.nf
+The proper syntax for the struct definition is:
+    "struct" struct-ident "{"
+	declaration-list
+    "}"
+
+Erroneous struct			The defect
+
+struct_id {				/* No "struct" keyword */
+	int x;
+};
+----------------------------------------------------------------------
+
+struct {				/* No struct-ident */
+	int x;
+};
+----------------------------------------------------------------------
+
+struct struct_id			/* Missing the "{" */
+	int x;
+};
+----------------------------------------------------------------------
+
+struct struct_id {			/* Missing the declaration list */
+};
+----------------------------------------------------------------------
+
+struct struct_id {			/* Bad declaration list */
+	x;
+};
+----------------------------------------------------------------------
+
+struct struct_id {			/* Bad declaration list */
+	int ;
+};
+----------------------------------------------------------------------
+
+struct struct_id {			/* Missing ";" after int x */
+	int x
+};
+----------------------------------------------------------------------
+
+struct struct_id {			/* Missing the "}" */
+	int x;
+;
+----------------------------------------------------------------------
+
+struct struct_id {		/* Missing the ";" between structs*/
+	int x;
+}
+
+struct good {
+	int y;
+};
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 3 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad typedef definitions"
+.sp 1
+These tests will study the  syntax of the typedef definition.  Each test
+case needs to be in a separate .x file and have rpcgen run on each file.
+.nf
+
+The proper syntax for the typedef definition is:
+    "typedef" declaration
+
+Erroneous typedef			The defect
+
+typedef *pointer;			/* No declaration type */
+----------------------------------------------------------------------
+
+typedef int ;				/* Missing the ident */
+----------------------------------------------------------------------
+
+typedef int integer			/* Missing the ";" */
+typedef char character;
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad program definitions"
+.sp 1
+The syntax of the program definition will be tested in this section.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+The proper syntax for the program definition is:
+       program-definition:
+        "program" program-ident "{"
+            version-list
+        "}" "=" value
+
+    version-list:
+        version ";"
+        version ";" version-list
+
+    version:
+        "version" version-ident "{"
+            procedure-list
+        "}" "=" value
+
+    procedure-list:
+        procedure ";"
+        procedure ";" procedure-list
+
+    procedure:
+        type-ident procedure-ident "(" type-ident ")" "=" value
+ 
+Erroneous program			The defect
+
+program APROG 				/* Missing "{" on the program */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "}" on the program */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+= 55;
+----------------------------------------------------------------------
+
+program {				/* Missing the program-id */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing the "version" */
+	        AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing a version_list */
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing version-id */
+	version {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "{" on the version */
+	version AVERS 
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing version number */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = ;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing procedure list */
+	version AVERS {
+	} = 1 ;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "}" on the version */
+	version AVERS {
+	   int APROC(int) = 1;
+	 = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing type-id on the proc */
+	version AVERS {
+	   APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing procedure name */
+	version AVERS {
+	   int (int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "(" on the proc */
+	version AVERS {
+	   int APROC int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing type-id for the */
+	version AVERS {			/* return value */
+	   int APROC() = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing ")" on the proc */
+	version AVERS {
+	   int APROC(int = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "=" on the proc */
+	version AVERS {
+	   int APROC(int)  1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing procedure number */
+	version AVERS {
+	   int APROC(int) = ;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing ";" on the proc */
+	version AVERS {
+	   int APROC(int) = 1
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "=" on the version */
+	version AVERS {
+	   int APROC(int) = 1;
+	}   1;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing version-number */
+	version AVERS {
+	   int APROC(int) = 1;
+	} =  ;
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing ";" for the version */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1
+} = 55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "=" for the program */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+}   55;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing program-number */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = ;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing ";" for the program */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55
+program ANOTHER_PROG {
+	version VERS {
+	   int NEW_PROC(int) = 1;
+	} = 1;
+} = 56;
+----------------------------------------------------------------------
+
+program APROG {				/* Missing "}" */
+	version AVERS {
+	   int APROC(int) = 1;
+	} = 1;
+} = 55;
+----------------------------------------------------------------------
+
+
+         IMPLEMENT TIME: 8 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad enum definitions"
+.sp 1
+This section will test the parsing of the enum definition.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+The proper syntax for the enum definition is:
+    enum-definition:
+        "enum" enum-ident "{"
+            enum-value-list
+   "}"
+   
+    enum-value-list:
+        enum-value
+        enum-value "," enum-value-list
+
+    enum-value:
+        enum-value-ident
+        enum-value-ident "=" value
+
+Erroneous enum				The defect
+
+enum {					/* missing the enum ident */
+	best = 911,
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+};
+----------------------------------------------------------------------
+
+porsches {				/* missing the "enum" */
+	best = 911,
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+};
+----------------------------------------------------------------------
+
+enum porsches  				/* missing the "{" */
+	best = 911,
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+};
+----------------------------------------------------------------------
+
+enum porsches {				/* missing the "}" */
+	best = 911,
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+;
+----------------------------------------------------------------------
+
+enum porsches {				/* missing the enum-list */
+};
+----------------------------------------------------------------------
+
+enum porsches {				/* missing the "=" */
+	best   911,
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+};
+----------------------------------------------------------------------
+
+enum porsches {				/* extra "," after last */
+	best = 911,			/* value */
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962,
+};
+----------------------------------------------------------------------
+
+enum fake {				/* use a long for the value */
+	RED = 8.8
+};
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 4 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad const definitions"
+.sp 1
+These tests study the syntax of the const definitions.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+The proper syntax for the const definition is:
+    const-definition:
+        "const" const-ident "=" integer
+
+Erroneous const				The defect
+
+GREAT_ONE = 99;				/* missing "const" */
+----------------------------------------------------------------------
+
+const           = 99;			/* missing the ident */
+----------------------------------------------------------------------
+
+const GREAT_ONE   99;			/* missing the "=" */
+----------------------------------------------------------------------
+
+const GREAT_ONE = ;			/* missing the number */
+----------------------------------------------------------------------
+
+const GREAT_ONE = 99 			/* missing the ";" */
+const ANOTHER = 1;
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME:
+         PERFORM TIME:
+         TYPE OF TEST: stress, functional, interactive, etc
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad union definitions"
+.sp 1
+This section will test the parsing of the union definition.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+The proper syntax for the union definition is:
+    union-definition:
+        "union" union-ident "switch" "(" declaration ")" "{"
+            case-list
+        "}"
+
+    case-list:
+        "case" value ":" declaration ";"
+        "default" ":" declaration ";"
+        "case" value ":" declaration ";" case-list
+
+Erroneous union				The defect
+
+the_union switch (int switcher) {  	/* missing "union" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union switch (int switcher) { 		/* missing the union ident */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union (int switcher) { 	/* missing the "switch" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch int switcher) { 	/* missing the "(" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch (switcher) { 	/* missing the type for the	 */
+	case 0 : int var_int;		/* declaration for the switch */
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher { 	/* missing the ")" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher)   /* missing the "{" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the "}" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+;
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the ";" */
+	case 0 : int var_int;
+	case 2 : char var_int;
+	default : long big_num;
+}
+int an_int_var;
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the case-list */
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* having a case after the */
+	case 0 : int var_int;		/* "default" */
+	default : long big_num;
+	case 2 : char var_int;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* having just a "default" */
+	default : long big_num;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* having two "default"'s */
+	default : long big_num;
+	default : long big_num_2;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* having a case after the */
+	case 0 : int var_int;		/* "default" and then another */
+	default : long big_num; 	/* "default" */
+	case 2 : char var_int;
+	default : long big_num_2;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing a type-id for case 0 */
+	case 0 : var_int;
+	case 2 : char var_int;
+	default : long;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the ident for case 0 */
+	case 0 : int ;
+	case 2 : char var_int;
+	default : long;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the ";" on case 0 */
+	case 0 : int var_int
+	case 2 : char var_int;
+	default : long;
+};
+----------------------------------------------------------------------
+
+union the_union switch (int switcher) { /* missing the declaration on case 0 */
+	case 0 : ;
+	case 2 : char var_int;
+	default : long;
+};
+----------------------------------------------------------------------
+
+union the_union_3 switch (int an_array[10]) { /* use an array in the  */
+	case 0 : int var_int;		     /* switch                */
+	case 1 : char var_char;
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (int an_array<10>) { /* use an array in the  */
+	case 0 : int var_int;		     /* switch                */
+	case 1 : char var_char;
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* use a double backslash */
+	case '\\' : int var_int;	     /* in the case           */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* use a mix of non-printing*/
+	case '\n0' : int var_int;	     /* const and octal       */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* use a mix of octal const*/
+	case '\0n' : int var_int;	     /* and non-printing const*/
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* use two non-printing  */
+	case '\nn' : int var_int;	     /* consts in the case    */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* use a octal that is   */
+	case '\0123' : int var_int;	     /* too long              */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* missing the initial '*/
+	case a' : int var_int;	             /* in the char const     */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* missing the ending ' */
+	case 'a   : int var_int;	     /* in the char const     */
+};
+----------------------------------------------------------------------
+
+union the_union_4 switch (char ch_switch) {  /* missing the end of the*/
+	                                     /* line                  */
+	case 'a
+	          : int var_int;	     
+};
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 7 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad fixed length array declarations"
+.sp 1
+This sections will test the handling of bad fixed length array declaration
+syntax.  The declarations need to be part of a struct definition as
+they cannot stand by themselves.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+Erroneous fixed-array			The defect
+
+struct holder {
+    an_array [77];			/* missing type-id */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int          [77];		/* missing ident */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int an_array  77];		/* missing "[" */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int an_array [77 ;		/* missing "]" */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int an_array [  ];		/* missing array length */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int an_array [77 23];		/* two array length values */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	int an_array [77] [12];		/* two separate lengths */
+}
+----------------------------------------------------------------------
+
+struct holder {				/* try an array of pointers */
+         char            *another_char_ptr_aray[1];
+}
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 3 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: In each case an error message should be given
+			  that should fit the error.
+.fi
+.sp 2
+.H 3 "Parsing bad variable length array declarations"
+.sp 1
+These tests will checkout the handling of the syntax of
+variable length arrays. 
+The declarations need to be part of a struct definition as
+they cannot stand by themselves.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+Erroneous variable length array		The defect
+
+struct holder {
+	     an_array <66>;		/* missing type-id */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	char          <66>;		/* missing ident */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	char an_array  66>;		/* missing "<" */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	char an_array <66 ;		/* missing ">" */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	char an_array <66 55>;		/* double array length values */
+}
+----------------------------------------------------------------------
+
+struct holder {
+	char an_array <66> <55>;	/* two separate array lengths */
+}
+----------------------------------------------------------------------
+         IMPLEMENT TIME: 3 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The appropriate error message should be 
+			  printed.
+.fi
+.sp 2
+.H 3 "Bad string and opaque declarations"
+.sp 1
+These test insure that improper declarations of opaque and string
+data is detected properly.
+Each test case needs to be in a separate .x file and have rpcgen run on
+each file.
+.nf
+
+Erroneous declarations			The defect
+
+struct test_opaque {			/* opaque data must be an */
+	opaque cookie;		        /* array                  */
+};
+----------------------------------------------------------------------
+
+struct test_string {			/* string data must be an */
+	string name;			/* array		  */
+};
+----------------------------------------------------------------------
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hours
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The appropriate error message should be 
+			  printed.
+.fi
+.sp 3
+.H 2 "RPCGEN Output Correctness"
+This section of the tests will see how rpcgen handles correct but somewhat
+unusual examples of the rpcgen language constructions.
+
+Output files should be examined by hand when the test is first
+put into the scaffold and then when it is run, all output files
+should be cat'ed to output so they can be compared to the cat'ed
+files in the std.out file.  
+
+.nf
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES:
+        ISSUES:
+.fi
+
+.sp 2
+.H 3 "Parsing declarations in a struct"
+.sp 1
+Create a struct in a file called struct.x and execute rpcgen on the file.
+The struct should contain the
+following declarations and supporting defines:
+.nf
+	typedef int int_def;
+	typedef char *char_ptr;
+	enum porsches {
+		best = 911,
+		for_racing = 914,
+		for_wimps = 944,
+		for_snobs = 928
+	};
+	typedef porsches p_def;
+
+	struct teststruct {
+		int  		an_int_var;
+		int_def 	an_int_def_var;
+		char_ptr 	a_char_ptr_var;
+		char		*another_char_ptr_var;
+		porsches 	a_car_var;
+		p_def		a_car_def_var;
+		user_defined  	user_def_var;
+		int		an_int_aray[4];
+		int_def 	an_int_def_aray[32767];
+		char_ptr 	a_char_ptr_aray[9];
+		porsches 	a_car_aray[3];
+		p_def		a_car_def_aray[666];
+		user_defined  	user_def_aray[12345];
+	};
+
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: struct.h, struct_clnt.c, struct_svc.c
+			  and struct_xdr.c are created and need to be
+			  examined for correctness
+.fi
+.sp 2
+.H 3 "Good uses of an union"  
+.sp 1
+Use rpcgen on a union that contains no "default" case, that has various
+declarations in the switch variable and in the declaration portion
+of the cases.
+Since these tests should be legal, they can go into one file.
+After the rpcgen is run on the file, the files produced must be examined
+for correctness before being placed as a reference copy in std.out
+Try to cc the xdr.c file.  It
+should compile (but since I have already found a bug in this
+area, it won't for now).
+.nf
+
+
+union the_union_1 switch (int switcher) { /* missing the "default" */
+	case 0 : int var_int;
+	case 1 : char var_char;
+};
+----------------------------------------------------------------------
+
+union the_union_2 switch (char switcher) { /* use a char in the  */
+	case 'a' : int var_int;		    /* switch                */
+	case 'b' : char var_char;
+	case '0' : char var_char;
+	case '\n' : char var_char;
+	case '\0' : char var_char;
+	case '\01' : char var_char;
+	case '\013' : char var_char;
+	case '\255' : char var_char;
+};
+----------------------------------------------------------------------
+
+enum porsches {				/* extra "," after last */
+	best = 911,			/* value */
+	for_racing = 914,
+	for_wimps = 944,
+	for_snobs = 928,
+	for_rich = 959,
+	for_speed = 962
+};
+
+union the_union_5 switch (porsches cars) { /* use an enum in the  */
+	case best : int var_int;	  /* switch                */
+	case for_racing : char var_char;
+	case for_wimps : u_char var_u_char;
+	case for_snobs : long var_long;
+	case for_rich : u_int var_u_int;
+	case for_speed : int var_array[33];
+};
+----------------------------------------------------------------------
+
+         IMPLEMENT TIME: 5 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: rpcgen should produce the proper files and
+			  cc should be able to compile them.
+.fi
+.sp 2
+.H 3 "More uses of a const and enum definition"  
+.sp 1
+This section will study legal uses of the const and enum definitions.
+Since these tests should be legal, they can go into one file.
+After the rpcgen is run on the file, the files produced must be examined
+for correctness before being placed as a reference copy in std.out
+Try to cc the xdr.c file.  It should compile.
+.nf
+
+/* Mix enum values and const values */
+
+enum quick_enum {
+	bird = 3,
+	tree = 2
+};
+
+const enum_1 = bird;
+const enum_2 = 7;
+
+enum enum_type {
+	RED = enum_2,
+	BLUE = 2,
+	WHITE = enum_1,
+	BLACK = 4,
+	GREEN = 5
+};
+
+struct test_struct {
+	enum_type enum_var;
+	int int_var;
+};
+
+----------------------------------------------------------------------
+         IMPLEMENT TIME: 3 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The rpcgen and compile should work.
+.fi
+.sp 2
+.H 3 "Wilder program definitions"
+.sp 1
+These tests will look at more ways to use the program definition.e
+Since these tests should be legal, they can go into one file.
+After the rpcgen is run on the file, the files produced must be examined
+for correctness before being placed as a reference copy in std.out
+Try to cc the xdr.c file.  It should compile.
+.nf
+
+/* Have a program that has many version numbers with the same 	*/
+/* procedure list.  Also use const's and enum's as the numbers	*/
+/* of the different versions.					*/
+
+typedef struct result_struct *answer;
+
+struct result_struct {
+	int int_var;
+	char char_var;
+};
+
+const   VERSION_1 = 1;
+const   VERSION_2 = 2;
+const   PROG_NUM =  5;
+
+enum proc_type {
+	PROC_1 = 1,
+	PROC_2 = 2
+};
+
+program TESTPROG {
+	version FIRST {
+	    answer 
+	    proc1(int) = PROC_1;
+	    int
+	    proc2(char) = PROC_2;
+	    char proc3(u_char) = 3;
+	    u_char proc4(long) = 4;
+	    bool proc5(bool) = 5;
+	} = VERSION_1;
+	version SECOND {
+	    answer 
+	    proc1(int) = PROC_1;
+	    int
+	    proc2(char) = PROC_2;
+	    bool proc3(u_char) = 3;
+	    char proc4(long) = 4;
+	    long proc5(bool) = 5;
+	} = VERSION_2;
+} = PROG_NUM;
+
+----------------------------------------------------------------------
+         IMPLEMENT TIME: 4 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The rpcgen and the C compile should
+			  work properly.
+.fi
+.sp 2
+.H 3 "More interesting declarations"
+.sp 1
+These tests will try to do more things with type declarations.  It
+will use const's and enum's in arrays, use opaque declarations
+and also do more with pointers.
+Since these tests should be legal, they can go into one file.
+After the rpcgen is run on the file, the files produced must be examined
+for correctness before being placed as a reference copy in std.out
+Try to cc the xdr.c file.  It
+should compile.
+.nf
+
+enum for_array {
+    small = 1,
+    big   = 777
+};
+
+const MAXARRAY = 888;
+
+struct test_struct {
+	int  i_array[small];            /*little fixed array*/
+	char aaa;			/*just a character*/
+	bool the_bool;			/*a boolean*/
+	bool the_bool_array   [99]; 	/*a boolean array*/
+	string name<big>;		/*large string array*/
+	opaque cookie   <>;		/*a block of storage*/
+	opaque oreo[big];		/*fixed block of storage*/
+	char max_name[MAXARRAY];	/*large fixed char array*/
+	int var_length<>;		/*variable int array*/
+	int var_length_bounded<MAXARRAY>;	/*variable int array*/
+};
+----------------------------------------------------------------------
+         IMPLEMENT TIME: 2 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The rpcgen and the C compile should
+			  work properly.
+.fi
+.sp 3
+.H 2 "RPCGEN Example Correctness"
+To insure that our examples in the rpcgen manual are accurate, they
+need to be executed.  This section of the test plan deals with this.
+.nf
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES:
+        ISSUES:
+.fi
+
+.sp 2
+.H 3 "Remote directory listing example program"
+.sp 1
+Put the example code found in the rpcgen chapter into a test format
+and make sure it runs.  There is a server side file (dir_proc.c)
+that does the
+actual reading of a directory.  There is a client side program file
+(rls.c)
+that parses user input and prints the results.  There is a .x file
+that will be used by rpcgen to generate the extra files.
+Code will have to be added to allow concurrent versions of this
+test to run.
+
+In order that the test returns the same files (so the scaffold
+can compare with std.out), a directory must be created that has
+a consistent list of files.
+.nf
+
+rpcgen dir.x       /* produces dir_clnt.c dir.h dir_xdr.c dir_svc.c */
+		   /* executed on the client                        */
+
+dir_svc.c dir_xdr.c dir_proc.c dir.h are sent over to the server
+
+cc -o rls  rls.c dir_clnt.c dir_xdr.c        /*the client        */
+					     /*executed on client*/
+
+cc -o dir_svc dir_svc.c dir_xdr.c dir_proc.c /*the server        */
+					     /*executed on server*/
+dir_svc            /* executed on the server */
+
+rls <server_mach> <the_directory>      /* executed on the client */
+
+remsh <server_mach> kill -9 <server_pid>   /* executed on client */
+
+         IMPLEMENT TIME: 5 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: stress, functional, interactive, etc
+         EXPECTED OUTPUT:
+.fi
+.sp 2
+.H 3 "Remote sort program"
+.sp 1
+This test will set up a remote sorting program.  The files can be
+found in ~/mikey/RPCGEN/demo/sort on hpcndk.  They will need to
+be transformed from using BSD libraries to using hpux libraries.
+There is presently a quick hack of using a include file called
+bsd_to_hpux.h that does this, but it should not be used.  Make
+sure to put the changes for the libraries in #ifdef hpux so that
+the files could be compiled on a Sun if needed.  There are other
+directories in the demo directory that have programs.  The math
+directory does not contain the server or client code, so it is
+not useful.  The dir directory contains code that does similar
+things that the previous test case does.  The msg directory
+writes to the server's console which is not that useful in
+an automated testing environment, but it could be changed to
+cat to a file which would be more interesting.  The rpopen acts
+like remsh in that it will execute a command on the server machine.
+As far as rpcgen is concerned, it is not that much more interesting
+then the remote directory listing program, so there would be little
+gained in executing it.
+
+.nf
+         IMPLEMENT TIME: 7 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The sort program should return the sorted
+			  list.
+.fi
+.sp 3
+.H 2 "RPCGEN and NLS"
+This section is concerned with the functioning of rpcgen when it has
+to deal with NLS (Native Language System).  There are two main areas
+that will be looked at.  The first area tests if the catalog files of the
+error messages for rpcgen are properly used to produce error messages
+in other than English.  The second area tests if rpcgen can handle .x
+files with 2 byte characters inside comments and if rpcgen can handle .x
+files with names that are spelled with 2 byte characters.
+.nf
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES: Having NLS environment on test systems
+        ISSUES: Cannot get NLS functions to work in rpcgen code
+.fi
+
+.H 3 "Producing error messages in other languages"
+.sp 1
+A catalog of alternate error messages must be created.
+This could simply be the error messages written in upper case letter.
+This file
+will then be placed the appropiate directory under "/usr/lib/nls".
+Now execute some of the functional tests that produce error messages
+and verify that the alternate error messages are used.
+Since rpcgen quits processing after the first error is seen, several
+test runs of rpcgen will need to be made.  The results should be
+examined and placed into the stdout and stderr files in order
+to allow for automatic verification.
+
+In order for rpcgen to use the nls catalog file, the LANG environment
+variable must be set to a value to corresponds to directory under
+"/usr/lib/nls" that the catalog file is placed.
+.nf
+         IMPLEMENT TIME: 7 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: Alternate error messages should be printed
+.fi
+.sp 2
+.H 3 ".x files containing 2 byte characters"
+.sp 1
+Rpcgen needs to properly handle input files that contain 2 byte characters.
+This type of data can ONLY be found inside comments, string literals and
+used to spell file names.  This is similar to the fashion that C programs
+accept 2 byte characters.  The main focus of the test is in two areas.
+The first is to have a comment of the form:
+.nf
+   	/*  Comment (first_of_2-byte_char)*/  more comment */
+.fi
+This is to test that the combination of the 2-byte character whose
+second byte is a "*" will not terminate the comment when the "/"
+character follows it.  The second test is similar, except that it deals
+with string literals.  The following line should be properly parsed by
+rpcgen:
+.nf
+	const  A_STRING = "abc  (first_of_2-byte_char)" more string";
+.fi
+Again the double quote that makes up the second byte of a 2 byte character
+should not terminate the string literal.
+
+Since these tests should be legal, they can go into one file.
+After the rpcgen is run on the file, the files produced must be examined
+for correctness before being placed as a reference copy in std.out
+
+Also a part of this test will be to have the file that contains the
+2 byte characters be spelled with a 2 byte character.  The name should
+have the form:
+.nf
+	afile_(first_of_2-byte_char)"_name.x
+.fi
+This will test the line that /lib/cpp (rpcgen passes the input file
+through cpp before it processes the file) inserts into its output
+to identify the name of the file that it is working on.  The line
+has the form:
+.nf
+ 	# <number>  "filename"
+.fi
+Again, the test will insure that the double quote that makes up the
+second byte of a 2 byte character will not terminate the quoted
+filename in the line that cpp produces.
+
+In order for rpcgen to use the nls tools properly so it can recognize
+2 byte characters, the LANG environment variable must be set to a value
+that corresponds to language that has 2 byte characters.  The first character
+of a 2 byte character must fall within a certain range in numberic value.
+This range is different depending upon what value is in LANG.  Also the
+proper environment files must exist in the directory /usr/lib/nls/<language>
+before the nls tools in rpcgen will function.
+.nf
+         IMPLEMENT TIME: 6 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: rpcgen should handle the file without problem
+.fi
+.sp 3
+.H 2 "RPCGEN Output Correctness"
+This section of the test plan will attempt to do a wide range of things with
+programs created by rpcgen.  Actual client and server side will have to
+be provided to the code produced by rpcgen to produce the test cases.
+The test cases will then be run between the server and client machines
+and the output from the client machine will be the key determiner of
+failure or passing of a test.  Each test case will have code added to
+it to allow the use of concurrent execution of the test under stress
+conditions.
+
+The main interest with these tests is not the degree of difficulty of the
+code implementing the server function, but it is in the variety of
+the data types used to pass arguments to the server and results back
+to the client.  I would expect the server to do things such as adding
+a constant to a argument.  The important aspect will be that the 
+argument and result will be long data types.
+
+In each case, a client program will have to be written to accept input
+from the test case and to print out the results.  This code along with 
+the clnt.c, xdr.c and .h files produced by rpcgen will be compiled to
+form the client program.  A .c file will have to be created to do the
+necessary function required by the server program.  This file along
+with the svc.c, xdr.c and .h files produced by rpcgen will be
+sent to the server machine to be compiled and to be started by the
+server machine.  The client program will then talk to the server to
+send over arguments and receive back results.
+
+In order to allow these tests to run concurrently under stress testing,
+some "on the fly" code modifications will have to be done using
+"sed".  In order to get a unique program number that the server and
+client can use, a unique number from the server must be obtained.
+This can be as simple as a process number of a dummy process started
+and quickly terminated on the server.  This number when sent back
+to the client will be used to modify the program number that is defined
+in the program declaration of the .x file.  This value will be put
+into the .h file by rpcgen thus allowing the client and the server to
+agree on a program number that another client or server program will
+not interfere with.
+
+Another problem with the server program is that there is no provision
+by rpcgen for unregistering a program number when the server program
+terminates.  With the new option of  "-u"  for rpcgen, this type of
+code can be inserted automatically, therefore all of the programs in
+these tests should use the -u option.
+.nf
+
+        RESPONSIBLE ENGINEER: Mike Shipley
+        DEPENDENCIES:
+        ISSUES:
+.fi
+
+.H 3 "Use a float for the argument and result"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will take a float value, send the value to the server which will take
+the value, add it to itself and then return the new value.
+.nf
+         IMPLEMENT TIME: 8 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client program will print the new number
+			  which will be double of the argument.
+.fi
+.sp 2
+
+
+
+.H 3 "Use an integer array for the argument and result"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will take a fixed length array of integers and send it to a server.  
+The server will
+take the array and add some constant to the elements of the array
+and ship the array back to the client which will print out the
+contents of the array
+.nf
+         IMPLEMENT TIME: 8 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client program will print out the 
+			  contents of the array returned by the server.
+.fi
+.sp 2
+
+.H 3 "Use a variable length array for the argument and result"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will take a variable length char array that contains both upper and
+lower case letters and send it to the server.  The server will 
+return a variable length integer array.  This array will contain elements
+that are 0 if the corresponding element of the char array was lower
+case and are 1 if the corresponding element of the char array was
+upper case.  If eGiiKK is given to the server in an array, the server
+will return 010011.  Use ctype(3C) to do the case check.
+.nf
+         IMPLEMENT TIME: 8 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client program will print out the
+			  contents of the integer array.
+.fi
+.sp 2
+
+
+.H 3 "Use an union for the argument and result"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will take an union struct which is described by the following
+rpcgen language construct:
+.nf
+	struct a_struct{
+		int num0;
+		int num1;
+		int num2;
+		int num3;
+		int num4;
+		int num5;
+		int num6;
+		int num7;
+		int num8;
+		int num9;
+	};
+
+	union array_or_struct switch (char switcher) {
+	  'a' : a_struct  struct_num;
+	  'b' : int array_num[10];
+	}
+
+
+.fi
+Both the argument and result values will be of the type "array_or_struct".
+There will be two test cases.  In the first case, "switcher" will be set
+to 'a' on the client.  It will load the union with 10 integer values and
+send it to the server.  The server will double each of the 10 values and
+return them in an "array_or_struct" data type with "switcher" set to 'b'
+so the values will be returned in an array.  The second case will have
+"switcher" set to 'b' and will have the 10 integers loaded into the
+union as an array.  The server will get this union and again double
+each element of the array.  It will put the values back into the union
+with "switcher" set to 'a' so that the values will be in a struct.
+For both cases, the server should return values that are double their
+original value.
+
+.nf
+         IMPLEMENT TIME: 10 hours
+         PERFORM TIME: 2 hours
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client should print out the contents of
+			  the argument and the result in both test cases.
+.fi
+.sp 2
+.H 3 "Use of void arguments and results and multiple programs"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will have two programs.  The first program will have an integer for
+the argument and return a void for the result.  The program will
+take an integer from the client and store it in a static variable
+in the server.  The second program will have a void for the argument
+and return a int for the result.  The program will make a request to
+the server and the server will take the value stored in the static
+variable, multiply it by 5 and return it to the client.
+.nf
+         IMPLEMENT TIME: 8 hours 
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client should print out the value sent
+			  to the first program and also print out the
+			  value returned by the second program.
+.fi
+.sp 2
+.H 3 "Use of multiple programs and versions in one server program"
+.sp 1
+Create a rpcgen .x file that will describe a server/client pair that
+will have four different versions of a server function called "compute()"
+It will also have a second and third program to be registered.
+The second program will have 4 versions of a function called "add_some()"
+and the third program will have 4 versions of a function called "sub_some()"
+.nf
+PROGRAM 1
+  Version 1     - compute() will take two integers, add them 
+		  together and return the result
+  Version 2     - compute() will take two integers, subtract the first
+		  from the second and return the result
+  Version 3     - compute() will take two integers, multiply them 
+		  together and return the result
+  Version 4     - compute() will take two integers, divide the first
+		  with the second and return the result
+
+PROGRAM 2
+  Version 1     - add_some() will take an integer and add 1 to it
+		  and return the result
+  Version 2     - add_some() will take an integer and add 2 to it
+		  and return the result
+  Version 3     - add_some() will take an integer and add 3 to it
+		  and return the result
+  Version 4     - add_some() will take an integer and add 4 to it
+		  and return the result
+
+PROGRAM 3
+  Version 1     - sub_some() will take an integer, subtract 1 from
+		  it and return the result
+  Version 2     - sub_some() will take an integer, subtract 2 from
+		  it and return the result
+  Version 3     - sub_some() will take an integer, subtract 3 from
+		  it and return the result
+  Version 4     - sub_some() will take an integer, subtract 4 from
+		  it and return the result
+
+.fi
+For the first program, the client will give two integers to the 
+four versions of the remote
+compute function and then print the results.
+This should be repeated for several integers.
+
+For the second program, the client will give an integer to the four
+versions of the remote add_some function and the print the results.
+This should be repeated for several integers.
+
+For the third program, the client will give an integer to the four
+versions of the remote sub_some function and the print the results.
+This should be repeated for several integers.
+.nf
+         IMPLEMENT TIME: 8 hours
+         PERFORM TIME: 1 hour
+         TYPE OF TEST: functional
+         EXPECTED OUTPUT: The client will print the two integers that 
+			  are used as arguments and then will print
+			  the result returned by the server.
+.fi
+.sp 2
+
+
+
+.\ The temp file
+
+.\ .H 3 "first test under test section 1"
+.\ .sp 1
+.\ Enter a description of the test.  Things that might be appropriate
+.\ Since these tests should be legal, they can go into one file.
+.\ After the rpcgen is run on the file, the files produced must be examined
+.\ for correctness before being placed as a reference copy in std.out
+.\ Try to cc the xdr.c file.  It should compile.
+.\ .nf
+.\          IMPLEMENT TIME:
+.\          PERFORM TIME:
+.\          TYPE OF TEST: stress, functional, interactive, etc
+.\          EXPECTED OUTPUT:
+.\ .fi
+.\ .sp 2

@@ -1,0 +1,164 @@
+/* SCCS macdefs    REV(64.1);       DATE(92/04/03        14:22:10) */
+/* KLEENIX_ID @(#)macdefs	64.1 91/08/28 */
+
+#ifdef IRIF
+/* IRIF interface stuff */
+
+#	define prntf	printf
+#	define sprntf	sprintf
+#	define fprntf	fprintf
+
+#       include "irifsizes.h"
+#endif /* IRIF */
+
+# define ALIGN300    0
+# define ALIGN500    1
+# define ALIGN800    2
+# define ALIGNCOMMON 3
+# define ALIGNNOPAD  4
+
+#ifndef IRIF
+
+# define  ARGINIT 64
+# define  AUTOINIT 0
+
+# define  SZCHAR 8
+# define  SZSCHAR SZCHAR
+# define  SZINT 32
+# define  SZFLOAT 32
+# define  SZDOUBLE 64
+
+# define  SZLONGDOUBLE 128
+
+# define  SZLONG 32
+# define  SZSHORT 16
+# define  SZPOINT 32
+# define  SZWIDE  SZINT
+
+/*	masks used in determining types of integer constants */
+
+#define MSKINT      0x7fffffff
+
+# define NUMALIGNS   5
+
+# define AL500CHAR       8
+# define AL500SHORT      16
+# define AL500INT        32
+# define AL500LONG       AL500INT
+# define AL500POINT      AL500INT
+# define AL500FLOAT      AL500INT
+# define AL500DOUBLE     AL500INT
+# define AL500LONGDOUBLE AL500INT
+# define AL500STRUCT     16
+
+# define AL800CHAR       8
+# define AL800SHORT      16
+# define AL800INT        32
+# define AL800LONG       AL800INT
+# define AL800POINT      AL800INT
+# define AL800FLOAT      AL800INT
+# define AL800DOUBLE     64
+# define AL800LONGDOUBLE 64
+# define AL800STRUCT     8
+
+# define ALCOMMONCHAR       8
+# define ALCOMMONSHORT      16
+# define ALCOMMONINT        32
+# define ALCOMMONLONG       ALCOMMONINT
+# define ALCOMMONPOINT      ALCOMMONINT
+# define ALCOMMONFLOAT      ALCOMMONINT
+# define ALCOMMONDOUBLE     64
+# define ALCOMMONLONGDOUBLE 64
+# define ALCOMMONSTRUCT     16
+
+# define ALSTACK 32
+# define ALCHAR 8
+# define ALSCHAR ALCHAR
+# define ALINT 16
+# define ALFLOAT 16
+# define ALDOUBLE ALFLOAT
+# define ALLONGDOUBLE ALFLOAT
+# define ALLONG ALINT
+# define ALSHORT 16
+# define ALPOINT 16
+# define ALSTRUCT ALINT
+
+#else /* IRIF */
+
+#         define  SZCHAR        SZ_IR_BYTE * SZ_IR_CHAR 
+#         define  SZSCHAR       SZCHAR
+#         define  SZINT         SZ_IR_BYTE * SZ_IR_INT
+#         define  SZFLOAT       SZ_IR_BYTE * SZ_IR_FLOAT
+#         define  SZDOUBLE      SZ_IR_BYTE * SZ_IR_DOUBLE
+#	  define  SZLONGDOUBLE  SZ_IR_BYTE * SZ_IR_LDOUBLE
+#         define  SZLONG        SZ_IR_BYTE * SZ_IR_LONG
+#         define  SZSHORT       SZ_IR_BYTE * SZ_IR_SHORT
+#         define  SZPOINT       SZ_IR_BYTE * SZ_IR_PTR 
+#         define  SZWIDE        SZINT
+
+#endif /* IRIF */
+
+/*	size in which constants are converted */
+/*	should be long if feasable */
+
+# define CONSZ long
+# define CONFMT "%d"
+# define CONFMT2 "0x%x"
+
+/*	size in which offsets are kept
+/*	should be large enough to cover address space in bits
+*/
+
+# define OFFSZ long
+
+/* 	character set macro */
+
+# define  CCTRANS(x) x
+
+/* register cookie for stack poINTer */
+
+# define  STKREG 14
+# define ARGREG 14
+
+/*	maximum and minimum register variables */
+
+# define MAXRVAR 7
+# define MINRVAR 2
+# define MAXARVAR 5
+# 	define MAXRFVAR 7
+# 	define MINRFVAR 2
+# 		define MAXRDVAR 15
+#		define MINRDVAR  3
+
+/* various standard pieces of code are used */
+# define STDPRTREE
+
+/* definition indicates automatics and/or temporaries
+   are on a negative growing stack */
+
+# define BACKAUTO
+# define BACKTEMP
+
+# ifndef FORT
+# 	define EXIT dexit
+#	define LABFMT "L%d"
+# else
+# 	define LABFMT "L%d\n"			/* changed for FORTRAN */
+# endif /* FORT */
+
+# define ENUMSIZE(high,low) INT
+
+# define FTITLESZ 256	/* max length + 1 for cpp directive lines */
+
+# define CENDARG() (autooff = AUTOINIT);
+# define NOINIT()  EXTERN
+
+# ifdef CXREF
+# 	include "cxmacdefs"
+# endif /* CXREF */
+
+/* floating pt range values used only for 32 bit C constant formation in trees.c */
+# define FRANGE1 -3.402823E38
+# define FRANGE2 -1.175495E-38
+# define FRANGE3  1.175495E-38
+# define FRANGE4  3.402823E38

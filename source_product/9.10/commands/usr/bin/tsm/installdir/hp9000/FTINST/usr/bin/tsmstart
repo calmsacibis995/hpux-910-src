@@ -1,0 +1,38 @@
+#!/bin/sh
+# @(#) $Header: tsmstart,v 66.2 90/09/20 12:22:00 kb Exp $
+#############################################################################
+
+# This is the "tsmstart" shell script that is used to start the 
+#     Terminal Session Manager "tsm"
+#
+#     Usage: tsmstart [<optional args>]
+
+# Add "$TSMPATH/bin" or "/usr/tsm/bin" to user's path if not already there.
+
+if [ -z "$TSMPATH" ]
+then
+	case $PATH in
+	*$TSMPATH/bin*)
+		;;
+	*)
+		PATH=$PATH:$TSMPATH/bin
+		;;
+	esac
+else
+	case $PATH in
+	*/usr/tsm/bin*)
+		;;
+	*)
+		PATH=$PATH:/usr/tsm/bin
+		;;
+	esac
+fi
+
+export PATH
+
+if [ "$#" -gt 0 ]
+then
+	exec tsm "$@"
+else
+	exec tsm
+fi

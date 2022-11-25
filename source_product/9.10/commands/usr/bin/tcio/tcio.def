@@ -1,0 +1,40 @@
+/* @(#) $Revision: 63.1 $ */      
+/* GLOBALS */
+ char	*fname;		/* primary file name */
+ int	maxindex;	/* After buffer is allocated this is the size */
+			/* of the memory buffer */
+ int	bufindex;	/* This is the buffer index for any incomplete */
+			/* writes/reads to the terminal */
+ int	start_cart;	/* For use with Merlin: specifies starting cartridge */
+ int	num_cart;	/* and maximum number of cartridges to be used */
+ int	num_cart_orig,
+	start_cart_orig;
+ char   *Tty;           /* Path name of alternate /dev/tty. */
+
+ char	*buf;		/* The character buffer allocated and locked */
+ int	fildes;		/* The file descriptor for the tape */
+
+/* option flags to maintain option settings */
+ int	checkflag;	/* Create check digit */
+ int	verifyflag = 1;	/* CS80 verify */
+ int	bufflag;	/* User specified buffer size */
+ int	releaseflag;	/* Unload tape cartridge */
+ int	markflag;	/* Write tape mark to tape */
+ int	verboseflag;	/* Print wordy messages on stderr */
+ int	Systemflag;	/* Do not write tape mark at beginning of tape */
+ int	eodmarkflag;	/* end of data mark */
+ int	fileskipflag;	/* skip over n files before reading/writing */
+ int	Merlinflag;	/* Output device is the 8-cartridge Merlin */
+ int	Merlinflag_n;	/* Merlin switch MUST be set to selective mode */
+ int    Xflag;		/* to use samprompter instead of opentty */
+ int    Alt_tty = 0;    /* If set, alternate /dev/tty is specified. */
+
+ int	tape_length;	/* in blocks; independent of "Z"!!! */
+ int	start_blk;	/* (with respect to current tape) */
+ int	num_blk; 	/* (with respect to current tape) */
+ int	total_blk;	/* (with respect to previous tapes) */
+#ifdef	DEBUG
+ int	Set_tape_size;	/* Debug tool: User sets tape size */
+#endif	DEBUG
+
+ unsigned  checksum;	/* Check digit */

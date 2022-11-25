@@ -1,0 +1,45 @@
+## FacetTerm  tvi955keys  description file 06/29/88
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: tvi955keys.FC,v 70.1 92/03/09 16:05:40 ssa Exp $
+### KEYS_OVERWRITE_ANYWAY function_key_clear=\E|\040
+### ?? function_key_clear_mode_yes=1
+### ?? function_key_clear_mode_no=0
+### 965 \E | 1 p2 <message> CTRL-Y
+### 965 parm_pkey_key=\E|0%p1%c%s1^\%p2%c%s2^\%p3%c%s3^Y
+### \E | p1 1 <message> CTRL-Y
+pkey_key=\E|%p1%c1%s1^Y
+### NO function_key_string_is_hex
+### NO function_key_includes_label
+function_key-1-=^A@\r
+function_key-2-=^AA\r
+function_key-3-=^AB\r
+function_key-4-=^AC\r
+function_key-5-=^AD\r
+function_key-6-=^AE\r
+function_key-7-=^AF\r
+function_key-8-=^AG\r
+function_key-9-=^AH\r
+function_key-:-=^AI\r
+function_key-;-=^AJ\r
+function_key-<-=^AK\r
+function_key-61-=^AL\r
+function_key->-=^AM\r
+function_key-?-=^AN\r
+function_key-@-=^AO\r
+shift_function_key
+function_key-A-=^A`\r
+function_key-B-=^Aa\r
+function_key-C-=^Ab\r
+function_key-D-=^Ac\r
+function_key-E-=^Ad\r
+function_key-F-=^Ae\r
+function_key-G-=^Af\r
+function_key-H-=^Ag\r
+function_key-I-=^Ah\r
+function_key-J-=^Ai\r
+function_key-K-=^Aj\r
+function_key-L-=^Ak\r
+function_key-M-=^Al\r
+function_key-N-=^Am\r
+function_key-O-=^An\r
+function_key-P-=^Ao\r

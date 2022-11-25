@@ -1,0 +1,273 @@
+/* HPUX_ID       @(#)interface.skel	1.1     88/04/13	*/
+
+/*
+ * Skeleton driver
+ */
+#include <param.h>
+#include <dir.h>
+#include <signal.h>
+#include <systm.h>
+#include <user.h>		/* user structure */
+#include <tty.h>		/* user structure */
+#include <hpibio.h>		/* isc_table_type structure */
+#include <errno.h>	
+#include <proc.h>
+#include <uio.h>
+#include <sysmacros.h>
+#include <intrpt.h>
+
+extern struct isc_table_type *isc_table[];
+
+#define SKEL_ID 2		/* Device ID we will own */
+#define CARD_SIZE 1024		/* # bytes in a block from this card */
+
+    /*
+     * Open the skel device. This routine is called on each open() system
+     *	call invoked by a user process.
+     */
+skel_open(dev, flag)
+    int dev, flag;
+{
+    register struct isc_table_type *isc;
+    register char *card;
+    register int selcode;
+
+    selcode = m_selcode(dev);
+    if ((selcode < 0) || (selcode > 31))		/* bad minor number */
+	    return(ENXIO);
+
+    if ((isc = isc_table[selcode]) == NULL)	/* no device at selcode */
+	    return(ENXIO);
+
+	/*
+	 * Build the card's address, use it to initialize the card's registers
+	 */
+    card = (char *)(isc->card_ptr);
+    /*
+	card->registerX = ....
+     */
+
+    return( 0 );
+ }
+
+    /*
+     * Close the device. This routine is called on the last close of
+     *	the device.
+     */
+skel_close(dev)
+    int dev;
+{
+    register struct isc_table_type *isc;
+    char *card;
+
+    isc = isc_table[m_selcode(dev)];
+    card = (char *)(isc->card_ptr);
+
+	/*
+	 * Nobody's using the card, so disable its interrupts
+	 */
+    /*
+	card->registerX = ....
+     */
+
+    return(0);
+}
+
+    /*
+     * System read call. A user's read request comes through here.
+     */
+skel_read(dev, uio)
+    dev_t dev;
+    struct uio *uio;
+{
+    register struct isc_table_type *isc;
+    char *card;
+    char buf[CARD_SIZE];
+
+    isc = isc_table[m_selcode(dev)];
+    card = (char *)(isc->card_ptr);
+
+	/*
+	 * Tell the card to start an I/O operation
+	 */
+    /*
+	card->registerX = ....
+     */
+
+	/*
+	 * Sleep until the card has returned with an interrupt
+	 *	We use the arbitrary memory location "ppoll_f"
+	 *	to coordinate--any unused memory location in the
+	 *	structure will do.
+	 */
+    sleep( isc->ppoll_f, isc->int_lvl );
+
+	/*
+	 * Get the data off the card (or it may have been DMA'ed
+	 *	into "buf" already). Ship it up to the user.
+	 */
+    uiomove(buf,CARD_SIZE,UIO_READ, uio);
+}
+
+    /*
+     * System write call.
+     */
+skel_write(dev, uio)
+    dev_t dev;
+    struct uio *uio;
+{
+    register struct isc_table_type *isc;
+
+    isc = isc_table[m_selcode(dev)];
+
+	/*
+	 * Generate a write request, block until it completes
+	 */
+    /*
+	card->registerX = ....
+     */
+
+	/*
+	 * Sleep until the card has returned with an interrupt
+	 *	We use the arbitrary memory location "ppoll_f"
+	 *	to coordinate--any unused memory location in the
+	 *	structure will do.
+	 */
+    sleep( isc->ppoll_f, isc->int_lvl );
+}
+
+    /*
+     * ioctl system call: execute special control of the unit
+     */
+skel_ioctl(dev, cmd, arg, mode)
+{
+	register struct isc_table_type *isc;
+
+	isc = isc_table[m_selcode(dev)];
+
+	switch( cmd ){
+	case 0:
+	    break;
+	case 1: /* etc... */
+	    break;
+	default:
+	    return( EINVAL );
+	    break;
+	}
+
+	return(0);
+}
+
+    /*
+     * Wait for something, with timeout optional
+     */
+skel_select(dev, rw)
+{
+    register struct isc_table_type *isc;
+
+    isc = isc_table[m_selcode(dev)];
+
+	/*
+	 * Return the number of bytes ready
+	 */
+    return(0);
+}
+
+
+    /*
+     * Interrupt service routine. Called when our card generates
+     *	an interrupt.
+     */
+skel_isr(info)
+    struct interrupt *info;
+{
+    register int parm1 = info->misc;
+    register int parm2 = info->temp;	/* isc index - see isrlink call */
+    register struct isc_table_type *isc = isc_table[parm2];
+    register char *card = (char *)isc->card_ptr;
+    register ushort stat;
+
+	/*
+	 * Read interrupt status
+	 */
+    /*
+	stat = card->status_reg;
+     */
+
+	/*
+	 * Return when there are no more characters
+	 */
+    if (stat & 0x01 == 1)
+	return;
+
+	/*
+	 * If someone's waiting for I/O completion, wake them up
+	 *	If you want to handle data arriving before a request,
+	 *	you'll have to write it yourself.
+	 */
+    if( isc->ppoll_f != NULL )
+	wakeup( isc->ppoll_f );
+}
+
+
+extern int (*make_entry)();		/* Pointer to linked list of drivers */
+int (*skel_saved_make_entry)();		/* Pointer to driver before us */
+
+    /*
+     * skel_make_entry()
+     *	At power-up time, each device is associated with a driver. The driver's
+     *	  powerup routine will either recognize the device & claim it, or else
+     *	  reject it. If the device is rejected, it will be passed on to
+     *	  the other drivers on the system.
+     */
+skel_make_entry(id, isc)
+    int id;
+    struct isc_table_type *isc;
+{
+    register char *card = (char *)isc->card_ptr;
+
+	/*
+	 * If we recognize the ID, then this device belongs with us.
+	 *	Otherwise, we refer it to the next driver in the list.
+	 */
+    if( id != SKEL_ID )
+	return( (* skel_saved_make_entry)(id,isc) );
+
+	/*
+	 * Arrange for interrupts to go to our service routine
+	 * isrlink(isr, level, regvalue, compare-value,
+	 *		parm1, parm2);
+	 */
+    isrlink(skel_isr, isc->int_lvl, (int) isc->card_ptr + 3, 0xc0, 0xc0,
+		0, ((int)isc->card_ptr >> 16) & 0x1f);
+    isc->ppoll_f = 0;
+
+    
+	/*
+	 * Do anything you want to your new card here
+	 */
+    /*
+	card->registerX = ....
+     */
+    
+	/*
+	 * Tell the user his card has been found & accepted
+	 * The isc struct pointer we've been using is not the permanent one.
+	 *	If we return with TRUE, what we fill into this struct will
+	 *	be copied into an allocated permanent struct. If we return
+	 *	FALSE, we will have to calloc() the isc struct ourselves.
+	 */
+    return( io_inform("HP986XX", isc, isc->int_lvl) );
+}
+
+    /*
+     * skel_link()
+     *	This is the very first code called in a driver. All it does is
+     *	  link itself into a list of ALL drivers.
+     */
+skel_link(){
+    skel_saved_make_entry = make_entry;
+    make_entry = skel_make_entry;
+}
+
+

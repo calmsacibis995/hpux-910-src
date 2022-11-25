@@ -1,0 +1,31 @@
+This file outlines the procedures to run the conversion tools. The 
+conversion tools are used for converting the old version of uucp to
+HoneyDanBer uucp.
+
+Refer to the System Administration Manual for more details.
+
+To run the conversion tools, do the following:
+
+1. The following files should be in /usr/lib/uucp/newconfig:
+
+	Make.cvt
+	awkperm
+	awkdevices
+	awksystems
+	Cvt
+  
+   Move these files into /usr/lib/uucp.  
+
+2. Type the following:
+
+	make -f Make.cvt  
+	
+   A set of messages will be printed. The files L.sys, L-devices,t
+   USERFILE,L-dialcodes should be converted to Systems,Devices,Permissions
+   and Dialcodes
+
+3. If you have spool files queued up, use sh to run the script Cvt. The
+   Cvt script will move the C., D. and X. files to the subdirectories.
+ 
+
+ 

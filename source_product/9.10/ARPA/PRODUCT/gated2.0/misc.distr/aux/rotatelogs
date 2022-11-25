@@ -1,0 +1,40 @@
+#!/bin/csh
+#
+#	script to rotate log files of gated.
+#
+set LOGDIR=/gated
+#
+#  go to the right place
+#
+cd $LOGDIR
+#
+#  stop the gated logging
+#
+/bin/kill -USR1 `cat /etc/gated.pid`
+#
+# to be safe, let output queues drain.
+#
+sleep 5
+#
+#  rotate the log files!
+#
+# /bin/cp gated.log.4 gated.log.5
+/bin/cp gated.log.3 gated.log.4
+/bin/cp gated.log.2 gated.log.3
+/bin/cp gated.log.1 gated.log.2
+/bin/cp gated.log.0 gated.log.1
+/bin/cp gated.log   gated.log.0
+#
+#  remove the old log file
+#
+/bin/rm -f gated.log
+#
+#  Start logging again
+#
+/bin/kill -USR1 `cat /etc/gated.pid`
+#
+#  back to where we started
+#
+cd /
+#
+#

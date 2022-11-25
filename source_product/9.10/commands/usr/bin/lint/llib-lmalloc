@@ -1,0 +1,10 @@
+/* HPUX_ID: @(#) $Revision: 66.3 $ */   
+#include "malloc.h"
+/*	Lint Library for Malloc(3x)	*/
+/*	MALLOC(3X)	*/
+/*	malloc, calloc, realloc and free are checked
+/*	by the c library lint file
+*/
+/*LINTLIBRARY*/
+int mallopt (int cmd, int value) { return cmd+value; }
+struct mallinfo mallinfo (void) { struct mallinfo s; return (s); }

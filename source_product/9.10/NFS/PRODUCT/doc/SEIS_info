@@ -1,0 +1,30 @@
+# 
+# A file that describes where all of the files are that are part
+# of SEIS are located.
+
+  SEIS is a system that collects project metrics for the NFS project.
+  It looks at the DTS database to get data.  It can be used to produce
+  graphs on defects.
+
+  There are three machines involved with the information needed by SEIS:
+
+     hpcndm - Contains the DTS databases in /usr/DTS/defectdb/nfscmds and
+	      /usr/DTS/defectdb/nfs300.
+	      Contains the two files that hold the mapping between
+	      the module names that SEIS knows about and the module names
+	      that can be found in the old nfs DTS reports.
+	      Since SEIS can only use a small number of modules, we
+	      decided to fold the large number of specific module
+	      names into several high level module names.
+	      These files are /usr/DTS/SEIS/nfscmds and /usr/DTS/SEIS/nfs300.
+
+     hpcndaw - This is where the SEIS user interface program exists.  It
+	       is executed as /users/seis/seis.  This is how one gets
+	       graphs created.  It is also where one sets up the module
+	       name and location of the code configuration files.
+	       Please see the SEIS user manual for more details.
+
+     hpcndk  - The files that decribe the mapping of SEIS module names 
+	       to code files can be found here.  The file names are
+	       /users/nerfs/mikey/SEIS/cmds/SEIS_Code_Conf and
+	       /source/nerfs/mikey/SEIS/kernel/SEIS_Code_Conf.

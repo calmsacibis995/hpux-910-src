@@ -1,0 +1,183 @@
+
+.H 1 "Topology/Gateway Testing (Steve Booth)"
+
+HP's series 9K NFS code will be certified through 2 gateways
+and a bridge: a SUN workstation, a series 9K workstation, and
+the McBridge (bridge) box from Roseville Networks Division (RND).
+NFS operation through a gateway/bridge will be fully
+certified only after testing fails to find defects in the code.
+
+.DS
+ASSUMPTIONS: YP tests exist in a separate subdirectory under
+               the nfs subdirectory; defects associated with
+               a local (same LAN) YP server have been found
+               and fixed.
+             The 'ypset' command will be available to execute
+               the YP functional tests through a gateway.
+             The 9K gateway code has previously been tested
+               and certified w/out NFS interactions
+ISSUES:      responsibility for testing the following
+               configurations:
+
+ _______            ______            _______ 
+|       |          |      |          |       |
+|  PC   | -------> | Gway | -------> |  9K   |
+|       |          |      |          |       |
+ -------            ------            ------- 
+ _______            ______            _______ 
+|       |          |      |          |       |
+|  9K   | -------> | Gway | -------> |  VAX  |
+|       |          |      |          |       |
+ -------            ------            ------- 
+
+.DE
+
+Gateway/bridge testing will consist of running the quick regression,
+functional, and stress tests between two nodes communicating through
+a gateway/bridge.  The two nodes will not necessarily be on different
+physical LAN cables.
+
+A list of any defects found in HP's competitors' code will be maintained
+and given to marketing at the end of the project.
+
+.H 2  "SUN Gateway Tests"
+
+RESPONSIBLE ENGINEER: Jason Zions
+
+Since the majority of LAN gateways (in the NFS marketplace) are SUN
+workstations, the majority of gateway testing will be with the SUN.
+
+.sp 2
+.H 3 "quick regression"
+.sp 1
+
+Run continuous 12-hour repetitions of the quick regression tests until
+they fail to isolate defects. 
+
+.DS
+ _______            _______            _______ 
+|       |          |       |          |       |
+|  9K   | -------> |  SUN  | -------> |  9K   |
+|       |          |       |          |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    3.0  md
+.DE
+
+.sp 2
+.H 3 "functional and stress tests"
+.sp 1
+
+Run continuous 12-hour repetitions of the functional and stress tests until
+they fail to isolate defects. 
+
+.DS
+ _______            _______            _______ 
+|       | -------> |       | -------> |       |
+|  9K   |          |  SUN  |          |  9K   |
+|       | <------- |       | <------- |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    4.0  md
+.DE
+
+.H 2  "9K Gateway Tests"
+
+.DS
+RESPONSIBLE ENGINEER: Steve Booth
+ASSUMPTIONS:  SUN gateway testing already in progress; most
+                gateway-related defects already isolated and
+                fixed
+              9K gateway code already tested w/out NFS
+.DE
+
+The intent is to isolate NFS defects, NOT 9K gateway defects.
+
+.sp 2
+.H 3 "functional and stress tests"
+.sp 1
+
+Run the functional and stress tests overnight
+until all defects (found by the testing) are resolved.
+
+.DS
+ _______            _______            _______ 
+|       |          |       |          |       |
+|  9K   | -------> |  9K   | -------> |  SUN  |
+|       |          |       |          |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    1.0  md
+
+.DE
+.sp
+.DS
+ _______            _______            _______ 
+|       |          |       |          |       |
+|  SUN  | -------> |  9K   | -------> |  9K   |
+|       |          |       |          |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    1.0  md
+.DE
+.sp
+.DS
+ _______            _______            _______ 
+|       | -------> |       | -------> |       |
+|  9K   |          |  9K   |          |  9K   |
+|       | <------- |       | <------- |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    2.0  md
+.DE
+
+.H 2  "McBridge Tests"
+
+.DS
+RESPONSIBLE ENGINEER: Steve Booth
+DEPENDENCIES: McBridge box available by mid-April
+ASSUMPTIONS:  SUN and 9K  gateway testing already in progress;
+              most gateway-related defects already isolated
+                and fixed
+              McBridge box already tested and working
+.DE
+
+It is anticipated that NFS testing via McBridge will be done
+in late April.
+
+.sp 2
+.H 3 "functional and stress tests"
+.sp 1
+
+Run the functional and stress tests overnight
+until all defects (found by the testing) are resolved.
+
+.DS
+ _______            _______            _______ 
+|       |          |       |          |       |
+|  9K   | -------> |  McB  | -------> |  9K   |
+|       |          |       |          |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    1.0  md
+.DE
+.sp
+.DS
+ _______            _______            _______ 
+|       |          |       |          |       |
+|  SUN  | -------> |  McB  | -------> |  9K   |
+|       |          |       |          |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    1.0  md
+.DE
+.sp
+.DS
+ _______            _______            _______ 
+|       | -------> |       | -------> |       |
+|  9K   |          |  McB  |          |  9K   |
+|       | <------- |       | <------- |       |
+ -------            -------            ------- 
+
+PERFORM TIME:    2.0  md
+.DE

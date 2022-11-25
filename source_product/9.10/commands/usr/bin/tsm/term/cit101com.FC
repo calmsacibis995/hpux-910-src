@@ -1,0 +1,178 @@
+## FacetTerm  cit101com  COMMON  description file 05/18/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: cit101com.FC,v 70.1 92/03/09 15:57:16 ssa Exp $
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+cursor_on=\E[v
+cursor_on=\E[0v
+cursor_off=\E[1v
+### parm_mode_val-CURSORON-00000000=?25
+### NO cursor_type=
+### NO cursor_type_turns_cursor_on
+## underline_cursor=\E[2v block_cursor=\E[3v (default)
+mode-00000000-00000100=\E[3v
+mode-00000100-00000000=\E[2v
+## steady_cursor=\E[4v block_cursor=\E[5v (default)
+mode-00000000-00000200=\E[4v
+mode-00000200-00000000=\E[5v
+## cursor_combinations
+mode-00000100-00000200=\E[2;4v
+mode-00000300-00000000=\E[2;5v
+mode-00000000-00000300=\E[3;4v
+mode-00000200-00000100=\E[3;5v
+### erase_window=\E[>3;top;left;bottom;rightJ
+## not_imp-erase_window=\E[>3;%p1%d;%p2%d;%p3%d;%p4%dJ
+### erase_window_line=\E[>3;left;rightK
+## not_imp-erase_window_line=\E[>3;%p1%d;%p2%dK
+## not_imp-resume_blinking=\E[w
+## not_imp-resume_blinking=\E[0w
+## not_imp-stop_blink_visible=\E[1w
+## not_imp-stop_blink_invisible=\E[2w
+## not_imp-select_alternate_attribute_set_for_line=\E#<
+## not_imp-select_normal_attribute_set_for_line=\E#=
+pass-smooth_scroll=\E[%p1%du
+pass-set_tabs_every_8=\E[>5g
+pass-set_identify_type_vt102=\E[>p
+pass-set_identify_type_vt102=\E[>0p
+pass-set_identify_type_vt100=\E[>1p
+pass-set_identify_type_vt101=\E[>2p
+pass-double_speed_smooth_scroll=\E[>1h
+pass-normal_speed_smooth_scroll=\E[>1l
+not_imp-hex_keypad_numeric_mode=\E[>3h
+pass-normal_keypad_numeric_mode=\E[>3l
+pass-clear_display_on_form_feed=\E[>4h
+pass-line_feed_on_form_feed=\E[>4l
+pass-disable_incoming_xoff_mode=\E[>6h
+not_imp-enable_incoming_xoff_mode=\E[>6l
+not_imp-screen_width_change_erase_mode=\E[>9h
+pass-screen_width_change_no_erase_mode=\E[>9l
+pass-...right_half_of_double_width_line_erase_mode=\E[>10h
+not_imp-right_half_of_double_width_line_preserve_mode=\E[>10l
+not_imp-erase_page_erases_scroll_region_mode=\E[>11h
+pass-...erase_page_erases_entire_display_mode=\E[>11l
+not_imp-destructive_tab_mode....=\E[>12h
+pass-...non_destructive_tab_mode=\E[>12l
+pass-...crt_saver_mode...=\E[>13h
+pass-...crt_no_saver_mode=\E[>13l
+not_imp-half_duplex_mode=\E[>14h
+pass-...full_duplex_mode=\E[>14l
+pass-request_terminal_status=\E[5n
+pass-request_terminal_parameters_plus_unsolicited=\E[x
+pass-request_terminal_parameters_plus_unsolicited=\E[0x
+pass-request_terminal_parameters=\E[1x
+pass-keyboard_data_to_comm=\E[0z
+## not_imp-keyboard_data_to_aux=\E[1z
+## not_imp-aux_port_to_comm=\E[2z
+## not_imp-aux_port_to_display=\E[3z
+## not_imp-cease_input_from_aux=\E[4z
+## not_imp-clear_aux_output_buffer=\E[5z
+## not_imp-enter_auto_aux_mode=\E#0
+## not_imp-exit_auto_aux_mode_or_concurrent_aux_mode=\E#1
+pass-output_line_to_aux=\E#2
+pass-output_display_to_aux=\E#7
+## not_imp-enter_concurrent_aux_mode=\E0
+## not_imp-enter_aux_control_mode=\E1
+## not_imp-exit_aux_control_mode=\E2
+pass-one_keyclick=\E#>
+not_imp-reset_terminal=\Ec
+## led_control=\E[%p1%dq
+## mode-00000010-00000000=\E[1q
+## mode-00000020-00000000=\E[2q
+## mode-00000040-00000000=\E[3q
+## mode-00000080-00000000=\E[4q
+## multi_mode-000000F0-00000000=\E[0q
+## multi_mode-000000F0-00000010=\E[0;1q
+## multi_mode-000000F0-00000020=\E[0;2q
+## multi_mode-000000F0-00000030=\E[0;1;2q
+## multi_mode-000000F0-00000040=\E[0;3q
+## multi_mode-000000F0-00000050=\E[0;1;3q
+## multi_mode-000000F0-00000060=\E[0;2;3q
+## multi_mode-000000F0-00000070=\E[0;1;2;3q
+## multi_mode-000000F0-00000080=\E[0;4q
+## multi_mode-000000F0-00000090=\E[0;1;4q
+## multi_mode-000000F0-000000A0=\E[0;2;4q
+## multi_mode-000000F0-000000B0=\E[0;1;2;4q
+## multi_mode-000000F0-000000C0=\E[0;3;4q
+## multi_mode-000000F0-000000D0=\E[0;1;3;4q
+## multi_mode-000000F0-000000E0=\E[0;2;3;4q
+## multi_mode-000000F0-000000F0=\E[0;1;2;3;4q
+## ----------------------------------------------------------------------
+##				host_message_attribute
+### NOTE p1 terminal status 0=normal 1=reverse 2=invisible
+### NOTE p2 host status 0=normal 1=reverse 2=invisible
+perwindow-9-CLSQ---=\E[>%p1%d;%p2%dV
+perwindow_default-..=\E[>0;0V
+set-host_message_attr_reverse=\E[>0;1V
+##				host_message
+perwindow-83-CLSQ---=\E[V%78s1\E\\
+perwindow_default-....=\E[V\E\\
+set-host_message=\E[V%78s1\E\\
+## -------------- start of order_group 'S' ------------------------------
+##				label_line_attribute
+##				norm=\E[>W norm=\E[>0W rev=\E[>1W invis=\E[>2W
+perwindow-5-CSQ---S=\E[>%p1%cW
+perwindow_also-....=\E[>W
+perwindow_default-.=\E[>W
+set-label_line_attr_reverse..=\E[>1W
+set-label_line_attr_invisible=\E[>2W
+##				label_line - clears labels 'a'
+perwindow-105-CSQ-a--S=\E[2W%99s1\E\\
+perwindow_default-...=\E[2W\E\\
+set-label_line=\E[2W%99s1\E\\
+##				label_line_label 1 thru 16
+##				cleared by label line
+perwindow-20-C--a-S=\E[0;0;0W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;1W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;2W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;3W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;4W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;5W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;6W%10s1\E\\
+perwindow-20-C--a-S=\E[0;0;7W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;0W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;2W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;3W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;4W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;5W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;6W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;7W%10s1\E\\
+## perwindow-20-C--a-S=\E[0;1;8W%10s1\E\\
+## set-label_1=\E[0;0;0W%10s1\E\\
+## set-label_2=\E[0;0;1W%10s1\E\\
+## set-label_3=\E[0;0;2W%10s1\E\\
+## set-label_4=\E[0;0;3W%10s1\E\\
+## set-label_5=\E[0;0;4W%10s1\E\\
+## set-label_6=\E[0;0;5W%10s1\E\\
+## set-label_7=\E[0;0;6W%10s1\E\\
+## set-label_8=\E[0;0;7W%10s1\E\\
+##				shift label line 
+##				clears shift lab 'b'
+perwindow-105-CSQ-b--S=\E[3W%99s1\E\\
+perwindow_default-....=\E[3W\E\\
+set-shift_label_line=\E[3W%99s1\E\\
+##				label_line_label shift 1 thru 16 
+##				cleared by shift_label_line
+perwindow-20-C--b-S=\E[1;0;0W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;1W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;2W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;3W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;4W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;5W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;6W%10s1\E\\
+perwindow-20-C--b-S=\E[1;0;7W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;0W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;2W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;3W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;4W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;5W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;6W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;7W%10s1\E\\
+## perwindow-20-C--b-S=\E[1;1;8W%10s1\E\\
+## set-shift_label_1=\E[1;0;0W%10s1\E\\
+## set-shift_label_2=\E[1;0;1W%10s1\E\\
+## set-shift_label_3=\E[1;0;2W%10s1\E\\
+## set-shift_label_4=\E[1;0;3W%10s1\E\\
+## set-shift_label_5=\E[1;0;4W%10s1\E\\
+## set-shift_label_6=\E[1;0;5W%10s1\E\\
+## set-shift_label_7=\E[1;0;6W%10s1\E\\
+## set-shift_label_8=\E[1;0;7W%10s1\E\\
+## -------------- end of order_group 'S' ------------------------------

@@ -1,0 +1,90 @@
+/* file macdefs */
+/* @(#) $Revision: 70.1 $ */
+/* KLEENIX_ID @(#)macdefs	16.1 90/11/05 */
+/* file macdefs */
+/*SCCS	macdefs	REV(20.1);	DATE(10/21/91	08:18:55) */
+/* KLEENIX_ID @(#)macdefs	20.1 90/12/21 */
+
+# define  SZINT 32
+# define ALSTACK 32
+
+/*	size in which constants are converted */
+/*	should be long if feasable */
+
+# define CONSZ long
+# define CONFMT "%d"
+# define CONFMT2 "0x%x"
+
+/*	size in which offsets are kept
+/*	should be large enough to cover address space in bits
+*/
+
+# define OFFSZ long
+
+# define FTITLESZ 256	/* max length + 1 for cpp directive lines */
+
+
+/*	68000 Registers */
+
+	/* registers */
+# define D0 0
+# define D1 1
+# define D2 2
+# define D3 3
+# define D4 4
+# define D5 5
+# define D6 6
+# define D7 7
+# define A0 8
+# define A1 9
+# define A2 10
+# define A3 11
+# define A4 12
+# define A5 13
+# define A6 14
+# define SP 15
+# define F0 16
+# define F1 17
+# define F2 18
+# define F3 19
+# define F4 20
+# define F5 21
+# define F6 22
+# define F7 23
+# define FP0 24
+# define FP1 25
+# define FP2 26
+# define FP3 27
+# define FP4 28
+# define FP5 29
+# define FP6 30
+# define FP7 31
+# define FP8 32
+# define FP9 33
+# define FP10 34
+# define FP11 35
+# define FP12 36
+# define FP13 37
+# define FP14 38
+# define FP15 39
+
+# define REGSZ 40
+
+# define TMPREG A6
+
+# define SWAP(p,q) {sp=p; p=q; q=sp;}
+# define SWAPX(a,b,c) {a->in.left=c; a->in.right=b;}
+# define RCON(p) (p->in.right->in.op==ICON)
+# define RO(p) p->in.right->in.op
+# define RV(p) p->in.right->tn.lval
+# define LCON(p) (p->in.left->in.op==ICON)
+# define LO(p) p->in.left->in.op
+# define LV(p) p->in.left->tn.lval
+# define BITMASK(n) ((1L<<n)-1)
+# define TNEXT(p) (p== &node[maxnodesz-1]?node:p+1)
+
+#	define nncon(p)	((p)->in.op == ICON && (p)->tn.name == NULL)
+
+#define NOTOFF(t,r,off,cp) (r<A0 || r>SP || cp!=0)
+
+# define COST_BREAKEVEN 2

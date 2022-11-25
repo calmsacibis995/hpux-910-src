@@ -1,0 +1,377 @@
+#! /bin/ksh -p
+#@(#) $Revision: 1.6.62.8 $
+########################################################################
+#                                                                      #
+# hp9000s300 KERN-BLD customize.                                       #
+#                                                                      #
+########################################################################
+########################### augment_dfile ##############################
+#								       #
+# augment_dfile() -- adjust configuration parameters in the 'dfile'    #
+#                    after an update.	                               #
+#								       #
+########################################################################
+augment_dfile()
+{
+
+    egrep -q '^nbuf[         ]|^bufpages[         ]' "$NEW_DFILE"
+    if [ $? -eq 0 ]; then	# found one or more matches
+        sed -e '/^nbuf[ 	]/s/^nbuf/*nbuf/
+           /^bufpages[ 	]/s/^bufpages/*bufpages/' "$NEW_DFILE" > "$PREV_DFILE"
+        cp "$PREV_DFILE" "$NEW_DFILE"
+        cat <<EOF
+NOTE:    The kernel configuration parameters "nbuf" and "bufpages"  have
+         been turned off in /etc/conf/dfile.  This release supports a 
+	 dynamic buffer cache which should eliminate the need for these
+	 kernel configuration parameters.  
+EOF
+    fi
+    egrep -q '^strace' "$NEW_DFILE"
+    if [ $? -ne 0 ]; then	# didnt find strace, add it
+        awk 'BEGIN {flag = 1} 
+          {if (flag && ($1 ~ "^[a-z]")) 
+	        { printf("strace\n%s\n", $0); flag = 0}
+          else 
+	        print $0}' "$NEW_DFILE" > "$PREV_DFILE"
+        mv "$PREV_DFILE" "$NEW_DFILE"
+    fi
+} 			# end of augment_dfile
+########################################################################
+#                                                                      #
+# Function rebuild_dfile                                               #
+#                                                                      #
+########################################################################
+rebuild_dfile()
+{
+/usr/bin/awk '
+
+# VALID_KERNEL_DRIVERS	: string of valid dfile entries for the 
+#                         kernel deliverables, separated by spaces. 
+#			  THIS LIST MUST BE MAINTAINED EACH RELEASE
+#			  as valid names may be added to /etc/master
+#
+# NEW_NAME_MAP		: string of pairs of kernel driver name
+#			  in the format "old1|new1 old2|new2 ...".
+#                         THIS LIST MUST BE MAINTAINED EACH RELEASE,
+#                         as names might be changed in the new 
+#			  /etc/master
+#
+# Note: The strings above are put together using awk string concatenation
+#       so on each lines the SPACE BEFORE THE QUOTE IS NECESSARY!
+#
+
+#
+# Initialization
+#
+BEGIN {
+	# CURRENT AS OF B.08.30.O
+	VALID_KERNEL_DRIVERS="98265 98624 98625 98626 98628 98642 " \
+                             "98658 ac amigo apci autoch autox cdfs " \
+                             "ciper cs80 dos dskless eisa flex gpio " \
+                             "hpib ica meas_sys parallel plot.old " \
+                             "printer ptymas ptyslv ramdisc rdu scsi " \
+                             "scsitape srm stape strace tape vme vme2 vmetest "
+
+	# CURRENT AS OF B.08.30.O
+	NEW_NAME_MAP="ac|autoch "
+
+	# 
+	# Build associative array of valid kernel driver dfile entries
+	# called "valid_drivers". This will be used to determine if a 
+	# string is a valid kernel driver.
+	#
+	size = split(VALID_KERNEL_DRIVERS, temp, " ")
+	for (i = 1; i <= size; i++)
+		valid_kernel_drivers[temp[i]]="VALID"
+	
+	#
+	# Build associative array of kernel driver names that need
+	# to be "updated" called "new_name_map". This will be used
+	# to determine if a driver name has been changed, as well
+	# as what the new name is.
+	# (e.g.,  new_name_map[old_name] == new_name)
+	#
+	stringsize = split(NEW_NAME_MAP, stringtemp, " ")
+	for (i = 1; i <= stringsize; i++) {
+		split(stringtemp[i], name_pair, "|")	
+		new_name_map[name_pair[1]] = name_pair[2]
+	}
+}
+
+FILENAME==master {
+	#
+	# Build an associative array "alias_map" that maps alias
+	# names to the real driver name as defined by the master file.
+	# (e.g., alias_map[7914] == cs80)
+	#
+	if (NF == 2 && substr($1,1,1) != "*") {
+		alias_map[$1]=$2
+	}
+}
+
+FILENAME==dfile {
+	#
+	# Scan input (a dfile) for valid kernel driver names. 
+	# Parse the input knowing that:
+	#
+	#       1) a driver entry is one word per line
+	#       2) anything starting with "*" is a comment
+	#
+	# An entry is a valid kernel driver name if:
+	#
+	#       1) the entry is a valid_kernel_drivers
+	#    or 2) the entry is an alias for an name in valid_kernel_drivers
+	#
+	# A valid kernel driver name may have been changed for the
+	# new release, and must be mapped into the "new" name. Aliases
+	# are treated special, as they might actually be aliased to
+	# an old name (according the the master file) which would
+	# be an error. If that is the case, we silently map the alias 
+	# to the NEW REAL name.
+	#
+	if (NF == 1 && substr($1,1,1) != "*") {
+		if (valid_kernel_drivers[$1] == "VALID") {
+			if (new_name_map[$1] != "") {
+				print new_name_map[$1]
+			}
+			else {
+				print $1
+			}
+		} 
+		else if (valid_kernel_drivers[alias_map[$1]] == "VALID") {
+			if (new_name_map[alias_map[$1]] != "") {
+				print new_name_map[alias_map[$1]]
+			}
+			else {
+				print $1
+			}
+		}
+	}
+}' master=${MASTER} dfile=${PREV_DFILE} ${MASTER} ${PREV_DFILE} | \
+
+#
+# Now take the list of drivers and add to the new dfile ($NEW_DFILE)
+#
+while read DRIVER_NAME
+do
+	${TOOL}/mod_dfile $NEW_DFILE add $DRIVER_NAME
+	if [ $? -eq 2 ]
+	then
+		echo "ERROR:   mod_dfile $NEW_DFILE add $DRIVER_NAME"
+		echo "         $DRIVER_NAME not added to $NEW_DFILE when"
+		echo "         it should be there!"
+	fi
+done
+
+} # rebuild_dfile
+
+
+EXIT_STATUS=0			# default exit status.
+VERBOSE=""			# set to non-null string for debugging.
+myname=`basename ${0}`
+
+########################################################################
+#                                                                      #
+# Check mixed clustered case.  Files that could be CDFs are defined    #
+# below and all references to CDFs use the variables.  Note that we    #
+# assume that if one CDF exists, then all relevant files are CDFs.     #
+#                                                                      #
+########################################################################
+
+if [ -H /bin ]
+then
+	CONF=/etc/conf+/HP-MC68020
+	FILESETS=/etc/filesets+/HP-MC68020
+	MASTER=/etc/master+/HP-MC68020
+	NEWCONFIG=/etc/newconfig+/HP-MC68020
+	OldMaster=/etc/master+/\#HP-MC68020
+	SYSTEM=/system+/HP-MC68020
+else
+	CONF=/etc/conf
+	FILESETS=/etc/filesets
+	MASTER=/etc/master
+	NEWCONFIG=/etc/newconfig
+	OldMaster=/etc/\#master
+	SYSTEM=/system
+fi
+TOOL=/system/TOOL
+
+
+########################################################################
+#                                                                      #
+# 300 updating 300 bits.                                               #
+#                                                                      #
+########################################################################
+
+if hp9000s300
+then
+	if [ -f "${MASTER}" ]
+	then
+		if [ -n "${VERBOSE}" ]
+		then
+			echo "NOTE:    Moving ${MASTER} to ${OldMaster}."
+		fi
+
+		mv -f ${MASTER} ${OldMaster}
+	fi
+
+	if [ -n "${VERBOSE}" ]
+	then
+		echo "NOTE:    Copying ${NEWCONFIG}/master to ${MASTER}."
+	fi
+
+	cp ${NEWCONFIG}/master ${MASTER}
+fi
+
+########################################################################
+#                                                                      #
+# 800 updating 300 bits.                                               #
+#                                                                      #
+########################################################################
+
+if hp9000s800
+then
+	if [ -f "${MASTER}" ]
+	then
+		if [ -n "${VERBOSE}" ]
+		then
+			echo "NOTE:    Moving ${MASTER} to ${OldMaster}."
+		fi
+
+		mv -f ${MASTER} ${OldMaster}
+	fi
+
+	if [ -n "${VERBOSE}" ]
+	then
+		echo "NOTE:    Copying ${NEWCONFIG}/master to ${MASTER}."
+	fi
+
+	cp ${NEWCONFIG}/master ${MASTER}
+fi
+
+########################################################################
+#                                                                      #
+# Remove files that should no longer be around.                        #
+#                                                                      #
+########################################################################
+
+if [ -n "${VERBOSE}" ]
+then
+	if [ -d "${SYSTEM}/KERN_BLD" -o -f "${FILESETS}/KERN_BLD" ]
+	then
+		echo "NOTE:    Removing ${SYSTEM}/KERN_BLD and ${FILESETS}/KERN_BLD."
+	fi
+fi
+
+rm -rf ${SYSTEM}/KERN_BLD ${FILESETS}/KERN_BLD
+
+for file in \
+	dm.h \
+	nsp.h \
+	protocol.h \
+	rmswap.h
+do
+	if [ -n "${VERBOSE}" ]
+	then
+		if [ -f "${CONF}/h/${file}" ]
+		then
+			echo "NOTE:    Removing ${CONF}/h/${file}."
+		fi
+	fi
+
+	rm -f ${CONF}/h/${file}
+done
+
+########################################################################
+#                                                                      #
+# Rebuild a new dfile from the update-extracted dfile                  #
+# rebuild_dfile looks for kernel drivers in the extracted dfile,       #
+# transmogrifies those entries appropriately for 8.0, then appends     #
+# them to the new dfile.                                               #
+#                                                                      #
+########################################################################
+if [ ! -f /etc/clusterconf ]
+then
+    PREV_DFILE=${CONF}/dfile.kern
+    NEW_DFILE=${CONF}/dfile
+    if [ -n "${VERBOSE}" ]
+    then
+    	echo "NOTE:    Re-building dfile"
+    	echo "         Previous dfile is ${PREV_DFILE}"
+    	echo "         New dfile is ${NEW_DFILE}"
+    fi
+    if [ -f "$PREV_DFILE" ]
+    then
+	rebuild_dfile
+	rm -f $PREV_DFILE
+    fi
+    if [ -f "$NEW_DFILE" ]
+    then
+        augment_dfile 
+    fi
+else
+    # First, take care of server's dfile if updating S300
+    if hp9000s300
+    then
+	PREV_DFILE=${CONF}/dfile.kern
+	NEW_DFILE=${CONF}/dfile
+	if [ -f "$PREV_DFILE" ]
+	then
+	    rebuild_dfile
+	    rm -f $PREV_DFILE
+	fi
+	if [ -f "$NEW_DFILE" ]
+	then
+	    augment_dfile
+	fi
+    fi
+    # Then the cnodes.
+    cnodelist=`/bin/sed -n 's/^[^#:]*:[^:]*:\([^:]*\):c:[^:]*:[^:]*$/\1/p' \
+    	 < /etc/clusterconf`
+
+    for cnodename in $cnodelist
+    do
+        # If there is no kernel by this name, then clusterconf is screwy.
+        if [ ! -f "/hp-ux+/$cnodename" ]
+        then
+    	    continue
+        fi
+
+        # Bypass non-S300 cnodes as identified by kernel magic number.
+        archtype=`${TOOL}/kern_util -t /hp-ux+/$cnodename`
+        if [ "${archtype}" != "HP-MC68020" ]
+        then
+	    continue
+        fi
+
+        PREV_DFILE=${CONF}/dfile+/${cnodename}.kern
+        NEW_DFILE=${CONF}/dfile+/${cnodename}
+	if [ -n "${VERBOSE}" ]
+        then
+    	    echo "NOTE:    Re-building dfile for ${cnodename}"
+	    echo "         Previous dfile is ${PREV_DFILE}"
+	    echo "         New dfile is ${NEW_DFILE}"
+        fi
+	if [ -f "$PREV_DFILE" ]
+	then
+	    rebuild_dfile
+	    rm -f $PREV_DFILE
+	fi
+	if [ -f "$NEW_DFILE" ]
+	then
+	    augment_dfile
+	fi
+    done
+fi
+
+# Create the trace device file
+mknod /dev/trace c 87 0 > /dev/null 2>&1
+
+########################################################################
+#                                                                      #
+# Fin.                                                                 #
+#                                                                      #
+########################################################################
+
+exit ${EXIT_STATUS}
+

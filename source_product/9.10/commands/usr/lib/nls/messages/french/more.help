@@ -1,0 +1,24 @@
+
+La plupart des commandes peuvent ¡tre pr≈c≈d≈es par un nombre entier k. Valeurs
+par d≈fauts entre []. (*) indique que l'argument devient la valeur par d≈faut.
+-------------------------------------------------------------------------------
+<espace>                Afficher k lignes suivantes [taille de l'≈cran]
+z                       Afficher k lignes suivantes [taille de l'≈cran]
+<Entr≈e>                Afficher k lignes de texte suivantes [1]*
+d ou ctrl-D             D≈filement de k lignes [valeur initiale 11]*
+q ou Q ou <ctrl-D>      Sortir de more
+s                       Avancer de k lignes de texte [1]
+f                       Avancer de k ≈crans de texte [1]
+'                       Aller l» oÀ la recherche pr≈c≈dente a commenc≈
+=                       Afficher le num≈ro de la ligne en cours
+/<expression standard>  Chercher occurrence ki…me de l'express standard(RE) [1]
+n                     Chercher occurrence ki…me de derni…re r.e (exprstand) [1]
+!<cmd> ou :!<cmd>       Ex≈cuter la commande <cmd> dans un sous-shell
+v                       Lancer /usr/bin/vi » la ligne en cours
+h                       Afficher ce message
+ctrl-L                  R≈g≈n≈rer l'≈cran
+:n                      Passer au fichier kth suivant [1]
+:p                      Passer au fichier kth pr≈c≈dent [1]
+:f                      Afficher nom du fichier en cours et num≈ro de la ligne
+.                       R≈p≈ter la commande pr≈c≈dente
+-------------------------------------------------------------------------------

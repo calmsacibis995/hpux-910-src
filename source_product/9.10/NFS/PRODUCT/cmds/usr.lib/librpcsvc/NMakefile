@@ -1,0 +1,99 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.lib/librpcsvc sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+OCFLAGS	= -O $(NMCFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS	= -g -DDEBUG 
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+CSOURCE	= mountxdr.c rstatxdr.c rusersxdr.c rwallxdr.c rex_xdr.c sm_inter.c sprayxdr.c util.c yppaswdxdr.c version.c rquotaxdr.c
+
+OBJECTS = mountxdr.o rstatxdr.o rusersxdr.o rwallxdr.o rex_xdr.o sm_inter.o sprayxdr.o util.o yppaswdxdr.o version.o rquotaxdr.o
+
+SDIR = $(SRCDIR:/^$/./)
+
+all:		build
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) librpcsvc.a \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/librpcsvc.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+build:		$(TARGET)
+
+install:;	$(INSTALL) $(TARGET)
+
+rinstall:	install ; $(RINSTALL) $(TARGET)
+
+librpcsvc.a:	$(OBJECTS)
+	ar r $(TARGET) $(OBJECTS)
+	$(CHMOD) 664 $(TARGET)
+
+mountxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/mountxdr.c 
+
+rstatxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rstatxdr.c
+
+rusersxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rusersxdr.c 
+
+rwallxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rwallxdr.c 
+
+rex_xdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rex_xdr.c 
+
+sm_inter.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sm_inter.c 
+
+sprayxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sprayxdr.c 
+
+util.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/util.c 
+
+yppaswdxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/yppaswdxdr.c 
+
+rquotaxdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rquotaxdr.c 
+
+version.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/version.c
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $(OBJECTS)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(TARGET) make?a*
+
+debug:		build
+
+

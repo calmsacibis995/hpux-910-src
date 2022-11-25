@@ -1,0 +1,196 @@
+#!/bin/sh
+# /* @(#) $Revision: 70.2 $ */       
+#Note: These options must be preceded by "BSD" in the option argument.
+#   ie.  use "-oBSDh" to suppress banner page.
+
+# lp interface for remote spooling.
+
+# Options Recognized:
+#
+#	-C class       Take  the  following  argument   as   a   job
+#	               classification for use on the banner page.
+#
+#	-J job         Take the following argument as the  job  name
+#	               to  print  on the banner page.  Normally, the
+#	               first file's name is used.
+#
+#	-T title       Use the next argument as the  title  used  by
+#	               pr(UTIL)  instead  of  the  file name.  -T is
+#	               ignored unless the -p option is specified.
+#
+#	-i[numcols]    Cause the output to be indented.  If the next
+#	               argument is numeric, it is used as the number
+#	               of blanks to be  printed  before  each  line;
+#	               otherwise, 8 characters are printed.
+#
+#	-kfont         Specify a font to be mounted on font position
+#	               k, where k is from 1 to 4.
+#
+#	-wnum          Take the immediately following number  to  be
+#	               the page width for pr(UTIL).
+#
+#	The following single letter options are used to  notify  the
+#	line  printer  spooler  that the files are not standard text
+#	files.  The spooling system uses the appropriate filters (if
+#	the  option  is  supported)  to  print the data accordingly.
+#	These options are mutually exclusive.
+#
+#	-c             The  files  are  assumed  to   contain   data
+#	               produced by cifplot.
+#
+#	-d             The files are assumed to  contain  data  from
+#	               tex (DVI format).
+#
+#	-f             Use  a  filter  that  interprets  the   first
+#	               character  of each line as a standard FORTRAN
+#	               carriage control character.
+#
+#	-g             The files are  assumed  to  contain  standard
+#	               plot data as produced by the plot routines.
+#
+#	-l             Use a filter that suppresses page breaks.
+#
+#	-n             The files are assumed to  contain  data  from
+#	               ditroff (device independent troff).
+#
+#	-p             Use pr(UTIL) to format the files.
+#
+#	-t             The files are assumed to  contain  data  from
+#	               troff (cat phototypesetter commands).
+#
+#	-v             The files are assumed  to  contain  a  raster
+#	               image for devices such as the Benson Varian.
+#
+#	-k	       The files are assumed to contain data from
+#		       Kerberized LPR clients and servers.
+#
+#	-o	       The files are assumed to contain Postscript data
+#
+#	-z	       The files are assumed to contain data from
+#		       the Palladium print system.
+#
+#	Other single letter options:
+#
+#	-h             Suppress the printing of the banner page.
+
+
+#
+# Test for the filter program
+
+printer=`basename $0`
+
+if [ ! -x /usr/lib/rlp ]
+then
+	disable -r"can't execute /usr/lib/rlp filter" $printer
+	exit 1
+fi
+
+requestid=$1
+
+# Determine which options have been involked.
+
+BSDC=""
+BSDJ=""
+BSDT=""
+BSDi=""
+BSD1=""
+BSD2=""
+BSD3=""
+BSD4=""
+BSDw=""
+BSDformat=""
+BSDh=""
+
+for i in $5
+do
+
+# remove the BSD from the option.
+
+eval ii='`echo $i | sed -e "s/\BSD//g"`'
+	case "$i" in
+		BSDC*)	# Specify the job classification.
+			BSDC=-$ii
+			;;
+		BSDJ*)	# Specify the job name.
+			BSDJ=-$ii
+			;;
+		BSDT*)	# Specify the title for pr(UTIL) to use.
+			BSDT=-$ii
+			;;
+		BSDi*)	# Cause the output to be indented.
+			BSDi=-$ii
+			;;
+		BSD1*)	# Specify a font for font position 1.
+			BSD1=-$ii
+			;;
+		BSD2*)	# Specify a font for font position 2.
+			BSD2=-$ii
+			;;
+		BSD3*)	# Specify a font for font position 3.
+			BSD3=-$ii
+			;;
+		BSD4*)	# Specify a font for font position 4.
+			BSD4=-$ii
+			;;
+		BSDw*)	# The page width for pr(UTIL).
+			BSDw=-$ii
+			;;
+		BSDc)	# Files contain data produced by cifplot.
+			BSDformat=-$ii
+			;;
+		BSDd)	# Files contain data from tex (DVI format).
+			BSDformat=-$ii
+			;;
+		BSDf)	# Files contain FORTRAN carriage control.
+			BSDformat=-$ii
+			;;
+		BSDg)	# Files contain plot data from plot routines.
+			BSDformat=-$ii
+			;;
+		BSDl)	# Files assume no page breaks.
+			BSDformat=-$ii
+			;;
+		BSDn)	# Files contain data from ditroff.
+			BSDformat=-$ii
+			;;
+		BSDp)	# Use pr(UTIL) to format the files.
+			BSDformat=-$ii
+			;;
+		BSDt)	# Files contain data from troff.
+			BSDformat=-$ii
+			;;
+		BSDv)	# Files contain a raster image.
+			BSDformat=-$ii
+			;;
+		BSDk)	# Files contain Kerberized data.
+			BSDformat=-$ii
+			;;
+		BSDo)	# Files contain Postscript data.
+			BSDformat=-$ii
+			;;
+		BSDz)	# Files contain Palladium print system data.
+			BSDformat=-$ii
+			;;
+		nb)	# Suppress the printing of the banner page.
+			BSDh="-h"
+			;;
+		BSDh)	# Suppress the printing of the banner page.
+			BSDh=-$ii
+			;;
+	esac
+done
+
+shift; shift; shift; shift; shift
+
+	/usr/lib/rlp -I$requestid $BSDC $BSDJ $BSDT $BSDi $BSD1 $BSD2 $BSD3 $BSD4 $BSDw $BSDformat $BSDh $1
+ret=$?
+case $ret in
+0)
+	exit 0
+	;;
+*)
+	reason="error $ret returned"
+	;;
+esac
+disable -r"$reason" $printer
+exit 1

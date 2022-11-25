@@ -1,0 +1,381 @@
+.H 1 "Security (Dan Simula)"
+
+This section of the system test plan addresses security testing 
+of the NFS product.  Obviously, NFS can be no more secure than
+the Un*x system that underlies it. This test plan attempts to insure 
+that no additional security holes are introduced.  There are a number of
+security problems that are inherent in Sun's initial design of NFS.  In
+these cases, the problems will be addressed on a case-by-case basis since
+complete fixes may not be possible.
+
+Four general areas of the NFS product will be exercised in an attempt 
+to isolate possible security holes.  These areas are
+.sp 1
+.nf
+	1) File access permissions,
+
+	2) UID and GID restrictions,
+
+	3) Yellow Pages and related system files, and
+
+	4) PCNFS.
+.fi
+.sp 1
+The security tests will be managed and maintained in the NFS test
+scaffold and will rely on the scaffold environment for their execution
+environment.  Whenever possible, tests will be leveraged from the 
+functional test suite.
+.sp 1
+NOTE:  Due to schedule constraints, the effort planned for writing this
+section of the system test plan and for writing/executing security tests
+has been limited.
+.sp 2
+.H 2  "File and directory access permissions"
+.sp 1
+A critical portion of system security is file access permissions.  
+The tests described in this section exercise read, write, and execute 
+capabilities of directories and regular files.  
+These tests will attempt to manipulate remote files and directories,
+and will be executed with root and normal user UIDs.  
+Each test in this section
+is designed to fail in a predicted manner.  Essentially, if a test 
+succeeds, it has successfully breached the system's intended security.
+.sp 1
+.nf
+
+        RESPONSIBLE ENGINEER: Dan Simula
+
+        DEPENDENCIES:
+		The security test suite is intended to be run on a
+		remote file system (i.e., "cd"'d to a remotely mounted
+		file system).
+
+		NFS does not allow root capabilities to be exported to
+		remote file systems.  For this reason all root tests,
+		which attempt remote file and directory access, fail.
+
+        ISSUES:
+.sp 2
+.H 3 "Remote file reads by owner (non-root)"
+.sp 1
+Attempt to read a file that does not have owner read permissions.  Test
+is run by owner or is executed set UID owner.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.fi
+.sp 2
+.H 3 "Remote file reads by group member (non-root)"
+.sp 1
+Attempt to read a file that does not have group read permissions. Test
+is run by member of group or is executed set GID group.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+	TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 3 "Remote file reads by other (non-root)"
+.sp 1
+Attempt to read a file that does not have other read permissions. The test
+is executed by a user who does not have owner or group access to the file.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 3 "Remote file writes by owner (non-root)"
+.sp 1
+Attempt to write to a file that does not have owner write permissions. Test
+is executed by the owner or is executed set UID owner.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.sp 2
+.H 3 "Remote file writes by group member (non-root)"
+.sp 1
+Attempt to write to a file that does not have group write permissions. The
+test is executed by a member of group or is executed set GUID group.
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.sp 2
+.H 3 "Remote file writes by other (non-root)"
+.sp 1
+Attempt to write to a file that does not have other write permissions. The
+test is executed by a user who does not have owner or group access to the
+file.
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.sp 2
+.H 3 "Remote directory access by owner (non-root)"
+.sp 1
+Attempt to "cd" to a directory that does not have owner execute permissions.  
+Test is run by owner or is executed set UID owner.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EACCESS is generated.
+.fi
+.sp 2
+.H 3 "Remote directory access by group member (non-root)"
+.sp 1
+Attempt to "cd" to a directory that does not have group execute permissions. 
+Test is run by member of group or is executed set GID group.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EACCESS is generated
+.fi
+.sp 2
+.H 3 "Remote directory access by other (non-root)"
+.sp 1
+Attempt to "cd" to a directory that does not have other execute permissions. 
+The test is executed by a user who does not have owner or group access to 
+the directory.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EACCESS is generated
+.fi
+.sp 2
+.H 3 "Remote file reads by owner (root)"
+.sp 1
+Attempt to read to a file that does not have owner read permissions.  The
+file is owned by root and the test is executed by root.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.sp 2
+.H 3 "Remote file reads by group member (root)"
+.sp 1
+Attempt to read to a file that does not have group read permissions. The
+test is executed by root where root is a member of group.
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.sp 2
+.H 3 "Remote file reads by other (root)"
+.sp 1
+Attempt to read to a file that does not have other read permissions. The file
+is owned by a non-root user and root must not be in the group. The test
+is executed by root.
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.sp 2
+.H 3 "Remote file writes by owner (root)"
+.sp 1
+Attempt to write a file that does not have owner write permissions.  The
+file is owned by root and test is run by root.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.fi
+.sp 2
+.H 3 "Remote file writes by group member (root)"
+.sp 1
+Attempt to write a file that does not have group write permissions. The test
+is run by root where root is a group member.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 3 "Remote file writes by other (root)"
+.sp 1
+Attempt to write a file that does not have other write permissions. The test
+is executed by root and root must not be the owner or a group member.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 3 "Remote directory access by owner (root)"
+.sp 1
+Attempt to "cd" to a directory that does not have owner execute permissions.  
+The directory is owned by root and the test is run by root.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated.
+.fi
+.sp 2
+.H 3 "Remote directory access by group member (non-root)"
+.sp 1
+Attempt to "cd" to a directory that does not have group execute permissions. 
+The test is run by root where root is a member of group.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 3 "Remote directory access by other (non-root)"
+.sp 1
+Attempt to "cd" to a directory that does not have other execute permissions. 
+The test is executed by root where root is neither the owner of the directory
+nor a member of the group.
+.sp 1
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: test passes if EPERM is generated
+.fi
+.sp 2
+.H 2  "UID and GID restrictions"
+.sp 1
+This portion of the security test plan deals with UID and/or 
+GID restrictions.
+.sp 1
+Each test in this section
+is designed to fail in a predicted manner.  Essentially, if a test 
+succeeds, it has successfully breached the system's intended security.
+.sp 1
+.nf
+
+        RESPONSIBLE ENGINEER: Dan Simula
+        DEPENDENCIES:
+        ISSUES:
+.sp 2
+.H 3 "Remote file access as disguised user"
+.sp 1
+As root, change your local UID to that of a known remote user and attempt
+to access (i.e., read, write, create, remove) the remote user's files.
+.sp1 
+.nf
+	IMPLEMENT TIME:  0.2  md 
+	PERFORM TIME:    0.2  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT:  
+		The test will output a failure message if the remote 
+		access succeeds.  
+
+	 NOTE:  
+		This test will always fail.  Identical behavior is 
+		inherent to Sun's NFS system.
+.fi
+.sp 2
+.H 3 "UID manipulation via RPC"
+.sp 1
+Using the user-level RPC library routines,  create an RPC request that
+contains a false UID and attempts to access a remote file system.
+.nf
+	IMPLEMENT TIME:  0.5  md  (not implemented)
+	PERFORM TIME:    0.5  md
+        TYPE OF TEST: functional
+        EXPECTED OUTPUT: This should work.  It is a security hole.
+.fi
+.sp 2
+.H 2  "YP Services and related system files"
+.sp 1
+The YP services provide centralized administration for one or more
+systems in a network environment.  The YP services manage the data
+bases that are composed of a number of security-critical system files
+(e.g., /etc/passwd, /etc/hosts, etc).  The ability to break the security
+of the YP services or the YP databases constitutes a breach in system
+security.
+.sp 1
+Each test in this section
+is designed to fail in a predicted manner.  Essentially, if a test 
+succeeds, it has successfully breached the system's intended security.
+.sp 1
+.nf
+        RESPONSIBLE ENGINEER: Dan Simula
+        DEPENDENCIES:
+        ISSUES:
+.sp 2
+.H 3 "Yellow Pages Security"
+.sp 1
+Examine Yellow Pages security.  This area is not being addressed due
+to scheduling constraints.  Of note is that YP, as designed, provides
+NO SECURITY, and indeed has no security objectives.
+.nf
+	IMPLEMENT TIME:  5.0  md 
+	PERFORM TIME:    4.0  md
+        TYPE OF TEST: security
+        EXPECTED OUTPUT:
+.fi
+.sp 2
+.H 2  "PCNFS"
+.sp 1
+NOTE:  THIS SECTION CONTAINS HIGHLY SENSITIVE SECURITY INFORMATION.
+.sp 1
+Sun's PC-NFS product runs on MS-DOS systems and allows remote file
+access capabilities to UN*X systems (client only).  The pcnfsd(1m)
+daemon provides user authentication to MS-DOS users who want to
+access owned files on UN*X file systems.  This section will 
+concentrate on identifying areas that represent security risks 
+for the server system (i.e., an HP-UX/NFS server system).
+.sp 1
+Each test in this section
+is designed to fail in a predicted manner.  Essentially, if a test 
+succeeds, it has successfully breached the system's intended security.
+.sp 1
+.nf
+        RESPONSIBLE ENGINEER: Dan Simula
+
+        DEPENDENCIES:
+		Since the HP-Vectra does not support the NFS 
+		test scaffold, these tests will be run manually 
+		or will be included in a PC test scaffold. 
+
+        ISSUES:
+		A blatant security hole exists in Sun's original 
+		design of NFS.  Any MS-DOS system has the capability 
+		to break system security of an NFS server.  
+.sp 2
+.H 3 "Gain unauthorized access to file system(s) on any NFS server"
+.sp 1
+Attempt to bypass the user-authentication function by directly touching
+the UID field in the PC-NFS system.
+.nf
+	IMPLEMENT TIME:  1.0  md 
+	PERFORM TIME:    1.0  md
+        TYPE OF TEST: manual
+        EXPECTED OUTPUT:  Unauthorized access to remote file system.
+.fi
+.sp 2

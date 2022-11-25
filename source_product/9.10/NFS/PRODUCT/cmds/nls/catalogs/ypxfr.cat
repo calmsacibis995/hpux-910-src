@@ -1,0 +1,60 @@
+$set 1
+1 ypxfr:  getdomainname system call failed\n
+2 ypxfr:  NIS domain name not set on this machine\n
+3 ypxfr:  can't get order number for map %s\n        from server at %s:  use the -f flag\n
+4 ypxfr:  transferred map %1$s from %2$s (%3$d entries)\n
+5 %19.19s: 
+6 ypxfr:  can't translate master name %s to an address\n
+7 ypxfr:  bind_to_server clnt_call error
+8 ypxfr:  bind_to_server clntudp_create error
+9 
+10 ypxfr:  can't get order number for map %1$s from ypserv at %2$s\n        reason:  %3$s\n
+11 ypxfr(get_v1order) RPC call to %s failed
+12 ypxfr:  can't get order number for map %1$s from ypserv at %2$s\n        reason:  %3$s\n
+13 ypxfr:  get_v2order RPC call to %s failed
+14 
+15 ypxfr:  can't get master name for map %1$s from ypserv at %2$s\n        reason:  %3$s\n
+16 ypxfr(get_v1master_name) RPC call to %s failed
+17 ypxfr:  can't get master name for map %1$s from ypserv at %2$s\n        reason:  %3$s\n
+18 ypxfr:  get_v2master_name RPC call to %s failed
+19 
+20 ypxfr:  can't get master of %1$s\n        reason:  %2$s\n
+21 ypxfr:  the map pathname, "%1$s...",\n        exceeds %2$d characters\n
+22 ypxfr:  the name of the non-standard map, "%1$s",\n        should not exceed %2$d characters, if this machine is to be an NIS server.\n
+23 ypxfr:  map %1$s at %2$s is not more recent than local\n
+24 ypxfr:  can't create temp map %s\n
+25 ypxfr:  can't dbm init temp map %s\n
+26 ypxfr:  can't dbm close temp map %s\n
+27 ypxfr:  version skew at %1$s while transferring map %2$s\n
+28 ypxfr:  rename error:  couldn't mv %1$s to %2$s\n
+29 ypxfr:  rename error:  check that old %s is still intact\n
+30 ypxfr:  rename error:  check that old %s is still intact\n
+31 ypxfr:  can't mv %1$s to %2$s\n
+32 ypxfr:  can't mv %1$s to %2$s\n
+33 ypxfr:  can't recover from rename failure\n
+35 ypxfr:  stat error on map file %s\n
+36 ypxfr:  error from ypserv on %1$s\n        ypall_callback = %2$s\n
+37 ypxfr:  count mismatch in dbm file %1$s:\n        old=%2$d, new=%3$d\n
+38 ypxfr (mismatch) - TCP channel create failure
+39 ypxfr (get_map/all) - RPC clnt_call (TCP) failure
+40 ypxfr:  wrong version number!\n
+41 ypxfr:  count mismatch after enumerating %1$s:\n        old=%2$d, new=%3$d\n
+42 ypxfr (get_map) - TCP channel create failure
+43 ypxfr (get_map/all) - RPC clnt_call (TCP) failure
+44 ypxfr (get_map/first) - RPC clnt_call (TCP) failure
+45 ypxfr:  error from ypserv on %1$s\n        get first = %2$s\n
+46 ypxfr:  can't do dbm store into temp map %s\n
+47 ypxfr (get_map/next) - RPC clnt_call (TCP) failure
+48 ypxfr:  error from ypserv on %1$s\n        get next = %2$d\n
+49 ypxfr:  error from ypserv on %1$s\n        ypall_callback = %2$s\n
+50 ypxfr:  duplicate key %1$s in map %2$s\n
+51 ypxfr:  can't do dbm store into temp map %s\n
+52 ypxfr:  key %1$s was not inserted into dbm file %2$s\n
+53 ypxfr:  can't do dbm store into temp map %s\n
+54 ypxfr:  can't do dbm store into temp map %s\n
+55 ypxfr:  gethostname system call failed\n
+56 ypxfr:  can't send ypclear message to ypserv on local machine\n
+57 ypxfr:  hostname exceeds %d characters\n
+58 ypxfr:  NIS domain name exceeds %d characters\n
+59 ypxfr:  mapname exceeds %d characters\n
+60 Usage:  ypxfr [-h host] [-f] [-d domain] [-c] [-C tid prog ipaddr port] mapname\n\nwhere\thost is either a name or an internet address of the form ww.xx.yy.zz\n\t-f forces transfer even if the master's copy is not newer\n\t-c inhibits sending a "Clear map" message to the local ypserv\n\t-C is used by ypserv to pass callback information\n

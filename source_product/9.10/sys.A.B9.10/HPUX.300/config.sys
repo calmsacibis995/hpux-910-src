@@ -1,0 +1,37 @@
+# @(#)config.sys: $Revision: 1.2.84.6 $	$Date: 93/12/15 13:27:36 $
+
+##
+##  HP-UX System Makefile
+##
+
+# .SILENT
+STDDEFS=-D__hp9000s300 -Dhpux -D_HPUX_SOURCE
+IDENT=-D_KERNEL -DPSTAT -DGENESIS -DAUTOCHANGER \
+	-DFSD_KI -D_UNSUPPORTED -D_KERNEL_BUILD
+
+CC = /bin/cc 
+AS = /bin/as
+LD = /bin/ld
+SHELL = /bin/sh
+
+CFLAGS= +M -Wc,-Nd3500,-Ns7000 -Wp,-H250000 -I.
+COPTS= $(STDDEFS) $(IDENT) $(OPTIONS)
+KREQ1_OBJS= exceptions.o locore.o vers.o
+KREQ2_OBJS= name.o funcentry.o cdfs_hooks.o
+LIBUSRDRV=`if [ -f $(ROOT)/libusrdrv.a ]; then echo $(ROOT)/libusrdrv.a; fi`
+
+all:	hp-ux
+
+hp-ux:	$(CONF).o
+	rm -f hp-ux
+	ar x $(ROOT)/libkreq.a $(KREQ1_OBJS) $(KREQ2_OBJS)
+	@echo 'Loading hp-ux...'
+	$(LD) -n -o hp-ux -e _start -x	\
+		$(KREQ1_OBJS) $(CONF).o $(KREQ2_OBJS) $(LIBUSRDRV) $(LIBS)
+	rm -f $(KREQ1_OBJS) $(KREQ2_OBJS)
+	chmod 755 hp-ux
+
+$(CONF).o: $(CONF).c
+	rm -f $(CONF).o
+	@echo 'Compiling $(CONF).c ...'
+	$(CC) -w $(CFLAGS) $(COPTS) -c $(CONF).c

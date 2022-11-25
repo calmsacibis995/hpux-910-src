@@ -1,0 +1,64 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+fileset=SPELL
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#
+# file_size -- return the size of a given file.
+#
+function file_size
+{
+    if [ -f "$1" ]; then
+	set -- `ls -lgn "$1"`
+	echo $4
+    else
+	echo 0
+    fi
+}
+
+#======
+# Make a writable spellhist file if there isn't one already
+#======
+if [ ! -f /usr/lib/spell/spellhist ]; then
+    : > /usr/lib/spell/spellhist
+    chmog 666 bin bin /usr/lib/spell/spellhist
+fi
+
+#======
+# Take care of spell(UTIL) configurable files.
+#======
+#
+#           FROM                        TO
+set -- \
+  $newconfig/hlista        /usr/lib/spell/hlista  \
+  $newconfig/hlistb        /usr/lib/spell/hlistb  \
+  $newconfig/hstop         /usr/lib/spell/hstop
+
+while [ $# -gt 0 ]; do
+    if [ -f $1 ]; then
+	#
+	# If the target file doesn't exist, has 0 size or is
+	# the size of an incompatable (System III) hash file,
+	# then copy the new version into place.
+	#
+	size=`file_size $2`
+	if [ "$size" -eq 0 -o "$size" -eq 50000 ]; then
+	    /bin/rm -f $2
+	    cp_retain $1 $2
+	fi
+    fi
+    shift 2
+done
+
+exit $exitval

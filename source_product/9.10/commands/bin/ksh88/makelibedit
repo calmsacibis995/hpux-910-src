@@ -1,0 +1,37 @@
+: HPUX_ID: @(#) $Revision: 66.1 $ 
+: This is the shell script for building the edit library
+: It only uses features common to early version of the shell
+if	test ! -f include/sh_config.h
+then	: generate the configuration header file
+	echo "Please wait for a little while"
+	install/config > include/sh_config.h
+	install/gen_rdonly 2> /dev/null
+	rm -f *.o
+fi
+
+echo compilation begins
+CC=${CC-cc}
+CCFLAGS=${CCFLAGS--O}
+if	grep SYSCALL include/sh_config.h > /dev/null 2>&1
+then	:
+elif	{ /bin/u3b2 || /bin/u3b5  || /bin/u3b15 ;} 2> /dev/null 
+then	SYSCALL=syscall.o
+else	echo '***Warning*** Requires syscall.o '
+fi
+if	test ! -d libedit
+then	mkdir libedit
+fi
+cd libedit
+for i in edit emacs history vi editlib
+do	if	test ! -f $i.o
+	then	echo + "${CC} -c ${CCFLAGS} -I../include ../sh/$i.c"
+		${CC} -c ${CCFLAGS} -I../include ../sh/$i.c
+	fi
+done
+: assemble syscall.s on some 3bs
+if	test "$SYSCALL"
+then	as -o $SYSCALL ../sh/syscall.s
+fi
+ar rcuv ../libedit.a edit.o emacs.o history.o vi.o editlib.o $SYSCALL
+(ranlib ../libedit.a) > /dev/null 2>&1
+echo libedit.a has been built.

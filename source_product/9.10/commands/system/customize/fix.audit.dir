@@ -1,0 +1,37 @@
+:
+
+if [ -f /system/UX-CORE/audit.dir.fixed ]
+then
+	exit 0
+fi
+
+mv /tcb/files/audit/help /etc/newconfig/tcb/audit
+chlevel syshi /tcb/files/audit
+
+cd /tcb/files/audit
+mkdir help
+chmod 555 help
+chown audit help
+chgrp audit help
+chlevel syshi /etc/newconfig/tcb/audit/help/help.keys
+mv /etc/newconfig/tcb/audit/help/help.keys /tcb/files/audit/help
+chlevel syshi /etc/newconfig/tcb/audit/profile
+mv /etc/newconfig/tcb/audit/profile /tcb/files/audit/.profile
+
+for dir in help/auddir help/audsl help/backup help/coll help/del.red \
+	   help/disable help/enable help/event help/maint help/print \
+	   help/red help/red.parm help/remsess help/restore help/setparm \
+	   help/toplevel help/usrgrp
+do
+	mkdir $dir
+	chmod 555 $dir
+	chown audit $dir
+	chgrp audit $dir
+	chlevel syshi /etc/newconfig/tcb/audit/$dir/*
+	mv /etc/newconfig/tcb/audit/$dir/* /tcb/files/audit/$dir
+done
+
+rm -rf /etc/newconfig/tcb/audit/help
+
+/tcb/bin/mkaud -a
+touch /system/UX-CORE/audit.dir.fixed

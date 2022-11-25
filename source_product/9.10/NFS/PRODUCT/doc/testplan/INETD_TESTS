@@ -1,0 +1,361 @@
+.H 2  "Inetd (Cristina Mahon)"
+
+.PP
+The purpose of this testplan is not to test all the functionality 
+of inetd, but only parts that were affected by the addition of 
+support of RPC based services.  It is implied that the tests 
+previously used to certify inetd will be run again on the new version,
+in addition to the new tests described below.
+.PP
+A line in inetd.conf file for an rpc server entry has the following fields:
+.sp
+.nf
+rpc  
+<socket type>  
+<protocol>  
+<wait/nowait> 
+<user> 
+<server program>
+<program number>
+<version number>
+<server program arguments>
+.fi
+.sp
+.PP
+For the configuration file tests inetd should either be
+reconfigured or killed and started again.  In the interest
+of branch flow coverage both options should be exercised,
+but that might be done outside the functional tests suite.
+On the following tests and examples a "?" stands for a number.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  5.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Have inetd start an rpc server"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf, start inetd and see if server
+correctly invoked:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1 rpcserv 
+.sp
+where rpcserv is a test RPC server and 10000? is the program number for
+that server.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       A service that  communicates with /etc/rpcserv  should be able to
+       start  rpcserv from inetd.  It should not be necessary to write a
+       new rpc service/server for that purpose.  Verify that the program
+       has been  correctly  registered  with  portmap  (program  number,
+       version  number,  correct  port).  Starting  with a  program  not
+       registered  with  portmap  a  rpcinfo  call  should  provide  the
+       information.  By turning  trace on on inetd you can see what port
+       was  assigned to the program in question and match it against the
+       one registered with portmap.
+.fi
+.sp 2
+.H 3 "No executable field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1 
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, field nine"
+.fi
+.sp 2
+.H 3 "No program number field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, missing program number"
+.fi
+.sp 2
+.H 3 "No version number field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000?
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, missing version number"
+.fi
+.sp 2
+.H 3 "Missing low number in range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? -3 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?,missing low number in range"
+.fi
+.sp 2
+.H 3 "Missing high number in range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1- rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?,missing high number in range"
+.fi
+.sp 2
+.H 3 "Inverted version number range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 3-1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, inverted version range"
+.fi
+.sp
+To be added.
+.sp 2
+.H 3 "Correct version range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1-3 rpcserv
+.sp
+for example.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       We should be able to verify  that at least  those three  versions
+       have been registered with portmap.
+.fi
+.sp 2
+.H 3 "Change program number"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100009 1-3 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that portmap has  unregistered  the old program number and
+       correctly registered the new one.
+.fi
+.sp 2
+.H 3 "Change version number (single)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 2 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 1 and
+       that version 2 is correctly registered.
+.fi
+.sp 2
+.H 3 "Change version number (high range)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-2 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 3 and
+       that versions 1 and 2 are still correctly registered.
+.fi
+.sp 2
+.H 3 "Change version number (low range)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 2-3 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 1 and
+       that versions 2 and 3 are still correctly registered.
+.fi
+.sp 2
+.H 3 "Change location of server"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /tmp/rpcserv 100008 1 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that when rpcserv is invoked,  the server in /tmp, and not
+       the one in /etc, is executed.
+.fi
+.sp 2
+.PP
+Because the rpc servers are identified by their executable instead
+of their name (they are all called rpc), if you change the executable 
+name the previous server will still be registered with inetd.  The portmap
+might override the old registration of the program number with the
+new one.????
+.sp 2
+.H 3 "Delete rpc server"
+.sp 1
+.PP
+Remove the entry for an rpc server from /etc/inetd.conf and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  that  program and all its
+       versions.  If the server is invoked it should not respond.
+.fi
+.sp 2
+.H 3 "Create a TCP based rpc server"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+    rpc stream tcp nowait root /etc/rpcserv 100008 1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that inetd correctly  registers such a server with portmap
+       and that it starts it correctly.   If a TCP based rpc server will
+       be created it should be extremely simple, maybe just a stub.
+.fi
+.sp 2
+.H 3 "Create a TCP based rpc server with wait option"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+     rpc stream tcp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that inetd correctly  registers such a server with portmap
+       and that it starts it correctly.   If a TCP based rpc server will
+       be created it should be extremely simple, maybe just a stub.
+       This might not be allowed, expected output still needs to be 
+       checked.????
+.fi
+.sp 2
+.H 3 "Try an rpc server that uses options"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+     rpc stream tcp wait root /etc/rpcserv 100008 1 rpcserv -option
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that when the server is invoked it starts with whatever option 
+       was listed in the configuration file.
+.fi
+.sp 2
+.H 3 "Test the security feature of inetd for rpc servers"
+.sp 1
+.PP
+A line in the security file should be similar to this:
+.sp
+     rpcserv 	deny	hostname
+.sp
+where rpcserv is an rpc server started by inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that such a server is denied access from the host.  If the
+       server is a "wait"  option  server once it is started all further
+       contact  between itself and clients does not go through the inetd
+       (until rpcserv is started  again), so the inetd security file has
+       no affect on that.
+.fi
+.sp 2

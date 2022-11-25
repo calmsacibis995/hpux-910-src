@@ -1,0 +1,47 @@
+:
+# @(#) $Header: tsm.help,v 66.6 90/12/21 11:12:01 kb Exp $
+if [ -z "$TSMPATH" ]
+then
+	TSMPATH=/usr/tsm
+fi
+file=
+if [ -f ./.tsmtext/$LANG/tsmhelptext ]
+then
+	file=./.tsmtext/$LANG/tsmhelptext
+elif [ -f ./.tsmtext/C/tsmhelptext ]
+then
+	file=./.tsmtext/C/tsmhelptext
+elif [ -f ./.tsmtext/tsmhelptext ]
+then
+	file=./.tsmtext/tsmhelptext
+elif [ -f $HOME/.tsmtext/$LANG/tsmhelptext ]
+then
+	file=$HOME/.tsmtext/$LANG/tsmhelptext
+elif [ -f $HOME/.tsmtext/C/tsmhelptext ]
+then
+	file=$HOME/.tsmtext/C/tsmhelptext
+elif [ -f $HOME/.tsmtext/tsmhelptext ]
+then
+	file=$HOME/.tsmtext/tsmhelptext
+elif [ -f $TSMPATH/text/$LANG/tsmhelptext ]
+then
+	file=$TSMPATH/text/$LANG/tsmhelptext
+elif [ -f $TSMPATH/text/C/tsmhelptext ]
+then
+	file=$TSMPATH/text/C/tsmhelptext
+elif [ -f $TSMPATH/text/tsmhelptext ]
+then
+	file=$TSMPATH/text/tsmhelptext
+fi
+if [ -n "$file" ]
+then
+	pg -24 -n -s -p \
+"Press: 'Return' for next page   '-' 'Return' for prev page   'Q' for TSM" \
+		${file}
+else
+	echo "File tsmhelptext not found."
+fi
+tput smso 2>/dev/null
+echo "--> -->  -->  Press 'Return' to resume TSM  <-- <-- <-- \c" 
+tput rmso 2>/dev/null
+read x

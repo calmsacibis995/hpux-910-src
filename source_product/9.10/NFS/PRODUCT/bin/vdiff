@@ -1,0 +1,330 @@
+#! /bin/sh
+
+#  @(#)$Revision: 1.12.109.1 $	$Date: 91/11/19 13:58:32 $
+# This script is being developed to easily tell what the
+# differences are between two versions of the kernel.
+
+# Currently, there is a file produced every night which records the output
+# of the kernel build.   The format of this file is:
+#
+# /source/bin/Get <possible option> filename
+# <revision of filename>
+# /source/bin/Get <options> newfilename
+# <revision of newfilename>
+# etc.
+#
+#  NOTE: we assume that filename always begins with /source/sys,
+#   	if this is not  true a more complicated mechanism will need to
+# 	be developed to handle that.
+# 
+# Our job is to take that information and turn it into something meaningful.
+#
+# First, we move the revision onto the end of the line with the filename,
+# and remove extraneous information on the beginning of the line.  At that
+# point we can then diff the two files to find out what has changed.
+#
+
+# Some temporary files to use:
+
+TMPFILE1=/tmp/vdiff1.$$
+TMPFILE2=/tmp/vdiff2.$$
+TMPFILE3=/tmp/vdiff3.$$
+TMPFILES="$TMPFILE1 $TMPFILE2 $TMPFILE3"
+
+rm -f $TMPFILES
+trap "rm -f $TMPFILES; exit 0" 0 1 2 3 13 15
+
+# Process the arguments.
+# Besides the prs option, the two arguments are expected to be dates in
+# the form MMDD, since that is the key used in the files that we will
+# be looking at.  After checking to see if the first argument is -prs,
+# we cd to the appropriate directory to make it easy to figure out file 
+# names.
+
+USAGE="USAGE: `basename $0` [-prs] [MMDD [MMDD]]"
+BASE="VERS"
+
+PRS=false
+PRSCMD=":"		# Make it an empty command unless asked for
+
+if [ $# -gt 0 -a "$1" = "-prs" ]
+then
+	PRS=true
+	PRSCMD=/source/bin/Prs
+	shift
+fi
+
+# If not on the build system, then go there
+VERSIONDIR=/users/sca/versions
+BUILDSYSTEM=hpcndhf
+CURRENTSYSTEM=`hostname`
+BUILDACCOUNT=sccslook
+HOMEBUILDACCOUNT=/users/$BUILDACCOUNT
+BUILDPASSWORD=cable
+NETDIR=""
+
+if [ "$CURRENTSYSTEM" != "$BUILDSYSTEM" ]
+then
+    if netunam /net/$BUILDSYSTEM $BUILDACCOUNT:$BUILDPASSWORD
+    then
+	    NETDIR="/net/$BUILDSYSTEM"
+    else
+	echo "ERROR: netunam to $BUILDSYSTEM failed!"
+	exit 1
+    fi
+    # MASSIVE HACK.  Because we need a special version of PRS that understands
+    # about the special sccs files used with the kernel, then we need to do the
+    # Prs on the remote system.  Unfortunately, to do this we need to remsh
+    # there, which implies we are in the .rhosts file.  Thus we need to make
+    # sure we are there:
+    if $PRS
+    then
+        cd $NETDIR/$HOMEBUILDACCOUNT
+	if grep -s `whoami` .rhosts >/dev/null
+	then
+	    true	# OK, do nothing
+	else
+    	    echo "`hostname` `whoami`" >>.rhosts
+	fi
+        PRSCMD="remsh $BUILDSYSTEM -l $BUILDACCOUNT $PRSCMD"
+    fi
+fi
+
+cd $NETDIR/$VERSIONDIR
+
+# Figure out file names based on number of arguments:
+# 	zero)	use the two most recent builds.
+#	one)	use the argument compared to the most recent build
+#	two)	compare the two arguments
+#	more)	error
+
+case $# in
+
+	0 )	set -- `ls -t $BASE.*`
+		FILE1=$1
+		FILE2=$2
+		DATE1=`expr "$FILE1" : "$BASE\.\(.*\)"`
+		DATE2=`expr "$FILE2" : "$BASE\.\(.*\)"`
+		;;
+
+	1 )	DATE1=$1
+		FILE1=$BASE.$DATE1
+		set -- `ls -t $BASE.*`
+		FILE2=$1
+		DATE2=`expr "$FILE2" : "$BASE\.\(.*\)"`
+		;;
+
+	2 )	DATE1=$1
+		DATE2=$2
+		FILE1=$BASE.$DATE1
+		FILE2=$BASE.$DATE2
+		;;
+
+	3)	echo "ERROR: too many arguments"   >&2
+		echo "$USAGE" >&2
+		exit 1
+		;;
+
+esac	# end of argument processing
+
+if [ ! -f $FILE1 ]
+then
+	echo "ERROR: `pwd`/$FILE1 DOES NOT EXIST!" >&2
+	echo "$USAGE" >&2
+	exit 1
+fi
+
+if [ ! -f $FILE2 ]
+then
+	echo "ERROR: `pwd`/$FILE2 DOES NOT EXIST!" >&2
+	echo "$USAGE" >&2
+	exit 1
+fi
+
+# IF FILE1 is newer, then swap with file two so that we can assume
+# the revision levels in file1 are lower than file2.
+
+if [ "`find $FILE1 -newer $FILE2 -print`" = "$FILE1" ]
+then
+	HOLD=$DATE1
+	DATE1=$DATE2
+	DATE2=$HOLD
+	HOLD=$FILE1
+	FILE1=$FILE2
+	FILE2=$HOLD
+fi
+
+# For each of the two files we need to create a new file with the
+# version at the end of the line and the Get at the begginging gone.
+# Also Pretty up the output some and sort it
+# What we are trying to get rid of here is filenames of the form
+# /source/sys/sccs/ufs/../sys/./../netinet/file.c and make it 
+# /source/sys/sccs/netinet/file.c 
+
+BEGIN=/source/sys
+
+while read filename
+do
+	if read version
+	then
+		echo "$filename $version"
+	else
+		echo "ERROR: no version for file $filename" >&2
+	fi
+done <$FILE1 |
+sed -e "s,^.*$BEGIN,$BEGIN," -e 's,/[^/]*/\./\.\./,/,' -e 's,/[^/]*/\.\./,/,' |
+sort >$TMPFILE1
+
+while read filename
+do
+	if read version
+	then
+		echo "$filename $version"
+	else
+		echo "ERROR: no version for file $filename" >&2
+	fi
+done <$FILE2 |
+sed -e "s,^.*$BEGIN,$BEGIN," -e 's,/[^/]*/\./\.\./,/,' -e 's,/[^/]*/\.\./,/,' |
+sort >$TMPFILE2
+
+# We now have two sorted files of the form:
+#  filename version
+#
+# So we can step through the files searching for differences
+# We put the Prs output in a different file so that we can
+# Produce a nice table first, and then a list of the prs stuff later.
+#
+# NOTE: This script uses a little known shell feature.  The
+# exec command below, since it is given no arguments, opens file descriptors
+# 3 and 4 associated with our tmp files.  We can read from those file
+# descriptors a line at a time like in a c program.
+
+exec 3<$TMPFILE1 4<$TMPFILE2
+
+# Algorithm:
+#    while there is more date
+#    do
+#	if file names are same
+#	then
+# 		if versions are NOT the same
+#		then
+#			Note the versions are different
+#		fi
+#		get new info from both files, continue
+#	else
+#		if filename1 is first in alphabetical order
+#		then
+#			Note the file disappeared
+#			Get new info from first file
+#		else
+#			Note a file appeared
+#			Get new info from second file
+#		fi
+#	fi
+#    done
+#    if a file is not at end of file, print the rest of the file
+#
+
+echo "$DATE1	$DATE2	FILENAME"
+echo "----	----	--------"
+echo
+
+if $PRS
+then
+	echo '
+**************************************************************
+**** PRS OUTPUT FOR FILES THAT HAVE BEEN CHANGED OR ADDED ****
+**************************************************************
+' >$TMPFILE3
+
+fi
+
+FILLLINE='=============================================================='
+
+# Priming reads for the merge loop
+# NOTE: assume the first reads will work.
+read FILENAME1 VERSION1 <&3
+read FILENAME2 VERSION2 <&4
+
+while true
+do
+
+    if [ "$FILENAME1" = "$FILENAME2" ]
+    then
+	# version has changed
+	if [ "$VERSION1" != "$VERSION2" ]
+	then
+	    echo "$VERSION1	$VERSION2	$FILENAME1"
+	    $PRSCMD -l -r$VERSION1 $FILENAME1 >>$TMPFILE3 2>&1
+	    echo "\\n$FILLLINE\\n" >>$TMPFILE3 2>&1
+	fi
+
+	if read FILENAME1 VERSION1 <&3
+	then
+	    if read FILENAME2 VERSION2 <&4 
+	    then
+		continue
+	    else
+		# EOF on second file, print info just got for file1
+		# NOTE: Don't print PRS info on files no longer used.
+	        echo "$VERSION1	N/A	$FILENAME1"
+		break
+	    fi
+	else
+	    break	# rest of info printed below
+	fi
+
+    else
+
+	if expr $FILENAME1 \< $FILENAME2 >/dev/null	# ignore output
+	then
+	    echo "$VERSION1	N/A	$FILENAME1"
+	    if read FILENAME1 VERSION1 <&3
+	    then
+		continue
+	    else
+	        echo "N/A	$VERSION2	$FILENAME2"
+		$PRSCMD $FILENAME2 >>$TMPFILE3 2>&1
+	        echo "\\n$FILLLINE\\n" >>$TMPFILE3 2>&1
+		break
+	    fi
+	else
+	    echo "N/A	$VERSION2	$FILENAME2"
+	    $PRSCMD $FILENAME2 >>$TMPFILE3 2>&1
+	    echo "\\n$FILLLINE\\n" >>$TMPFILE3 2>&1
+	    if read FILENAME2 VERSION2 <&4
+	    then
+		continue
+	    else
+		echo "$VERSION1	N/A	$FILENAME1"
+		break
+	    fi
+	fi
+
+    fi
+
+done
+
+# Print out the remainder of the files
+while read FILENAME1 VERSION1 <&3
+do
+    echo "$VERSION1	N/A	$FILENAME1"
+done
+
+while read FILENAME2 VERSION2 <&4
+do
+    echo "N/A	$VERSION2	$FILENAME2"
+    $PRSCMD $FILENAME2 >>$TMPFILE3 2>&1
+    echo "\\n$FILLLINE\\n" >>$TMPFILE3 2>&1
+done
+
+# Now print the PRS information by catting the file we stored it in.
+if $PRS
+then
+    cat $TMPFILE3
+fi
+
+# Clean up.
+rm -f $TMPFILES
+
+exit 0

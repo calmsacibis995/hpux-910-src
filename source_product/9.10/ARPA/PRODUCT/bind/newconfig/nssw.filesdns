@@ -1,0 +1,11 @@
+#
+# This file contains a configuration that will cause a host to use /etc/files
+# first then DNS, if /etc/hosts does not contain any answer in its database.
+#
+# To use this configuration, copy this file to /etc/nsswitch.conf.
+#
+# See the Adminstering Internet Services Manual and the switch(4) man
+# page for more information on the name service switch.
+#
+
+hosts: files [NOTFOUND=continue] dns

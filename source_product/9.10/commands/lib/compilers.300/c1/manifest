@@ -1,0 +1,192 @@
+/* file manifest */
+/* @(#) $Revision: 70.1 $ */
+/* KLEENIX_ID @(#)manifest	16.1 90/11/05 */
+
+# include <stdio.h>
+/*	manifest constant file for the lex/yacc interface */
+
+#ifdef DEBUGGING
+#	define LOCAL 
+#else
+#	define LOCAL static
+#endif
+
+# ifndef C1
+#	define C1
+# endif	/* C1 */
+
+/* this include must follow the define of "C1" */
+# include "opcodes.h"
+
+/*	common defined pseudo-types */
+
+typedef union ndu NODE;
+typedef unsigned char flag;
+typedef int *pointr;
+typedef unsigned int TWORD;
+typedef unsigned char uchar;
+typedef struct exttype TTYPE;
+
+# ifndef _SYS_TYPES_INCLUDED
+	typedef unsigned short ushort;
+# endif _SYS_TYPES_INCLUDED
+
+struct exttype
+	{
+	ushort base;
+	ushort mods2:14;	/* second half-word extension (if any) */
+	TWORD mods1;	/* first word extension (if any) */
+	} ;
+
+# define NIL (NODE *)0
+
+/*	node types */
+# define LTYPE 02
+# define UTYPE 04
+# define BITYPE 010
+
+/*	type names, used in symbol table building */
+/*	mkunsigned() in cgram.y depends on this ordering */
+# define UNDEF 0
+# define FARG 1
+# define CHAR 2
+# define SHORT 3
+# define INT 4
+# define LONG 5
+# define FLOAT 6
+# define DOUBLE 7
+# define STRTY 8
+# define UNIONTY 9
+# define ENUMTY 10
+# define MOETY 11
+# define UCHAR 12
+# define USHORT 13
+# define UNSIGNED 14
+# define WIDECHAR UNSIGNED
+# define ULONG 15
+# define VOID 16
+# define FVOID (FTN | VOID)
+# define VOIDPTR (PTR | VOID)
+# define LONGDOUBLE 17
+# define SCHAR 18
+# define LABTY 19
+# define SIGNED 20
+# define CONST 21
+# define VOLATILE 22
+# define TNULL 23 /* flags null or empty symbol table entry */
+
+/* type modifiers */
+
+# define PTR  0100
+# define PTRPTR  0300
+# define FTN  0200
+# define ARY  0300
+
+/* type packing constants */
+
+# define TMASK 0300
+# define WIDETMASK 01700
+# define BTMASK 0x3F
+# define BT2MASK 0xC03F
+# define TSHIFT 2
+# define MODS1MASK	0x8000
+# define MODS2MASK	0x4000
+# define MODS2SHIFT	18
+
+/*	macros	*/
+
+# define BTYPE(t)  ((t).base&BTMASK)   /* basic type of t */
+# define ISUNSIGNED(t) ((t).base<=ULONG && (t).base>=UCHAR)
+# define ISINT(t) (((t).base<=ULONG && (t).base>=UCHAR) || ((t).base<=LONG && (t).base>=CHAR))
+# define ISPTR(t) (((t).base&TMASK)==PTR)
+# define ISPTRPTR(t) (((t).base&WIDETMASK)==PTRPTR)
+# define ISFTN(t)  (((t).base&TMASK)==FTN)  /* is t a function type */
+# define ISARY(t)   (((t).base&TMASK)==ARY)   /* is t an array type */
+# define ISTEMP(np) ( (np)->in.op == OREG && (np)->tn.lval < -baseoff )
+# define ISCONST(np) (np->in.op == ICON && np->tn.name == NULL)
+#	define ISFTP(t)	( ((t).base==DOUBLE)||((t).base==FLOAT)||((t).base==LONGDOUBLE) )
+
+# define TMODS1(x) ((x) & MODS1MASK)		/* On the LONG read in */
+						/* at least 1 extension
+						   word for the type.
+						*/
+# define TMODS2(x) ((x) & MODS2MASK)		/* On the LONG read in */
+						/* additional 14 bits of type
+						   info is present.
+						*/
+# define FMODS2(x) ((x)>>MODS2SHIFT)		/* Convert long into 14 bits */
+
+
+# define DECREF(x) (((x).base&BT2MASK) | (((x).base&~BT2MASK)>>TSHIFT)&~BT2MASK)
+# define SETOFF(x,y)   if( x%y != 0 ) x = ( (x/y + 1) * y)
+	/* SETOFF: an expression of value = first arg rounded up to a 
+	   multiple of the second arg.
+	*/
+
+
+# define INDEXREG(p) ((p)->in.op==REG && (p)->tn.rval>=A0 &&(p)->tn.rval<=SP)
+
+/*	operator information */
+
+# define TYFLG 		016
+# define ASGFLG 	01
+# define LOGFLG 	020
+
+# define SIMPFLG 	040
+# define COMMFLG 	0100
+# define DIVFLG 	0200
+# define FLOFLG 	0400
+# define LTYFLG 	01000		/* bitwise logical ops */
+# define CALLFLG 	02000
+# define INVFLG 	04000
+# define SHFFLG 	010000
+# define ASGOPFLG 	020000
+# define SPFLG 		040000
+# define FHWFLG 	0100000		/* ops supported on flt pt. hardware */
+# define NODELAYFLG	0200000		/* ops that must evaluate "in order" */
+# define HEAVYFLG	0400000		/* ops that cost more than mov.l to mem */
+# define AHEAVYFLG	01000000	/* address heavy ops */
+# define NCOMMONFLG	02000000	/* ops not to be made common for CSE */
+# define NOSEQFLG	04000000	/* ops not candidates for seqtab[] in dag.c */
+
+
+# define optype(o) 	(dope[o]&TYFLG)
+# define asgop(o) 	(dope[o]&ASGFLG)
+# define logop(o) 	(dope[o]&LOGFLG)
+# define callop(o) 	(dope[o]&CALLFLG)
+# define nodelayop(o)	(dope[o]&NODELAYFLG)
+# define heavyop(o)	(dope[o]&HEAVYFLG)
+# define aheavyop(o)	(dope[o]&AHEAVYFLG)
+# define noinvariantop(o)	(dope[o]&INVFLG)
+# define divop(o)	(dope[o]&DIVFLG)
+# define nocommonop(o)	(dope[o]&NCOMMONFLG)
+
+/*	table sizes	*/
+
+# define SYMTSZ 1000 	/* size of the symbol table */
+# define NCHNAM 255  	/* max number of characters in a name */
+# define AVENCHNAM 10	/* max avg length of symbol for full symbol table */
+# define ASCIZSZ AVENCHNAM*SYMTSZ
+# define HASHL 8	/* # chars significant to the hash in lookup */
+# define MAXUSEFULERRS 30 /* more errors than this are just junk */
+# define BBLSZ	300	/* max number of BBLOCKs */
+# define LBLSZ	300	/* max number of LBLOCKs */
+# define REGIONSZ 100	/* max number of regions (i.e. natural loops) */
+#   define TREESZ 1000 	/* space for building parse tree */
+# define EPSZ	3	/* default size of entry point table */
+# define MAXLABVALS 6	/* default # consecutive labels allowed per stmt */
+# define TASCIZSZ AVENCHNAM*TREESZ/* size of treeasciz array */
+# define DAGSZ TREESZ
+# define FICONSZ	10 /* default size of ficonlab table */
+# define DFTSZ		100/* default size of the deftab[] in oglobal.c */
+
+# define COMTABINCR 8	/* size of incremental growth of the comtab[] */
+# define STATICTABINCR 20    /* size of incremental growth of the statictab[] */
+# define IVINC	10	/* size of incremental growth of the ivtab[] */
+
+
+
+# define FALSE 0
+# define NO  FALSE
+# define TRUE 1
+# define YES TRUE

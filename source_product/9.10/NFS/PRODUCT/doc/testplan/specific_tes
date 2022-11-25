@@ -1,0 +1,411 @@
+.H 1 "NFS specific system functions (Mike Shipley)"
+This chapter will cover the testing to be done for the system intrinsics
+that were added for NFS.  They are getdomainname(), setdomainname(),
+getfh(), vfsmount(), nfssvc() and async_daemon().
+
+Most of the testing will done from C programs.  Some of the intrinsics are
+embedded inside NFS daemons and have no general exposure to the user.
+They will have limited explicit testing as described in this chapter.
+We will rely on the execution of the daemons during the normal execution
+of NFS to test their functionality.
+
+
+.H 2  "testing getdomainname() and setdomainname() "
+
+These intrinsics are used by YP.  The tests will determine if they
+properly set and return a string that is to be the domainname.  In
+the YP tests, there will be a test to insure that this string is indeed used
+by the kernel as the name of the domain it thinks it is in on the network.
+Finally there will be tests to confirm that the intrinsics function
+properly under error conditions.
+
+.nf
+RESPONSIBLE ENGINEER: Mike Shipley
+DEPENDENCIES: None
+ISSUES:
+.fi
+
+.sp 2
+.H 3 "Set and compare returned name"
+.sp 1
+Set the domain name to be a string, get the string back and then compare
+the two strings to make sure they are equal.  
+The setting of the name needs to be done as super-user.  
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: 
+    The strings should be equal
+.fi
+
+.sp 2
+.H 3 "Error conditions and Corner cases"
+.sp 1
+For the string parameter, pass a pointer of NULL to getdomainname and   
+setdomainname.
+.sp 1
+Try to set up domain names of length -1, 0, 1, 254, 255 and 256.
+.sp 1
+With a buffer of size n and a domain name of length n-1, request
+getdomainname to return a name and set the "namelen" parameter
+to be n-2.  Then examine the buffer to see if any attempt was made
+to write past byte number n-2.
+.sp 1
+Try to set the domain name with a name of n characters one of which
+is the NULL character.  Get the name back and see if the returned
+value has only the characters preceding the NULL character or if
+all n characters are returned. 
+All of the preceding tests need to be done as super-user.
+.sp 1
+As a non super-user, try to set a domainname.
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: 
+    For NULL pointer, errno should be EFAULT.
+    For names of length -1, 0, 1 and 256, the call should
+      not work and errno probably will be EINVAL.
+    For names of length 1, 254 and 255, the call should
+      execute properly and should be compared to the value
+      returned in getdomainname.
+    For returning a part of a name, only the number of
+      bytes requested should be written into the buffer.
+    When trying to set the domainname from a group of 
+      letters with an embedded NULL, one should probably
+      be returned only the characters preceding the NULL. ????
+    Setting the name as a non super-user will have
+      errno set up EPERM.
+.fi
+
+.H 2  "testing getfh()"
+This call returns a file handle for an open file.  It is only used in
+the mount daemon and has very limited functionality.
+                 
+.nf
+RESPONSIBLE ENGINEER: Mike Shipley
+DEPENDENCIES: None
+ISSUES:
+.fi
+
+.sp 2
+.H 3 "Get a file handle"
+.sp 1
+Open a file and pass
+the file descriptor to getfh().  Open the same file again to get
+a different file descriptor and then pass it to getfh.  The resulting
+two file handles should be compared byte to byte.
+.sp 1
+Pass gethf() a non valid file descriptor.
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    For the valid file descriptor, getfh will return 0
+      and the fhandle_t struct should have a value.
+    For the case of doing two getfh's, the fhandle_t
+      should be the same.
+    For a non valid file descriptor, getfh will return
+      -1 and errno should be EBADF.
+.fi
+
+
+.sp 2
+.H 3 "Get a file handle for a CDF"
+.sp 1
+Create the file of concern as a CDF.  This is done by the following:
+.nf
+
+mkdir      the_file
+chmod u+s  the_file
+
+.fi
+Now basically repeat the previous test.  Don't bother to do the
+non valid file descriptor.
+Open a file and pass
+the file descriptor to getfh().  Open the same file again to get
+a different file descriptor and then pass it to getfh.  The resulting
+two file handles should be compared byte to byte.
+.sp 1
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    For the valid file descriptor, getfh will return 0
+      and the fhandle_t struct should have a value.
+    For the case of doing two getfh's, the fhandle_t
+      should be the same.
+.fi
+
+
+.H 2  "testing vfsmount()"
+Testing vfsmount() requires that many things such as connections
+and file handles be already established before calling vfsmount.
+This is done in the mount command, so taking the command source
+and changing code inside the command source is the way to exercise
+vfsmount() as compared to trying to write a test program from 
+scratch.  This system call is NOT something that an ordinary user
+can just throw into a program.  The only way it will get used is
+through the mount command, so extreme stressing of all parameters
+is of less importance than with other system calls.
+
+.nf
+RESPONSIBLE ENGINEER: Mike Shipley
+DEPENDENCIES: Obtaining the command source from ISO
+ISSUES:
+.fi
+
+.sp 2
+.H 3 "Non superuser access"
+.sp 1
+Try to execute vfsmount without being superuser.  Also create the 
+program from the mount source that will do the testing of vfsmount.
+
+.nf
+IMPLEMENT TIME:  1.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    vfsmount should return -1 and errno should equal EPERM
+.fi
+
+.sp 2
+.H 3 "Bad file handle"
+.sp 1
+Give vfsmount a bad file handle in the nfs_args struct.  This file 
+handle would refer to the remote file system to be mounted.        
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    vfsmount should return -1 and errno should equal ENOENT
+.fi
+
+.sp 2
+.H 3 "Mount a directory twice"
+.sp 1
+Do a remote mount on a directory.  Then try to pass vfsmount that
+same directory to do a mount on.
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: 
+    vfsmount should return -1 and errno should equal EBUSY
+.fi
+
+.sp 2
+.H 3 "Exercising options"
+.sp 1
+The nfs_args structure that is passed to vfsmount contains several
+fields that contains options that vfsmount uses.  These are settable with
+the mount command and SHOULD be tested by ISO.  The object of this test
+is to find out from ISO what options to the mount command
+they are testing and then
+either get them to test any holes that may exist in the option testing
+or to do the tests here.  We really need to make sure that we don't
+duplicate testing that will be done at ISO in the normal command testing.
+
+.nf
+IMPLEMENT TIME:  2.0  md 
+PERFORM TIME:    1.0  md
+TYPE OF TEST: functional
+DEPENDENCIES: Getting information on the tests that ISO will be 
+	      doing on the mount command.
+EXPECTED OUTPUT:
+
+
+
+.sp 2
+.H 3 "Vfsmount and CDF's Part 1"
+.sp 1
+The following tests look at vfsmount() and CDF.  The mount command
+can be used in these tests instead of trying to build a special
+program.
+
+To make a CDF, do the following two steps.  I will treat these two
+steps as a script called mkcdf whenever I want to create a CDF.
+.nf
+
+mkcdf would look like this:
+mkdir      $1
+chmod u+s  $1
+
+.fi
+Create a CDF directory and use it as a mount point.  Then from this
+mount point, create a CDF directory on a remote node and do a mount
+of that CDF directory.
+
+.nf
+mkcdf  /cdfA               (On node A)
+mkdir  /cdfA               (On node A)
+mount  nodeB:/  /cdfA      (On node A)
+cd  /cdfA/tmp
+touch  x y z               (On node A)
+ls  /cdfA/tmp              (On node A)  
+# RESULT  The ls should work properly and return "x y z"
+rm  x y z
+cd
+
+mkcdf  /cdfA/cdfB          (On node A)
+mkdir  /cdfA/cdfB+/default (On node A)
+cd     /cdfA/cdfB          (On node A)
+touch  a b c d e           (On node A)
+cd                         (On node A)
+umount  /cdfA              (On node A)
+mount  nodeB:/cdfB  /cdfA  (On node A)
+ls  /cdfA                  (On node A)
+# RESULT  The ls should work properly and return "a b c d e"
+umount /cdfA               (On node A)
+mount  nodeB:/cdfB+/default  /cdfA   (On node A)
+ls  /cdfA                  (On node A)
+# RESULT  The ls should work properly and return "a b c d e"
+cd /cdfA                   (On node A)
+rm  a b c d e              (On node A)
+cd                         (On node A)
+umount  /cdfA              (On node A)
+mount  nodeB:/  /cdfA      (On node A)
+rm -r /cdfA/cdfB+          (On node A)
+
+mkcdf  /cdfA/cdfB              (On node A)
+cat >/cdfA/cdfB <<zztop        (On node A)
+xyzzy                          (On node A)
+zztop                          (On node A)
+cdf_context=`ls /cdfA/cdfB+`   (On node A)
+# RESULT cdf_context should be the context of the remote node
+# RESULT There is no way to determine what that context will be.
+# RESULT Most likely it will be the hostname of the remote node.
+# RESULT The only certainty is that is will not be the hostname
+# RESULT of the client node as the context is set by the context
+# RESULT of the nfs server process
+umount  /cdfA                  (On node A)
+rm -r /cdfA+                   (On node A)
+
+.fi
+.sp 1
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+See the "# RESULT" lines in the script
+.fi
+
+.sp 2
+.H 3 "Vfsmount and CDF's Part 2"
+.sp 1
+The following tests look at vfsmount() and CDF.  The mount command
+can be used in these tests instead of trying to build a special
+program.  This test will involve diskless nodes and a CDF for a
+mount point.
+
+To make a CDF, do the following two steps.  I will treat these two
+steps as a script called mkcdf whenever I want to create a CDF.
+.nf
+
+mkcdf would look like this:
+mkdir      $1
+chmod u+s  $1
+
+There are 5 nodes involved in this test.  They are as follows:
+   NodeA = root server
+   NodeB = diskless server
+   NodeC = diskless server
+   NodeD = a node outside the server
+   NodeE = a node outside the server
+.fi
+The idea is to create a CDF directory on A that can be used by B and
+C to reach D and E.
+
+.nf
+mkcdf  /mnt_cdf			(On NodeA)
+mkdir  /mnt_cdf+/B		(On NodeA)
+mkdir  /mnt_cdf+/C		(On NodeA)
+mount  NodeD:/tmp  /mnt_cdf	(On NodeB)
+mount  NodeE:/tmp  /mnt_cdf	(On NodeC)
+cd  /mnt/cdf			(On NodeB)
+touch a b c d e			(On NodeB)
+cd  /mnt/cdf			(On NodeC)
+touch x y z    			(On NodeC)
+cd				(On NodeB)
+cd				(On NodeC)
+ls /mnt/cdf			(On NodeB)
+# RESULT  The ls should work and return "a b c d e"
+ls /mnt/cdf			(On NodeC)
+# RESULT  The ls should work and return "x y z"
+cd  /mnt/cdf			(On NodeB)
+rm a b c d e			(On NodeB)
+cd  /mnt/cdf			(On NodeC)
+rm x y z    			(On NodeC)
+umount  /mnt_cdf		(On NodeB)
+umount  /mnt_cdf		(On NodeC)
+rm -r /mnt_cdf+			(On NodeA)
+
+
+.fi
+.sp 1
+
+.nf
+IMPLEMENT TIME:  1.1  md 
+PERFORM TIME:    0.3  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+See the "# RESULT" lines in the script
+.fi
+
+.H 2  "testing nfssvc() and async_daemon()"
+The system calls of nfssvc and async_daemon are only used in nfs server
+daemon process and the bio daemons.  They have very few options and
+therefore there will be little testing outside their normal execution.
+If they are successful in operation, they will not return, so we will
+want to only test failure cases.
+We will monitor the successful operation of these calls by the successful
+functioning of NFS, BFA numbers and performance differences (when
+the /etc/biod is executed).
+
+.nf
+RESPONSIBLE ENGINEER: Mike Shipley
+DEPENDENCIES: None
+ISSUES:
+.fi
+
+.sp 2
+.H 3 "Execution without networking"
+.sp 1
+Try to execute /etc/nfsd and /etc/biod without having the networking
+powered up.
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    Both the nfsd and biod programs should fail to work.
+      Error messages unknown. ????
+.fi
+
+.sp 2
+.H 3  "Bad socket for nfssvc()"
+.sp 1
+Put nfssvc() in a program and pass it an invalid socket number.
+
+.nf
+IMPLEMENT TIME:  0.2  md 
+PERFORM TIME:    0.2  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:
+    The call to nfssvc should return with a value of -1.
+		   The value of errno is unknown, but should be checked
+		   to determine if it seems appropriate.   ????
+.fi

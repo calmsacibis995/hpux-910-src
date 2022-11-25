@@ -1,0 +1,48 @@
+# Sample key file.
+#
+# There are four formats for keys. 
+# S  Standard format is a  64 bit hex format specified in the DES document. The
+#    low order bit of each byte being a parity bit, a la the NBS standard.
+# N  This NTP format is a 64 bit hex format specified in the NTP standard.
+#    It uses the  high order bit of each byte for parity.  
+# A  Ascii format simply encodes a 1-8 character ascii string as a key. 
+#    Note that because of the simple tokenizing routine, the characters ' ', 
+#    '#', '\t', '\n' and  '\0' can't be used in an ascii key. 
+# M  The Key format is a 1-8 character ascii string, using the MD5 
+#    authentication scheme.
+#
+# keyno  type      key
+# -----  ----  -----------
+
+    1     S    0101010101010101        # Standard Format
+    2     S    f1f1f1f1f1f1f1f1
+    3     S    01020407080bf1f1
+    4     S    f8f8f8f8f8f8f8f8
+    5     S    f43bb34fba7601ab
+    6     N    8080808080808080        # NTP Format
+    7     N    f8f8f8f8f8f8f8f8
+    8     N    130D898A1C5BAE32
+    9     N    201AD06E40F8B6FD
+   10     N    924932769EFD49DC
+   11     A    ABCDEFGH                # ASCII Format
+   12     A    Fangs
+   13     A    &^%$@!*(
+   14     A    AB10ab*
+   15     A    password
+   16     M    ranDom77                # MD5 Format
+   17     M    secret
+   18     M    key1
+   19     M    key2
+   20 	  M    foobar
+   21     M    tick
+   22     M    tock
+   23     M    key23
+   24     M    key24
+   25     M    key25
+   26     M    a
+   27     M    few
+   28     M    more
+   29     M    random
+   30     M    md5
+   31     M    keys!
+

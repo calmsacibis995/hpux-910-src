@@ -1,0 +1,555 @@
+* $Source: /source/hpux_source/kernel/sys.SWT68K_300/REG.300/RCS/master.REG,v $
+* $Revision: 1.9.84.14 $	$Author: dkm $
+* $State: Exp $   	$Locker:  $
+* $Date: 94/12/06 11:04:06 $
+*
+* HPUX_ID: @(#)master	52.5     88/09/06 
+*
+* The following devices are those that can be specified in the system
+* description file.  The name specified must agree with the name shown,
+* or with an alias.
+*
+* name		handle		type	mask	block	char
+*
+audio           audio           9       1FD     -1      57
+cs80		cs80		3	7FB	0	4
+scsi		scsi		3	7FB	7	47
+flex            mf              3       1FA     1       6
+amigo           amigo           3       3FB     2       11
+rdu		rdu		B	3C	6	45
+tape		tp		1	FA	-1	5
+printer		lp		1	DA	-1	7
+stape           stp             1       FA      -1      9
+ica		ica		1	F9	-1	40
+scsitape        scsitape        1       FA      -1      54
+srm		srm629		1	1FD	-1	13
+plot.old	pt		1	F2	-1	14
+rje             rje             1       1FA     -1	15
+ptymas		ptym		9	FC	-1	16
+ptyslv		ptys		9	1FD	-1	17
+lla             lla             9       181     -1      18
+lan01           lla             9       081     -1      19
+hpib            hpib            1       1FB      -1      21
+gpio            hpib            1       1FB      -1     22
+ciper		ciper		1	DA	-1	26
+netdiag1        netdiag1        9       FA      -1      46
+snalink		snalink		1	1C0	-1	36
+dos		dos		1	F9	-1	27
+vme		vme		1	1F8	-1	32
+vme2		stealth		1	1C8	-1	44
+dskless		dskless		18	100	-1	-1
+nfs		nfsc		10	100	-1	-1
+uipc		uipc		10	100	-1	-1
+nipc		nipc		10	100	-1	-1
+inet		inet		10	100	-1	-1
+cdfs		cdfs		10	100	-1	-1
+ramdisc         ram             3       1FB     4       20
+strace          strace          1       1ED     -1      87
+vmetest		vtest		1	F8	-1	50
+x25             pdn0            9       FA      -1      53
+x25pa           x25pa           10      100     -1      -1
+x25ip           x25ip           10      100     -1      -1
+pdix25          pdix25          10      100     -1      -1
+autox           autox0          1       E8      -1      33
+autoch          autoch          3      10FB     10      55
+meas_sys	meas_sys	1	0F8	-1	41
+netman		nm		1	EC	-1	60
+ni		ni		9	1FC	-1	56
+eisa		eeprom		1	1F8	-1	64
+etest		etest		1	1F8	-1	51
+*streams
+hpstreams       hpstreams       10      100     -1      -1
+clone           clninfo         21      FC      -1      72
+strlog          loginfo         21      20FC    -1      73
+sad             sadinfo         21      20FC    -1      74
+timod           timodinfo       40      0       -1      -1
+tirdwr          tirdwrinfo      40      0       -1      -1
+lo              loinfo          21      FC      -1      75
+tlo             tloinfo         21      FC      -1      76
+tmx             tmxinfo         21      FC      -1      77
+tidg            tidinfo         21      FC      -1      78
+tivc            tivinfo         21      FC      -1      79
+loop            loopinfo        21      FC      -1     114
+sp              spinfo          21      FC      -1     115
+echo            echoinfo        21      20FC    -1     116
+test_weld       twinfo          21      FC      -1     130
+sc              scinfo          40      2000    -1      -1
+lmodb           lmbinfo         40      0       -1      -1
+lmode           lmeinfo         40      0       -1      -1
+lmodr           lmrinfo         40      0       -1      -1
+lmodt           lmtinfo         40      0       -1      -1
+lmodc           lmcinfo         40      0       -1      -1
+*STREAMS DLPI LAN Driver
+dlpi            dlpiinfo        21      FC      -1      119
+*STREAMS TPISO Pseudo-Driver (TPI-to-sockets)
+*   subsystem
+tpiso           tpiso           10      100     -1      -1
+*   device files
+inet_cots       tpisoinfo       21      20FC    -1      122
+inet_clts       tpisoinfo       21      20FC    -1      126
+unix_cots       tpisoinfo       21      20FC    -1      127
+unix_clts       tpisoinfo       21      20FC    -1      128
+***** SNAplus ***
+sixr            sixrinfo        21      FD      -1      107
+sixt            sixt             1      F9      -1      110
+six1            six1info        21      FD      -1      108
+sixl            sixlinfo        21      FD      -1      109
+sixq            sixqinfo        21      FD      -1      117
+snap_pvc        snap_pvc         9      C8      -1      133
+sixtr           sixtrinfo       21      FD      -1      118
+* OTS subsystems
+otsam           otsam           10      100     -1      -1
+xtisys          xtisys		10	100	-1	-1
+* OTS streams drivers 
+osipi           oopiinfo        21      FC      -1      90
+ositpi          otpiinfo        21      FC      -1      91
+osicltpi        ocltinfo        21      FC      -1      131
+strlan          ltostrinfo      21      FC      -1      93
+strx25          xtostrinfo      21      FC      -1      94
+ositmr          ositmrinfo      21      FC      -1      92
+* OTS streams modules
+fcmod           fcmodinfo       40       0      -1      -1
+xtimod          xtimodinfo      40       0      -1      -1
+*
+* The following cards are those that can be specified in the system
+* description file.  The name specified must agree with the name shown,
+* or with an alias.
+*
+* name	handle	type	mask	block	char
+*
+98624	ti9914	10	100	-1	-1
+parallel	parallel	10	100	-1	-1
+98625   hshpib  10      100     -1      -1
+98626   sio626  10      100     -1      -1
+apci    ap_sio  10      100     -1      -1
+98628   sio628  10      100     -1      -1
+98642   sio642  10      100     -1      -1
+98265   scsi_if 10      100     -1      -1
+98658   scsi_if 10      100     -1      -1
+98659	ody	1	1FC	-1	52
+*
+* The following devices must not be specified in the system description
+* file.  They are here to supply information to the config program.
+*
+* name		handle		type	mask	block	char
+swapdev		swap		E	0	3	-1
+swapdev1	swap1		E	0	5	-1
+console		cons		D	FD	-1	0
+ttyXX		tty		D	FD	-1	1
+tty		sy		D	FD	-1	2
+mem		mm		D	32	-1	3
+dconfig		dconfig		D	E9	-1	69
+swap		swap		D	30	-1	8
+iomap		iomap		D	F9	-1	10
+graphics        graphics        5       1C9     -1      12
+r8042		r8042		D	C8	-1	23
+hil		hil		D	1EC	-1	24
+nimitz		nimitz		D	E4	-1	25
+ite		ite200		1C	100	-1	-1
+$$$
+*
+* The following entries form the alias table.
+* field 1: product #	field 2: driver name
+*
+2200A	cs80
+2203A	cs80
+7962B	cs80
+7907	cs80
+7908	cs80
+790X	cs80
+7911	cs80
+7912	cs80
+7914	cs80
+791X	cs80
+7933	cs80
+7935	cs80
+7936	cs80
+7937	cs80
+793X	cs80
+7941	cs80
+7942	cs80
+7945	cs80
+7946	cs80
+794X	cs80
+7957	cs80
+7958	cs80
+7957B	cs80
+7958B	cs80
+7959B	cs80
+9122	cs80
+9122C	cs80
+9123	cs80
+9125	cs80
+9127	cs80
+9133D	cs80
+9133H	cs80
+9133L	cs80
+9134D	cs80
+9134H	cs80
+9134L	cs80
+913XH	cs80
+913XL	cs80
+9144	cs80
+9145	cs80
+9153	cs80
+9153B	cs80
+9153C	cs80
+9154	cs80
+915X	cs80
+9161	cs80
+9162	cs80
+9163	cs80
+9161B	cs80
+9162B	cs80
+9163B	cs80
+ct	cs80
+simon	hshpib
+MAXTOR_LXT200	scsi
+QUANTUM_PD425S	scsi
+QUANTUM_PD210S	scsi
+MICROP_1588T	scsi
+MICROP_1528	scsi
+RODIME_RO3000T	scsi
+S6300.650A	scsi
+97560	scsi
+97556	scsi
+C2235	scsi
+C2233	scsi
+2212A	scsi
+2213A	scsi
+7957S	scsi
+7958S	scsi
+7959S	scsi
+20GBA   autoch
+ac	autoch
+7906	amigo
+7920	amigo
+7925	amigo
+82901	amigo
+82902	amigo
+9121	amigo
+9133A	amigo
+9133B	amigo
+9133V	amigo
+9133XV	amigo
+9134A	amigo
+9134B	amigo
+9134XV	amigo
+9135	amigo
+9138A	amigo
+913XA	amigo
+913XB	amigo
+9895	amigo
+int	flex
+fd	flex
+7970	tape
+7971	tape
+mt	tape
+7974	stape
+7978	stape
+7979	stape
+7979A	stape
+7980	stape
+7980A	stape
+7980XC	stape
+lp	printer
+2225	printer
+2227	printer
+2228	printer
+2245	printer
+2601	printer
+2603	printer
+2631	printer
+2671A   printer
+2671G   printer
+2673	printer
+2686	printer
+2932	printer
+2933	printer
+2934	printer
+293X	printer
+82905	printer
+82906	printer
+9876	printer
+*
+* Several printers listed below can also be
+* supported on hpib and RS-232
+*
+2563	ciper
+2564	ciper
+2565	ciper
+2566	ciper
+2567    ciper
+2608S	ciper
+98629	srm
+98641	rje 
+98171   lla
+*
+* Plotters can also be supported on RS-232
+*
+plt	hpib
+7440	hpib
+7470	hpib
+7475	hpib
+7510	hpib
+7550	hpib
+7570	hpib
+7580	hpib
+7585	hpib
+7586	hpib
+758X 	hpib
+9111	hpib
+9872	hpib
+1347A	hpib
+37201A  hpib
+98622	gpio
+inthpib	98624
+ti9914  98624
+simon	98625
+98644	98626
+sio626	98626
+sio628	98628
+sio642	98642
+mux     98642
+98577	vme2
+stealth vme2
+ieee802  lla
+ethernet lan01
+$$$
+*
+* The following entries form the tunable parameter table.  Any of these
+* values can be overwritten in the dfile.  However, before changing any
+* value, know the ramifications of your change.
+*
+maxusers	MAXUSERS	8			0
+timezone	TIMEZONE	420			-1440
+dst		DST		1			0
+nproc           NPROC           (20+8*MAXUSERS+(NGCSP))		6
+num_cnodes	NUM_CNODES	((5*SERVER_NODE)+DSKLESS_NODE)	0
+dskless_node	DSKLESS_NODE	0			0
+server_node	SERVER_NODE	0			0
+ninode	NINODE	((NPROC+16+MAXUSERS)+32+(2*NPTY)+SERVER_NODE*18*NUM_CNODES)	14
+nfile           NFILE           (16*(NPROC+16+MAXUSERS)/10+32+(2*NPTY))	14
+file_pad        FILE_PAD        10                      0
+maxfiles	MAXFILES	60			0
+maxfiles_lim	MAXFILES_LIM	1024			0
+dbc_cushion	DBC_CUSHION	512			0
+dbc_min_pct	DBC_MIN_PCT	5			2
+dbc_max_pct	DBC_MAX_PCT	50			2
+nbuf		NBUF		0			0
+bufpages	BUFPAGES	0			0
+fs_async        FS_ASYNC        0                       -1
+create_fastlinks CREATE_FASTLINKS   0                   0
+dos_mem_byte	DOS_MEM_BYTE	0			0
+ncallout	NCALLOUT  (16+NPROC+USING_ARRAY_SIZE+SERVING_ARRAY_SIZE) 6
+unlockable_mem  UNLOCKABLE_MEM  102400			0
+nflocks		NFLOCKS		200			2
+npty            NPTY            82			1
+maxuprc         MAXUPRC         50 			3
+maxdsiz         MAXDSIZ         0x01000000		0x00040000
+maxssiz         MAXSSIZ         0x00200000		0x00040000
+maxtsiz         MAXTSIZ         0x01000000		0x00040000
+parity_option   PARITY_OPTION   2			0
+reboot_option   REBOOT_OPTION   1			0
+timeslice       TIMESLICE       0			-1
+acctsuspend     ACCTSUSPEND     2			-100
+acctresume      ACCTRESUME      4			-100
+ndilbuffers	NDILBUFFERS	30			1
+using_array_size	USING_ARRAY_SIZE   (NPROC)  1
+serving_array_size SERVING_ARRAY_SIZE (SERVER_NODE*NUM_CNODES*MAXUSERS+2*MAXUSERS) 1
+dskless_fsbufs	DSKLESS_FSBUFS	(SERVING_ARRAY_SIZE)    0
+selftest_period	SELFTEST_PERIOD	120	0
+indirect_ptes	INDIRECT_PTES	1			0
+hpux_aes_override AES_OVERRIDE  0                       0
+*
+* The next two parameters, check_alive_period and retry_alive_period, should
+* only be changed carefully.  Diskless node crashes could occur if either 
+* of these parameters is changed improperly!  See the system admin manual
+* for details.
+*
+check_alive_period	CHECK_ALIVE_PERIOD	 4	 4
+retry_alive_period	RETRY_ALIVE_PERIOD	21	21
+maxswapchunks	MAXSWAPCHUNKS	512	1
+minswapchunks	MINSWAPCHUNKS	4	1
+nswapdev        NSWAPDEV        10      1
+nswapfs         NSWAPFS         10      1
+num_lan_cards	NUM_LAN_CARDS	2			0
+netisr_priority	NETISR_PRIORITY	-1			-1
+netmemmax       NETMEMMAX       0                       -1
+ngcsp		NGCSP		(8*NUM_CNODES)		0
+nni		NNI		1			0
+scroll_lines	SCROLL_LINES	100			100
+num_pdn0        NUM_PDN0        -1                      -1
+*
+* Messages, Semaphores, and Shared Memory Constants
+mesg	MESG	1		0
+msgmap  MSGMAP  (MSGTQL+2)	3
+msgmax	MSGMAX	8192		0
+msgmnb	MSGMNB	16384		0
+msgmni	MSGMNI	50		1
+msgssz  MSGSSZ  1		1
+msgtql	MSGTQL	40		1
+msgseg  MSGSEG  16384		1
+sema	SEMA	1		0
+semmap  SEMMAP  (SEMMNI+2)	4
+semmni	SEMMNI	64		2
+semmns	SEMMNS	128		2
+semmnu	SEMMNU	30		1
+semume  SEMUME  10		1
+semvmx	SEMVMX	32767		1
+semaem	SEMAEM	16384		0
+shmem	SHMEM	1		0
+shmmax	SHMMAX  0x00600000	0x00200000
+shmmin 	SHMMIN  1		1
+shmmni  SHMMNI  30		1
+shmseg 	SHMSEG  10		1
+fpa	FPA	1		0
+mc68040	MC68040	1		0
+prb	PRB	1		0
+swapmem_on	SWAPMEM_ON	0		0
+swchunk		SWCHUNK		2048		2048
+ddb_boot	DDBBOOT		0		0
+*
+* Default streams configurable parameter values
+*
+NSTREVENT	NSTREVENT            50         20
+STRMSGSZ	STRMSGSZ             4096       1024
+STRCTLSZ	STRCTLSZ             1024       512
+NSTRPUSH	NSTRPUSH             16         8
+$$$
+*
+* Driver dependency table, if one driver is present, what
+* other drivers should also be in the dfile.
+* NOTE: A maximum of 6 dependency entries my follow the driver name.
+* NOTE: This mechanism does not support chaining.  In other words, if
+*       a driver is included as a dependency, that driver will not be
+*       checked for its dependencies.
+*
+* Driver name   <dependency>  <dependency> .....
+*
+dskless		lla	lan01	rdu	uipc	inet	
+lla		lan01	uipc	inet
+lan01		lla	uipc	inet
+x25ip		x25	pdix25	lan01	lla	uipc	inet
+x25pa		x25	pdix25	lan01	lla	uipc	inet
+nfs		lla	lan01	uipc	inet
+pdix25		x25
+scsi		98265
+scsitape	98265
+autoch		scsi	98265
+$$$
+*
+* The driver/library table.  This table defines which libraries a given
+* driver depends on.  If the driver is included in the dfile, then the
+* libraries that driver depends on will be included on the ld(1) command
+* line.  Only optional libraries *need* to be specified in this table,
+* (but required ones can be included, as well).
+*
+* Driver handle    <libraries>
+*
+* subsystems first
+cdfs		libcdrom.a
+dskless		libdskless.a	libduxreq.a
+inet		libinet.a	libnet.a
+hpstreams       libstream.a
+dlpi		libdlpi.a
+tpiso           libtpiso.a
+sixr            libsixr.a
+sixt            libsixt.a
+six1            libsix1.a
+sixl            libsixl.a
+sixq            libsixq.a
+snap_pvc        libpvc.a
+sixtr           libsixtr.a
+otsam           libotsam.a 
+xtisys          libxtisys.a
+lla		liblan.a
+nfs		libnfs.a
+nipc		libnipc.a	libuipc.a	libinet.a	libnet.a
+uipc		libuipc.a
+ni		libinet.a	libnet.a
+netmem		libinet.a	libnet.a
+x25		libx25.a
+x25ip		libx25ip.a
+x25pa		libx25pa.a
+$$$
+*
+* The library table.  Each element in the library table describes
+* one unique library.  The flag member is a boolean value, it is
+* initialized to 1 if the library should *always* be included on
+* the ld(1) command line, or 0 if the library is optional (i.e. it
+* is only included when one or more drivers require it).  The order
+* of the library table determines the order of the libraries on the
+* ld(1) command line, (i.e. defines an implicit load order).  New
+* libraries must be added to this table.
+*
+* Library   <required>
+*
+libuipc.a	0
+libnipc.a	0
+liblan.a	0
+libinet.a	0
+libns.a		0
+libnet.a	0
+libx25.a	0
+libx25ip.a	0
+libx25pa.a	0
+libcdrom.a	0
+libdskless.a	0
+libnfs.a	0
+libkreq.a	1
+libdreq.a	1
+libpm.a		1
+libvm.a		1
+libduxreq.a	0
+libstream.a 	0
+libdlpi.a	0
+libtpiso.a      0
+libsixr.a       0
+libsixt.a       0
+libsix1.a       0
+libsixl.a       0
+libsixq.a       0
+libpvc.a        0
+libsixtr.a      0
+libotsam.a	0
+libxtisys.a	0
+libsysV.a 	1
+libmin.a 	1
+libdevelop.a 	1
+libdil_srm.a 	1
+libdebug.a 	0
+libkern.a 	1
+libk.a 		1
+$$$
+* Subsystem #define table.  For any subsystem that is found in the dfile
+* and appears below, a #define is generated in the conf.c file.  This
+* is used to include any space defined in space.h.
+uipc
+nipc
+inet
+ni
+dskless
+lan01
+x25
+x25ip
+x25pa
+hpstreams
+sixr
+sixt
+six1
+sixl
+sixq
+snap_pvc
+sixtr
+otsam
+vme2
+$$$
+*
+* Driver product table.  The following generates a table of supported products
+* for a given interface card.  The input is a driver handle followed by a list
+* of product/vendor id's. What is produced is a table of these product/vendor
+* id's to be used by the interface driver for further qualification during
+* booting and the setting of root device location.
+*
+$$$

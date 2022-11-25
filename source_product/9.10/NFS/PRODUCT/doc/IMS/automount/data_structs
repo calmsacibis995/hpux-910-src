@@ -1,0 +1,204 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/data_structs,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:25 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "Data structures"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Overview of Data Structures"
+
+	Most of automount's data structures are defined in the header file
+automount.h.  For example there are structures that define what automount
+knows about the directories it serves and  the remote file systems that it
+has mounted.  These data structures are linked together through some
+general purpose queue macros defined in automount.h.  These data structures
+are then accessed through a hash table that is defined in auto_node.c.
+
+.H 2 "Internal Data Structures"
+
+.H 3 "General Queue Structure"
+
+.nf
+struct queue {
+	struct queue	*q_next;
+#define	q_head	q_next
+	struct queue	*q_prev;
+#define	q_tail	q_prev
+};
+
+#define	INSQUE(head, ptr) my_insque(&(head), &(ptr)->q)
+#define	REMQUE(head, ptr) my_remque(&(head), &(ptr)->q)
+#define HEAD(type, head) ((type *)(head.q_head))
+#define NEXT(type, ptr)	((type *)(ptr->q.q_next))
+#define	TAIL(type, head) ((type *)(head.q_tail))
+#define PREV(type, ptr)	((type *)(ptr->q.q_prev))
+.fi
+
+.H 3 "Automount Vnodes"
+
+.nf
+/*
+ * Types of filesystem entities (vnodes)
+ * We support only one level of DIR; everything else is a symbolic LINK
+ */
+enum vn_type { VN_DIR, VN_LINK};
+struct vnode {
+	struct queue q;
+	nfs_fh	vn_fh;		/* fhandle */
+	struct fattr vn_fattr;	/* file attributes */
+	enum vn_type vn_type;	/* type of vnode */
+	caddr_t	vn_data;	/* vnode private data */
+};
+
+struct vnode *fhtovn();		/* lookup vnode given fhandle */
+.fi
+
+.H 3 "Map File System Entry"
+
+.nf
+/*
+ * Structure describing a host/filesystem/dir tuple in a NIS map entry
+ */
+struct mapfs {
+	struct mapfs *mfs_next;		/* next in entry */
+	int	mfs_ignore;		/* ignore this entry */
+	char	*mfs_host;		/* host name */
+	struct in_addr mfs_addr;	/* address of host */
+	char	*mfs_dir;		/* dir to mount */
+	char	*mfs_subdir;		/* subdir of dir */
+};
+.fi
+
+.H 3 "Map Entry"
+
+.nf
+/*
+ * NIS entry - lookup of name in DIR gets us this
+ */
+struct mapent {
+	char	*map_root;
+	char	*map_mntpnt;
+	char	*map_mntopts;
+	struct mapfs *map_fs;
+	struct mapent *map_next;
+};
+struct mapent *getmapent();
+.fi
+
+.H 3 "File System Entry"
+
+.nf
+/*
+ * Everthing we know about a mounted filesystem
+ * Can include things not mounted by us (fs_mine == 0)
+ */
+struct filsys {
+	struct queue q;			/* next in queue */
+	int	fs_death;		/* time when no longer valid */
+	int	fs_mine;		/* 1 if we mounted this fs */
+	int	fs_present;		/* for checking unmounts */
+	int	fs_unmounted;		/* 1 if unmounted OK */
+	char	*fs_type;		/* type of filesystem */
+	char	*fs_host;		/* host name */
+	char	*fs_dir;		/* dir of host mounted */
+	char    *fs_name;		/* fs_host:fs_dir */
+	char	*fs_mntpnt;		/* local mount point */
+	char	*fs_opts;		/* mount options */
+	dev_t	fs_mntpntdev;		/* device of mntpnt */
+	dev_t	fs_mountdev;		/* device of mount */
+	struct nfs_args fs_nfsargs;	/* nfs mount args */
+	struct sockaddr_in fs_addr;	/* host address */
+	struct filsys *fs_rootfs;	/* root for this hierarchy */
+	nfs_fh	fs_rootfh;		/* file handle for nfs mount */
+	int	fs_mflags;		/* mount flags */
+};
+struct queue fs_q;
+.fi
+
+.H 3 "Link Entry"
+
+.nf
+/*
+ * Structure for recently referenced links
+ */
+struct link {
+	struct queue q;		/* next in queue */
+	struct vnode link_vnode;	/* space for vnode */
+	struct autodir *link_dir;	/* dir which we are part of */
+	char	*link_name;	/* this name in dir */
+	struct filsys *link_fs;	/* mounted file system */
+	char	*link_path;	/* dir within file system */
+	long	link_death;	/* time when no longer valid */
+};
+.fi
+	
+.H 3 "Automount Directory Entry"
+
+.nf
+/*
+ * Descriptor for each directory served by the automounter 
+ */
+struct autodir {
+	struct queue q;
+	struct	vnode dir_vnode;	/* vnode */
+	char	*dir_name;	/* mount point */
+	char	*dir_map;	/* name of map for dir */
+	char	*dir_opts;	/* default mount options */
+	int	dir_remove;	/* remove mount point */
+	struct queue dir_head;
+};
+struct queue dir_q;
+.fi
+
+.H 3 "File Handle Hash Queue"
+
+.nf
+#define	FH_HASH_SIZE	8
+
+struct queue fh_q_hash[FH_HASH_SIZE];
+.fi
+
+.H 2 "External Data Structures"
+
+.H 3 "/etc/mnttab"
+
+Notice that this is different than the /etc/mnttab subsection in the
+interface section which covers the calls automount makes to reference
+the mnttab data structures.  This subsection covers the mnttab data
+structures.  Here is a quick summary; the mnttab[4] man page has the
+details.
+
+.nf
+ mnttab(4)                                                         mnttab(4)
+
+ NAME
+      mnttab - mounted file system table
+
+ SYNOPSIS
+      #include <mntent.h>
+
+ DESCRIPTION
+      mnttab resides in directory /etc and contains a table of devices
+      mounted by the mount(1M) command.  The file contains a line of
+      information for each mounted filesystem which, with the exception of
+      the cnode_id field, is structurally identical to the contents of
+      /etc/checklist, described in checklist(4).
+
+      There are a number of lines of the form:
+
+           special_file_name dir type opts freq passno mount_time cnode_id
+
+      consisting of entries similar to:
+
+	   /dev/dsk/c0d0s0  /  hfs  rw  0  1  537851723  1
+.fi
+
+.H 3 "Kernel Mount Table"
+
+The important thing to know about the kernel mount table is that it
+contains the information from mnttab.  It is the authoritive source of
+this information.  The kernel mount table is updated by automount
+through the vfsmount and umount system calls.  See the "Interface" 
+section in this document for more information.

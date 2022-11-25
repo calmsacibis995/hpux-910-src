@@ -1,0 +1,38 @@
+/ @(#) $Revision: 51.1 $    
+/ Was version 27.2 of old uucp
+/
+/ clear the 2334
+/
+timeout 25
+/ send some ^Q's in case output stopped
+send "\021\021\r"
+/ ignore garbage
+expectg 2 "**++**++**++**++**++**++**++**++**++**++**++**++**++**++"
+
+/ see if 2334 already cleared
+cr:
+	send "\r"
+	expect 2 "@"
+	error brk_clr
+        exit 0
+
+/ try BREAK to get its attention
+brk_clr:
+	break
+	run sleep 1
+	expect 2 "@"
+	error dle_clr
+	send "CLR\r"
+	expect 2 "@"
+/	error dle_clr
+	exit 0
+
+/ try ^P to get its attention
+dle_clr:
+	send "\020"
+	expect 2 "@"
+	error cr
+	send "CLR\r"
+	expect 2 "@"
+/	error cr
+	exit 0

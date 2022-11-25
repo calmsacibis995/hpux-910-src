@@ -1,0 +1,24 @@
+* disk drivers
+ramdisc
+nfs
+
+* Pseudo-entries to bring in the4.3-based networking initialization
+uipc
+inet
+lan01
+
+fpa 		0
+mc68040		0
+maxusers	2
+nbuf		64
+ndilbuffers	1
+nproc		16
+maxswapchunks   64
+nfile           256
+ninode          256
+nflocks         128
+mesg		0
+semmni          10
+nswapdev        1
+nswapfs         1
+shmmni          60

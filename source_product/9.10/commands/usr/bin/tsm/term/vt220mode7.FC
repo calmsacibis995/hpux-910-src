@@ -1,0 +1,10 @@
+## FacetTerm  vt220mode7  COMMON  description file  09/01/89
+#    VT200 7-Bit mode switchable to VT200 8-Bit mode and VT100 mode
+#    !!! IMPORTANT NOTE !!!
+#    Set Terminal to:   XON/XOFF
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt220mode7.FC,v 70.1 92/03/09 16:08:00 ssa Exp $
+xon_xoff
+##--- CONTROL_8_BIT ---##
+### vt220_7_bit=\E[62;1"p   auto_wrap_on=\E[?7h
+enter_ca_mode=\E[62;1"p\E[?7h

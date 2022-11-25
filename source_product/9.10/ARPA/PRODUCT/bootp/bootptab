@@ -1,0 +1,158 @@
+# Example /etc/bootptab: database for bootp server (/usr/lbin/bootpd).
+#@(#) $Header: bootptab,v 1.2.109.3 94/07/06 08:24:44 randyc Exp $
+#
+# Format:
+#	nodename:tag=value:tag=value: ... :tag=value
+#
+#	first field --	nodename (hostname) of terminal followed by colon
+#			(should be full domain name)
+#
+# Blank lines and lines beginning with '#' are ignored.
+# Make sure you include a colon and a backslash to continue a line.
+# Don't put any spaces in the tag=value string.
+# The ht tag MUST precede the ha tag.
+#
+# The options listed below are commonly used for HP X Window terminals
+# and HPUX NFS Diskless. They are specified as tag=value and delimited 
+# by colons. For a list of all possible options, see the bootpd.1m man page.
+#
+#	ba -- broadcast bootp reply for testing with bootpquery
+#	bf -- bootfile (for tftp download)
+#	bp -- bootp server IP addresses to relay the bootp requests
+#	ds -- domain name server IP address
+#	gw -- gateway IP address (must have sm tag defined also)
+#	ha -- hardware address (link level address) (hex)
+#	hd -- home directory for bootfile (chrooted to tftp home directory)
+#	hn -- send nodename (boolean flag, no "=value" needed)
+#	hp -- maximum hops value (cannot exceed 16)
+#	hm -- hardware mask (hex) (must be preceded the ht tag)
+#	ht -- hardware type (ether) (must precede the ha and hm tag)
+#	ip -- X terminal IP address
+#	sm -- network subnet mask
+#	tc -- template for common defaults (should be the first option listed)
+#	th -- threshold value in seconds
+#	vm -- vendor magic cookie selector (should be rfc1048)
+#	T144  remote config file name (file name must be enclosed in "")
+#
+#
+#----------------------------------------------------------------------------
+# First example: simple network with no domains, no gateway, no subnets
+#
+# The first entry is the template for options common to all the
+# X terminals.
+#
+#global.defaults:\
+#	bf=C2300B:\
+#	hd=/usr/lib/X11/700X/bin:\
+#	hn:\
+#	ht=ether:\
+#	vm=rfc1048:\
+#	T144="C2300B.cfg"
+#
+# Now the actual entries for the individual X terminals are listed.
+#
+#xterm1:\
+#	tc=global.defaults:\
+#	ha=08000903212F:\
+#	ip=190.40.101.22
+#
+#xterm2:\
+#	tc=global.defaults:\
+#	ha=0800090324AC:\
+#	ip=190.40.101.35
+#
+#----------------------------------------------------------------------------
+# Second example: network with domains, subnets, and gateways
+#
+# The first entry is the template for options common to all the
+# X terminals.
+#
+#----------------------------------------------------------------------------
+#global.defaults:\
+#	bf=C2300B:\
+#	ds=15.2.112.119:\
+#	gw=15.8.19.100:\
+#	hd=/usr/lib/X11/700X/bin:\
+#	hn:\
+#	ht=ether:\
+#	sm=255.255.248.0:\
+#	vm=rfc1048:\
+#	T144="site.cfg"
+#
+# Now the actual entries for the individual X terminals are listed.
+#
+#xterm1.div.hp.com:\
+#	tc=global.defaults:\
+#	ha=08000903212F:\
+#	ip=15.8.19.22
+#
+# Note that template options can be individually overridden. Here we specify
+# a gateway and a remote config file different than the template.
+#
+#xterm2.div.hp.com:\
+#	tc=global.defaults:\
+#	gw=15.8.19.3:\
+#	ha=0800090324AC:\
+#	ip=15.8.19.35:\
+#	T144="xterm2.cfg"
+#
+#----------------------------------------------------------------------------
+#     
+# Thrid example: NFS diskless client entry:
+#     
+# client1:\
+#       hn:\
+#	vm=rfc1048:\
+# 	ht=ether:\
+#	ha=08000919BB78:\
+#	ip=15.1.55.234:\
+#	bf=/export/tftpboot/client1/stand/uxbootlf
+#
+#----------------------------------------------------------------------------
+#     
+# Forth example: bootp relay entries:
+# 
+# Common relay entry. 
+#
+# relay-default:\
+#     ht=ethernet:\
+#     bp=15.4.3.136 15.13.6.192:\
+#     th=2:\
+#     hp=1
+#  
+# Relay entry for node2
+#
+# node2:\
+#     ha=08000902CA00:\
+#     tc=relay-default
+#  
+# Group relay entry
+#  
+# group-machines:\
+#     ha=080009000000:\
+#     hm=080009000000:\
+#     tc=relay-default
+#  
+# Turn the relay off (block the relay) for the following machines.
+#
+# blocked-machines:\
+#     ht=ethernet:\
+#     ha=07000A000000:\
+#     hm=07000A000000
+# 
+# Relay definition for all other machines.
+# 
+# all:\
+#     ha=000000000000:\
+#     hm=000000000000:\
+#     tc=relay-default
+#----------------------------------------------------------------------------
+
+test:\
+	bf=C2300B:\
+	hd=/usr/lib/X11/700X/bin:\
+	hn:\
+	ht=ether:\
+	vm=rfc1048:\
+	ha=080009000000:\
+	ip=192.30.103.01

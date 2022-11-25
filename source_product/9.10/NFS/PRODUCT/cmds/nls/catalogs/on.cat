@@ -1,0 +1,45 @@
+$ ==============
+$ on.c
+$ ==============
+$set 1
+1 on (size): 
+2 \r\n
+3 on (signal): 
+4 \r\n
+5 Unknown option %s\n
+6 Usage: on [-i|-n] [-d] host [command [argument] ... ]\n
+7 on: unknown host %s\n
+8 Got the host named %1$s (%2$s)\n
+9 on: cannot connect to server on %s\n
+10 TCP RPC connection created\n
+11 on: can't find . (%s)\n
+12 on: can't locate mount point for %1$s (%2$s)\n
+13 on: current directory (%s) is remote via RFA.\n
+14     RFA directories not supported by on \n
+15 wd host %1$s, fs %2$s, dir within %3$s\n
+16 on %s: 
+17 \n
+18 on %1$s: %2$s
+19 Client call was made\r\n
+20 on (modes) %s: 
+21 \r\n
+22 on (size) %s: 
+23 \r\n
+24 accept on stdout\r\n
+25 accept on stderr\r\n
+26 on: select
+27 on: 
+28 \r\n
+29 on: ioctl(TCSETAW)
+30 \r\n
+31 on: accept
+32 on: socket
+33 on: standard input (stdin) is not a tty\n
+34 on: failed to reach %1$s at address %2$s\n
+35 on: now trying %s\n
+$ ==============
+$ where.c
+$ ==============
+$set 1
+41 unknown error
+43 mount table problem

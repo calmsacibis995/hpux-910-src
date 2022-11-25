@@ -1,0 +1,560 @@
+.\"	@(#)MR Deliverables Checklist:	$Revision: 1.11.109.1 $	$Date: 91/11/19 14:28:14 $
+.\"
+.\"  This document describes a list of events that must occur prior to the
+.\"  MR Checkpoint of the NFS Services/300 product.
+.\"
+.\"  This document is made printable by entering the following command:
+.\"
+.\"		nroff -cm filename > formatted_file
+.\"		lp -ogothic < formatted_file
+.\"
+.\"  Original author:  Dave Erickson
+.\"
+.tr ~
+.PH "''\fB-~NFS Services/300 MR Deliverables Checklist, 6.2 Release~-\fR''"
+.PF "''-~\\\\nP~-''"
+.nr Hc 1000
+\fBManufacture/Release will occur on ? June; the MR meeting is ?
+June from WHEN to WHEN in WHAT ROOM.\fR
+.sp
+An MR deliverables checklist follows, with the following parts:
+.sp
+.VL 16 2
+.LI "___~~\fBMar 30\fR"
+Installability Testing of Product Media
+.LI "___~~\fBApr 18\fR"
+Sync the Online Man Pages with Written
+.LI "___~~\fBMay 23\fR"
+Final Bits to SSIT
+.LI "___~~\fBMay 25\fR"
+SSIT Provides SE Media for Testing
+.LI "___~~\fBJun 9\fR"
+Partner Testing of SE Media Complete
+.LI "___~~\fBJun 10\fR"
+Defects into STARS
+.LI "___~~\fBJun 10\fR"
+SSIT Provides Final NFS Product Bits
+.LI "___~~\fBJun 10\fR"
+Internal Documentation Complete
+.LI "___~~\fBJun 10\fR"
+Code, Documentation and Tools Archived
+.LI "___~~\fBJun 10\fR"
+Corporate Metrics Complete
+.LI "___~~\fBJun 10\fR"
+QA Metrics Complete
+.LI "___~~\fBJun 13\fR"
+Release Final Product to Manufacturing
+.LI "___~~\fBJun 14\fR"
+Verify Media Received from Manufacturing
+.LI "___~~\fBJun 14\fR"
+Forward Resolved STARS Reports to QA
+.LI "___~~\fBJun 22\fR"
+Project History Notebook
+.LE
+.sp 2
+.HU "Installability Testing of Product Media (Mar 30)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveysan\fR)
+Perform an update on a non-NFS 6.2 system, similar to what
+customers may have.
+.LI "___~" 1
+(\fBDaveysan, Mickie\fR)
+Verify that the installation instructions provided in the NFS manual are
+correct and usable, i.e., perform them and report success or failure.
+If there are any difficulties, modify the documentation.
+.LE
+.sp 2
+.HU "Sync the Online Man Pages with Written (April 18)"
+.sp
+.ML "___~" 9
+.LI
+(\fBDaveysan, Mickie\fR)
+Copy man pages from the documentation group, so the online versions are the
+same as the written ones.
+.LE
+.sp 2
+.HU "Final Bits to SSIT (May 23)"
+.sp
+.ML "___~" 9
+.LI
+(\fBDaveysan\fR)
+Provide the final NFS bits to SSIT via the standard SSIT delivery process.
+.LE
+.sp 2
+.HU "SSIT Provides SE Media for Testing (May 25)"
+.sp
+.ML "___~" 9
+.LI
+(\fBSSIT\fR)
+SSIT provides the tapes and floppies for use in Partner
+Testing; details listed below.
+.LE
+.sp 2
+.HU "Partner Testing of SE Tapes Complete (June 9)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveysan, Arsenal\fR)
+Prepare the \fINFS Partner Test Plan\fR.
+.LI "___~" 1
+(\fBDarren, Daveysan, Mark, Mike, Arsenal\fR)
+Execute the \fINFS Partner Test Plan\fR.
+.LI "___~" 1
+(\fBEveryone\fR)
+Perform various keybanging tests that are deemed appropriate.
+.sp
+\fBEveryone, please help me here - give me your ideas of basic tests that
+should be done to check situations you recall that had problems in the
+past, and I will enumerate them.\fR
+.AL A 8 1
+.LI "___~" 1
+(\fBDaveysan\fR)
+netstat performance with YP
+.LI "___~" 1
+(\fBDaveysan\fR)
+PAM
+.LI "___~" 1
+(\fBDaveysan\fR)
+csh filename expansion with YP
+.LI "___~" 1
+(\fBDarren\fR)
+verify async option of NFS
+.LI "___~" 1
+(\fBDarren\fR)
+quick NFS performance test
+.LE
+.LE
+.sp 2
+.HU "Defects into STARS (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBMike, reviewed by DaveM\fR)
+Identify which defects remain in DTS that are unfixed and "significant."
+.LI "___~" 1
+(\fBMike\fR)
+Extract the information related to those defects and enter each defect into
+STARS.
+.LE
+.sp 2
+.HU "SSIT Provides Final NFS Product Bits (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBSSIT\fR)
+SSIT provides us with tape and floppy versions of the NFS product.
+.LI "___~" 1
+\fIFor both linus tape and
+micro-floppy media created by SSIT\fR:
+.sp
+\fBTap~~~Flp\fR
+.AL A 14
+.LI "___~~___~" 1
+(\fBDaveysan\fR)
+Verify that all filesets install successfully from the medium;
+compare the installed and delivered bits.
+.LI "___~~___~" 1
+(\fBDaveysan\fR)
+Verify that all files in every fileset are present with the
+correct modes, owners and groups.
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+If there are any problems, have SSIT recreate the media and repeat this
+verification process.
+.LE
+.sp 2
+.HU "Internal Documentation Complete (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBArsenal\fR)
+NFS System Test Plan
+.LI "___~" 1
+(\fBDaveysan\fR)
+RPC/XDR Internal Maintenance Specification
+.LI "___~" 1
+(\fBDaveysan\fR)
+Yellow Pages Internal Maintenance Specification
+.LI "___~" 1
+(\fBMike, Darren\fR)
+Kernel Internal Reference Specification
+.LI "___~" 1
+(\fBDaveysan\fR)
+External Reference Specification
+.LI "___~" 1
+(\fBCristina\fR)
+Development Environment Document
+.LI "___~" 1
+(\fBCristina\fR)
+NFS Localization Cookbook (NLS)
+.LE
+.sp 2
+.HU "Code, Documentation and Tools Archived (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBCristina\fR)
+Prepare a document ("how_to" is its name) that
+.AL A 6 1
+.LI
+describes how to restore the development environment,
+.LI
+describes how to modify and rebuild the product and
+.LI
+contains an index of what is included on the tape.
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Prepare the development environment for archival, ensuring all of the following
+are organized in an acceptable directory structure.
+.AL A 6 1
+.LI
+Current source code
+.LI
+Makefiles
+.LI
+Online documentation (man pages)
+.LI
+Build and administrative tools
+.LI
+These documents:
+.AL i 6 1
+.LI
+RPC/XDR Internal Maintenance Specification
+.LI
+Yellow Pages Internal Maintenance Specification
+.LI
+Kernel Internal Reference Specification
+.LI
+External Reference Specification
+.LE
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Archive the above using an acceptable method, e.g.,
+.sp
+	find . -print | cpio -o | tcio -or /dev/rct
+.LI "___~" 1
+(\fBDaveysan\fR)
+Copy the archive tape to another tape.
+.LI "___~" 1
+(\fBDaveysan\fR)
+Prepare the appropriate forms for manufacturing; give the forms and both
+archive tapes to manufacturing.
+.LE
+.sp 2
+.HU "Corporate Metrics Complete (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveM\fR)
+Determine the engineering payroll months expended during the following
+phases of the project.
+.AL A 6 1
+.LI
+Investigation/External Specification
+.LI
+Design
+.LI
+Implementation
+.LI
+Testing
+.LE
+.LI "___~" 1
+(\fBDaveM\fR)
+Determine the calendar months expended during the following
+phases of the project.
+.AL A 6 1
+.LI
+Investigation/External Specification
+.LI
+Design
+.LI
+Implementation
+.LI
+Testing
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Determine the engineering time over or under the 40-hour engineering week
+averaged over the project duration.
+.LI "___~" 1
+(\fBMike\fR)
+(Optional) Determine the number of defects introduced during the following
+phases of the project.
+.AL A 6 1
+.LI
+Investigation/External Specification
+.LI
+Design
+.LI
+Implementation
+.LI
+Testing
+.LE
+.LI "___~" 1
+(\fBMike\fR)
+Determine the number of defects found during the following
+phases of the project.
+.AL A 6 1
+.LI
+Investigation/External Specification
+.LI
+Design
+.LI
+Implementation
+.LI
+Testing
+.LE
+.LI "___~" 1
+(\fBMike\fR)
+Determine the number of defects closed during the following
+phases of the project.
+.AL A 6 1
+.LI
+Investigation/External Specification
+.LI
+Design
+.LI
+Implementation
+.LI
+Testing
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Determine numbers for each of the following (for each programming language
+used):
+.AL A 6 1
+.LI
+Non-comment source statements
+.LI
+Comment lines
+.LI
+Blank lines
+.LI
+% of recycled code
+.LI
+(Optional) Number of procedures
+.LI
+(Optional) Bytes of object code
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+(Optional) Determine numbers for each of the following:
+.AL A 6 1
+.LI
+Number of lines in engineering documentation
+.LI
+Number of figures in engineering documentation
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Transcribe all of the numbers from above into the \fISoftware Metrics
+Collection Forms\fR.
+Send the forms to the Metrics Administrator at the
+Software Engineering Lab in Palo Alto, and provide copies to Bugarin's
+Productivity, Tools and Training project.
+.LE
+.sp 2
+.HU "QA Metrics Complete (June 10)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveysan\fR)
+Complete the "CND Quality Engineering Project Worksheet" line items,
+which are:
+.AL A 6 1
+.LI
+Number of crashes during testing.
+.LI
+Path coverage during testing.
+.LI
+Defects found during testing and reported via DTS.
+.LI
+DTS-reported defects fixed.
+.LI
+A count of pre-release status reports in STARS.
+.LI
+A breakdown of the pre-release status reports in STARS by severity and type.
+.LI
+A count of non-commented source statements.
+.LI
+CND's software defect density 10x goal (defects per KNCSS), to be completed by
+the QA department.
+.LI
+Estimated defect density at MR, to be completed by the QA department.
+.LE
+.LI "___~" 1
+(\fBDaveM\fR)
+Provide a "bug chart," describing resources and time expended.
+.LI "___~" 1
+(\fBDaveM\fR)
+Write a statement of congruence to the Functionality, Usability, Reliability,
+Performance and Supportability (FURPS) goals.
+.LI "___~" 1
+(\fBDaveysan\fR)
+Provide a copy of the completed Corporate Metrics forms.
+.LI "___~" 1
+(\fBDaveysan\fR)
+Provide a brief summary reporting the items of the Partner Test Plan that
+have been completed.
+.LI "___~" 1
+(\fBDaveysan\fR)
+Gather the following information.
+.AL A 6 1
+.LI "___~" 1
+(\fBArsenal\fR)
+The Kbytes of test code.
+.LI "___~" 1
+(\fBArsenal\fR)
+The number of lines of test code source (if possible, provide figures on
+non-commented source statements, blank lines and comments).
+.LI "___~" 1
+(\fBMike\fR)
+A distribution of the system crashes occurring in the last month.
+.LI "___~" 1
+(\fBIf available\fR)
+A description of the effort expended fixing defects during the project.
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Assemble these items into a report to give to the QA department of CND;
+provide SSIT with a copy.
+.LE
+.sp 2
+.HU "Release Final Product to Manufacturing (June 13)"
+.sp
+.ML "___~" 9
+.LI
+(\fBDaveysan\fR)
+Provide CND manufacturing with the master floppies and tape.
+These media were received from SSIT and verified during the 
+"SSIT Provides Final NFS Product Bits" step above.
+.LE
+.sp 2
+.HU "Verify Media Received from Manufacturing (June 14)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveysan\fR)
+Repeat the process of verifying the contents of the master floppies and tape
+created by manufacturing, described above in
+"SSIT Provides Final NFS Product Bits."
+.LI "___~" 1
+(\fBDaveysan\fR)
+Report failure or success to CND manufacturing.
+.LE
+.sp 2
+.HU "Forward Resolved STARS Reports to QA (June 14)"
+.sp
+.ML "___~" 9
+.LI
+(\fBDaveysan\fR)
+For all STARS reports that have been resolved since the last release, forward
+them to QA.
+(This is a process done while using the STARS system - from the main menu,
+select the "to QA" function.)
+.LE
+.sp 2
+.HU "Project History Notebook (June 22)"
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDaveysan\fR)
+Gather the following documents, etc.;
+collect only those which have changed since 6.0.
+.AL A 8 1
+.LI "___~" 1
+(\fBDaveysan\fR)
+MR events/deliverables checklist
+.LI "___~" 1
+(\fBDaveysan\fR)
+NFS System Test Plan
+.LI "___~" 1
+(\fBDaveysan\fR)
+RPC/XDR Internal Maintenance Specification
+.LI "___~" 1
+(\fBDaveysan\fR)
+Yellow Pages Internal Maintenance Specification
+.LI "___~" 1
+(\fBMike, Darren\fR)
+Kernel Internal Reference Specification
+.LI "___~" 1
+(\fBDaveysan\fR)
+External Reference Specification
+.LI "___~" 1
+(\fBCristina\fR)
+Development Environment Document
+.LI "___~" 1
+(\fBMark\fR)
+Product Requirements Document
+.LI "___~" 1
+(\fBMark\fR)
+Product Data Sheet
+.LI "___~" 1
+(\fBDaveysan\fR)
+Update_info document
+.LI "___~" 1
+(\fBChuck\fR)
+Software Support Plan
+.LI "___~" 1
+(\fBChuck\fR)
+NFS Whitepaper
+.LI "___~" 1
+(\fBAndy\fR)
+Product Plan
+.LI "___~" 1
+(\fBAndy\fR)
+Sales Training Manual
+.LI "___~" 1
+(\fBDaveM\fR)
+All checkpoint meetings slides
+.LI "___~" 1
+(\fBDaveysan\fR)
+Team photo
+.LI "___~" 1
+(\fBDaveysan\fR)
+QA Metrics Report, including the Corporate Metrics Forms
+.LI "___~" 1
+(\fBDaveM\fR)
+Project Estimation Summary for PTT group
+.LI "___~" 1
+(\fBMike, et al.\fR)
+Post-mortem reports
+.LI "___~" 1
+(\fBDaveM\fR)
+DaveM's monthly reports
+.LI "___~" 1
+(\fBDaveM\fR)
+MTS' task list data, summarized by category for the entire project
+.LI "___~" 1
+(\fBCristina\fR)
+The how_to document (see the "Code, Documentation and Tools Archived" section,
+above)
+.LI "___~" 1
+(\fBCristina\fR)
+NLS Cookbook
+.LI "___~" 1
+(\fBDaveysan\fR)
+Various MR documents
+.LI "___~" 1
+(\fBDaveysan\fR)
+Various mailings and news releases (Momentum, Computer News, Tech Exchange
+Newsletters)
+.LI "___~" 1
+(\fBDaveysan\fR)
+Copies of STARS reports since last release
+.LE
+.LI "___~" 1
+(\fBDaveysan\fR)
+Provide the deltas to
+.AL A 8
+.LI "___~" 1
+create a supplement to the NFS project notebook
+.LI "___~" 1
+the Project Documentation Librarian
+.LE
+.LE

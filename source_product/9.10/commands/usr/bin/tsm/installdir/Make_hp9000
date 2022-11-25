@@ -1,0 +1,26 @@
+# FACET/TERM installdir files install
+#		HP 9000/300
+# @(#) $Header: Make_hp9000,v 70.1 92/03/09 15:48:21 ssa Exp $
+MACH=		hp9000
+SHELL=		/bin/sh
+
+.SUFFIXES:
+MAKE=	              MACH=$(MACH) \
+	MACH_FILES_TOP_DIR="" \
+           FACET_NAME_DIRS="" \
+            TEXT_TREE_DIRS="" \
+	     USR_FACET_DIR="/usr/tsm" \
+	 USR_FACETTERM_DIR="/usr/tsm" \
+			make -e -f Make_comm
+.DEFAULT:
+		$(MAKE) $<
+all:
+		$(MAKE)
+install:
+		$(MAKE) install.hp
+installtext:
+		$(MAKE) installtext.hp
+installprog:
+		$(MAKE) installprog.hp
+installown:
+		$(MAKE) installown.hp

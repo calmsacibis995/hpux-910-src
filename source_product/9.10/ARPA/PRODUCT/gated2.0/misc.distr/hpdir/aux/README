@@ -1,0 +1,19 @@
+
+	These are just very primitive scripts to rotate the
+	gated log files (much like syslog), do some primitive
+	analysis of the logs, and mail the output to a list of
+	users.
+
+	Remember I said primitive and occasionally the awk scripts
+	produce some strange results.
+
+	gated-mon -  this is what you put in crontab. I run it every
+		     day at midnight.
+
+	gw-mon -  runs all the analysis scripts.
+
+	rotatelogs - rotates the gated log files
+
+	redirects.awk - awk script that provides a redirect summary
+
+	changes.awk -  awk script that provides list of changes and deletions

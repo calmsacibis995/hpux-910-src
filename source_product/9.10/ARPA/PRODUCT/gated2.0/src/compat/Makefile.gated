@@ -1,0 +1,42 @@
+#
+#	Makefile for gated compatability routines
+#
+#		Don't edit this file
+#
+
+SRCS= getdtablesize.c insque.c strcasecmp.c herrs.c h_errno.c recvmsg.c
+
+OBJS= getdtablesize.o insque.o strcasecmp.o herrs.o h_errno.o recvmsg.o sigvec.o
+
+LIBGATED= ../libgated.a
+
+#
+#  The default is to build the complete library
+#
+
+all:	${LIBGATED}
+
+${LIBGATED}: ${OBJS}
+	ar rc ${@} ${?}
+#	${RANLIB} ${@}
+#	rm -f ${OBJS}
+
+sigvec.o:
+	ar x /usr/lib/libBSD.a sigvec.o
+	
+#
+#  Clean up objects and stuff
+#
+
+clean:
+	-rm -f ${LIBGATED} ${OBJS}
+
+cleanall: clean
+
+#
+#  Build the dependency list and put into Makefile.depend
+#
+
+depend:
+	${CC} ${DFLAGS} ${IFLAGS} ${CCD} ${SRCS} > Makefile.depend
+

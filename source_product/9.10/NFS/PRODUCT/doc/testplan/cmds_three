@@ -1,0 +1,570 @@
+.H 2  "Portmap (Cristina Mahon)"
+
+.PP
+Portmap implements the program, version to port number mapping for rpc 
+services.  For example, inetd gets a socket for rpc.mountd based on a 
+non-reserved port number (>1023).  It then registers rpc.mountd (its
+program and version number) with portmap and tells portmap what port
+number it will be listening at for rpc.mountd requests.  When a remote
+system wants to mount a filesystem from our system it will call portmap
+and ask portmap for the port number that corresponds to the program and
+version number for rpc.mountd.  Portmap will provide the calling
+program (mount) with that information so that the calling program can
+contact rpc.mountd directly.
+.PP
+The command line for portmap is:
+.sp
+           portmap
+.sp 2
+To exercise certain options in portmap it might be necessary to write a program
+that calls portmap and either requests information/calls procedures or provides
+information.
+.sp
+Note: All these tests must be run as superuser.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  3.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Make a null procedure call"
+.sp 1
+.PP
+Call the null procedure for portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_NULL)
+EXPECTED OUTPUT: 
+       Portmap will return a NULL.
+.fi
+.sp 2
+.H 3 "Register a program"
+.sp 1
+.PP
+Call portmap and register a program that was not previously registered.
+Check also when the program is the first one to be registered.
+If the registering succeeds, portmap will send a one as the reply.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       When  prompting  for the port number for that  program you should
+       get the information previously supplied.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (diff version)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+different version number.
+Portmap will send a one as the reply if it succeeds in registering the
+program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       When  prompting  for the port number for that  program you should
+       get  the   information   supplied   for  the  new   version.  The
+       information for the old version should still be there.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (same version, diff port)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+the same version number, but a different port number.
+Portmap will return a zero reply, meaning that it did not
+register the program.  For this to succeed, the program, version has first
+to be unset, before it can be set (registered).
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       If prompting for the port number for that program and version you
+       should get the old port number, not the one you just supplied.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (same version, same port)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+the same version number and the same port number.
+Portmap will return a reply of one meaning that it succeeded.
+Portmap will basically ignore this call since no information changed.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       If prompting for the port number for that program and version you
+       should get the old/new port number.
+.fi
+.sp 2
+.H 3 "Unregister registered program and version numbers" 
+.sp 1
+.PP
+Call portmap and unregister a program and a version number of that program
+that have been previously registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of one if successful.  Any attempt
+       to get  information on the program and version  numbers that were
+       just unregistered should fail.
+.fi
+.sp 2
+.H 3 "Unregister only registered program and version numbers" 
+.sp 1
+.PP
+Call portmap and unregister a program and a version number of that program
+that have been previously registered.  The program and version numbers should
+be the only ones registered.  The purpose is to check if portmap correctly
+handles unregistering the last registered program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of one if successful.  Any attempt
+       to get  information on the program and version  numbers that were
+       just unregistered should fail.
+.fi
+.sp 2
+.H 3 "Unregister program never registered" 
+.sp 1
+.PP
+Call portmap and unregister a program that has never been registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of zero, since it couldn't succeed.  
+.fi
+.sp 2
+.H 3 "Unregister version never registered" 
+.sp 1
+.PP
+Call portmap and unregister a version that has never been registered of a 
+registered program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of zero, since it couldn't succeed.  
+.fi
+.sp 2
+.H 3 "Acquire information on registered program/version numbers"
+.sp 1
+.PP
+Call portmap and request information on a program number registered.
+We should have the port number that was originally used to register the program
+with so that we can compare to the answer received from portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Portmap  should  return a port number  equal to the port that was
+       originally registered.
+.fi
+.sp 2
+.H 3 "Acquire information on unknown program number"
+.sp 1
+.PP
+Call portmap and request information on a program number not registered.
+This could be done maybe with "mount" if mountd is not registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Portmap should return a port equal to zero.
+.fi
+.sp 2
+.H 3 "Acquire information on unknown version number of known program"
+.sp 1
+.PP
+Call portmap and request information on a version number of a registered
+program.  The program will be registered with a different version number.
+This could be done maybe with "mount" if "mountd" is registered with a bogus
+version number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Right now it seems that  portmap  will return the port number for
+       the program even if the versions don't match.  Possible bug.
+.fi
+.sp 2
+.H 3 "Acquire information on all registered programs/versions"
+.sp 1
+.PP
+Call portmap and request information on all registered programs.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_DUMP)
+EXPECTED OUTPUT: 
+
+       Portmap  returns  a  list(?)  of all  registered  programs  as an
+       structure.
+.fi
+.sp 2
+.H 3 "Call procedure on local machine"
+.sp 1
+.PP
+This calls a procedure on the local machine that has been registered
+with portmap.  This procedure is only supported for on rpc/udp and calls 
+via rpc/udp.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap returns the remote call result.(?)
+.fi
+.sp 2
+.H 3 "Call nonexistent procedure on local machine"
+.sp 1
+.PP
+This calls a procedure that doesn't exist on the local machine, but
+has been registered with portmap.
+This service of the portmap DOES NOT complain if something goes
+wrong.  This is because the procedure is written to
+support broadcast rpc and the requester could be overrun with complaints
+at the expense of not hearing a valid reply.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Call procedure on local machine with wrong version"
+.sp 1
+.PP
+This calls a procedure that exists on the local machine but that has
+not been registered with this version number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Call procedure not registered on local machine"
+.sp 1
+.PP
+This calls a procedure that has not been registered with the local 
+portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Start two portmaps at once"
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should fail. 
+.fi
+.sp 2
+.H 3 "Start portmap without being superuser "
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should fail. 
+.fi
+.sp 2
+.H 2  "Nfsstat (Cristina Mahon)"
+
+.PP
+Nfsd displays statistical information about NFS and RPC.
+It is also used to reinitialize this information.
+.PP
+The command line for nfsstat is:
+.sp
+           nfsstat [ -csnrz ] [hp-ux]
+.sp 
+Most of this tests will probably be interactive tests.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Nfsstat with incorrect option"
+.sp 1
+.ad
+.PP
+If nfsstat is invoked with an option other than c, s, n, r or z
+it will return an usage message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       usage: nfsstat [-cnrsz] [hp-ux]
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with no options"
+.sp 1
+.ad
+.PP
+Nfsstat with no options is equivalent to nfsstat -csnr.  It
+returns information about both NFS and RPC clients and servers.
+Perform a mount of a remote filesystem, have a remote system 
+mount a filesystem from this machine, zero the statistics,
+do an ls of a remote directory and have the remote system do
+an ls of the directory it mounted from us.  These actions will
+modify the values for both the server and client information.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+.ad
+       The expected output will have to be dependent in exactly 
+what operations are performed between having the statistics
+checked.
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with combination of options"
+.sp 1
+.ad
+.PP
+The combinations of options are:
+.sp
+.nf
+-c: NFS and RPC client information, 
+-s: NFS and RPC server information, 
+-n: NFS client and server information, 
+-r: RPC client and server information, 
+-cs: client and server NFS and RPC information, 
+-nr: NFS and RPC client and server information, 
+-cn: NFS client information, 
+-cr: RPC client information, 
+-sn: NFS server information, 
+-sr: RPC server information, 
+-rsc: RPC server and client information, 
+-nsc: NFS server and client information,
+-nrsc: NFS and RPC client and server information.
+.fi
+.sp
+Each one of this operation can be tested by hand based
+on some values none to be correct (for example, reading
+a remote directory should increment certain statistics).
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT:
+       The expected output will have to be dependent in exactly 
+what operations are performed between having the statistics
+checked.
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with different kernel"
+.sp 1
+.ad
+.PP
+Run nfsstat on a system that has been booted from a kernel
+other than /hp-ux.  Doing a normal nfsstat without specifying
+the differnet kernel will return statistics for that kernel
+which are probably zeros.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+.ad
+       The correct statistics for whatever has happened on that
+system.  
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat -z"
+.sp 1
+.ad
+.PP
+Zero all statistics.  It will print the current statistics, then zero
+them.  If you do another nfsstat it will show zeros.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Zero statistics.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with z option on subsets"
+.sp 1
+.ad
+.PP
+Zero subsets of statistics.  It will print the current statistics, then zero
+the subset.  If you do another nfsstat it will show zeros for that subset.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Zero statistics for that subset.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat -z without being superuser"
+.sp 1
+.ad
+.PP
+It will print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       Must be root to use z flag.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat without being superuser"
+.sp 1
+.ad
+.PP
+If /dev/kmem is not readable by everyone, which is the normal
+way we ship it, then we will get an error message to that effect.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       /dev/kmem: Permission denied.
+.fi
+.na
+.sp 2
+.H 2  "Fsirand (Cristina Mahon)"
+
+.ad
+.PP
+Fsirand installs random inode generation numbers on all the
+inodes on the specified device and also installs a filesystem
+ID in the superblock.
+.PP
+The command line for fsirand is:
+.sp
+           fsirand [ -p ] device_name
+.sp 
+WARNING: Fsirand must be used only on an unmounted filesystem
+that has been checked with fsck.  The only exception is that it
+can be used on the root filesystem in single-user mode, if the
+system is immediately re-booted afterwards.
+.sp
+Due to the high risk involved in using this command, these tests
+should probably be interactive tests.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.na
+.sp 2
+.H 3 "Fsirand -p"
+.sp 1
+.PP
+This should print the current inode, generation number pair.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       A list of inode generation numbers.
+.fi
+.sp 2
+.H 3 "Fsirand without arguments"
+.sp 1
+.PP
+This should print an usage message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Usage: fsirand [-p] special"
+.fi
+.sp 2
+.H 3 "Fsirand with unknown device"
+.sp 1
+.PP
+This should print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Cannot open <device>"
+.fi
+.sp 2
+.H 3 "Fsirand with unknown option"
+.sp 1
+.PP
+This should print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Cannot open <device>" where device is the unknown option.
+.fi
+.sp 2
+.H 3 "Run fsirand"
+.sp 1
+.PP
+.ad
+First run fsirand -p on that device and save the information.
+Then run fsirand on that device and verify, through another fsirand -p,
+that the inode, generation pairs have changed.  
+Make sure the disk is unmounted!
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+.ad
+       The output of the second fsirand -p should be different from 
+the first and the disk should be correct (an fsck should not detect
+any errors).
+.na
+.fi
+.na
+.sp 2

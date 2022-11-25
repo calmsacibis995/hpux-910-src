@@ -1,0 +1,47 @@
+#
+# GATED configuration for Yoyo.AARNet.EDU.AU
+#
+# Yoyo runs the SL/IP link between Adelaide-Uni and CSIRO DMT
+#
+# This configuration file is for GateD V2.0
+# The manual page does NOT describe this version.
+#
+# Turn off the tracing, since it seems to be working OK now! :-)
+#tracefile "/var/tmp/gated.trace" replace ;
+#traceoptions config rip update ;
+
+# Only trust the gateways we know about,
+rip on {
+        trustedgateways
+                129.127.40.86   # pancho.adelaide.edu.au
+                129.127.40.42   # sa.gw.au
+                129.127.40.100  # multigate.ucs.adelaide.edu.au
+                192.83.238.8 ;  # aegir.adl.dmt.csiro.au
+} ;
+hello off ;
+egp off ;
+bgp off ;
+
+redirect on ;
+
+#
+# DMT have the nasty habit of sending us the default route even though they
+# have no path to it, so we only accept routes to DMS and DMT Adelaide from
+# them.
+#
+accept proto rip gateway 192.83.238.8 { # aegir.adl.dmt.csiro.au
+        listen 192.83.238 ;     # CSIRO-DMTADL
+        listen 192.42.60 ;      # DMS-ADEL
+} ;
+
+# Murray only wants local routes to go to DMT from here, the default route will
+# come through the internal CSIRO link to Melbourne.
+#
+# That internal link has gone away so we now must supply everything to DMT.
+#
+#propagate proto rip gateway 192.83.238.8 { # aegir.adl.dmt.csiro.au
+#       announce 129.96 ;       # FLINDERS-UNI
+#       announce 129.127 ;      # ADELAIDE-UNI
+#       announce 130.220 ;      # SAITEN
+#       announce 136.169 ;      # SACAENET
+#} ;

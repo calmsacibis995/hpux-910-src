@@ -1,0 +1,9 @@
+## FacetTerm  hp2622ans  COMMON  description file 10/08/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp2622ans.FC,v 70.1 92/03/09 16:00:14 ssa Exp $
+answer-...............................=2622\r
+question-...terminal_id_status_request=\E*s\^
+question-...terminal_id_status_request=\E*s1\^
+## identify's test for a WYSE terminal
+pass-identify_test_for_wyse=\E ^D
+pass-identify_clean_up=^D

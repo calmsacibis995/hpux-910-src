@@ -1,0 +1,886 @@
+.TH SYSDEBUG 63.0 ""
+.ad b
+.SH NAME
+SYSDEBUG \- kernel symbolic debugger
+.SH HP-UX COMPATIBILITY
+.TP 10
+Level:
+HP-UX/EXPERIMENTAL
+.TP
+Origin:
+Third Eye Software
+.SH TABLE OF CONTENTS
+.rs
+.nf
+.ta .4i .8i
+
+	\s-1DESCRIPTION\s+1
+	\s-1CONVENTIONS\s+1
+		Notational Conventions
+		Variable Name Conventions
+		Expression Conventions
+	\s-1COMMANDS\s+1
+		Display Formats
+		Data Viewing Commands
+		Job Control Commands
+		Breakpoint Commands
+		Miscellaneous Commands
+		Vi Editing Mode
+	\s-1DIAGNOSTICS\s+1
+	\s-1WARNINGS\s+1
+	\s-1BUGS\s+1
+	\s-1COMMENTS\s+1
+.fi
+.SH DESCRIPTION
+\fISYSDEBUG\fR
+provides a controlled environment for the execution of the kernel.
+It is powered up from the boot rom.
+.PP
+\fISYSDEBUG\fR will use a half megabyte of memory.
+It will either take that memory from the kernel or use the memory
+beginning at 0x880000 if it exists. One side affect of this is
+that systems that are going to use the kernel debugger cannot use
+the memory at 0x800000 for any monitors they wish to use.
+Due to its address limitation the kernel debugger must run at
+0x880000 on a 310.
+.PP
+\fISYSDEBUG\fR runs on all series 300 machines.
+Communication with the debugger is done via an RS232
+port set to select code 9 and a terminal.
+The internal port on all s300 machines set to select
+code 9 (this is the default setting) will work.
+Also a 98626 or 98644 RS232 card set to select code 9
+can be used.
+The terminal must be set to 7-bit mode, no parity.
+.PP
+The kernel debugger is set to automatically boot \fI/hp-ux\fR. If this
+is not desired hit any key when the appropriate message is displayed.
+The kernel can then be loaded with the 'r' or  'R' command.
+.PP
+Control can then be returned to the kernel debugger by setting a 
+breakpoint after the kernel has been loaded and run until the mapping
+has been turned on (see the 'r' command). Control can also be returned
+to the kernel debugger by hitting NMI (<shift-ctrl-reset>) after the 
+kernel has fully come up. And finally control is returned to the
+kernel debugger when a panic occurs.
+.PP
+The NMI is also used to exit from X-windows. If you are in X-windows and
+running the kernel debugger, the first NMI will get you out of X-windows,
+the second will put you into the debugger.
+.PP
+Entering the debugger via
+an NMI at disadvantageous times can be bad for your system.
+Specifically, if you enter the debugger when the system is running
+code that has a timeout around it you may hang the system when you
+continue. It is possible to set the debugger variable \fI$notime\fR
+to 1 if you think you may have done this.
+It is best to use the NMI when the system is
+quiescent.
+.SH CONVENTIONS
+The debugger remembers the current file, current procedure, current line, and
+current data location.
+Many commands use these current locations as defaults, and many commands
+set them as a side effect.
+It is important to keep this in mind when deciding what a command does
+in any particular situation.
+.PP
+In order to more fully utilize the features of the kernel debugger the
+procedure that is being debugged needs to be compiled with symbolic debug
+information turned on. This is the '-g' option of \fIcc\fR.
+For example,
+information about line numbers and local variables comes from the 
+symbolic debug information.
+Other differences are mentioned at relevant places in
+this manual.
+.SS "Notational Conventions"
+Most commands are of the form "[\fImodifier\fR\^] \fIcommand-letter\fR
+[\fIoptions\fR\^]".
+Numeric modifiers before and after commands can be any numeric expression.
+They need not be just simple numbers.
+A blank is required before any numeric \fIoption\fR.
+Multiple commands on one line must be separated by "\fB;\fR".
+.PP
+These are common modifiers and other special notations:
+.TP 13n
+(A | B | C)
+Any one of A or B or C is required.
+.TP
+[A | B | C]
+Any one of A or B or C is optional.
+.TP
+\fIfile\fR
+A file name.
+.TP
+\fIproc\fR
+A procedure (or function, or subroutine) name.
+.TP
+\fIvar\fR
+A variable name.
+.TP
+\fInumber\fR
+A specific, constant number (e.g. "9", not "4+5").
+Floating point (real) numbers are not supported.
+.TP
+\fIexpr\fR
+Any expression, but with limitations stated below.
+.TP
+\fIdepth\fR
+A stack depth, as printed by the "\fBt\fR" command.
+The top procedure is at a \fIdepth\fR of zero.
+A negative \fIdepth\fR acts like a \fIdepth\fR of zero.
+Stack depth usually means "exactly at the specified depth", not "the
+first instance at or above the specified depth".
+.TP
+\fIformat\fR
+A style for printing data.
+See the \fIData Viewing Commands\fR section below for details.
+.TP
+\fIcommands\fR
+A series of debugger commands, separated by "\fB;\fR", entered on the command
+line or saved with a breakpoint.
+Semicolons are ignored (as commands) so they can be freely used as command
+separators.
+Commands may be grouped with "\fB{}\fR" for the "\fBa\fR", "\fBb\fR",
+"\fBif\fR", and "\fB!\fR" commands.
+In all other cases commands inside "\fB{}\fR" are ignored.
+.SS "Variable Name Conventions"
+Variables are referenced exactly as they are named in your source file(s).
+Be careful with one letter variable names, since they can be confused with
+commands.
+If an expression begins with a variable that might be mistaken for a command,
+just enclose the expression in "\fB()\fR" (e.g. "(u)"),
+or eliminate any white space between the variable and the first operator
+(use "u=\09" instead of "u\0=\09").
+.PP
+Variables which are compiled with symbolic debug information are referenced
+in different ways than those that are not.
+Variables which are compiled with debug information can be referenced in
+the following ways.
+.PP
+If you are interested in the value of some variable \fIvar\fR, there are a
+number of ways of getting it, depending on where and what it is:
+.TP .6i
+\fIvar\fR
+Search the stack for the most recent instance of the current procedure.
+If found, see if \fIvar\fR is a parameter or local variable of that procedure.
+If not, search for a global variable named \fIvar\fR.
+.TP
+\fIproc\fB.\fIvar\fR
+Search the stack for the most recent instance of \fIproc\fR.
+If found, see if it has a parameter or local variable named \fIvar\fR, as
+before.
+.TP
+\fIproc\fB.\fIdepth\fB.\fIvar\fR
+Use the instance of \fIproc\fR that is at depth \fIdepth\fR (exactly), instead
+of the most recent instance.
+This is very useful for debugging recursive procedures where there are
+multiple instances on the stack.
+.TP
+\fB:\fIvar\fR
+Search for a global (not local) variable named \fIvar\fR.
+.PP
+Variables which are not compiled with symbolic debug information can  only
+be referenced in the following way.
+.TP .6i
+\fIvar\fR
+Search the linker symbol table for the global variable named \fIvar\fR.
+If found return the address of the variable.
+.TP
+\&\fB.\fR
+\fIDot\fR is shorthand for the last thing you viewed (see the \fIData Viewing
+Commands\fR section below).
+It has the same size it did when you last viewed it.
+For example, if you look at a \fBlong\fR as a \fBchar\fR, then "\fB.\fR" is
+considered to be one byte long.
+\fIDot\fR may be treated like any other variable.
+.RS
+.PP
+\s-1NOTE\s+1:  "\fB.\fR" is the \fIname\fR of this magic location.
+If you use it, it is dereferenced like any other name.
+If you want the \fIaddress\fR of something that is, say, 30 bytes farther on in
+memory, do not say "\fB.\fR+30".
+That would take the contents of \fIdot\fR and add 30 to it.
+Instead, say "&\fB.\fR+30", which adds 30 to the \fIaddress\fR of \fIdot\fR.
+.RE
+.PP
+Special variables are names for things that are not normally directly
+accessible.
+Special variables include:
+.TP
+\fB$\fIvar\fR
+The debugger has room in its own address space for a number of user-created
+special variables.
+There are 26 of them.
+They are all of type \fBlong\fR, and do not take on the type of any expression
+they are assigned to.
+Names are defined when they are first seen.
+For example, saying "$xyz = 3\(**4" creates special symbol "$xyz",
+and assigns to it the value 12.
+Special variables may be used just like any other variables.
+.TP
+\fB$pc\fR, \fB$ps\fR, \fB$sp\fR, \fB$a0\fR, etc.
+These are the names of the program counter, the processor status register, the stack
+pointer, address register 0, etc.
+To find out which names are available on your system, use the "\fBl\0r\fR"
+(list registers) command.
+\fB$sp\fR is a synonym for \fB$a7\fR.
+All registers act as type \fBinteger\fR.
+.TP
+\fB$result\fR
+This is used to reference the return value from the last procedure exit.
+Where possible, it takes on the type of the procedure.
+.TP
+\fB$notime\fR
+In order to make the debugger run in no time set this to one. In order to
+make it use time set it to zero.
+This is useful for debugging code running under a timeout.
+It is initialized to zero.
+.TP
+\fB$scroll\fR
+The debugger will scroll through multi-page output when this variable is
+set to one; it will not scroll when it is set to zero.
+It is initialized to zero.
+.PP
+To see all the special variables, including the predefined ones, use the
+"\fBl\0s\fR" (list specials) command.
+.PP
+You can also look up code addresses with
+.PP
+.RS
+\fIproc\^\fB#\fIline\fR
+.RE
+.PP
+which searches for the given procedure name and line number (which must be an
+executable line within \fIproc\fR\^) and uses the code address of that line.
+Just referring to a procedure \fIproc\fR by name uses the code address of
+the entry point to that procedure.
+.SS "Expression Conventions"
+Every expression has a value, even simple assignment statements, as in C.
+"Naked" expression values (those which aren't command modifiers) are always
+printed unless the next token is "\fB;\fR" (command separator) or "\fB}\fR"
+(command block terminator).
+Thus breakpoint commands (see the appropriate sections below) are
+normally silent.
+To force an expression result to be printed, follow the expression with
+"\fB/n\fR" (print in normal format; see below).
+.PP
+Integer constants may begin with "\fB0\fR" for octal or "\fB0x\fR" or
+"\fB0X\fR" for hexadecimal.
+.PP
+Character constants must be entered in \fB''\fR and are treated as
+\fBinteger\fRs.
+String constants must be entered in \fB""\fR and are treated like "\fBchar *\fR"
+(e.g. pointer to \fBchar\fR).
+Character and string constants may contain the standard backslashed escapes
+understood by the C compiler and the \fIecho\fR\^(1) command, including
+"\fB\eb\fR",
+"\fB\ef\fR",
+"\fB\en\fR",
+"\fB\er\fR",
+"\fB\et\fR",
+"\fB\e\e\fR",
+"\fB\e\(fm\fR",
+and
+"\fB\e\fInnn\fR\^".
+However, "\fB\e\fR<newline>" is not supported, neither in quotes nor at the
+end of a command line.
+.PP
+Expressions are composed of any combination of variables, constants, and C
+operators.
+The C operator "\fBsizeof\fR" is
+also available.
+.PP
+Expressions approximately follow the C rules of promotion, e.g. \fBchar\fR,
+\fBshort\fR, and \fBint\fR become \fBlong\fR.
+If either operand is \fBunsigned\fR, unsigned math is used.
+Otherwise, normal (integer) math is used.
+Results are then cast to proper destination types for assignments.
+.PP
+Use "\fB//\fR" for division, instead of "\fB/\fR", to distinguish from display
+formatting (see the \fIData Viewing Commands\fR section below).
+.PP
+If the first expression on a line begins with "\fB+\fR" or "\fB\-\fR", use
+"\fB()\fR" around it to distinguish from the "\fB+\fR" and "\fB\-\fR" commands
+(see the \fIData Viewing Commands\fR section below).
+Parentheses may also be needed to distinguish an expression from a command
+it modifies.
+.PP
+You can attempt to dereference any constant, variable, or expression result
+using the C "\fB\(**\fR" operator.
+If the address is invalid, an error is given.
+.PP
+Whenever an array variable is referenced without giving all its subscripts,
+the result is the address of the lowest element referenced.
+For example, consider an array declared as "x[5][6][7]" in C.
+Referencing it simply as "x" is the same as just "x" in C.
+Referencing it as "x[4]" is the same as "&\0(x[4][0][0])" in C,
+.PP
+If a not-fully-qualified array reference appears on the left side of an
+assignment, the value of the right-hand expression is stored into the element
+at the address specified.
+.PP
+For the purposes of expression evaluation variables which are
+compiled with symbolic debug information are treated different
+than those which are not. Variables with symbolic debug
+information are evaluated to be the value of that variable.
+Global variables without debug
+information are simply treated as constants, and their value is
+their address. In order to find out the value that is at that
+location it
+is necessary to use \fB*\fR to dereference them.
+.SH COMMANDS
+The debugger has a large number of commands for manipulating the kernel.
+They are explained below, grouped by functional similarity.
+.SS "Display Formats"
+A \fIformat\fR is of the form
+"[\fB\(**\fR][\fIcount\fR\^]\fIformchar\fR\^[\fIsize\fR\^]".
+.PP
+"\fB\(**\fR" means "use alternate address map" (access user space).
+.PP
+\fICount\fR is the number of times to apply the format style \fIformchar\fR.
+It must be a \fInumber\fR.
+.PP
+\fISize\fR is the number of bytes to be formatted for each \fIcount\fR, and
+overrides the default \fIsize\fR for the format style.
+It must be a positive decimal \fInumber\fR.
+\fISize\fR is disallowed with those \fIformchar\fR\^s where it makes no sense.
+.PP
+For example, "abc/4x2" prints, starting at the location of "abc", four
+two-byte numbers in hexadecimal.
+.PP
+The following formats are available:
+.TP 1i
+\fBn\fR
+Print in the "normal" format, based on the type.
+Arrays of \fBchar\fR and pointers to \fBchar\fR are interpreted as strings,
+and structures are fully dumped.
+.TP
+\fBd\fR
+Print in decimal.
+.TP
+\fBu\fR
+Print in unsigned decimal.
+.TP
+\fBo\fR
+Print in octal.
+.TP
+\fBx\fR
+Print in hexadecimal.
+.TP
+\fBb\fR
+Print a byte in decimal.
+.TP
+\fBc\fR 
+Print a character. Non-printing characters are printed as
+octal constants. Characters are printed 8 to a line.
+.TP
+\fBC\fR
+Print a character. Non-printing characters are printed as blanks.
+Characters are printed as a string.
+.TP
+\fBa\fR
+Print a string using \fIexpr\fR as the address of the first byte.
+.TP
+\fBs\fR
+Print a string using \fIexpr\fR as the address of a pointer to the first byte.
+This is the same as saying "\fB\(**\fIexpr\fB/a\fR", except for arrays.
+.TP
+\fBi\fR
+Print the assembly language instruction at location \fIexpr\fR.
+.TP
+\fBp\fR
+Print the name of the symbol containing address \fIexpr\fR.
+.TP
+\fBS\fR
+Do a formatted dump of a structure (only with symbol tables which support it).
+Note that \fIexpr\fR must be the address of a structure, not the address of
+a pointer to a structure.
+.PP
+It is also possible to display any location with the format of a structure
+that has been compiled with debug information.
+(e.g. 0x5000/iobuf will print the contents of an iobuf structure that begins
+at 0x5000)
+.PP
+If you view an object with a \fIsize\fR (explicitly or implicitly) less than or
+equal to the size of a \fBlong\fR, the debugger changes the basetype to
+something appropriate for that \fIsize\fR.
+This is so "\fB.\fR" (\fIdot\fR\^) works correctly for assignments.
+For example, "abc/x2" sets the type of "\fB.\fR" to \fBshort\fR.
+.SS "Data Viewing Commands"
+.PP
+For the following set of commands an \fIexpr\fR that evaluates to a
+constant is treated as the address of an integer.
+.rs
+.TP
+\fIexpr\fR
+If \fIexpr\fR does not look like anything else (such as a command), it is
+handled as if you had typed "\fIexpr\fB/n\fR" (print expression in normal
+format), unless followed by "\fB;\fR" or "\fB}\fR", in which case nothing
+is printed.
+.TP
+\fIexpr\^\fB/\fIformat\fR
+Print the contents (value) of \fIexpr\fR using \fIformat\fR.
+For example, "abc/x" prints the contents of "abc" as an \fBinteger\fR, in
+hexadecimal.
+.TP
+\fIexpr\^\fB?\fIformat\fR
+Print the address of \fIexpr\fR using \fIformat\fR.
+For example, "abc?o" prints the address of "abc" in octal.
+.TP
+\fB^\fR\^[\^[\fB/\fR\^]\fIformat\fR\^]
+Back up to the preceding memory location (based on the size of the last
+thing displayed).
+Use \fIformat\fR if supplied, or the previous \fIformat\fR if not.
+Note that no "\fB/\fR" is needed after the "\fB^\fR".
+Also note that you can reverse direction again (e.g. start going forward)
+by entering "\fB.\fR" (\fIdot\fR\^), which is always an alias for the current
+location, followed by carriage returns.
+.TP
+\fBl\fR [\fIproc\fR[.\fIdepth\fR\^]\^]
+List all parameters and local variables of the current procedure (or of
+\fIproc\fR, if given, at the specified \fIdepth\fR, if any).
+Data is displayed using "\fB/n\fR" format, except that all arrays,
+pointers, and structures are shown simply as addresses.
+.TP
+\fBl\fR (\fBb\fR | \fBx\fR )
+List all
+\fBb\fRreakpoints.
+or
+e\fBx\fRtra information.
+Extra information contains such things as exception vectors grabbed by the
+debugger, user stack pointer and other potentially useful information.
+.TP
+\fBl\fR (\fBf\fR | \fBg\fR | \fBl\fR | \fBp\fR | \fBr\fR | \fBs\fR | \fBt\fR) [\fIstring\fR\^]
+List all
+\fBf\fRiles (source files which built \fIobjectfile\fR\^),
+\fBg\fRlobal variables,
+\fBl\fRabels (program entry points known to the linker),
+\fBp\fRrocedure names,
+\fBr\fRegisters,
+\fBs\fRpecial variables (except registers),
+or
+\fBt\fRypes.
+If \fIstring\fR is present, only those things with the same initial
+characters are listed.
+.SS "Job Control Commands"
+.rs
+.TP
+[\fIcount\fR] \fBr\fR \fIname\fR
+Load the kernel with name \fIname\fR.
+\fICount\fR is used to specify the number of times to continue after
+loading the kernel. Acceptable values are:
+.PP
+.nf
+	 0 -- do not run the kernel at all
+	 1 -- run until mapping turned on, control is auto-
+	      matically returned to the debugger at this point.
+	      This is the default
+	 2 -- continue on after mapping turned on, control not 
+	      given back to the debugger
+.fi
+.TP
+[\fIcount\fR] \fBR\fR
+same as \fBr\fR above, but default the kernel file name to \fIhp-ux\fR.
+.TP
+[\fIcount\fR\^] \fBc\fR [\fIline\fR\^]
+Continue after a breakpoint or an NMI.
+If \fIcount\fR is given, the current breakpoint, if any, has its \fIcount\fR
+set to that value.
+If \fIline\fR is given, a temporary breakpoint is set at that line number,
+with a \fIcount\fR of \-1 (see the \fIBreakpoint Commands\fR section below).
+.TP
+[\fIcount\fR\^] \fBC\fR [\fIline\fR\^]
+Continue just like "\fBc\fR".
+.TP
+[\fIcount\fR\^] \fBs\fR
+Single step 1 (or \fIcount\fR\^) statements (source line).
+Successive carriage-returns repeat with a \fIcount\fR of 1.
+If \fIcount\fR is less than one, the kernel is not stepped.
+.RS
+.PP
+If you accidently step down into a procedure you don't care about, use the
+"\fBbU\fR" command to set a temporary up-level breakpoint, and then continue
+using "\fBc\fR".
+.RE
+.TP
+[\fIcount\fR\^] \fBS\fR
+Single step like "\fBs\fR", but treat procedure calls as single statements
+(don't follow them down).
+If a breakpoint is hit in such a procedure, or in one that it calls, its
+\fIcommands\fR are executed.
+This is usually alright, but beware if there is a "\fBc\fR" command in
+that breakpoint's command list!
+.TP
+[\fIcount\fR\^] \fBu\fR
+Single step 1 (or \fIcount\fR\^) machine instructions.
+.TP
+[\fIcount\fR\^] \fBU\fR
+Single step like "\fBS\fR", but do so at a machine instruction level.
+.SS "Breakpoint Commands"
+The debugger provides a number of commands for setting and deleting breakpoints.
+A breakpoint has three attributes associated with it:
+.TP
+\fIaddress\fR
+All the commands which set a breakpoint are simply alternate ways to specify
+the breakpoint address.
+The breakpoint is then encountered whenever \fIaddress\fR is about to be
+executed, regardless of the path taken to get there.
+Only one breakpoint at a time (of any type or count) may be set at a given
+\fIaddress\fR.
+Setting a new breakpoint at \fIaddress\fR replaces the old one, if any.
+.TP
+\fIcount\fR
+The number of times the breakpoint is encountered prior to recognition.
+If \fIcount\fR is positive, the breakpoint is "permanent", and \fIcount\fR
+decrements with each encounter.
+Each time \fIcount\fR goes to zero, the breakpoint is recognized and
+\fIcount\fR is reset to one (so it stays there until explicitly set to a
+different value by a "\fBc\fR" or "\fBC\fR" command).
+.RS
+.PP
+If \fIcount\fR is negative, the breakpoint is "temporary", and \fIcount\fR
+increments with each encounter.
+Once \fIcount\fR goes to zero, the breakpoint is recognized, then deleted.
+.PP
+A \fIcount\fR of zero is used internally by the debugger and means that the
+breakpoint is deleted when the kernel next stops for any reason, whether
+it hit that breakpoint or not.
+Commands saved with such breakpoints are ignored.
+Normally you never see these sorts of breakpoints.
+.PP
+Note that \fIcount\fR is set to either \-1 (temporary) or 1 (permanent) for any
+new breakpoint.
+It can then be modified only by the "\fBc\fR" or "\fBC\fR" command.
+.RE
+.TP
+\fIcommands\fR
+Actions to be taken upon recognition of a breakpoint before waiting for
+command input.
+These are separated by "\fB;\fR" and may be enclosed in "\fB{}\fR" to delimit
+the list saved with the breakpoint from other commands on the same line.
+If the first character is anything other than "\fB{\fR", or if the matching
+"\fB}\fR" is missing, the rest of the line is saved with the breakpoint.
+.RS
+.PP
+Remember that the results of expressions followed by "\fB;\fR" or "\fB}\fR"
+are not printed unless you specify a print format.
+You can use "\fB/n\fR" (normal format) to simply force printing of a result.
+.PP
+Saved commands are not parsed until the breakpoint is recognized.
+If \fIcommands\fR are nil then, after recognition of the breakpoint, the
+debugger just waits for command input.
+.PP
+The debugger has only one active command line at a time.
+When it begins to execute breakpoint commands, the remainder (if any) of the
+old command line is tossed, with notice given.
+.RE
+.PP
+Here are the breakpoint commands:
+.ne 10v
+.TP
+\fBl\0b\fR
+.PD 0
+.TP
+\fBB\fR
+.PD
+Both forms list all breakpoints in the format
+"\fInum\fR\^: count: \fInnn  proc\fR\^: \fIln\fR\^: \fIcontents\fR\^",
+followed by "{\fIcommands\fR\^}", e.g.:
+.PP
+.RS
+.nf
+ 0: count: \-1 (temporary)  sortall: 12: abc += 1;
+    {t;i/D}
+ 1: count: 5  fixit: 29: def = abc >> 4;
+    {Q;if \(**argv == \-1 {"Oops"}\|{c}}
+.fi
+.RE
+.RS .5i
+.PP
+The leftmost number is an index number for use with the "\fBd\fR" (delete)
+command.
+.RE
+.TP
+[\fIline\fR\^] \fBb\fR [\fIcommands\fR\^]
+Set a permanent breakpoint at the current line (or at \fIline\fR in the
+current procedure).
+When the breakpoint is hit, \fIcommands\fR are executed.
+If there are none, the debugger pauses for command input.
+If immediate continuation is desired, finish the command list with "\fBc\fR"
+(see breakpoint 1 in the example above).
+.TP
+[\fIexpr\fR\^] \fBd\fR
+Delete breakpoint number \fIexpr\fR.
+If \fIexpr\fR is absent, delete the breakpoint at the current line, if any.
+If there is none, the debugger executes a "\fBB\fR" command instead.
+.TP
+\fBD\fR
+Delete all breakpoints.
+.PP
+For the following commands, if the second character is upper case, e.g.
+"\fBbU\fR" instead of "\fBbu\fR", then the breakpoint is temporary
+(\fIcount\fR is \-1), not permanent (\fIcount\fR is 1).
+.TP
+[\fIdepth\fR\^] \fBbu\fR [\fIcommands\fR\^]
+.PD 0
+.TP
+[\fIdepth\fR\^] \fBbU\fR [\fIcommands\fR\^]
+.PD
+Set an up-level breakpoint.
+The breakpoint is set immediately after the return to the procedure at
+the specified stack \fIdepth\fR (default one, not zero).
+A \fIdepth\fR of zero means "current location", e.g. "\fB0bU\fR" is a way to
+set a temporary breakpoint at the current value of \fB$pc\fI.
+.TP
+\fIaddress\fR \fBba\fR [\fIcommands\fR\^]
+.PD 0
+.TP
+\fIaddress\fR \fBbA\fR [\fIcommands\fR\^]
+.PD
+Set a breakpoint at the given code address.
+.PP
+A sample breakpoint command would be:
+.PP
+.RS
+\fIproc\^\fB#\fIline ba\fR
+.RE
+.PP
+This command would set a breakpoint in procedure \fIproc\fR
+at line number \fIline\fR
+in the file.
+.PP
+The next few commands, while not strictly part of the breakpoint group,
+are used almost exclusively as arguments to breakpoints.
+.TP
+\fBif\fR\0[\fIexpr\fR\^]\0\fB{\fIcommands\^\fB}\fR\|[\fB{\fIcommands\^\fB}\fR]
+If \fIexpr\fR evaluates to a non-zero value, the first group of commands
+(the first "\fB{}\fR" block) is executed, else the second group (if any) is
+executed.
+The "\fBif\fR" command is nestable, and may be abbreviated to "\fBi\fR".
+.TP
+\fB"\fIany string you like\^\fB"\fR
+Print the given string, which may have the standard backslashed character
+escapes in it, including "\fB\\n\fR" for newline.
+This command is useful for labelling output from breakpoint commands.
+.SS "Miscellaneous Commands"
+.rs
+.TP
+<carriage-return>
+.PD 0
+.TP
+\fB~\fR
+.PD
+An empty line or a "\fB~\fR" command causes the debugger to repeat
+the last command, if possible, with an appropriate increment, if any.
+Repeatable commands are those which print a line,
+print a data value, single step, and single step over procedures.
+.TP
+\fBe\fR
+If the current procedure is compiled with debug information
+show the current file, procedure, and line number
+else
+show the show the current pc value and the assembly language instruction
+at that address
+.TP
+\fBh\fR
+print the history stack.
+.TP
+\fBI\fR
+Print information (inquire) about the state of the debugger.
+.TP
+\fBJ\fI address\fR<,\fIparameter\fR>
+Do a subroutine jump to \fIaddress\fR. Up to ten parameters, but
+no breakpoints set.
+.TP
+[\fIdepth\fR\^] \fBt\fR
+Trace the stack for the first \fIdepth\fR (default 20) levels.
+.SS Vi Editing Mode
+.I SYSDEBUG
+provides some of the command line editing features of ksh.
+The features provided are described below.
+.P
+There are two typing modes.
+Initially, when you enter a command you are in the
+.I input\^
+mode.
+To edit, the user enters
+.I control\^
+mode by typing ESC (
+.B 033
+) and
+moves the cursor to the point needing correction and
+then inserts or deletes characters or words as needed.
+.SS "\ \ \ \ \ Motion Edit Commands"
+.RS
+These commands will move the cursor.
+.TP 10
+\f3l\fP
+Cursor forward (right) one character. 
+.TP 10
+\f3h\fP
+Cursor backward (left) one character.
+.TP 10
+.B 0 
+Cursor to start of line.
+.TP 10
+.B $ 
+Cursor to end of line.
+.RE
+.SS "\ \ \ \ \ Search Edit Commands"
+.RS
+These commands access your command history.
+.TP 10
+\f3k\fP
+Fetch previous command. 
+Each time 
+.B k 
+is entered
+the previous command back in time is accessed.
+.TP 10
+\f3j\fP
+Fetch next command. 
+Each time 
+.B j 
+is entered
+the next command forward in time is accessed.
+.RE
+.SS "\ \ \ \ \ Text Modification Edit Commands"
+.RS
+These commands will modify the line.
+.TP 10
+.B a
+Enter input mode and enter text after the current character.
+.TP 10
+.B i
+Enter input mode and insert text before the current character.
+.TP 10
+.BI r c
+Replace the current character with
+.IR c .
+.TP 10
+\f3x\fP
+Delete current character.
+.RE
+.SH DIAGNOSTICS
+Most errors cause a reasonably accurate message to be given.
+.PP
+Debugger errors are preceded by "panic:\0", while user errors are not.
+If any error happens, the debugger attempts to reset
+itself to an idle state, waiting for command input.
+.SH WARNINGS
+Do not do any includes within a procedures since the debugger may
+not work properly.
+.PP
+Many compilers only issue source line symbols at the end of each logical
+statement or physical line, \fIwhichever is greater\fR.
+This means that, if you are in the habit of saying "a = 0; b = 1;" on one line,
+there is no way to put a breakpoint after the assignment to "a" but before the
+assignment to "b".
+.PP
+Multi-line statements, such as a multi-line \fIif\fR, may only have a line
+symbol generated at the end of the list of conditions.
+If you try to set a breakpoint on any but the last line of this statement, the
+breakpoint will actually be set \fIon the preceding statement\fR.
+Also, if you try to set a breakpoint before the first executable line of a
+procedure, it may be set at the last line of the previous procedure.
+You can detect this because the debugger tells you what line it really set the
+breakpoint on.
+.PP
+Some statements do not emit code where you would expect it.
+For example, assume:
+.PP
+.RS
+.nf
+.ta .1iR .4i .8i
+	99:	for (i = 0; i < 9; i++) {
+	100:		xyz (i);
+	101:	}
+.fi
+.RE
+.PP
+A breakpoint placed on line 99 will be hit only once in some cases.
+The code for incrementing is placed at line 101.
+Each compiler is a little different; you must get used to what your particular
+compiler does.
+A good way of finding out is to use single stepping to see in what order the
+source lines are executed.
+.PP
+The output of some program generators, such as \fIyacc\fR\^(1), have compiler
+line number directives in them that can confuse the debugger.
+It expects source line entries in the symbol table to appear in sorted order.
+Removal of line directives fixes the problem, but makes it more difficult to
+find error locations in the original source file.
+The following script, run after \fIyacc\fR\^(1) and before
+\fIcc\fR\^(1), comments out line number changes in C programs:
+.PP
+.RS
+sed\0"/# \(**line/s/^.\(**$/\e/\(**&\(**\e//"\0y.tab.c\0>temp.c
+.RE
+.PP
+In general, line number directives (or compiler options) are only safe so
+long as they never set the number backwards.
+.SH BUGS
+The C operators "\fB++\fR", "\fB\-\^\-\fR", and "\fB?:\fR" are not available.
+.PP
+The debugger doesn't understand C type casts.
+.PP
+The C operators "\fB&&\fR" and "\fB||\fR" aren't short circuit evaluated as
+in the compiler.
+All parts of expressions involving them are evaluated, with any side-effects,
+even if it's not necessary.
+.PP
+The debugger doesn't understand C pointer arithmetic.
+"\(**(a+n)" is not the same as "a[n]" unless "a" has an element size of 1.
+.PP
+There is no support for C local variables declared in nested blocks, nor
+for any local overriding a parameter with the same name.
+When looking up a local by name, parameters come first, then locals in the
+order of the "\fB}\fR"s of the blocks in which they are declared.
+When listing all locals, they are shown in the same order.
+When there is a name overlap, the address or data shown is that of the
+first variable with that name.
+.PP
+Register variables at other than the current level cannot be
+inspected. This means that \fIproc.depth.var\fR will not work with
+register variables.
+.PP
+Accessing a variable which is a pointer to user space will cause
+an address fault. Use the \fB*\fR format.
+.SH COMMENTS
+Assignment of less than 4 bytes to a location compiled without debug
+information is less than obvious.
+In order to do this first print the location as in
+.PP
+.DS
+    0x1000/x1
+.DE
+.PP
+Then to make the assignment type
+.PP
+.DS
+    .=0x63
+.DE
+.PP
+This will put the hex value 63 at location 0x1000
+.PP
+The kernel provides three procedure functions that can be used by
+the kernel. These are kdb_printf, kdb_scanf and kdb_gets. If the
+kernel is loaded by the kernel debugger these will be the locations
+of SYSDEBUG's printf routine, its scanf routine, and its gets routine.
+These can be used to write and read from the debugger terminal.
+If the kernel is not loaded by the kernel debugger, these routines
+are stubs.
+.PP
+An example of the declaration for the kernel debugger printf routine
+would be:
+.PP
+.DS
+    extern int (*kdb_printf)();
+.DE
+.PP
+An example of how to call the kernel debugger printf routine
+would be:
+.PP
+.DS
+    (*kdb_printf)("Hello cruel world!");
+.DE

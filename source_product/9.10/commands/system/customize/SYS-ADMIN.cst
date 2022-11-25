@@ -1,0 +1,43 @@
+#!/bin/ksh
+# @(#) $Revision: 70.2 $
+#
+fileset=SYS-ADMIN
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Remove obsolete files
+#   /etc/mkrs.devs is no longer used by /etc/mkrs
+#======
+/bin/rm -f /etc/mkrs.devs$CDF
+/bin/rm -f /etc/mkrs.devs
+/bin/rmdir /etc/mkrs.devs+ </dev/null >/dev/null 2>&1
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they do not already exist
+# or were not customized.
+#======
+cksum_cp $newconfig/backup /etc/backup "45422 10"
+
+#======
+# /etc/syslist --
+#    /etc/install doesn't need the default /etc/syslist contents, so we
+#    delete /etc/syslist if it is the same version that we shipped.
+#    We leave the file in place if it has been modified.
+#======
+if [ -f /etc/syslist ]; then
+    set -- `/bin/wc -lwc < /etc/syslist`
+    [ "$1,$2,$3" = "199,199,2513" ] && /bin/rm -f /etc/syslist
+fi
+
+exit $exitval

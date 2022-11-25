@@ -1,0 +1,106 @@
+
+We would  like to  suggest  an  organization  that can help in your code
+development:
+
+	(1) make three directories:
+		mkdir source
+		mkdir RCS
+		mkdir h (only if you intend to modify existing headers,
+			 or require developing new headers)
+
+	(2) archive  the  existing  source  into  RCS   format.  This is
+	    strongly  urged, so that the user can keep a careful history
+	    of source  changes.
+
+		% ci file.c
+
+	    You may want to reread the Revision Control System
+	    documentation at this point.
+
+	(3) move the source in the current directory to the directory: source.
+
+We now have a  skelton  for  users to study  and  develop  code to HP-UX
+drivers.
+
+	source: is a directory  containing  actual  driver  source and a
+		makefile.  All  code   development  and  kernel  'makes'
+		should occur here.  This makefile  simplifies the user's
+		development  tasks by creating an environment for future
+		source code development.
+
+	RCS:   is a directory that contains the source already archived.
+
+	h:     is  currently  an empty  directory,  but is intended  for
+	       those  users who may need to  develop  their  own  header
+	       files, or may need to keep modified headers locally.
+
+Archive  the  makefile  also.  Good  coding  practice  demands  that all
+changes to source, header files, or even to makefiles should be archived
+by the change.  Our skelton,  although  modest, is an attempt to inspire
+the user to maintain a detailed history of their code development.
+
+For the user who will  actually  modify code, we recommend the user does
+an explicit  check out of the file for editing.  For instance, to modify
+'scsi.c' remove the file source/scsi.c and then execute:
+
+	% co -l scsi.c
+
+In order for the user to actually link and load a kernel it is necessary
+to go through the typical steps in  config'ing a kernel.  *Please*  read
+the HP-UX  documentation for configuring a new kernel.  E.g.  choose the
+appropriate  'dfile'  and then do a config in the  directory  './source'
+Then the user may use our distributed  makefile to control the remaining
+events in linking and loading the kernel.
+
+IMPORTANT
+---------
+In  order to actually link with the modified ".o" files (such as  scsi.o 
+and scsi_if.o if they are the files being developed) it is necessary  to
+edit Makefile by adding the files to the DRIVER_OBJS line as follows.
+
+	/*** OLD DRIVER_OBJS line Makefile ***/
+
+	DRIVER_OBJS =
+
+	/*** NEW DRIVER_OBJS line in Makefile ***/
+
+	DRIVER_OBJS = scsi.o scsi_if.o
+
+Recompiling  the source:  
+
+It is a very valuable lesson for the user who intends to customize their
+kernel,  to  compile  the  ORIGINAL  source,  and link and load the scsi
+object code *BEFORE* any future modifications.
+
+Copy the  appropriate  version  of dfile  from  /etc/conf  to the  local
+directory,  and  modify  the file if  necessary.  Next,  run the  config
+program, to make conf.c and  config.mk  (the  makefile for  building the
+kernel).
+
+
+EXAMPLE SESSION
+------- -------
+Let us suppose we are modifying scsi.c.  We will want to compile and
+load scsi.o with the kernel.  Here is a sample list of steps:
+
+	% cd ./source
+	% cp /etc/conf/dfile.full.lan dfile
+	    <create or copy appropriate 'dfile'>
+	% config dfile
+	% vi Makefile
+	    <add scsi.o to DRIVER_OBJS line - see above>
+	% vi scsi.c
+	    <edit scsi.c as required>
+	% make hp-ux
+	    <our makefile will create and invoke 'drivers.mk'>
+
+The final step is to test your  kernel on a root disc.  First,  SAVE the
+original hp-ux in /SYSBCKUP or in  /hp-ux.save.  Next, mv hp-ux to / and
+shut the system down and reboot.  Here is a typical reboot sequence:
+
+	# mv /hp-ux /hp-ux.save
+	# sync
+	# mv hp-ux /
+	# reboot
+
+	Good Luck! and Goodbye.

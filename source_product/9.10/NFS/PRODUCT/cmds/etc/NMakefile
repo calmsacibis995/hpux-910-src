@@ -1,0 +1,103 @@
+/*
+##
+#	NMakefile - nmake style makefile for NFS /etc source
+#	
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/89
+##
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+SDIR = $(SRCDIR:/^$/./)
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+CSOURCE = nfsd.c biod.c portmap.c fsirand.c pcnfsd.c ypbind.c \
+	  /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+
+build:		$$(TARGET)
+
+bfa :
+        $(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+                CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+                CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" 
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+nfsd: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o nfsd $(SDIR)/nfsd.c $(LIBCA) $(LIBSEC) \
+	      $(SECFLAGS)
+
+biod:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o biod $(SDIR)/biod.c $(LIBCA)
+
+portmap:
+	LDOPTS="-a archive"
+	export LDOPTS
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o portmap $(SDIR)/portmap.c $(LIBCA)
+
+fsirand:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o fsirand $(SDIR)/fsirand.c $(LIBCA) \
+	      $(SECFLAGS)
+
+pcnfsd:		logging$(USCORE).o  $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o pcnfsd $(SDIR)/pcnfsd.c logging$(USCORE).o $(LIBCA)  $(LIBSEC) $(SECFLAGS)
+
+ypbind:		logging$(USCORE).o
+	LDOPTS="-a archive"
+	export LDOPTS
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o ypbind $(SDIR)/ypbind.c logging$(USCORE).o $(LIBCA)
+
+yp:;
+	chmod +w .
+	touch yp
+	$(RM) yp
+	su bin -c "umask 022; ln -s /usr/etc/yp yp"
+	
+
+logging.o:	/source/NFS/$(USER)/cmds/usr.etc/logging.c
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+logging_.o:	/source/NFS/$(USER)/cmds/usr.etc/logging.c
+	$(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c 
+
+state:;		/bin/touch state
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build
+
+priv_lib.o: /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+	$(CC) $(NMCFLAGS)  -c /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+

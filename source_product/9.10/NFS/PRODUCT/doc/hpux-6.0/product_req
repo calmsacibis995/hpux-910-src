@@ -1,0 +1,894 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Product Requirements Document"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'Product Requirements Document''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+PRODUCT REQUIREMENTS DOCUMENT
+S300/S800 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:31:19 $
+$Revision: 1.35.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Jeff Lindberg
+Author: Dan Simula
+.ps 10
+.vs 12
+.sp 6
+.ad
+The s300/s800 NFS project is responsible for providing Sun's Network File
+System  (NFS) on the HP 9000  Series  300/800  HP-UX  systems.  NFS
+provides a means of transparently sharing  files among heterogeneous
+systems on a common network.  Remote  file  access remains invisible
+to users.
+.sp 1
+The NFS  code  will be  ported  from  source  code  provided  by Sun
+Microsystems,   Inc.  in  accordance   with  Sun's  NFS   technology
+licensing  agreement.  To insure compatibility and connectivity in a
+multi-vendor network environment, the HP NFS product will conform to
+the  multi-vendor  industry standards   implemented  by  Sun.  These
+standards are defined by the NFS protocol specifications.
+.sp 1
+Unless otherwise stated, all objectives and comments herein refer
+to both the series 300 and the series 800.
+.na
+.H 1 "PRODUCT OBJECTIVES"
+.H 2 "Key Product Features"
+.ad
+The objective of the NFS project is to provide an industry 
+standard remote file access capability across heterogeneous 
+operating systems for the HP 9000 s300/s800.  The NFS Services/300 
+and NFS Services/800 products will be based on Sun's 3.0 release 
+of NFS.  The primary features of these products include:
+.na
+.nf
+
+	o The industry standard Network File System (NFS).
+	  Capabilities include mounting of remote file systems
+	  and accessing remote files across a local area network.
+
+	o The Yellow Pages services (YP).
+	  A service, independent from NFS, that provides a
+	  centrally administered, distributed data lookup service.
+
+	o Remote Procedure Call (RPC) and 
+	  External Data Representation (XDR).
+	  A programmatic interface for inter-process communication,
+	  including machine independent data formats.
+
+	o The PC-NFS daemon, pcnfsd(1m).
+
+	o Associated NFS/RPC User Commands.
+.fi
+.bp
+.H 2 "Quality Objectives"
+.ad
+The overall goal is to have a product of quality equal to or better
+than Sun's NFS product.
+The quality objectives are based
+on the FURPS model.
+.na
+.sp 2
+.H 3 "Functionality Objectives"
+.sp 1
+.nf
+	MUST	- Provide 100 percent of Sun's NFS (rel 3.0)
+		  functionality The exact feature set is defined 
+		  by the MUST level objectives in the Detailed 
+		  Functionality section.
+
+.fi
+.sp 2
+.H 3 "Usability Objectives"
+.sp 1
+.nf
+	MUST 	- Provide natural language support (NLS), otherwise
+		  known as "localizibility".  Localizibility includes
+		    o support of 7, 8, and 16 bit characters,
+		    o conformance with the HP-15 standard (see notice),
+		    o support for local customs (e.g., date formats),
+		    o support for message catalogues.
+
+
+	================================================================
+				IMPORTANT NOTICE
+
+	A  design  flaw  exists  in  the  current  HP-15  Standard.  The
+	Standard  restricts  computer  systems  on the same  network  to
+	support the same 16-bit  character  set.  The existing  uucp and
+	LAN products are in violation of this restriction.
+
+	THERE WILL BE NO ATTEMPT IN THIS PROJECT TO RECTIFY THE PROBLEM.
+	================================================================
+
+
+	MUST	- The user must be able to optionally configure
+		  the NFS product into the HP-UX kernel.
+
+	MUST 	- Usability greater than or equal to Sun, as
+		  measured by feedback from Beta sites.
+
+	MUST 	- Provide HP-quality documentation.
+
+	HW	- Provide a common user interface for the s300
+		  and s800.
+
+	W 	- Improve diagnostic and error messages
+		  (i.e., readability and correctness).
+
+	W	- Provide system configuration tools.
+.fi
+.sp 2
+.H 3 "Reliability Objectives"
+.sp 1
+.fi
+.ad b
+s300 Reliability Objectives
+.sp 1
+The reliability objectives for the NFS Services/300 product 
+address user-space code and kernel code separately.  
+Essentially, the objectives for the NFS Services/300 product are to 
+1) attain HP quality for all NFS kernel code and 
+2) to attain quality equal to or better than Sun's 
+NFS product for all NFS user-space code.
+.sp 1
+The reliability objectives for the NFS Services/300 product 
+are significantly less stringent than those for the s800 product.  
+.sp 1
+.nf
+	MUST	- Fix all known defects with DTS weights greater than
+		  or equal to six.
+
+	MUST 	- Obtain 70 percent code depth coverage for kernel code.
+
+	MUST	- Demonstrate overall system reliability by successfully
+		  completing 24, 48 and 120 hour reliability tests.
+
+	MUST	- Have no system crashes caused by unknown NFS
+		  defects during the last 20 calendar days before
+		  release to manufacturing.
+
+	MUST 	- Show that the number of outstanding medium, serious and 
+		  critical defects known at release to manufacturing is 
+		  less than or equal to the number of medium, serious and 
+		  critical defects known to exist in Sun's NFS product.
+
+	MUST	- Pass all tests in the functional test suite as
+		  a final bits test.  For the s300 product, this test
+		  must be run before releasing the bits to SSIT
+		  and also after SSIT has returned the final bits.
+
+	MUST	- Pass the Sun-supplied NFS tests.
+
+	HW	- Kernel code depth coverage will be equal to or
+		  greater than 85 percent (ING goal).
+
+	HW 	- Obtain 70 percent code depth coverage for user code.
+
+	HW	- Attain a SRs/KNCSS less than or equal to 0.1212 
+		  SD/KNCSS, assuming 12/87 shipments.
+
+
+
+s800 Reliability Objectives
+.sp 1
+.fi
+.ad b
+See the NFS/800 Project Plan and Life Cycle for definition of the
+quality certification criteria that will be met at various
+milestones for the NFS/800 project.  
+These criteria 
+are derived from the
+Spectrum HP-UX Certification Acceptance Criteria and are
+consistent with the HP-PA release 2.0 program objectives.  
+They include defect density, code coverage (both depth and
+breadth coverage), and number of hours of reliability.
+.sp 1
+Other quality objectives for NFS/800 are listed below.
+.sp 1
+.nf
+	MUST	- Demonstrate code stability by showing that the
+		  following measures have a consistent downward trend.
+		  The two code stability measures are 1) module change
+		  rate, and 2) rate of defect detection.  Any indication
+		  of increasing rates or rates which have peaked and
+		  flattened out will result in non-acceptance of the
+		  software.
+
+	MUST	- Have no system crashes caused by unknown NFS
+		  defects during the last 20 calendar days before
+		  release to manufacturing.
+
+	MUST 	- Show that the number of outstanding medium, serious 
+		  and critical defects known at release to manufacturing 
+		  is less than or equal to the number of medium, serious 
+		  and critical defects known to exist in Sun's NFS product.
+
+	MUST	- Pass all tests in the functional test suite as
+		  a final bits test.  
+
+	MUST	- Pass the Sun-supplied NFS tests.
+
+	HW	- Code depth coverage will be equal to or
+		  greater than 85 percent (ING goal).
+
+	HW	- Attain a SRs/KNCSS less than or equal to 0.1080
+		  SD/KNCSS, assuming 3/88 shipments.
+
+.fi
+.sp 2
+.H 3 "Performance Objectives"
+.sp 1
+.ad
+Performance comparisons will be made
+between two HP systems and two Sun systems.  The
+comparisons will involve equivalent hardware systems.
+For testing purposes, the performance of equivalent
+systems should be evaluated under similar loads
+and conditions.
+.sp 1
+.nf
+	MUST	- Attain performance competitive with Sun's NFS 
+		  performance as measured by a NFS specific benchmark. 
+		  These comparison will be performed on systems 
+		  configured with equivalent hardware.  The actual 
+		  benchmark has not been determined.  Specifically,
+		  attain the following level of performance:
+
+		  Model 330:  75% of Sun 3/160
+		  Model 350:  75% of Sun 3/260
+		  Model 825:  55% of Sun 3/260
+
+		  The HP systems listed above are in the same general
+		  price range as the corresponding Sun systems.
+
+	MUST	- Attain YP performance equal to Sun's, as measured
+		  by the average elapsed time for a user to log into
+		  a system.
+
+	HW	- Attain performance equal to or better than Sun's
+		  NFS performance.  Specifically:
+
+		  Model 330:  at least equal to Sun 3/160
+		  Model 350:  at least equal to Sun 3/260
+		  Model 825:  at least 85% Sun 3/260
+
+	HW	- Attain Yellow Pages performance better than Sun's
+		  as measured by the average elapsed time for a user
+		  to log in.
+.fi
+.sp 2
+.H 3 "Supportability Objectives"
+.sp 1
+.nf
+	MUST	- Provide NFS-specific diagnostic capabilities which
+		  are functionally equivalent to those provided by
+		  Sun.
+
+	MUST 	- Attain a level of supportability better than or
+		  equal to Sun, as evaluated by Beta sites.
+
+	HW	- Provide better diagnostic capabilities than Sun's.
+.fi
+.bp
+.H 2 "Detailed Functional Objectives"
+.nf
+	MUST 	- Provide NFS capabilities for the s300/800 HP-UX
+		  systems.  NFS provides transparent access to
+		  files in a heterogeneous environment. Specific
+		  capabilities include mounting remote file systems
+		  and transparently accessing remote files.
+
+	MUST    - Support the programmatic interfaces to the
+		  YP or RPC/XDR libraries.  
+
+	MUST	- Provide the Yellow Pages (YP) services.
+		  Specifically, provide the user level commands
+		  needed for global system administration of 
+		  certain "key" name files (e.g.,  /etc/passwd and
+		  /etc/hosts). See Appendix 1 for a list of commands.
+
+	MUST	- Provide associated NFS/RPC user level commands.
+
+	MUST	- Provide the pcnfsd(1m) daemon. The pcnfsd(1m) daemon
+		  provides MS-DOS clients running Sun's PC-NFS
+		  with remote file access, user authentication and
+		  remote printing capabilities on HP-UX systems.
+
+	MUST 	- Modify selected HP-UX commands affected by NFS so that
+		  they correctly function in a networked file system.
+		  See Appendix 5 for the list of commands that will
+		  require modification.
+
+	HW	- Modify all HP-UX commands affected by NFS so that
+		  they correctly function in a networking file system.
+.fi
+.bp
+.H 2 "System Attributes"
+.ad
+In  addition  to the formal  quality  objectives,  other
+objectives  related  to  system  attributes  are  considered  vital.
+Meeting  these  objectives  will  result in a product  that  will be
+perceived as being highly usable in a  multi-vendor
+environment and as exhibiting "HP added value."
+.na
+.sp 2
+.H 3 "Connectivity Objectives"
+.sp 1
+.nf
+
+S300 Connectivity Objectives
+
+	MUST	- Provide tested connectivity with the following
+		  NFS systems and implementations:
+
+		      o Sun's NFS (the two latest major releases;
+			currently 3.0 and 3.2)
+		      o Wollongong's NFS (server only) running
+			on a VAX/VMS system,
+		      o Sun's PC-NFS (client only, release 1.0 and 2.0) 
+			running on a Vectra and IBM PC-AT,
+		      o s300 HP-UX 6.0 running as a discless node.
+
+	MUST	- Provide tested connectivity via the following HP
+		  networking products:
+		      o RND bridge box (MacBridge),
+		      o s300 IP gateway, and
+		      o s800 IP gateway (if available in 2.0).
+
+	MUST	- Provided tested connectivity through a Sun system
+		  acting as an IP gateway.
+
+	HW	- Perform informal connectivity testing to other
+		  systems at the Connect-a-thon and at Uniforum.
+
+	HW	- Perform informal connectivity testing to other
+		  systems through Alpha and Beta sites.
+
+	W	- Provide tested connectivity via the following HP
+		  networking products:
+		      o s800 IP gateway (if available in 2.0).
+
+	W 	- Provide tested connectivity with Mt. Xinu's 
+		  NFS for 4.3BSD systems (i.e., VAX/UN*X systems).
+
+	W 	- Provide tested connectivity with VAX/ULTRIX,
+		  but only if this configuration is supported by
+		  the NS-ARPA/300 product.
+
+
+.bp
+s800 Connectivity Objectives
+
+	MUST    - Provide the same supported and tested connectivity 
+		  as NFS/300.  See the following objectives for a
+		  specific list:
+
+	MUST	- Provide tested connectivity with the following
+		  NFS systems and implementations:
+
+		      o Sun's NFS (the two latest major releases;
+			currently 3.0 and 3.2)
+		      o Wollongong's NFS (server only) running
+			on a VAX/VMS system,
+		      o Sun's PC-NFS (client only, releases 1.0 and 2.0) 
+			running on  Vectra and IBM PC-AT,
+		      o HP-UX 6.0 w/NFS running on a discless s3x0,
+		      o HP-UX 6.0 w/NFS running on s3x0 systems, 
+
+	MUST	- Provide tested connectivity via the following HP
+		  networking products:
+		      o RND bridge box (MacBridge),
+		      o s300 IP gateway, and
+		      o s800 IP gateway 
+
+	MUST	- Provided tested connectivity through a Sun system
+		  acting as an IP gateway.
+
+	HW	- Perform informal connectivity testing to other
+		  systems at the Connect-a-thon and at Uniforum.
+
+	HW	- Perform informal connectivity testing to other
+		  systems through Alpha and Beta sites.
+
+	W 	- Provide tested connectivity with Mt. Xinu's 
+		  NFS for 4.3BSD systems (i.e., VAX/UN*X systems).
+
+	W 	- Provide tested connectivity with VAX/ULTRIX,
+		  but only if this configuration is supported by
+		  the LINK/800 product.
+
+.fi
+.sp 2
+.H 3 "Compatibility Objectives"
+.sp 1
+.nf
+	MUST	- NFS must be object code compatible with
+		  previous HP-UX releases.  Customers should
+		  not have to re-compile programs that perform
+		  local file system operations.
+
+	MUST	- NFS, RPC and XDR protocols must be compatible
+		  with Sun's implementation.
+
+	MUST 	- NFS must coexist with current HP networking
+		  products: specifically the NS and the ARPA/
+		  Berkeley services.  Co-existence is defined as
+		  the ability to
+		      o be co-operable,
+		      o share the same hardware,
+		      o share the same network drivers, and
+		      o use the same network.
+
+	MUST	- NFS must coexist with HP-UX/discless/300 nodes.
+
+	MUST	- NFS must be integrated with HP-UX in such
+		  a way that it does not conflict with the HP-UX
+		  standard.
+
+	HW	- Provide a user interface that is identical
+		  to Sun's.  Obvious exceptions to this would
+		  be improved error messages and commands that
+		  must be modified to avoid conflicts with the
+		  HP-UX standard.
+
+	HW	- Provide a programmatic interface that is
+		  identical to Sun's.  Note that this programmatic 
+		  interface is provided, but not fully supported.
+
+.fi
+.sp 2
+.bp
+.H 2 "Timeliness Objectives"
+.ad
+The following objectives deal with timeliness to market. Although
+they do not relate to traditional quality metrics, they do have a
+significant impact on how successful the NFS product will be.
+.na
+.sp 2
+.nf
+	MUST	- Ship the s300 NFS products by December '87.
+
+	MUST	- Release the series 300 NFS concurrent with
+		  or before the 6.0 HP-UX release.
+
+	MUST	- Release the series 800 NFS concurrent with
+		  or before the 2.0 HP-UX release.
+.fi
+.bp
+.H 2 "User Definition"
+.nf
+	General Customers
+	  - individuals that already have NFS running on other systems.
+	  - companies that want remote file access between computers with
+	    heterogeneous operating systems.
+
+	Initial Customers
+	  - users familiar with NFS.
+	  - engineers using CAE, CAD, CAM and CASE applications.
+	  - government-driven, defense industrial complexes.
+	  - university research environments.
+
+	Future Customers
+	  - volume end users who need to access files across systems
+	    with heterogeneous operating systems (e.g., Fortune 500
+	    corporations doing CAD, CAD, CAM and CASE tasks).
+	  - end users who need to connect MS-DOS based PCs and PC
+	    networks with systems operating in a technical computing
+	    environment.
+
+.fi
+.bp
+.H 2 "Product Environment"
+.H 3 "Hardware Environment"
+.sp 1
+.ad
+The target hardware is an HP 9000 s300 or s800 HP-UX computer system.
+.sp 1
+The S300 host computer must be equipped with a
+98643A DIO-LAN or an equivalent built-in LAN interface for the
+Model 330 and 350.  The S800 host computer must be equipped with a
+27125A/B CIO-LAN interface card.
+.sp 1
+The minimal useful configuration is one HP 9000 s300 or s800
+and one other node. Both must support NFS, connect to the
+same LAN cable, and use the same physical-level protocol
+(ETHERNET or IEEE 802.3).
+.na
+.sp 2
+.H 3 "Software Environment"
+.sp 1
+.ad
+The target software environment for the NFS product is the
+HP-UX operating system with TCP/IP support, including the
+inetd daemon and sockets.  
+.sp 1
+On the Series 300, NFS depends on the HP-UX AXE product,
+and the NS-ARPA Services/300 product.  On the Series 800,
+NFS depends on the HP-UX product and the LAN/800 product
+(previously called LINK/800).
+.sp2
+.bp
+.H 2 "Non-Objectives"
+.nf
+	The following items are specific NON objectives for
+	this project:
+
+	  WILL NOT - Provide Sun 3.2 NFS features.
+
+	  WILL NOT - Support 4.2 or 4.3 BSD features unless they
+		     are specific to NFS or currently exist in HP-UX.
+
+	  WILL NOT - Provide 4.3 BSD quota functionality.
+		     Quota functionality provides a way of
+		     limiting the amount of file system space
+		     that any single user can consume.
+
+	  WILL NOT - Provide "discless" workstation capabilities.
+		     NOTE: HP-UX/Discless/300 is providing discless 
+		     workstation capabilities for the Series 300.
+
+	  WILL NOT - Provide access to remote device files.
+
+	  WILL NOT - Provide the rarpd daemon or arp command.
+		     No NFS-specific functionality is provided by
+		     rarpd or arp.
+
+.fi
+.aH "Appendix 1: Yellow Pages commands and libraries"
+.sp 2
+.nf
+OWNER		Dave Erickson
+DIVISION	CND
+.sp 2
+.cu 1
+COMMANDS
+.sp 1
+etc/ypbind.c
+.sp 1
+usr.bin/ypcat.c
+usr.bin/ypmatch.c
+usr.bin/yppasswd.c
+usr.bin/ypwhich.c
+usr.etc/rpc.yppasswdd.c
+.sp 1
+usr.etc/yp/make.script
+usr.etc/yp/makedbm.c
+usr.etc/yp/revnetgroup/getgroup.c
+usr.etc/yp/revnetgroup/getgroup.h
+usr.etc/yp/revnetgroup/revnetgrp.c
+usr.etc/yp/revnetgroup/table.c
+usr.etc/yp/revnetgroup/table.h
+usr.etc/yp/revnetgroup/util.c
+usr.etc/yp/revnetgroup/util.h
+usr.etc/yp/stdhosts.c
+usr.etc/yp/ypinit.sh
+usr.etc/yp/yppoll.c
+usr.etc/yp/yppush.c
+usr.etc/yp/ypset.c
+usr.etc/yp/ypxfr.c
+usr.etc/yp/ypxfr_1perday
+usr.etc/yp/ypxfr_1perhour
+usr.etc/yp/ypxfr_2perday
+.sp 1
+usr.etc/ypserv/ypserv.c
+usr.etc/ypserv/ypserv_ancil.c
+usr.etc/ypserv/ypserv_map.c
+usr.etc/ypserv/ypserv_proc.c
+usr.etc/ypserv/ypsym.h
+.sp 2
+.cu 1
+LIBRARIES
+.sp 1
+lib/libc/yp/yp_all.c
+lib/libc/yp/yp_bind.c
+lib/libc/yp/yp_enum.c
+lib/libc/yp/yp_master.c
+lib/libc/yp/yp_match.c
+lib/libc/yp/yp_order.c
+lib/libc/yp/yp_prot.h
+lib/libc/yp/ypclnt.h
+lib/libc/yp/yperr_string.c
+lib/libc/yp/ypprot_err.c
+lib/libc/yp/ypv1_prot.h
+lib/libc/yp/ypv1_xdr.c
+lib/libc/yp/ypxdr.c
+.sp 1
+usr.lib/libdbm/dbm.c
+usr.lib/libdbm/dbm.h
+usr.lib/librpcsvc/yppasswd.h
+usr.lib/librpcsvc/yppasswdxdr.c
+.sp 2
+.cu 1
+AUXILIARY COMMANDS
+.sp 1
+bin/domainname.c
+
+.aH "Appendix 2: RPC/XDR programmatic interface"
+.nf
+.sp 2
+OWNER		John Dilley  
+DIVISION	CND
+.sp 2
+.cu 1
+LIBRARIES
+.sp 1
+lib/libc/rpc/auth.h
+lib/libc/rpc/auth_kern.c
+lib/libc/rpc/auth_none.c
+lib/libc/rpc/auth_unix.c
+lib/libc/rpc/auth_unix.h
+lib/libc/rpc/authunix_prot.c
+lib/libc/rpc/clnt.h
+lib/libc/rpc/clnt_kudp.c
+lib/libc/rpc/clnt_perror.c
+lib/libc/rpc/clnt_raw.c
+lib/libc/rpc/clnt_simple.c
+lib/libc/rpc/clnt_tcp.c
+lib/libc/rpc/clnt_udp.c
+lib/libc/rpc/kudp_fastsend.
+lib/libc/rpc/pmap_clnt.c
+lib/libc/rpc/pmap_clnt.h
+lib/libc/rpc/pmap_getmaps.c
+lib/libc/rpc/pmap_getport.c
+lib/libc/rpc/pmap_prot.c
+lib/libc/rpc/pmap_prot.h
+lib/libc/rpc/pmap_rmt.c
+lib/libc/rpc/rpc.h
+lib/libc/rpc/rpc_msg.h
+lib/libc/rpc/rpc_prot.c
+lib/libc/rpc/subr_kudp.c
+lib/libc/rpc/svc.c
+lib/libc/rpc/svc.h
+lib/libc/rpc/svc_auth.c
+lib/libc/rpc/svc_auth.h
+lib/libc/rpc/svc_auth_unix.
+lib/libc/rpc/svc_kudp.c
+lib/libc/rpc/svc_raw.c
+lib/libc/rpc/svc_simple.c
+lib/libc/rpc/svc_tcp.c
+lib/libc/rpc/svc_udp.c
+lib/libc/rpc/types.h
+lib/libc/rpc/xdr.c
+lib/libc/rpc/xdr.h
+lib/libc/rpc/xdr_array.c
+lib/libc/rpc/xdr_float.c
+lib/libc/rpc/xdr_mbuf.c
+lib/libc/rpc/xdr_mem.c
+lib/libc/rpc/xdr_rec.c
+lib/libc/rpc/xdr_reference.
+lib/libc/rpc/xdr_stdio.c
+.sp 1	
+usr.lib/librpcsvc/ether.h
+usr.lib/librpcsvc/etherxdr.c
+usr.lib/librpcsvc/mount.h
+usr.lib/librpcsvc/mountxdr.c
+usr.lib/librpcsvc/rstat.h
+usr.lib/librpcsvc/rstatxdr.c
+usr.lib/librpcsvc/rusers.h
+usr.lib/librpcsvc/rusersxdr.c
+usr.lib/librpcsvc/rwall.h
+usr.lib/librpcsvc/rwallxdr.c
+usr.lib/librpcsvc/spray.h
+usr.lib/librpcsvc/sprayxdr.c
+usr.lib/librpcsvc/util.c
+.sp 1
+.aH "Appendix 3: NFS/RPC user commands"
+.nf
+.sp 2
+OWNERS		mak:  Mark Kepke
+		jad:  John Dilley
+DIVISION	CND
+.sp 2
+                             	Owner	
+.cu 1
+COMMANDS
+.sp 1
+etc/biod.c			mak
+etc/fsirand.c			mak	
+etc/nfsd.c			mak
+etc/portmap.c			mak
+.sp 1
+ucb/rup.c			jad	
+ucb/rusers.c			jad	
+.sp 1
+usr.etc/nfsstat.c		mak	
+usr.etc/rpc.mountd.c		jad
+usr.etc/rpc.rstatd.c		jad	
+usr.etc/rpc.rusersd.c		jad	
+usr.etc/rpc.rwalld.c		jad	
+usr.etc/rpc.sprayd.c		jad
+usr.etc/rwall.c			jad	
+usr.etc/showmount.c		jad
+usr.etc/spray.c			jad
+.sp 1
+.aH "Appendix 4: NFS libraries and system calls"
+.nf
+.sp 2
+OWNERS    ms:   Mike Shipley
+          gmf:	George Feinberg
+	  jad:  John Dilley
+.sp 2
+.cu 1
+LIBRARIES
+.sp 1
+					Owner
+.sp 1	
+lib/libc/gen/mntent.c			jad (CND)
+lib/libc/net/ether_addr.c		jad (CND)
+lib/libc/net/getnetgrent.c		jad (CND)
+lib/libc/net/getrpcent.c		jad (CND)
+lib/libc/net/innetgr.c			jad (CND)
+.sp 2
+.cu 1
+SYSTEM CALLS
+.sp 1
+.nf
+		   Implement    Owner 300/    RFA     Owner         with NFS
+                                      800    Support  (for RFA)     or HP-UX
+.sp 1
+Source: HP
+.sp 1
+lstat()               Must      SSO/ISO       Yes      gmf/ms (CND)   HP-UX
+nfsmount()            Must      gmf(CND)/?    N/A                     HP-UX
+readlink()            Must      SSO/ISO       Yes      gmf/ms (CND)   HP-UX
+rename()              Must      SSO/ISO       Yes      gmf/ms (CND)   HP-UX
+symlink()             Must      SSO/ISO       Yes      gmf/ms (CND)   HP-UX
+.sp 2
+Source: Sun
+.sp 1
+adjtime()             No        N/A           N/A		      N/A
+async_daemon()        Must      gmf(CND)/?    N/A                     NFS
+exportfs()            No        N/A           N/A                     N/A
+fstatfs()             Must      SSO/ISO       No                      HP-UX
+getdirentries()       Must      SSO/ISO       Yes       gmf/ms (CND)  HP-UX
+getdomainname()       Must      gmf(CND)/?    N/A                     HP-UX
+getfh()               Must      gmf(CND)/?    N/A                     NFS
+nfssvc()              Must      gmf(CND)/?    N/A                     NFS
+setdomainname()       Must      gmf(CND)/?    N/A                     HP-UX
+statfs()              Must      SSO/ISO       No                      HP-UX
+.fi
+.sp 1
+.aH "Appendix 5: HP-UX commands requiring modification"
+.nf
+.sp 2
+OWNER	ISO/SSO commands group
+        jrg: Jeff Glasson
+        ems: Ed Sesek
+        mike: Mike Saboff
+.sp 1
+The fields after the command name contain the following information:
+.sp
+section to which the command belongs
+who is responsible for the command
+reason for the change
+.cu 1
+COMMANDS
+.sp 1
+chgrp               |UTIL|jrg     |Yellow pages   
+chown               |UTIL|jrg     |Yellow pages 
+chsh                |UTIL|jrg     |Add yellow pages 
+clri                |ADMN|ems     |Clear new inode fields  
+csh                 |UTIL|ems     |   
+devnm               |ADMN|ems     |Handle remote file systems    
+df                  |ADMN|ems     |Support remote file systems
+find                |UTIL|ems     |    
+fsck                |ADMN|ems     |Site specific device files  
+fsclean             |ADMN|ems     |Reads /etc/checklist  
+fsdb                |ADMN|ems     |Site specific device files
+groups              |UTIL|ems     |Yellow pages   
+grpck               |ADMN|ems     |Yellow pages   
+id                  |UTIL|ems     |Yellow pages  
+l                   |UTIL|mike    |    
+ll                  |UTIL|mike    |    
+login               |UTIL|ems     |      
+ls                  |UTIL|mike    |  
+lsf                 |UTIL|mike    |      
+lsr                 |UTIL|mike    |    
+lsx                 |UTIL|mike    |    
+make                |UTIL|jrg     |Document time differences    
+mount               |ADMN|ems     |Mount remote file systems  
+ncheck              |ADMN|ems     |                   
+newgrp              |UTIL|jrg     |Add yellow page support   
+passwd              |UTIL|ems     |Add reference to yypasswd  
+pwck                |ADMN|ems     |Yellow pages         
+sh                  |UTIL|ems     |             
+su                  |UTIL|ems     |Yellow pages  
+umount              |ADMN|ems     |Mount remote file systems  
+.sp 2
+.cu 1
+LIBRARIES
+.sp 1
+addmntent           |LIBX|ems     |New NFS library  
+closedir            |LIBC|jrg     |Remote directory support  
+endgrent            |LIBC|jrg     |Add YP support   
+endmntent           |LIBX|ems     |New NFS library  
+endpwent            |LIBC|jrg     |Add YP support  
+fgetgrent           |LIBC|jrg     |Add YP support   
+fgetpwent           |LIBC|jrg     |Add YP support  
+getgrent            |LIBC|jrg     |Add YP support  
+getgrgid            |LIBC|jrg     |Add YP support   
+getgrnam            |LIBC|jrg     |Add YP support   
+getmntent           |LIBX|ems     |New NFS library  
+getpw               |LIBC|jrg     |Add YP support    
+getpwent            |LIBC|jrg     |Add YP support
+getpwnam            |LIBC|jrg     |Add YP support    
+getpwuid            |LIBC|jrg     |Add YP support    
+hasmntent           |LIBX|ems     |New NFS library  
+opendir             |LIBC|jrg     |Remote directory support   
+putpwent            |LIBC|ems     |Yellow Pages support
+readdir             |LIBC|jrg     |Remote directory support 
+rewinddir           |LIBC|jrg     |Remote directory support 
+seekdir             |LIBC|jrg     |Remote directory support  
+setgrent            |LIBC|jrg     |Add YP support   
+setmntent           |LIBX|ems     |New NFS library 
+setpwent            |LIBC|jrg     |Add YP support 
+telldir             |LIBC|jrg     |Remote directory support  
+.sp 1
+.aH "Appendix 6: Network commands requiring modification"
+.nf
+.sp 2
+OWNERS		jad: John Dilley (CND)
+		Smelter group (CND)
+		Peking group (CND)
+.sp 2
+.cu 1
+NETWORKING COMMANDS
+.sp 1
+				Owner
+.sp 1
+etc/remshd.c			Smelter
+etc/rlogind.c			Smelter
+etc/ftpd.c			Smelter
+etc/telnetd.c			Smelter
+etc/inetd.c			jad
+.sp 1
+usr/bin/ftp.c			Smelter
+usr/bin/rcp.c			Smelter
+usr/bin/remsh.c			Smelter
+usr/bin/rlogin.c		Smelter
+usr/bin/telnet.c		Smelter
+usr/lib/sendmail.c		Smelter
+.sp 1
+usr/bin/netstat			Peking
+if.c 
+inet.c
+main.c
+usr/etc/ping.c			Peking
+.sp 2
+.cu 1
+NETWORKING LIBRARIES
+.sp 1
+				Owner
+.sp 1
+usr/lib/libbsdipc:	
+.sp 1
+    gethostent.c		jad
+    getnetent.c			jad
+    getprotoent.c		jad
+    getservent.c		jad
+    rcmd.c			jad
+.fi
+.TC 2 2 3 0 "TABLE OF CONTENTS"	\" Define format for table of contents

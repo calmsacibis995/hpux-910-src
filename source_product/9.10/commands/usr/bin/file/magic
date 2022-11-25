@@ -1,0 +1,173 @@
+# @(#) $Revision: 66.11 $
+#
+#	file command's magic file
+#
+#  The fields of the file are basically:
+#	byte offset
+#	type to read
+#	number to match
+#	string to print if the number matches or the condition applies
+#
+# The way to read this file is to recognize that the delimiting field
+# is the numeric in the byte offset column.  If a ">" is encountered in
+# the byte offset column, file will continue scanning and trying to
+# match fields until a line which doesn't begin with a ">" is found.
+#
+# The 'byte offset' field may simply be a number or may specify an
+# indirect offset.  Indirect offsets have the form:
+#
+#    (nnnnn[.[bsl]][+-][mmmmm])
+#
+# nnnnn	  -- is the location in the file to read a value.
+# .[bsl]  -- indicates if the value at location nnnnn is a byte, short
+#	     or long.  If nothing is specified, 'long' is assumed.
+# +-mmmmm -- is a constant to add to the value read from location
+#	     nnnnn.
+# 
+# For example, the specification:
+#
+#    (144.l+0x12)
+#
+# will read 4 bytes from offset 144, treating that value as a long
+# integer, the constant 18 (0x12) is added.  The result is then used
+# as the 'byte offset' into the file.
+# 
+# The second field tells what type of number should be read.  Valid
+# values for this field are:
+#     byte   --	 8 bits
+#     char   --	 8 bits
+#     short  -- 16 bits
+#     long   -- 32 bits
+#     string -- any literal string
+#
+# Values other than those listed above are undefined and reserved for
+# future enhancements.
+#
+# The third field gives a condition to be tested, along with a value
+# to use in the test.  This field is comprised of an operator
+# immediately followed by a value.  The specified operation is
+# performed on the value from the file starting from the byte offset
+# for the length specified.  The table below lists the operators and
+# their meanings.  In this table, "file_val" represents the value from
+# the file, "test_val" represents the test value that was specified
+# after the operator.
+#
+#  operator	true when
+#  --------	--------------------------
+#   none	(file_val == test_val)
+#   =		(file_val == test_val)
+#   ==		(file_val == test_val)
+#   >		(file_val >  test_val)
+#   >=		(file_val >= test_val)
+#   <		(file_val <  test_val)
+#   <=		(file_val <= test_val)
+#   &		((file_val & test_val) != 0)
+#   &=		((file_val & test_val) == test_val)
+#
+# The last column prints the diagnostic which fits the information
+# accrued from the table.  The diagnostic may contain 1 optional "%"
+# format specification.	 This format specification will be used to
+# format the value from the file that caused the match to succeed.
+#
+0	long 	0x020c0108	s200 pure executable
+>4	short	>0		-version %ld
+>8	long	&0x80000000	save fp regs
+>8	long	&0x40000000	dynamically linked
+>8	long	&0x20000000	debuggable
+>36	long	>0		not stripped
+0	long	0x020c0107	s200 executable
+>4	short	>0		-version %ld
+>8	long	&0x80000000	save fp regs
+>8	long	&0x40000000	dynamically linked
+>8	long	&0x20000000	debuggable
+>36	long	>0		not stripped
+0	long	0x020c010b	s200 demand-load executable
+>4	short	>0		-version %ld
+>8	long	&0x80000000	save fp regs
+>8	long	&0x40000000	dynamically linked
+>8	long	&0x20000000	debuggable
+>36	long	>0		not stripped
+0	long	0x020c0106	s200 relocatable executable
+>4	short	>0		-version %ld
+>6	short	>0		-highwater %d
+>8	long	&0x80000000	save fp regs
+>8	long	&0x20000000	debuggable
+>8	long	&0x10000000	PIC
+0	long 	0x020a0108	s200 (2.x release) pure executable
+>4	short	>0		-version %ld
+>36	long	>0		not stripped
+0	long	0x020a0107	s200 (2.x release) executable
+>4	short	>0		-version %ld
+>36	long	>0		not stripped
+0	long	0x020c010e	s200 shared library
+>4	short	>0		-version %ld
+>6	short	>0		-highwater %d
+>36	long	>0		not stripped
+0	long	0x020c010d	s200 dynamic load library
+>4	short	>0		-version %ld
+>6	short	>0		-highwater %d
+>36	long	>0		not stripped
+0	short	0x71c7		cpio archive
+0	long	0x30373037	ASCII cpio archive
+0	long 	0x020b0106	s800 relocatable object
+0	long 	0x020b0107	s800 executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x020b0108	s800 shared executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x020b010b	s800 demand-load executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x020b010e	s800 shared library
+>96	long	>0		-not stripped
+0	long 	0x020b010d	s800 dynamic load library
+>96	long	>0		-not stripped
+0	long	0x213c6172	archive file
+>68	long 	0x020b0619	-s800 relocatable library
+0	long 	0x02100106	PA-RISC1.1 relocatable object
+0	long 	0x02100107	PA-RISC1.1 executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x02100108	PA-RISC1.1 shared executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x0210010b	PA-RISC1.1 demand-load executable
+>(144)	long	0x054ef630	dynamically linked
+>96	long	>0		-not stripped
+0	long 	0x0210010e	PA-RISC1.1 shared library
+>96	long	>0		-not stripped
+0	long 	0x0210010d	PA-RISC1.1 dynamic load library
+>96	long	>0		-not stripped
+0	short	0x8000		lif file
+0	long	0x020c010c	compiled Lisp
+0	long	0x4da7eee8	HP-WINDOWS font
+>8	char	>0		-version %ld
+0	string	msgcat01	NLS message catalog,
+>8	long	>0		%d messages
+0	long	0x02080108	s500 pure executable
+>16	long	>0		-version %ld
+0	long	0x02080107	s500 executable
+>16 	long	>0		-version %ld
+0	long	0x02080106	s500 relocatable executable
+>16	long	>0		-version %ld
+0	long	0x0000ff65	old archive
+0	long	0x020aff65	s200 old archive
+0	long	0x020cff65	s200 old archive
+0	long	0x0208ff65	s500 old archive
+0	long	0x39bed		PDP-11 old archive
+0	long	0x39bee		PDP-11 4.0 archive
+0	long	0x65ff0000	VAX 3.0 archive
+0	long	0x3c61723e	VAX 5.0 archive
+0	short	0x1f1e		packed data,
+>2	long	>1		%d characters originally
+>2	long	=1		%d character originally
+1	string	# This is a shell archive.	shar file
+81	string	# This is a shell archive.	shar file
+0	string	%!PS-Adobe-	postscript file
+>11	string	1.0		-version %s
+>11	string	2.0		-version %s
+>15	string	EPS		-type %s
+>15	string	Query		-type %s
+>15	string	ExitServer	-type %s
+0	string	%!		postscript file

@@ -1,0 +1,9 @@
+The commands build process consists of three scripts; buildit, nbp, and build.
+The nbp script resides on the build system in the real root and builds the 
+entire core commands product using the buildit script.  The buildit script 
+resides on hpfclx3 in the pseudo root.  The buildit script executes a make 
+default and a make install on the specified target.  It also is responsible 
+for maintaining the compile, compile.err, install, and install.err files in
+the report directory.  Finally, the build script is used on the DBE system,
+hpfcdbe, to provide developers with a mechanism for building specific targets
+of the core commands product.

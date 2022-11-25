@@ -1,0 +1,190 @@
+#! /bin/ksh
+#
+# Name: uncheckout
+#
+# The uncheckout source routine based on KCS used by NFS only.
+#
+# Syntax:  uncheckout [ -rev kcs-rev-number ] file(s)
+#    where rev is:  KCS revision number.
+#          file is: one or more files to be checked in.
+
+
+#
+# If no RMTBRANCH is in the current directory, generate an error and stop.
+#
+
+if [ ! -f RMTBRANCH ] ; then
+    print "Error: There must be an RMTBRANCH file in this directory."
+    print "       Where RMTBRANCH contains -"
+    print "           branch-name/kcs-dir-path/RCS/ 300|800|conv"
+    exit 1
+fi
+
+#
+# Go sort out the parameters.  Note order is somewhat important. Options must
+# appear before the file or files are listed.
+#
+
+while [ $# -gt 0 ] ; do
+    case ${1} in
+        -rev | -REV)
+            shift 
+	    REVNUM=${1}
+	    ;;
+        -rev* | -REV*)
+            REVNUM=`expr "${1}" : "-[rR][eE][vV]\(.*\)"`
+            ;;
+        *)
+            if [ $# = 0 ] ; then
+                print "Error: No file(s) where specified."
+                exit 1
+            fi
+            break
+            ;;
+    esac
+    shift
+done
+
+#
+# Capture file or files to be checked in.
+#
+
+FILELIST=$@
+if [ "${FILELIST}" = "" ] ; then
+   print "Error: No file(s) where specified."
+   exit 1
+fi
+
+#
+# Set KCS environment variables based on the branch name specified in the
+# RMTBRANCH file.
+#
+
+# get branch name from the local RMTBRANCH file.
+
+BRANCH=$(awk -F/ '{print $1}' RMTBRANCH)
+
+# print "Branch is: ${BRANCH}"
+
+# use branch name to get KCS database disignator for the dcia.kcsrc.kshell 
+# script.
+
+SERDB=$(grep "${BRANCH} " $Nfs/bin/dcia.relinfo.rc | awk '{ print $4}')
+if [ "${SERDB}" = "" ] ; then
+        print "Error: Invalid branch name specified in the RMTBRANCH file."
+        exit 1
+fi
+
+# print "Serdb is: ${SERDB}"
+
+#
+# Get work area name so the Nfs variable can be checked later.
+#
+
+WORKDIR=$(grep "${BRANCH} " $Nfs/bin/dcia.relinfo.rc | awk '{ print $5}')
+WORKDIR=${WORKDIR##*/}
+
+# set KCS environment variables.
+
+. $Nfs/bin/dcia.kcsrc.kshell ${SERDB}
+
+#
+# Figure out base directory for the NFS variables
+#
+
+CURDIR=`pwd`
+DIFDIR=${CURDIR##*/${WORKDIR}}
+if [ "${CURDIR}" = "${DIFDIR}" ] ; then
+    print "Current directory is: ${CURDIR} and diff dir is: ${DIFDIR}"
+    print "Error: Your Nfs variable does not fit with your current working"
+    print "       directory.  Please reset your Nfs environment variable."
+    exit 1
+fi
+
+USER=`whoami`
+nfs=${Nfs}/develop/${USER}
+
+#
+# See if a system build is in progress
+#
+
+if [ ! -w $Nfs/log/update ] ; then
+    cat <<-EOF
+
+	NOTE: Updates are disabled.  Your files have not been modified.
+	Please try again later.
+	EOF
+    exit 1
+fi
+
+#
+# Set defaults for the base directory path for the pseudoroot location
+#
+
+umask 022
+
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH nfs
+
+#
+# Get base path for the file(s) from the RMTBRANCH file.  Base path is the
+# KCS directory path to a file.
+#
+
+RMTFILE=$(cat < RMTBRANCH)
+
+# Remove the 'RCS/ arch' from the RMTBRANCH file
+BASEDIR=${RMTFILE%%RCS/*}
+
+# Remove the branch name from the RMTBRANCH file. This now leave the base path.
+BASEDIR=${BASEDIR#*/}
+
+# print "final result of base path is '${BASEDIR}'."
+
+#
+# Loop for each file.
+#
+
+for FILENAME in ${FILELIST}
+do
+    CHKNAME=${FILENAME##*/}
+    if [ "${FILENAME}" != "${CHKNAME}" ] ; then
+        print "The filename is: ${FILENAME}"
+        print "Error: You must be in the directory where the files are located."
+        exit 1
+    fi
+    
+    # make sure we are in the checkout directory and not in the user base
+    # directory for the check in process.
+
+    cd $nfs/checkout/${BASEDIR}
+
+    if [ ! -f RMTBRANCH ] ; then
+    cat > RMTBRANCH <<-EOF
+        ${RMTFILE}
+	EOF
+    fi
+
+    # print "Current Dir: $(pwd)"
+    # print "/usr/local/bin/kcs -u${REVNUM} ${FILENAME}"
+    /usr/local/bin/kcs -u${REVNUM} ${FILENAME}
+    rm ${FILENAME}
+    
+    # print "Go to $nfs/${BASEDIR} for co"
+    cd $nfs/${BASEDIR}
+
+    # print "Current dir is now: $(pwd)"
+
+    # Link the working file to the development working directory
+
+    # print "ln -f $Nfs/${BASEDIR}/${FILENAME} ${FILENAME}"
+    ln -f $Nfs/${BASEDIR}/${FILENAME} ${FILENAME}
+
+    # Log the transaction
+    cat >> $Nfs/log/update <<-EOF
+	`date "+%y.%m.%d %T"`	${LOGNAME}	${FILENAME}
+	EOF
+ 
+    # Return to working directory
+    cd ${CURDIR}
+done

@@ -1,0 +1,13 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+exitval=0
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+/bin/rm -f /etc/termcap
+
+exit $exitval

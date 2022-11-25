@@ -1,0 +1,39 @@
+## FacetTerm Menu Capabilities for the HP 2626  06/13/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: 2626.FM,v 70.1 92/03/09 16:52:51 ssa Exp $
+## ##-menu-cap-init_string=
+### is2=\E&s1A\E<\E&k0\\
+##-menu-cap-cursor_address=\E&a%p1%dy%p2%dX
+##-menu-cap-clear_screen=\EH\EJ
+##-menu-cap-clr_eol=\EK
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=^N
+##-menu-cap-exit_alt_charset_mode=^O
+##-menu-cap-acs_chars=jgktlrmfq,t5u6v8w7x.
+##-menu-cap-keypad_xmit=\E&s1A
+##-menu-cap-no_attr=\E&d@
+##-menu-cap-shadow_attr=\E&d@
+##-menu-cap-item_attr=\E&d@
+##-menu-cap-box_attr=\E&dB
+##-menu-cap-title_attr=\E&dB
+##-menu-cap-highlight_attr=\E&dB
+##-menu-cap-highlight_blink_attr=\E&dC
+## ##-menu-cap-magic_cookie=0
+##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\EA
+##-menu-cap-key_down=\EB
+##-menu-cap-key_right=\EC
+##-menu-cap-key_left=\ED
+##-menu_cap-key_home=\Eh
+##-menu-cap-key_ignore=\EV
+##-menu-cap-key_ignore=\EU
+##-menu-cap-key_ignore=\Ev
+##-menu-cap-key_ignore=\Eu
+##-menu-cap-key_ignore=\Ew\r
+##-menu-cap-key_ignore=\Ev\r
+##-menu-cap-key_ignore=\Eu\r
+##-menu-cap-key_ignore=\Et\r
+##-menu-cap-key_ignore=\Es\r
+##-menu-cap-key_ignore=\Er\r
+##-menu-cap-key_ignore=\Eq\r
+##-menu-cap-key_ignore=\Ep\r

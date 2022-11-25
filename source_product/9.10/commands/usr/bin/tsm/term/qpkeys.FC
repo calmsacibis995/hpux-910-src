@@ -1,0 +1,37 @@
+## FacetTerm  qpkeys  description file 11/28/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: qpkeys.FC,v 70.1 92/03/09 16:49:19 ssa Exp $
+pkey_key=\EK0%p1%c%80S1
+pkey_key=\EK1%p1%c%80S1
+pkey_key=\EK2%p1%c%80S1
+pkey_key=\EK3%p1%c%80S1
+pkey_key=\EK4%p1%c%80S1
+pkey_key=\EK5%p1%c%80S1
+pkey_key=\EK6%p1%c%80S1
+pkey_key=\EK7%p1%c%80S1
+pkey_key=\EK%p1%c%80S1
+function_key-@-"=^A@\r
+function_key-A-"=^AA\r
+function_key-B-"=^AB\r
+function_key-C-"=^AC\r
+function_key-D-"=^AD\r
+function_key-E-"=^AE\r
+function_key-F-"=^AF\r
+function_key-G-"=^AG\r
+function_key-H-"=^AH\r
+function_key-I-"=^AI\r
+function_key-J-"=^AJ\r
+function_key-K-"=^AK\r
+shift_function_key
+function_key-`-"=^A`\r
+function_key-a-"=^Aa\r
+function_key-b-"=^Ab\r
+function_key-c-"=^Ac\r
+function_key-d-"=^Ad\r
+function_key-e-"=^Ae\r
+function_key-f-"=^Af\r
+function_key-g-"=^Ag\r
+function_key-h-"=^Ah\r
+function_key-i-"=^Ai\r
+function_key-j-"=^Aj\r
+function_key-k-"=^Ak\r

@@ -1,0 +1,103 @@
+#!/bin/sh
+# @(#) $Header: tsm.lpcat,v 66.3 90/09/20 12:22:47 kb Exp $
+
+# Script for reading the output of lp thru a named pipe and putting
+# it out to a local printer connected to the terminal. The script
+# requires the tsm environmet, and must be run in a tsm session.
+
+echo_setup()
+{
+    clear
+    echo
+    echo "This session being used as an lp interface port to" 
+    echo "your local printer, $TSMLP."
+    echo
+    echo "Please,                DO NOT DISTURB"
+}
+
+abort_cat()
+{
+    # TSM now has output to this window redirected to /dev/null
+    # the cat process should die from the sigint that got us here
+    # as should the sender (on sigpipe) because there was only one reader
+
+    /usr/tsm/bin/tsm.command $PSNUM  # switch to this window
+    sleep 3                          # wait for data to drain from buffers
+    /usr/tsm/bin/tsm.command xpn     # turn off transparent print
+    stty opost min 1 time 0 -icanon
+    echo "\007"                      # ring the bell
+    clear
+    echo "Print job aborted by BREAK, remaining print data purged..."
+    echo "Press c to continue \c"
+    R="a"
+    while [ "$R" != "c" -a "$R" != "C" ]
+    do
+      R=`dd bs=1 count=1 2>/dev/null`
+    done
+    echo_setup
+    sleep 3                          # provide time to read message
+    stty -opost
+    /usr/tsm/bin/tsm.command xpy
+    /usr/tsm/bin/tsm.command l       # switch back to active session
+    # returns to while loop which starts up a new cat
+}
+
+PIPEPATH=/usr/spool/lp/tsm.pipes
+PSNUM=`/usr/tsm/bin/tsm.info window_number`
+clear
+
+if [ $TSMLP ]  # Exit quietly if TSMLP is not set
+then
+  :
+else
+  exit 1 
+fi
+
+if /usr/tsm/bin/tsm.info not_a_window
+then
+  echo "$0 must be run in a tsm session designated for printing."
+  exit 1
+fi
+
+if [ -p $PIPEPATH/$TSMLP ]
+then
+  if /usr/tsm/sys/tsm.isopen $PIPEPATH/$TSMLP
+  then
+    /usr/tsm/bin/tsm.command $PSNUM
+    echo "This session ($PSNUM) was configured to be an lp interface port, but..."
+    echo "The requested printer, $TSMLP, is in use by another instance of tsm."
+    echo "\007"
+    echo
+    echo "Local printer setup aborted ..."
+    echo "Press return to continue \c"
+    read R
+    /usr/tsm/bin/tsm.command l  # switch back to active session
+    exit 1
+  else
+    echo_setup
+    stty -opost
+    /usr/tsm/bin/tsm.command xpy
+    trap abort_cat 2 
+    while true
+    do
+      cat $PIPEPATH/$TSMLP
+    done
+    exit 1
+  fi
+else
+  /usr/tsm/bin/tsm.command $PSNUM
+  echo
+  echo "This session ($PSNUM) was configured to be an lp interface port, but..."
+  echo "The printer, $TSMLP, was not found."
+  echo
+  echo "The environment variable TSMLP must name the desired printer,"
+  echo "and the printer must have an assosicated named pipe in $PIPEPATH."
+  echo "You can configure a printer for tsm with the tsm.lpadmin script."
+  echo "\007"
+  echo
+  echo "Local printer setup aborted ..."
+  echo "Press return to continue \c"
+  read R
+  /usr/tsm/bin/tsm.command l  # switch back to active session
+  exit 1
+fi

@@ -1,0 +1,7 @@
+# This contains the list of header file database files.
+# Advise release 1.1,  file $Revision: 70.5 $
+/usr/apex/headers/hpux.headers
+/usr/apex/headers/aegis.headers
+/usr/apex/headers/sysv.headers
+/usr/apex/headers/bsd.headers
+/usr/apex/headers/gpr.headers

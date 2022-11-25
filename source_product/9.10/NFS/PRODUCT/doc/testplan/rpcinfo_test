@@ -1,0 +1,120 @@
+.H 2 "rpcinfo Test Plan"
+
+This chapter covers the
+.B rpcinfo
+command.  The main use of this command is to list information about
+.I RPC
+services present on hosts in the local network.  It can also be used 
+to determine which services are active (ready) and which are not.
+Note: this test plan goes into some detail about the
+.B rpcinfo
+options to be tested; in general, my test plans will not go into this
+detail, it will be up to the implementer to come up with the individual,
+appropriate test cases.
+
+.H 3  "rpcinfo options"
+.sp 1
+.nf
+RESPONSIBLE ENGINEER:  John A Dilley
+ASSUMPTIONS:           Module to be tested is functional
+.fi
+
+.sp 2
+.H 4 "no options"
+.sp 2
+.nf
+IMPLEMENT TIME:   0.25 md
+PERFORM TIME:     1.0 md
+TYPE OF TEST:     functional
+EXPECTED OUTPUT:  no output if the test passes
+.fi
+.sp 1
+Test
+.B rpcinfo
+with no options.
+It should print the usage error message on stderr
+and exit with a non-zero status.
+.sp 2
+.H 4 "bad option"
+.sp 1
+.nf
+IMPLEMENT TIME:   0.25 md
+PERFORM TIME:     1.0 md
+TYPE OF TEST:     functional
+EXPECTED OUTPUT:  no output if the test passes
+.fi
+.sp 1
+Test
+.B rpcinfo
+with any option besides "-p", "-u" or "-t".  It should print the usage
+error message on stderr and exit with a non-zero status.
+Test 
+.B rpcinfo 
+with a hostname.   It should print the usage message.
+.sp 2
+.H 4 "-p host"
+.sp 1
+.nf
+IMPLEMENT TIME:   0.75 md
+PERFORM TIME:     2.25 md
+TYPE OF TEST:     functional
+EXPECTED OUTPUT:  no output if the test passes
+.fi
+.sp 1
+Test the -p option without a host name.
+It should print portmap information about the local host.
+Test the -p option with an invalid host name.
+It should print an error message and exit with a non-zero status.
+Test the -p option with two host names:
+.nf
+rpcinfo -p host host
+.fi
+It should print an error message and exit with a non-zero status.
+Test the -p option with a valid host name.
+It should print portmap information about the named host.
+Test the -p option with a valid host name that doesn't have /etc/portmap
+running on it.
+.sp 2
+.H 4 "-u host program [version]"
+.sp 1
+.nf
+IMPLEMENT TIME:   0.25 md
+PERFORM TIME:     1.0 md
+TYPE OF TEST:     functional
+EXPECTED OUTPUT:  no output if the test passes
+.fi
+.sp 1
+Test the -u option without a host or program name.
+It should print the usage error message on stderr and exit with a non-zero status.
+Test the -u option with an invalid host name.
+It should print an error message and exit with a non-zero status.
+Test the -u option with a valid host name, but invalid program name.
+It should print a message that the program is not available.
+Test the -u option with a valid host and program name.
+It should print the a message that the program is ready and waiting.
+.sp 2
+.H 4 "-t host program [version]"
+.sp 1
+.nf
+IMPLEMENT TIME:   0.25 md
+PERFORM TIME:     1.0 md
+TYPE OF TEST:     functional
+EXPECTED OUTPUT:  no output if the test passes
+.fi
+.sp 1
+Test the -t option without a host or program name.
+It should print the usage error message on stderr and exit with a non-zero status.
+Test the -t option with an invalid host name.
+It should print an error message and exit with a non-zero status.
+Test the -t option with a valid host name, but invalid program name.
+It should print a message that the program is not available.
+Test the -t option with a valid host and program name.
+The following tests were added to increase BFA coverage:
+.nf
+rpcinfo -t host progname
+rpcinfo -t host <unknown progname>
+rpcinfo -t host prognum
+rpcinfo -t <unknown host> prognum
+rpcinfo -t host prognum versnum
+rpcinfo -t host prognum badversnum
+.fi

@@ -1,0 +1,359 @@
+/* This lint library is not part of hpux.  It is provided for APEX use only. */
+/*LINTLIBRARY*/
+#include <sys/stdsyms.h>
+#ifndef __STDC__
+#	define __STDC__
+#endif
+/* Constants and functions for PortNLS - MPE native language support */
+
+
+#ifdef _INCLUDE_HPUX_SOURCE
+/* Function prototypes */
+
+void almanac ( unsigned short int date, unsigned short int err[2], 
+	short int *pyear, short int *pmonth, short int *pday, short int *pweekday )
+	{ 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The almanac() call returns numeric date information in MPE format.
+	It is HP-UX specific and not portable to open systems.
+
+	The use of gmtime() or localtime() in conjunction with mktime() 
+	provides similar functionality with greater portability.  See 
+	ctime(3C).  */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+
+unsigned short calendar ( void ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The calendar() call returns the current calendar date in MPE 
+	format.  It is HP-UX specific and not portable to open systems.  
+	
+	Use time(2) to get the current time.  Pass that value to
+	gmtime() or localtime() to get desired values.  Note that the
+	day of the year returned by calendar() starts at 1, while the
+	day of the year returned by gmtime() and localtime() starts 
+	at 0.  See ctime(3C).  */
+
+#endif  /* _APEX_SOURCE */
+ return;}
+
+
+void nlappend(char *a, short int b, unsigned short int c[2] ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlappend() call is part of an obsolete HP specific Native
+	Language Support system.  The functionality provided by this
+	call is obsolete.  For best portability use the set of
+	functions described in hpnls(5).  See hpnls(5) and the Native
+	Language Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlcollate(const char *a, const char *b, short int c, short int *d,
+			 short int e, unsigned short int f[2], const char *g) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlcollate() call is part of an obsolete HP specific Native
+	Language Support system.  The strcoll() function provides
+	similar functionality and is portable to open systems.  For
+	best portability use the set of functions described in
+	hpnls(5).  See hpnls(5), string(3C), and the Native Language
+	Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+unsigned int nlconvclock(const char *a, short int b, short int c,
+    			 unsigned short int d[2]) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlconvclock() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided by
+	this call is obsolete.  See the functions in ctime(3C) for
+	similar portable functionality.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+unsigned short int nlconvcustdate(const char *a, short int b,
+			 short int c, unsigned short int d[2]) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlconvcustdate() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided by
+	this call is obsolete.  See the functions in ctime(3C) for
+	similar portable functionality.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void nlconvnum(short int a, const char *b, short int c, char *d,
+			 short int *e, unsigned short int f[2], const char *g,
+			 short int h, short int *i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlconvnum() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+short int nlfindstr(short int a, const char *c, short int b,
+			 const char *d, short int e, unsigned short int f[2],
+			 const char *g) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfindstr() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support User's Guide.  See also string(3C). */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void nlfmtcalendar(unsigned short int a, char *b, short int c,
+			 unsigned short int *d) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfmtcalendar() call is part of an obsolete HP specific
+	Native Language Support system.   Use strftime().  See
+	the Native Language Support User's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlfmtclock(unsigned int a, char *b, short int c,
+			 unsigned short int *d) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The nlfmtclock() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided by
+	this call is obsolete.  See the functions in ctime(3C) for
+	similar portable functionality.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlfmtcustdate(unsigned short int a, char *b, short int c,
+			 unsigned short int *d) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfmtcustdate() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided by
+	this call is obsolete.  See the functions in ctime(3C) for
+	similar portable functionality.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support User's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlfmtdate(unsigned short int a, unsigned long int b, char *c,
+			 short int d, unsigned short int *e) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfmtdate() call is part of an obsolete HP specific
+	Native Language Support system.   Use strftime().  See
+	the Native Language Support User's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlfmtlongcal(unsigned short int a, char *b, short int c,
+			 unsigned short int *d) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfmtlongcal() call is part of an obsolete HP specific
+	Native Language Support system.   Use strftime().  See
+	the Native Language Support User's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlfmtnum(short int a, const char *b, short int c, char *d,
+			 short int *e, unsigned short int f[2], const char *g,
+			 short int h, short int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlfmtnum() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+short int nlgetlang(short int a, unsigned short int *b) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlgetlang() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void nlinfo(short int a, int *b, short int *c, unsigned short int *d) 
+			{ 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlinfo() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+short int nljudge(short int a, const char *b, short int c, char *d,
+			 unsigned short int e[2], const char *f) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nljudge() call is part of an obsolete HP specific
+	Native Language Support system.  The mblen() call provides
+	similar functionality and is portable to other systems.
+	See multibyte(3C).  For best portability use the set of 
+	functions described in hpnls(5).  See the Native Language 
+	Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void nlkeycompare(const char *a, short int b, const char *c,
+			 short int d, short int *e, short int f,
+			 unsigned short int g[2], const unsigned short int *h) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlkeycompare() call is part of an obsolete HP specific
+	Native Language Support system.  Use _tolower() to convert
+	each string to lower case, then compare them using strcmp().
+	For best portability use the set of functions described in 
+	hpnls(5).  See conv(3C), string(3C), and the Native Language 
+	Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlnumspec(short int a, char *b, unsigned short int *c) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlnumspec() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlrepchar(const char *a, char *b, short int c, short int d,
+			 short int e, unsigned short int *f, const char *g) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlrepchar() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+short int nlscanmove(const char *a, char *b, short int c, int d,
+			 short int e, unsigned short int f[2],
+			 const char *g, const char *h) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlscanmove() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide.  */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+void nlsubstr(const char *a, int b, char *c, short int *d, short int e,
+			 short int f, short int g, short int h,
+			 unsigned short int i[2], const unsigned short int *j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlsubstr() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nlswitchbuf(short int a, const char *b, char *c, short int d,
+			 unsigned short int e, unsigned short int f[2]) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nlswitchbuf() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+void nltranslate(short int a, const char *b, char *c, short int d,
+			 short int e, unsigned short int *f, const char *g) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The nltranslate() call is part of an obsolete HP specific
+	Native Language Support system.  The functionality provided
+	by this call is obsolete.  For best portability use the
+	set of functions described in hpnls(5).  See the Native
+	Language Support Users's Guide. */
+
+#endif  /* _APEX_SOURCE */
+ return; }
+
+#endif /* _INCLUDE_HPUX_SOURCE */

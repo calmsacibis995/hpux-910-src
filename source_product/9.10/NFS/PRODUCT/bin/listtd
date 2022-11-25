@@ -1,0 +1,52 @@
+#!/bin/sh
+##	@(#)9.1	88/01/14
+#	listtd	--	creates a list of include file dependencies for 
+#			the files given (one per line)
+##
+#	usage:	listtd [-Iinclude_path] [-*] C files ...
+#	writes to standard output the list of dependencies in each C
+#	file.  uses /lib/cpp to compute transitive dependencies, so if
+#	you #include "foo.h", which #includes <bar.h>, both will show up
+#	in the dependency list.
+##
+#	usage:	listtd [CFLAGS] source files ...
+#		passes all CFLAGS to /lib/cpp for conditional compilation
+#		By default it keeps all dependencies on /usr/include
+##
+TEMP=/tmp/listtd.$$
+
+for ARG
+do			# parse all arguemnts
+    case $ARG
+    in
+	-I)			# include directories ...
+	    OPTS="$OPTS -I$1"
+	    shift 2
+	    ;;
+	-I*|-D*|-U*|-H*)
+	    OPTS="$OPTS $ARG"
+	    shift
+	    ;;
+	-*)			# any other C flags ignored
+	    shift
+	    ;;
+	*)			# C file: go handle it ...
+	    break
+	    ;;
+    esac
+done
+
+if [ $# -eq 0 ] ; then
+    echo	usage: $0 [FLAGS] C_files ...
+    exit 1
+fi
+
+##
+#	run through all files listed on the command line, run cpp on
+#	the file, and get the list of included file names ...
+##
+for FILE in $* ; do
+    /lib/cpp $OPTS $FILE | egrep '^# [0-9]* ".*\.h"' | \
+    sed -e 's,"./,",' -e 's/[^"]*"//' -e 's/".*$//' | \
+    sort | uniq
+done

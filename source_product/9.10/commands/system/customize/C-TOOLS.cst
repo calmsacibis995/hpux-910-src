@@ -1,0 +1,59 @@
+#!/bin/ksh
+# @(#) $Revision: 70.2 $
+#
+fileset=C-TOOLS
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Remove obsolete files:
+#   /usr/lib/xcpp -- was a special cpp for /usr/bin/cxref.  The
+#                    standard cpp, /lib/cpp now supports the features
+#                    used by cxref.
+#======
+/bin/rm -rf /usr/lib/xcpp+ /usr/lib/xcpp
+
+#======
+# With a full "llib-" prefix and ".ln" suffix, at least one of the lint
+# libraries would have a name longer than 14 characters.  However, no
+# files are shipped with a name length greater than fourteen characters.
+# On a long file name (LFN) system, lint was not able to locate such a
+# library by its truncated name "*.l".  In previous releases, an attempt
+# was made to work around this limitation in this customize script.
+# Under certain circumstances, the attempt would fail, possibly leaving
+# the system with both "llib-lcurses.l" and "llib-lcurses.ln" files.
+# The following code is to correct the problems left by such a failure.
+# 
+# For 9.0, lint has been fixed to go by only the first 14 characters
+# when searching for a lint library.
+#======
+#
+#       SHORT                   LONG
+set -- \
+  /usr/lib/llib-lcurses.l	/usr/lib/llib-lcurses.ln
+
+while [ $# -gt 0 ]; do
+    if [ -f $1$CDF ]; then
+	inode1=`/bin/ls -i $1$CDF | /usr/bin/awk '{print $1}'`
+
+	if [ -f $2$CDF ]; then
+	    inode2=`/bin/ls -i $2$CDF | /usr/bin/awk '{print $1}'`
+
+	    if [ "$inode1" != "$inode2" ]; then
+		/bin/rm -rf $2+
+		/bin/rm -rf $2
+	    fi
+	fi
+    fi
+    shift 2
+done
+
+exit $exitval

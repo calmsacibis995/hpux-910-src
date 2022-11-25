@@ -1,0 +1,95 @@
+## FACET/TERM wyse50stat  wyse50 status lines  8/29/89
+## Copyright (c) Structured Software Solutions, Inc 1989.  All Rights Reserved.
+## @(#) $Header: wyse50stat.FC,v 66.3 90/09/20 12:56:52 kb Exp $
+function_key_file=sl_16.ftkey
+### out_screen_saver_start=
+### normal status_line_attribute=\EA10 blank_status_line=\Ez(\r
+out_screen_saver_start=\EA10\Ez(\r
+### out_screen_saver_end=
+##				local message attribute
+perwindow-4-CL=\EA2%p1%c
+perwindow_default-underline=\EA28
+set-local_message_attr_blank=\EA21
+##				host message 
+perwindow-49-CLSQ=\EF%46s1\r
+perwindow_default-blank=\EF\r
+set-host_message=\EF%46s1\r
+##				host message attribute
+perwindow-4-CL=\EA3%p1%c
+perwindow_default-underline=\EA38
+set-host_message_attr_reverse=\EA34
+set-host_message_attr_dim_reverse=\EA3t
+## -------------- start of order_group 'S' ------------------------------
+##				status_line_attribute
+perwindow-4-CSQF---S=\EA1%p1%c
+perwindow_default-..=\EA10
+set-status_line_attr_reverse=\EA14
+set-status_line_attr_dim_reverse=\EA1t
+set-label_attr_reverse=\EA14
+set-label_attr_dim_reverse=\EA1t
+##				status_line - clears labels 'a'
+perwindow-81-CSQF-a--S=\Ef%78s1\r
+perwindow_also-.......=\Ez(%78s1\r
+perwindow_default-....=\Ez(\r
+set-status_line=\Ez(%78s1\r
+##				status_line_label 1 thru 16
+##				cleared by status line
+perwindow-11-CF--a-S=\Ez0%8s1\r
+perwindow-11-CF--a-S=\Ez1%8s1\r
+perwindow-11-CF--a-S=\Ez2%8s1\r
+perwindow-11-CF--a-S=\Ez3%8s1\r
+perwindow-11-CF--a-S=\Ez4%8s1\r
+perwindow-11-CF--a-S=\Ez5%8s1\r
+perwindow-11-CF--a-S=\Ez6%8s1\r
+perwindow-11-CF--a-S=\Ez7%8s1\r
+perwindow-11-CF--a-S=\Ez8%8s1\r
+perwindow-11-CF--a-S=\Ez9%8s1\r
+perwindow-11-CF--a-S=\Ez:%8s1\r
+perwindow-11-CF--a-S=\Ez;%8s1\r
+perwindow-11-CF--a-S=\Ez<%8s1\r
+perwindow-11-CF--a-S=\Ez=%8s1\r
+perwindow-11-CF--a-S=\Ez>%8s1\r
+perwindow-11-CF--a-S=\Ez?%8s1\r
+set-label_1=\Ez0%8s1\r
+set-label_2=\Ez1%8s1\r
+set-label_3=\Ez2%8s1\r
+set-label_4=\Ez3%8s1\r
+set-label_5=\Ez4%8s1\r
+set-label_6=\Ez5%8s1\r
+set-label_7=\Ez6%8s1\r
+set-label_8=\Ez7%8s1\r
+##				shift status line 
+##				clears shift disable 'b' & shift lab 'c'
+perwindow-81-CSQF-bc--S=\Ez)%78s1\r
+perwindow_default-.....=\Ez)\r
+set-shift_status_line=\Ez)%78s1\r
+##				status_line_label shift 1 thru 16 
+##				cleared by shift_status_line
+perwindow-11-CF-b-c-S=\EzP%8s1\r
+perwindow-11-CF-b-c-S=\EzQ%8s1\r
+perwindow-11-CF-b-c-S=\EzR%8s1\r
+perwindow-11-CF-b-c-S=\EzS%8s1\r
+perwindow-11-CF-b-c-S=\EzT%8s1\r
+perwindow-11-CF-b-c-S=\EzU%8s1\r
+perwindow-11-CF-b-c-S=\EzV%8s1\r
+perwindow-11-CF-b-c-S=\EzW%8s1\r
+perwindow-11-CF-b-c-S=\EzX%8s1\r
+perwindow-11-CF-b-c-S=\EzY%8s1\r
+perwindow-11-CF-b-c-S=\EzZ%8s1\r
+perwindow-11-CF-b-c-S=\Ez[%8s1\r
+perwindow-11-CF-b-c-S=\Ez\\%8s1\r
+perwindow-11-CF-b-c-S=\Ez]%8s1\r
+perwindow-11-CF-b-c-S=\Ez\^%8s1\r
+perwindow-11-CF-b-c-S=\Ez_%8s1\r
+set-shift_label_1=\EzP%8s1\r
+set-shift_label_2=\EzQ%8s1\r
+set-shift_label_3=\EzR%8s1\r
+set-shift_label_4=\EzS%8s1\r
+set-shift_label_5=\EzT%8s1\r
+set-shift_label_6=\EzU%8s1\r
+set-shift_label_7=\EzV%8s1\r
+set-shift_label_8=\EzW%8s1\r
+##				shift status line disable
+perwindow-3-CSQF--b-S=\Ez^?
+perwindow_default-..=\Ez^?
+## -------------- end of order_group 'S' ------------------------------

@@ -1,0 +1,19 @@
+## FacetTerm  tm229color COMMON   description file  08/14/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: tm229color.FC,v 70.1 92/03/09 16:04:38 ssa Exp $
+parm_attribute_val-...i-lkj.=30
+parm_attribute_val-..j.-lk.i=31
+parm_attribute_val-....-lkji=32
+parm_attribute_val-..ji-lk..=33
+parm_attribute_val-.k..-l.ji=34
+parm_attribute_val-.k.i-l.j.=35
+parm_attribute_val-.kj.-l..i=36
+parm_attribute_val-.kji-l...=37
+parm_attribute_val-....-ponm=40
+parm_attribute_val-...m-pon.=41
+parm_attribute_val-..n.-po.m=42
+parm_attribute_val-..nm-po..=43
+parm_attribute_val-.o..-p.nm=44
+parm_attribute_val-.o.m-p.n.=45
+parm_attribute_val-.on.-p..m=46
+parm_attribute_val-.onm-p...=47

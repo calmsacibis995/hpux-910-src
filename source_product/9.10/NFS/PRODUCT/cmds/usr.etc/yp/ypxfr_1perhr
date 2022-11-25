@@ -1,0 +1,9 @@
+#	   @(#)ypxfr_1perhour:	$Revision: 1.19.109.1 $	$Date: 91/11/19 14:21:48 $  
+#
+#  (c) Copyright 1987 Hewlett-Packard Company
+#  (c) Copyright 1985 Sun Microsystems, Inc.  
+#
+#  ypxfr_1perhour - Do hourly Network Information Service map check/updates
+
+/usr/etc/yp/ypxfr passwd.byname
+/usr/etc/yp/ypxfr passwd.byuid 

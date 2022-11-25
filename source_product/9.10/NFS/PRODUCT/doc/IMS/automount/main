@@ -1,0 +1,90 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/main,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:50 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+\" to print: soelim irmain | pic | tbl | troff -mm -rN4
+\"
+.ce 3
+\f3\s+9
+.sp 6
+.vs +9
+.TL
+Internal Maintenance Specification
+.br
+NFS Automount Command
+.br
+.ps 14
+Information Networks Division
+.vs -9
+.sp 3
+
+.ds DI Information Networks Division
+.AF "Hewlett Packard Company"
+.AU "Paul Burns" "" DI
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+\" to print: soelim main | pic | tbl | troff -mm -rN4
+\"
+
+.AS
+.ps 12
+.vs 16
+.sp 1
+.ce 2
+$Revision: 1.2.109.1 $
+DRAFT COPY
+.ps 10
+.vs 12
+.sp 2
+.P
+
+This document presents the internals of the automount command for use
+by CPE engineers.
+
+.sp 10
+.ce 2 
+* HP CONFIDENTIAL *
+.sp 5
+.nf
+\h'+.25i'\f(HP\s18ABCDE\f1
+
+.bp
+.P
+.AE
+.MT 4
+.PH "'Automount IMS'"
+.EF "'\fBHP Internal Use Only\fR' - \\\\nP - '\\*(DT'"
+.OF "'\fBHP Internal Use Only\fR' - \\\\nP - '\\*(DT'"
+.nr Pi 5                        \" paragraph indent
+.nr Ej 1                        \" page eject for all Level 1 headings (.H 1)
+.nr Hb 7                        \" break after all headings less than this
+.nr Hs 7                        \" space after all headings less than this
+.nr Hu 3                        \" unnumbered heading at level 3 (not 2)
+.ds HF 3 3 3 3 3 3 3            \" heading font specifications
+.ds HP 16 14 12 10 10 10 10	\" heading point size specifications
+.nr Cl 4                        \" save 4 levels of headings for contents
+.P
+.. Place a non-expandable blank to force section 1 to begin at the
+.. top of the next page
+\
+.SK
+	
+.nr P 0
+.so overview
+.so des_overview
+.so data_structs
+.so interfaces
+.so algorithms
+.so notes
+.so files
+.so direct
+
+
+.bp
+.RP 0 2
+.TC 1 2 4 0 "NFS 4.1" "Automount IMS" "" "Table of Contents"
+
+
+

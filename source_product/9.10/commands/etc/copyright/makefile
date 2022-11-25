@@ -1,0 +1,558 @@
+default:
+	: 
+
+install:
+	mkdir -p ../../../Filesets.sl/ACCOUNTNG/system/ACCOUNTNG
+	! cp copyright ../../../Filesets.sl/ACCOUNTNG/system/ACCOUNTNG/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ACCOUNTNG/system/ACCOUNTNG/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ACCOUNTNG/system/ACCOUNTNG
+	! chmog 555 bin bin ../../../Filesets.sl/ACCOUNTNG/system
+	! chmog 555 bin bin ../../../Filesets.sl/ACCOUNTNG
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/AMERICAN/system/AMERICAN
+	! cp copyright ../../../Filesets.sl/AMERICAN/system/AMERICAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/AMERICAN/system/AMERICAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/AMERICAN/system/AMERICAN
+	! chmog 555 bin bin ../../../Filesets.sl/AMERICAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/AMERICAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ARABIC/system/ARABIC
+	! cp copyright ../../../Filesets.sl/ARABIC/system/ARABIC/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ARABIC/system/ARABIC/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ARABIC/system/ARABIC
+	! chmog 555 bin bin ../../../Filesets.sl/ARABIC/system
+	! chmog 555 bin bin ../../../Filesets.sl/ARABIC
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ARABICW/system/ARABICW
+	! cp copyright ../../../Filesets.sl/ARABICW/system/ARABICW/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ARABICW/system/ARABICW/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ARABICW/system/ARABICW
+	! chmog 555 bin bin ../../../Filesets.sl/ARABICW/system
+	! chmog 555 bin bin ../../../Filesets.sl/ARABICW
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/AUDIT/system/AUDIT
+	! cp copyright ../../../Filesets.sl/AUDIT/system/AUDIT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/AUDIT/system/AUDIT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/AUDIT/system/AUDIT
+	! chmog 555 bin bin ../../../Filesets.sl/AUDIT/system
+	! chmog 555 bin bin ../../../Filesets.sl/AUDIT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/BIF-CMDS/system/BIF-CMDS
+	! cp copyright ../../../Filesets.sl/BIF-CMDS/system/BIF-CMDS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/BIF-CMDS/system/BIF-CMDS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/BIF-CMDS/system/BIF-CMDS
+	! chmog 555 bin bin ../../../Filesets.sl/BIF-CMDS/system
+	! chmog 555 bin bin ../../../Filesets.sl/BIF-CMDS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/BUILD/system/BUILD
+	! cp copyright ../../../Filesets.sl/BUILD/system/BUILD/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/BUILD/system/BUILD/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/BUILD/system/BUILD
+	! chmog 555 bin bin ../../../Filesets.sl/BUILD/system
+	! chmog 555 bin bin ../../../Filesets.sl/BUILD
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/BULGARIAN/system/BULGARIAN
+	! cp copyright ../../../Filesets.sl/BULGARIAN/system/BULGARIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/BULGARIAN/system/BULGARIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/BULGARIAN/system/BULGARIAN
+	! chmog 555 bin bin ../../../Filesets.sl/BULGARIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/BULGARIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/C/system/C
+	! cp copyright ../../../Filesets.sl/C/system/C/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/C/system/C/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/C/system/C
+	! chmog 555 bin bin ../../../Filesets.sl/C/system
+	! chmog 555 bin bin ../../../Filesets.sl/C
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/C-AUX/system/C-AUX
+	! cp copyright ../../../Filesets.sl/C-AUX/system/C-AUX/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/C-AUX/system/C-AUX/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/C-AUX/system/C-AUX
+	! chmog 555 bin bin ../../../Filesets.sl/C-AUX/system
+	! chmog 555 bin bin ../../../Filesets.sl/C-AUX
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/C-INC/system/C-INC
+	! cp copyright ../../../Filesets.sl/C-INC/system/C-INC/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/C-INC/system/C-INC/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/C-INC/system/C-INC
+	! chmog 555 bin bin ../../../Filesets.sl/C-INC/system
+	! chmog 555 bin bin ../../../Filesets.sl/C-INC
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/C-MIN/system/C-MIN
+	! cp copyright ../../../Filesets.sl/C-MIN/system/C-MIN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/C-MIN/system/C-MIN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/C-MIN/system/C-MIN
+	! chmog 555 bin bin ../../../Filesets.sl/C-MIN/system
+	! chmog 555 bin bin ../../../Filesets.sl/C-MIN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/C-TOOLS/system/C-TOOLS
+	! cp copyright ../../../Filesets.sl/C-TOOLS/system/C-TOOLS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/C-TOOLS/system/C-TOOLS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/C-TOOLS/system/C-TOOLS
+	! chmog 555 bin bin ../../../Filesets.sl/C-TOOLS/system
+	! chmog 555 bin bin ../../../Filesets.sl/C-TOOLS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CFRENCH/system/CFRENCH
+	! cp copyright ../../../Filesets.sl/CFRENCH/system/CFRENCH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CFRENCH/system/CFRENCH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH/system/CFRENCH
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH/system
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CFRENCH-CAT/system/CFRENCH-CAT
+	! cp copyright ../../../Filesets.sl/CFRENCH-CAT/system/CFRENCH-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CFRENCH-CAT/system/CFRENCH-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH-CAT/system/CFRENCH-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/CFRENCH-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CHINESES/system/CHINESES
+	! cp copyright ../../../Filesets.sl/CHINESES/system/CHINESES/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CHINESES/system/CHINESES/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES/system/CHINESES
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES/system
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CHINESES-CAT/system/CHINESES-CAT
+	! cp copyright ../../../Filesets.sl/CHINESES-CAT/system/CHINESES-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CHINESES-CAT/system/CHINESES-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES-CAT/system/CHINESES-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESES-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CHINESET/system/CHINESET
+	! cp copyright ../../../Filesets.sl/CHINESET/system/CHINESET/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CHINESET/system/CHINESET/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET/system/CHINESET
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET/system
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CHINESET-CAT/system/CHINESET-CAT
+	! cp copyright ../../../Filesets.sl/CHINESET-CAT/system/CHINESET-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CHINESET-CAT/system/CHINESET-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET-CAT/system/CHINESET-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/CHINESET-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CMDS-AUX/system/CMDS-AUX
+	! cp copyright ../../../Filesets.sl/CMDS-AUX/system/CMDS-AUX/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CMDS-AUX/system/CMDS-AUX/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-AUX/system/CMDS-AUX
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-AUX/system
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-AUX
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CMDS-MIN/system/CMDS-MIN
+	! cp copyright ../../../Filesets.sl/CMDS-MIN/system/CMDS-MIN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CMDS-MIN/system/CMDS-MIN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-MIN/system/CMDS-MIN
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-MIN/system
+	! chmog 555 bin bin ../../../Filesets.sl/CMDS-MIN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CORE-SHLIBS/system/CORE-SHLIBS
+	! cp copyright ../../../Filesets.sl/CORE-SHLIBS/system/CORE-SHLIBS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CORE-SHLIBS/system/CORE-SHLIBS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CORE-SHLIBS/system/CORE-SHLIBS
+	! chmog 555 bin bin ../../../Filesets.sl/CORE-SHLIBS/system
+	! chmog 555 bin bin ../../../Filesets.sl/CORE-SHLIBS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/CZECH/system/CZECH
+	! cp copyright ../../../Filesets.sl/CZECH/system/CZECH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/CZECH/system/CZECH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/CZECH/system/CZECH
+	! chmog 555 bin bin ../../../Filesets.sl/CZECH/system
+	! chmog 555 bin bin ../../../Filesets.sl/CZECH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DANISH/system/DANISH
+	! cp copyright ../../../Filesets.sl/DANISH/system/DANISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DANISH/system/DANISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DANISH/system/DANISH
+	! chmog 555 bin bin ../../../Filesets.sl/DANISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/DANISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DEL-INFO/system/DEL-INFO
+	! cp copyright ../../../Filesets.sl/DEL-INFO/system/DEL-INFO/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DEL-INFO/system/DEL-INFO/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DEL-INFO/system/DEL-INFO
+	! chmog 555 bin bin ../../../Filesets.sl/DEL-INFO/system
+	! chmog 555 bin bin ../../../Filesets.sl/DEL-INFO
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DISKLESS/system/DISKLESS
+	! cp copyright ../../../Filesets.sl/DISKLESS/system/DISKLESS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DISKLESS/system/DISKLESS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DISKLESS/system/DISKLESS
+	! chmog 555 bin bin ../../../Filesets.sl/DISKLESS/system
+	! chmog 555 bin bin ../../../Filesets.sl/DISKLESS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DOS-UTILS/system/DOS-UTILS
+	! cp copyright ../../../Filesets.sl/DOS-UTILS/system/DOS-UTILS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DOS-UTILS/system/DOS-UTILS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DOS-UTILS/system/DOS-UTILS
+	! chmog 555 bin bin ../../../Filesets.sl/DOS-UTILS/system
+	! chmog 555 bin bin ../../../Filesets.sl/DOS-UTILS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DQUOTA/system/DQUOTA
+	! cp copyright ../../../Filesets.sl/DQUOTA/system/DQUOTA/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DQUOTA/system/DQUOTA/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DQUOTA/system/DQUOTA
+	! chmog 555 bin bin ../../../Filesets.sl/DQUOTA/system
+	! chmog 555 bin bin ../../../Filesets.sl/DQUOTA
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/DUTCH/system/DUTCH
+	! cp copyright ../../../Filesets.sl/DUTCH/system/DUTCH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/DUTCH/system/DUTCH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/DUTCH/system/DUTCH
+	! chmog 555 bin bin ../../../Filesets.sl/DUTCH/system
+	! chmog 555 bin bin ../../../Filesets.sl/DUTCH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ECC-TOOLS/system/ECC-TOOLS
+	! cp copyright ../../../Filesets.sl/ECC-TOOLS/system/ECC-TOOLS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ECC-TOOLS/system/ECC-TOOLS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ECC-TOOLS/system/ECC-TOOLS
+	! chmog 555 bin bin ../../../Filesets.sl/ECC-TOOLS/system
+	! chmog 555 bin bin ../../../Filesets.sl/ECC-TOOLS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/EDITORS/system/EDITORS
+	! cp copyright ../../../Filesets.sl/EDITORS/system/EDITORS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/EDITORS/system/EDITORS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/EDITORS/system/EDITORS
+	! chmog 555 bin bin ../../../Filesets.sl/EDITORS/system
+	! chmog 555 bin bin ../../../Filesets.sl/EDITORS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ENGLISH/system/ENGLISH
+	! cp copyright ../../../Filesets.sl/ENGLISH/system/ENGLISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ENGLISH/system/ENGLISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ENGLISH/system/ENGLISH
+	! chmog 555 bin bin ../../../Filesets.sl/ENGLISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/ENGLISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/FINNISH/system/FINNISH
+	! cp copyright ../../../Filesets.sl/FINNISH/system/FINNISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/FINNISH/system/FINNISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/FINNISH/system/FINNISH
+	! chmog 555 bin bin ../../../Filesets.sl/FINNISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/FINNISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/FPA/system/FPA
+	! cp copyright ../../../Filesets.sl/FPA/system/FPA/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/FPA/system/FPA/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/FPA/system/FPA
+	! chmog 555 bin bin ../../../Filesets.sl/FPA/system
+	! chmog 555 bin bin ../../../Filesets.sl/FPA
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/FRENCH/system/FRENCH
+	! cp copyright ../../../Filesets.sl/FRENCH/system/FRENCH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/FRENCH/system/FRENCH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH/system/FRENCH
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH/system
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/FRENCH-CAT/system/FRENCH-CAT
+	! cp copyright ../../../Filesets.sl/FRENCH-CAT/system/FRENCH-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/FRENCH-CAT/system/FRENCH-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH-CAT/system/FRENCH-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/FRENCH-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/GERMAN/system/GERMAN
+	! cp copyright ../../../Filesets.sl/GERMAN/system/GERMAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/GERMAN/system/GERMAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN/system/GERMAN
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/GERMAN-CAT/system/GERMAN-CAT
+	! cp copyright ../../../Filesets.sl/GERMAN-CAT/system/GERMAN-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/GERMAN-CAT/system/GERMAN-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN-CAT/system/GERMAN-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/GERMAN-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/GREEK/system/GREEK
+	! cp copyright ../../../Filesets.sl/GREEK/system/GREEK/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/GREEK/system/GREEK/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/GREEK/system/GREEK
+	! chmog 555 bin bin ../../../Filesets.sl/GREEK/system
+	! chmog 555 bin bin ../../../Filesets.sl/GREEK
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/HEBREW/system/HEBREW
+	! cp copyright ../../../Filesets.sl/HEBREW/system/HEBREW/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/HEBREW/system/HEBREW/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/HEBREW/system/HEBREW
+	! chmog 555 bin bin ../../../Filesets.sl/HEBREW/system
+	! chmog 555 bin bin ../../../Filesets.sl/HEBREW
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/HUNGARIAN/system/HUNGARIAN
+	! cp copyright ../../../Filesets.sl/HUNGARIAN/system/HUNGARIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/HUNGARIAN/system/HUNGARIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/HUNGARIAN/system/HUNGARIAN
+	! chmog 555 bin bin ../../../Filesets.sl/HUNGARIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/HUNGARIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ICELANDIC/system/ICELANDIC
+	! cp copyright ../../../Filesets.sl/ICELANDIC/system/ICELANDIC/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ICELANDIC/system/ICELANDIC/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ICELANDIC/system/ICELANDIC
+	! chmog 555 bin bin ../../../Filesets.sl/ICELANDIC/system
+	! chmog 555 bin bin ../../../Filesets.sl/ICELANDIC
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/ITALIAN/system/ITALIAN
+	! cp copyright ../../../Filesets.sl/ITALIAN/system/ITALIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/ITALIAN/system/ITALIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/ITALIAN/system/ITALIAN
+	! chmog 555 bin bin ../../../Filesets.sl/ITALIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/ITALIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/JAPANESE/system/JAPANESE
+	! cp copyright ../../../Filesets.sl/JAPANESE/system/JAPANESE/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/JAPANESE/system/JAPANESE/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE/system/JAPANESE
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE/system
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/JAPANESE-CAT/system/JAPANESE-CAT
+	! cp copyright ../../../Filesets.sl/JAPANESE-CAT/system/JAPANESE-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/JAPANESE-CAT/system/JAPANESE-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE-CAT/system/JAPANESE-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/JAPANESE-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/KATAKANA/system/KATAKANA
+	! cp copyright ../../../Filesets.sl/KATAKANA/system/KATAKANA/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/KATAKANA/system/KATAKANA/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/KATAKANA/system/KATAKANA
+	! chmog 555 bin bin ../../../Filesets.sl/KATAKANA/system
+	! chmog 555 bin bin ../../../Filesets.sl/KATAKANA
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/KEYSHELL-RUN/system/KEYSHELL-RUN
+	! cp copyright ../../../Filesets.sl/KEYSHELL-RUN/system/KEYSHELL-RUN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/KEYSHELL-RUN/system/KEYSHELL-RUN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/KEYSHELL-RUN/system/KEYSHELL-RUN
+	! chmog 555 bin bin ../../../Filesets.sl/KEYSHELL-RUN/system
+	! chmog 555 bin bin ../../../Filesets.sl/KEYSHELL-RUN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/KOREAN/system/KOREAN
+	! cp copyright ../../../Filesets.sl/KOREAN/system/KOREAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/KOREAN/system/KOREAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN/system/KOREAN
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/KOREAN-CAT/system/KOREAN-CAT
+	! cp copyright ../../../Filesets.sl/KOREAN-CAT/system/KOREAN-CAT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/KOREAN-CAT/system/KOREAN-CAT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN-CAT/system/KOREAN-CAT
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN-CAT/system
+	! chmog 555 bin bin ../../../Filesets.sl/KOREAN-CAT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/LP-SPOOL/system/LP-SPOOL
+	! cp copyright ../../../Filesets.sl/LP-SPOOL/system/LP-SPOOL/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/LP-SPOOL/system/LP-SPOOL/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/LP-SPOOL/system/LP-SPOOL
+	! chmog 555 bin bin ../../../Filesets.sl/LP-SPOOL/system
+	! chmog 555 bin bin ../../../Filesets.sl/LP-SPOOL
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/MAILERS/system/MAILERS
+	! cp copyright ../../../Filesets.sl/MAILERS/system/MAILERS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/MAILERS/system/MAILERS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/MAILERS/system/MAILERS
+	! chmog 555 bin bin ../../../Filesets.sl/MAILERS/system
+	! chmog 555 bin bin ../../../Filesets.sl/MAILERS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/NLS-CORE/system/NLS-CORE
+	! cp copyright ../../../Filesets.sl/NLS-CORE/system/NLS-CORE/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/NLS-CORE/system/NLS-CORE/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/NLS-CORE/system/NLS-CORE
+	! chmog 555 bin bin ../../../Filesets.sl/NLS-CORE/system
+	! chmog 555 bin bin ../../../Filesets.sl/NLS-CORE
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/NONHPTERM/system/NONHPTERM
+	! cp copyright ../../../Filesets.sl/NONHPTERM/system/NONHPTERM/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/NONHPTERM/system/NONHPTERM/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/NONHPTERM/system/NONHPTERM
+	! chmog 555 bin bin ../../../Filesets.sl/NONHPTERM/system
+	! chmog 555 bin bin ../../../Filesets.sl/NONHPTERM
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/NORWEGIAN/system/NORWEGIAN
+	! cp copyright ../../../Filesets.sl/NORWEGIAN/system/NORWEGIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/NORWEGIAN/system/NORWEGIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/NORWEGIAN/system/NORWEGIAN
+	! chmog 555 bin bin ../../../Filesets.sl/NORWEGIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/NORWEGIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/POLISH/system/POLISH
+	! cp copyright ../../../Filesets.sl/POLISH/system/POLISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/POLISH/system/POLISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/POLISH/system/POLISH
+	! chmog 555 bin bin ../../../Filesets.sl/POLISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/POLISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/PORTUGUES/system/PORTUGUES
+	! cp copyright ../../../Filesets.sl/PORTUGUES/system/PORTUGUES/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/PORTUGUES/system/PORTUGUES/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/PORTUGUES/system/PORTUGUES
+	! chmog 555 bin bin ../../../Filesets.sl/PORTUGUES/system
+	! chmog 555 bin bin ../../../Filesets.sl/PORTUGUES
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/PROG-AUX/system/PROG-AUX
+	! cp copyright ../../../Filesets.sl/PROG-AUX/system/PROG-AUX/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/PROG-AUX/system/PROG-AUX/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-AUX/system/PROG-AUX
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-AUX/system
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-AUX
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/PROG-MIN/system/PROG-MIN
+	! cp copyright ../../../Filesets.sl/PROG-MIN/system/PROG-MIN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/PROG-MIN/system/PROG-MIN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-MIN/system/PROG-MIN
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-MIN/system
+	! chmog 555 bin bin ../../../Filesets.sl/PROG-MIN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/RBOOTD/system/RBOOTD
+	! cp copyright ../../../Filesets.sl/RBOOTD/system/RBOOTD/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/RBOOTD/system/RBOOTD/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/RBOOTD/system/RBOOTD
+	! chmog 555 bin bin ../../../Filesets.sl/RBOOTD/system
+	! chmog 555 bin bin ../../../Filesets.sl/RBOOTD
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/RUMANIAN/system/RUMANIAN
+	! cp copyright ../../../Filesets.sl/RUMANIAN/system/RUMANIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/RUMANIAN/system/RUMANIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/RUMANIAN/system/RUMANIAN
+	! chmog 555 bin bin ../../../Filesets.sl/RUMANIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/RUMANIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/RUSSIAN/system/RUSSIAN
+	! cp copyright ../../../Filesets.sl/RUSSIAN/system/RUSSIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/RUSSIAN/system/RUSSIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/RUSSIAN/system/RUSSIAN
+	! chmog 555 bin bin ../../../Filesets.sl/RUSSIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/RUSSIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SDF-CMDS/system/SDF-CMDS
+	! cp copyright ../../../Filesets.sl/SDF-CMDS/system/SDF-CMDS/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SDF-CMDS/system/SDF-CMDS/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SDF-CMDS/system/SDF-CMDS
+	! chmog 555 bin bin ../../../Filesets.sl/SDF-CMDS/system
+	! chmog 555 bin bin ../../../Filesets.sl/SDF-CMDS
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SERBOCROATIAN/system/SERBOCROATIAN
+	! cp copyright ../../../Filesets.sl/SERBOCROATIAN/system/SERBOCROATIAN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SERBOCROATIAN/system/SERBOCROATIAN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SERBOCROATIAN/system/SERBOCROATIAN
+	! chmog 555 bin bin ../../../Filesets.sl/SERBOCROATIAN/system
+	! chmog 555 bin bin ../../../Filesets.sl/SERBOCROATIAN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SLOVENE/system/SLOVENE
+	! cp copyright ../../../Filesets.sl/SLOVENE/system/SLOVENE/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SLOVENE/system/SLOVENE/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SLOVENE/system/SLOVENE
+	! chmog 555 bin bin ../../../Filesets.sl/SLOVENE/system
+	! chmog 555 bin bin ../../../Filesets.sl/SLOVENE
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SPANISH/system/SPANISH
+	! cp copyright ../../../Filesets.sl/SPANISH/system/SPANISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SPANISH/system/SPANISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SPANISH/system/SPANISH
+	! chmog 555 bin bin ../../../Filesets.sl/SPANISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/SPANISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SPELL/system/SPELL
+	! cp copyright ../../../Filesets.sl/SPELL/system/SPELL/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SPELL/system/SPELL/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SPELL/system/SPELL
+	! chmog 555 bin bin ../../../Filesets.sl/SPELL/system
+	! chmog 555 bin bin ../../../Filesets.sl/SPELL
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SRC-CNTL/system/SRC-CNTL
+	! cp copyright ../../../Filesets.sl/SRC-CNTL/system/SRC-CNTL/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SRC-CNTL/system/SRC-CNTL/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SRC-CNTL/system/SRC-CNTL
+	! chmog 555 bin bin ../../../Filesets.sl/SRC-CNTL/system
+	! chmog 555 bin bin ../../../Filesets.sl/SRC-CNTL
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SWEDISH/system/SWEDISH
+	! cp copyright ../../../Filesets.sl/SWEDISH/system/SWEDISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SWEDISH/system/SWEDISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SWEDISH/system/SWEDISH
+	! chmog 555 bin bin ../../../Filesets.sl/SWEDISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/SWEDISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SYS-ADMIN/system/SYS-ADMIN
+	! cp copyright ../../../Filesets.sl/SYS-ADMIN/system/SYS-ADMIN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SYS-ADMIN/system/SYS-ADMIN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SYS-ADMIN/system/SYS-ADMIN
+	! chmog 555 bin bin ../../../Filesets.sl/SYS-ADMIN/system
+	! chmog 555 bin bin ../../../Filesets.sl/SYS-ADMIN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/SYSCOM/system/SYSCOM
+	! cp copyright ../../../Filesets.sl/SYSCOM/system/SYSCOM/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/SYSCOM/system/SYSCOM/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/SYSCOM/system/SYSCOM
+	! chmog 555 bin bin ../../../Filesets.sl/SYSCOM/system
+	! chmog 555 bin bin ../../../Filesets.sl/SYSCOM
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/TERM-MNGR-MIN/system/TERM-MNGR-MIN
+	! cp copyright ../../../Filesets.sl/TERM-MNGR-MIN/system/TERM-MNGR-MIN/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/TERM-MNGR-MIN/system/TERM-MNGR-MIN/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-MIN/system/TERM-MNGR-MIN
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-MIN/system
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-MIN
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/TERM-MNGR-NHP/system/TERM-MNGR-NHP
+	! cp copyright ../../../Filesets.sl/TERM-MNGR-NHP/system/TERM-MNGR-NHP/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/TERM-MNGR-NHP/system/TERM-MNGR-NHP/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-NHP/system/TERM-MNGR-NHP
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-NHP/system
+	! chmog 555 bin bin ../../../Filesets.sl/TERM-MNGR-NHP
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/TEXT-FMT/system/TEXT-FMT
+	! cp copyright ../../../Filesets.sl/TEXT-FMT/system/TEXT-FMT/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/TEXT-FMT/system/TEXT-FMT/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/TEXT-FMT/system/TEXT-FMT
+	! chmog 555 bin bin ../../../Filesets.sl/TEXT-FMT/system
+	! chmog 555 bin bin ../../../Filesets.sl/TEXT-FMT
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/THAI/system/THAI
+	! cp copyright ../../../Filesets.sl/THAI/system/THAI/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/THAI/system/THAI/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/THAI/system/THAI
+	! chmog 555 bin bin ../../../Filesets.sl/THAI/system
+	! chmog 555 bin bin ../../../Filesets.sl/THAI
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/TURKISH/system/TURKISH
+	! cp copyright ../../../Filesets.sl/TURKISH/system/TURKISH/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/TURKISH/system/TURKISH/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/TURKISH/system/TURKISH
+	! chmog 555 bin bin ../../../Filesets.sl/TURKISH/system
+	! chmog 555 bin bin ../../../Filesets.sl/TURKISH
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/UNSUPP/system/UNSUPP
+	! cp copyright ../../../Filesets.sl/UNSUPP/system/UNSUPP/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/UNSUPP/system/UNSUPP/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/UNSUPP/system/UNSUPP
+	! chmog 555 bin bin ../../../Filesets.sl/UNSUPP/system
+	! chmog 555 bin bin ../../../Filesets.sl/UNSUPP
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/USRCONTRB/system/USRCONTRB
+	! cp copyright ../../../Filesets.sl/USRCONTRB/system/USRCONTRB/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/USRCONTRB/system/USRCONTRB/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/USRCONTRB/system/USRCONTRB
+	! chmog 555 bin bin ../../../Filesets.sl/USRCONTRB/system
+	! chmog 555 bin bin ../../../Filesets.sl/USRCONTRB
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/UUCP/system/UUCP
+	! cp copyright ../../../Filesets.sl/UUCP/system/UUCP/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/UUCP/system/UUCP/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/UUCP/system/UUCP
+	! chmog 555 bin bin ../../../Filesets.sl/UUCP/system
+	! chmog 555 bin bin ../../../Filesets.sl/UUCP
+	! chmog 555 bin bin ../../../Filesets.sl
+	mkdir -p ../../../Filesets.sl/UX-CORE/system/UX-CORE
+	! cp copyright ../../../Filesets.sl/UX-CORE/system/UX-CORE/copyright
+	! chmog 444 bin bin ../../../Filesets.sl/UX-CORE/system/UX-CORE/copyright
+	! chmog 555 bin bin ../../../Filesets.sl/UX-CORE/system/UX-CORE
+	! chmog 555 bin bin ../../../Filesets.sl/UX-CORE/system
+	! chmog 555 bin bin ../../../Filesets.sl/UX-CORE
+	! chmog 555 bin bin ../../../Filesets.sl
+

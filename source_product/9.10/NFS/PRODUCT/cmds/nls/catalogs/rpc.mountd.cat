@@ -1,0 +1,35 @@
+$set 1
+1 mountd: getsockname
+2 mountd: couldn't create udp transport\n
+3 mountd: couldn't register MOUNTPROG
+4 Error: mountd: svc_run shouldn't have returned\n
+5 mountd: couldn't reply to rpc call (NULL PROC)\n
+6 mountd: couldn't reply to rpc call (MOUNTPROC_DUMP)\n
+7 mountd: open (%s)
+8 mountd: getfh
+9 mountd: stat (%s)
+11 mountd: couldn't reply to rpc call (MOUNTPROC_MNT)\n
+12 mountd: couldn't reply to rpc call (MOUNTPROC_UMNT)\n
+13 mountd: couldn't reply to rpc call (MOUNTPROC_EXPORT)\n
+14 mountd: creat (%s)
+15 mountd: fdopen (%s, w)
+16 mountd: rename (%s)
+17 mountd: stat (%s) failed 
+18 mountd: can't parse '%s'\n
+19 mountd: can't stat (%s)
+20 mountd: %s bad file system root\n
+21 mountd: Out of memory\n
+22 mountd: NFS system call is not available.\n        Please configure NFS into your kernel.\n
+23 mountd: %s is not a directory\n
+24 mountd: %s is not a directory\n
+25 mountd: cannot stat %s 
+26 Credential type not AUTH_UNIX
+27 Remote port(%d) >= IPPORT_RESERVED
+28 gethostbyname(%s) returned NULL
+29 Actual address (%s) != claimed address (%s)
+30 %s not in access list for %s
+31 Exported %s to %s
+32 %s unmounted %s
+33 %s unmounted %s (unmountall)
+34 mountd: needs to be executed with SEC_REMOTE, SEC_ALLOWDACACCESS\n        SEC_ALLOWMACACCESS and SEC_WRITE_AUDIT privileges
+35 mountd: Not authorized for network subsystem:  Permission denied\n

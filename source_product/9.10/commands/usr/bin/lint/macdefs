@@ -1,0 +1,127 @@
+/* @(#) $Revision: 70.2 $       */
+# define makecc(val,i)  lastcon |= val<<(8*i);  /* pdp-11 womp next char  */
+
+# define  ARGINIT 288 /* initial offset for arguments */
+# define  AUTOINIT 0   /* initial automatic offset */
+extern int  SZCHAR;
+extern int  SZSCHAR;
+extern int  SZINT;
+extern int  SZFLOAT;
+extern int  SZDOUBLE;
+extern int  SZLONGDOUBLE;
+extern int  SZLONG;
+extern int  SZSHORT;
+extern int SZPOINT;
+extern int SZWIDE;
+extern int ALCHAR;
+extern int ALINT;
+extern int ALFLOAT;
+extern int ALDOUBLE;
+extern int ALLONGDOUBLE;
+extern int ALLONG;
+extern int ALSHORT;
+extern int ALPOINT;
+extern int ALSTRUCT;
+extern int ALSTACK;
+# define SAVEADJUST 0 /* bits of adjustment required for stackframe */
+
+#define MSKINT      0x7fffffff
+
+/* type (INT OR LONG) big enough to hold pointers */
+
+/*	size in which constants are converted */
+/*	should be long if feasable */
+
+# define CONFMT "%Ld"
+# define CONOFMT "%Lo"
+# define CONFMT2 "0x%x"
+
+/*	size in which offsets are kept
+/*	should be large enough to cover address space in bits
+*/
+
+# define OFFSZ long
+
+/* 	character set macro */
+
+# define  CCTRANS(x) x
+
+/*	register cookie for stack pointer */
+
+# define STKREG 9
+
+/*	maximum and minimum register variable values */
+
+# define MAXRVAR 1000
+# define MINRVAR 1
+# define MAXRFVAR 1000
+# define MINRFVAR 1
+# define MAXRDVAR 1000
+# define MINRDVAR  1
+/* many macro definitions for functions irrelevant to lint */
+
+# ifndef __lint		/* (void)locctr(PROG) causes trouble linting lint */
+# define locctr(n) 0
+# endif
+
+# define genswitch(x,y,z)
+# define bccode()
+# define cendarg()
+# define incode(a,s) (inoff += (s))
+# define fincode(a,s) (inoff += (s) )
+# define vfdzero(n) (inoff += (n))
+# define aobeg()
+# define aoend()
+
+#    define	WERROR	lwerror
+#    define	UERROR	luerror
+#    define	MESSAGE(x)	(x)
+
+
+# define EXIT(x)	lerror( "", 06 )
+ 
+/* ***** added for s200  ***** */
+#   undef ONEPASS
+#   undef STDPRTREE
+#   define CENDARG() (autooff = AUTOINIT);
+#   define NOINIT()  EXTERN
+#   define LONGFIELDS
+#   define FTITLESZ 256
+
+# define NUMALIGNS   5
+# define ALIGN300    0
+# define ALIGN500    1
+# define ALIGN800    2
+# define ALIGNCOMMON 3
+# define ALIGNNOPAD  4
+
+# define AL500CHAR       8
+# define AL500SHORT      16
+# define AL500INT        32
+# define AL500LONG       AL500INT
+# define AL500POINT      AL500INT
+# define AL500FLOAT      AL500INT
+# define AL500DOUBLE     AL500INT
+# define AL500LONGDOUBLE AL500INT
+# define AL500STRUCT     16
+
+# define AL800CHAR       8
+# define AL800SHORT      16
+# define AL800INT        32
+# define AL800LONG       AL800INT
+# define AL800POINT      AL800INT
+# define AL800FLOAT      AL800INT
+# define AL800DOUBLE     64
+# define AL800LONGDOUBLE 64
+# define AL800STRUCT     8
+
+# define ALCOMMONCHAR       8
+# define ALCOMMONSHORT      16
+# define ALCOMMONINT        32
+# define ALCOMMONLONG       ALCOMMONINT
+# define ALCOMMONPOINT      ALCOMMONINT
+# define ALCOMMONFLOAT      ALCOMMONINT
+# define ALCOMMONDOUBLE     64
+# define ALCOMMONLONGDOUBLE 64
+# define ALCOMMONSTRUCT     16
+

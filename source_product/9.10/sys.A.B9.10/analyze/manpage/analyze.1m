@@ -1,0 +1,485 @@
+.lg 0
+.TH ANALYZE 8 " August 1987"
+.UC 4
+.SH NAME
+analyze \- Virtual UNIX postmortem crash analyzer
+.SH SYNOPSIS
+.B /usr/local/bin/analyze
+[
+.B \-F
+] [
+.B \-C
+] [
+.B \-A
+] [
+.B \-U
+] [
+.B \-H
+] [
+.B \-Q
+] [
+.B \-S
+] [
+.B \-M
+] [
+.B \-R
+] [
+.B \-i
+] [
+.B \-I
+] [
+.B \-b
+] [
+.B \-B
+] [
+.B \-d
+] [
+.B \-D
+] [
+.B \-o
+] [
+.B \-O
+] [
+.B \-n
+] [
+.B \-N
+] [
+.B \-v
+]
+corefile
+[system]
+.SH DESCRIPTION
+.I Analyze
+is the post-mortem analyzer for the state of the system.
+In order to use
+.I analyze
+you must arrange to get an image of the memory of the system after 
+it crashes. This can be done using rdb, or through the use of 
+.IR savecore (8).
+.PP
+The
+.I analyze
+program reads the relevant system data structures from the core
+image file and indexing information from 
+.B /hp-ux
+(or the specified system file)
+to determine the state of the paging, io message, and networking
+subsystems at the point of the crash.
+It looks at each process in the system, and the resources used by
+each in an attempt to determine inconsistencies in the system
+state.  Normally, the output consists of a sequence of lines showing
+each active process, its state (whether swapped in or not), its
+.IR p0br ,
+and the number and location of its page table pages. A kernel stack
+trace can also be obtained when using the \fBU\fP option. Cross checks
+are done between different tables whenever possible.  If the io subsystem
+"o" or networking subsystem "n" scan options are chosen then only their
+associated data structures will be scanned.
+.PP
+.I Analyze
+has two modes of operation. The first is batch mode where
+one supplies any one of the options followed by the corefile
+and an optional system file. When an option flag is spotted
+in the runstring 
+.I analyze 
+knows that it is in batch mode, and will scan the entire corefile
+based on the flags given. If no options are given
+.I analyze
+will go interactive, and issue a command prompt. When in interactive
+mode one can display single table entries. Some commands
+allow a built in search facility. 
+.PP
+Even in interactive mode a complete scan can be started by using the
+.I scan 
+command. Both interactive and scan modes can be extremely useful when 
+running on an active system (corefile == /dev/mem). Only a subset of
+checking is done in scan mode when operating on the active kernel. 
+This is because tables are changing even as they are being read, and
+.I analyze
+would detect problems when they don't really exist. In particular
+.I analyze
+will not scan the coremap, or the PDIR when the core
+file given is /dev/mem.
+.PP
+Whenever
+.I analyze
+detects an inconsistency it will display that fact regardless of the 
+upper case verbose flag for that table.
+The following flags exist for 
+.I analyze
+to control additional checks, and how verbose each will be.
+.PP
+Options to
+.IR analyze :
+.TP
+.B \-F
+causes each free list entry to be dumped. 
+.TP
+.B \-C
+causes the entire coremap state to be dumped. 
+.TP
+.B \-A
+causes the registers to be dumped, and a details about an HPMC
+if one occured.
+.TP
+.B \-U
+causes additional u_area info (open file pointers) to be dumped,
+as well as a kernel stack trace.
+.TP
+.B \-H
+causes the text hash chains of incore CTEXT pages to be scanned and dumped. 
+.TP
+.B \-Q
+causes the run queue headers to be dumped.
+.TP
+.B \-S
+causes shared memory tables to be dumped.
+.TP
+.B \-M
+causes the mount and file table to be dumped.
+.TP
+.B \-R
+makes analyze a realtime process (useful when running against an active system).
+.TP
+.B \-i
+cause the inode table to be scanned 
+.TP
+.B \-I 
+cause the inode entries to be dumped if the
+.B \-i
+option was invoked.
+.TP
+.B \-b
+cause the buffer headers (swap and file system) to be scanned.
+.TP
+.B \-B
+cause the buffer entries to be dumped if the 
+.B \-b
+option was invoked.
+.TP
+.B \-d
+causes the process swap maps and free swap resource maps to be scanned. The 
+information will then be sorted for detection of overlaps and lost pieces.
+.TP
+.B \-D
+causes the diskmap for each process to be printed if the 
+.B \-d
+option was invoked.
+.TP
+.B \-o
+causes the message based i/o system message frames to be scanned (io subsystem
+only).
+.TP
+.B \-O
+causes the imcport and server control block for each I/O Port to be scanned,
+as well as to dump queued io messages.
+.TP
+.B \-n
+causes networking structures to be scanned (networking only). The
+structures listed in the net help command are scanned.
+.TP
+.B \-N
+causes the rfa table to be dumped during the scan command.
+.TP
+.B \-v
+(long unused) this option is extremely verbose, and is here for debug
+purposes only.
+.PP
+In general, the output from this program can be confused by processes
+which were forking, swapping, exiting or
+happened to be in an unusual state (ie. PREEMPTED) when the
+crash occurred.  One should examine the flags fields of the relevant
+processes, as well as its kernel stack trace (see U option) to determine
+the relevance of an error.
+.PP
+The interactive mode can be used to look at individual table entries.
+This can be useful when the system has not necessarily crashed, but 
+is in an unexpected state.
+Most commands can have their output redirected or appended to another
+file. This is accomplished through the use of the ">" or ">>" symbols
+at the end of the command followed by a file name.
+The following commands exist in interactive mode:
+.TP
+\fBshow [symbol | vmstats | vmaddr | iostats | network] \fP
+This command dumps out  information pertaining to the category
+chosen.
+.TP
+\fBsnap \fP
+The snap command updates the local copy of kernel tables that analyze is
+interested in. This is only useful on an active system.
+.TP
+\fBreal  \fP
+This command attempts to make analyze a realtime process. The command will
+succeed only if the user has the ability to run realtime processes. This 
+is only useful on an active system. The purpose is to read the tables
+as quickly as possible in order to get the best possible snapshot. The
+command is a toggle, and a second use will set the process back to its old
+priority.
+.TP
+\fBscan [FCUHQSMRiIbBdDoOnN] [> | >> filename] \fP
+This command puts analyze in scan mode. The flags descriptions are
+the same as those discussed above. 
+Typically one would redirect this output to a file since it might be 
+long. A few examples might be "scan dDbUS > myfile " to check the memory/process
+managment subsystem, "scan oO > myfile" to scan the io subsystem, or finally
+"scan n > myfile" to check the networking subsystem. 
+.TP
+\fBbuf    [address] | [index n] | [dev blkno d] [> | >> filename]\fP
+.IP
+Dump contents of specified buffer header. A few examples of
+the buf command follow.
+"buf 0x036780"  (this dumps the buffer header at <address> if it exists),
+"buf 4 n"  (this dumps buffer table index 4),
+"buf 0 a"  (this dumps the entire buffer table),
+"buf 0 a" > OUT  (this dumps the entire buffer table into a file called OUT),
+"buf 0x0 0x800 d"  (this dumps the buffer whose dev is 0x0 and blkno is 0x800,
+if there is such a buffer).
+.TP
+\fBswbuf  [address] | [index n] | [0 a] [> | >> filename]\fP
+Dump contents of specified swap buffer header.
+.TP
+\fBcmap   [address] | [index n] | [dev blkno d] | [page c] | [0 a]\fP
+\fB   [> | >> filename]\fP
+.IP
+Dump contents of specified core map entry.
+.TP
+\fBframe  [address] | [index n] | [> | >> filename]\fP
+Dump contents of specified message frame.
+.TP
+\fBport   [address] | [index n] [> | >> filename]\fP
+Dump imcport entry associated with port directory.
+.TP
+\fBinode  [address] | [index n] | [dev inumber d] | [0 a] [> | >> filename]\fP
+.IP
+Dump contents of specified inode entry.
+.TP
+\fBpdir   [address] | [index n] | [0 a] [> | >> filename]\fP
+Dump contents of specified pdir entry (note: a physical page number 
+is an index into the pdir).
+.TP
+\fBproc   [address] | [index n] | [pid p] | [0 a] [> | >> filename]\fP
+.IP
+Dump contents of specified proc entry.
+.TP
+\fBshmem  [address] | [index n] | [0 a] [> | >> filename]\fP
+Dump contents of specified shared memory shmid table .
+.TP
+\fBtext   [address] | [index n] | [ 0 a] [> | >> filename]\fP
+Dump contents of specified text table .
+.TP
+\fBsavestate [address][> | >> filename]\fP
+Dump a formatted version of the savestate.
+.TP
+\fBltor   [address] [> | >> filename]\fP
+Look up in the pdir hash chains to see if the virtual address is mapped.
+If so the physical address is returned. 
+.TP
+\fBdump   [address length ] [p | s] [> | >> filename]\fP
+Dump memory locations starting at address for length number of words.
+The default for this command is to interpret the address as virtual. The
+"p" specifies that the address is to be interpreted as physical. 
+The "s" specifies that the contents of the addresses are to be
+converted to there closest kernel symbol. 
+.TP
+\fBbinary    [address length] [> | >> filename]\fP
+Dump memory starting at the virtual address in binary format.
+.TP
+\fBxdump     [address length] [> | >> filename]\fP
+Dump hex/ascii memory at the virtual location <address> for length
+number of words.
+.TP
+\fBlistcount [address] [offset] [> | >> filename]\fP
+Display a count of the number of nodes starting at virtual location
+<address>.  The 'offset' option specifies the next pointer location
+in each node.
+.TP
+\fBlistdump  [address length] [p|a] [offset] [> | >> filename]\fP
+Dump hex/ascii memory starting at the virtual location <address>
+for length number of words.  The 'p' option pauses after each
+dump.  The 'a' option dumps all entries.  The 'offset' option
+specifies the next pointer location in each node.
+.TP
+\fBnet    help [> | >> filename]\fP
+Give help for the net command.
+.TP
+\fBnet	  <data> [addr] [n|a]\fP
+Display networking data structure <data> at address addr, or at index
+addr 'n'. The 'a' option dumps all entries of type <data>. Data 
+structures supported are: conn, mbuf, cluster, ifnet, lan_ift, sap_input,
+xsap_link, ipq, inpcb, tcpcb, msgmtbl, pxpcb, 
+socket, domain, protosw.
+.TP
+\fBmuxdata    [addr] [n|a]\fP
+Display muxdata entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBmuxcamdata [addr] [n|a]\fP
+Display muxcamdata entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBmuxhwdata  [addr] [n|a]\fP
+Display muxhwdata entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBptyinfo [addr] [n|a]\fP
+Display ptyinfo entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBpty     [addr] [n|a]\fP
+Display pty entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBtty     [addr] [n|a]\fP
+Display mux tty entry at address addr, or at index
+addr 'n'. The 'a' option dumps all entries.
+.TP
+\fBsetmask[value mask]\fP
+Set the global value to be searched for, and the mask.
+An example would be "setmask 0x2345000 0xffff0000". This
+would set up the search for the pattern 0x02345000, where
+only bits 0-15 must match.
+.TP
+\fBsearch [address length]\fP
+Search the virtual address space given for the value set in setmask
+.TP
+\fBsymbol [address] [> | >> filename]\fP
+Find the closest kernel symbol to the given address.
+.TP
+\fB= expr\fP
+Display the value of the given expression.
+.TP
+\fBhelp   [> | >> filename]\fP
+Give this help message.
+.TP
+\fBquit   \fP
+Exit analyze program.
+\fB!   \fP
+Execute a shell command.
+.PP
+Other commands include a built in calculator, and a set of 26 local
+registers($a \- $z). The calculator is used with the "= " command. 
+A few examples of the calculator, and expression capabilities are
+shown below:
+.IP
+= (0x1240 + 40) 
+.IP
+This would display the value of hex 1240 plus decimal 40.
+.IP
+$b = (@(cmap) + 0xf0a0)
+.IP
+This would put the address of the 0xf0a'th coremap entry into local
+variable "b".
+.IP
+dump $b 4
+.IP
+This would dump out four words starting at the address specified 
+in register "b".
+.PP
+It is possible to look at a core dump using 
+.I adb
+.PP
+if you do
+.IP
+adb \-k /hp-ux /hp-core
+.SH FILES
+/hp-ux	default system namelist
+.SH SEE ALSO
+adb(1), savecore(8)
+.SH AUTHORS
+Origional authors Ozalp Babaoglu and William Joy. 
+.I Analyze
+was rewritten and extended by Hewlett-Packard.
+.SH DIAGNOSTICS
+Various diagnostics about the state of the kernel are emitted. Some
+of the checks done are listed below.
+.IP
+Process ptes are scanned. These ptes are compared against proc table
+info, cmap info and the PDIR.  Pages are logged, and duplicate 
+pages and ptes are detected. Swap map data blocks are logged.
+Shared memory links are followed. U_procp pointers are checked.
+.IP 
+The text table is scanned accounting for text pages and checking 
+proc table pointer chains. Text hash chains are scanned verifying
+that they contain only CTEXT pages. Swap map text blocks are
+logged.
+.IP
+Shared memory tables are scanned accounting for their resources.
+.IP
+Overlaps in swap mappings, and missing swap mappings are detected.
+.IP
+Pages which are locked or intransit, and inconsistencies in the 
+free page list are detected (ie. on freelist, but c_free bit NOT set).
+.IP
+Extensive checks are made on the pdir hash chains. Information in the PDIR
+is compared against log tables which were filled in during earlier 
+table scanning. This includes checking of <space, offset>, <access right>,
+and <protection id> information.
+.IP
+Lost and duplicate resources (ie, pages, buffer headers, inodes ,
+swap buffer headers, message frames) are detected and recorded. 
+Chains are checked for bad, or invalid pointers( ie. looping chains,
+or chain collisions). Mutually exclusive flags are checked.
+.IP
+Currently the following networking areas are scanned when the
+"n" scan option is envoked.
+.IP
+First the Buffer manager tables are
+checked. This includes mbufs. The mbufs are checked for valid offsets,
+lengths, alignment, and type. If the mbuf points to a cluster, the cluster
+is checked for a positive reference count. In addition the mfree and
+mclfree chains are followed and counts are checked. 
+Cluster referance counts are compared
+against the mclrefcnt.
+.IP
+The next major networking area scanned is the networking interface. 
+The ifnet chain is followed. A check is made to see if the ifqueue is full,
+and if the length of the queue equals ifq_len. All mbuf pointers in the
+ifqueue are verified, and the if_macct mbuf is checked to see
+if it is valid. The last check on the ifnet structure is that the function
+pointers are valid. Next the sap_active (sap_log) is checked. Two things 
+are verified here. The pointer to the ifqueue, and the pointer to the input
+routine. The xsap_link structure has the following checks performed. All
+forward and backward links are verified, as well as the mbuf pointers. 
+The last networking interface structure checked is the lan_ift structure.
+Here the mbuf pointers, xtofree, and mbuf_rd fields are scanned to see
+if they contain valid pointers. The arpcom ifnet structure (is_ac.ac_if),
+and arpcom next link (is_ac.ac_ac), and m_acct fields are checked for
+valid pointers. Finally the driver statistics are displayed and we are warned
+if the LAN card died.
+.IP
+Finally all processes which were waiting on networking memory, or
+which referance open sockets are dumped.
+.IP 
+More to come in this area...
+.SH BUGS 
+Most of the structures that
+.I analyze
+deals with are read in at one time (or following a snap command).
+There are a few tables, such as a processes user area,
+a processes kernel stack, imcport and scb entries which
+are read only when needed.  This makes no difference when running against
+a core file, however it should be taken into account when running against
+/dev/mem. 
+.PP
+When you are in a syscall (your stack trace has syscall), the user
+PC reported by analyze is garbage, and RP has the return address
+of the user code calling the system call. Actually the PC value 
+is a stale entry on the kernel stack from the last trap.
+.PP
+When you are in a trap (your trace shows that you trapped into the
+system, this might even be a forced time slice) the user
+PC is the address that caused the trap (or was executing when
+a trap was forced), and RP is the user routine the program
+would return to.
+.PP
+The "@" command in expression evaluation expects a physical address,
+and hence should be used with equivalently mapped structure. This 
+is most likely to be changed in the near future to expect kernel
+addresses, in space zero.
+.PP
+Analyze is still evolving, and will likely be modified for
+future releases. Since analyze knows alot about the internals of the
+system, it is not always possible to run an old version of analyze on 
+a new release of the operating system. One should always run the most
+current version of analyze on the most current version of the OS.
+

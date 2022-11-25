@@ -1,0 +1,53 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_300/REG.300/RCS/config.sys.nightly,v $
+# $Revision: 1.2.84.6 $	$Author: marshall $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/12/15 13:30:36 $
+
+##
+##  HP-UX System Makefile
+##
+
+# .SILENT
+STDDEFS=-D__hp9000s300 -Dhpux -D_HPUX_SOURCE
+IDENT=-D_KERNEL -DPSTAT -DGENESIS -DAUTOCHANGER \
+        -DFSD_KI -D_UNSUPPORTED -D_KERNEL_BUILD -DQUOTA
+DEBUG=-DOSDEBUG
+DUXD=-DLOCAL_DISC -DBSDJOBCTL -DPOSIX -DACLS -DAUDIT
+LAN=-DCONFIG_HP200
+TUNE=-DKERNEL_TUNE_FG
+DEBUGONLY=$(DEBUG) -UGPROF -DSYSCALLTRACE -DTRACE \
+	-DCLEANUP_DEBUG -DDCTRACE -DKERNEL_DEBUG_ONLY -UNS_QA
+
+SHELL = /bin/ksh
+SOURCE=
+COMPILE_BIN=$(SOURCE)/bin
+COMPILE_LIB=$(SOURCE)/lib
+CC    = $(COMPILE_BIN)/cc -t pc2,$(COMPILE_LIB)/ -t a,$(COMPILE_BIN)/as
+AS    = $(COMPILE_BIN)/as
+LD    = $(COMPILE_BIN)/ld
+
+CFLAGS= +M -Wc,-Nd3500,-Ns7000 -Wp,-H250000 -I.
+COPTS= $(STDDEFS) $(IDENT) $(DEBUGONLY) $(LAN) $(DUXD) $(TUNE) $(OPTIONS)
+KREQ1_OBJS= exceptions.o locore.o vers.o
+KREQ2_OBJS= name.o funcentry.o cdfs_hooks.o
+DEBUG_OBJS= debug.nms.o
+XOBJS=`if [ -d /DDB ]; then echo /DDB/*.o; fi`
+LIBUSRDRV=`if [ -f $(ROOT)/libusrdrv.a ]; then echo $(ROOT)/libusrdrv.a; fi;`
+
+all:	hp-ux
+
+hp-ux:	$(CONF).o
+	rm -f hp-ux
+	ar x $(ROOT)/libkreq.a $(KREQ1_OBJS) $(KREQ2_OBJS)
+	ar x $(ROOT)/libdebug.a $(DEBUG_OBJS)
+	@echo 'Loading hp-ux...'
+	$(LD) -L $(COMPILE_PATH)/lib/ -n -o hp-ux -e _start -x	\
+		$(KREQ1_OBJS) $(CONF).o $(KREQ2_OBJS) $(DEBUG_OBJS) \
+		$(LIBUSRDRV) $(XOBJS) $(LIBS)
+	rm -f $(KREQ1_OBJS) $(KREQ2_OBJS) $(DEBUG_OBJS)
+	chmod 755 hp-ux
+
+$(CONF).o: $(CONF).c
+	rm -f $(CONF).o
+	@echo 'Compiling $(CONF).c ...'
+	$(CC) $(CFLAGS) $(COPTS) -c $(CONF).c

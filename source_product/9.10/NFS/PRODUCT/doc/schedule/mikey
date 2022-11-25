@@ -1,0 +1,147 @@
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	. building nightly/weekly development systems for group distributions
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. coordinate with partners since it is mainly based on interrupts
+#	. time spent doing schedule estimates
+
+##
+# Effort Categories:
+#
+#	Doc		--	Documentation
+#	Tech		--	Tech support
+#	Mkt		--	Marketing
+#	SSIT		--	SSIT work
+#	Sup		--	Project support work
+#	Dev		--	Development work
+#	Test		--	Testing effort
+#	Train		--	Training
+#	FTO		--	FTO
+#	Tool		--	tool work
+#	Coord		--	coordination
+#	A/B		--	Alpha/Beta sites
+#	Iss		--	Issues
+#	Metr		--	Metrics
+#	Other		--	Anything else
+#	New		--	New Additional tasks
+##
+
+
+NAME: Mike Shipley
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+Checkpoint   EB1  05/12/87
+#
+0.5	2.5	4.0  	Test		Code reading for high risk code [New]
+Checkpoint   Beta  06/22/87
+#
+1.0	3.0	4.0	Test		BFA coverage to 70% in kernel (Ugh!)
+Checkpoint	EB3	08/17/87	
+#
+27.1	8.2	26	Dev		Debug NFS kernel code [Added from GMF]
+3.7     1.5	6	Sup		Proj support (life cycle,sched,DTS,meet)
+1.75    1.25    3.0     Coord           Keep shared code up to date.
+					     [New]
+1	2	4	Coord		Track kernel modifications 
+
+0	1	1	Doc		third documentation review
+0.2	1.8	2	Tech		SE class review/edit
+0	4.0	4.0	Test		BFA coverage to 85% in kernel (Ugh!)
+#
+Checkpoint	BitRel  10/07/87	Complete QA / Bit Release
+#
+# Tasks over project life or that can be done RIGHT after Bit Release
+4.0	2.0	8	New		Customer visit and customizing scripts
+					   for VHE(Write ERS, scripts)
+0	0	2	Metr		Post Mortem of Project
+1.4	0.6	2	Test		Performance:  Get the tests in a 
+					   usable documented form.
+0	1.7	1.7	Test		Performance test #3 of NFS 
+					   Running standard tests
+					   Use HPIB to HPIB and
+					   SCSI to SCSI.  See Paul
+					   Perlmutter.  Note disks used
+					   Use Eagle disks.
+						[New from GMF]
+0 	2	2	Test		Performance:  Compare NFS to RFA(5.x
+					   and 6.0), rcp, nfs and ftp
+					   Check with Carole C.
+2.6	0.8	2	Doc		providing technical information	
+					(this is for documentation and for
+					 notes files)
+0	15	15	FTO		Vacation
+#
+0	2	2	Tool		Learning tools 
+5	0	3	Train		Courses	
+5.25    0       0	Other           Overhead 
+					( Logging errors from kernel .75 d
+					  Merge ISO changes for NFS - 1.25 d
+					  Talk about NFS with SE from Germany
+					  Redo NFS source licence, 2.5 days
+					  on tracing processor board bug,
+					  put EB2 on hpcndfm [1st on the block])
+Checkpoint    After_Bit_Release  10/07/87
+# Done or canned tasks
+0       0       1       Other           section offsite meeting (Canceled)
+1.7	0	2	Doc		first documentation review
+2.2 	0	3	Dev		IRS for RPC/NFS interactions
+7.2	0	10	Dev		Port NFS (kernel code) 
+1	0	1	Dev		Port NFS-specific system calls
+.7	0	1	Dev		Sun compatibility documents
+3.50	0	4.5	Doc		modify brick pages and provide examples
+.75	0	2       Doc		provide data for comparing RFA and NFS 
+2.6	0	2.5     Dev		Initial BFA numbers/setup for kernel
+0	0	4.0	Test		BFA coverage to 50% in kernel
+2.4	0	2	Doc		second documentation review
+4.3	0	2	Metr		QA metrics (Needs BFA info)
+2.7     0       2.5     Doc             Took over doing the vfsmount() man page
+2.1     0	4	Doc		get TWG approval for man pages
+0	0	5	Test		Sym link test(RFA and diskless interact)
+					    [New from GMF]
+0	0	7	Test		Test NFS kernel code (write tests)
+						[Added from GMF]
+0.5	0	1.7	Test		Performance test #1 of NFS 
+						[New from GMF]
+0	0	3 	Test		Test operational interac of NFS and RFA	
+0	0	3 	Test		Test operational interac of NFS and DUX
+.75	0	1	Coord		Follow-up efforts on long file names
+0	0	13	Test		Test NFS kernel code (execute tests)
+						[Added from GMF]
+5.6	0  	4   	Test		preliminary NFS kernel testplan (add
+					    getdirentries, system acct)
+0.5	0.0	0.5	Dev		Def/doc of install/config process
+0	0	2	Tech		connectivity tool development
+0	0	2	A/B		support of Alpha/Beta and B.O. sites
+					for performance.  [Added from GMF]
+0	0	1	Test		Release final bits to SSIT 
+					     [Added from GMF]
+.50	0.0	2   	Test		Help test group with testing RFA add.
+0.5	0.0	1   	Dev		Provide RFA Requestor support
+3.125	0	4  	Dev		Provide RFA Server support 
+0	0.0	0.5	Dev		Implementation of installation process
+0	0	2	Test		Multi-vendor connectivity testing
+0	0	1	Test		Reliability testing	
+0	0	1 	Test		Test optional conf capabilities kernel
+0.5     0       0       Other           Help Glen Shirey with Test Plan
+					template.
+1.5	0	4	Other		Mentoring
+0.6     0       0       Other           Interview
+0	0	0	Dev		Provide NLS (i.e., localizibility)
+1.0	0  	1	Dev		NFS/RFA/DUX/A-B interactions 
+0.7	0  	1.7	Test		Performance test #2 of NFS
+					   Running standard tests
+					   (Performance seems about the same
+					    Will try again after Darren does
+					    his hack)
+						[New from GMF]
+0.2     0       0.5     Mkt 		Get info about what Sun bugs we have
+					   fixed (number and importance)
+2	0	2	FTO		Before Labor Day
+
+Checkpoint  END_Done_or_canceled_tasks

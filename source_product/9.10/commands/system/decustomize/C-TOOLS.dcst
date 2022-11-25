@@ -1,0 +1,13 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+lint=/usr/lib/llib
+/bin/rm -f $lint-lcurses.ln  $lint-lmalloc.ln
+/bin/rmdir $lint-lcurses.ln+ $lint-lmalloc.ln+ >/dev/null 2>&1
+
+exit 0

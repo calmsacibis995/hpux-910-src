@@ -1,0 +1,12 @@
+## FacetTerm vi603graph  description file 5/24/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vi603graph.FC,v 70.1 92/03/09 16:51:35 ssa Exp $
+graph_mode_clear=^X
+out_graph_mode_clear=^_\E^L^X
+graph_mode_start=^]
+graph_mode_start=^_
+graph_mode_start=\E^L
+graph_mode_start=\E'
+graph_mode_start=\E/0d
+graph_mode_start=\E/1d
+graph_mode_start=\E0

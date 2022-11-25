@@ -1,0 +1,155 @@
+#!/bin/sh
+#
+# This script can be used to send the proper signals
+# to the name server.
+#
+# $Header: sig_named,v 1.8.109.1 91/11/21 11:46:02 kcs Exp $
+# 
+
+MYNAME=`basename $0`
+VERIFIED="no"
+
+if [ $# -eq 0 ]
+then
+	echo "usage: $MYNAME [-v] [debug [+]debug-level | dump | kill | restart | stats]" >&2
+	exit 1
+fi
+
+if [ -r /etc/named.pid ]
+then
+	PID=`cat /etc/named.pid`
+	FROM="file"
+else
+	PID=`ps -ef | fgrep /etc/named | fgrep -v fgrep | awk '{print $2}'`
+	FROM="ps"
+fi
+
+if [ "$PID" = "" ]
+then
+	echo No name server is running. >&2
+	exit 1
+fi
+
+while [ $# -gt 0 ]
+do
+	case $1 in
+	  -v)    
+		 if [ "$VERIFIED" = "yes" ]
+		 then
+			shift
+			continue
+		 fi
+		 VERIFIED="yes"
+		 if [ "$FROM" = "file" ]
+		 then
+		     #
+		     # See if PID from /etc/named.pid exists
+		     #
+		     PID=`ps -lp $PID | fgrep named | awk '{print $4}'`
+		     if [ "$PID" = "" ]
+		     then
+			#
+			# Use ps since PID from /etc/resolv.conf seems
+			# to be old.
+			#
+			PID=`ps -ef | fgrep /etc/named | fgrep -v fgrep | awk '{print $2}'`
+		     fi
+		 fi
+		 if [ "$PID" = "" ]
+		 then
+			echo No name server is running.
+			exit 1
+		 else
+			echo Name server is running and its process id is $PID.
+		 fi
+	         shift ;;
+	  kill)  if kill $PID
+		 then
+		     rm -f /etc/named.pid
+		     echo Name server killed.
+		 fi
+		 exit 0 ;;
+	  stats) rm -f /usr/tmp/named.stats
+		 if kill -6 $PID
+		 then
+		     i=0
+		     while test ! -s /usr/tmp/named.stats
+		     do
+			i=`expr $i + 1`
+			if test $i -eq 20
+			then
+				break;
+			fi
+			sleep 1
+		     done
+		     if test $i -lt 20
+		     then
+		     	cat /usr/tmp/named.stats
+		     else
+			echo The statistics file, /usr/tmp/named.stats, is empty >&2
+		     fi
+		 fi
+	         exit 0 ;;
+	  debug) if [ "$2" = "" ]
+		 then
+		     echo $MYNAME: debug requires a debug level. >&2
+		     echo $MYNAME: Level 0 will turn debugging off. >&2
+		     exit 1
+		 fi
+		 case $2 in
+		     +[0-9]|+[0-9][0-9]) LEVEL=`echo $2 | sed -e "s/+//"` ;;
+		     [0-9]|[0-9][0-9])
+				   #
+		 		   # Turn off debugging so that we
+		 		   # get the right debug level.
+		 	   	   #
+		 		   if kill -17 $PID
+		 		   then
+					sleep 1 # timing problem
+				   else
+					exit 1
+				   fi
+		                   LEVEL=$2
+				   ;;
+		     *) echo $MYNAME: unknown debug level - $2 >&2
+			exit 1 ;;
+		 esac
+		 while [ "$LEVEL" -gt "0" ]
+		 do
+			 if kill -16 $PID
+			 then
+			     LEVEL=`expr $LEVEL - 1`
+			 else
+			     exit 1
+			 fi
+		 done
+		 case $2 in
+		     +*) LEVEL=`echo $2 | sed -e "s/+//"`
+			 echo Debug raised $LEVEL levels. ;;
+		      *) if [ "$2" = "0" ]
+		         then
+			        echo Debug turned off.
+		         else
+			        echo Name server set at debug level $2.
+		                echo Debug output is in /usr/tmp/named.run
+		         fi ;;
+		 esac
+		 exit 0 ;;
+	  dump)  rm -f /usr/tmp/named_dump.db
+		 if kill -2 $PID
+		 then
+		     echo Name server data has been dumped to /usr/tmp/named_dump.db
+		 fi
+		 exit 0 ;;
+	restart) if kill -1 $PID
+		 then
+		     echo Name server restarted
+		 fi
+		 exit 0 ;;
+	    *)   echo $MYNAME: unknown option $1 >&2
+	         echo "usage: $MYNAME [-v] [debug [+]debug-level | dump | kill | restart | stats]" >&2
+		 exit 1
+	esac
+done
+
+

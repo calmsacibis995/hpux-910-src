@@ -1,0 +1,34 @@
+## FacetTerm  wy350col  description file  1/18/89
+## Wyse 350 color palette and color assignments
+## Copyright (c) Structured Software Solutions, Inc 1989.  All Rights Reserved.
+## @(#) $Header: wy350col.FC,v 70.1 92/03/09 16:46:15 ssa Exp $
+## ------------------- start of order group 'C' ------------------------
+## palette - clears individual colors 'd' - set to default on start idle quit
+perwindow-3-CSIQ-d---palette..=\E%%%p1%c
+perwindow_default-palette_0...=\E%0
+set-palette_0=\E%%0
+set-palette_1=\E%%1
+set-palette_2=\E%%2
+set-palette_3=\E%%3
+set-palette_4=\E%%4
+set-palette_5=\E%%5
+set-palette_6=\E%%6
+set-palette_7=\E%%7
+set-palette_8=\E%%8
+set-palette_9=\E%%9
+set-palette_10=\E%%:
+set-palette_11=\E%%;
+set-palette_12=\E%%<
+set-palette_13=\E%%=
+set-palette_14=\E%%>
+set-palette_15=\E%%?
+## individual colors - cleared by palette 'd'
+perwindow-5-C--d--normal.................=\Em0%p1%c%p2%c
+perwindow-5-C--d--reverse................=\Em1%p1%c%p2%c
+perwindow-5-C--d--dim....................=\Em2%p1%c%p2%c
+perwindow-5-C--d--underline..............=\Em3%p1%c%p2%c
+perwindow-5-C--d--reverse_dim............=\Em4%p1%c%p2%c
+perwindow-5-C--d--reverse_underline......=\Em5%p1%c%p2%c
+perwindow-5-C--d--dim_underline..........=\Em6%p1%c%p2%c
+perwindow-5-C--d--reverse_dim_underline..=\Em7%p1%c%p2%c
+perwindow-5-C--d--protect................=\Em8%p1%c%p2%c

@@ -1,0 +1,59 @@
+/*
+##
+#	@(#)$Revision: 1.9.109.1 $	$Date: 91/11/19 14:00:56 $
+# 	NFSSRC (#)Makefile	2.2 86/04/17
+#	Makefile nfs.1.0 85/06/28 SAI; from 4.17 83/08/19
+##
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+CSOURCE	= domainname.c
+
+OCFLAGS	= -O $(NMCFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	=
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g
+BLFLAGS	= -Wl,-a archive $(LDFLAGS)
+SDIR = $(SRCDIR:/^$/./)
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+bfa : 
+        $(MAKE) -e -f $(MAKEFILE) $(-) build \
+                CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/domainname.B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"
+
+domainname: 
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o domainname $(SDIR)/domainname.c $(LIBCA)
+
+build:		domainname
+
+install:;	$(INSTALL) domainname
+
+rinstall:	install ; $(RINSTALL) domainname
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;	$(RM) $(RMFLAGS) domainname
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:	build

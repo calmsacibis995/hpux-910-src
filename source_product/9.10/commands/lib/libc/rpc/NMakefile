@@ -1,0 +1,188 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS libc/rpc source.
+#	
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON -DLIBTRACE"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS	= -g -DDEBUG 
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+C_SRC   = authux_pro.c rpc_prot.c svc.c svc_auth.c svc_authux.c \
+        xdr.c xdr_array.c xdr_mem.c
+C_OBJ   = authux_pro.o rpc_prot.o svc.o svc_auth.o svc_authux.o \
+        xdr.o xdr_array.o xdr_mem.o
+U_SRC   = auth_none.c auth_unix.c bdresvport.c clnt_gen.c \
+        clnt_perr.c clnt_raw.c clnt_simpl.c clnt_tcp.c clnt_udp.c \
+        pmap_clnt.c pmap_maps.c pmap_port.c pmap_prot.c pmap_rmt.c \
+        svc_raw.c svc_simple.c svc_tcp.c svc_udp.c rpc_data.c \
+        xdr_float.c xdr_rec.c xdr_refer.c xdr_stdio.c rpc_alloc.c xdr_fh.c
+U_OBJ   = auth_none.o auth_unix.o bdresvport.o clnt_gen.o \
+        clnt_perr.o clnt_raw.o clnt_simpl.o clnt_tcp.o clnt_udp.o \
+        pmap_clnt.o pmap_maps.o pmap_port.o pmap_prot.o pmap_rmt.o \
+        svc_raw.o svc_simple.o svc_tcp.o svc_udp.o rpc_data.o \
+        xdr_float.o xdr_rec.o xdr_refer.o xdr_stdio.o rpc_alloc.o xdr_fh.o
+
+
+CSOURCE	= $(C_SRC) $(U_SRC)
+OBJECTS	= $(C_OBJ) $(U_OBJ)
+
+TARGETS	= ../libc.a
+
+all:		build
+
+bfa:
+	$(MAKE) -e -f $(MAKEFILE) $(-) $(TARGETS) \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/libc.B"\
+		CC="$(BFACC)" SRCDIR="$(SRCDIR)"
+
+
+build:		$$(TARGET)	
+
+install:;	/bin/echo NFS project does not deliver any portions of libc
+
+rinstall:	install
+
+rpc.libc:	$(TARGETS)
+
+authux_pro.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/authux_pro.c
+
+rpc_prot.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_prot.c
+
+svc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc.c
+
+svc_auth.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_auth.c
+
+svc_authux.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_authux.c
+
+xdr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr.c
+
+xdr_array.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_array.c
+
+xdr_mem.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_mem.c
+
+auth_none.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auth_none.c
+
+auth_unix.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/auth_unix.c
+
+bdresvport.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/bdresvport.c
+
+clnt_gen.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_gen.c
+
+clnt_perr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_perr.c
+
+clnt_raw.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_raw.c
+
+clnt_simpl.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_simpl.c
+
+clnt_tcp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_tcp.c
+
+clnt_udp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/clnt_udp.c
+
+pmap_clnt.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap_clnt.c
+
+pmap_maps.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap_maps.c
+
+pmap_port.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap_port.c
+
+pmap_prot.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap_prot.c
+
+pmap_rmt.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap_rmt.c
+
+svc_raw.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_raw.c
+
+svc_simple.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_simple.c
+
+svc_tcp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_tcp.c
+
+svc_udp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_udp.c
+
+rpc_data.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_data.c
+
+xdr_float.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_float.c
+
+xdr_rec.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_rec.c
+
+xdr_refer.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_refer.c
+
+xdr_stdio.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_stdio.c
+
+rpc_alloc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/rpc_alloc.c
+
+xdr_fh.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_fh.c
+
+$(TARGETS):	$(OBJECTS)
+    	$(CP) $(TARGETS) ../libc.tmp
+    	$(MV) -f ../libc.tmp $(TARGETS)
+	$(CHMOD) u+w $(TARGETS)
+	ar r $(TARGETS) $(OBJECTS)
+	$(CHMOD) 664 $(TARGETS)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build
+

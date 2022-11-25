@@ -1,0 +1,10 @@
+$set 1
+1 rusersd: getsockname
+2 svc_rpc_udp_create: error\n
+3 svc_rpc_register: error\n
+4 svc_rpc_register: error\n
+5 run_svc_rpc should never return\n
+6 err: rusersd
+7 svc_rpc_send_results
+8 svc_rpc_send_results
+9 svc_rpc_send_results

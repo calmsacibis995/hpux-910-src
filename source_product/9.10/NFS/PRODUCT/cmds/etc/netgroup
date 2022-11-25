@@ -1,0 +1,21 @@
+# @(#)netgroup:	$Revision: 1.14.109.1 $	$Date: 91/11/19 14:01:37 $
+#
+# This file defines network wide groups used for permission
+# checking when doing remote mounts, remote logins, and remote
+# shells. 
+#
+# The format for each entry is:
+# groupname  member1  member2 ...
+#
+# where each member is either another network group name, or a triplet:
+#
+#	(hostname, username, domainname)
+#
+# For example:
+#
+# engineering	hardware software (host3, mikey, hp)
+# hardware	(hardwhost1, chm, hp)   (hardwhost2, dae, hp)
+# software	(softwhost1, jad, hp)   (softwhost2, dds, hp)
+#
+# See the netgroup(4) manual page for more information
+#

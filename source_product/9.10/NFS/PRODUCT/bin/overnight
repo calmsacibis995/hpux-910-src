@@ -1,0 +1,350 @@
+#!/bin/ksh
+#
+# @(#)$Revision: 1.89.109.5 $  $Date: 92/01/30 16:54:54 $
+#
+# Name: overnight
+#
+# NFS BE support script.  This script will clean up be BE, checkout new sources
+# for all NFS developers and reestablish the NFS BE.
+#
+# Syntax:  overnight [-tag tag] [-p dest-dir] -a arch -r release
+#    where tag is:      IC1, MR80, etc
+#          dest-dir is: directory path for the source checkout
+#          arch is:     300 or 800  (800 is the default)
+#          release is:  8.07, 9.0, etc
+
+
+
+#
+# Make sure the user is root
+#
+
+if [ "$(id -u)" != "0" ]  ; then
+    print "ERROR: Sorry, must be root to execute overnight."
+    exit 1
+fi
+
+
+#
+# If no parameters are given, generate an error and stop.
+#
+
+if [ $# -eq 0 ] ; then
+	print "Syntax:  overnight [-tag tag] [-p dest-dir] -a arch -r release"
+	print "   where tag is:      IC1, MR80, etc"
+	print "         dest-dir is: directory path for the source checkout"
+	print "         arch is:     300 or 800  (800 is the default)"
+	print "         release is:  8.07, 9.0, etc"
+	exit 1
+fi
+
+#
+# Go sort out the parameters.  Note order is not important.
+#
+
+i=1
+while [ ${i} -le $# ] ; do
+    eval parm=\${$i}
+    case ${parm} in
+        -tag | -TAG)
+            i=`expr $i + 1`
+            eval TAG=\${$i}
+	    TAG="-i ${TAG}"
+            ;;
+        -tag* | -TAG*)
+            TAG=`expr "$parm" : "-[tT][aA][gG]\(.*\)"`
+	    TAG="-i ${TAG}"
+            ;;
+        -p | -P)
+            i=`expr $i + 1`
+            eval DESTDIR=\${$i}
+            ;;
+        -p* | -P*)
+            DESTDIR=`expr "$parm" : "-[pP]\(.*\)"`
+            ;;
+        -a | -A)
+            i=`expr $i + 1`
+            eval ARCH=\${$i}
+            ;;
+        -a* | -A*)
+            ARCH=`expr "$parm" : "-[sS]\(.*\)"`
+            ;;
+        -r | -R)
+            i=`expr $i + 1`
+            eval RELEASE=\${$i}
+            ;;
+        -r* | -R*)
+            RELEASE=`expr "$parm" : "-[rR]\(.*\)"`
+            ;;
+        *)
+	    print "Syntax:  overnight [-tag tag] [-p dest-dir] -a arch -r release"
+	    print "   where tag is:      IC1, MR80, etc"
+	    print "         dest-dir is: directory path for the source checkout"
+	    print "         arch is:     300 or 800  (800 is the default)"
+	    print "         release is:  8.07, 9.0, etc"
+	    exit 1
+            ;;
+    esac
+    i=`expr $i + 1`
+done
+
+#
+# Set the specific information for each release.  This area will need to be
+# modified for each new release.
+#
+
+case ${RELEASE} in
+    8.0 | 80 | 800 | 8.00)
+        RELEASE=8.0
+        ;;
+    8.05 | 805)
+        RELEASE=8.05
+        ;;
+    8.07 | 807)
+        RELEASE=8.07
+        ;;
+    9.0 | 90 | 900 | 9.00)
+        RELEASE=9.00
+        ;;
+    *)
+        print "ERROR: release is: 8.07, 9.00, etc."
+        exit 1
+esac
+
+#
+# Set defaults:
+#     Set Shell env.
+#     Time.
+#     Product name (NFS).
+#     Release.
+#     Archtechure.
+#     Locate default directory path were sorces are to be placed.
+#     Database designator.
+#     branch name.
+#     Set Nfs to destination directory.
+#     Set nfs to destination directory.
+#
+
+SHELL=/bin/ksh
+
+TIME=$(date +%m%d_%H%M)
+
+PROD=NFS
+
+RELEASE=${RELEASE:-"9.00"}
+ARCH=${ARCH:-800}
+
+DEFDIR=$(grep ${PROD} /betools/dcia.relinfo.rc | grep "${RELEASE} " | awk '{ print $6}')
+DESTDIR=${DESTDIR:-${DEFDIR}}
+
+SERDB=$(grep ${PROD} /betools/dcia.relinfo.rc | grep "${RELEASE} " | awk '{ print $4}')
+if [ "${SERDB}" = "" ] ; then
+    print "ERROR: No info is given in /betools/dcia.relinfo.rc for ${RELEASE}."
+    exit 1
+fi
+
+BRANCH=$(grep ${PROD} /betools/dcia.relinfo.rc | grep "${RELEASE} " | awk '{ print $3}')
+
+print "Branch name: ${BRANCH}    Database is: ${SERDB}"
+
+Nfs=${DESTDIR}
+nfs=${DESTDIR}
+
+print "Destination path is: ${DESTDIR}"
+
+#
+# Setup NFS default info.
+#
+
+PATH="$Nfs/bin:/bin:/usr/bin:/etc:/usr/local/bin"
+print "PATH is: ${PATH}"
+
+TZ=MST7MDT
+NAME=`basename $0`
+export PATH TZ LOGNAME nfs Nfs
+
+#
+# Set the database environment variables.
+#
+
+. /betools/dcia.kcsrc.kshell ${SERDB}
+
+
+###############################################################################
+#	MAIN LINE 
+###############################################################################
+
+date "+%y.%m.%d %T $NAME Begin $Nfs DE update"
+
+##
+#	Set the umask, and notify everyone that build is starting ...
+##
+
+umask 022
+
+
+##
+# Disable updates. Save group write permission in wupdate.
+##
+
+print `date '+%y.%m.%d %T'` $NAME Disable updates.
+
+wupdate=` ll $Nfs/log/update | sed -e 's/^.....\(.\).*/\1/' `
+su nfsmgr -c "chmod g-w $Nfs/log/update"
+
+
+##
+#  Take down the development environments
+##
+
+print `date '+%y.%m.%d %T'` $NAME take down the development environments.
+
+cd $Nfs
+
+for LOGNAME in `ls develop`
+do
+    nfs=$Nfs/develop/$LOGNAME
+
+    ##
+    #	Note: the takedown file will be created after this overnight
+    #	run finishes, and mail will be sent to the user in case they
+    #	want to have their takedown disabled for longer than one day.
+    ##
+    if [ -f $nfs/log/takedown -a ! -f $nfs/log/notakedown ] ; then
+        date "+%y.%m.%d %T $NAME takedown $nfs"
+        su $LOGNAME -c "
+		/bin/ksh -c \"$Nfs/bin/takedown > $nfs/log/takedown 2>&1\""
+    fi
+done
+
+nfs=$Nfs
+
+
+##
+#  Check out latest sources.
+##
+
+print `date '+%y.%m.%d %T'` $NAME check out latest sources.
+
+#
+#   Checkout the latest source.
+#
+
+print "   Get sources from the ${BRANCH} branch and place them in ${DESTDIR}."
+
+/bin/su nfsmgr -c "
+    date \"+%y.%m.%d %T $NAME source checkout.\"
+
+    # The files are removed to prevent obsolete files from hanging around.
+    # Write permission is removed to allow kgm to function on any file we
+    # might forget to remove in the future.
+
+    print \"Perform clean up prior to getting the source.\"
+    rm -f FILES Makefile RMTBRANCH kgm.*
+    rm -rf bin cmds doc include man nfs releases system
+    find ${DESTDIR} -type f -exec chmod -w {} \;
+
+    print \"kgm -o -d ${DESTDIR} -f ${BRANCH} -K ${ARCH} ${TAG} > ${Nfs}/kgm.${BRANCH}.${TIME} 2>&1\"
+    /usr/local/bin/kgm -o -d ${DESTDIR} -f ${BRANCH} -K ${ARCH} ${TAG} > ${Nfs}/kgm.${BRANCH}.${TIME} 2>&1"
+
+#
+#   Make sure that everything is world-readable, group writable.
+#
+
+print "Updating modes ..."
+
+/bin/su nfsmgr -c "
+    find ${DESTDIR} -type d -exec chmod 775 {} \; 
+    find ${DESTDIR} -type f -exec chmod ug+w {} \; "
+
+print "Source checkout is complete."
+
+
+##
+#  Make cscope.* files for the nfs commands.
+##
+
+cd $Nfs
+
+print `date '+%y.%m.%d %T'` $NAME Make cscope files.
+
+# Generate user-space cscope.* files
+su nfsmgr -c "
+    if [ -f log/cscope_cmds -a -w log/cscope_cmds ] ; then
+        date \"+%y.%m.%d %T $NAME make_cscope /nfs/usr/include cmds\"
+	$Nfs/bin/make_cscope -I/nfs/usr/include cmds > $nfs/log/cscope_cmds 2>&1
+    fi"
+
+
+##
+#  Enable updates and setup the development environments
+##
+
+# Enable updates if they were previously enabled.
+
+print `date '+%y.%m.%d %T'` $NAME Enable updates
+
+if [ ${wupdate} = 'w' ] ; then
+    su nfsmgr -c "chmod g+w $Nfs/log/update"
+fi
+
+# Setup the development directories.
+
+print `date '+%y.%m.%d %T'` $NAME Setup the DEs.
+
+cd $Nfs
+
+for LOGNAME in `ls develop`
+do
+    nfs=$Nfs/develop/$LOGNAME
+    if [ -f $nfs/log/takedown ] ; then
+        # set up the development environment, but ONLY ONCE!!
+        # see also bin/setup for similar code -- only one set of
+        # directories may be setup for any user.
+        if [ -w $nfs/log/setup ] ; then
+            SETUP="setup"
+        elif [ -w $nfs/log/setup_cmds ] ; then
+            SETUP="setup_cmds"
+        elif [ -w $nfs/log/setup_kern ] ; then
+            SETUP="setup_kern"
+        elif [ -w $nfs/log/setup_3.2 ] ; then
+            SETUP="setup_3.2"
+        elif [ -w $nfs/log/setup_6.5 ] ; then
+            SETUP="setup_6.5"
+        else
+            SETUP=""
+        fi
+
+        # only execute the setup command as $LOGNAME if
+        # we're going to do something ...
+        if [ "$SETUP" ] ; then
+            date "+%y.%m.%d %T $NAME $SETUP $nfs"
+            su $LOGNAME -c "
+		/bin/ksh -c \"$Nfs/bin/setup > $nfs/log/$SETUP\""
+        fi
+    fi
+
+    # Create a takedown log file if it doesn't already exist
+    # Send mail to the user so they know about this, and can re-remove
+    # the takedown file if they really don't want to takedown/setup...
+
+    if [ ! -f $nfs/log/takedown ] ; then
+        if [ ! -f $nfs/log/notakedown ] ; then
+            su nfsmgr -c "touch $nfs/log/takedown"
+            su nfsmgr -c "chmod 664 $nfs/log/takedown"
+            su nfsmgr -c "chown $LOGNAME $nfs/log/takedown"
+            su nfsmgr -c mailx -s "$nfs/log/takedown created" $LOGNAME <<-@EOF@
+                Your log/takedown file has just been created, so your
+                development environment will get taken down tomorrow
+                night, unless you remove it again.
+	            Sincerely!
+			    The NFS MuGeR
+		@EOF@
+        fi
+    fi
+done
+
+nfs=$Nfs
+
+
+print "Setup of development directories in $Nfs is now complete."

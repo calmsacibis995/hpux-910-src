@@ -1,0 +1,13 @@
+#
+#	Config file gated-alpha on risci
+#
+
+traceoptions internal external route bgp ;
+
+autonomoussystem 283 ;
+
+rip yes ;
+
+bgp yes {
+	peer 129.140.1.1 asin 145 interface un0 gateway chumley ;
+} ;

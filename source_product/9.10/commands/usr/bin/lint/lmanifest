@@ -1,0 +1,95 @@
+/* @(#) $Revision: 70.2 $      */
+/*	the key:
+	LDI	defined and initialized: storage set aside
+	LIB	defined on a library
+	LDC	defined as a common region on UNIX
+	LDX	defined by an extern: if ! pflag, same as LDI
+	LRV	function returns a value
+	LUV	function used in a value context
+	LUE	function used in effects context
+	LUM	mentioned somewhere other than at the declaration
+	LDS	defined static object (like LDI)
+	LPR     function prototype (new style declaration)
+	LBS	defined on a LINTSTDLIB library
+	LNU	NOTUSED directive seen
+	LND	NOTDEFINED directive seen
+	LDB	database info
+	LFE	function end
+	LFM	Fortran main program
+	*/
+# define LDI 01
+# define LIB 02
+# define LDC 04
+# define LDX 010
+# define LRV 020
+# define LUV 040
+# define LUE 0100
+# define LUM 0200
+# define LDS 0400
+# define LFN 01000  /* filename record */
+# define LPR 02000
+# define LBS 04000
+# define LNU 010000
+# define LND 020000
+#ifdef APEX
+# define LDB 040000
+# define LFE 0100000
+# define LFM 0200000
+#endif
+
+#ifdef APEX
+
+#define MAXDIMS         20      /* number of array dimensions allowed */
+
+typedef struct ty {
+        TWORD aty;
+        TWORD extra;    /* const/volatile + misc flags */
+        long stcheck;
+        int *dimptr;    /* overloaded as argdimary index when used in atyp */
+        char numdim;
+        char *typename;
+        char *stname;
+        } ATYPE;
+typedef struct line {
+        short decflag;
+        char *name;
+        long fline;
+        short nargs;
+        short altret;
+        ATYPE type;
+        long dims[MAXDIMS];
+        } LINE;
+
+#else   /* APEX */
+
+typedef struct ty {
+	TWORD aty;
+	short extra;
+	} ATYPE;
+
+typedef struct line {
+	short decflag;
+	char *name;
+	short nargs;
+	short fline;
+	ATYPE type;
+	} LINE;
+
+#endif
+
+union rec {
+	struct line l;
+	struct {
+		short decflag;
+		char *fn;
+		int mno;
+		} f;
+	};
+
+#ifdef CXREF
+extern FILE *outfp;
+#endif
+
+#ifndef LINT2
+extern int ansilint;
+#endif

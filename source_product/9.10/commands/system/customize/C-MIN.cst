@@ -1,0 +1,92 @@
+#!/bin/ksh
+# @(#) $Revision: 70.3 $
+#
+fileset=C-MIN
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#=====
+# These files are old and now obsolete.
+#=====
+rm -f /lib$CDF/c220 /lib$CDF/ccom20
+
+#======
+# /lib/c1 and /lib/c2 aren't used by the new s300 C compiler.  We
+# remove them unless /usr/bin/fc is present.  If /usr/bin/fc is
+# present, we do nothing; either it is the old version of the fortran
+# compiler which uses /lib/c1 and /lib/c2 or it is the new version in
+# which case the FORTRAN customize script will take care of things.
+#======
+if s300 && [ ! -x /usr/bin$CDF/fc ]; then
+    for file in /lib$CDF/c1 /lib$CDF/c2; do
+	if [ -f $file ]; then
+	    echo "NOTE:    File $file is obsolete; removing it."
+	    rm -f $file
+	fi
+    done
+fi
+
+#======
+# If the "C" fileset hasn't been loaded, we must install the minimum
+# cc driver as /bin/cc.  If the "C" fileset has been loaded, we don't
+# need to do anything, the "C" customize script will (or has already)
+# installed the correct /bin/cc.
+#======
+if [ ! -x /bin$CDF/c89 ]; then
+    rm -f /bin$CDF/cc
+    ln /system$CDF/$fileset/scc /bin$CDF/cc 2>/dev/null ||
+	cp_retain /system$CDF/$fileset/scc /bin$CDF/cc
+fi
+
+#======
+# In 8.07 and 9.0, libmalloc.a ceases to exist.  All malloc functionality
+# has been merged and moved to libc.  Here, we want to remove any traces
+# of the old library.
+#======
+link_cnt=1
+if [ -f /usr/lib/libmalloc.a$CDF ]; then
+    link_cnt=`/bin/ll /usr/lib/libmalloc.a$CDF | /usr/bin/awk '{print $2}'`
+    if [ "$link_cnt" = 1 ]; then
+	# libmalloc.a is not a link to libempty.a, so we delete it and
+	# make the link.
+	/bin/rm -f /usr/lib/libmalloc.a$CDF
+	if [ -f /usr/lib/libempty.a$CDF ]; then
+	    /bin/ln /usr/lib/libempty.a$CDF /usr/lib/libmalloc.a$CDF
+	    cat << EOF
+NOTE:    /usr/lib/libmalloc.a$CDF has been made a link to
+         /usr/lib/libempty.a$CDF.  All malloc functionality
+         has been moved to libc.
+EOF
+	fi
+    fi
+fi
+
+# delete lint library source
+/bin/rm -f /usr/lib/llib-lmalloc
+# delete lint library
+/bin/rm -f /usr/lib/llib-lmalloc.l$CDF
+/bin/rm -f /usr/lib/llib-lmalloc.ln$CDF
+/bin/rm -f /usr/lib/llib-lmalloc.l
+# delete profile library
+/bin/rm -f /lib$CDF/libp/libmalloc.a
+# delete manpages in both cat3* and man3* directories
+/bin/rm -f /usr/man/*3*/malloc.3x
+/bin/rm -f /usr/man/*3*/realloc.3x
+/bin/rm -f /usr/man/*3*/free.3x
+/bin/rm -f /usr/man/*3*/mallopt.3x
+/bin/rm -f /usr/man/*3*/mallinfo.3x
+cat << EOF
+NOTE:    The functionality in /usr/lib/libmalloc.a has been moved to malloc in
+         libc.  You should change your makefiles to remove any instances of
+         "-lmalloc".
+EOF
+
+exit $exitval

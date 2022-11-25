@@ -1,0 +1,129 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc source.
+#	
+#	Created By: 	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+CSOURCE = rpcinfo.c nfsstat.c rpc.mountd.c rpc.rstatd.c rpc.rwalld.c \
+	rpc.ruserd.c rpc.sprayd.c rpc.ypassd.c rwall.c showmount.c spray.c\
+	rpc.rquota.c exportfs.c 
+TARGETS = rpcinfo nfsstat rpc.mountd rpc.rstatd rpc.rwalld rpc.rusersd \
+	rpc.sprayd rpc.yppasswdd rwall showmount spray rpc.rquotad priv_lib.o \
+        exportfs
+
+MISC    = logging$(USCORE).o $(SRCDIR:/^$/./)/check_exit.c 
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+bfa :
+        $(MAKE) -e -f $(MAKEFILE) $(-) build \
+                NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+                CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+                CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+                USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+rpcinfo:
+        $(CC) $(NMCFLAGS) $(LDFLAGS) -o rpcinfo $(SDIR)/rpcinfo.c $(RPCSVC_LIB) $(LIBCA)
+
+nfsstat: $(PRIV_LIB)
+        $(CC) $(NMCFLAGS) $(LDFLAGS) -o nfsstat $(SDIR)/nfsstat.c $(RPCSVC_LIB) $(LIBCA) $(LIBSEC) $(SECFLAGS)
+
+rwall:
+        $(CC) $(NMCFLAGS) $(LDFLAGS) -o rwall $(SDIR)/rwall.c $(RPCSVC_LIB) $(LIBCA)
+
+showmount:
+        $(CC) $(NMCFLAGS) $(LDFLAGS) -o showmount $(SDIR)/showmount.c $(RPCSVC_LIB) $(LIBCA)
+
+spray:
+        $(CC) $(NMCFLAGS) $(LDFLAGS) -o spray $(SDIR)/spray.c $(RPCSVC_LIB) $(LIBCA)
+
+rpc.rusersd:	$(MISC)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.rusersd $(SDIR)/rpc.ruserd.c $(MISC) $(RPCSVC_LIB) $(LIBCA)
+
+
+exportfs:	issubdir.o 
+	$(CC) $(NMCFLAGS) -o exportfs $(SDIR)/exportfs.c issubdir.o $(LIBCA)
+
+/* 
+	We don't want rpc.mountd to be stripped so that is why we don't use 
+	LDFLAGS.
+*/
+rpc.mountd:	$(MISC) $(PRIV_LIB) issubdir.o
+	$(CC) $(NMCFLAGS) -o rpc.mountd $(SDIR)/rpc.mountd.c issubdir.o $(MISC) $(RPCSVC_LIB) $(LIBCA) $(LIBSEC) $(SECFLAGS)
+
+rpc.rstatd:	$(MISC)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.rstatd $(SDIR)/rpc.rstatd.c $(MISC) $(RPCSVC_LIB) $(LIBCA)
+
+rpc.rwalld:	$(MISC)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.rwalld $(SDIR)/rpc.rwalld.c $(MISC) $(RPCSVC_LIB) $(LIBCA)
+
+rpc.sprayd:	$(MISC)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.sprayd $(SDIR)/rpc.sprayd.c $(MISC) $(RPCSVC_LIB) $(LIBCA)
+
+rpc.yppasswdd:	logging$(USCORE).o
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.yppasswdd $(SDIR)/rpc.ypassd.c logging$(USCORE).o $(RPCSVC_LIB) $(LIBCA)
+
+rpc.rquotad:	logging$(USCORE).o 
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.rquotad $(SDIR)/rpc.rquota.c logging$(USCORE).o $(RPCSVC_LIB) $(LIBCA)
+
+issubdir.o:	
+	$(CC) $(NMCFLAGS)  -c $(SDIR)/issubdir.c
+
+exportfs_.o:
+        $(AS) -o exportfs_.o $(SDIR)/exportfs_.s
+
+logging.o:	
+	$(CC) $(NMCFLAGS)  -c $(SDIR)/logging.c
+
+priv_lib.o:
+	$(CC) $(NMCFLAGS)  -c $(SDIR)/priv_lib.c
+
+logging_.o:     /source/NFS/$(USER)/cmds/usr.etc/logging.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+dwclean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clean:;		echo target=$$(TARGET) target2=$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms *.o make?a*
+
+debug:		build
+

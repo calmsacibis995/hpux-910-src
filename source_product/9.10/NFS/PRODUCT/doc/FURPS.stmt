@@ -1,0 +1,535 @@
+	NFS/300 PROJECT
+	STATEMENT OF CONGRUENCE TO FURPS OBJECTIVES
+	Jeff Lindberg
+	CND
+	12/4/87
+
+
+	This report summarizes how well the NFS/300 project met its
+	FURPS objectives, as specified in the Product Requirements
+	Document.  The objectives from the PRD are listed, each objective
+	followed by a brief statement describing whether that objective
+	was satisfied.
+	
+
+	SUMMARY:
+
+	All of the 32 MUST objectives were met, with the following
+	qualifiers.  Also, many of the 14 HIGH WANT and WANT objectives
+	were met (3) or partially met (5).
+
+	QUALIFIERS:
+
+	We had a MUST objective that 300 NFS performance must be at least
+	75% as fast as Sun's NFS performance.  We met that objective
+	overall, if you consider read and write composite performance.
+	However, 300 NFS write performance by itself is only 50 to 55%
+	as fast as Sun.  Read performance was approximately 95 to 100%
+	of Sun's read speed.  Overall performance still meets the goal,
+	especially since reads are done much more often than writes in
+	most applications.  [See a separate memo by Jeff Lindberg for 
+	more details.]
+
+	We had MUST objectives that we exceed Sun's supportability
+	and usability.  We believe we have achieved this.  However, we
+	planned to use beta site feedback to measure this, and we did
+	not receive adequate feedback from our formal beta site to 
+	verify this objective.  [A recommendation on the beta site 
+	selection process will be made by Carole Crall.]
+
+	We dropped an objective that YP performance be equal to Sun's
+	because it was not a meaningful measure for normal system
+	configurations.  
+
+	A MUST objective was to ship to customers before the end of
+	calendar 1987.  Customer shipments have not yet occurred as of
+	this writing, but we have released media and manuals to
+	manufacturing and the printer in time to meet this schedule.
+
+
+	LIST OF DETAILED FURPS OBJECTIVES AND THE RESULTS:
+	==================================================
+
+
+	1.2  Quality Objectives
+
+	The overall goal is to have a product of quality equal to or
+	better  than  Sun's NFS product.  The quality objectives are
+	based on the FURPS model.
+
+	YES	See supporting objectives listed below.
+
+	--------------------------------------------------------------
+
+
+	1.2.1  Functionality_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide 100 percent of Sun's NFS (rel 3.0)
+	                  functionality.  The exact feature set is defined
+	                  by the MUST level objectives in the Detailed
+	                  Functionality section.
+
+	YES		
+
+	--------------------------------------------------------------
+
+
+	1.2.2  Usability_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide natural language support (NLS), otherwise
+	                  known as "localizability".  Localizability includes
+	                    o support of 7, 8, and 16 bit characters,
+	                    o conformance with the HP-15 standard (see notice),
+	                    o support for local customs (e.g., date formats),
+	                    o support for message catalogues.
+
+	YES	Met, but see the following disclaimer:
+
+	        A  design  flaw  exists  in  the  current  HP-15  Standard.  The
+	        Standard  restricts  computer  systems  on the same  network  to
+	        support the same 16-bit  character  set.  The existing  uucp and
+	        LAN products are in violation of this restriction.
+
+	        THERE WILL BE NO ATTEMPT IN THIS PROJECT TO RECTIFY THE PROBLEM.
+
+	--------------------------------------------------------------
+
+	        MUST    - The user must be able to optionally configure
+	                  the NFS product into the HP-UX kernel.
+
+	YES		
+
+	--------------------------------------------------------------
+
+	        MUST    - Usability greater than or equal to Sun, as
+	                  measured by feedback from Beta sites.
+			
+	YES?	We believe this was met, but we don't have adequate
+		feedback from the formal beta sites to measure it.
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide HP-quality documentation.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        W       - Improve diagnostic and error messages
+	                  (i.e., readability and correctness).
+
+	YES
+
+	--------------------------------------------------------------
+
+	        W       - Provide system configuration tools.
+
+	SOME	The netnfsrc script was provided to make system
+		configuration easier.
+
+	--------------------------------------------------------------
+
+
+	1.2.3  Reliability_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Fix all known defects with DTS weights greater than
+	                  or equal to six.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Obtain 70 percent code depth coverage for kernel code.
+
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Demonstrate overall system reliability by successfully
+	                  completing 24, 48 and 120 hour reliability tests.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Have no system crashes caused by unknown NFS
+	                  defects during the last 20 calendar days before
+	                  release to manufacturing.
+	
+	YES	As of 12/4/87, this was true.
+
+	--------------------------------------------------------------
+
+	        MUST    - Show that the number of outstanding medium,
+			  serious and critical defects known at release
+			  to manufacturing is less than or equal to the
+			  number of medium, serious and critical defects
+			  known to exist in Sun's NFS product.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Pass all tests in the functional test suite as
+	                  a final bits test.  For the s300 product, this test
+	                  must be run before releasing the bits to SSIT
+	                  and also after SSIT has returned the final bits.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Pass the Sun-supplied NFS tests.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        HW      - Kernel code depth coverage will be equal to or
+	                  greater than 85 percent (ING goal).
+
+	NO	We reached just over 70% coverage measured by BFA.
+
+	--------------------------------------------------------------
+
+	        HW      - Obtain 70 percent code depth coverage for user code.
+
+	NO	We reached 65% for the user code as measured by BFA.
+		However, the tests have been extended for the NFS/800
+		user code project, and future NFS/300 releases will
+		achieve coverage of at least 73%.
+
+	--------------------------------------------------------------
+
+	        HW      - Attain a SRs/KNCSS less than or equal to 0.1212
+	                  SD/KNCSS, assuming 12/87 shipments.
+
+	??	We need this data from the analysis to be done by Bill 
+		Mayfield of QA.
+
+	--------------------------------------------------------------
+
+
+	1.2.4  Performance_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Attain performance competitive with Sun's NFS
+	                  performance as measured by a NFS specific benchmark.
+	                  These comparison will be performed on systems
+	                  configured with equivalent hardware.  Specifically,
+	                  attain the following level of performance:
+
+	                  Model 330:  75% of Sun 3/160
+	                  Model 350:  75% of Sun 3/260
+	
+	YES 	In terms of overall performance, we met the above objective.
+	and	However, if you break down reads and writes separately, we 
+	NO	met the objective for NFS reads, but not for NFS writes.
+		The 300 read performance is approximately equal to Sun's, 
+		but 300 write speed is about 50 to 55% of Sun's.
+
+	--------------------------------------------------------------
+
+	        MUST    - Attain YP performance equal to Sun's, as measured
+	                  by the average elapsed time for a user to log into
+	                  a system.
+
+	DROPPED	We dropped the above objective, because it was not a
+		meaningful measure for normal system configurations.
+
+	--------------------------------------------------------------
+
+	        HW      - Attain performance equal to or better than Sun's
+	                  NFS performance.  Specifically:
+
+	                  Model 330:  at least equal to Sun 3/160
+	                  Model 350:  at least equal to Sun 3/260
+
+	NO	We did reach approximately equal performance for read
+		speeds, but not for write performance.
+
+	--------------------------------------------------------------
+
+	        HW      - Attain Yellow Pages performance better than Sun's
+	                  as measured by the average elapsed time for a user
+	                  to log in.
+
+	DROPPED	We dropped the above objective, because it was not a
+		meaningful measure for normal system configurations.
+
+	--------------------------------------------------------------
+
+
+	1.2.5  Supportability_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide NFS-specific diagnostic capabilities which
+	                  are functionally equivalent to those provided by
+	                  Sun.
+
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Attain a level of supportability better than or
+	                  equal to Sun, as evaluated by Beta sites.
+			
+	YES?	We believe this was met, but we don't have adequate
+		feedback from the formal beta sites to measure it.
+
+	--------------------------------------------------------------
+
+	        HW      - Provide better diagnostic capabilities than Sun's.
+
+	SOME	We provided improved error messages, and error logging.
+
+	--------------------------------------------------------------
+
+
+	1.3  Detailed Functional Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide NFS capabilities for the s300/800 HP-UX
+	                  systems.  NFS provides transparent access to
+	                  files in a heterogeneous environment. Specific
+	                  capabilities include mounting remote file systems
+	                  and transparently accessing remote files.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Support the programmatic interfaces to the
+	                  YP or RPC/XDR libraries.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide the Yellow Pages (YP) services.
+	                  Specifically, provide the user level commands
+	                  needed for global system administration of
+	                  certain "key" name files (e.g.,  /etc/passwd and
+	                  /etc/hosts). See Appendix 1 for a list of commands.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide associated NFS/RPC user level commands.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide the pcnfsd(1m) daemon. The pcnfsd(1m) daemon
+	                  provides MS-DOS clients running Sun's PC-NFS
+	                  with remote file access, user authentication and
+	                  remote printing capabilities on HP-UX systems.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Modify selected HP-UX commands affected by NFS so that
+	                  they correctly function in a networked file system.
+	                  See Appendix 5 for the list of commands that will
+	                  require modification.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        HW      - Modify all HP-UX commands affected by NFS so that
+	                  they correctly function in a networking file system.
+	
+	NO	Not all HP-UX commands work correctly over NFS.
+		Known examples:  
+
+			Commands run as root don't necessarily
+			have R/W permissions on the remote
+			system, e.g. cat, tar, more.
+
+			Commands that use lock files are not
+			guaranteed to be reliable over NFS.
+
+			ksh has a problem working over NFS.
+
+	--------------------------------------------------------------
+
+
+	1.4.1  Connectivity_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide tested connectivity with the following
+	                  NFS systems and implementations:
+
+	                      o Sun's NFS (the two latest major releases;
+	                        currently 3.0 and 3.2)
+	                      o Wollongong's NFS (server only) running
+	                        on a VAX/VMS system,
+	                      o Sun's PC-NFS (client only, release 1.0 and 2.0)
+	                        running on a Vectra and IBM PC-AT,
+	                      o s300 HP-UX 6.0 running as a discless node.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Provide tested connectivity via the following HP
+	                  networking products:
+	                      o RND bridge box (MacBridge),
+	                      o s300 IP gateway, and
+	                      o s800 IP gateway (if available in 2.0).
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - Provided tested connectivity through a Sun system
+	                  acting as an IP gateway.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        HW      - Perform informal connectivity testing to other
+	                  systems at the Connect-a-thon and at UniForum.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        HW      - Perform informal connectivity testing to other
+	                  systems through Alpha and Beta sites.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        W       - Provide tested connectivity with Mt. Xinu's
+	                  NFS for 4.3BSD systems (i.e., VAX/UN*X systems).
+
+	NO
+
+	--------------------------------------------------------------
+
+	        W       - Provide tested connectivity with VAX/ULTRIX,
+	                  but only if this configuration is supported by
+	                  the NS-ARPA/300 product.
+	
+	SOME	We ran our test suite with the VAX/ULTRIX NFS product,
+		but we did not complete full formal connectivity 
+		testing.  So we believe that it will work, but we
+		do not officially support NFS connections to VAX/ULTRIX.
+
+	--------------------------------------------------------------
+
+
+	1.4.2  Compatibility_Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - NFS must be object code compatible with
+	                  previous HP-UX releases.  Customers should
+	                  not have to re-compile programs that perform
+	                  local file system operations.
+
+	YES     If the customer is not using NFS or YP, there is no need
+		to recompile.  However, if the customer wants to use NFS
+		or YP, some of his applications may need to be recompiled.
+
+	--------------------------------------------------------------
+
+	        MUST    - NFS, RPC and XDR protocols must be compatible
+	                  with Sun's implementation.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - NFS must coexist with current HP networking
+	                  products: specifically the NS and the ARPA/
+	                  Berkeley services.  Co-existence is defined as
+	                  the ability to
+	                      o be co-operable,
+	                      o share the same hardware,
+	                      o share the same network drivers, and
+	                      o use the same network.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - NFS must coexist with HP-UX/discless/300 nodes.
+	
+	YES
+
+	--------------------------------------------------------------
+
+	        MUST    - NFS must be integrated with HP-UX in such
+	                  a way that it does not conflict with the HP-UX
+	                  standard.
+	
+	YES	There is no direct conflict with the HP-UX standard; 
+		however, some extensions provided by NFS are not in the
+		HP-UX standard.  NFS features were approved by the 
+		Networking Standards Group (NSG).
+
+	--------------------------------------------------------------
+
+	        HW      - Provide a user interface that is identical
+	                  to Sun's.  Obvious exceptions to this would
+	                  be improved error messages and commands that
+	                  must be modified to avoid conflicts with the
+	                  HP-UX standard.
+
+	ALMOST	There are some differences between HP's NFS and Sun's
+		NFS.  However, they are primarily extensions to the user
+		interface and do not present direct incompatibilities with
+		Sun.  The reasons for the differences are:
+
+			Usability improvements;
+			Reliability improvements (bug fixes);
+			Differences between SunOS and HP-UX semantics;
+			Files or features that don't exist on HP-UX,
+			    such as long file names.
+
+	--------------------------------------------------------------
+
+	        HW      - Provide a programmatic interface that is
+	                  identical to Sun's.  Note that this programmatic
+	                  interface is provided, but not fully supported.
+	
+	ALMOST	See the previous objective.
+
+	--------------------------------------------------------------
+
+
+	1.5  Timeliness Objectives
+
+	--------------------------------------------------------------
+
+	        MUST    - Ship the s300 NFS products by December '87.
+	
+	YES!	(Keep your fingers crossed!)
+
+	--------------------------------------------------------------
+
+	        MUST    - Release the series 300 NFS concurrent with
+	                  or before the 6.0 HP-UX release.
+
+	YES
+
+	--------------------------------------------------------------
+

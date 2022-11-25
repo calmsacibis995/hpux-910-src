@@ -1,0 +1,105 @@
+#!/bin/sh
+# @(#)whohas	$Revision: 1.15.109.1 $	$Date: 91/11/19 13:58:43 $
+# Written by Dave Grindeland
+# Modified for NFS project by Cristina Mahon
+
+# Initialize.
+SHELL=/bin/sh
+CS="rcs"
+FIXED="false"
+export SHELL
+umask 022
+
+# Check to see if RCS was asked for
+while [ $# -gt 0 ]
+do
+	case $1 in
+		-r | -rcs )
+			CS="rcs"
+			FIXED="true"
+			;;
+		-s | -sccs )
+			CS="sccs"
+			FIXED="true"
+			;;
+		*)
+			break
+			;;
+	esac
+	shift
+done
+
+# Usage
+if [ $# -eq 0 ] ; then
+    echo "Usage:  $0 [-r or -rcs] [-s or -sccs] <list of nfs-relative filenames>"
+    exit 1
+fi
+
+echo $0 ":"
+
+#SSRCHOST=`cat $Ssrc/bin/SSRCHOST | awk '{if (length($0) > 5) \
+#                                           if (substr($0,1,4) == "hpfc") \
+#                                             print substr($0,1,6)}'`
+
+#if [ `hostname` = $SSRCHOST ] ; then
+#  NETPREFIX=""
+#else
+#  NETPREFIX="/net/"$SSRCHOST
+#  netunam $NETPREFIX sdcsmgr:$SSRCHOST
+#fi
+
+# Loop for each argument
+for ARG
+do
+    DIR=`dirname $ARG`
+    BASE=`basename $ARG`
+    SCCS=$Nfs/sccs/$DIR/s.$BASE
+    RCS=$Nfs/rcs/$DIR/$BASE,v
+
+    if [ "$FIXED" = "false" ] ; then
+	if [ -f $RCS ] ; then
+		CS="rcs"
+	elif [ -f $SCCS ] ; then
+		CS="sccs"
+	fi
+    fi
+
+    if [ $CS = "sccs" ] ; then
+
+      PSCCS=$Nfs/sccs/$DIR/p.$BASE
+
+      # Check that the sccs file exists
+      if [ ! -f $SCCS ] ; then
+	  echo "ERROR($0): \"$ARG\" has not been admin'd." 1>&2
+	  continue
+      fi
+
+      # Check that the p-file exists.  If so, find out who has the sccs file
+      if [ ! -f $PSCCS ] ; then
+	  echo "ERROR($0): \"$ARG\" is not checked out." 1>&2
+	  continue
+      else
+          WHOHAS=`/bin/ls -l $PSCCS | awk '{print $3}'`
+          echo $WHOHAS "has \"$ARG\" checked out"
+      fi
+    else
+
+      # Check that the rcs file exists
+      if [ ! -f $RCS ] ; then
+	  echo "ERROR($0): \"$ARG\" has not been admin'd." 1>&2
+	  continue
+      fi
+
+      WHOHAS=`Rlog -h $RCS | awk 'NR == 4 {if ($2 == ";") \
+                                             print $2; \
+                                           else \
+                                             print substr($2,1,(length($2)-1))}'`
+      if [ $WHOHAS = ";" ] ; then
+	  echo "ERROR($0): \"$ARG\" is not currently checked out." 1>&2
+      else
+          echo $WHOHAS "has \"$ARG\" checked out"
+      fi
+
+    fi
+
+done

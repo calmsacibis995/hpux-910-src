@@ -1,0 +1,1853 @@
+
+.\"	@(#)NFS IRS:	$Revision: 1.16.109.1 $	$Date: 91/11/19 14:27:40 $
+.\"
+.\" Leave the first line of the file blank as the .TL and .AS
+.\" macros do not work otherwise.  Don't ask me why.
+.\"
+.\"  This document is made printable by entering the following command:
+.\"
+.\"		tbl filename | nroff -cm > formatted_file
+.\"
+.\"  To print it:
+.\"
+.\"		lp -depoc -oelite < formatted_file
+.\"
+.\"  (Use "elite4" to get four printed pages per physical page.)
+.TL
+COLORADO NETWORKS DIVISION
+IRS FOR PROJECT NERFS  (NFS/300)
+
+.\" System test plan title.  Be specific about what the
+.\" test plan covers.
+
+
+.ce 3
+Mike Shipley
+CND 1-229-2131 
+hpfcla!m_shipley
+
+.ce 3
+Darren Smith
+CND 1-229-2536 
+hpfcla!d_smith
+
+
+
+
+.AS
+.\" Put your abstract here
+Internal Reference Specification for the implementation of
+SUN's Network File System on the HP9000/3XX.  This paper
+will discuss only the kernel portions of the NFS implementation.
+It will also describe the kernel RPC/XDR interfaces.
+The Yellow Pages and other user space code will not be covered.
+
+.AE
+
+
+
+
+
+
+
+
+.ce 2
+$Revision: 1.16.109.1 $
+$Date: 91/11/19 14:27:40 $
+.nr P 1
+.PH " 'NFS/300 IRS' 'Introduction' "
+.bp
+.SA 1
+.H 1 "Project"
+.PF " 'HP Internal Use Only' ' \\\\n(H1-\\\\nP'  "
+
+
+.nf
+
+     Project Name    : NERFS
+
+.H 2 "Personnel"
+     Project Manager : Dave Matthews
+    
+     Project Engineers:
+         Mike Shipley
+         Darren Smith
+
+.H 2 "Related Projects "
+.\"  This is an area to list both current related projects and
+.\"  possible future projects that may be affected.
+    
+.nf
+    Diskless HP-UX for HP9000/3XX    SSO
+    Diskless HP-UX for HP9000/8XX    ISO
+    NFS for HP9000/8XX               ISO
+    Networking Convergence for
+	HP9000/3XX and HP9000/8XX    CND
+.fi
+
+
+
+.PH " 'NFS/300 IRS' 'History' "
+.bp
+
+.nr P 1
+.H 1 "Revision History"
+.nf
+First Version.....................................March, 1987
+.sp
+Revised (6.0)..................................November, 1987
+.sp
+Revised (6.2)..................................May, 1988
+
+
+
+.PH " 'NFS/300 IRS' 'Preface' "
+.fi
+.bp
+.nr P 1
+.H 1 "Preface"
+
+As stated above, this is the IRS for the NFS/300 project.  It
+will use terms and actions that assume the reader is familiar
+with NFS from a user's point of view.  If this is not true for
+you, then please refer to the project ERS and related product
+user documents to become knowledgeable on NFS.  This paper also
+assumes that the reader has some knowledge of the how the HP-UX
+kernel, file system, and networking work.
+
+The implementation for NFS on the HP9000/3XX is done from code ported
+from SUN's implementation.  It is based on the idea of the vnode.  The
+vnode is a way of identifying a file from a level higher then how the file
+is actually stored.  For local files the vnode would point to an inode
+which is the means by which HP-UX identifies local files.  In addition
+to the vnodes, there is also a vfs struct that has a similar abstracting
+operation on file systems instead of files.
+
+For each type of file
+that a vnode points to, there is a struct of function pointers that are
+to be called when a generic file operation is desired.  In this way, the
+kernel functions such as open and read can make a call through the struct
+and get the proper operation done for different types of files without
+having to know that there was even a different type of file.  For a vfs,
+there are similar structs of function pointers that are used to make
+calls to generic file system operations.  Again, kernel system calls such
+as mount can make the appropriate function call for different types of
+file systems without having to know that they are dealing with different
+types of file systems.
+
+To communicate with the remote file server, NFS uses the Remote Procedure
+Call (RPC) protocol with the eXternal Data Representation (XDR).  RPC/XDR
+provide a method for communicating between heterogeneous systems.  RPC
+provides a standard interface for communicating with a remote system via
+function calls on the local system.  It relies on a client/server model
+in which the client sends a request to the remote server.  The server
+will call a function to handle the request and send the results back.  
+The packets sent are in a standard format (XDR) to ensure communication
+between different types of machines, and include information about who
+is making the request (i.e. UNIX credentials).
+
+.\" ***********************************************
+.\" NEEDS TO BE COVERED
+.nf
+.fi
+.\" NEEDS TO BE COVERED
+.\" ***********************************************
+
+.PH " 'NFS/300 IRS' 'Vnodes' "
+.bp
+
+.nr P 1
+.H 1 "Vnodes"
+
+As mentioned above, our implementation of NFS is based on the concept
+of vnodes.  A vnode is a struct in the kernel that is pointed to by
+a file struct.  In a normal kernel, the file struct points to the
+inode that represents the file, but now there is an intervening struct
+between the file and inode struct.  This has the advantage of abstracting
+the user's view of a file (through the file struct) and the means
+of access that file.  Now the vnode points to an inode if it refers to
+a local file or it points to a rnode if it refers to a remote file.
+
+.DF 
+                                                                         
+       +----------+                         +--------------+                
+       |  struct  |                         |nfs_vnodeops  |                
+       |    file  |                         |  struct      |                
+       +----------+           +---......--->|    vnodeops  |                
+             |                |             |  (for NFS)   |                
+             |                |             +--------------+                
+             |                |                                             
+             |       +-----------+          +--------------+                
+             |       |           |          |ufs_vnodeops  |                
+             +------>|  struct   |--....--->|  struct      |                
+                     |    vnode  |          |    vnodeops  |                
+                     +-----------+          |  (for local) |                
+                         |   |              +--------------+                
+                         |   |                                              
+                         |   |                                              
+                         |   |                                              
+     +-----------+       |   |       +-----------+                            
+     |  struct   |       |   |       |  struct   |                            
+     |    inode  |<-.....+   +.....->|    rnode  |                            
+     |(for local)|                   |  (for NFS)|                            
+     +-----------+                   +-----------+                            
+                                                                         
+     Figure 1:  A vnode and other file structures.
+.DE
+
+In the above figure, the vnode is shown to point to two vnodeops struct.
+This was done with "..." to show that this is a conditional connection.
+In other words, the vnode may point to the struct for NFS functions or
+for local function, but not to both structs.  The same is true for the
+vnode pointing to a rnode or inode.  It will only point to one struct.
+
+It is during the pathname resolution that the vnode is connected to the
+correct structs.  The resolution is done in a routine called lookupname().
+As the local parts of the pathname are resolved, the ufs_vnodeops (the
+name of the struct used for local files) functions are used.  As the
+NFS mount point is parsed, the nfs_vnodeops struct is now used.  At this
+point, the path name resolution will use routines that know about NFS
+and they will make requests over the network to the serving node to
+resolve the pathname.  When the vnode is finally created, it will point
+to the nfs_vnodeops struct and a rnode struct.
+
+As mentioned, the means of accessing a file is now separated from
+the file struct.  This is done through the vnode by means of the
+vnodeops struct.  It is a struct made of function pointers and it is
+pointed to by a vnode.  These pointers point to functions that perform
+all of the basic file operations such as open(), read(), chmod() and
+others.  There is a global vnodeops struct (named ufs_vnodeops)
+that contains pointers
+that refer to functions that work on local files and a global vnodeops
+struct (named nfs_vnodeops) that contains pointers that
+refer to functions that work on
+remote files.  Therefore once a vnode is set up for a file, the top
+level of a system call, for example fsync(), simply goes through the vnodeops
+struct connected to the vnode and the code to do the
+fsync operation for that specific type of file will be called.
+The call is made through a macro that has the form of VOP_"THE.SYSTEM.CALL".
+The following example is code from the kernel showing how fsync uses the
+VOP macros.  In this case, the operation is done on an already open file, so
+the vnode has been already been established for the file.  If the file
+represented by "fd" is a local file, then VOP_FSYNC will resolve to a call
+to ufs_fsync().  If the file is an NFS file, then VOP_FSYNC will become a
+call to nfs_fsync().
+
+.DF
+/*
+ * Flush output pending for file.
+ */
+fsync(uap)
+	struct a {
+		int	fd;
+	} *uap;
+{
+	struct file *fp;
+
+	u.u_error = getvnodefp(uap->fd, &fp);
+	if (u.u_error == 0)
+		u.u_error = VOP_FSYNC((struct vnode *)fp->f_data,
+			       fp->f_cred,1);
+}
+		       Example 1
+
+.DE
+
+.PH " 'NFS/300 IRS' 'Remote Access' "
+.bp
+
+.nr P 1
+.H 1 "Reaching the Remote Node"
+
+The vnode concept allows the kernel to use the appropriate routine
+for remote file, but that is only half of the battle.  One needs
+to somehow get a request to and a reply back from the remote node.
+The node making the request will be known as the client and the
+node creating the replies will be called the server.  The pieces that
+will be used to do the communications are RPC (Remote Procedure Call),
+XDR (eXternal Data Representation) and UDP (Unreliable Datagram Protocol).
+
+This part of the IRS will not go into detail describing RPC and XDR
+as this will be done in another chapter.  RPC is a means of executing
+a procedure on a remote node.  XDR is used to get data to and results
+out of the procedure executed with RPC.  It has standards that are used
+to represent data in a machine independent fashion.  This data can consist
+of integers, reals, arrays, strings and other data types.  The machine
+independence is necessary to achieve the implementation of NFS on
+heterogeneous machines.  UDP is a lightweight 
+protocol to get a block of data from a producer to a consumer.
+It is not intended to be a reliable connection oriented service
+such as TCP and as such is able to operate with less overhead.
+NFS is a stateless service and therefore can handle the duplicate
+packets that are possible with a connectionless protocol like UDP.
+
+As an example, we will document a call of readlink() on a symbolic
+link located on a remote node.  The format of the explanation will
+be in the form of a stack.  That is we will show the calling sequence
+and then the return order of those calls will be the inverse of the
+calling sequence. 
+
+The function readlink()
+is the first function called after the jump to the kernel is made
+from user space and the desired system call is made.  After
+doing a lookupname to get
+the vnode for the file, it fills in parameters in the struct 
+that the lower level readlink function expects.
+After that it will make a call through VOP_READLINK().  When
+the file is a NFS file, VOP_READLINK will call nfs_readlink().
+
+nfs_readlink() takes the input parameters and uses them to make
+a RPC call to a routine known as rfs_readlink which will be
+on the server node.  To simplify the interface to RPC, there is
+a routine called rfscall() which does the handling of parameters
+and calling of the desired remote procedure.  rfscall() calls
+a RPC routine to send the parameters to the procedure on the server
+node.  On the server node, the request will come to rfs_dispatch
+which gives the request to one of the nfs server daemon routines
+that are started after powerup.  The rfs_dispatch changes the
+credentials (user id etc.) of the daemon process to that of the
+requesting process so that access checking can be done.  Then the
+daemon process starts execution.  It calls the routine that was
+requested back on the client node during the call to rfscall().
+In the case of readlink, a call to rfs_readlink will be made.
+rfs_readlink() will reformat parameters and make a call through
+VOP_READLINK().  Since the file that the readlink is to be performed on is
+a file local to the server node, its vnode will point to the
+ufs_vnodeops and therefore the call through VOP_READLINK() will
+result in a call to ufs_readlink().
+
+ufs_readlink() is the routine to read local symbolic links.  It
+will read the link and return the data back to rfs_readlink. 
+rfs_readlink then returns to rfs_dispatch which will take the
+results obtains from ufs_readlink() and send them back through
+the RPC/XDR to the client node.
+
+On the client node the reply packet will arrive which will unblock
+the process (in rfscall) that made the RPC call to rfs_readlink.  
+The readlink data will be taken from the reply packet and passed back to 
+nfs_readlink().  nfs_readlink() returns to readlink() which finally gives
+the data to the user.  See figure 2 for a pictorial representation
+of the calling sequence.
+.bp 
+.DF
+                                  #                                   
+    readlink(path, buf, bufsize)  #                                   
+    |  ==== User Space ====       #                                   
+    |  === Kernel Space ===       #       === Kernel Space ===        
+    |                 ^           #                                   
+    |                 |           #                                   
+    |                 | (Returns  #                                   
+    |                 |  data)    #                                   
+    V                 |           #                                   
+    readlink()        ^           #           +------ufs_readlink()   
+    |                 |           #           |              ^        
+    | (through        |           #           | (Return      |        
+    |  VOP_READLINK)  |           #           |  Calling     |        
+    |                 |           #           |  Sequence)   |        
+    V                 | (Return   #           |              |        
+    nfs_readlink()    ^  Calling  #           V      rfs_readlink()   
+    |                 |  Sequence)#           |              ^        
+    |                 |           #           |              |        
+    |                 |           #           |              |        
+    |                 |           #           |              |        
+    V                 |           #           |              |        
+    rfscall()         ^           # (through  V      rfs_dispatch()  
+    |                 |           #  RPC/XDR) |              ^        
+    |                 +---<.......#.......<---+              |        
+    | (through                    #                          |        
+    |  RPC/XDR)                   #                          |        
+    + --------------->............#............>-------------+        
+                                  #                                   
+           Client Node                        Server Node             
+
+     Figure 2:  Calling sequence for a readlink() call.
+                                                                      
+.DE
+
+.PH " 'NFS/300 IRS' 'NFS I/O' "
+.bp
+
+.nr P 1
+.H 1 "NFS and the Buffer System "
+
+The following is a very simplified version of how NFS does its
+reads and writes through the buffer system of HP-UX.  We will 
+first discuss the local buffer system and then show how NFS
+fits in.
+
+HP-UX maintains a
+list of buffers through which I/O is done.  When a request is
+made to read data from user space, that is translated into
+a read of a large number of bytes into a buffer which is kept
+in memory.  If subsequent read request from user space reference
+data that is found in the buffer, that data is transferred from the
+buffer without access to the disc.  Writes from user space send
+data to a buffer and not directly to a disc.  When the buffer
+is full, more writes may put data into another buffer if one is
+available or may cause a block until a buffer is freed.  To free
+a buffer, the system will call a function that knows how to
+get the data onto a disc.  When a file is closed, all of the buffers
+associated with the file are written (flushed) out to a disc.
+During a sync operation, the system will attempt to flush buffers
+to disc.
+
+NFS does its reads and writes through the buffer system.  When a
+request to read a NFS file comes from user space, the system will
+attempt to get the data from a buffer and if it finds that there
+is no such buffer or that the buffer has old data, it will go through
+the vnodeops to have NFS make a remote call to get data and to put
+it into the buffer.  Then on the next read request, there may be
+no NFS request made to the NFS server as the data can be pulled
+from the buffer.  NFS writes also go through the buffer system.
+Individual writes of small amounts of data (less than 8K) are
+put into a buffer until the time comes that the buffer needs to
+be flushed.  At this time the nfs_write() routine will get executed
+(courtesy of the vnodeops struct)
+which will do the transmission of the data over to the server.
+
+.PH " 'NFS/300 IRS' 'NFS Daemon' "
+.bp
+
+.nr P 1
+.H 1 "NFS Daemon Process "
+
+The file operations, done on behalf of the client, on the server are done
+by a nfs daemon process.  These processes are started by the nfsd program,
+usually started by a system powerup script.  They block waiting for something to
+do until the rfs_dispatch() routine gets a request from a client.  They then
+assume the credentials of the requesting process to allow file access checking
+and then perform the desired file function.
+If the credentials to be assumed are those of the superuser, then a value
+of "-2" will be used for the uid of the daemon.  This is to restrict superuser
+access over the network.
+After they are done, they block
+until awakened by another incoming request.
+
+.PH " 'NFS/300 IRS' 'Statelessness' "
+.bp
+
+.nr P 1
+.H 1 "NFS:  A Stateless Service "
+
+NFS is based on the idea of having the server operate without state information.
+This means that it does not keep information obtained from one request to the
+next request.  As any bright HP-UX expert will now shout, what about an open
+file?  Yes an open file should represent a state and indeed there is state
+information about the open file, but it is only found on the client node.
+There will be a valid file descriptor, file struct, vnode struct
+and rnode struct on the client node.  The server node will only have a vnode
+struct and inode struct, but these are there no matter if a file is open or
+not, so this does not represent state information.  The client is given 
+an abstract data type known as a file handle from the server when it opens
+a file.  It then uses the file handle whenever it wants to refer to the
+file it considers open.  The contents of the file handle are hidden to the
+client.  Its contents only have meaning on the server
+(something else that aids in implementing NFS in a heterogeneous environment).
+
+Operations such as reads and writes must be done carefully to remove the need
+of having state information on the server.  For reads, all accesses are done
+relative to an absolute location in the file and never relative to the
+position the previous read was made.
+To do a read, the client will send the server a file handle, an offset from the
+beginning of the file to position the file pointer and a number of bytes
+to read.
+This is all done by the kernel, so the user sees no difference.
+To keep writes stateless, all writes must be done synchronously on the
+server side.  In other words, the server cannot send back a reply until the
+write has gone out to the disk.  This is necessary to preserve data in the
+case of a system crash in between the time the reply is sent and the time
+the data actually got written out to the disk.
+Writes are also done to a position in the file relative to the beginning
+of the file.
+
+The synchronous nature of the NFS write request has a serious impact on
+performance, however.  Write requests actually result in up to three writes
+to the disc (the inode, the indirect block, and the actual data).  This is
+very time consuming.  Again, if we go back to why writes must be synchronous,
+it is to prevent data loss in the event of a server crash.  If writes were
+allowed to be asynchronous, then the server could respond immediately upon
+receiving the request, only queueing the write instead of waiting for it
+to complete.  If a crash occurred after the data was queued, but before it
+was written, then data loss would occur since the server has no way of
+notifying the client to retransmit.  Thus this seems undesirable.  However,
+this problem will ONLY occur when a crash occurs and ONLY IF the data
+has not yet made it to disk.  Even then, in many cases this is not a
+major problem since the data is reproducable.  Thus, an option has been
+added to the /etc/exports file to specify that asynchronous writes are OK
+for a given file system.  To support this, rpc.mountd was changed to 
+recognise this option.  Further, a field was added to the file handle
+given to the client.  This field is a flags field that is then copied
+by the NFS server when a NEW file handle is created.  Finally,
+the server checks this field and tells
+the local file system whether to due synchronous or asynchronous writes.
+
+Why is NFS stateless?  It was done in order to allow easy recovery from
+server crashes.  If a server crashes during a read of a file, the client will
+wait until the server is back up.  At that time,
+the RPC will retransmit the last request
+packet that was sent (it has been retransmitting during the crash, but since UDP
+is connectless, it does not automatically stop if the other node stops
+responding) and then return the reply from the server which will let the client
+continue.
+
+The dark side of statelessness is something that needs some explanation.
+The biggest problem that is caused is that since a server does not know
+if client has a file open, it has no compulsion against removing such a file.
+Since it is a common programming practice to open a file, to unlink
+it afterwards, use it (the file will not go away since it is open) and then 
+exit the program assuming the file will then actually be removed from the
+system, there is a kluge in NFS to allow this.  What happens is if a client
+notices a unlink being done on an open file, it simply renames the file
+on the remote node so it will look as if it has been removed.  After the
+file is closed, the client will then remove the file.  Unfortunately
+this has no effect if node A has the file open and an user on node B
+removes the file.  When the user on node A then tries to access the file
+he has open, he will be returned an ESTALE error.  This says that the 
+file handle no longer refers to a valid file on the server node.
+Another side effect can be shown with the follow scenario.  Node A opens
+a file on Node B and then Node A removes the file thereby causing a
+rename of the file on Node B.  Node B then crashes and afterwards Node
+A closes the files and attempts to remove the renamed file.  This will
+cause the process on Node A to hang.  If the user interrupts the process
+and terminates the close then there will never be another attempt to 
+remove the file on the server.  It is not a likely event, but it can
+happen and leave strangely named files on the server.
+	
+.PH " 'NFS/300 IRS' 'NFS Mount' "
+.bp
+
+.nr P 1
+.H 1 "How NFS does a remote Mount"
+
+A mount of a NFS file system is done with the mount command.  Once it 
+recognizes that the type of the mount is to be NFS, it uses the node
+name given in the command input line to make a connection to the desired
+server node.  It then does a RPC call to the mountd daemon program on the
+server node to request a file handle for the file system that the user
+wants to mount.  That information is passed to the kernel along with the
+mount options and the directory that will be covered with the contents
+of the remote file system.  This is done through the vfsmount() system
+call.  vfsmount() will call nfs_mount().  nfs_mount() makes a call
+to the remote node to check if it is OK to mount the file system.  If
+that file system is remotely mounted from another node, the request will
+be disallowed.  This was done to prevent using NFS to gateway through
+a middle node to mount a third node's file system.  The request may
+also be refused if the remote node does not have the file system exported
+in its /etc/exports file.  If the request is successful, then nfs_mount()
+will notify the HP-UX kernel that the covered directory now has a valid
+connection to the remote server node and that future accesses of that
+local directory will reflect what exists on the remote file system.
+
+
+.PH " 'NFS/300 IRS' 'Changes made by HP' "
+.bp
+
+.nr P 1
+.H 1 "Overview"
+
+This chapter will be a collection of descriptions of the
+changes we have made to fit NFS into HP-UX.  Some of the changes
+were made to have NFS conform to the semantics of HP-UX which
+are different to BSD 4.2.  Other changes were made to let
+NFS live with the discless product that HP-UX 6.0 contains.
+
+.H 1 "Duplicate Requests"
+
+Since NFS is a stateless service and UDP is a unreliable transport,
+it would look like a marriage made in heaven.  Unfortunately, there
+are some file operations that cause state change by their very nature.
+For example you can only remove a file once.  The next time you try
+it, you will get ENOENT for an error.  The original NFS code had in
+some of the functions that do the file operations on the server side
+code that would recognize a duplicate request.  If it happened,
+for example, that the result of a remove was ENOENT and that the request
+was a duplicate(due to timeout retransmission), then the code would
+mask the ENOENT and simply return a value of no error.  
+
+The server keeps a list of request id's that it has seen.  It uses
+this list to check if an incoming request is new or if it has been
+seen before and therefore is a duplicate.
+
+This will work in normal situations, but with the addition of diskless
+to HP-UX, there was added the concept of Context Dependent Files(CDF).
+(We will not try to explain what a CDF is.  If you don't know what they
+are, please research them before continuing.)  The situation now exists
+where you can have multiple files all being able to be accessed through
+a single pathname.  This leads to having one remove request removing
+one of the contexts.  If a duplicate of this request is received
+by the server, it could succeed and remove another context.  The code
+for handling duplicates does not work for CDF.  What was done was to
+make a check for duplicate requests before the actual remove was done.
+It will work as a request is never marked as having been seen (i.e.
+being a duplicate) unless the previous 
+request was done with no error.
+
+.H 1 "Restricting Actions"
+
+There are several areas where we had to add code to restrict operations
+on remote NFS files.  They were:
+.AL
+.LI
+Doing a unlink of a directory.
+.LI
+Removing a file that had the text busy set.
+.LI
+Setting the sticky bit on a file.
+.LE
+These actions had several things in common.  They were actions that had
+checks made at a high level in the system where the executing process
+could be the superuser.  Then when the request was sent over to the
+the NFS server, there was no further check so the action was done even
+though on the server the daemon process would be executing with a
+uid of "-2".  
+
+For a specific example, look at the unlinking of a directory.  HP-UX
+semantics allow the superuser to unlink a directory locally even if
+it has files in it.  It is not a smart thing to do.  The check for
+being superuser is done in the unlink code.  If the process is executing
+as superuser, a call is made to a lower level routine that
+does no checking and just does the unlink assuming that it would
+never be called to do something that it should not do.  In the case
+of NFS, the check in the unlink code succeeds and the request to 
+do the remove of the directory is sent to the server.  The low level
+routine on the server (the same function that gets executed for a local
+file) just assumes that proper checking has been done by the routines
+calling it so it just blows away the directory.  This leaves a big
+hole in your file system.  We added code in the rfs_remove() routine
+on the server side to check if a directory is being removed and that
+it is being done by a superuser.  With the nfs daemon having a uid of
+"-2", it cannot do a straight unlink of a directory.  
+Normal rmdir()'s
+go through a different NFS request, so there is no problem there.
+The structure of having the lower layer code not doing any checking
+was done because many higher level functions may call the lower level
+code and it seemed redundant to do the checking twice.
+
+The reason that the original code from SUN appears to allow this is
+that BSD 4.2 semantics forbid doing an unlink on a directory so the
+request should never be generated.  An interesting aspect of this
+that should never be done(like, I don't know where...maybe at...USENIX!!!)
+is that a SUN with NFS can have its directories unlinked by an
+HP-UX machine leaving it bleeding in a massive way.
+
+We had to change the server to prevent the other actions mentioned 
+above from being able to be executed.  They have similar reasons
+that allowed them to work.  A check was made on the client side
+that was passed and then no check being done on the server side.
+
+.H 1 "Queuing NFS Writes"
+
+Normally a process blocks when doing an nfs_write until the server
+sends a reply.  This caused problems with sync when it was being
+called by one of the diskless server processes.  These server processes
+have a time limit they must beat when performing an action or the
+server will panic thinking that the node it is talking to is down.
+If the sync took a long time to complete, then the diskless server
+process would panic.  To relieve this, we put in a queue for outbound
+NFS write buffers.  Normally there is a queue with a length corresponding
+to the number of biod processes.  We just extended the queue to allow
+the buffers to be queued up in the async_daemon code.  Unfortunately,
+one can tie up all of the system buffers if one continues to write to a 
+NFS server that is down.  We will need to do something better for
+the next release.
+
+.H 1 "Asynchronous Errors"
+
+Since individual writes from user space are not tied to specific
+NFS write requests, if an error should happen during one of those
+NFS writes and the error is returned, it may not be possible to
+connect it to a specific call to the write() intrinsic.  What happens
+is that the rnode associated with the "open" NFS file
+is marked with an error flag.  The next time an access is made to the
+"open" NFS file, that error will be returned.  It can have the
+strange side effect of having a write complete, but then for the
+close of the file to get an error.
+
+.H 1 "ACL system calls"
+
+The s300 6.5 and s800 4.0 releases introduce new system calls to support 
+Access Control Lists (ACLs).  Some of these system calls, specifically 
+\fIsetacl()\fR and \fIgetacl()\fR have to be dealt with by NFS.  
+.sp
+The NFS protocol (version 2) does not support transferring the information 
+those system calls request from the NFS server to the client system.  
+Therefore, these system calls when invoked to act on a file that is NFS 
+mounted will return an error, EOPNOTSUPP.  That was accomplished by changing 
+the structure nfs_vnodeops and adding a new routine called nfs_notsupp()
+that returns EOPNOTSUPP.  For more information on the ACLs investigation 
+consult the NFS ERS.
+
+.H 1 "POSIX system calls"
+
+HP-UX will be POSIX compliant starting at releases 6.5 on the s300 and
+3.1 on the s800.  Part of the work to make HP-UX POSIX conpliant was
+to introduce two new system calls that deal with the file system, 
+\fIpathconf\fR and \fIfpathconf\fR.  
+.sp
+The current version of the NFS protocol (version 2) is not able to handle
+some of the information requested by the above system calls.  The variables
+passwd to the system calls that are not supported over NFS are _PC_LINK_MAX,
+_PC_NAME_MAX, _PC_PATH_MAX, _PC_CHOWN_RESTRICTED and PC_NO_TRUNC.  
+When the system calls are invoked with those variables, NFS will return with 
+an EOPNOTSUPP errno.   
+.sp
+For the other variables, _PC_MAX_CANON, _PC_MAX_INPUT and _PC_VDISABLE, 
+that are not file system specific, we will return the local information.  
+All that we need to do before invoking \fIfpathconf\fR is open the device file 
+(no need to read or write from/to it) and, since device files are recognized 
+at least that much with NFS 3.0, we do not need NFS device files support 
+(or NFS 3.2) to have this work.
+.sp 
+Also, we will support the variable _PC_PIPE_BUF over NFS with the introduction 
+of NFS 3.2 (releases s300 6.5 and s800 4.0).  Before that time (s800 release 
+3.1) we will return EOPNOTSUPP.
+.sp
+To add support for \fIpathconf\fR and \fIfpathconf\fR we changed the structure 
+nfs_vnodeops to deal with those system calls and added a new routine called 
+nfs_pathconf() that returns the correct values for the local information and
+EOPNOTSUPP for variables used to invoke the system call that we do support.  
+If that routine is invoked with a variable that it does not know how to handle
+it returns EINVAL.  _PC_PIPE_BUF is handled by the NFS 3.2 FIFO code.  
+
+.PH " 'NFS/300 IRS' 'KERNEL RPC/XDR' "
+.bp
+
+.nr P 1
+.H 1 "KERNEL LEVEL RPC/XDR"
+.H 2 "OVERVIEW"
+This chapter deals with the implementation of the Remote Procedure Call
+(RPC) protocol and the eXternal Data Representation (XDR) for the HP9000
+Series 300 kernel.  It assumes that the reader has a basic understanding
+of the kernel and how it works, and also has some understanding of the
+RPC/XDR client/server paradigm.  Note that the kernel RPC/XDR implementation
+operates strictly using UDP, unlike the library implementation which provides
+for UDP and TCP implementations.  For more information about RPC/XDR, see
+the RPC and XDR specifications, and the "Remote Procedure Call Programming
+Specifications".  For more information about the kernel see the appropriate IRS.
+.sp 1
+The structure of the RPC/XDR kernel code is split into several pieces.
+The client routines handle the basic control of the RPC code
+on the client side and interface with the NFS client code.  
+Similarly, there is a set of routines to handle the server RPC code.
+These routines share a common set of routines to interface with the
+low-level networking code, and a set of routines to do the XDR translations.
+Finally, there are functions to do the actual RPC protocol and deal with
+the sets of UNIX credentials used for authentication.
+.sp 1
+Before continuing, it is worth noting that a fair portion of the RPC/XDR code
+is shared between the kernel implementation, and the library implementation
+provided to users.  Sometimes steps are taken to provide a flexible interface
+where it is not strictly necessary for the kernel.  However, this allows us
+to have expandable interfaces and greater isolation of code modules.  Thus,
+many of the functions discussed in this chapter are actually referenced 
+through sets of macros.  These macros typically access a field of a structure
+to determine the address of the function to call.  This structure must
+be initialized upon startup to the appropriate values.  This practice will
+be discussed more as appropriate.
+.bp
+.H 2 "RPC CLIENT"
+The RPC client code provides the interface between the NFS file system
+code and the kernel networking code on the client.  In the discussion
+here, we will concentrate on that interface and what must be done on the
+RPC client side to create a connection to a remote RPC server, and not
+on the myriad of other issues related to being an NFS client (such as 
+first doing the mount, etc.).
+.H 3 "Client creation and initialization."
+The first action that must be performed to allow a connection to a remote
+system is to create and initialize the structures used by the RPC layer.
+The structure used to communicate between the NFS and RPC layers is the
+CLIENT structure.  The CLIENT structure, also known as the "CLIENT handle",
+keeps track of the information needed by the RPC layer.  Because the CLIENT
+structure is the same between kernel and user space, it actually
+contains only a minimal set of information, and the rest of the necessary
+information for the kernel is kept in a "private" structure associated with
+the CLIENT structure, but hidden from the NFS layers.  Thus, the CLIENT
+structure looks like:
+.sp 1
+.nf
+typedef struct {
+    AUTH *cl_auth;		/* authenticator */
+    struct clnt_ops {
+	enum clnt_stat	(*cl_call)();
+	void		(*cl_abort)();	
+	void		(*cl_geterr)();
+	bool_t		(*cl_freeres)();
+	void		(*cl_destroy)();
+    } *cl_ops;
+    caddr_t	cl_private;	/* private stuff */
+} CLIENT;
+.fi
+.sp 1
+The AUTH structure contains the user credentials and pointers to the routines
+which handle them.  As can be seen, the clnt_ops structure contains pointers
+to functions which provide the client RPC operations.  Finally, the last
+field is a pointer to a private data area used by the RPC layer only.  To access
+the functions of the clnt_ops structure, macros are provided that dereference
+the function pointers.  Thus, the CLNT_CALL macro looks like: 
+.sp 1
+.nf
+#define	CLNT_CALL(rh, proc, xargs, argsp, xres, resp, secs)
+	((*(rh)->cl_ops->cl_call)(rh, proc, xargs, argsp,
+    		xres, resp,secs))
+.sp 1
+.fi
+where the first parameter is a pointer to the CLIENT structure, and
+the rest of the parameters will be discussed later.
+.sp 1
+For convenience, the CLIENT structure is actually CONTAINED in the private
+data structure, and the two structures contain pointers to each other, allowing
+easy mapping between the two.  The private data structure, called cku_private,
+contains such information as flag values, socket information, and other
+values that map on a per client basis.  See Figure 3.
+.sp 1
+.nf
+	cku_private --->  +----------------+
+			  |   flags        |<---+
+			  |----------------|    |
+			  | CLIENT         |    |
+			  |      AUTH      |    |
+			  |      clnt_ops  |    |
+			  |      private --+----+
+			  |----------------|
+			  | other socket   |
+			  | and client info|
+                          +----------------+
+
+     Figure 3:  CLIENT and cku_private data structures.
+.sp 1
+.fi
+Each time the NFS layer wishes to create a client, it calls
+the function clntkudp_create(), which allocates space for the cku_private
+and CLIENT structures, initializes values, allocates memory for doing the
+XDR translations, and creates and initializes a socket for use by the client.
+It returns a pointer to the CLIENT structure it created.  That pointer is
+then passed as parameter to all future RPC calls dealing with that client.
+.sp 1
+As the NFS layer is servicing requests for multiple user processes, it does
+not make sense for it to allocate and deallocate RPC clients for every file
+system request.  Instead, the NFS layer will reuse the client structure when
+possible.  To do this, it simply calls clntkudp_init(), which re-initializes
+certain fields, the most notable being the address of the remote server to
+which requests will go.  Thus, for each file system request, the first task
+done by the NFS layer is to either call clntkudp_create() or clntkudp_init()
+as appropriate.  The NFS layer determines how many clients will actually
+be created and in use at any one time, with the current maximum number being
+four.  NOTE: once an RPC CLIENT structure and its associated data buffers and
+structures has been created, it does NOT get destroyed or released by the NFS
+layer, and thus holds onto the memory it has allocated until the system is
+rebooted.
+.H 3 "Clntkudp_callit()"
+As was discussed above, the clnt_ops structure contains pointers to functions
+which provide the standard interfaces to the RPC client code.  In the kernel,
+these routines are named clntkudp_callit(), clntkudp_abort(), etc.  Of the
+five routines that fill in the clnt_ops structure, only clntkudp_callit() is
+currently used, with the remaining four being provided to fill in the
+standard client interface and provide for future usage.  
+.sp 1
+Clntkudp_callit() is the main routine in the client RPC code, doing the work
+of actually making a RPC transaction with the server.  Normally called through
+the CLNT_CALL() macro, clntkudp_callit() takes seven parameters:
+.sp 1
+.nf
+enum clnt_stat
+clntkudp_callit(h, procnum, xdr_args, argsp, xdr_results,
+		    resultsp, wait)
+.fi
+.sp 1
+The first parameter, h, is a pointer to a CLIENT structure that has been
+allocated and initialized via clntkudp_create() and clntkudp_init().  The
+procnum is the number of the NFS procedure to be executed by the server.  It
+is up to the NFS layer to make sure that it is passing in an appropriate
+procedure number.  Argsp is a pointer to some piece of data, and will be
+passed as an argument to the XDR routine xdr_args().  Xdr_args() is used to do
+the necessary translations of *argsp before the data is sent to the remote system. 
+When a reply is received, xdr_results() is used to translate the results back
+into a format appropriate for the local system, with the results going into the
+data area pointed to by *resultsp.  The final parameter, wait, is a timeval
+structure that specifies the initial timeout on RPC requests.  Clntkudp_callit()
+returns an enumerated type, clnt_stat, which specifies the results of the
+RPC request.
+.sp 1
+The first thing that clntkudp_callit() does is to synchronize its access to
+the data structures it uses.  Once this is done, it puts the RPC protocol
+information in a buffer, has the UNIX authorization routines process the user's
+credentials (user and group ids), and then calls the xdr_args() routine to do
+the XDR translations on the calling arguments.  It then sends the request to
+the remote system and waits for a response.  If a response arrives that matches
+the request sent, it attempts to decode the results (via xdr_results()).  If
+this succeeds, the results are returned to the calling routine.  Note that a
+return value of RPC_SUCCESS simply means that it correctly exchanged a response
+with the server machine, not that the NFS request was successful.  It is up to
+the NFS layer to look at the results and determine the success or failure of
+its request.  If the result was not RPC_SUCCESS, or if there is  no response
+from the server within the timeout period, clntkudp_callit() will resend the
+request and begin waiting again.  The number of times that RPC will attempt
+to resend the request was specified in the initialization process.  After that
+number of tries, clntkudp_callit() will return the last error it detected.
+.H 3 "Synchronization."
+To protect itself from multiple processes accidentally accessing the
+same CLIENT structures, clntkudp_callit() goes through a synchronization
+process.  This process basically involves the work necessary to do a semaphore
+type operation on the BUSY flag in the data structure.  To do this, it raises
+its priority to protect itself during the critical region, checks the flag,
+and sets it if it is not busy.  If it is busy, it goes into a loop where it
+sleeps waiting to be notified about the structure, checks the flag when it
+gets awakened, and possibly sleeps again if the structure is still busy.  When
+it finally gets the structure and sets the BUSY flag, it lowers it priority and
+continues.  Ideally, this process would be replaced by a semaphore operation at
+sometime in the future.  When clntkudp_callit() is done with the structure
+(just before returning), it clears the BUSY flag, and wakes up any processes
+waiting for the structure.  NOTE: Due to the way the NFS layer allocates the
+clients it has had the RPC layer create, it is not currently possible for
+multiple processes to access the same client.  However, this code provides a
+safety net to insure that we are safe.
+.sp 1
+At the time the CLIENT structures are created, a buffer is also allocated.
+This buffer is used to create the RPC packet that will be sent to the server.
+As the appropriate XDR operations occur on data the results are put into this
+buffer.  The entire contents of the buffer are then passed to the networking
+layer to be sent to the remote host.  To do this, a special type of mbuf was
+created, similar to a networking cluster, which simply points at the data
+instead of having to copy it into a mbuf.  However, at the time the data is
+given to the networking layer to send, it is only put on a queue to be sent,
+and the actually delivery may be not occur until sometime later.  Because the
+function that does the sending can return without having sent the packet, a
+synchronization process must also occur on the data buffer to prevent the
+client from writing new data into it before the actual networking layers
+have sent the old data.  Thus, a process similar to that used above is
+necessary.  However, in the process discussed above, all synchronization
+occurs in the clntkudp_callit() routine itself.  In this case, the low-level
+networking routines must inform clntkudp_callit() when they are done with
+the buffer.  To do this, the buffree() function is called at the time the
+mbuf is freed.  Buffree() then wakes up clntkudp_callit() so that 
+clntkudp_callit() can either mark the buffer available or reuse it.
+.H 3 "Timeouts."
+The last parameter to clntkudp_callit() is a timeval structure that 
+represents the amount of time to wait for a response before timing out
+to retry the request.  After the request is sent to the server, a timer
+is set just before sleeping, and disabled upon return from the sleep.  If
+the timer goes off before the sleep returns, a function is called by the
+timer routines which sets a flag and wakes up clntkudp_callit().
+Each time that a timer expires, clntkudp_callit() does an exponential
+back-off (i.e. it doubles the value) on the timeout value, and then
+retries the request.  This will be done up to a number of tries as
+specified in the initialization process, upon which it returns an error
+indicating that a timeout has occurred.
+.sp 1
+It is worth noting that because of interactions with the low-level
+networking routines, the function called upon timeout, cku_wakeup, does not
+actually set any flags or change any values.  This is because the timeout
+routines run at a high priority, and could be interrupting the network
+hardware interrupt routines.  If those routines are being interrupted, there
+is the possibility that some of the network data structures may be in an
+inconsistent state.  Thus, the only thing cku_wakeup() does is to
+schedule another function, realcku_wakeup(), to be run at a lower priority.
+That function then sets the timeout flag and wakes up clntkudp_callit().
+.H 3 "Interrupts."
+In the original SUN design of the NFS code, the NFS requests to remote systems
+were non-interruptible.  By non-interruptible, we mean that all sleeps occurred
+at non-interruptible priorities, and that the NFS code never checked to see
+if an interrupt occurred.  Thus, if a server went down, any NFS request for 
+that server would block forever (meaning until the server came back up), 
+resulting in a hung process.  With release 3.2 of the NFS code, SUN added
+support for detecting interrupts at the NFS level.  To do this, an option
+was added to mount specifying interrupts, and the NFS level was made to
+check for interrupts.  However, because the NFS level must wait on the
+clnt_call() routine to timeout, this meant that it may take as much as
+several minutes before the interrupt was recognized and the NFS level
+aborted its request.
+.sp 1
+To avoid the long wait for interrupts, the HP version of NFS has the support
+for interrupts at the RPC layer.  To do this, an extra call, clntkudp_setint(),
+was added to set a flag in the client data structures.  This routine is called
+by the NFS layer after clntkudp_init() has been called, but before any calls
+the clntkudp_callit(), whenever the interruptible option has been specified
+with the mount.  The RPC client routines then sleep at an interruptible
+priority, but catch the interrupt, to allow a return of an error value to
+the NFS routines to allow cleanup procedures to occur.  This results in a
+fast return from an interrupted call, avoiding the long wait for the
+timeout to occur.
+.bp
+.H 2 "RPC SERVER"
+The RPC server code is similar to much daemon code, in that it is response
+oriented code.  By that we mean that it waits for a request to arrive, 
+services that request, sends a reply, and then waits for another request.
+The discussion in this section will concentrate on those sections of the
+RPC code that are server specific, as opposed to being of more general use.
+.H 3 "Server creation and initialization."
+Just as a CLIENT structure must be created and initialized before use, similar
+events must happen on the server side.  When a nfsd(1M) process is started
+on the server machine, it creates a socket and binds to NFS port.  It
+then enters the kernel via the system call nfs_svc().  Nfs_svc() is the function
+in the NFS layer that starts the NFS kernel daemon, and does not return
+from the kernel unless killed.  Nfs_svc() does the setup necessary to become
+a kernel daemon by calling the RPC server creation and initialization functions,
+and then calling svc_run() to begin serving NFS requests.
+.sp 1
+Each time nfs_svc() is entered, it must first create the server structures it
+will use by calling svckudp_create().  Svckudp_create() creates the server
+transport structure, SVCXPRT.  A SVCXPRT structure is very similar to the
+CLIENT structure, containing socket information, a xp_ops structure that
+contains pointers to various server functions, and pointers to private data
+areas.  Svckudp_create() also allocates a buffer to be used by that server
+process for doing the XDR translations, and the private data structure used by
+the kernel RPC layer.  Again, the private data structure, udp_data, contains
+pointers and data specific to that instance of the server, but not necessary
+for a user-level implementation, such as pointers to inbound and outbound
+mbuf chains.  Svckudp_create() returns a pointer to the SVCXPRT structure
+it allocated, and that pointer is passed as a parameter to other calls
+to the RPC server code. 
+.bp
+The SVCXPRT structure is defined as:
+.sp 1
+.nf
+typedef struct {
+    struct socket *xp_sock;
+    u_short	   xp_port;	 /* associated port number */
+    struct xp_ops {
+	bool_t	(*xp_recv)();	 /* receive requests */
+	enum xprt_stat (*xp_stat)(); /* get status */
+	bool_t	(*xp_getargs)(); /* get arguments */
+	bool_t	(*xp_reply)();	 /* send reply */
+	bool_t	(*xp_freeargs)();/* free mem for args */
+	void	(*xp_destroy)(); /* destroy this struct */
+    } *xp_ops;
+    int		xp_addrlen;	 /* length of address */
+    struct sockaddr_in xp_raddr; /* remote address */
+    struct opaque_auth xp_verf;	 /* raw response verifier */
+    caddr_t		xp_p1;	 /* private */
+    caddr_t		xp_p2;	 /* private */
+} SVCXPRT;
+.fi
+.sp 1
+The first private data area points to the buffer used for doing the
+XDR translations.  The second data area points to the private udp_data
+structure associated with this server.
+.sp 1
+Finally, svckudp_create() takes care of allocating a special macct for
+use by the NFS code.  This macct allows mbufs to be transferred from
+the socket to the NFS code, allowing more packets to be queued.  Further,
+the queue size on the server is adjusted up from the default of 3 to a
+default of 6 for NFS.  This allows us to queue up to 6 requests, matching
+the up to 6 client structures allowed on the client.
+.sp 1
+After calling svckudp_create(), nfs_svc() must call svc_register() to
+tell the RPC layer what RPC program number it is serving (100003 for NFS),
+what NFS versions, and what routine to call as the dispatch routine when
+a request comes in for an NFS service.  The dispatch routine is a function
+which decides which NFS function to call for a particular request.  
+Currently, NFS uses the dispatch routine rfs_dispatch().  The job of 
+svc_register() is to record the given information into a structure for
+future use.  NOTE: in the library version of RPC, svc_register() also
+makes an RPC call to the portmap() program to make known what port it is
+listening on.  In the case of NFS, however, this has already been done
+before entering nfs_svc().  Also, nfsd always uses the UDP port 2049,
+so that remote systems don't have to go to the portmapper to know where to
+contact nfsd.
+.sp 1
+After calling svc_register(), nfs_svc() then can call the RPC routine
+svc_run().  Svc_run() simply goes into a loop in which it waits for a
+request to arrive, and services that request.  Svc_run() only
+returns if the process receives an interrupt.  To process a request, svc_run()
+calls svc_getreq(), which receives the packet, does the authentication, and
+looks up the dispatch routine to call to handle the request.  If an error is
+detected in the RPC protocol or a request is made for an unavailable program,
+svc_getreq() sends a reply packet indicating an error and returns to svc_run().
+If no error is detected here, then it is up to the dispatch routine to 
+call one of the RPC reply routines to generate an appropriate response.
+.H 3 "Server UDP functions."
+The server functions discussed so far, with the exception of svckudp_create(),
+are generic RPC functions in that the same steps would be performed in either
+kernel or user space.  However, the SVCXPRT structure contained the xp_ops
+structure which was filled in by the svckudp_create() routine.  Svckudp_create()
+fills the role of setting up the transport specific information.  In this case,
+the transport is a kernel-level UDP transport, so xp_ops contains pointers to
+the kernel RPC transport routines.  As with the client, these routines are
+accessed through macro calls to hide the use of pointers.  For example, to
+do the receive of the incoming packet, the macro SVC_RECV() is used to 
+dereference the pointers and call svckudp_recv().  The svckudp routines
+provide the main functions that are transport dependent.
+.sp 1
+Svckudp_recv() (referenced by the macro SVC_RECV()), received the RPC packet
+for the client.  Because we are using UDP, this is a relatively simple process.
+First, svckudp_recv() calls ku_recvfrom() to receive an mbuf chain from the
+socket.  It then deserializes (decodes) the RPC CALL message via
+xdr_callmsg() to verify
+that it is an RPC packet.  If the deserialization works, it returns true,
+otherwise false (after cleaning up).
+.sp 1
+Svckudp_send() (referenced by the macro SVC_SEND()), does the reverse operation.
+Since it uses the buffer allocated in svckudp_create(), we can run into the
+same problem that occurred with the clnt_call() routine:  namely, the sending
+of the buffer by the low-level networking layers may be delayed.  Thus, the
+same type of synchronization process must occur to avoid corrupting data. 
+After obtaining exclusive use of the buffer, svckudp_create() gets an mbuf
+and points it at the buffer, serializes (encodes) the response into the buffer
+via xdr_replymsg(),
+and sends it out, returning true if everything works.
+.sp 1
+The remaining xp_ops routines are fairly simple.  Svckudp_getargs()
+(SVC_GETARGS()) is used by the NFS dispatch routine to initiate the XDR
+decoding, but it actually only calls the appropriate NFS XDR routine.
+Svckudp_freeargs() releases any resources used during the processing of one
+RPC transaction.  It should be called only after all processing on the
+packet has taken place.  Finally, svckudp_destroy actually frees up the
+SVCXPRT and it's associated structures, and it is only called upon
+termination of nfsd(1M).
+.H 3 "Rfs_dispatch() and what it is expected to do."
+When discussing svc_run() and svc_getreq() above, we mentioned the dispatch
+function that svc_getreq() calls to actually service the NFS request.  This
+function, called rfs_dispatch(), is in the NFS layer, and it is important to
+understand the distinctions between it and svc_getreq(), and what their
+respective functions are.  Svc_getreq() is a generic RPC transaction routine.
+It controls the processing of an RPC packet on the server machine, including
+receiving the packet, verifying that it actually is an RPC packet, validating
+the versions (RPC and NFS) being asked for, etc.  Rfs_dispatch(), on the other
+hand, handles the NFS specific functions, including deciding what functions
+to call to handle the request, possible further authentication, etc.  The
+things that it MUST do, from svc_getreq() standpoint, is to call svc_getargs()
+to obtain the rest of the call packet, call svc_freeargs() to free the
+resources allocated during the decoding(), and initiate some kind
+of response packet (remember, the RPC request can succeed but the NFS request
+fail) after processing the request.
+.H 3 "Duplicate requests."
+Because of the nature of the RPC protocol, it is possible to receive duplicate
+requests from a client for the same operation.  In the case of NFS, most of the
+time this is not a problem.  For example,  the client sends a request to write
+10 bytes to a file starting at location x.  NFS processes the request and sends
+a response indicating that the operation was successful.  However, because of
+a lost packet or because the server was under heavy usage, the client times
+out and resends the request.  Because the NFS protocol specifies the starting
+location of the write, as well as how much to write, the write simply occurs
+again and there is no problem.
+With some operations, however, a duplicate processing can cause an error.  For
+example, a request to create a directory would succeed for the first packet,
+but would fail for the second packet because the directory is already there.
+.sp 1
+NOTE: The write code actually does check for duplicate requests.  This was
+added by HP due to the high likelyhood of duplicate requests for writes
+as a performance improvement.
+.sp 1
+To allow the NFS layer to detect this condition, the RPC layer of the kernel
+provides support for detecting duplicate requests based on the RPC 
+transaction ID.  Two routines are provided: svckudp_dupsave(), which saves
+the transaction id, program, version, etc., into a list of requests, and
+svckudp_dup(), which checks a transaction against the list of requests to
+see if it is a duplicate.  Note that only the information necessary to 
+uniquely identify a request is saved, not the actual request or reply.
+Because this is not necessary for all requests, it is up to the NFS layer
+to determine when it wants to save the request information for future reference.
+The current maximum saved at any one time is 400 requests, which are kept in
+linked lists from a hashing table to minimize lookup time.  It is interesting
+to note that, strictly speaking, this violates the RPC protocol as specified
+by Sun.
+.sp 1
+NOTE: Because the transaction id checking only occurs at the RPC level, it
+is still possible for duplicate requests to cause a problem as follows:
+The NFS client calls rfscall() which calls clntkudp_callit() to contact
+the remote host.  Clntkudp_callit() tries four times (with appropriate
+timeouts) to contact the server, and then returns an error indicating it
+timed-out.  Rfscall(), decides to retry the request and again calls
+clntkudp_callit(), which increments the transaction id before sending the
+new request.  If any of the first packets got through, but no response was
+received, then any of the second set of packets to get through will NOT
+be detected as a duplicate.  This problem occurs on most clients based on
+Sun code.  However, HP code has been patched to preserve the transaction id
+from one clnt_call() to the next.  This is done by adding a field to the private
+client structures that save the id used, and flag indicating that this is a
+retransmission.  This is done entirely at the RPC level.
+.bp
+.H 2 "RPC SUBR (SOCKET INTERFACE)"
+The client and server functions share a common set of routines for interfacing
+with the low-level network protocols.  These routines provide the kernel
+level equivalents of the user level routines sendto() and recvfrom() which
+are used with UDP code.  This allows us to divorce the processing of a
+packet from the transport used to deliver the packet.  However, because of
+the nature of the networking architecture, these routines can not handle
+the entire interface and still maintain reasonable efficiency.  Thus, some
+of the other kernel RPC routines understand about the network architecture and
+take advantage of that knowledge.
+.H 3 "Ku_recvfrom()."
+The kernel equivalent of the system call recvfrom() is provided by the
+function ku_recvfrom().  However, rather than putting the data into an
+area provided by the caller, it simply returns a pointer to the first
+mbuf in an mbuf chain.  To do this, it takes the socket structure it is
+given and pulls the mbufs off of the receive queue one at a time until
+it runs out of mbufs or detects an end-of-message flag in an mbuf (after
+appropriately locking the structure, of course).  The first mbuf is
+assumed to contain the address of the machine that sent the packet, and that
+address is copied into a parameter passed in.  The remaining mbufs are assumed
+to contain data only (i.e. all other UDP/IP headers have already disappeared).
+Note that the mbufs are only disconnected from the socket queue, not freed
+or released in any way.  Before the mbuf chain is returned to the caller,
+a scan is made to help avoid alignment problems.  On machines like the
+hp9000 Series 310, to reference a long it must be aligned on an even
+byte (word) boundary.  Thus, each packet is checked to guarantee that it at
+least starts on a word boundary.  However, this does not totally guarantee
+alignment because there is no guarantee that there will be an even number
+of bytes in any given mbuf.  Thus, routines accessing integers through
+pointers in the mbuf will need to verify alignment before deferencing.
+.H 3 "Ku_sendto() and ku_fastsend()."
+The reverse of the ku_recvfrom() routine is ku_sendto(), which takes a
+mbuf chain and sends it off to the given address as a UDP packet.  The first
+attempt to send the packet is made by calling ku_fastsend().  Ku_fastsend()
+performs the same function as ku_sendto(), but attempts to bypass the more
+complicated functions in the UDP and IP layers of the network architecture.
+Instead, it does it's own simple routing, IP fragmenting, etc., and talks
+directly to the LAN card interface drivers.  It avoids the overhead of any
+procedure calls to udp_output() and ip_output(), implementing only the 
+minimum necessary for the UDP/IP protocols.  It also avoids some of the
+copying overhead associated with IP fragmenting by using mbufs as pointers
+instead of actually copying the data into them.  If ku_fastsend() fails,
+two things can happen.  If it was able to send any IP packet (i.e. a part
+of the UDP packet), it frees the mbufs chain and returns -1.  This informs
+ku_sendto() that a partial send occurred, and that it should abort the
+send, and ku_sendto() returns an error.  On the other hand, if ku_fastsend()
+was not able to actually send anything and the mbuf chain is still intact,
+it returns a -2.  Ku_sendto() then attempts a more normal mechanism by
+setting the address to send to and calling udp_output() to send the packet.
+.H 3 "Mbufs and mclgetx()."
+Mbufs, which have been mentioned frequently here, are the main data structure
+and/or storage mechanism of the networking architecture.  As such, there are
+many places in the RPC kernel code where mbufs are used.  Besides being the
+input and output mechanisms used with ku_sendto() and ku_recvfrom(), mbufs
+are frequently used to interface with other socket functions.  However,
+the main use is for communicating.  Thus, the main mbuf routines used are
+MGET(), to obtain an mbuf, and mfree() and mfreem() to free an mbuf and an
+mbuf chain, respectively.  The other main mbuf routine used is mclgetx().
+Mclgetx() is a function that was added to the mbuf code specifically for NFS. 
+.sp 1
+Before NFS, the mbuf architecture could store network data two ways:
+either in the mbuf itself (for small amounts), or in a network cluster (for
+larger amounts).  A network cluster is allocated from the networking memory,
+and must contain certain information to allow it to be kept track of.  With
+mclgetx(), a third alternative is provided: mbufs are now allowed to simply
+keep a pointer to where the data is stored.  The mbuf still keeps track of
+how much data is there, what state it is in, etc., but the data can be
+anywhere in kernel memory.  This allows us to avoid an extra copy in many
+cases by simply pointing the mbuf at the data we wish to send.  (Mclgetx()
+is only used when we are sending.  For receiving, the networking architecture
+puts the data into mbufs and clusters.)  However, when we send a packet, the
+networking architecture will free the mbuf chain it sent.  But because the
+mbuf now does not contain the data, some arbitrary data area does, the
+mbuf freeing routines must be given a function to call to free the storage
+area.  A pointer to this function is kept in the mbuf, and the function is
+called with the data area as an argument when the mbuf is freed.  That function
+then frees the data area.  Mclgetx() thus takes a pointer to a data area
+and a function to be used to free it.  It gets an mbuf that it points at the
+structure and saves the function to be called in a field in the mbuf.
+.sp 1
+In the case of RPC, the "freeing" function used with mclgetx() normally does
+not actually free the data area.  We discussed above the synchronization
+process used with the client and server code to control access to the data
+structures and buffers.  Thus, the "freeing" function usually checks some
+flags to see if anybody is waiting for the structure.  If they are, it wakes
+them up so they can now use the buffer, and then returns.
+.bp
+.H 2 "RPC and XDR"
+RPC and XDR are frequently talked about as if they are different layers in
+a network architecture stack; this is not true.  While RPC is a protocol that
+relies on UDP for the data transport.  XDR, on the other hand, is not so much
+a protocol, as a standard way of representing things.  For example, the XDR
+standard says that a "long" is four bytes of data interpreted in a certain
+way.  It does not say how what will be done with that four bytes of data, or
+where it will be put.  RPC uses XDR to ensure that it can communicate in a
+heterogeneous environment.  Thus, while a uid on one machine may be a 
+short, and on another an int, they will have no problem communicating because
+the RPC protocol specifies that a uid will be an XDR unsigned long, and both
+machines must do an appropriate translation to an unsigned long if they
+expect to communicate correctly.   Thus, whenever sending or receiving data
+via RPC, the data must be transformed to the XDR standard format.  NOTE:
+conveniently, the XDR standard is basically the same format as data is accessed
+on a 68010 processor, normally making XDR translations into fairly simple
+copies.  Also, to increase communication in a heterogeneous environment, all
+data is made into a multiple of 4 bytes.  Thus, a variable declared as a
+short would be transformed into a long of the same value by the XDR routines
+as part of the encoding process on a Series 300, since a short is two bytes
+and a long is four bytes.
+.sp 1
+Three distinct sets of routines provide this function in our implementation.
+First, we have a set of routines which can be called in a more abstract way.
+For example, xdr_long() is called to handle a value in the XDR standard "long"
+way.  The second set of routines understands about the underlying transport
+and how to get data to and from that transport.  To continue the example
+above, xdr_long() would actually end up calling the routine xdrmbuf_getlong(),
+to decode a long for a packet being received.  These routines  are meant to
+be called only from the more generic routines.  Finally, at a higher level,
+we have a set of
+xdr routines that are specific to the protocol using XDR.  For example,
+xdr_callmsg() takes an RPC request, and translates it into the standard
+format by calling the various generic XDR functions like xdr_long().
+Thus, we again have a sort of layering effect in the code.
+.H 3 "XDR initialization"
+As with all the other various pieces of code discussed here, the XDR code
+must be initialized before being used.  In the normal case in the kernel,
+the routine that does this is xdrmbuf_init(), which initializes the necessary
+information for the XDR routines that know about mbufs.  As with the RPC
+client and server code, a structure is used that is the same for both 
+the kernel and user level code.  The XDR structure looks like:
+.sp 1
+.nf
+typedef struct {
+    enum xdr_op	x_op;		/* operation */
+    struct xdr_ops {
+	bool_t	(*x_getlong)();	
+	bool_t	(*x_putlong)();
+	bool_t	(*x_getbytes)();
+	bool_t	(*x_putbytes)();
+	u_int	(*x_getpostn)();
+	bool_t  (*x_setpostn)();
+	long *	(*x_inline)();
+	void	(*x_destroy)();
+    } *x_ops;
+    caddr_t 	x_public;	/* users' data */
+    caddr_t	x_private;	/* pointer to private data */
+    caddr_t 	x_base;		/* private info */
+    int		x_handy;	/* extra private word */
+} XDR;
+.fi
+.sp 1
+The x_op field will be set to either XDR_ENCODE, XDR_DECODE, or XDR_FREE, to
+indicate whether we are getting data from the data stream, writing data
+to the data stream, or freeing resources allocated during the decoding
+stage.  The xdr_ops structure contains pointers to the XDR functions that
+know about mbufs, and  which are normally referenced through macros, e.g.
+xdrmbuf_getlong() is normally called by using the macro XDR_GETLONG().  For
+the kernel mbuf case, the private data pointers are used to keep track of the
+mbuf information, with x_base pointing to the current mbuf, x_private
+pointing to the DATA of the mbuf, and x_handy specifying how much data is
+there.  The x_public field is used for a special purpose discussed below.
+.sp 1
+Unlike the client and server creation routines, the XDR initialization
+does not allocate any resources, since the XDR structure is allocated as
+part of the CLIENT or SVCXPRT structure.  Also, in a given RPC transaction,
+the client and server must both call xdrmbuf_init() at least twice:  once for
+decoding and once for encoding the request and reply.  Thus, xdrmbuf_init()
+is typically called in the routines that do the receiving and sending, just
+before those routines call xdr_callmsg() or xdr_replymsg(), which encode 
+and decode the requests and replies.  
+.bp
+.H 3 "Generic XDR functions."
+The generic XDR functions include xdr_void(), xdr_int(), xdr_long(),
+xdr_string(), etc.  These routines are basically
+a set of interface routines between RPC and the underlying XDR translations.
+They examine the value of x_op in the XDR structure to determine whether to
+encode, decode or free, and then call appropriate functions depending on the
+operation.  For example, xdr_long() will call xdrmbuf_getlong() to decode
+a long and will call xdrmbuf_putlong() to encode a long.  XDR routines return
+TRUE if the encode/decode succeeded, or FALSE if it failed.  A failure usually
+indicates that there was not enough data available to do the decoding.
+The generic functions include:
+.sp 1
+.nf
+ function           description/comments
+ --------           --------------------
+
+ xdr_void()         Always returns TRUE, useful where an XDR
+		        routine must be given as the param.
+ xdr_int()          Simply calls xdr_long()
+ xdr_u_int()        Simply calls xdr_u_long()
+ xdr_long()         Calls xdrmbuf_getlong() or putlong()
+ xdr_u_long()       Calls xdrmbuf_getlong() or putlong()
+ xdr_short()        Converts short to long, calls xdrmbuf()
+                        routines
+ xdr_u_short()      Converts short to long, calls xdrmbuf()
+                        routines
+ xdr_bool()         Handles boolean (TRUE/FALSE) value.
+ xdr_enum()         Treats it as an xdr_long().
+ xdr_opaque()       Copies "cnt" bytes into/out of the XDR
+		       stream by calling xdrmbuf_getbytes(),
+		       xdrmbuf_putbytes().
+*xdr_bytes()        Similar to xdr_opaque(), but the byte
+                       count is also encoded in the stream.
+ xdr_union()        Calls xdr_enum() to determine choice,
+                       then calls XDR routine chosen from
+		       the array given it.
+*xdr_string()       Calls xdr_u_int to get length of string
+                       and then calls xdr_opaque to get data. 
+ xdr_wrapstring()   Another way to handle strings.
+*xdr_array()        XDRs the length of array, and then each
+		       element in order.
+ xdr_float()        NOT USED IN KERNEL.
+
+*These routines may allocate memory when decoding.  To free
+ the memory they must be called with x_op set to XDR_FREE.
+.fi
+.sp 1
+.H 3 "XDR mbuf functions."
+The XDR mbuf routines do not actually do any XDR translation.  Instead, they
+provide the necessary functions for getting data to and from the underlying
+data transport.  In this case, that transport is the kernel UDP implementation
+using mbufs.  Thus, xdrmbuf_getlong() knows how to get a long from the
+mbuf chain returned by ku_recvfrom().  This layer of the XDR implementation
+actually knows only about longs, which actually means a four byte value, or
+about a request for an arbitrary number of bytes.  Thus, we have
+xdrmbuf_getlong(), xdrmbuf_putlong(), xdrmbuf_getbytes(), and
+xdrmbuf_putbytes() to handle these values.  It is also the responsibility of
+this layer to keep track of where it is in the mbuf chain, manipulate the
+mbuf pointers, etc., and it uses the pointers at the end of the XDR structure
+discussed above. 
+.sp 1
+Despite the simple sound of the get and put routines, they are actually fairly
+complicated, since they must handle correctly the case where a requested
+value crosses from the end of one mbuf to the beginning of the next.  For
+example, if we call xdrmbuf_getlong(), and there are only two bytes left in
+the current input mbuf, it must save those two bytes, find the next mbuf, 
+check to see if two bytes are available, get those two bytes, and finally
+put it all together.  Further, even if there are four bytes available, it
+cannot just assign the value, since on a Series 310 or a Series 800 the
+long must be aligned on a word boundary.  Thus, it must also check for
+potential alignment problems.
+.sp 1
+Two functions are provided for manipulating the mbuf chain: 
+xdrmbuf_getpos() and xdrmbuf_setpos().  The routine
+xdrmbuf_getpos() is used to determine the current position of the XDR
+stream in the current mbuf.  The complement routine, xdrmbuf_setpos() is
+used to set the XDR position to a particular point in the current mbuf.  
+These routines are used to make the RPC calls more efficient by
+"pre-serializing" some of the RPC packet.  That is, the RPC client routines
+know that the information at the beginning of the RPC packet is mostly
+the same from one call to the next.  As part of the creation process, that
+initial information if put into the output buffer, and xdrmbuf_getpos() is
+called to determine the current location.  Then, when a request is made,
+xdrmbuf_setpos() is called to set the position to that point, avoiding the
+process of XDR'ing the RPC header for every RPC call.
+.sp 1
+One other function, xdrmbuf_inline(), is used to ask for a block of contiguous
+data from the input stream.   If the amount asked for is available from the
+current mbuf, it advances the pointers past that data and returns a pointer
+to the data to the calling routine, allowing the calling routine to make
+"short cuts" in processing.  These short cuts take  the form of macros calls,
+with names like IXDR_GET_LONG().  The "I" at the beginning standing for
+"Inline".  These macros do the copies in the simplest manner possible, avoiding
+extra checks.  For
+example, the xdr routines that handle the RPC protocol may know that every
+RPC packet should start with eight (8) longs.  Xdr_inline() would be called
+asking for 32 bytes (eight longs times four bytes per long), and would return
+a pointer to 32 contiguous bytes.  Since the RPC protocol routines now know 
+that they do not have to worry about the data crossing mbufs, etc., they
+can call IXDR_GET_LONG() eight times before again calling the normal
+XDR routines.  NOTE: Xdrmbuf_inline() MUST be called before using the
+IXDR macros to insure that enough contiguous data is available.
+.sp 1
+The last XDR mbuf routine, xdrmbuf_putbuf(), is not referenced in the normal
+way (i.e. it is not referenced via a macro that looks at the xp_ops structure).
+This routine was created out of a need for an efficient way to handle the
+results of a read request on the server side, since this is the most common
+request of the server.  This routine is given a pointer to a data buffer and
+the length of the buffer.  An mbuf is allocated and made to point at the
+data buffer, and the mbuf is appended to the end of the output mbuf chain.
+Thus, when a server receives a read request, and after the server has read
+the data into some internal buffer from the disk, it will call xdrmbuf_putbuf()
+from one
+of the NFS XDR routines at the point that the data should be inserted.  This
+provides the equivalent of an xdr_bytes() for encoding only, but avoids the 
+expense of copying a potentially large (8K) number of bytes.
+.bp
+.H 2 "THE RPC PROTOCOL"
+The RPC protocol is somewhat unique in that the format of the packet can
+vary depending on the type of the packet and also the results it contains.
+There are two basic types of packets: CALL packets, representing requests
+from the client to the server, and REPLY packets, representing the servers
+response.  Because it assumes an unreliable transport protocol, RPC does
+some extra tasks, like timing out if no response is received within a certain
+time period, to improve reliability.  However, the RPC protocol does not
+specify any specific timeout period or number of retransmissions.  It is up
+to the client process to determine those numbers, which can be set for
+NFS via the mount(1M) command.  The server side does not retransmit or
+guarantee in any way that the response it sends out is received by the client.
+Thus, the RPC protocol is a simple request/response protocol with no ACK
+of received packets.  The only requirements of the RPC protocol are 
+1) it follow the packet structures described below, and 2) XDR is used
+to insure transportability between heterogeneous machines.  NOTE: This
+chapter is not intended to be a complete specification of the RPC protocol.
+Rather, it is intended to give a more in depth look at the actual format
+of the RPC packets and what the values contained in them represent.
+.sp 1
+An RPC packet always starts with two values:  the transaction ID (XID) and the
+direction.  The direction is either CALL or REPLY as discussed above.  The
+XID is set by the client for each transaction, and the server returns that
+value in its REPLY packet.  In the kernel's case, the XID is a value 
+that is incremented each time clntkudp_callit() is entered.  The XID is also
+used on the server side by the NFS code to detect a duplicate request on
+non-idempotent requests, such as directory creation.  See the discussion
+of duplicate requests under the server section above.  The remainder of the
+packet varies depending on the type of packet.
+.sp 1
+.nf
+     +--------------------------------------
+     | XID | DIRECTION | body of packet
+     +--------------------------------------
+
+     Figure 4:  The basic RPC packet structure.
+.fi
+.sp 1
+.H 3 "RPC CALL packet structure."
+The RPC CALL packet has a very standard, though variable in size, format that
+contains information about what program and procedure is being requested and
+the credentials to be used to authorize access, besides the body of data
+representing the parameters to be used by the remote procedure.  The fields of
+the CALL packet are, in order:
+.sp 1
+1) XID (transaction ID).  See above.
+.sp 1
+2) DIRECTION. The value is CALL.
+.sp 1
+3) RPC VERSION. The RPC version specifies which version of the RPC protocol
+is being used.  The only version supported by HP is version 2.
+.sp 1
+4) PROGRAM.  This is the RPC program number for the service being requested.
+In this case, the number will be 100003 for NFS.
+.sp 1
+5) PROGRAM VERSION.  Which version of the program do we want?  RPC allows
+multiple versions of a program to be serviced at the same time.  In the
+case of NFS, the only version currently supported is version 2.
+.sp 1
+6) PROGRAM PROCEDURE.  This field specifies which remote procedure we want
+the requested program to execute.  This is an enum, but it is up to the
+server's dispatch routine to verify its contents and to be sure that the
+client and server are using the same numbers to represent the asked for
+procedures.
+.sp 1
+7) AUTH TYPE (CREDENTIALS).  The specifies which type, or flavor, of
+credentials are
+being sent to the client for this request.  The possible values are AUTH_NULL,
+for no credentials, or AUTH_UNIX, for standard UNIX credentials.  For most
+NFS requests this value is AUTH_UNIX.  The only time that it is not
+AUTH_UNIX (and the request is accepted), is when the request is for the
+NFS_NULL_PROC, which just verifies connectivity.  See below
+for more information about UNIX credentials.
+.sp 1
+8) AUTH LENGTH.  This specifies the length of the credentials which follow,
+allowing them to be treated as opaque objects without having to know the
+structure of the credentials.
+.sp 1
+9) AUTH CREDENTIALS.  This is the actual credentials being sent.  If the
+length specified above was zero, then this field will actually be empty (take
+up no space) in the packet.
+.sp 1
+10, 11, 12) VERIFICATION TYPE, LENGTH, CREDENTIALS.  The "verification"
+information is a set of information to be used for verification purposes, and
+is dependent on the protocol using RPC.  For NFS, TYPE will be zero (AUTH_NULL),
+the LENGTH will be zero, and there will be no extra credentials.
+.sp 1
+13) DATA.  The remainder of the CALL packet is the parameters to the remote
+procedure in XDR format.  This information is entirely dependent not only
+on what remote program is being called (NFS), but on which procedure is being
+requested.
+.sp 1
+.nf
+	    +------------------+
+	    | XID              |
+	    |------------------|
+	    | DIRECTION = CALL |
+	    |------------------|
+	    | RPC VERS. = 2    |
+	    |------------------|
+	    | PROGRAM = 100003 |
+	    |------------------|
+	    | PROG VERS. = 2   |
+	    |------------------|
+	    | PROG PROC.       |
+	    |------------------|
+	    | AUTH TYPE = UNIX |
+	    |------------------|
+	    | AUTH LEN.        |
+	    |------------------|
+	    | AUTH CRED.       |
+	    |------------------|
+	    | VERF TYPE = 0    |
+	    |------------------|
+	    | VERF LEN. = 0    |
+	    |------------------|
+	    | VERF CRED. = NULL|
+	    |------------------|
+	    |  data dependent  |
+	    |  on NFS request  |
+	    |  being made      |
+	    +------------------+
+
+    Figure 5:  The RPC CALL packet structure.
+.fi
+.H 3 "RPC REPLY packet structure."
+The RPC REPLY packet structure can vary depending on whether the RPC request
+succeeded or failed.  The first two fields in all cases are the transaction
+ID and the direction discussed above.  Of course, direction in all cases
+discussed here will be REPLY.  There are also two types of failure packets,
+one in which the message was not accepted, MSG_DENIED, meaning that either
+there was a problem with the credentials or there was a mismatch in the
+RPC version, or one in which the message was accepted, MSG_ACCEPTED, but
+failed for some other reason.  It is important to note that an RPC call
+can return a SUCCESS status, indicating that RPC successfully exchanged a
+reply between client and server, and still have a failure in the request
+because the remote procedure could not carry out the requested action.
+.H 4 "A successful reply packet"
+In the normal case the RPC call will be successful, and the reply packet will
+have the following fields, in order:
+.sp 1
+1) XID.  The transaction ID returned will be the one assigned by the client.
+.sp 1
+2) DIRECTION.  The direction will be REPLY.
+.sp 1
+3) REPLY STATUS.  This status field indicates only whether the RPC packet sent
+by the client was accepted or rejected.  In this case the value should be
+MSG_ACCEPTED.
+.sp 1
+4) VERIFICATION FLAVOR.  This is a verification field that is dependent on
+the protocol using RPC.  In the case of NFS, this field has a value of
+zero (i.e. a long which value is zero), indicating that no verification is
+being done.
+.sp 1
+5) VERIFICATION LENGTH.  This is the length of the verification field that
+follows.  In the case of NFS this length will be zero.
+.sp 1
+6) VERIFICATION FIELD.  This field is available for verification of host
+identity.  Because NFS does not support any verification, this field will
+actually be non-existent (a side effect of having a zero length verifier).
+.sp 1
+7) RPC STATUS.  This status field indicates the status of an accepted
+reply.  For the normal successful response, this field is set to SUCCESS.
+.sp 1
+8) RPC REPLY DATA.  The rest of the packet contains the response of the remote
+procedure, in XDR format.  It is up to the client process (NFS) to supply
+routines which interpret this data.
+.bp
+.nf
+               +-----------------------+
+               | transaction ID        |
+               |-----------------------|
+               | DIRECTION = REPLY     |
+               |-----------------------|
+               | STATUS = MSG_ACCEPTED |
+               |-----------------------|
+               | V. FLAVOR = 0         |
+               |-----------------------|
+               | V. LENGTH = 0         |
+               |-----------------------|
+               | V. FIELD = empty      |
+               |-----------------------|
+               | RPCSTATUS =RPC_SUCCESS|
+               |-----------------------|
+               | data dependent on NFS |
+               +-----------------------+
+
+     Figure 6: RPC REPLY packet for a successful exchange.
+.fi
+.sp 1
+.H 4 "MSG_ACCEPTED packet"
+An RPC call can return a packet indicating that it successfully received the
+client's request, but failed for some other reason.  In this case, the reply
+status field (the third field above) will still have MSG_ACCEPTED as its
+value, but the RPC status field will have some value other than RPC_SUCCESS.
+In this case, the first six (6) fields will be the same, and the following
+fields will be different:
+.sp 1
+7) RPC STATUS.  The status field will indicate the reason for the error, and
+will be one of the following:  PROG_UNAVAIL, indicating that the RPC program
+number requested was not registered on the server's machine; PROG_MISMATCH,
+indicating that the program number was registered, but not the version asked
+for; PROC_UNAVAIL, indicating that the procedure requested is not supported;
+GARBAGE_ARGS, indicating that the server was unable to decode the arguments
+for the remote procedure; or SYSTEM_ERR, indicating some other generic problem.
+.sp 1
+8) LOW VERSION.  This field is only used if the previes status field is set
+to PROG_MISMATCH.  In this case this field represents the lowest version
+number supported by the program registered on the server.
+.sp 1
+9) HIGH VERSION.  Same as above (8), except it represents the highest version
+of the RPC program supported by the remote server.
+.bp
+.sp 1
+.nf
+	     +-----------------------+
+	     | transaction ID        |
+	     |-----------------------|
+	     | DIRECTION = REPLY     |
+	     |-----------------------|
+	     | STATUS = MSG_ACCEPTED |
+	     |-----------------------|
+	     | V. FLAVOR = 0         |
+	     |-----------------------|
+	     | V. LENGTH = 0         |
+	     |-----------------------|
+	     | V. FIELD = empty      |
+	     |-----------------------|
+	     | RPCSTATUS = error     |
+	     |-----------------------|
+	     |*LOW VERSION           |
+	     |-----------------------|
+	     |*HIGH VERSION          |
+	     +-----------------------+
+
+	  * Only used with RPCSTATUS = PROG_MISMATCH
+
+     Figure 7: RPC REPLY packet for a MSG_ACCEPTED failure.
+.fi
+.sp 1
+.H 4 "MSG_DENIED packet"
+Finally, the RPC reply packet can indicate that the client's request was not
+accepted by the server.  In this case, the reply STATUS field indicates an
+error of MSG_DENIED, and the remainder of the fields are as follows, in order:
+.sp 1
+4) DENIED STATUS.  This field indicates why the message was denied, and has
+one of two values:  RPC_MISMATCH to indicate that the RPC versions did not
+match between the client and server, or AUTH_ERROR, to indicate that the
+client's credentials were incorrect for some reason.  NOTE: HP servers do
+not currently return an error of RPC_MISMATCH.
+.sp 1
+5a) RPC LOW VERSION.  If the previous field was set to RPC_MISMATCH, then
+this value is the lowest RPC version the server supports.
+.sp 1
+5b) AUTH ERROR REASON.  If the previous field was set to AUTH_ERROR, then
+this value indicates the reason for the failure and should be one of the
+following:
+AUTH_BADCRED, indicating some problem occurred in decoding the credentials;
+AUTH_REJECTEDCRED, indicating that the type of credentials requested was bad
+(i.e. not AUTH_UNIX or AUTH_NULL); or AUTH_TOOWEAK, indicating either that
+the credentials were not of type AUTH_UNIX and the procedure requested was
+not the NFS_NULL procedure, or that the NFS server has port monitoring turned
+on and the client is not on a reserved port.
+.sp 1
+6) RPC HIGH VERSION.  This field is used only if the message was denied due to
+an RPC version mismatch, and indicates the highest RPC version supported
+by the server.
+.sp 1
+.nf
+             +-----------------------+
+	     | transaction ID        |
+	     |-----------------------|
+	     | DIRECTION = REPLY     |
+	     |-----------------------|
+	     | STATUS = MSG_DENIED   |
+	     |-----------------------|
+	     | REASON = AUTH_ERROR   |
+	     |-----------------------|
+	     |*WHY = auth. problem   |
+	     +-----------------------+
+
+	  * Only used with REASON = AUTH_ERROR
+
+     Figure 8: RPC REPLY packet for a AUTH_ERROR failure.
+.fi
+.sp 1
+.nf
+             +-----------------------+
+	     | transaction ID        |
+	     |-----------------------|
+	     | DIRECTION = REPLY     |
+	     |-----------------------|
+	     | STATUS = MSG_DENIED   |
+	     |-----------------------|
+	     | REASON = RPC_MISMATCH |
+	     |-----------------------|
+	     |*LOW VERSION           |
+	     |-----------------------|
+	     |*HIGH VERSION          |
+	     +-----------------------+
+
+	  * Only used with REASON = RPC_MISMATCH
+
+     Figure 9: RPC REPLY packet for a RPC_MISMATCH failure.
+.fi
+.sp 1
+.H 3 "XDR routines for the RPC protocol."
+Since the RPC protocol specifies that all data must be in the XDR format,
+a set of routines must be provided to do the XDR translations for the RPC
+protocol.  As can be surmised by the descriptions above, the CALL
+routines are different from the REPLY routines; xdr_callmsg() versus 
+xdr_replymsg().  These two routines know the expected format of the two
+types of packets and how too interpret them.  Further, because there are
+two different types of REPLY packets, two other routines may be called by
+xdr_replymsg(), namely xdr_accepted_reply() and xdr_rejected_reply().  However,
+both xdr_callmsg(), and xdr_replymsg() will make use of XDR_INLINE() and the
+IXDR macros if possible, avoiding overhead via calls to other more complex
+routines.
+.bp
+.H 2 "Unix credentials and RPC/NFS."
+NFS makes use of the standard UNIX user id and group id, etc., for controlling
+access to files.  It is RPC, however, that does the actual packaging and
+transport of the UNIX credentials, even though RPC does NOT actually use the
+credentials for its own protocol.  Rather, RPC makes the credentials available
+to a higher level protocol by saving them in a credentials structure, and 
+guarantees that they are in a valid format.  Thus,
+at the time the NFS client makes a request, the RPC client packages up the
+UNIX credentials of the calling process and sends them as part of the RPC
+header.  The server verifies that the credentials are in a valid format and
+makes them available for the NFS server.  The NFS server then uses them to
+verify access permissions to files on the remote machine.
+.H 3 "Client structures and procedures."
+At the same time that the CLIENT structure is setup and initialized for the
+RPC client routines, an AUTH structure is setup to be used for the authorization
+processes on the client.  This is done via the authkern_create() routine in
+clntkudp_create(), which simply allocates memory for the structure and sets
+the initial values.  Like the CLIENT structure, the AUTH structure contains
+pointers to routines which will be used for the kernel authorization, and
+which will be accessed via macros.  Of these routines, the only main one
+is authkern_marshal(), which is called via the AUTH_MARSHALL() macro.  
+Authkern_marshal() is called from clntkudp_callit() to insert the current
+credentials into the RPC packet.  This routine is actually an XDR routine,
+as it performs the action of getting the credential data from the user
+structure and calling XDR routines to translate that data.  If possible,
+it will use xdrmbuf_inline() and the IXDR macros to do inline translations,
+otherwise it will call xdr_authkern() to do the XDR translations.  Note that
+because a contiguous buffer is allocated by the client code for this purpose,
+the inline routines should always work.
+.H 3 "Server structures and procedures."
+On the server side, the initial handling of the credentials occurs in
+xdr_callmsg(), which simply copies the credential information into a
+raw data area.  Xdr_callmsg() is called from the svckudp_recv() routine,
+which is called by svc_getreq(), the main server routine.  After receiving
+the packet, svc_getreq() finishes the processing of the credentials by
+calling _authenticate(), which simply looks up the appropriate service
+routine for the type of credentials.  Since the credentials are usually
+of the UNIX type, the routine normally called is _svcauth_unix().  This
+routine is basically the inverse of authkern_marshal(), using the XDR
+inline routines when possible, otherwise calling xdr_authunix_parms() to
+decode the information.  The results of the decoding are put into the
+message structure which is passed to the dispatch routine.  The NFS
+dispatch routine copies those credentials as appropriate.
+.H 3 "UNIX credentials in the RPC protocol."
+In discussing the RPC protocol in the previous chapter, the format of the
+credentials was left as an opaque value.  That is, the actual contents
+depended on the type of credentials being used.  Whether doing the inline
+version of XDR in authkern_marshal() or relying on xdr_authunix_parms(),
+the fields are as follows:
+.sp 1
+1) CURRENT TIME.  The first value is a time stamp in the standard UNIX
+measurement: an unsigned long representing the number of seconds since
+January 1, 1970 as measured on the client machine.
+.sp 1
+2) HOSTNAME.  This is in the format of xdr_string().  That is, the first
+value is the length of the string, followed by the actual value of the string.
+.sp 1
+3) UID.  The user id of the calling process.
+.sp 1
+4) GID.  The group id of the calling process.
+.sp 1
+5) GROUPS.  The 4.2 UNIX groups to which the process belongs.  These are 
+in the format of an xdr_array() of integers, i.e. the first value is the
+number of groups, with the rest of the values being integers representing
+group IDs.  Under the format used with RPC, the maximum number of groups
+allowed is eight.
+.sp 1
+.nf
+	     +------------------------+
+	     | TIME (in seconds)      |
+	     |------------------------|
+	     | HOSTNAME LENGTH        |
+	     |------------------------|
+	     | HOSTNAME (string)      |
+	     |------------------------|
+	     | UID                    |
+	     |------------------------|
+	     | GID                    |
+	     |------------------------|
+	     | GID ARRAY LENGTH       |
+	     |------------------------|
+	     | ARRAY OF GIDS          |
+	     +------------------------+
+
+     Figure 10:  UNIX credentials format in a RPC packet.
+.fi
+.\" Now this will produce a table of contents
+.TC  

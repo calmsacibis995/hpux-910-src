@@ -1,0 +1,48 @@
+#!/bin/sh
+##	@(#)get_800inc	$Revision: 1.14.109.1 $	$Date: 91/11/19 13:54:43 $
+#	get_800inc	--	get s800 include files (not shared)
+# Written by Cristina Mahon for the NFS project.
+# Script to get 800 include files that are not shared with the 
+# 300 from a machine at ISO.
+##
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+FLAGS="-DHFS -Dhp9000s800 -Dunix -Dhpux -DNLS16 -DNLS -Uhp9000s200 -Uhp9000s500 -USDF -Uvax -Updp11 -Uu3b -Uu3b5 -UBELL5_2 -DNFS -DHP_NFS -DHPNFS"
+TMPDIR=/tmp/800include
+FINALDIR=$Nfs/include/800
+
+if [ ! -d $TMPDIR ] ; then
+	mkdir $TMPDIR
+fi
+if [ ! -d $TMPDIR/sys ] ; then
+	mkdir $TMPDIR/sys
+fi
+if [ ! -d $TMPDIR/machine ] ; then
+	mkdir $TMPDIR/machine
+fi
+
+# Start process on remote system that puts 800 include files on temporary
+# directory (under the correct subdirectories) on the local system.
+remsh hpisoa1 -l cmahon /mnt/azure/cmahon/bin/rmt_include
+
+# Unifdef include files and put them in their corresponding final directories
+
+for FILE in `ls $TMPDIR/sys` 
+do
+	mv -f $FINALDIR/sys/$FILE $FINALDIR/sys/$FILE.old
+	$Nfs/bin/unifdef $FLAGS -UKERNEL -Dspectrum $TMPDIR/sys/$FILE > $FINALDIR/sys/$FILE
+	chmod 444 $FINALDIR/sys/$FILE
+	chgrp nerfs $FINALDIR/sys/$FILE
+	chown nfsmgr $FINALDIR/sys/$FILE
+done
+
+for FILE in `ls $TMPDIR/machine` 
+do
+	mv -f $FINALDIR/machine/$FILE $FINALDIR/machine/$FILE.old
+	$Nfs/bin/unifdef $FLAGS -UKERNEL -Dspectrum $TMPDIR/machine/$FILE > $FINALDIR/machine/$FILE
+	chmod 444 $FINALDIR/machine/$FILE
+	chgrp nerfs $FINALDIR/machine/$FILE
+	chown nfsmgr $FINALDIR/machine/$FILE
+done
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

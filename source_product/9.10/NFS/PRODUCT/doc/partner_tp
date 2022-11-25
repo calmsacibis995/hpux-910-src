@@ -1,0 +1,210 @@
+.\"	@(#)NFS Partner Test Plan:	$Revision: 1.7.109.1 $	$Date: 91/11/19 14:29:30 $
+.\"
+.\"  This document describes some basic tests to be performed on final bits
+.\"  received from SSIT.  The tests are done by members of the NFS and 
+.\"  testing teams.
+.\"
+.\"  This document is made printable by entering the following command:
+.\"
+.\"		nroff -cm filename > formatted_file
+.\"
+.\"  Original author:  Dave Erickson
+.\"
+.PH "''NFS Services/300 Partner Test Plan''"
+.tr ~
+.nr Hc 1000
+.HU "Basic Testing"
+.sp
+\fIA basic set of tests will be performed after installation\fR.
+These tests will be run on the machines labelled 2dae1 and dae2 as
+seen in the NFS project configuration matrix.
+.sp
+.AL 1 9
+.LI "___~" 1
+(\fBDAE\fR)
+Verify that all filesets install successfully from the medium; perform a
+checksum on the installed bits to validate them.
+.LI "___~" 1
+(\fBDAE\fR)
+Verify that all files in every fileset are present with the
+correct modes, owners and groups.
+.LI "___~" 1
+(\fBNFS team - 6 engineers\fR)
+Product functionality will be exercised regularly by
+self-hosting on our home machine (2dae1).
+.LI "___~" 1
+(\fBDAE, DDS\fR)
+Check files in /etc/filesets - no user configurable files
+should be included.
+Should verify after update, after conversion of standalone system
+to diskless, and after having added a cnode.
+.LI "___~" 1
+(\fBDAE, DDS\fR)
+Verify output from customize and CDFcustomize scripts in
+/tmp/update.log and /tmp/reconfig.log.
+Should verify after update, after conversion of standalone system
+to diskless, and after having added a cnode.
+.LI "___~" 1
+(\fBDAE, DDS\fR)
+Verify CDFs in the file system.
+Check for correct contexts after update, conversion of standalone
+system to diskless, and after having added a cnode.
+.PF "''-~\\\\nP~-''"
+.LI "___~" 1
+(\fBDAE, DDS\fR)
+Verify the owner, group and permission bits of CDFs and their elements.
+.LI "___~" 1
+(\fBDAE\fR)
+After updating, each customize belonging to the product being
+tested is re-executed and the results verified (no extraneous
+errors, no corruption of the system):
+.sp
+.nf
+	cd /
+	system/<fileset>/customize
+.fi
+.LI "___~" 1
+(\fBDAE\fR)
+The following actions will be taken on the systems.
+.AL 1 9 1
+.LI
+Login (any login shell desired)
+.LI
+ps -el
+.LI
+mkdir /tmp/config
+.LI
+/bin/ls -l / > /tmp/config/root.list
+.LI
+cd /tmp/config
+.LI
+pwd
+.LI
+cp root.list remove.me
+.LI
+df -t
+.LI
+cd /
+.LI
+rm -rf /tmp/config
+.LI
+shutdown
+.LI
+use vi
+.LI
+build a kernel via reconfig or by using the config(1m) command
+.LI
+reboot
+.LI
+Repeat steps 1 and 2.
+.LE
+.LE
+.sp
+.HU "Comprehensive Testing"
+.sp
+\fIA full battery of tests will be applied to the NFS bits by the NFS Testing
+Team.\fR
+These tests will be run among the machines labelled 2jlv5 through 2jlv19 as
+seen in the LAN project configuration matrix (which specific ones is, as yet,
+unknown).
+.sp
+.nf
+Run Description	     		Who
+_______________	     		___
+
+stress F 2L 120	300  		AOD
+300, 300, 800
+Diskless
+
+nfs I 1L s	     		AOD
+300 -> 300
+
+nfs F 1L 12	     		AOD
+300 <-> 300 (running 6.0)
+300 <-> 800 (running 2.0)
+
+Xserv 1L 12 	     		AOD
+300 <-> 300
+300 <-> 800
+
+nfs ML/D 1L s	     		AOD
+300 -> 300
+.fi
+.HU "KEY"
+.sp
+.BL 9
+.LI
+\fBRun Description\fR consists of 5 fields where the first
+two may be combined and the last one is optional.
+The 5 fields are:
+.AL A 8 1
+.LI
+\fBmodule\fR:
+test suite module
+.LI
+\fBtype\fR:
+type of tests
+.LI
+\fBlan\fR:
+single lan or gateway configuration
+.LI
+\fBiterations\fR:
+iterations of suite per run
+.LI
+\fBgateway\fR:
+specifies type of IP gateway in configuration
+.LE
+.LI
+\fBFields in the Run Description\fR:
+.ML - 9
+.LI
+module
+.AL A 8 1
+.LI
+nfs
+.LI
+Xserv  (includes nfsXab, nfsXnft, nfsXrfa, nsXab)
+.LI
+stress (reliab tests - multiple streams and .st; 
+type field not used)
+.LE
+.LI
+type
+.AL A 8 1
+.LI
+F  functional
+.LI
+I  isolated (incl. interactive and isolated super-user)
+.LI
+X  cross services
+.LI
+ML Memory limit tests
+.LI
+D  Destructive tests (nfs/recv)
+.LE
+.LI
+lan
+.AL A 8 1
+.LI
+1L single LAN
+.LI
+2L LAN-LAN
+.LE
+.LI
+iterations
+.AL A 8 1
+.LI
+s   single iteration
+.LI
+<n> Continuous hours of operation specified by an integer
+.LE
+.LI
+gateway
+.AL A 8 1
+.LI
+300
+.LI
+800
+.LE
+.LE
+.LE

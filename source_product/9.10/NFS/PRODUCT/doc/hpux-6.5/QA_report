@@ -1,0 +1,55 @@
+.\"	@(#)QA Metrics Report:	$Revision: 1.1.109.1 $	$Date: 91/11/19 14:32:58 $
+.\"
+.\"  This document is essentially a wrapper for the collection of QA Metrics
+.\"  information that is to be provided to the QA department.  It contains a
+.\"  brief list of contents, followed by a section of "Miscellaneous
+.\"  Information" where a variety of data are listed.
+.\"
+.\"  This document is made printable by entering the following command:
+.\"
+.\"		nroff -cm filename > formatted_file
+.\"		cat formatted_file | lp -ogothic
+.\"
+.\"  Original author:  Dave Erickson
+.\"  Release 6.5 author:  Jeff Elison
+.\"
+.tr ~
+.PH "''\fBQA Metrics Report:  NFS Services/300\fR''"
+.PF ""
+.nr Hc 1000
+.HU "Submitted by Jeff Elison"
+.HU "17 February 1989"
+.sp 3
+This report is submitted for the NFS Services/300 product.
+The report comprises the following items:
+.AL
+.LI
+CND Quality Engineering Project Worksheet.
+.LI
+A "bug chart," describing the resources and time expended.
+.LI
+Statement of Congruence to FURPS Objectives.
+.LI
+A copy of the Corporate Software Development Metrics forms.
+.LI
+A memo describing completion of testing of NFS bits.
+.LI
+Miscellaneous Information.
+.LE
+.bp
+.HU "Miscellaneous Information"
+.sp 3
+.ML .
+.LI
+Kbytes of test code:  18,806
+.LI
+Lines of test code source (comments included):  123,568
+.LI
+Distribution of system crashes in the last month: 
+.nf
+                     - vn_close on Arsenal 318
+		     - dup2 on various hardware
+.fi
+.LI
+Effort expended fixing defects:  data not available.
+.LE

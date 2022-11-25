@@ -1,0 +1,71 @@
+@(#) $Revision: 66.1 $
+
+The command ied is a front-end filter that allows command-line editing
+of the style of ksh to be used with any "dumb" command.  (Examples
+include bc, dc, adb, and ed.)  It can even be used with cat, which
+would make Dennis Ritchie's job of writing device drivers easier...
+(sorry..).
+
+In the simplest case, 
+
+	ied <command>
+
+gives you editing for that command.  
+
+	ied sh
+
+does work well (so does  ied ksh  and  ied csh ), and ied will not
+interfere with the operation of programs such as vi.  (It doesn't do
+any good, either, but the purpose is to have history when not in vi.)
+The command ied provides several other features as described in the
+manual page.
+
+There are a couple of problems with ied in certain usages.  These 
+are actually kernel bugs, and I could find no way to work around them
+from user space; they are pty bugs.  Don't let these discourage you; it
+takes a pty-smart application to cause the problem in the first place,
+so most usages will work quite well.  I hope the kernel bugs can be
+fixed for 7.0.
+
+    S300:
+    For a few commands (specifically shl and ied itself) the characters
+    sent to the application will be "one behind" the characters typed
+    to the keyboard, but only in some modes of the application.  This
+    is obvious, and is always fixed by using the -x option.  (But
+    EOF then breaks, as described in the manual page.)  (6.5 behavior;
+    6.2 would hang up but time out.)
+
+    S800:
+    There is a combination of bugs in pty such that certain commands
+    (again specifically shl and ied itself) either refuse to run at
+    all or hang up solidly (and unkillably from the keyboard).  (3.0
+    behavior; 2.x was the same as 6.2.)  The -x option simply doesn't
+    work at all because of another bug.
+
+The command ied does come with a "shrink-wrap" agreement.  By obtaining
+the file containing the ied object, you are agreeing to the following.
+
+1) It is currently available only for HP internal use.  (I think it
+   might be useful enough to put into HP-UX; if so I don't want to have
+   copies outside.  Also, I want more exposure before dissemenating it
+   widely.)
+
+2) You agree that you will update to any new versions that come out, or
+   expect to meet with derision at best if you attempt to get support
+   on an old version.
+
+3) You agree to provide the derision above if you encounter a question
+   on a version you know to be obsolete.
+
+4) You agree to keep this notice with ied if you pass it on to anyone
+   and agree to inform them of new versions.
+    
+5) You agree to provide me with reports on any bugs you may find.  Of
+   particular interest are commands that "should" work and don't.
+
+Since it contains a large amount of licensed source, I'm uncomfortable
+with posting the source (for obvious reasons) but I'm more than willing
+to provide it on a "no warranty" basis if requested and you have the
+appropriate licenses.
+
+Donn

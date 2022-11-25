@@ -1,0 +1,811 @@
+/* @(#) $Revision: 70.9 $ */
+
+/*LINTLIBRARY*/
+#include <math.h>
+
+#ifdef _INCLUDE__STDC__
+/* EXP(3M) */
+double	exp(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	log(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	log10(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	pow(double x, double y) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	sqrt(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+
+/* FLOOR(3M) */
+double	floor(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	ceil(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	fmod(double x, double y) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	fabs(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+#if defined(__hp9000s700) || defined(__hp9000s800)
+	int	rint(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }	/* rint not on s300 */
+
+#endif 
+
+/* SINH(3M) */
+double	sinh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	cosh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	tanh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+
+/* TRIG(3M) */
+double	sin(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	cos(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	tan(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	asin(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	acos(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	atan(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	atan2(double x, double y) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+#endif /* _INCLUDE__STDC__ */
+
+#ifdef _INCLUDE_XOPEN_SOURCE
+/* BESSEL(3M) */
+double	j0(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	j1(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	jn(int n, double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	y0(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	y1(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	yn(int n, double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+
+/* ERF(3M) */
+double	erf(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	erfc(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+
+/* GAMMA(3M) */
+double	gamma(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	lgamma(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+int	signgam;
+
+/* HYPOT(3M) */
+double	hypot(double x, double y) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double cabs() { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ double x; return(x); }
+
+
+/* ISNAN(3M) */
+int	isnan(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->XPG3,XPG4,OSF_AES,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+
+#endif /* _INCLUDE_XOPEN_SOURCE */
+
+#ifdef _INCLUDE_HPUX_SOURCE
+/* EXP(3M) */
+# if defined(__hp9000s800) || defined(__hp9000s700)
+double	log2(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	cbrt(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	expf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	logf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	log2f(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	log10f(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	powf(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	sqrtf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	cbrtf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+# ifdef __hp9000s300 
+float	fexp(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use exp(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	flog(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use log(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	flog10(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use log10(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fpow(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use pow(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fsqrt(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use sprt(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+
+/* FLOOR(3M) */
+# if defined(__hp9000s800) || defined(__hp9000s700)
+float	fabsf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fmodf(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+
+/* SINH(3M) */
+# if defined(__hp9000s800) || defined(__hp9000s700)
+double	asinh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	acosh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	atanh(double x) { 
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	sinhf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	coshf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	tanhf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+# ifdef __hp9000s300 
+float	fsinh(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use sinh(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fcosh(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use cosh(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	ftanh(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use tanh(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+
+/* TRIG(3M) */
+# if defined(__hp9000s800) || defined(__hp9000s700)
+double	sind(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	cosd(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	tand(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	asind(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	acosd(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	atand(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	atan2d(double x, double y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	sinf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	cosf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	tanf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	asinf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	acosf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	atanf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	atan2f(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	sindf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	cosdf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	tandf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	asindf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	acosdf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	atandf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	atan2df(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+# ifdef __hp9000s300
+float	fsin(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use sin(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fcos(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use cos(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	ftan(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use tan(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fasin(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use asin(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	facos(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use acos(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fatan(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use atan(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fatan2(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	Use atan2(). */
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	fcot(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	This HP-UX specific function is not portable to open systems.*/
+
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif                          
+
+/* ISNAN(3M), ISINF(3M) IEEE(3M) */
+int	isinf(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	The isinf() call determines if a double floating point number
+	is +/-INFINITY.  This call is HP-UX specific and has is not
+	portable to open systems.  */
+
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+
+# if defined(__hp9000s800) || defined(__hp9000s700)
+int	isnanf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+int	isinff(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+int	finite(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+int	finitef(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((int) x); }
+
+double	copysign(double x, double y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+float	copysignf(float x, float y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+double	scalb(double x, int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+int	logb(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (int) (x); }
+
+double	drem(double x, double y) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+int	fpclassify(double x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (int)(x); }
+
+int	fpclassifyf(float x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (int)(x); }
+
+# endif           
+
+/* MATHERR(3M) */
+# ifndef _libM             
+	int	matherr(struct exception *p) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The matherr() call is invoked by functions in the Math Library
+	(linked with the -lm option to the C compiler) when errors are 
+	detected.  Normally this function is not explicitly called by 
+	a user.  The user can supply their own matherr() function to 
+	handle math errors.  The matherr() call is not portable to 
+	open systems.  But, a user supplied matherr() function is 
+	portable.  See matherr(3M).  */
+
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+#else
+	int	_matherr(struct exception *p) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1]
+	The _matherr() call is invoked by functions in the Math Library 
+	(linked with the -lM option to the C compiler) when errors are 
+	detected.  Normally this function is not explicitly called by a 
+	user.  The user can supply their own _matherr() function to 
+	handle math errors.  The _matherr() call is not portable to 
+	open systems.  But, a user supplied _matherr() function is 
+	portable.  See matherr(3M).  */
+
+#endif  /* _APEX_SOURCE */
+ return (0); }
+
+# endif
+
+/* FPGETROUND(3C) */
+# if defined(__hp9000s800) || defined(__hp9000s700)
+fp_rnd	fpgetround(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((fp_rnd)(1)); }
+
+fp_rnd	fpsetround(fp_rnd x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+fp_except	fpgetmask(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((fp_except)(1)); }
+
+fp_except	fpsetmask(fp_except x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+fp_except	fpgetsticky(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((fp_except) (1)); }
+
+fp_except	fpsetsticky(fp_except x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }  
+
+void	fpsetdefaults(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+  }
+
+int	fpgetfastmode(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (1); }
+
+int	fpsetfastmode(int x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+fp_control	fpgetcontrol(void) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return ((fp_control) (1)); }
+
+fp_control	fpsetcontrol(fp_control x) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (x); }
+
+# endif
+#endif /* _INCLUDE_HPUX_SOURCE */

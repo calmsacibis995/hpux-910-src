@@ -1,0 +1,33 @@
+$set 1
+1 Fork failure
+2 Can't catch broadcast process exit signal
+3 Can't create TCP service
+4 Can't register TCP service
+5 Can't create UDP service
+6 Can't register UDP service
+7 Can't register TCP service
+8 Can't register UDP service
+9 Bad fds bits in main loop select mask
+10 Invalid timeout in main loop select
+11 Can't reply to RPC call
+12 Can't respond to RPC request
+13 ypbind_get_binding can't free args
+14 Server for NIS domain "%s" OK
+15 Server not responding for NIS domain "%s"; still trying
+16 Broadcaster fork failure
+18 ypbind:  ypbind_send_setdom clntudp_create error
+19 Can't reply to RPC call
+20 ypbind:  ypbind_ping clntudp_create error
+21 You must be super-user to run %s\n
+22 Usage:  %s [-l log_file]\n
+23 The log file "%s" cannot be opened.\n%s aborted.\n
+25 ypbind: Set domain request to host %s,  from host %s, failed (ypset not
+allowed)!\n
+26 ypbind: Set domain request to host %s, from host %s, failed (bad
+port).\n
+27 ypbind: Set domain request to host %s, from host %s, failed (not
+local).\n
+28 ypbind: Set domain request to host %s, from host %s, failed (not
+root).\n
+29 ypbind: Set domain request to host %s,",  from host %s, failed
+(credentials).\n

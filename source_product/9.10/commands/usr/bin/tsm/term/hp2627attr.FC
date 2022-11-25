@@ -1,0 +1,15 @@
+## FacetTerm  hp2627attr  description file 05/18/90
+## HP 2627 attributes
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp2627attr.FC,v 70.1 92/03/09 16:01:02 ssa Exp $
+##--- LINE ATTRIBUTES ---##
+### line_attribute_off=
+line_attribute_off=\E&k-5S
+### line_attribute=
+### TBD ### HP does not truncate line_attribute lines - retains offscreen chars
+not_imp-line_attribute-top_1wide=\E&k-1S
+not_imp-line_attribute-bot_2wide=\E&k-2S
+line_attribute-top_2wide=\E&k-3S
+line_attribute-bot_2wide=\E&k-4S
+line_attribute-....2wide=\E&k-6S
+### line_attribute=

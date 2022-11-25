@@ -1,0 +1,64 @@
+
+ ______________________________________________________________________________
+ |          ___         |                                                     |
+ |         /  /         | NFS Services/800 - PRELIMINARY PRODUCT DATA SHEET   |
+ | HEWLETT/hp/PACKARD   |                                                     |
+ |       /__/           | Network File System for Series 800                  |
+ |                      | Project Managers:  Dan Simula, Jeff Lindberg,       |
+ |    CND/ISO/IND       |    Ching-Fa Hwang, Craig Wassenberg, Doug Hartman   |
+ |                      | November 1st, 1987                                  |
+ |____________________________________________________________________________|
+ 
+ DESCRIPTION:  Provide Sun Microsystems' Network File System (NFS) on the 
+ Series 800 HP-UX system.  With NFS, heterogeneous systems on a common network 
+ can transparently share files.  Remote file access remains invisible to users.
+ UNIX and non-UNIX systems can participate in an NFS network.
+
+ IND, ISO and CND are cooperating in a joint venture to provide NFS on the 800.
+ Other groups in CND and ISO are providing key support for NFS in the Series 
+ 800 networking and HP-UX products.  The NFS code is being ported from source 
+ code provided by Sun, in accordance with Sun's NFS licensing agreement.
+ ______________________________________________________________________________
+ 
+ MARKET CONTRIBUTION
+ 
+ The addition of NFS to HP-UX provides direct file access connectivity to
+ other vendors' engineering computers.  Sun has established NFS as an emerging 
+ industry standard, and its heterogeneous nature gives it an advantage over 
+ RFA and RFS.  With NFS, users can make more flexible and efficient use of 
+ disk space, and keep a single master copy of shared data.
+ ______________________________________________________________________________
+ 
+ KEY PROJECT "MUST" OBJECTIVES
+ 
+ Port Sun's NFS/3.0 to the Series 800 HP-UX system.  Capabilities include
+ mounting of remote file systems and accessing remote files across a LAN.
+ 
+ Also provide Yellow Pages (YP), a centrally administered, distributed data 
+ lookup service, and associated user commands.  
+ 
+ Supported programmatic interface to Remote Procedure Call (RPC), 
+ External Data Representation (XDR) and Yellow Pages library routines.
+ 
+ Firefox (Model 825) NFS performance 55% of Sun 3/260.  (High Want: 85%)
+
+ Connectivity with Series 300 NFS, Sun's NFS, Wollongong's NFS (server only) 
+ on VAX/VMS, and Sun's PC-NFS (client only) on Vectra and IBM PC-AT.  
+ 
+ Connectivity via the following LAN/LAN gateways:  the RND "McBridge" bridge 
+ box, 300 and 800 (if available in 2.0) HP-UX IP gateways, and Sun IP gateway.
+ 
+ Release the series 800 HP-NFS concurrent with the 2.0 HP-UX release.
+ ______________________________________________________________________________
+ 
+ KEY CHECKPOINTS                 Committed dates
+ Requirements Complete           11/10/86 (actual) 
+ ERS Complete         		 4/13/87  (actual)
+ I/L				 5/28/87  (actual)
+ Functional Complete		 8/19/87  (actual)
+ Level A (24 Hr Reliability)	 9/21/87  (actual)
+ Level B (48 Hr Reliability)	 11/02/87 (actual)
+ Level C (120 Hr Reliability)	 01/11/88 (FB#5)
+ Manufacturing Release           2/29/88
+ Customer Shipments              3/14/88
+ ______________________________________________________________________________

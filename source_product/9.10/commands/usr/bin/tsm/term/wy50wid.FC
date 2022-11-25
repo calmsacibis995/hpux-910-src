@@ -1,0 +1,8 @@
+## FacetTerm  wy50wid  description file  06/20/88
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy50wid.FC,v 70.1 92/03/09 16:46:28 ssa Exp $
+columns_wide=132
+columns_wide_on=\E`;
+columns_wide_off=\E`:
+### NO columns_wide_clears_screen
+### NO parm_mode_val-COLSWIDE-00000000=

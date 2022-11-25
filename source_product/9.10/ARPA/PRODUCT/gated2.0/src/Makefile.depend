@@ -1,0 +1,53 @@
+bgp.o : bgp.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h bgp.h 
+bgp_init.o : bgp_init.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h bgp.h 
+bgp_rt.o : bgp_rt.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h bgp.h 
+egp.o : egp.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h egp.h egp_param.h snmp.h 
+egp_init.o : egp_init.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h egp.h egp_param.h 
+egp_rt.o : egp_rt.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h egp.h egp_param.h 
+ext.o : ext.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h egp.h egp_param.h 
+hello.o : hello.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h hello.h 
+if.o : if.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h snmp.h 
+if_rt.o : if_rt.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h 
+icmp.o : icmp.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h 
+inet.o : inet.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h 
+krt.o : krt.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h 
+main.o : main.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h bgp.h egp.h egp_param.h hello.h icmp.h rip.h parse.h 
+rip.o : rip.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h routed.h rip.h icmp.h 
+rt_control.o : rt_control.c include.h config.h defs.h inet.h rt_control.h \
+  if.h task.h rt_table.h trace.h 
+rt_table.o : rt_table.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h routed.h 
+snmp.o : snmp.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h snmp.h egp.h egp_param.h 
+str.o : str.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h /usr/include/math.h 
+task.o : task.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h bgp.h egp.h egp_param.h rip.h hello.h icmp.h snmp.h \
+  parse.h task_sig.h 
+trace.o : trace.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h 
+parser.o : parser.c include.h config.h defs.h inet.h rt_control.h if.h \
+  task.h rt_table.h trace.h parse.h rip.h hello.h egp.h egp_param.h bgp.h \
+  snmp.h 
+lexer.o : lexer.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h parse.h parser.h 
+parse.o : parse.c include.h config.h defs.h inet.h rt_control.h if.h task.h \
+  rt_table.h trace.h parse.h parser.h rip.h hello.h egp.h egp_param.h bgp.h \
+  snmp.h 
+ripquery.o : ripquery.c routed.h 
+ripquery.o : ripquery.c routed.h 

@@ -1,0 +1,84 @@
+BEGIN {line = 1}
+{
+    if ( FILENAME == "L.cmds" )
+    {
+	cmdlist[line] = $1
+
+	if ( NF > 1 )
+	    machlist[line] = $2
+	else
+	    machlist[line] = "_any_"
+
+	line++
+    }
+    else if ( FILENAME == "USERFILE" )
+    {
+	{
+	    if ( substr($1,1,1) == "#" )
+	    {
+		print ; next
+	    }
+
+	    split($1, parts, "," )
+
+	    user = parts[1]
+	    system = parts[2]
+
+	    if ( $2 == "c" )
+	    {
+		callback = "yes"
+		n = 3
+	    }
+	    else
+	    {
+		callback = "no"
+		n = 2
+	    }
+
+	    paths = $n
+
+	    for (i = n+1; i <= NF; i++)
+		paths = paths ":" $i
+
+	    commands = ""
+
+	    for (i = 1; i < line; i++)
+	    {
+		found = 0
+
+		if ( "_any_" == machlist[i] )
+		    found = 1
+		else
+		    for ( j = split(machlist[i], parts, ","); j > 0; j--)
+			if (parts[j] == system)
+			    found = 1
+
+		if ( found == 1 )
+		{
+		    if ( commands == "" )
+			commands = cmdlist[i]
+		    else
+			commands = commands ":" cmdlist[i]
+		}
+	    }
+
+	    if ( user != "" )
+	    {
+		printf "LOGNAME=%s \\\n", user
+		printf "\tREQUEST=yes SENDFILES=yes \\\n"
+		printf "\tREAD=%s WRITE=%s \\\n", paths, paths
+		printf "\tCALLBACK=%s \\\n", callback
+		printf "\tCOMMANDS=%s\n\n", commands
+	    }
+
+	    if ( system != "" )
+	    {
+		printf "MACHINE=%s \\\n", system
+		printf "\tREQUEST=yes SENDFILES=yes \\\n"
+		printf "\tREAD=%s WRITE=%s \\\n", paths, paths
+		printf "\tCALLBACK=%s \\\n", callback
+		printf "\tCOMMANDS=%s\n\n", commands
+	    }
+	}
+    }
+}

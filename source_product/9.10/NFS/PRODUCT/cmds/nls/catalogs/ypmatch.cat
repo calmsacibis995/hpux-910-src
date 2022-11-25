@@ -1,0 +1,10 @@
+$set 1
+1 ypmatch:  NIS domain name exceeds %d characters\n
+2 ypmatch:  mapname exceeds %d characters\n
+3 ypmatch:  getdomainname system call failed\n
+4 ypmatch:  the NIS domain name hasn't been set on this machine\n
+5 ypmatch:  can't match %1$s.\n          Reason:  %2$s\n
+6 %s: 
+7 %.*s\n
+8 Use "%1$s" for map "%2$s"\n
+9 Usage:  ypmatch [-k] [-t] [-d domain] key ...  mname\n        ypmatch -x\n\nwhere   mname may be either a mapname or a map nickname\n        -k prints keys as well as values\n        -t inhibits map nickname translation\n        -x prints a list of map nicknames and their corresponding mapnames\n

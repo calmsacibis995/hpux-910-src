@@ -1,0 +1,9 @@
+# Master Makefile for HP 9000/300
+# @(#) $Header: Make_hp9000,v 66.2 90/09/20 11:59:55 kb Exp $
+MACH=		hp9000
+.SUFFIXES:
+MAKE=		MACH=$(MACH) make -e -f Make_comm
+.DEFAULT:
+		$(MAKE) $<
+all:
+		$(MAKE)

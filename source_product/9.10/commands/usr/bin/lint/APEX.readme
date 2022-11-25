@@ -1,0 +1,65 @@
+This file tells how to maintain the apex information in the lint 
+library source.  
+
+Apex is the Application Portability EXaminer.  It is part of the
+Advise toolkit.  The apex application scans a users source code
+to check the function calls used for standards compliance.  If
+any HP proprietary or obsolete functions are used, hints are
+printed to assist the programmer to move to a standards based
+function.
+
+All apex information is coded in the lint libraries as comments
+in the body of the functions.  Every function in the library 
+will have a line with the apex standards information. For example:
+
+                    *********************
+int     iscntrl(int c) {
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->ANSIC,POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+#endif  /* _APEX_SOURCE */
+ return (c); }                  /* ANSI 4.3.1.3 */
+                    *********************
+
+These lines tell apex that the iscntrl() function is in the ANSIC, 
+POSIX.1, XPG3, XPG4, OSF_AES, FIPS151_1, standards and it is implemented
+in  HPUX and OSF1.  The "HPUX->" indicates to apex this standards 
+information is for use when the origin platform is HPUX.  In other
+words, it is used when porting from HPUX to open systems.
+
+The "#ifdef _APEX_SOURCE" block delimits the apex information so it can be
+removed with the unifdef command.  This is necessary so the lint library
+sources can be shipped without the apex information visible to end users.
+
+
+
+An example with a hint provided:
+
+                    *********************
+int execve(const char *f, char * const *a, char * const *e ) {
+#ifdef _APEX_SOURCE
+/* APEX STD [HPUX->POSIX.1,XPG3,XPG4,OSF_AES,FIPS151_1,OSF1,HPUX] */
+    /* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1][
+9]
+    The executable specified by the "file" parameter may be in a
+    different location in the file system on open systems.  The
+    new location must be specified in the environment variable
+    $PATH.  See exec(2).  */
+
+#endif  /* _APEX_SOURCE */
+ return (0); }
+                    *********************
+
+Here the "APEX HINT" comment prints the text included in it whenever the
+associated function call is used and one of the targets listed in the 
+HINT [] block is specified with the apex "-target" option.
+
+When adding a new function definition to a lint library you should
+check the various standards books to see what standards specify
+the function.  Most functions added to HP-UX at this point fall into
+one of two categories: They are either HP proprietary and not part
+of a standard, or they are required for compliance to a specific 
+standard.  In either case it should be clear what the apex standards
+list would include.  New standards based functions would not need
+hints.  New proprietary functions should have a generic hint
+describing what the function does and stating there is no functional
+replacement in open systems.

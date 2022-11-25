@@ -1,0 +1,111 @@
+$ ==============
+$ sm_proc.c
+$ ==============
+$set 1
+21 proc sm_stat: mon_name = %s\n
+22 proc sm_unmon_all: [%1$s, %2$d, %3$d, %4$d]\n
+23 proc sm_simu_crash\n
+24 insert_mon: malloc
+25 add_mon(%1$x) %2$s (id=%3$d)\n
+26 delete_mon(%1$x): %2$s\n
+27 statd_call_lockd: %1$s state = %2$d\n
+28 statd cannot contact local lockd on %s status change, give up!\n
+29 *****monitor_q = NULL\n
+30 *****monitor_q: 
+31 (%x), 
+32 \n
+$ ==============
+$ sm_statd.c
+$ ==============
+41 sm_notify: %1$s state =%2$d\n
+42 enter statd_init\n
+44 fseek
+45 \n
+46 empty file\n
+47 fseek
+48 \n
+49 fsync
+50 \n
+51 local state = %d\n
+52 mkdir current
+53 \n
+54 mkdir backup
+55 \n
+56 open current directory
+57 \n
+58 getdirentries
+59 \n
+60 rename
+61 \n
+62 rename: %1$s to %2$s\n
+63 close current directory\n
+64 \n
+65 open backup directory
+66 \n
+67 getdirentries
+68 \n
+70 remove monitor entry %s\n
+71 \n
+72 close current directory\n
+73 \n
+74 statd_call_statd at %s\n
+75 statd cannot talk to statd at %s
+76 enter sm_try: recovery_q = %s\n
+77 malloc
+78 \n
+79 create monitor entry %s\n
+80 open: \n
+81 \n
+82 %s is created\n
+83 close
+84 \n
+85 remove monitor entry %s\n
+86 \n
+87 sm_crash clean up\n
+$ ==============
+$ sm_svc.c
+$ ==============
+1 unable to free arguments\n
+2 Usage: rpc.statd [ -l logfile]\n
+3 debug is on, create entry: %1$s, %2$s, %3$s\n
+4 in.lockd: fork failure\n
+5 cannot create udp service.\n
+6 unable to register (SM_PROG, SM_VERS, udp).\n
+7 cannot create tcp service.\n
+8 unable to register (SM_PROG, SM_VERS, tcp).\n
+9 svc_run returned\n
+10 statd: Not authorized for network subsystem:  Permission denied\n
+$ ==============
+$ sm_sec.h
+$ ==============
+90 statd:  needs to be executed with SEC_ALLOWDACACCESS, SEC_ALLOWMACACCESS\n           and SEC_CHOWN privileges
+$ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$ NOTE!!!!! pmap.c, udp.c, and tcp.c are in both the statd and lockd
+$ catalogs.  If you are changing this portion of the file make sure
+$ you are changing the rest!!!!!
+$ +++++++++++++++++++++++++++++++++++++++++++++++++++++++++
+$ ==============
+$ pmap.c
+$ ==============
+1000 Error in recvfrom on socket used for portmap requests
+1001 pmap_recvfrom(): xid (%d) not found
+1002 Port = %1$d, prog = %2$d, host = %3$s
+1003 pmap_svc_run(): Select failed
+$ ==============
+$ udp.c
+$ ==============
+1020 ERROR -- out of memory
+1021 add hash entry (%1$x), %2$s, %3$x, %4$x\n
+1022 delete hash entry (%1$d), %2$s, %3$d, %4$d\n
+1023 call_udp[%1$s, %2$d, %3$d, %4$d] returns %5$d
+1024 Cannot send due to out of cache\n
+1025 (%1$x):[%2$s, %3$d, %4$d] is a new connection\n
+1026 (%1$x):[%2$s, %3$d, %4$d] is a timed out connection\n
+1027 clnt_create(%1$s): addr = %2$x, port = %3$d
+1028 socket() call failed
+1029 Failure in fcntl() to create new socket
+1030 socket descriptor for link_sock = %d\n
+$ ==============
+$ tcp.c
+$ ==============
+10040 call_tcp[%1$s, %2$d, %3$d, %4$d] returns %5$d

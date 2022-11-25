@@ -1,0 +1,71 @@
+#!/bin/sh
+##	@(#)maketd	$Revision: 1.14.109.1 $	$Date: 91/11/19 13:56:55 $
+#	maketd	--	creates a dependency list for the files given
+##
+#	usage:	maketd [-Iinclude_path] [-y] [-*] C files ...
+#	writes to standard output the list of dependencies in each C
+#	file.  uses /lib/cpp to compute transitive dependencies, so if
+#	you #include "foo.h", which #includes <bar.h>, both will show up
+#	in the dependency list.
+##
+#	usage:	maketd [CFLAGS|-Y] source files ...
+#		passes all CFLAGS to /lib/cpp for conditional compilation
+#		uses -Y to mean "Yes, keep /usr/include dependencies";
+#		the default is to not print them.
+##
+DIRS="/usr/include"		# the default place to look
+TEMP=/tmp/maketd.$$
+FILTER='grep -v /usr/include'
+
+for ARG
+do			# parse all arguemnts
+    case $ARG
+    in
+	-I)			# include directories ...
+	    OPTS="$OPTS -I$1"
+	    shift 2
+	    ;;
+	-I*|-D*|-U*|-H*)
+	    OPTS="$OPTS $ARG"
+	    shift
+	    ;;
+	-[yY])			# do include files found in /usr/include
+	    FILTER='cat'
+	    shift
+	    ;;
+	-*)			# any other C flags ignored
+	    shift
+	    ;;
+	*)			# C file: go handle it ...
+	    break
+	    ;;
+    esac
+done
+
+if [ $# -eq 0 ] ; then
+    echo	usage: $0 [FLAGS] C_files ...
+    exit 1
+fi
+
+##
+#	run through all files listed on the command line, run cpp on
+#	the file, and get the list of included file names ...
+##
+for FILE in $* ; do
+    OFILE="`basename $FILE .c`.o: "
+    /lib/cpp $OPTS $FILE | egrep '^# [0-9]* ".*\.h"' | $FILTER | \
+    sed -e 's,"./,",' -e 's/[^"]*"//' -e 's/".*$//' -e "s?^?$OFILE?" | \
+    sort | uniq
+done | awk '
+{
+    if ($1 != prev) {
+	print rec;	rec = $0;
+	prev = $1;
+    } else {
+	if (length(rec $2) > 78) {
+	    print rec;	rec = $0;
+	} else
+	    rec = rec " " $2
+    }
+}
+END { print rec }'

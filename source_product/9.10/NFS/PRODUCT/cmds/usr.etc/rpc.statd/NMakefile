@@ -1,0 +1,112 @@
+/*
+##
+#       NMakefile - nmake style makefile for NFS usr.etc/rpc.statd source
+#
+#       Created By:     Dominic Ruffatto
+#       Date:           1/8/90
+##
+*/
+
+.OPTIONS:	
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS) $(SRCDIR:/^$/./)/ \
+		/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd
+
+CSOURCE = sm_svc.c sm_proc.c sm_statd.c \
+	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c \
+	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c \
+	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c\
+	/source/NFS/$(USER)/cmds/usr.etc/logging.c \
+	/source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+
+OBJECTS = sm_svc.o sm_proc.o sm_statd.o tcp.o udp.o pmap.o logging.o $(PRIV_LIB)
+
+TARGETS = rpc.statd
+HDRS=  sm_statd.h sm_sec.h
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+rpc.statd:	$(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.statd $(OBJECTS) $(RPCSVC_LIB) $(LIBCA) $(LIBSEC) $(SECFLAGS)
+
+bfa :
+        $(MAKE) -e -f $(MAKEFILE) $(-) build \
+                NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+                CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+                CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+                RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+                USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+sm_svc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sm_svc.c
+
+sm_proc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sm_proc.c
+
+sm_statd.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sm_statd.c
+
+udp.o:
+	$(CC) $(NMCFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c -o udp.o
+
+udp_.o: /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/udp.B $(LDFLAGS) -o udp_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c
+
+tcp.o:
+	$(CC) $(NMCFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c -o tcp.o
+
+tcp_.o: /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/tcp.B $(LDFLAGS) -o tcp_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c
+
+pmap.o:
+	$(CC) $(NMCFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c -o pmap.o
+
+pmap_.o:        /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/pmap.B $(LDFLAGS) -o pmap_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c
+
+logging.o:      /source/NFS/$(USER)/cmds/usr.etc/logging.c
+	$(CC) $(NMCFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/logging.c $(RPCSVC_LIB)
+
+logging_.o:     /source/NFS/$(USER)/cmds/usr.etc/logging.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build
+
+priv_lib.o: /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+	$(CC) $(NMCFLAGS)  -c /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+
+

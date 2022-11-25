@@ -1,0 +1,102 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Problems with Porting Sun Code"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.vs 20
+.ft 3
+.ce 
+PROBLEMS WITH PORTING SUN CODE
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:29:35 $
+$Revision: 1.4.109.1 $
+.ps 10
+.vs 12
+.sp 9
+.ad
+This document lists problems that the NFS project has run into when
+porting code from Sun.  
+.na
+.bp
+.AL
+.LI
+NULL might be automatically defined for Sun.  It doesn't seem to 
+be defined in any of the files they sometimes include (like stdio.h).
+.LI
+memset():  Sun has this function, but it always sets memory to
+zero.  Theirs only takes two arguments.  HP's memset takes
+three parameters with the extra argument being the value to
+set the memory to.  Very dangerous since the 2 argument version
+will compile and link.  
+.LI
+Sun has a function called strdup().  It duplicates a string.
+HP-UX has to do a strcpy(string, malloc(strlen()))  or something
+like this.
+.LI
+Signals different between HP/BSD.
+Fix:  Just make it automatic to convert signals to sigvector, no 
+matter whether it seems to be working or not.
+.LI
+time.h vs sys/time.h.  The difference in time.h location is an easy one
+to fix.
+.LI
+Problems with free().  On Sun/BSD systems, if you call free with a
+memory location that was not allocated, it doesn't free it.  On our systems
+it will attempt to free it, causing problems at some later date.  This is
+really a "watch out for it" rather than something you can actively
+pursue (usually).
+.LI
+Differences in system call parameters:  some to watch out for: mount(2),
+setpgrp(2), memset(3).
+.LI
+Differences in inetd(1M).  Since our inetd is different from Sun's, we
+sometimes behave differently.  This is particularly true of TCP sockets
+started with RPC.
+.LI
+Routines normally used in BSD systems that System V does not have and
+their corresponding mappings:
+.sp
+.nf
+#define  index(a,b)    strchr(a,b)
+#define  rindex(a,b)   strrchr(a,b)
+#define  SIGCHLD       SIGCLD
+#define  setegid(a)    setgid(a) 
+#define  seteuid(a)    setuid(a) 
+#define  bcopy(a,b,c)  memcpy(b,a,c) 
+#define  bzero(a,b)    memset(a,0,b)
+#define  bcmp(a,b,c)   memcmp(a,b,c) 
+#define  getwd(a)      getcwd(a,MAXPATHLEN) 
+
+extern char *strchr(), *strrchr();
+extern char *memcpy(), *memset();
+extern char *getcwd();
+.fi
+.LI
+Alignment problems:  the s800 requires word-alignment while the
+s300 only cares about byte-alignment. Since Sun's code was developed
+in machines that originally only cared about byte-alignment most of
+it does not deal with word-alignment.  Places to watch out for this
+problem is where we manipulate buffers by adding and removing code
+from it through pointer assignments (xdr_mem.c, xdr_mbuf.c and
+xdr_rec.c are examples of places where this problem occurred).
+.LI
+Sun uses abort() quite often in their code for areas where they don't
+handle problems.  Code that is being ported should be reviewed for that
+and there should be a conscious decision on whether to leave the abort,
+remove it or replace it with something that makes more sense.  An abort() 
+on user level code makes the program core dump (leaving the core file around).
+.LI
+Functions that go into libc will have to have special definitions to
+accomodate the POSIX/ANSI-C Name Space cleanup.  See the document
+called "namespace" in $nfs/doc.
+.LE

@@ -1,0 +1,17 @@
+:
+# @(#) $Header: Installhere,v 66.2 90/09/20 12:23:54 kb Exp $
+echo ============================
+cat HPVERSION
+echo ============================
+set -e
+echo "cd FTINST"
+cd FTINST
+pwd
+echo "THIS WILL DO : find . -type f -print | cpio -pmvd /"
+echo "WARNING - ready to install files on THIS HP MACHINE - press return: \c"
+read x
+echo "find . -type f -print | cpio -pmvd /"
+find . -type f -print | cpio -pmvd /
+echo
+echo "install complete"
+echo

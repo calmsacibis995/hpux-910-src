@@ -1,0 +1,149 @@
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lint/make.dff.osf,v $
+# $Revision: 70.4 $
+
+# Common makefile for lint utility
+
+MIP = ../ccom
+CFLAGS =
+XAR=/usr/apollo/bin/xar
+CCPAX = /paXdev/bin/c89
+
+# Common flags
+FLAGS=-DLINT -DLINT_TRY -DNOCDB -DANSI -DBUG4 \
+	-DSILENT_ANSI_CHANGES -DOSF -DLINTHACK
+LLIB_FLAGS = -E -Wp,-C -Dlint -D__lint \
+             -D_CLASSIC_ANSI_TYPES   -U_CLASSIC_ID_TYPES \
+             -D_CLASSIC_POSIX_TYPES  -D_CLASSIC_XOPEN_TYPES \
+             -U_INCLUDE_HPUX_SOURCE  -D_INCLUDE_POSIX2_SOURCE \
+             -D_INCLUDE_POSIX_SOURCE -D_INCLUDE_XOPEN_SOURCE \
+             -D_INCLUDE__STDC__
+
+# S800 specific flags, needed for the cross-compile
+FLAGS_800 = $(FLAGS) -Dxcomp300_800 -Dprntf=printf -Dfprntf=fprintf \
+		-Dsprntf=sprintf -DSLOW_WALKF 
+FLAGS_300_68 = $(FLAGS) -DPAXDEV -DNEWC0SUPPORT -DSLOW_WALKF -Dprntf=printf \
+		-Dfprntf=fprintf -Dsprntf=sprintf -D_LOCALE_INCLUDED -A cpu,m68k
+FLAGS_300_88 = $(FLAGS) -DPAXDEV -DNEWC0SUPPORT -DSLOW_WALKF -Dprntf=printf \
+		-Dfprntf=fprintf -Dsprntf=sprintf -D_LOCALE_INCLUDED -A cpu,a88k
+FLAGS_300_X  = $(FLAGS) -UPAXDEV -DNEWC0SUPPORT -DSLOW_WALKF -Dprntf=printf \
+		-Dfprntf=fprintf -Dsprntf=sprintf -D_LOCALE_INCLUDED
+
+# flags for unifdef'ing cgram.y
+UNIFFLAGS_800 = -UIRIF -DLINT -Dxcomp300_800
+UNIFFLAGS_300 = -UIRIF -DLINT -Uxcomp300_800
+
+YACC = /paXdev/bin/yacc
+
+CC = /bin/cc
+
+MIP_FILES = $(MIP)/trees.c $(MIP)/pftn.c $(MIP)/scan.c \
+	     $(MIP)/comm1.c $(MIP)/messages.c $(MIP)/optim.c \
+	     $(MIP)/xdefs.c $(MIP)/cgram.y \
+	     $(MIP)/mfile1 $(MIP)/manifest $(MIP)/common \
+	     $(MIP)/commonb $(MIP)/yaccpar $(MIP)/opcodes.h \
+	     $(MIP)/mac2defs $(MIP)/messages.h
+
+MIP_300 = $(MIP_FILES)
+
+MIP_800 = $(MIP_FILES) $(MIP)/quad.c
+
+# sources linked from other directories that need to be cleaned up
+# rm -f won't complain if the file is not there, so don't distinguish
+# 300/800 exceptions, just list everything
+CCOM_CLEAN = \
+    trees.c  pftn.c scan.c comm1.c messages.c optim.c xdefs.c \
+    cgram.y mfile1  manifest common commonb yaccpar opcodes.h \
+    mac2defs messages.h print.s walkf.s quad.c gram.y
+
+MFILES = macdefs manifest mfile1
+
+# Source and Object files for first and second passes
+CFILES1 = trees.c pftn.c scan.c comm1.c messages.c optim.c xdefs.c \
+        lerror.c msgbuf.c lint.c
+OFILES1 = trees.o pftn.o scan.o comm1.o messages.o optim.o xdefs.o \
+	cgram.o lerror.o msgbuf.o lint.o hpux_rel.o
+CFILES2 = lpass2.c lerror2.c msgbuf2.c messages.c
+OFILES2 = lpass2.o lerror2.o msgbuf2.o hpux_rel.o messages.o
+
+OBJ1_300 = $(OFILES1)
+OBJ1_800 = $(OFILES1) quad.o
+OBJ2_300 = $(OFILES2)
+OBJ2_800 = $(OFILES2)
+
+# This sort of structure was needed so that different paths, flags
+# and extra files could be specified when run on different machines.
+default:
+	$(MAKE) clobber;					\
+	mipfiles="$(MIP_300)";					\
+	files1="$(OBJ1_300)";					\
+	files2="$(OBJ2_300)";					\
+	unifflags="$(UNIFFLAGS_300)";           		\
+	flags="$(FLAGS_300_68)";				\
+	$(MAKE)	MIP_FILES="$$mipfiles"				\
+		OFILES1="$$files1" 				\
+		OFILES2="$$files2" 				\
+		LIBS="$(LIBS) $$lib"				\
+		UNIFFLAGS="$$unifflags"				\
+		PFLAGS="$$flags"				\
+		link_files lint1;				\
+	$(LD) -A cpu,m68k lint1 -o lint1.m68k;			\
+	flags="$(FLAGS_300_88)";				\
+	$(MAKE) clean;						\
+	$(MAKE)	MIP_FILES="$$mipfiles"				\
+		OFILES1="$$files1" 				\
+		OFILES2="$$files2" 				\
+		LIBS="$(LIBS) $$lib"				\
+		UNIFFLAGS="$$unifflags"				\
+		PFLAGS="$$flags"				\
+		link_files lint1;				\
+	$(LD) -A cpu,a88k lint1 -o lint1.a88k;			\
+	/bin/rm -rf dff.X;					\
+	$(XAR) -cv dff.X lint1.m68k lint1.a88k;			\
+	flags="$(FLAGS_300_X)";					\
+	$(MAKE) clean;						\
+	$(MAKE)	MIP_FILES="$$mipfiles"				\
+		OFILES1="$$files1" 				\
+		OFILES2="$$files2" 				\
+		LIBS="$(LIBS) $$lib"				\
+		CC="/paXdev/bin/cc"				\
+		UNIFFLAGS="$$unifflags"				\
+		PFLAGS="$$flags"				\
+		link_files lint1;				\
+		mv lint1 dff
+
+link_files:
+	/bin/rm -f $(CCOM_CLEAN)
+	/bin/ln -s $(MIP_FILES) .
+
+lint1:	$(OFILES1)
+	$(CC) $(LDFLAGS) $(PFLAGS) -o lint1 $(OFILES1) -lm
+
+# Dependencies
+trees.o:	trees.c messages.h $(MFILES)
+pftn.o:		pftn.c messages.h $(MFILES)
+scan.o:		scan.c messages.h $(MFILES)
+comm1.o:	comm1.c common $(MFILES)
+messages.o:	messages.c messages.h
+optim.o:	optim.c $(MFILES)
+xdefs.o:	xdefs.c $(MFILES)
+gram.y:		cgram.y
+		-unifdef -DANSI $(UNIFFLAGS) cgram.y >gram.y
+cgram.c:	gram.y 
+		$(YACC) gram.y ; mv y.tab.c cgram.c
+cgram.o:	cgram.c $(MFILES)
+		$(CC) -c +O1 $(PFLAGS) cgram.c
+lerror.o:	lerror.c lerror.h messages.h
+msgbuf.o:	msgbuf.c lerror.h messages.h
+lint.o:		lint.c lerror.h lmanifest messages.h $(MFILES)
+
+clean:
+	/bin/rm -f $(CCOM_CLEAN)
+	/bin/rm -f *.o cgram.c
+
+clobber: clean
+	/bin/rm -f dff dff.X lint lint1 lint2  *a88* *m68*
+
+# Needed to redefine the rule for compilation from a c source file to
+# an object level file as to include some extra flags.
+.c.o:
+	$(CC) $(CFLAGS) $(PFLAGS) -c $<

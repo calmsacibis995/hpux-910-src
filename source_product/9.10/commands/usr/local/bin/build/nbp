@@ -1,0 +1,201 @@
+#! /bin/ksh
+#
+# Checkout the source and then
+# build the source in three phases.  First, build the headers, second
+# build the BE, and third build the rest of the commands.  Note that the
+# BE component after the headers consists of the libraries.  This build
+# tales place in the pseudo root and populates the filesets tree.  When
+# this phase is complete, the only task remaining is the delivery of the
+# commands product.  By the way, this phase constructs the BE which will
+# be delivered prior to completing the rest of the build.
+#
+# Variables
+RELEASE=9_1				# default
+RMTSYSTEMS="hpfclx3 hpfcjr mrspock"
+integer numsys=3			# number of systems in RMTSYSTEMS
+integer thresh=12			# 4 * numsys
+ME="hpfclx3"
+integer WHICHSYS=0
+
+#
+# determines which system to execute on next
+#
+setsysname()
+{
+    set -- $RMTSYSTEMS
+    shift $WHICHSYS
+    sysname=$1			# spit out the system name
+    (( WHICHSYS=$WHICHSYS+1 ))	# get the next system name
+    if (( WHICHSYS >= $numsys ))
+    then
+	WHICHSYS=0
+    fi
+}
+
+#
+# determines if we should continue or wait
+#
+waitjobs()
+{
+    integer procs
+    set -- `jobs -l | wc -l`
+    procs=$1
+    while (( $procs >= $thresh ))
+    do
+	sleep 2
+	set -- `jobs -l | wc -l`
+	procs=$1
+    done
+}
+
+if [ $# -eq 1 ]
+then
+    RELEASE=$1
+fi
+
+if [ $# -gt 1 ]
+then
+    echo nbp release
+    exit 1
+fi
+
+#
+# intiialize log files and remove old filesets
+#
+mkdir -p /Build/$RELEASE/REPS
+cd /Build/$RELEASE/REPS
+rm -f compile compile.err install install.err checkout checkout.err
+touch compile compile.err install install.err checkout checkout.err
+chmod 666 *
+cd ..
+mv Filesets.sl.last Filesets.sl.rm
+mv Filesets.sl Filesets.sl.last
+mkdir Filesets.sl
+mv src src.rm
+mkdir -p src/bin src/doc src/etc src/install src/lib src/system src/usr
+chmod 777 src src/bin src/doc src/etc src/install src/lib src/system src/usr
+
+#
+# check out the source
+#
+echo "start checkout: `date`" > /Build/$RELEASE/REPS/tstats
+for srcdir in bin doc etc install lib system usr
+do
+    cd src/$srcdir
+    fco -RM -rSWT/9_03 /hpux/src.rcs/$srcdir > \
+	/Build/$RELEASE/tmp/co.$srcdir 2>/Build/$RELEASE/tmp/co_err.$srcdir &
+    cd /Build/$RELEASE
+done
+wait		# for checkouts to complete
+echo "end checkout: `date`" >> /Build/$RELEASE/REPS/tstats
+
+cd REPS
+for srcdir in bin doc etc install lib system usr
+do
+    cat /Build/$RELEASE/tmp/co.$srcdir >> checkout
+    cat /Build/$RELEASE/tmp/co_err.$srcdir >> checkout.err
+done
+
+#
+# build the header files.  The make file also copies the files to 
+# the BE for building everything else.
+#
+echo "start headers: `date`" >> /Build/$RELEASE/REPS/tstats
+/etc/chroot /Build/$RELEASE /usr/local/bin/buildit /usr/include
+echo "end headers: `date`" >> /Build/$RELEASE/REPS/tstats
+
+#
+# build the BE components on the various systems.  Please note that
+# due to the ordering, libc and libcurses are built on different
+# systems.  This should be retained should any modifications be made
+# the the build structure.  Also, c0 and c1 are built before compilers.300
+# since that makefile does the install.
+
+echo "start BE: `date`" >> /Build/$RELEASE/REPS/tstats
+for target in	  /lib/libPW /lib/libc /lib/libcurses /lib/libld /lib/libm \
+		  /usr/lib/libBSD \
+		  /usr/lib/libBUILD /lib/libDUX /usr/lib/libV3 \
+		  /usr/lib/libdbm /usr/lib/libdvio /usr/lib/libempty \
+		  /usr/lib/libhp /usr/lib/libio /usr/lib/libl \
+		  /usr/lib/libmalloc /usr/lib/libpnls /usr/lib/libvmmap \
+		  /usr/lib/liby \
+		  /bin/as /bin/cc /lib/compilers.300 /bin/linkers /lib/cpp \
+		  /bin/ranlib /usr/bin/lex /usr/bin/lint /lib/cpp.ansi \
+		  /lib/c2
+do
+    setsysname
+    remsh $sysname -n -l root "/etc/chroot /Build/$RELEASE /usr/local/bin/buildit $target" &
+    waitjobs
+done
+
+#
+# wait for the libs to finish
+#
+wait
+touch /tmp/BE_DONE
+echo "end BE: `date`" >> /Build/$RELEASE/REPS/tstats
+
+#
+# copy the libs to the BE for building the rest
+#
+cp /Build/$RELEASE/src/lib/libPW/libPW.a /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libc/libc.a /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libc/libc.sl /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libc/libpicc.a /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libcurses/screen/libcurses.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/lib/libcurses/screen/libcurses.sl /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libm/libm.a /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/lib/libm/libm.sl /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/usr/lib/libBSD/libBSD.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libBUILD/libBUILD.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/lib/libDUX/libDUX.a /Build/$RELEASE/lib
+cp /Build/$RELEASE/src/usr/lib/libV3/libV3.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libdbm/libdbm.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libdvio/libdvio.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libempty/libempty.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libio/libio.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libl/libl.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libpnls/libportnls.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/libvmmap/libvmmap.a /Build/$RELEASE/usr/lib
+cp /Build/$RELEASE/src/usr/lib/liby/liby.a /Build/$RELEASE/usr/lib
+
+echo "start the rest: `date`" >> /Build/$RELEASE/REPS/tstats
+
+#
+# build lib/libk bin, etc, system, usr/bin, usr/contrib/bin,
+# usr/pub, usr/lib, and usr/lib/messages.
+#
+cd /Build/$RELEASE/src
+for target in lib/libk bin/* etc/* system/* usr/bin/* \
+	      usr/contrib/bin/* usr/pub/* usr/lib/* \
+	      usr/lib/nls/messages
+do
+    if [ "/$target" = "/bin/as" -o "/$target" = "/bin/cc" -o \
+	 "/$target" = "/bin/linkers" -o \
+	 "/$target" = "/bin/ranlib" -o \
+	 "/$target" = "/usr/lib/nls" -o \
+	 "/$target" = "/usr/lib/libcrypt" -o \
+	 "/$target" = "/usr/lib/libdbm" -o \
+	 "/$target" = "/usr/lib/libempty" ]
+    then
+	:	skip it, we be done
+    else
+    	setsysname
+        remsh $sysname -n -l root "/etc/chroot /Build/$RELEASE /usr/local/bin/buildit /$target" &
+    fi
+    waitjobs
+done
+
+#
+# wait for the builds to finish
+#
+wait
+
+#
+# get rid of the old stuff
+#
+cd /Build/$RELEASE
+nohup rm -rf src.rm > /dev/null 2>&1 &
+nohup rm -rf Filesets.sl.rm > /dev/null 2>&1 &
+
+echo "end the rest: `date`" >> /Build/$RELEASE/REPS/tstats

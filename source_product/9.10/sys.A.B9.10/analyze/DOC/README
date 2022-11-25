@@ -1,0 +1,164 @@
+Permissions:
+-rwxrwxr-x   1 bin      bin       184320 Jun 20 00:00 /usr/local/bin/analyze*
+
+The man page for analyze should be in the ADMIN section, unless we
+have a special section for unreleased commands.
+
+
+The man page is called analyze.man 
+
+
+Layout of objects  directory.
+				Contains make file and object files
+Layout of manpage  directory.
+				Contains often out of date man pages
+				analyze.man
+	
+Layout of io       directory.
+				Contains I/O files
+Layout of debrec   directory.
+				Contains debug record files
+Layout of grammar  directory.
+				Contains grammar rules
+Layout of net      directory.
+				Contains networking files
+Layout of DOC      directory.
+				Contains documentation
+Layout of link     directory.
+				Contains communication files 
+				to allow analyze to talk over a
+				parallel card link
+Layout of somacces directory.
+				Contains routines to access
+				the s800 som, s300 is much easier
+				no need for directory.
+Layout of standard directory.
+				Contains core stack trace, symbol trace,
+				main driver routines (analyze/analyze1.c).
+				Contains translation and memory
+				read routines.
+				Contains VM and process management routines
+				Contains FS routines
+
+Description of some files in standard and grammar directories.
+
+gram.y	- grammar rules
+lexsrc.l- parsing rules
+version.c - version string
+
+==========================
+
+inc.h 	   - header files
+an_nlist.h - nlist array
+an_nldef.h - nlist defines
+an_rpb.h   - rpb layout
+symdef.h   - s300 symbol table stuff
+unwind.h   - s800 symbol table stuff
+defs.h     - normal defines
+externs.h  - normal defines
+types.h    - type declarations
+
+
+==========================
+
+analyze.c - main program
+analyze1.c
+
+==========================
+
+get.c	- get data routines (getchunk)
+log.c	- log routines (tuck data away)
+scan.c	- scan data structures logging data, and scanning for resources
+	  inconsistencies.
+
+dump.c	- format data structures.
+
+trace.c	- stack tracing code.
+
+symbol.c- symbol resolution.
+
+find.c  - verify indexes, and addresses
+
+display.c- interactive interface to the main routines.
+
+
+=========================================================
+
+
+	      Guide lines to Reading Memory
+
+
+
+	These read from logical memory, out to the end of BSS.
+
+get     - Get a word from logical text, initialized data, or bss.
+getshort  Really anything from the nlist structure (anything in the
+	  nlist structure, as all entries from nlist come from the 
+	  above category)
+
+lseek   - Seek from logical memory file out to end of BSS only.
+read    - Read from logical memory file out to end of BSS only.
+
+
+
+
+	These read from physical memory, anywhere.
+
+getreal - Get a word from the physical location (addresses obtained
+	  from getphyaddr ot ltor).
+getshortreal
+
+
+longseek- Seek in physical memory file (addresses obtained from
+	  getphyaddr, or ltor).
+longread- Read from physical memory file.
+
+
+	
+
+	Translation routines
+
+	You cannot use any of these until the mapping structures
+	are set up. In the S800 that means until the pdir is
+	read in. In the S300 it means once Sysmap has been read in.
+	These both occur fairly early in analyze.c
+
+
+ltor    - Convert long address to real (space, offset).
+	  On the S300 its (0, offset) for kernel or (proc, offset)
+	  for user space.
+	- It has been suggested to make it (vas,offset) for regions.
+
+getchunk- Get a chunk of vitual memory at the specified location and 
+	  put in buf provided.
+
+getphyaddr()
+	- Getphyaddr just gets a physical address of a kernel address
+	  (it just calls ltor with 0 for the space). People should probably
+	  use ltor directly.
+
+
+=============================================================
+
+
+All the files starting with "net" are for the HP-UX networking
+code.  Right now the networking code supports CIO and NIO Lan
+drivers.  (Thanks to Randy Janke)
+
+All the networking code is only UPWARD compatible.
+I tried to make it backward compatible but it became a real pain
+because people were changing header files right and left.
+(Networking Guru: Rohit Aggarwal)
+.
+
+
+
+
+
+
+
+
+
+
+
+

@@ -1,0 +1,192 @@
+#!/bin/sh
+# @(#)$Revision: 1.17.109.1 $	$Date: 91/11/19 13:51:30 $
+
+#=============================================================================
+#
+#  This shell script, "transfer" is based on the install_SSIT script 
+#  written by Dave Erickson.
+#
+#  This script does the following:
+#
+#		. Creates a directory tree containing all the source files,
+#		  Makefiles, man pages and include files needed to compile
+#		  the product and that are part of the product.
+#
+#		. Keeps track of all the what strings of the different 
+#		  files submitted for the product
+#
+#		. Tars the final directory into a tar file to be submitted
+#		  to the Integration group at ISO
+#
+#  Author:  Dave Erickson, CND, April 1987.
+#	    Modified by Cristina Mahon, CND, July 1987.
+#
+#=============================================================================
+
+IC=$1				#  The integration cycle that we are 
+				#  submitting for.
+WHAT_STRINGS=/tmp/what_str.$IC  #  The name of the file that contains the what 
+				#  strings for all the files submitted
+FINAL_DIR=tmp/800.$IC		#  The name given the directory that will
+				#  contain the final source tree to be submitted
+SUB_FILES=800sub_files		#  The name of the file which contains the 
+				#  list of source files, include files and
+				#  man pages for distribution
+TAR_FILE=/tmp/nfs.tar.$IC	#  Tar file that will contain the full
+				#  product to be submitted to ISO
+
+if [ $# -eq 0 ] ; then
+	echo "Usage: 800_subm IC#" >&2
+	exit 1
+fi
+
+##########
+#  Check to make sure the user is root.
+##########
+
+if [ `whoami` != root ] ; then
+	echo "\nYou must be root to run $0.\n" >&2
+	exit 1
+fi
+
+##########
+#  Check to make sure the SUB_FILES exists.
+##########
+
+if [ ! -r $SUB_FILES ] ; then
+	echo "\nThe input file, \"$SUB_FILES\", does not exist or is not readable.\n" >&2
+	exit 1
+fi
+
+##########
+#  Remove and recreate the needed high-level directories.
+##########
+
+echo "Recursively removing /$FINAL_DIR...."
+rm -rf /$FINAL_DIR
+echo "Now creating /$FINAL_DIR"
+mkdir /$FINAL_DIR
+
+##########
+#  Create manx.Z directories
+##########
+
+mkdir /$FINAL_DIR/man
+for dir in man1.Z man1m.Z man2.Z man3.Z man4.Z man7.Z
+do
+	echo "Now creating /$FINAL_DIR/man/$dir"
+	mkdir /$FINAL_DIR/man/$dir
+done
+
+##########
+#  Open the list of source files for reading.
+##########
+
+exec 3<$SUB_FILES
+
+##########
+#  Read a line at a time from the list of source files, skipping blanks lines 
+#  and lines beginning with '#'.
+##########
+
+while read LOCAL_FILE <&3 ; do
+
+	##########
+	#  Check only non-blank lines.
+	##########
+
+	if [ -n "$LOCAL_FILE" ] ; then
+
+		##########
+		#  Check only lines not beginning with '#'.
+		##########
+
+		if [ `expr substr $LOCAL_FILE 1 1` != "#" ] ; then
+
+			##########
+			#  Strip any leading '/'s from the initial filename.
+			##########
+
+			while [ `expr substr $LOCAL_FILE 1 1` = / ] ; do
+				LEN=`expr length $LOCAL_FILE - 1`
+				LOCAL_FILE=`expr substr $LOCAL_FILE 2 $LEN`
+			done
+
+			##########
+			#  Generate a list of the directories under which the
+			#  final filename will reside.
+			##########
+
+			DIRNAME=`dirname $LOCAL_FILE`
+			touch $$.dirs
+			while [ $DIRNAME != . ] ; do
+				echo $DIRNAME >> $$.dirs
+				DIRNAME=`dirname $DIRNAME`
+			done
+
+			##########
+			#  Sort the list of directories, so they will be created
+			#  in the proper order.  If the directory does not
+			#  normally exist as part of the HP-UX directory
+			#  structure, add it to the fileset list.  Create the
+			#  subdirectory if it's not there.
+			##########
+
+			sort $$.dirs -o $$.dirs
+			exec 4<$$.dirs
+			while read DIR <&4 ; do
+				if [ ! -d /$FINAL_DIR/$DIR ] ; then
+					mkdir /$FINAL_DIR/$DIR
+				fi
+			done
+			rm $$.dirs
+
+			##########
+			#  Copy the local file to its final subdirectory, and
+			#  set the desired owner, group and permissions.  Add
+			#  its name to the fileset list.
+			##########
+
+			DIRNAME=`dirname $LOCAL_FILE`
+			if [ "$DIRNAME" = "man/man1" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man1.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man1.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man1m" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man1m.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man1m.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man2" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man2.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man2.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man3" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man3.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man3.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man4" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man4.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man4.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man4" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man4.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man4.Z/`basename $LOCAL_FILE`
+			elif [ "$DIRNAME" = "man/man7" ] ; then
+				echo "Formatting $Nfs/$LOCAL_FILE to /$FINAL_DIR/man/man7.Z/`basename $LOCAL_FILE`"
+ 				compress -c $Nfs/$LOCAL_FILE > /$FINAL_DIR/man/man7.Z/`basename $LOCAL_FILE`
+			fi
+
+			echo "Copying $Nfs/$LOCAL_FILE to /$FINAL_DIR/$LOCAL_FILE"
+			cp $Nfs/$LOCAL_FILE /$FINAL_DIR/$LOCAL_FILE
+			what $Nfs/$LOCAL_FILE >> $WHAT_STRINGS
+			chown root /$FINAL_DIR/$LOCAL_FILE
+			chgrp other /$FINAL_DIR/$LOCAL_FILE
+			chmod 666 /$FINAL_DIR/$LOCAL_FILE
+		fi
+	fi
+done
+
+echo "Tar the final directory\n"
+cd /$FINAL_DIR
+tar cvf $TAR_FILE .
+
+##########
+#  We're done!
+##########
+
+echo "\nDone.\n"

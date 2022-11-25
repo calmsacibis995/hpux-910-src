@@ -1,0 +1,10 @@
+## FacetTerm  vt100ans COMMON description file 05/18/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt100ans.FC,v 70.1 92/03/09 16:06:24 ssa Exp $
+### 1=132_col  2=printer_port
+answer-..........=\E[?1;2c
+question-identify=\E[0c
+question-identify=\E[c
+### not a wyse
+pass_current-identify_test_for_wyse=\E ^D
+pass_current-identify_clean_up=^D

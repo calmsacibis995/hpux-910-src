@@ -1,0 +1,1803 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Program Plan and Life Cycle for s800 release 3.0"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+PROGRAM PLAN AND LIFE CYCLE 
+FOR S800 RELEASE 3.0
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:32:22 $
+$Revision: 1.21.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Dan Simula
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document contains the CND s800 release 3.0 program milestones and the
+corresponding deliverables and dependencies.  
+The target dates for the milestones are based on the HP-UX program 
+3.0 release integration cycles. 
+.sp
+The two major objectives of this document are to provide logical 
+checkpoints based on the individual CND project team schedules
+and to centralize a list of major dependencies which the involved project
+teams have on each other or on external entities.  
+.sp
+This document is a working document used by the CND groups involved on
+the s800 3.0 release.  The deliverables listed for each checkpoint are 
+specified for these groups, with other external projects covered under 
+dependencies.
+.sp
+ASSUMPTIONS:  The NS, ARPA and NFS products for the s300 release 6.2 and 
+the NS, ARPA and NFS 800 products for the s800 3.0 release will be nearly 
+identical.  
+.na
+.bp
+.H 1 "PROJECTS INVOLVED"
+.sp 
+.H 2 "Staff"
+.sp 2
+.ad
+The following teams within CND are involved on the s800 release 3.0:
+.nf
+.TS
+tab(#);
+l l l l.
+\fBProject Name\fR#\fBResponsibility\fR#\fBProgram Rep\fR
+ARSENAL#NS/ARPA/NFS testing#Dan Simula
+CLP#NS/ARPA development#Pierre Rassat
+SMURFS#NFS development#Dave Matthews
+DOC#User Information#Tina-Marie Gardner
+NFS_TECH#Technical Support#Chuck Morse
+ARPA_TECH#Technical Support#Alex Barnett
+PROD#Product Marketing#Andy Drol
+QA#Quality Assurance#
+.TE
+.fi
+.sp
+The projects in other divisions with which CND will interact for the
+s800 3.0 release are:
+.sp
+.nf
+.TS
+tab(#);
+l l l l.
+\fBDivision\fR#\fBResponsibility\fR#\fBProject Manager\fR#\fBProject Name\fR
+UKL#File system and NFS kernel#Ching Fa Hwang#HP-UX
+UKL#HP-UX commands#Ed Sesek#SAPPHIRE
+ISO#Integration build#Randy Barbano#INT
+XTTC#Integration testing#Barbara Scott#XTTC
+IND#RPC/XDR kernel#Craig Wassenberg#RPC
+IND#S800 Transport#Tracy/Gregg#TRANSPORT
+.TE
+.fi
+This document uses the following abbreviations:
+.sp
+.nf
+IC = Integration Cycle
+FB = Final build of an Integration Cycle
+TC = Test Cycle
+.fi
+.bp
+.H 1 "GENERAL DEPENDENCIES"
+.ad
+.sp
+This section lists general dependencies the CND groups have on
+different partners.   Listed below are the dependencies, which
+groups have to meet those dependencies and a brief explanation of 
+what they consist of:
+.sp
+Lab Dependencies:
+.sp
+.AL
+.LI
+Participation on the SWAT team. 
+A member each of the HP-UX (UKL), SAPPHIRE (UKL), RPC (IND) and TRANSPORT (IND)
+groups should be part of the SWAT team.  The SWAT representative can be either 
+always the same person or different people on a rotational schedule.
+The SWAT team is called when there is a major defect that is stopping any
+further testing by the arsenal group.  The resolution of the defect that 
+caused the SWAT team to be called becomes the main task of all members of the 
+team until that defect is characterized and fixed.
+.LI
+Internet available when needed.
+Most of the processes implemented between CND and UKL/IND rely heavily on the 
+Internet.
+If the Internet is not up the turn-around for some of our deliverables will
+jump from an hour or two to a day or more.  This will become specially
+critical when the integration cycles begin.
+.LE
+.na
+.H 1 "RESPONSIBILITIES"
+.ad
+This section describes the general responsibilities of the different
+development and testing groups involved on the s800 release 3.0 and that
+are partners to CND groups.
+.sp
+.ML o
+.LI
+SMURFS (CND, Dave Matthews):
+.BL
+.LI
+NFS/YP/RPC/XDR and VHE user code responsibility including code submittals
+and defect fixes.
+.LI
+Gather metrics (corporate, CND and program) for the NFS user level code.
+.LI
+Provide MR documentation for NFS user level code.
+.LE
+.LI
+CLP (CND, Pierre Rassat):
+.BL
+.LI
+ARPA and NS Services code responsibility including code submittals and 
+defect fixes.
+.LI
+Gather metrics (corporate, CND and program) for ARPA and NS.
+.LI
+Provide MR documentation for ARPA and NS.
+.LE
+.LI
+HP-UX (UKL, Ching Fa Hwang):
+.BL
+.LI
+Overall contact for kernel problems except when those are in the networking
+kernel.
+.LI
+File system and NFS kernel layer code responsibilities.
+.LI
+Perform any performance tuning necessary in the NFS kernel code.
+.LI
+Keep 300 and 800 NFS kernel code merged with the NFS 300 kernel group.
+.LI
+Provide MR documentation for the areas of kernel code for which they are
+responsible.
+.LI
+Run "Busy system testing" to meet CHO requirements.
+.LI
+Run CND's test scaffold to (re)generate any defects.
+.LE
+.LI
+RPC (IND, Craig Wassenberg):
+.BL
+.LI
+Responsible for the RPC/XDR kernel code.
+.LI
+Perform any performance tuning necessary in the RPC/XDR and network kernel code
+for NFS.
+.LI
+Provide any MR documentation that might be needed for the RPC/XDR networking 
+kernel.
+.LI
+Keep 300 and 800 RPC/XDR kernel code merged with the NFS 300 kernel group.
+.LE
+.LI
+TRANSPORT (IND, ):
+.BL
+.LI
+Track down defects in the network architecture and transport level.
+.LI
+Provide any MR documentation that might be needed for the networking kernel.
+.LE
+.LI
+SAPPHIRE: ??
+(Do we want a single point of contact for the commands and which group
+would that be?)
+.BL
+.LI
+Serve as main contact for commands defects.
+.LE
+.LI
+ARSENAL (CND, Dan Simula):
+.BL
+.LI
+Augment and maintain the NFS system test plan.
+.LI
+Maintain and augment the NFS, ARPA and NS test scaffolds.
+.LI
+Maintain, distribute and support the NFS, NS and ARPA test suites.
+.LI
+Perform ARPA, NS and NFS subsystem reliability testing.
+.LI
+Perform NFS, NS and ARPA subsystem stress testing.
+.LI
+Perform NFS, NS and ARPA connectivity testing.
+.LI
+Perform topology, gateway and hardware configuration testing.
+.LI
+Perform isolated, error recovery and destructive testing.
+.LI
+Perform network cross-services testing (i.e., NFS x RFA, NFS x NFT, NFS x A/B,
+A/B x NS).
+.LI
+Perform IC partner regression testing during each IC.
+.LE
+.LI
+INTEGRATION GROUP (UKL, Randy Barbano)
+.BL
+.LI
+Responsible for integrating, building and releasing the Release 3 s800 kernel
+(including integration cycles).
+.LE
+.LI
+XTTC:
+.BL
+.LI
+BSU reliability testing
+.LI
+CSU reliability testing
+.LI
+Inter-systems testing
+.LI
+Installation testing
+.LI
+Powerfail/Recovery testing
+.LI
+Documentation testing
+.LI
+Final bits verification.
+.LE
+.LE
+.na
+.bp
+.H 1 "LIFE CYCLE"
+.ad
+.H 2 "Checkpoint: Functional Complete (IC1)"
+.sp
+\fBMilestone Date\fR: March 07, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+300/800 NS, ARPA, and NFS 2.0 "Master" Reference Pages Available to R&D
+for Integration Cycles
+.br
+NOTE: Write access not allowed until final 6.2 series 300 changes made
+to these pages.
+.nf
+By: DOC
+When: 03/01/88
+Expected: 
+Actual: 03/01/88
+.fi
+.LI
+12 CHO with quicky test suites completed for CIO systems.
+.nf
+By: ARSENAL
+When: 03/07/88
+Expected: 03/28/88
+Actual: 04/10/88
+.fi
+.LI
+12 CHO with quicky test suites completed for NIO systems.
+.nf
+By: ARSENAL
+When: 03/07/88
+Expected: 03/28/88
+Actual: DONE
+.fi
+.LI
+ARPA/NS/NFS commands submitted for IC1 base build.
+.nf
+By: CLP and SMURFS
+When: 03/07/88
+Expected:
+Actual: 03/04/88
+.fi
+.LI
+Product Plan for 3.0 Networking sent to information brokers with
+a need to know.
+.nf
+By: PROD
+When: 03/18/88
+Expected: 
+Actual: 04/10/88 (?)
+.fi
+.LI
+Final User Information Plan.
+.nf
+By: DOC
+When: 03/01/88
+Expected: 03/28/88
+Actual: 03/28/88
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Agreement with partners on method to obtain networking kernel for services 
+testing (only for IC builds)
+.nf
+By: ARSENAL 
+On: IND and UKL
+When: 02/01/88
+Expected:
+Actual: Superseeded
+.fi
+.LI
+Delivery of Burgundy
+.nf
+By: ARSENAL
+On: ESO
+When: 02/15/88
+Expected:
+Actual: 02/12/88
+.fi
+.LI
+Stable compilers and libraries	
+.nf
+By: ARSENAL
+On: HP-UX commands
+When: 02/15/88
+Expected:
+Actual: Superseeded
+.fi
+.LI
+CND kernel debugger operational	
+.nf
+By: ARSENAL
+On: CLP
+When: 02/15/88
+Expected:
+Actual: 09/87
+.fi
+.LI
+Delivery of 3.0 system installable by update (1M)
+.nf
+By: ARSENAL
+On: INT
+When: 02/15/88
+Expected:
+Actual: 03/17/88 and fix to make it bootable on 03/23/88
+.fi
+.LI
+NS, ARPA and NFS Product Structures 
+.nf
+By: DOC
+On: PROD
+When: 02/22/88
+Expected: 03/23/88
+Actual: 03/22/88
+.fi
+.LI
+System-Level Process Changes, Usability Goals, Style, Standards, and Learning 
+Products Plans Communicated to Column Divisions Impacted by These
+.nf
+By: DOC
+On: Mimi Niemiller/TCG
+When: 02/22/88
+Expected: 03/23/88
+Actual: 03/25/88
+.fi
+.LI
+Training Plans Communicated               
+.nf
+By: DOC
+On: NFS_TECH and ARPA_TECH
+When: 02/22/88
+Expected: 03/23/88
+Actual: 03/24/88
+.fi
+.LI
+Using Network Services (NS)/9000 Series 800 Reformatted to Ventura
+full-size style.  Illustrations recreated and loaded into chapters.
+.nf
+By: DOC
+On: Temporary Help (Laura)
+When: 03/28/88
+Expected: 
+Actual: 03/17/88
+.fi
+.LI
+When Early Manual Drafts Required for Pre-Releases, Training Classes, etc.
+.nf
+By: DOC
+On: NFS_TECH, ARPA_TECH, PROD, CLP and SMURFS
+When: 02/22/88
+Expected: 03/23/88
+Actual: 03/23/88 from TECH
+.fi
+.LI
+3.0 Related changes to 2.0 Using Network Services (NS)/9000 Series 800
+Manual Identified.
+.nf
+By: DOC
+On: CLP
+When: 03/28/88 
+Expected:
+Actual: 3/31/88
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to CND NTC testing resources as needed 
+.br
+(VAX, 500, Apollo) 
+.nf
+By: ARSENAL
+On: NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Regression test plan in place at IND and UKL
+.nf
+By: ARSENAL
+On: IND and UKL
+When: ??
+Expected:
+Actual: DONE
+.fi
+.LI
+All changes in error messages and commands syntax negotiated in advance 
+with ARSENAL
+.nf
+By: ARSENAL and DOC
+On: CLP, SMURFS and HP-UX commands (kernel also?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Proper 3.0 CND user information Loading and Staffing Maintained
+for on-time customer shipments.
+.nf
+By: DOC
+On: S. Hodapp
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Level A (IC2)"
+.sp 
+\fBMilestone Date\fR: May 09, 1988
+.sp
+\fBNote\fR:  The original milestone date was April 11, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+24 CHO with functional test suites completed for CIO systems
+.nf
+By: ARSENAL
+When: 04/11/88
+Expected:
+Actual: 04/11/88 
+.fi
+.LI
+24 CHO with functional test suites completed for NIO systems
+.nf
+By: ARSENAL
+When: 05/09/88
+Expected:
+Actual: DONE
+.fi
+.LI
+S800 tested as IP gateway and PROBE proxy server for 24 hours under
+light stress (gateway running 2.0).
+.nf
+By:  ARSENAL
+When: 04/11/88
+Expected: 04/12/88
+Actual: 04/22/88
+.fi
+.LI
+TurboLan card exposure in reliability, stress, and gateway runs of 
+functional test suites.
+.nf
+By: ARSENAL
+When: 04/11/88
+Expected: 04/26/88
+Actual: DONE
+.fi
+.LI
+ARPA/NS/NFS commands submitted for IC2 base build.
+.nf
+By: CLP and SMURFS
+When: 04/11/88
+Expected: 04/18/88 (IC2 delayed)
+Actual: 04/18/88 (or earlier)
+.fi
+.LI
+Using Network Services: (NS)/9000 Series 800: Initial Revision
+.nf
+By: DOC
+When: 04/11/88
+Expected: 04/14/88 (dependency met late)
+Actual: 04/19/88
+.fi
+.LI
+Defect density of 0/1/5 (critical, serious and medium/low) by FB2.
+.nf
+By: SMURFS
+When: 05/02/88 (used to be 04/25/88)
+Expected: 05/09/88
+Actual: DONE ahead of time
+.fi
+.LI
+Defect density of 0/1/11 (critical, serious and medium/low) by FB2.
+.nf
+By: CLP (NS Services)
+When: 05/02/88 (used to be 04/25/88)
+Expected: 05/09/88
+Actual: DONE ahead of time
+.fi
+.LI
+Defect density of 0/1/9 (critical, serious and medium/low) by FB2.
+.nf
+By: CLP (ARPA Services)
+When: 05/02/88 (used to be 04/25/88)
+Expected: 05/09/88
+Actual: DONE ahead of time
+.fi
+.LI
+Check interest for the VHE or Turbo Alpha/Beta Site: Investigate
+.nf
+By: PROD
+When: 04/25/88
+Expected:
+Actual: DONE
+.fi
+.LI
+HP 9000 Series 800 Networking Overview: LAN, NS, ARPA and NFS:
+Initial Revision
+.nf
+By: DOC
+When: 05/02/88
+Expected:
+Actual: 04/26/88
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Output of UKL 3.0 IC1 final build
+.nf
+By: ARSENAL
+On: INT
+When: 03/28/88
+Expected:
+Actual: 04/13/88
+.fi
+.LI
+Manual pages delivered to SMURFS for FB2
+.nf
+By: SMURFS
+On: DOC
+When: 04/27/88
+Expected:
+Actual: 04/18/88
+.fi
+.LI
+Stable kernel at level A for CIO
+.nf
+By: ARSENAL, SMURFS and CLP
+On: HP-UX and RPC
+When: 04/11/88
+Expected:
+Actual: 04/11/88
+.fi
+.LI
+Stable kernel at level A for NIO
+.nf
+By: ARSENAL, SMURFS and CLP
+On: HP-UX and RPC
+When: 05/09/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Planned New LAN, NS, ARPA and NFS Network Connectivity Support Identified
+First Version
+.nf
+By: DOC
+On: PROD (and IND PROD)
+When: 04/11/88
+Expected:
+Actual: 04/11/88
+.fi
+.LI
+Planned NIO card, TurboLan Card, Link Level Access and StarLan 10 Link for
+HP 9000s Product Naming and Structures
+.nf
+By: DOC
+On: N. Schommer and I. Cantu
+When: 04/11/88
+Expected:
+Actual: 04/11/88
+.fi
+.LI
+Planned NIO Card, TurboLan Card, Link-Level Access and StarLan 10 link
+for HP9000s Documentation Titles and Structures
+.nf
+By: DOC
+On: P. Allen (RND), Travis Houck (RND) and Jacquie Toth (IND)
+When: 04/11/88
+Expected:
+Actual: 04/09/88
+.fi
+.LI
+Finalize contents of 3.0 Networking Performance
+.nf
+By: RPC, ARSENAL, SMURFS and CLP
+On: NFS_TECH and ARPA_TECH
+When: 04/11/88
+Expected: 05/13/88
+Actual: DONE
+.fi
+.LI
+Stable NFS commands
+.nf
+By: HP-UX and RPC
+On: SMURFS
+When: 04/11/88
+Expected:
+Actual: 04/11/88
+.fi
+.LI
+TurboLan cards delivered to CND
+.nf
+By: ARSENAL
+On: RND
+When: 04/01/88
+Expected: 04/15/88 
+Actual: 04/22/88
+.fi
+.LI
+Using Network Services (NS)/9000 Series 800: Perform and Complete First Review
+.nf
+By: DOC
+On: NS Product Team
+When: 04/14/88-05/04/88
+Expected: 04/22/88-05/12/88
+Actual: 05/12/88
+.fi
+.LI
+Stable kernel at level B for CIO
+.nf
+By: ARSENAL, SMURFS, CLP
+On: HP-UX and RPC
+When: 05/16/88
+Expected: 
+Actual: DONE
+.fi
+.LI
+Stable kernel at level B for NIO
+.nf
+By: ARSENAL, SMURFS, CLP
+On: HP-UX and RPC
+When: 05/16/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Stable NFS commands
+.nf
+By: HP-UX and RPC
+On: SMURFS
+When: 04/18/88
+Expected:
+Actual: 04/18/88
+.fi
+.LI
+3.0 Reference Page Process Known (New or Old) and implemented if new
+comunnicated
+.nf
+By: DOC
+On: B. Mowson, D. Smith and J. Zions
+When: 05/02/88
+Expected: 05/15/88
+Actual: Old used for 3.0
+.fi
+.LI
+Camera-Ready Section on NFS Virtual Home Environment Available
+.nf
+By: DOC
+On: M. Calkins
+When: 05/02/88
+Expected:
+Actual: 05/06/88
+.fi
+.LI
+6.2 Camera Ready "Master" 300/800 NS, ARPA and NFS reference pages
+available for 3.0 modifications.
+.nf
+By: DOC
+On: M. Calkins
+When: 05/02/88
+Expected:
+Actual: 05/06/88
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Support and timely repairs of 1000, 3000, VAX/VMS to pass regression test 
+suites	
+.nf
+By: ARSENAL
+On: IND
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to CND NTC testing resources as needed (VAX, 500, Apollo)
+.nf
+By: ARSENAL
+On: NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to IND NTC testing resources as needed 
+.br
+(1000, 3000, VAX)
+.nf
+By: ARSENAL
+On: IND NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Level B (IC3)"
+.sp 
+\fBMilestone Date\fR: June 13, 1988
+.sp
+\fBNote\fR:  The original milestone date was May 16, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+48 CHO with functional test suites completed - 1 800 with TurboLan, 
+1 800 with CIO, 1 800 with NIO.
+.nf
+By: ARSENAL
+When: 06/13/88
+Expected:
+Actual: 06/10/88
+.fi
+.LI
+S800/2.0 tested as IP gateway an PROBE proxy server for 48 hours.
+.nf
+By: ARSENAL
+When: 06/13/88
+Expected:
+Actual: 06/10/88
+.fi
+.LI
+ARPA/NS/NFS commands submitted for IC3 base build.
+.nf
+By: CLP and SMURFS
+When: 06/13/88
+Expected:
+Actual: 06/13/88
+.fi
+.LI
+Draft of changes to CE/SE/Customer training for 300 and 800 NFS.
+.nfB
+By: NFS_TECH
+When: 06/13/88
+Expected:
+Actual: CE/SE DONE, Customer 08/01/88
+.fi
+.LI
+Preliminary Performance Numbers for review (consistent format with 
+6.0/2.0 deliverable)
+.nf
+By: Peter Notess and RPC
+When: 06/13/88
+Expected:
+Actual: DONE
+.fi
+.LI
+List of potential VHE or Turbo LAN Alpha/Beta sites.
+.nf
+By: PROD
+When: 05/25/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Defect density of 0/0.5/3 (critical, serious and medium/low) by FB3
+.nf
+By: SMURFS
+When: 06/27/88
+Expected:
+Actual: 06/27/88
+.fi
+.LI
+Defect density of 0/0.5/7 (critical, serious and medium/low) by FB3
+.nf
+By: CLP (NS Services)
+When: 06/27/88
+Expected:
+Actual: 06/27/88
+.fi
+.LI
+Defect density of 0/0.5/5 (critical, serious and medium/low) by FB3
+.nf
+By: CLP (ARPA Services)
+When: 06/27/88
+Expected:
+Actual: 06/27/88
+.fi
+.LI
+Using and Administering NFS Services/800: Initial Revision.
+.nf
+By: DOC
+When: 05/20/88
+Expected:
+Actual: 05/19/88
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Output of UKL 3.0 IC2 final build	
+.nf
+By: ARSENAL
+On: INT
+When: 05/31/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Manual pages delivered to SMURFS for BB3
+.nf
+By: SMURFS
+On: DOC
+When: 06/08/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Manual pages delivered to SMURFS for FB3
+.nf
+By: SMURFS
+On: DOC
+When: 06/22/88
+Expected:
+Actual: DONE
+.fi
+.LI
+HP 9000 Series 800 Networking Overview LAN, NS, ARPA and NFS: Perform
+and Complete First Review
+.nf
+By: DOC
+On: TEAM
+When: 05/05/88-05/18/88
+Expected:
+Actual: 04/25/88
+.fi
+.LI
+NS, ARPA and NFS Reference Pages: Perform and Complete First Review
+.nf
+By: DOC
+On: TEAM
+When: 05/19/88-06/08/88
+Expected: 
+Actual: 05/23/88 for NFS and ARPA
+	? for NS
+.fi
+.LI
+Using and Administering NFS Services/800: Perform and Complete First 
+Review
+.nf
+By: DOC
+On: TEAM
+When: 06/09/88-06/15/88
+Expected: 
+Actual: 06/03/88
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Support and timely repairs of 1000, 3000, VAX/VMS to pass regression test 
+suites	
+.nf
+By: ARSENAL
+On: IND
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to CND NTC testing resources as needed 
+.br
+(VAX, 500, Apollo)
+.nf
+By: ARSENAL
+On: NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to IND NTC testing resources as needed (1000, 3000, VAX)
+.nf
+By: ARSENAL
+On: IND NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Level C (IC4)"
+.sp 
+\fBMilestone Date\fR: August 8, 1988
+.sp 
+\fBNote\fR:  The original milestone date was June 20, 1988 and
+             then July 18.
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+120 CHO with functional test suites completed
+.nf
+By: ARSENAL
+When: 08/01/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Completion of TurboLan testing requirements.  (Greater than 48 CHO's in 3
+configurations as follows: 
+.nf
+
+   1) 1 high-end 800 with TurboLan
+      1 low-end 800 with TurboLan
+      1 other 800 with TurboLan
+
+   2) 1 800 with TurboLan
+      1 800 with CIO
+
+   3) 3 800s with TurboLan)
+
+By: ARSENAL
+When: 08/01/88
+Expected:
+Actual: DONE
+.fi
+.LI
+S800/3.0 tested as IP gateway an PROBE proxy server for 120 hours 
+.nf
+By: ARSENAL
+When: 08/01/88
+Expected:
+Actual: DONE
+.fi
+.LI
+ARPA/NS/NFS commands submitted for IC4 base build.
+.nf
+By: CLP and SMURFS
+When: 08/01/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Introduction Plan Message to information brokers (telling about
+product changes, contains all plans to get the word to the field)
+.nf
+By: PROD
+When: 06/24/88 (?)
+Expected:
+Actual: DONE
+.fi
+.LI
+Give go or no-go on VHE or Turbo LAN Beta depending on interest.
+Select sites.
+.nf
+By: Arsenal, CLP, SMURFS, NFS_TECH, ARPA_TECH and PROD
+When: 06/24/88 (?)
+Expected:
+Actual: DONE
+.fi
+.LI
+Re-measure and report KNCSS at the entry to TC4.
+.nf
+By: CLP and SMURFS
+When: 08/08/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Defect density of 0/0/1 (critical, serious and medium/low) by FB4
+.nf
+By: CLP and SMURFS
+When: 08/01/88
+Expected:
+Actual: DONE
+.fi
+.LI
+If we have Beta sites, begin VHE or Turbo Betas
+.nf
+By: PROD
+When: 07/05/88 (?)
+Expected:
+Actual: No Beta sites
+.fi
+.LI
+NS, ARPA and NFS Reference Pages: Final review for clarity and grammatical
+correctness
+.nf
+By: DOC 
+When: 08/05/88-08/09/88
+Expected:
+Actual: DONE
+.fi
+.LI
+HP 9000 Series 800 Networking Overview: Perform and Complete 
+second review
+.nf
+By: Product Team
+When: 07/18/88-08/02/88
+Expected:
+Actual: DONE
+.nf
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Output of UKL 3.0 IC3 final build
+.nf
+By: ARSENAL
+On: INT
+When: 07/05/88
+Expected:
+Actual: 07/07/88
+.fi
+.LI
+Manual pages delivered to SMURFS for BB4
+.nf
+By: SMURFS
+On: DOC
+When: 07/13/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Manual pages delivered to SMURFS for FB4
+.nf
+By: SMURFS
+On: DOC
+When: 07/27/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Stable kernel at level C
+.nf
+By: ARSENAL, SMURFS and CLP
+On: HP-UX and RPC
+When: 07/18/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Stable NFS commands
+.nf
+By: HP-UX and RPC
+On: SMURFS
+When: 07/18/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Final New LAN, NS, ARPA and NFS Network Connectivity Support Identified
+.nf
+By: DOC
+On: PROD (and IND PROD)
+When: 07/11/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Using Network Services (NS)/9000 Series 800: Sign Off to Print
+.nf
+By: DOC
+On: NS Product Team
+When: 06/30/88-07/15/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Using and Administering NFS Services/800: Sign-Off to Print
+.nf
+By: DOC
+On: NFS Product Team
+When: 08/03/88-08/18/88
+Expected: 
+Actual: DONE
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Support and timely repairs of 1000, 3000, VAX/VMS to pass regression test 
+suites	
+.nf
+By: ARSENAL
+On: IND
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to CND NTC testing resources as needed 
+.br
+(VAX, 500, Apollo)
+.nf
+By: ARSENAL
+On: NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to IND NTC testing resources as needed 
+.br
+(1000, 3000, VAX)
+.nf
+By: ARSENAL
+On: IND NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Output of IC4
+.nf
+By: ARSENAL
+On: INT
+When: on schedule
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Regression Test (IC5)"
+.sp 
+\fBMilestone Date\fR: September 12, 1988
+.sp 
+\fBNote\fR:  The original milestone date was July 25, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+Maintain 120 CHO with functional test suites 
+.nf
+By: ARSENAL
+When: 08/22/88
+Expected:
+Actual: DONE
+.fi
+.LI
+HP 9000/Series 800 Networking Overview: LAN, NS, ARPA and NFS
+Final Revision and Camera Ready Art
+.nf
+By: DOC
+When: 08/10/88-08/19/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Maintain 120 CHO for S800 as IP gateway an PROBE proxy server 
+.nf
+By: ARSENAL
+When: 08/22/88
+Expected:
+Actual: DONE
+.fi
+.LI
+ARPA/NS/NFS commands submitted for IC5 base build.
+.nf
+By: CLP and SMURFS
+When: 08/22/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Revised training released to PrSD
+.nf
+By: NFS_TECH
+When: ?
+Expected:
+Actual: 06/29
+.fi
+.LI
+Pass CND's 120 hours reliability (CHO) test by FB5.
+.nf
+By: CLP and SMURFS
+When: 09/06/88
+Expected:
+Actual: DONE
+.fi
+.LI
+All LAN Reference Pages and "Networking Reference" Table of Contents
+and Permuted Index: Camera-Ready Art to IND for printing
+.nf
+By: DOC 
+When: 08/31/88
+Expected:
+Actual: DONE
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Output of UKL 3.0 IC4 final build	
+.nf
+By: ARSENAL
+On: INT
+When: 08/08/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Manual pages delivered to SMURFS for BB5
+.nf
+By: SMURFS
+On: DOC
+When: 08/17/88
+Expected:
+Actual: DONE
+.fi
+.LIB
+Manual pages delivered to SMURFS for FB5
+.nf
+By: SMURFS
+On: DOC
+When: 08/31/88
+Expected:
+Actual: DONE
+.fi
+.LI
+On-line copies of all LAN Reference Pages delivered to CND for 
+transfer to typesetting 
+.nf
+By: DOC
+On: Jacquie Toth
+When: 08/22/88
+Expected:
+Actual: DONE
+.fi
+.LI
+All LAN reference pages and "Networking Reference" Table of Contents
+and Permuted Index: Camera-Ready Art Available
+.nf
+By: DOC
+On: D. Einfaltt (ISD) and C. Echols (ISD)
+When: 08/31/88
+Expected:
+Actual: DONE
+.fi
+.LI
+HP 9000 Series 800 Networking Overview: LAN, NS, ARPA and NFS: Sign-Off
+to Print
+.nf
+By: DOC
+On: TEAM
+When: 07/28/88-08/08/88 (?)
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Support and timely repairs of 1000, 3000, VAX/VMS to pass regression test 
+suites	
+.nf
+By: ARSENAL
+On: IND
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to CND NTC testing resources as needed 
+.br
+(VAX, 500, Apollo)
+.nf
+By: ARSENAL
+On: NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LI
+Access to IND NTC testing resources as needed 
+.br
+(1000, 3000, VAX)
+.nf
+By: ARSENAL
+On: IND NTC
+When: as needed
+Expected:
+Actual: DONE
+.fi
+.LE
+.TE
+.bp
+.H 2 "Checkpoint: Spot-check"
+.sp 
+\fBMilestone Date\fR: October ?, 1988
+.sp
+\fBNote\fR: This milestone used to be on August 15, 1988
+.sp
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+Output of UKL 3.0 IC5 final build	
+.nf
+By: ARSENAL
+On: INT
+When: 09/12/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Maintain 120 CHO with functional test suites 
+.nf
+By: ARSENAL
+When: 09/19/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Maintain 120 CHO for S800 as IP gateway an PROBE proxy server 
+.nf
+By: ARSENAL
+When: 09/19/88
+Expected:
+Actual: DONE
+.fi
+.LI
+All critical and serious defects will be fixed, pending CRT approval.
+Medium and low defects discovered after FB5 will not be fixed.
+.nf
+By: CLP and SMURFS
+When: 09/26/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Re-measure and report KNCSS at the entry to TC5.
+.nf
+By: CLP and SMURFS
+When: 09/12/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Re-measure and report KNCSS at the start of final build for MR.
+.nf
+By: CLP and SMURFS
+When: 09/06/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Inform the field about enhancements (Computer News, Momentum)
+.nf
+By: PROD
+When: 09/19/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Present Beta Site Feedback if any.
+.nf
+By: PROD, NFS_TECH and ARPA_TECH
+When: 09/19/88
+Expected:
+Actual: No Beta sites
+.fi
+.LI
+Camera-Ready Art for all CND 3.0 Manuals delivered to CND
+Manufacturing Coordination for transport to RMO
+.nf
+By: DOC
+When: 08/31/88
+Expected:
+Actual: DONE
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+Camera Ready Art delivered to the Coordination group for transport
+to RMO
+.nf
+By: MANUFACTURING
+On: DOC
+When: 09/19/88
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking kernel support, troubleshooting and timely defect repairs to 
+pass regression test suites
+.nf
+By: ARSENAL
+On: IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Networking services support, troubleshooting and timely defect repairs to 
+pass regression test suites	
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LI
+Timely defect fixes to HP-UX commands
+.nf
+By: ARSENAL
+On: SAPPHIRE (HP_UX commands?)
+When: continuous
+Expected:
+Actual: DONE
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Bit release"
+.sp
+\fBMilestone Date\fR: November 09, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+Updated Performance Brief.
+.nf
+By: CLP and RPC
+When: 09/26/88
+Expected:
+Actual: 
+.fi
+.LI
+Rerun all test suites for which there is engineer time.
+.nf
+By: ARSENAL
+When: 09/26/88
+Expected:
+Actual:
+.fi
+.LE
+.sp 2
+\fBDependencies\fR:
+.AL
+.LI
+No new defects introduced into the system
+.nf
+By: ARSENAL
+On: CLP, SMURFS, IND and UKL
+When: 09/19/88
+Expected:
+Actual:
+.fi
+.LI
+Output of UKL 3.0 final build
+.nf
+By: ARSENAL
+On: INT
+When: 09/19/88
+Expected:
+Actual:
+.fi
+.LI
+Performance results from all data suppliers (Momentum Mailing)
+.nf
+By: Peter Notess
+On: CLP, RPC, SMURFS and ARSENAL 
+When: 09/26/88
+Expected:
+Actual:
+.fi
+.LI
+UKL releases bits for the various products to CMO
+for production.
+.nf
+By: MANUFACTURING
+On: INT
+When: 09/26/88
+Expected:
+Actual:
+.fi
+.LE
+.bp
+.H 2 "Checkpoint: Lab Manufacturing Release"
+.sp
+NOTE: This is bit release in the manufacturing schedule
+.sp 
+\fBMilestone Date\fR: November 09, 1988
+.sp 
+\fBMilestone Deliverables\fR:
+.AL
+.LI
+Source code and tools archived for manufacturing release. ??
+.nf
+By: CLP and SMURFS
+When: 10/05/88
+Expected:
+Actual:
+.fi
+.LI
+Tests archived for manufacturing release. ??
+.nf
+By: ARSENAL
+When: 10/05/88
+Expected:
+Actual:
+.fi
+.LI
+CND Quality summary worksheet and Product Date Sheet delivered to QA.
+.nf
+By: CLP and SMURFS
+When: 10/12/88
+Expected:
+Actual:
+.fi
+.LI
+Corporate software metrics collection forms complete.
+.nf
+By: CLP and SMURFS
+When: 10/12/88
+Expected:
+Actual:
+.fi
+.LI
+Release celebration planned.
+.nf
+By: TEAM
+When: 10/88
+Expected:
+Actual:
+.fi
+.LI
+CND Project Notebook Completed
+.nf
+By: CLP and SMURFS
+When: 11/88
+Expected:
+Actual:
+.fi
+.LI
+Project post mortem complete.
+.nf
+By: TEAM
+When: 11/88
+Expected:
+Actual:
+.fi
+.LI
+3.0 Networking Performance Brief distributed in Momentum.
+(customer version done through ING?)
+.nf
+By: NFS_TECH and Peter Notess
+When: 10/01/88
+Expected:
+Actual:
+.fi
+.LI
+Retest of final bits.
+.nf
+By: CLP and SMURFS 
+When: when bits available
+Expected:
+Actual:
+.fi
+.LE
+.sp 3
+\fBDependencies\fR:
+.AL
+.LI
+Output from final build
+.nf
+By: ARSENAL, CLP and SMURFS 
+On: INT
+When: on schedule
+Expected:
+Actual:
+.fi
+.LI
+Copies of HP-UX, NFS, NS, ARPA and LAN/LINK products to CND
+(Federal Express)
+.nf
+By: CLP, SMURFS and ARSENAL
+On: CMO
+When: when bits available
+Expected:
+Actual:
+.fi
+.LE
+.sp
+.TE
+.TC 2 2 3 0 "TABLE OF CONTENTS"	\" Define format for table of contents

@@ -1,0 +1,281 @@
+/* file commonb */
+/* SCCS commonb    REV(64.1);       DATE(92/04/03        14:21:58) */
+/* KLEENIX_ID @(#)commonb	64.1 91/08/28 */
+
+/*		'commonb' was created to facilitate sharing of
+ *		global definitions with the FORTRAN 'c0' procedure
+ *		integrator.
+ *		It is merely excerpts from the original 'common'.
+*/
+
+long dope[ DSIZE ];
+char *opst[DSIZE];
+
+#ifdef xcomp300_800
+struct dopest { short dopeop; char opst[15]; long dopeval; } indope[] = {
+#else
+struct dopest { short dopeop; char opst[14]; long dopeval; } indope[] = {
+#endif /* xcomp300_800 */
+
+	NAME, "NAME", LTYPE|DALFLG,
+	STRING, "STRING", LTYPE,
+	REG, "REG", LTYPE|DALFLG,
+	OREG, "OREG", LTYPE|DALFLG,
+# ifdef C0
+	FC0OREG, "FC0OREG", LTYPE|DALFLG,
+# endif /* C0 */
+	ICON, "ICON", LTYPE|DALFLG,
+	DBRA, "DBRA", BITYPE,
+	FCON, "FCON", LTYPE|DALFLG,
+	CCODES, "CCODES", LTYPE,
+	FENTRY, "FENTRY", LTYPE,
+	FREE, "FREE", LTYPE,
+	UNARY MINUS, "unary -", UTYPE|FLOFLG,
+	UNARY PLUS, "unary +", UTYPE,
+	UNARY MUL, "unary *", UTYPE,
+	UNARY AND, "unary &", UTYPE,
+	UNARY CALL, "UCALL", UTYPE|CALLFLG,
+	NOT, "!", UTYPE|LOGFLG,
+	COMPL, "~", UTYPE,
+	FORCE, "FORCE", UTYPE,
+	INIT, "INIT", UTYPE,
+	SCONV, "SCONV", UTYPE|FHWFLG|FLOFLG,
+	PCONV, "PCONV", UTYPE,
+	PLUS, "+", BITYPE|FLOFLG|SIMPFLG|COMMFLG|FHWFLG|NOTEMPLFLG,
+	ASG PLUS, "+= (++)" /* ++<exp> treated as <exp>+=1 */,
+	           BITYPE|ASGFLG|ASGOPFLG|FLOFLG|SIMPFLG|COMMFLG,
+	MINUS, "-", BITYPE|FLOFLG|SIMPFLG|FHWFLG|NOTEMPLFLG,
+	ASG MINUS, "-= (--)" /* --<exp> treated as <exp>-=1 */,
+	           BITYPE|FLOFLG|SIMPFLG|ASGFLG|ASGOPFLG,
+
+#ifdef IRIF
+	ADDICON, "+", BITYPE,
+	SUBICON, "-", BITYPE,
+	PADDICON, "+", BITYPE,
+	PSUBICON, "-", BITYPE,
+	PADDI, "+", BITYPE,
+	PSUBI, "-", BITYPE,
+	PSUBP, "-", BITYPE,
+	ASG ADDICON, "+= (++)", BITYPE,
+	ASG SUBICON, "-= (--)", BITYPE,
+	ASG PADDICON, "+= (++)", BITYPE,
+	ASG PSUBICON, "-= (--)", BITYPE,
+	ASG PADDI, "+= (++)", BITYPE,
+	ASG PSUBI, "-= (--)", BITYPE,
+#endif /* IRIF */
+
+	MUL, "*", BITYPE|FLOFLG|MULFLG|FHWFLG|NOTEMPLFLG,
+	ASG MUL, "*=", BITYPE|FLOFLG|MULFLG|ASGFLG|ASGOPFLG,
+	AND, "&", BITYPE|SIMPFLG|COMMFLG|LTYFLG|NOTEMPLFLG,
+	ASG AND, "&=", BITYPE|SIMPFLG|COMMFLG|ASGFLG|ASGOPFLG,
+	COLON, ":", BITYPE,
+	ANDAND, "&&", BITYPE|LOGFLG,
+	OROR, "||", BITYPE|LOGFLG,
+	CM, ",", BITYPE,
+	COMOP, ",OP", BITYPE,
+	ASSIGN, "=", BITYPE|ASGFLG,
+	DIV, "/", BITYPE|FLOFLG|MULFLG|DIVFLG|FHWFLG|NOTEMPLFLG,
+	ASG DIV, "/=", BITYPE|FLOFLG|MULFLG|DIVFLG|ASGFLG|ASGOPFLG,
+	MOD, "%", BITYPE|DIVFLG|NOTEMPLFLG,
+	ASG MOD, "%=", BITYPE|DIVFLG|ASGFLG|ASGOPFLG,
+	LS, "<<", BITYPE|SHFFLG|NOTEMPLFLG,
+	ASG LS, "<<=", BITYPE|SHFFLG|ASGFLG|ASGOPFLG,
+	RS, ">>", BITYPE|SHFFLG|NOTEMPLFLG,
+	ASG RS, ">>=", BITYPE|SHFFLG|ASGFLG|ASGOPFLG,
+	OR, "|", BITYPE|COMMFLG|SIMPFLG|LTYFLG|NOTEMPLFLG,
+	ASG OR, "|=", BITYPE|COMMFLG|SIMPFLG|ASGFLG|ASGOPFLG,
+	ER, "^", BITYPE|COMMFLG|LTYFLG|NOTEMPLFLG,
+	ASG ER, "^=", BITYPE|COMMFLG|ASGFLG|ASGOPFLG,
+	INCR, "++", BITYPE|ASGFLG|FLOFLG,
+	DECR, "--", BITYPE|ASGFLG|FLOFLG,
+#ifdef IRIF
+	DOT, ".", BITYPE,
+#endif /* IRIF */
+	STREF, "->", BITYPE,
+	CALL, "CALL", BITYPE|CALLFLG,
+# ifdef C0
+	FC0CALL, "FC0CALL", UTYPE,
+	FC0CALLC, "FC0CALLC", LTYPE,
+# endif /* C0 */
+	QUEST, "?", BITYPE|FLOFLG,
+	EQ, "==", BITYPE|LOGFLG|FLOFLG,
+	NE, "!=", BITYPE|LOGFLG|FLOFLG,
+	LE, "<=", BITYPE|LOGFLG|FLOFLG,
+	LT, "<", BITYPE|LOGFLG|FLOFLG,
+	GE, ">=", BITYPE|LOGFLG|FLOFLG,
+	GT, ">", BITYPE|LOGFLG|FLOFLG,
+#ifndef IRIF
+	CBRANCH, "CBRANCH", BITYPE|FLOFLG,
+#endif /* not IRIF */
+	BICCODES, "BICCODES", BITYPE|FLOFLG,
+	UGT, "UGT", BITYPE|LOGFLG,
+	UGE, "UGE", BITYPE|LOGFLG,
+	ULT, "ULT", BITYPE|LOGFLG,
+	ULE, "ULE", BITYPE|LOGFLG,
+	ARS, "A>>", BITYPE,
+	TYPE, "TYPE", LTYPE,
+	LB, "[", BITYPE,
+	FLD, "FLD", UTYPE,
+	PMCONV, "PMCONV", BITYPE,
+	PVCONV, "PVCONV", BITYPE,
+#ifndef IRIF
+	RETURN, "return", BITYPE|ASGFLG|ASGOPFLG,
+	CAST, "CAST", BITYPE|ASGFLG|ASGOPFLG|FHWFLG,
+#else /* IRIF */
+	RETURN, "return", BITYPE|ASGFLG,
+	CAST, "CAST", BITYPE|ASGFLG|FHWFLG,
+#endif /* IRIF */
+	GOTO, "goto", UTYPE,
+
+#ifndef IRIF
+	STASG, "STASG", BITYPE|ASGFLG,
+	STARG, "STARG", UTYPE,
+	STCALL, "STCALL", BITYPE|CALLFLG,
+	UNARY STCALL, "USTCALL", UTYPE|CALLFLG,
+/* special opcodes for 68881 support. Seen only in pass 2 */
+	FEQ, "F==", BITYPE|LOGFLG|FLOFLG,
+	FNEQ,"F!=", BITYPE|LOGFLG|FLOFLG,
+	FGT, "F>", BITYPE|LOGFLG|FLOFLG,
+	FNGT,"F!>", BITYPE|LOGFLG|FLOFLG,
+	FGE, "F>=", BITYPE|LOGFLG|FLOFLG,
+	FNGE,"F!>=", BITYPE|LOGFLG|FLOFLG,
+	FLT, "F<", BITYPE|LOGFLG|FLOFLG,
+	FNLT,"F!<", BITYPE|LOGFLG|FLOFLG,
+	FLE, "F<=", BITYPE|LOGFLG|FLOFLG,
+	FNLE,"F!<=", BITYPE|LOGFLG|FLOFLG,
+
+#else /* IRIF */
+	INDEX, "INDEX", BITYPE,
+	VA_START, "VA_START", BITYPE,
+	ASGOPCONV, "ASGOPCONV", UTYPE,
+#endif /* IRIF */
+
+	FMONADIC, "FMONADIC", BITYPE|FLOFLG,
+	DIVP2, "/2", BITYPE|MULFLG|DIVFLG|NOTEMPLFLG,
+	ASG DIVP2, "/=2", BITYPE|MULFLG|DIVFLG|ASGFLG|ASGOPFLG,
+	PAREN, "()", UTYPE,
+	PHEAD, "PHEAD", LTYPE,
+	ARGLIST, "ARGLIST", UTYPE,
+	ARGASG, "(arg convert)", BITYPE|ASGFLG,
+	EQV, "EQV", BITYPE|COMMFLG,
+	NEQV, "NEQV", BITYPE|COMMFLG,
+-1,	0
+};
+
+mkdope(){
+	register struct dopest *q;
+
+	for( q = indope; q->dopeop >= 0; ++q ){
+		dope[q->dopeop] = q->dopeval;
+		opst[q->dopeop] = q->opst;
+		}
+	}
+# ifdef DEBUGGING
+tprint( t, ta )  register TWORD t, ta; {/* output a nice description of the type of t */
+
+	static char * tnames[] = {
+		"undef",
+		"farg",
+		"char",
+		"short",
+		"int",
+		"long",
+		"float",
+		"double",
+		"strty",
+		"unionty",
+		"enumty",
+		"moety",
+		"uchar",
+		"ushort",
+		"unsigned",
+		"ulong",
+		"void",
+		"long double",
+		"signed char",
+		"labty",
+		"tnull",
+		"?", "?"
+		};
+
+	for(;; t = DECREF(t) ){
+                if (ISPVOL(ta)) prntf("volatile ");
+		if (ISPCON(ta)) prntf("const ");
+		ta = DECREF(ta);
+		if( ISPTR(t) ) prntf( "PTR " );
+		else if( ISFTN(t) ) prntf( "FTN " );
+		else if( ISARY(t) ) prntf( "ARY " );
+		else if(t <= TNULL) {
+                        if (ISVOL(ta)) prntf("volatile ");
+			if (ISCON(ta)) prntf("const ");
+			if (SCLASS(ta)==ATTR_REG) prntf("reg_class ");
+			prntf( "%s", tnames[t] );
+			return;
+			}
+		else {
+# ifdef C0
+			fatal("unknown type in tprint");
+# else /* C0 */
+#ifdef BRIDGE
+			cerror1("unknown type in tprint %d", t);
+#else  /*BRIDGE*/
+			cerror("unknown type in tprint %d",t);
+#endif /*BRIDGE*/
+# endif /* C0 */
+		     }
+		}
+	}
+# endif /* DEBUGGING */
+
+
+
+
+#ifndef C0
+
+/* fwalk() is a prefix tree traversal routine that visits nodes in the order
+   P - L - R.
+*/
+fwalk( t, f, down ) register NODE *t; int (*f)(); {
+
+	int down1, down2;
+
+more:
+	if( t == NULL ) return;
+
+	down1 = 0; down2 = 0;
+
+	(*f)( t, down, &down1, &down2 );
+
+	switch( optype( t->in.op ) ){
+
+	case BITYPE:
+		fwalk( t->in.left, f, down1 );
+		t = t->in.right;
+		down = down2;
+		goto more;
+
+	case UTYPE:
+		t = t->in.left;
+		down = down1;
+		goto more;
+
+		}
+	}
+#endif /* C0 */
+
+
+
+# if ( defined SLOW_WALKF || defined IRIF )
+/* walkf() is a postfix tree traversal routine that traverses the tree in the
+   order L - R - P.
+*/
+walkf( t, f ) register NODE *t;  int (*f)(); {
+	register short opty;
+
+	opty = optype(t->in.op);
+
+	if( opty != LTYPE ) walkf( t->in.left, f );
+	if( opty == BITYPE ) walkf( t->in.right, f );
+	(*f)( t );
+	}
+# endif /* SLOW_WALKF */

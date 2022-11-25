@@ -1,0 +1,443 @@
+# @(#) $Header: fmenu.doc,v 66.3 90/09/20 12:58:58 kb Exp $
+			    TSM User Interface
+
+Menu Control Files
+
+	Tsm.ui looks for menu control files using the search path:
+		 ./.tsmtext/$LANG/filename
+		 ./.tsmtext/C/filename
+		 ./.tsmtext/filename
+		 $HOME/.tsmtext/$LANG/filename
+		 $HOME/.tsmtext/C/filename
+		 $HOME/.tsmtext/filename
+		 /usr/tsm/text/$LANG/filename
+		 /usr/tsm/text/C/filename
+		 /usr/tsm/text/filename
+	You may use some files from the default /usr/tsm/text/$(LANG)
+	subdirectory, but override others, such as the program menu, by
+	putting a user specific control file for that menu in the current
+	directory or the $HOME/.facettext directory.
+
+	Menu control files consist of groups of lines which describe each
+	item on the menu. Each line begins with a key word which identifies
+	what aspect of a menu item is being described. The following is a
+	list of the different types of menu control file specifications:
+
+	Blank lines and lines beginning with # are considered as comments.
+
+	menu_bar { row col }	Specifies that the menu is a menu bar type.
+				If row and col are specified, the upper
+				left corner of the menu is located at
+				that position - otherwise, the menu is
+				located at a default position.
+
+	pull_down { row col }	Specifies that the menu is a pull down type.
+				If row and col are specified, the upper
+				left corner of the menu is located at
+				that position - otherwise, the menu is
+				located at a default position. A cascading
+				menu which is entered from a pull_down menu
+				is also specified as a pull_down menu.
+
+	menu_title xxx		Remainder of line after "menu_title " is used
+				as the title for the menu. Titles may
+				specify variables which are resolved at
+				run time by tsm.ui. The variables available
+				are listed below.
+				
+				The menu is drawn differently depending on
+				whether a title is specified or not. If no
+				title is specified, a briefer menu is drawn
+				having fewer line drawing characters.
+
+	item_name xxx		Remainder of line after "item_name " is used
+				as the name of the item in the menu. An
+				"item_name" entry begins a new item. All other
+				item specifications will apply to the previous
+				item created by an "item_name" specification.
+
+	item_selection c	The character following "item_selection " is
+				used as the item selection character. The
+				upper or lower case version of the character
+				will both work as an item selection character.
+				Those writing menu control files should
+				capitalize the item selection character in
+				the item name, to indicate the character to
+				the user.
+
+	item_type  type_name	Where "type_name" is substituted with:
+
+				program
+
+					Which indicates that the item action
+					will be a UNIX program which should be
+					run in an available window.
+					
+				menu
+				
+					Which indicates that the item action
+					is a menu control file which will be
+					searched for in the manner described
+					above.
+				
+				intrinsic
+				
+					Which means the that then item action
+					is a keyword for a function which is
+					intrinsic to the menu. The available
+					intrinsic item actions are listed below.
+
+				tsm_command
+
+					Which means that the item action is a
+					string which should be sent to TSM as
+					if the ^W hotkey had been pressed. For
+					example, an item action of
+
+						t1
+
+					would cause window 1 to be put in the
+					top half of a split screen and be made
+					the current window.
+
+				tsm_cmd_to_user
+
+					Which means that the item action is
+					a string which should be sent to TSM
+					as if the ^W hotkey had been pressed.
+					After the string is processed, TSM
+					will begin accepting input from
+					the user. For example, an item action of
+
+						xc
+
+					would bring up the TSM command line
+					to the point of asking whether capture
+					should be turned on or off and would
+					allow the user to continue interaction
+					with the command line.
+
+				menu_program
+
+	item_action xxx		The remainder of the line after "item_action"
+				is used as the action which is interpreted
+				according to the action type as described
+				above.
+
+	item_action_2 xxx	Same as item_action except that it is a second
+				action to take. This is only used with a
+				tsm_command item type and is used to send
+				two successive commands to TSM. It is used,
+				for example in the split screen item in the
+				default menus to specify both the top and
+				bottom windows to TSM.
+
+	new_window_title xxx	The remainder of the line after
+				"new_window_title" is used as the title of
+				a new window which is activated as a result
+				of the action. This is only used if the item
+				type is program since this is the only type
+				of action which activates a new window. If
+				no new_window_title specification is made
+				then the item_name value is used as the
+				new window's title.
+
+	item_auto_select	Indicates that this item should be automatically
+				selected when this menu is run. If multiple
+				items claim to be the auto selection item,
+				the last one specified is the one used.
+
+	dialog_box { row col }	Specifies that the current item, when selected
+				will put up a dialog box to get some information
+				from the user. The row and column for the
+				upper left corner of the dialog box on the
+				screen may be specified. Otherwise it will
+				be placed in a default position on the screen.
+
+	dialog_item_prompt xxx	Creates a new item for the dialog box and the
+				remainder of the line after "dialog_item_prompt"
+				will be used as the prompt for the item in the
+				dialog box.
+
+	dialog_item_var	$[0-9] maxlen
+				Specifies which variable $0 through $9 will
+				be used to hold the user's input to this
+				dialog box item. If this entry is omitted,
+				then the dialog box item will be for display
+				of the prompt text only, and the highlight
+				will not be positioned on it for entry
+				by the user. "maxlen" is the maximum number
+				of characters to accept for the value.
+
+
+	Variables.
+	----------
+
+	$Current_window		Current window number when tsm.ui popped
+				up.
+
+	$Current_window_title	Title of the current window when tsm.ui
+				popped up.
+
+	$0, $1, $2, ... $9	Variables for which values may be specified
+				by the user via a dialog box. These variables
+				are cleared each time before entered by the
+				user from a dialog box.
+
+	
+	Intrinsic Item Actions.
+	-----------------------
+
+	The following are the item actions that are recognized for the
+	"intrinsic" item type. All except the win_menu and win_menu_with_title
+	are for convenience only and can be done with a tsm_command or
+	tsm_cmd_to_user item type also.
+
+	win_menu		Cause the window selection menu to be built
+				and run with a list of the currently running
+				windows in its list of items. This menu will
+				be a pull down menu without a title.
+
+	win_menu_with_title	Same as win_menu except that the menu has
+				a title.
+
+	start_cut		Causes TSM to enter window command mode at
+				the point in the cut operation that the user
+				is marking the corners of the block to be cut.
+
+	do_paste		Causes TSM to paste the contents of the cut
+				buffer into the current window which the
+				menu was popped up over.
+
+	print_window		Causes TSM to print the contents of the current
+				window that the menu was popped up over on
+				the system line printer (or whatever the
+				.facetprint script specifies).
+
+	start_shell		Causes TSM to start the users default shell
+				as specified by the $SHELL environment variable
+				to be started in the next available window.
+
+	quit_ft			Causes TSM to terminate and kill all the
+				processes running in windows.
+
+
+	In addition, to the above description of menu control files, examples
+	of menu control files may be found by looking at the default menus
+	which are installed in the /usr/tsm/menu/C directory.
+
+
+Keyboard Usage
+
+	Keys have the following meanings when in each part of the menu:
+
+	Menu bar.
+
+		Left arrow,
+		Backspace:
+
+			Moves the highlight to the next item to the left.
+			When at the left most item, the highlight is wrapped
+			around to the rightmost item.
+
+		Right arrow:
+
+			Moves the highlight to the next item to the right.
+			When at the right most item, the highlight is wrapped
+			around to the left most item.
+
+		Down arrow:
+
+			When on an item associated with a pull down menu,
+			causes the menu to be pulled down and entered.
+
+		Return:
+
+			Causes "execution" of the current item. If the item
+			is associated with a pull down menu, it is pulled
+			down.
+
+		Escape,
+		Space:
+
+			Causes the menu bar to be exited and removed from
+			the screen. If the menu bar was the top level menu
+			the user is returned to interacting with the program
+			in the window over which the menu was popped.
+
+		Interrupt key:
+
+			The interrupt key (as defined in the stty settings)
+			when pressed at the top level menu bar will cause the
+			menu to terminate. This key is usually defined to be
+			DEL or ^C. Note that this is not the same as exiting
+			the menu bar with an escape or space. In that case
+			the menu program is still running and available
+			for activation. When the menu is terminated with
+			the interrupt key, the menu program actually terminates
+			and the menu is no longer available until restarted
+			in a window by the user.
+
+	Pull down menu.
+
+		Up arrow:
+
+			Moves the highlight to the next item up.  When at
+			the top most item, the highlight is wrapped around
+			to the bottom most item.
+
+		Down arrow,
+		Newline (linefeed):
+
+			Moves the highlight to the next item down.  When at
+			the bottom most item, the highlight is wrapped around
+			to the top most item.
+
+		Left arrow,
+		Backspace:
+
+			If in a pull down menu just below a menu bar, the left
+			arrow key will cause the pull down menu to be closed,
+			the next item to the left on the menu bar will be
+			selected, and if it has a pull down menu associated
+			with it, it will be pulled down.
+
+		Right arrow:
+
+			If in a pull down menu just below a menu bar, the right
+			arrow key will cause the pull down menu to be closed,
+			the next item to the right on the menu bar will be
+			selected, and if it has a pull down menu associated
+			with it, it will be pulled down.
+
+		Return:
+
+			Causes "execution" of the current item.
+
+		Escape,
+		Space:
+
+			Causes the pull down menu to be exited and removed from
+			the screen. The user is placed back in the menu above
+			the pull down menu which was exited.
+
+	Dialog box entry item.
+
+	Dialog box OK item.
+
+
+Menu customization in the .tsm file
+
+	At this time, the only customization of the menu operation that
+	is specified in the .tsm file is the hot key which causes the
+	menu to pop up. It is specified with a line in the .tsm file
+	of the form:
+
+	menu_hotkey=^X
+
+	In this example the hotkey would be ^X (control X).
+
+
+Terminal description file directives for the menu
+
+	If the menu is run on a terminal type for which there are no
+	directives in the TSM terminal description file for the menu,
+	the menu will run satisfactorily, but it may not use the terminal's
+	line drawing characters, and the user might find that the menus
+	are not drawn as nicely as they would like. The following terminal
+	description file directives may be used to direct the way that
+	the menu uses the terminal:
+
+	##-menu-cap-ena_acs=		Used to specify the string (if any)
+					required to output to the terminal to
+					enable the use of its alternate
+					character set for line drawing
+					characters. This string is output once
+					when the menu starts.
+
+	##-menu-cap-enter_alt_charset_mode=
+					Used to specify the string to enter
+					the alternate character set mode so
+					that line drawing characters may be
+					printed. This string is output each
+					time the menu needs to draw a series
+					of line drawing characters.
+
+	##-menu-cap-exit_alt_charset_mode=
+					Used to specify the string to exit
+					alternate character set mode. Output
+					when the menu has been writing line
+					drawing characters and needs to revert
+					back to normal text.
+
+	##-menu-cap-acs_chars=		Used to specify a string of characters
+					which relate the characters used
+					for special characters in the terminal's
+					alternate character set to the same
+					special character in a vt100's alternate
+					character set. This string is as
+					documented in the System V.3 SVID
+					documentation for the terminfo
+					capability acs_chars.
+
+	##-menu-cap-no_attr=		Used to specify the attribute string
+					to be sent to the terminal to turn
+					any attributes that the menu has been
+					using off.
+
+	##-menu-cap-shadow_attr=	Used to specify the attribute string
+					to be sent to the terminal to draw
+					the shadowed area around the edges
+					of a menu.
+
+	##-menu-cap-box_attr=		Used to specify the attribute string
+					to be sent to the terminal to draw
+					the box around the contents of a
+					menu.
+
+	##-menu-cap-title_attr=		Used to specify the attribute string
+					to be sent to the terminal when
+					writing the menu title.
+
+	##-menu-cap-item_attr=		Used to specify the attribute string
+					to be sent to the terminal when
+					writing an item in the menu which
+					is not the current item.
+
+	##-menu-cap-highlight_attr=	Used to specify the attribute string
+					to be sent to the terminal when
+					writing an item in the menu which
+					IS the current item.
+
+	##-menu-cap-highlight_blink_attr=
+					Used to specify the attribute string
+					to be sent to the terminal when
+					writing an item in the menu which
+					is the current item and it has been
+					selected and it is causing a new
+					program to be started in a new window.
+					The blinking is used to indicate
+					activity while the user is waiting
+					for the system to start the new program
+					and select the new window.
+
+	##-menu-cap-magic_cookie=	Used to specify that the attribute
+					strings used are space taking magic
+					cookie attributes (such as on a
+					Wyse 50). The value after this
+					capability should be the number of
+					characters that an attribute uses
+					(typically 1). If magic cookie
+					attributes are not used, this directive
+					may still be specified but with a
+					value of 0.
+
+	It is best to include these directives in a separate terminal
+	description file which is "used" by other terminal description
+	file. By convention, these menu capability description files
+	end with the extension ".fm" rather than ".fi". The search path
+	for these files is the same as with any other terminal description
+	files, allowing users to customize this one part of their TSM
+	terminal description. This would be most often done in the case
+	of a color terminal where a user might have his own preferences
+	for the color attributes used for the various parts of the menu.

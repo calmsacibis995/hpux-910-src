@@ -1,0 +1,185 @@
+.\" .PH "''''"
+.\" .PF "''\\\\nP''"
+.\" .ds HF 3 3 3 3 3 3 3	\" all headings are bold
+.\" .nr Hb 7
+.\" .nr Hs 7
+.\" .pl 66
+.\" .ll 70
+.\" .po -5
+.\" .ad b
+.H 2 "NFS/Diskless Tests (Jason Zions)"
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Jason Zions
+DEPENDENCY:
+ISSUE: Final decision on NFS-hetergeneous clusters
+.fi
+.sp 2
+.H 3 "Introduction"
+.sp 1
+The objective of the NFS/Diskless tests is to isolate defects
+peculiar to NFS and Diskless
+interactions which would not be found through other 
+testing processes.
+.sp 1
+The success or failure of the tests will be determined using the following
+criteria outlined below and if appropriate, an analysis of the end state
+of the system.
+.sp 1
+.BL
+.LI
+None of the test systems should crash or hang, including otherwise
+uninvolved diskless clients.
+.LI
+The integrity of both services should be preserved.
+.LI
+No failures occur other than those seen in non-diskless scenarios.
+.LE
+.sp 2
+.H 3 "Intra-cluster testing"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    4.0  md
+.fi
+.sp 1
+Run the full functional and stress suites on a three node cluster, i.e.
+.DS
+    =============================================
+    |              |             |              |
+---------      ---------     ---------      ---------
+|  9K   |      |  9K   |     |  9K   |      |  9K   |
+| Server|<-----| client|     | client|      | client|
+---------      ---------     ---------      ---------
+|  disk |<---------------------/  Single-line indicates
+---------                  NFS client & server relationship
+  |__^
+.DE
+.sp 1
+Two of the three clients, as well as the server, should actively participate
+in the tests. The third client should run a simple set of non-NFS tests
+which merely ensure the node remains busy and that any failure is immediately
+visible. One possibility for this test set is the DUX kernel validation
+suite, available from SSO.
+.sp 1
+The goal for this scenario is
+48 hours continuous operation at level 2 stress.
+Steps should be taken to
+ensure that moderate to high filesystem and swapping activity is
+maintained during the test.
+.sp 2
+.H 3 "Inter-cluster tests"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    8.0  md
+.fi
+.sp 1
+Set up five systems in the following configuration:
+.sp 1
+.DS
+    ==============================
+    |              |             |
+---------      ---------     ---------
+|  9K   |      |  9K   |     |  9K   |
+| Server|<-----| client|     | client|
+---------      ---------     ---------
+|  disk |<---     /
+---------    \e   /  Single-line indicates NFS
+  ^   |       \e /   client to server relationship
+  |   |        X
+  |   v       / \e   Double-line connects cnodes
+---------    /   \e  in the same cluster
+|  9K   |<---     \e
+| Server|      ---------
+---------      |  9K   |
+|  disk |      | client|
+---------      ---------
+    |              |
+    ================
+.DE
+.sp 1
+As in the intra-system test scenario, four of the five systems
+run functional tests as indicated in the diagram. The fifth
+system, a diskless client, does not run NFS tests; it simply
+keeps fairly busy performing normal filesystem activities.
+.sp 1
+Since this configuration is fairly representative of typical
+usage, the tests should be run for 120 hours at level 3 stress.
+Steps should be taken to
+ensure that moderate to high filesystem and swapping activity is
+maintained during the test.
+.sp 2
+.H 3 "Extra-cluster tests"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    6.0  md
+.fi
+.sp 1
+Set up five systems in the following configuration:
+.sp 1
+.DS
+    ===========================================
+    |              |             |            |
+---------      ---------     ---------    ---------
+|  9K   |      |  9K   |     |  9K   |    |  9K   |
+| Server|<-----| client|     | client|    | client|
+---------      ---------     ---------    ---------
+|  disk |                        /
+---------        _______________/
+  ^   |         /
+  |   |        /
+  |   v       /  Single-line indicates NFS
+---------    /   client to server relationship
+|  9K   |<---
+| Server|        Double-line connects cnodes
+---------        in the same cluster
+|  disk |
+---------
+.DE
+.sp 1
+As in the above scenarios, four of the five systems
+run functional tests as indicated in the diagram. The fifth
+system, a diskless client, does not run NFS tests; it simply
+keeps fairly busy performing normal filesystem activities.
+.sp 1
+Since this configuration is fairly representative of typical
+usage, the tests should be run for 120 hours at level 3 stress.
+Steps should be taken to
+ensure that moderate to high filesystem and swapping activity is
+maintained during the test.
+.sp 2
+.H 3 "Error testing"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    2.0  md
+.fi
+.sp 1
+Configure a three system cluster as shown below.
+.DS
+    ==============================
+    |              |             |
+---------      ---------     ---------
+|9K   A |      |9K   B |     |9K   C |
+|Server |      |client |     |client |
+---------      ---------     ---------
+| w/NFS |      |w/o NFS|     | w/NFS |
+---------      ---------     ---------
+.DE
+.sp 1
+.nf
+test #     Description                  Response
+
+  1        Bring up A and C; attempt	B should panic during boot
+	   to bring up B.               with an appropriate error
+
+  2        Bring up A and C; mount a    umount should fail with
+	   remote disk from C; cd to    "directory busy" error
+	   the mounted tree on C;
+	   attempt to umount on A.
+
+  3        Same as case 2, reversing    umount should fail with
+	   roles of A and C.            "directory busy" error
+.fi

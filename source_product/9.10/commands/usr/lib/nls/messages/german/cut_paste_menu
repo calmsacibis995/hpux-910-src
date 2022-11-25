@@ -1,0 +1,76 @@
+############################################################################
+# TSM user customizable file: cut_paste_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# Cut and Paste menu for TSM
+# @(#) $Header: cut_paste_menu,v 70.1 92/06/11 19:40:39 ssa Exp $
+#
+# LOCALIZERS:
+# In all of the following only item_name and item_selection can be translated. 
+# If needed, translate the string to the right of "=" sign; but do NOT
+# translate $tsm_hot_key. You can translate the letter following $tsm_hot_key
+# if you've changed the key mappings. In such a case, translate c/p to 
+# the new mappings. To change mappings see "!in_window_mode_prompt_popup" in 
+# tsmtext file.
+#
+# The item_selection corresponds to the letter which can be entered by the
+# user to quickly select this item instead of using the arrow keys, when the 
+# sub-submenu is displayed.  Only a single character can be speicifed.
+#
+# WARNING:
+# Make sure you are consistent between key mappings and item_selection letters.
+#
+
+pull_down_menu
+
+# The next item_name corresponds to the first line of the submenu 
+# displayed when "Cut & paste" is selected from the main menu.
+#
+item_name=Ausschneiden    $tsm_hot_keyc
+item_selection=A
+item_type=tsm_cmd_to_user
+item_action=c
+
+# The next item_name corresponds to the second line of the submenu 
+# displayed when "Cut & paste" is selected from the main menu.
+#
+item_name=Einfœgen        $tsm_hot_keyp
+item_selection=E
+item_type=intrinsic
+item_action=do_paste
+
+# The next item_name corresponds to the third line of the submenu 
+# displayed when "Cut & paste" is selected from the main menu.
+# The "..." string at the end of item_name is optional and is used to indicate
+# that the item itself is a pull down menu.  Extra spacing is to ensure
+# output is lined up (not necessary to keep).
+item_name=Schneideoptionen 
+item_selection=S
+item_type=menu
+item_action=cut_o_menu
+
+# The next item_name corresponds to the forth line of the submenu 
+# displayed when "Cut & paste" is selected from the main menu.
+# The "..." string at the end of item_name is optional and is used to indicate
+# that the item itself is a pull down menu.
+item_name=einfœgeOptionen
+item_selection=O
+item_type=menu
+item_action=paste_o_menu

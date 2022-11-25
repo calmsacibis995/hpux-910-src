@@ -1,0 +1,10 @@
+## FacetTerm  hp-pcmode7  COMMON  description file  09/01/89
+#    VT200 7-Bit mode switchable to VT200 8-Bit mode and VT100 mode and HP-PC
+#    !!! IMPORTANT NOTE !!!
+#    Set Terminal to:   no XON/XOFF  4800 baud or less
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp-pcmode7.FC,v 70.1 92/03/09 15:59:10 ssa Exp $
+## DOES_NOT_WORK_IN_PC_MODE xon_xoff
+##--- CONTROL_8_BIT ---##
+### vt220_7_bit=\E[62;1"p   auto_wrap_on=\E[?7h 24_line=\E[10>l
+enter_ca_mode=\E[62;1"p\E[?7h\E[10>l

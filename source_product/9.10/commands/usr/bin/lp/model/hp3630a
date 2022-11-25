@@ -1,0 +1,178 @@
+#!/bin/sh
+# /* @(#) $Revision: 70.1 $ */    
+
+# lp interface for hp3630a (paintjet) graphics/text printer
+#
+# Options recognized:
+#
+# Print Pitch Selection:(Default 10 cpi)
+#	10 | -10 	print mode (10.0 cpi)
+#	12 | -12	print mode (12.0 cpi)
+#
+# Stroke Weight:	(Default Medium)
+#	 b | -b | bold	use bold stroke weight
+#
+# Output filtering:	(Default Cooked)
+#	 r | -r | raw	use raw mode for binary output to printer
+#
+# Other:
+#	nb | -nb	do not output banner page (to save paper)
+#
+
+# set up redirection of stderr
+log=/usr/spool/lp/log
+exec 2>>$log
+
+# Save the arguments to the model
+
+printer=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+
+# Set up RS-232 interface if this is a tty port
+
+if tty -s <&1
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1
+fi
+
+# Handle disable and cancel traps.
+
+trap "echo 'Terminated: $reqid'  >> $log; trap 15; kill -15 0; exit 0 " 15
+
+# Determine which options have been invoked
+
+pitch="p2"
+bold="no"
+outputmode="cooked"
+banner="yes"
+
+for i in $5
+do
+	case "$i" in
+	-10 | 10) # expanded compressed print (10.0 cpi)
+		pitch="p2";;
+	-12 | 12) # normal print (12.0 cpi)
+		pitch="p3";;
+
+
+	-b | b | bold) # bold
+		bold="yes";;
+
+	-r | r | raw) # raw mode for binary output to printer
+		outputmode="raw";;
+
+	-nb | nb) # Do not print banner page
+		banner="";;
+	esac
+done
+
+# Assume that the rest of the arguments are files
+
+shift; shift; shift; shift; shift
+files="$*"
+
+#       set the line termination mode
+
+	echo "\033&k2G\c"
+
+#	set to print over the perferations so that output from
+#	the pr command looks correct.
+
+	echo "\033&l0L\c"
+
+# Print the standard header
+
+if [ -n "$banner" ]
+then
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "\014\r\c"
+	echo "$x\n$x\n$x\n$x\n"
+	banner `echo $user | tr [a-z] [A-Z]`
+	echo "\n"
+	user=`pwget -n $user | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $reqid    Printer: $printer\n"
+	date
+	echo "\n"
+	if [ -n "$title" ]
+	then
+		banner "$title" 
+	fi
+	echo "\014\r\c"
+fi
+
+# if raw    mode, turn off output processing and set for no tab expansion.
+# if cooked mode, setup to not print on the page perferations.
+#                 uncomment the cooked case for this feature
+
+case $outputmode in
+#	Set up RS-232 interface if this is a tty port
+	raw) if tty -s <&1
+then
+		stty raw 9600 -opost -parenb cs8 ixon -istrip clocal tab0 <&1
+fi;;
+#	cooked)	echo "\033&l1L\c" ;;
+esac
+
+# Print the spooled files
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		case "$pitch" in
+			p2)	echo "\033&k0S\r\c";;
+			p3)	echo "\033&k4S\r\c";;
+		esac
+
+		case "$bold" in
+			no)	echo "\033(s0B\033)s0B\r\c";;
+			yes)	echo "\033(s1B\033)s1B\r\c";;
+		esac
+
+		case $outputmode in
+			raw)	cat "$file" 2>/tmp/sh$$
+				if [ -s /tmp/sh$$ ]
+				then
+				    cat /tmp/sh$$	# send any error
+				fi			# messages to the user
+				rm /tmp/sh$$
+				echo "\014\r\c";;
+			cooked)	cat "$file" 2>/tmp/sh$$
+				if [ -s /tmp/sh$$ ]
+				then
+				    cat /tmp/sh$$	# send any error
+				fi			# messages to the user
+				rm /tmp/sh$$
+				echo "\014\r\c";;
+		esac
+#		echo "\033E\r\c"		# hard reset --
+						# -- between spool files
+		echo "\033&k0S\r\c"		# reset pitches
+		echo "\033(s0B\033)s0B\r\c"	# reset stroke weights
+		echo "\033&v0S\r\c"             # Reset Color
+		echo "\033&d@\r\c"		# disable auto-underline
+		echo "\033&l6D\r\c"		# reset printer to
+						# 6 lines per inch
+	done
+	i=`expr $i + 1`
+done
+
+# Set up RS-232 interface if this is a tty port
+# This will allow the output to drain.
+
+if tty -s <&1
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1
+fi
+
+exit 0

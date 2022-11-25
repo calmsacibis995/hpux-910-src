@@ -1,0 +1,1 @@
+ite.o graf.o machdep.o  ram_disc.o kernel.o dma.o uipc_mbuf.o kern_exit.o init_main.o swapconf.o

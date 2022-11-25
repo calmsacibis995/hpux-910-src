@@ -1,0 +1,29 @@
+
+#	   @(#)$Revision: 1.10.109.1 $	$Date: 91/11/19 13:56:51 $
+
+# Written by Darren D. Smith for NFS project
+
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+
+# Simply walks a directory PATH and makes sure all the pieces exist.
+#
+# NOTE: Path is ALWAYS root-relative.
+
+cd /
+for D in `/bin/echo $1 | /bin/sed 's#/# #g'`
+do
+   if [ ! -d $D ]
+   then
+      if [ -f $D -o -c $D -o -b $D -o -p $D ]
+      then
+         echo "ERROR: `pwd`/$D exists and is NOT a directory!" >&2
+         exit 1
+      fi
+      /bin/mkdir $D
+      /bin/chmod 775 $D
+   fi
+   cd $D
+done
+
+exit 0

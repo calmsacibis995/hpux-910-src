@@ -1,0 +1,595 @@
+.\"
+.\" $Header: gated-config.man,v 1.1.109.8 92/03/25 16:04:01 ash Exp $
+.\"
+.TH gated-config 4 "Requires Optional \s-1ARPA\s0 Services Software"
+.SH NAME
+gated-config \- Gated configuration file syntax
+.SH SYNOPSIS
+/etc/gated.conf
+.SH DESCRIPTION
+.PP
+The gated config file consists of a sequence of statements
+terminated by a semi-colon (;).  Statements are composed of
+tokens separated by white space, which can be any combination
+of blanks, tabs and newlines.
+.sp
+.sp
+Comments may be specified in either of
+two forms.  One form starts with a
+pound-sign (#) and runs to the end of the 
+line.  The other form is "C" style, which
+starts with a "/*" and continues until it reaches "*/".
+.sp
+There are six classes of statements.  The first two classes
+may be specified in the configuration file in any order:
+.RS
+.IP directives
+These statements are immediately acted upon by
+the parser.  They are used to specify included
+files and the directory in which they reside.
+Unlike other statements which terminate a semi-colon (;),
+directive statements terminate with a newline.
+.IP traceoptions
+These statements control tracing options.
+.RE
+.PP
+The four remaining classes must be specified in order.
+.RS
+.IP definition
+These statements specify options, the
+autonomous system, martian networks and
+interface options.
+.IP protocol
+These statements enable or disable protocols
+and set protocol options.
+.IP route
+Static routes are defined by route statements.
+.IP control
+Control statements define routes that are
+accepted from routing peers and routes that
+are propagated to these peers.
+.RE
+.PP
+Detailed definitions of these classes of statements follow.
+Primitives that are used in the following definitions are:
+.IP host 2c
+Any host.  A host may be specified by its IP
+address or by a domain name.  If a domain name
+is specified that has multiple IP address it
+is considered an error.  The host bits in the
+IP address must be non-zero.
+.IP network
+Any network.  A network may be specified by
+its IP address or a network name.  The host
+bits in a network specification must be zero.
+"Default" may also be used to specify the
+default network (0.0.0.0).
+.IP destination
+Any host or network.
+.IP dest_mask
+.PD 0
+Any host or network with an optional mask:
+.RS
+.IP "" 8
+.nf
+all
+<network>
+<network> mask <mask>
+.fi
+.RE
+.PD
+.IP ""
+A mask is a dotted quad specifying which bits of
+the destination are significant.  "All" may be
+used to specify any IP address may be matched.
+.IP gateway
+A gateway must be a host on an attached network.
+.IP interface
+An interface may be specified by IP address,
+domain name, or interface name.  Be careful
+with the use of interface names as future Unix
+operating systems may allow more than one
+address per interface.
+.IP gateway_list
+A gateway list is a list of one or more gateways. 
+.IP interface_list
+An interface list is a list of one or more
+interface names or addresses, or the token
+"all", which refers to all interfaces.
+The token "all, may not be used with any of the control
+statements (such as, accept, propagate and proto).
+.IP preference
+A preference is used to determine the order of
+routes to the same destination in routing
+table.  Gated allows one route to a
+destination per protocol/per autonomous system.  In the case
+of multiple routes the route to use is chosen
+by preference, which is a number between 0 and
+255, with 0 being the most preferred and 255
+being the least preferred.
+.IP ""
+In case of a preference tie, if the two routes are from the same
+protocol and from the same autonomous system, gated will chose the route
+with the lowest metric.  Otherwise gated will choose the route with the
+lowest numeric next-hop gateway address.
+.IP metric
+Is a valid metric for the specified protocol.
+.SH "DIRECTIVE STATEMENTS"
+.TP
+%directory "<path_name>"
+Sets the current directory to <path_name>.  This is
+the directory where gated looks for included files
+that do not begin with "/".
+.IP ""
+Note that this statement does not actually change the current
+directory, it just specifies the prefix applied to included file
+names. 
+.TP
+%include "filename"
+Causes the specified file to be parsed completely
+before resuming with this file.  Nesting up to 10
+levels is supported.  
+.SH "TRACE STATEMENTS"
+.TP
+tracefile "filename" [replace] ;
+Specifies the file to contain tracing output.  Trace
+information is appended to this file unless "replace"
+is specified.
+.TP
+traceoptions <traceoption> [<traceoption> [ ... ]] ;
+Changes the tracing options to those specified.  If "none"
+is the only option specified, tracing is turned off.  Trace
+flags are:
+.RS
+.IP all 1i
+Turn on all of the following options, except nostamp.
+.IP general
+Turn on internal, external and route.
+.IP internal
+Internal errors and informational
+messages. 
+.IP external
+External errors.
+.IP nostamp
+Do not timestamp all messages in the trace file.
+.IP mark
+Output a message to the trace log
+every 10 minutes to insure gated is
+still running.
+.IP task
+Task scheduling, signal handling and
+packet reception.
+.IP timer
+Timer scheduling.
+.IP lex
+Objects the lexical analyzer locates
+in the config file.
+.IP parse
+Tokens the parser recognizes in the
+config file. 
+.IP config
+Redisplays statements read from the
+config file after they are parsed.
+This allows verification that the
+statements were parsed correctly.
+.IP route
+Changes to the gated routing table.
+.IP kernel
+Changes to the kernel's routing table.
+.IP bgp
+BGP packets sent and received. May be
+modified by "update" and "protocol".
+.IP egp
+EGP packets sent and received. May be
+modified by "update" and "protocol".
+.IP rip
+RIP packets sent and received. May be
+modified by "update". 
+.IP hello
+HELLO packets sent and received.  May
+be modified by "update". 
+.IP icmp
+ICMP redirect packets sent and
+received.  May be modified by
+"update".
+.IP ""
+Note that redirects processed are
+traced under the "route" option.
+.IP protocol
+Provide messages about protocol state
+machine transitions when used with
+"egp" or "bgp".
+.IP update
+Trace the contents of protocol packets. 
+.RE
+.SH "DEFINITION STATEMENTS"
+.IP "options <option_list> ;" 10
+Sets gated options:
+.RS
+.IP noinstall 10
+Do not change kernel's routing table.  Useful for verifying
+configuration files.
+.IP gendefault BGP and EGP neighbors should
+cause the internal generation of a default route when up.  This
+route will not be installed in the kernel's routing table, but may be
+announced by other protocols.  Announcement is controlled by
+referencing the special protocol "default".
+.RE
+.IP "autonomoussystem <autonomous system> ;" 10
+Sets the autonomous system of this router to be <autonomous system>.
+This option is required if BGP or EGP are in use.
+.IP "interface <interface_list> <interface_options> ;" 10
+Sets interface options on the specified interfaces.
+An interface list is "all" or a list of interface
+names (see warning about interface names), domain
+names, or numeric addresses.
+.RS
+.PP
+Interface options are:
+.IP "metric <metric>" 10
+Set the interface metric for
+this interface.  This metric
+is used by RIP and HELLO.
+Specifying the metric here
+overrides for internal use, but does not
+change, the metric set with
+ifconfig.
+.IP "preference <pref>"
+Sets the preference for routes
+to this interface.
+.IP passive	
+Prevents gated from deleting
+the route to this interface if
+it is believed to be down due
+to lack of received routing
+information.
+.RE
+.PP
+.nf
+martians {
+	<martian_list>
+} ;
+.fi
+.IP "" 10
+Defines a list of martian addresses about which all
+routing information is ignored.  The <martian_list> is
+a semi-colon separated list of symbolic or numeric
+hosts with optional masks.  See dest_mask.
+.SH "PROTOCOL STATEMENTS"
+.PP
+Enables or disables use of a protocol and controls protocol
+options.  These may be specified in any order.
+.PP
+For all protocols, "preference" controls the choice of routes learned
+via this protocol or from this autonomous system in relation to routes
+learned from other protocols/autonomous systems.  The default metric
+used when propagating routes learned from other protocols is specified
+with "defaultmetric" which itself defaults to the highest valid metric
+for this protocol, for many protocols this signifies a lack of
+reachability.
+.PP
+For distance vector IGPs (RIP and HELLO) and redirects (ICMP),
+the "trustedgateways" clause supplies a list of gateways providing
+valid routing information, routing packets from others are ignored.
+This defaults to all gateways on the attached networks.  In addition
+to routing packets to the remote end of pointopoint links and the
+broadcast address of broadcast capable interfaces, routing updates may
+be sent to specific gateways if they are listed in a "sourcegateways"
+clause and "pointopoint" or "supplier" is specified.  Disabling the
+transmission and reception of routing packets for the protocols may be
+specified with the "interface" clause.
+.PP
+For exterior protocols (BGP, EGP), the autonomous system advertised to
+the peer is specified by the global "autonomoussystem" clause unless
+overridden by the "asout" parameter.  The incoming autonomous system
+number is not verified unless "asin" is specified.  Specifying
+"metricout" fixes the outgoing metric for all routes propagated to
+this peer.  If the peer does not share a network, "interface" can be
+used to specify which interface address to use when communicating with
+this peer and "gateway" can be used to specify the next hop to use for
+all routes learned from this peer.  An internal default is generated
+when routing information is learned from a peer unless the
+"nogendefault" parameter is specified.
+.sp
+.nf
+rip yes|no|on|off|quiet|pointopoint|supplier [ {
+	preference <preference> ;
+	defaultmetric <metric> ;
+	interface <interface_list> [noripin] [noripout] ;
+	...
+	trustedgateways <gateway_list> ;
+	sourcegateways <gateway_list> ;
+} ] ;
+.fi
+.RS
+.PP
+If "yes" or "on" is specified, RIP will assume "quiet"
+if there is only one interface and "supplier" if there
+are more than one.  "Quiet" specifies that no RIP
+packets will be generated.  "Supplier" specifies that
+RIP packets will be generated.  "Pointopoint"
+specifies that RIP packets will only be sent to
+gateways listed in the "sourcegateways" clause.  If
+the RIP clause is not specified the default is "on".
+.PP
+The default metric is 16, the default preference is 100.
+.RE
+.PP
+.nf
+hello yes|no|on|off|quiet|pointopoint|supplier [ {
+	preference <preference> ;
+	defaultmetric <metric> ;
+	interface <interface_list> [nohelloin] [nohelloout] ;
+	...
+	trustedgateways <gateway_list> ;
+	sourcegateways <gateway_list> ;
+} ] ;
+.fi
+.RS
+.PP
+If "yes" or "on" is specified, HELLO will assume
+"quiet" if there is only one interface and "supplier"
+if there are more than one.  "Quiet" specifies that no
+HELLO packets will be generated.  "Supplier" specifies
+that HELLO packets will be generated.  "Pointopoint"
+specifies that HELLO packets will only be sent to
+gateways listed in the "sourcegateways" clause.  If
+the HELLO clause is not specified the default is
+"off".
+.PP
+The default metric is 30000, the default preference is 90.
+.RE
+.PP
+.nf
+egp yes|no|on|off [ {
+	preference <preference> ;
+	defaultmetric <metric> ;
+	packetsize <maxpacketsize> ;
+	group		[asin <autonomous system>]
+			[asout <autonomous system>]
+			[maxup <number>]
+			[preference <preference>] {
+		neighbor <host>
+			[metricout <metric>]
+			[nogendefault]
+			[acceptdefault]
+			[propagatedefault]
+			[gateway <gateway>]
+			[interface <interface>]
+			[sourcenet <network>]
+			[minhello <min_hello>]
+			[minpoll <min_poll>]
+			;
+		...
+	} ;
+	...
+} ] ;
+.fi
+.RS
+.PP
+"Packetsize" specifies the size, in bytes, of the largest EGP packet
+that will be accepted or sent.  A "group" lists a group of EGP peers
+in one autonomous system.  "Maxup" specifies the maximum number of
+peers that will be maintained in the Up state.  "Acceptdefault" and
+"propagatedefault" tell gated to accept or propagate the default
+network (0.0.0.0) in updates exchanged with an EGP neighbor.  If not
+specified, the the default network is ignored when exchanging EGP
+updates.  "Sourcenet" specifies the network to query in EGP Poll
+packets, this is normally the shared network.  The minimum EGP hello
+and poll intervals acceptable may be specified with the "minhello" and
+"minpoll" arguments, respectively.  These are both specified as a time
+in seconds, minutes:seconds or hours:minutes:seconds.  Any number of
+"group" clauses may be specified containing any number of "neighbor"
+clauses.  Any parameters from the "neighbor" clause may be specified
+on the "group" clause to provide defaults for the group.
+.PP
+The default metric is 255, the default preference is 200.
+.RE
+.sp
+.PP
+.ul 2
+NOTE: Although BGP is available with this gated, it is currently
+not supported by Hewlett-Packard, 
+.sp
+.nf
+bgp yes|no|on|off [ {
+	preference <preference> ;
+	defaultmetric <metric> ;
+	peer <host>
+		[linktype [up|down|horizontal|internal]]
+		[metricout <metric>]
+		[asin <autonomous system>]
+		[asout <autonomous system>]
+		[nogendefault]
+		[gateway <gateway>]
+		[interface <interface>]
+			;
+	...
+} ] ;
+.fi
+.RS
+.PP
+Peer specifies the address of each BGP peer.  A linktype internal is
+assumed if the neighbor's autonomous system is the same as my
+autonomous system.  Otherwise linktype horizontal is assumed.
+.PP
+The default metric is 65535 and the default preference is 150 for
+external BGP and 250 for internal BGP.
+.RE
+.PP
+.nf
+redirect yes|no|on|off [ {
+	preference <preference> ;
+	interface <interface_list> [noicmpin] ;
+	trustedgateways <gateway_list> ;
+} ] ;
+.fi
+.RS
+.PP
+Controls whether gated makes routing table changes
+based on ICMP redirects when not functioning as a
+router.  When functioning as a router (i.e. any
+interior routing protocols (RIP, HELLO) are
+participating in routing on any interface, ICMP
+redirects are disabled.  When ICMP redirects are
+disabled, gated must actively remove the effects
+of redirects from the kernel as the kernel always
+processes ICMP redirects.
+.PP
+The default preference is 20.
+.RE
+.SH "STATIC STATEMENTS"
+.PP
+Static routes are specified with "static" clauses.
+.RS
+.nf
+static {
+	<destination> gateway <gateway> [preference
+		<preference>] ;
+	...
+	<destination> interface <interface> [preference
+		<preference>] ;
+	...
+} ;
+.fi
+.IP ""
+Any number of "static" statements may be specified,
+each containing any number of static route
+definitions.  The first form defines a static route
+through a gateway.  The second defines a static
+interface route which is used for primitive support of
+multiple networks on one interface.
+.PP
+The preference for static routes defaults to 50.
+.RE
+.SH "CONTROL STATEMENTS"
+.PP
+Acceptance of routes from routing protocol peers and propagation of
+routes to routing protocol peers are controlled by "accept" and
+"propagate" clauses.
+.RS
+.nf
+accept proto bgp|egp as <autonomous system> [preference <preference>] {
+	<acceptance_list>
+} ;
+
+accept proto rip|hello|redirect {
+	<acceptance_list>
+} ;
+
+accept proto rip|hello|redirect interface <interface_list>
+	[preference <preference>] {
+	<acceptance_list>
+} ;
+
+accept proto rip|hello|redirect gateway <gateway_list>
+	[preference <preference>] {
+	<acceptance_list>
+} ;
+.fi
+.TP
+acceptance_list:
+.nf
+listen <dest_mask> [preference <preference>] ;
+nolisten <dest_mask> ;
+.fi
+.IP ""
+If no acceptance list is specified, all routes will be accepted.  If
+one or more acceptance lists are specified, the relevant acceptance
+lists are scanned for a match from most specific to least specific
+(gateway, interface, protocol).  If no match is found, the route is
+discarded.  Rephrased, a "nolisten all" entry is assumed after all
+relevant acceptance lists are processed.
+.PP
+.nf
+propagate proto bgp|egp as <autonomous system> [metric <metric>] {
+	<propagation_list>
+} ;
+
+propagate proto rip|hello [metric <metric>] {
+	<propagation_list>
+} ;
+
+propagate proto rip|hello interface <interface_list>
+	[metric <metric>] {
+	<propagation_list>
+} ;
+
+propagate proto rip|hello gateway <gateway_list>
+	[metric <metric>] {
+	<propagation_list>
+} ;
+.fi
+.TP
+propagation_list:
+The propagation list specifies propagation
+based on the origination of a destination:
+.nf
+proto bgp|egp as <autonomous system> [metric <metric>] [ {
+	<announce_list>
+} ] ;
+
+proto rip|hello|direct|static|default [metric <metric>] [ {
+	<announce_list>
+} ] ;
+
+proto rip|hello|direct|static|default interface <interface_list>
+	[metric<metric>] [ {
+	<announce_list>
+} ] ;
+
+proto rip|hello gateway <gateway_list>
+	[metric<metric>] [ {
+	<announce_list>
+} ] ;
+.fi
+.TP
+announce_list:
+.nf
+announce <dest_mask> [metric <metric>] ;
+noannounce <dest_mask> ;
+.fi
+.IP
+If no announce_list is specified, all destinations are announced.  If
+an announce list relevant to this protocol, interface, gateway or
+autonomous system is specified, a "noannounce all" is assumed if no
+match is found after all relevant lists are examined.  Therefore, an
+empty announce list is the equivalent of "noannounce all".  Announce
+list are scanned from the most specific to the least specific in the
+order specified in the config file.  All lists specifying gateways are
+first, followed by interface lists and finally lists that just specify
+the protocol.
+.IP
+Note that to announce routes which specify a next
+hop of the loopback interface (i.e. static and
+internally generated default routes) via RIP or
+HELLO it is necessary to specify the metric at
+some level in the propagate clause.  Just setting
+a default metric for RIP or HELLO is not
+sufficient.
+.SH FILES
+/etc/gated.conf
+.PD
+.SH AUTHORS
+Mark Fedor, PSI
+.br
+Jeffrey C Honig, Cornell University
+.SH SEE ALSO
+arp(1m),
+gated(1m),
+ifconfig(1m),
+netstat(1m)
+.PP
+.PD 0
+.IP RFC\ 891 16
+DCN Local-Network Protocols (HELLO)
+.IP RFC\ 904
+Exterior Gateway Protocol Formal Specification
+.IP RFC\ 911
+EGP Gateway under Berkeley UNIX 4.2
+.IP RFC\ 1058
+Routing Information Protocol
+.IP RFC\ 1163
+A Border Gateway Protocol (BGP)
+.IP RFC\ 1164
+Application of the Border Gateway Protocol in the Internet

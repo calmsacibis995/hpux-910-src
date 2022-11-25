@@ -1,0 +1,19 @@
+#!/bin/sh
+##	@(#)fullbackup	$Revision: 1.20.109.1 $	$Date: 91/11/19 13:54:34 $
+#	fullbackup	--	fully back up the NFS source tree
+# written by Cristina Mahon
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $Nfs begin
+
+cd $Nfs/..
+
+# $Nfs/log/fulltime indicates when the last fullbackup has been started.
+touch $Nfs/log/fulltime
+find `basename $Nfs` -type f -print | tee $Nfs/log/fullbackup | cpio -o | compress -v | tcio -or -T /dev/console /dev/rctnfs
+
+tcio -urV /dev/rctnfs
+touch /tmp/changetape
+
+echo `date "+%y.%m.%d %T"` $0 $Nfs end

@@ -1,0 +1,22 @@
+## FacetTerm  2397pallet COMMOM description file 03/28/90
+##				pallets
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2397pallet.FC,v 70.1 92/03/09 15:49:57 ssa Exp $
+##                 o=cleared by soft reset
+perwindow-80-CLSQ--o--=\E&v%70u120I
+perwindow_default-white...black..=\E&v0m1a1b1c0x0y0z0I
+perwindow-80-CLSQ--o--=\E&v%70u121I
+perwindow_default-red.....black..=\E&v0m1a0b0c0x0y0z1I
+perwindow-80-CLSQ--o--=\E&v%70u122I
+perwindow_default-green...black..=\E&v0m0a1b0c0x0y0z2I
+perwindow-80-CLSQ--o--=\E&v%70u123I
+perwindow_default-yellow..black..=\E&v0m1a1b0c0x0y0z3I
+perwindow-80-CLSQ--o--=\E&v%70u124I
+perwindow_default-blue....black..=\E&v0m0a0b1c0x0y0z4I
+perwindow-80-CLSQ--o--=\E&v%70u125I
+perwindow_default-magenta.black..=\E&v0m1a0b1c0x0y0z5I
+perwindow-80-CLSQ--o--=\E&v%70u126I
+perwindow_default-cyan....black..=\E&v0m0a1b1c0x0y0z6I
+perwindow-80-CLSQ--o--=\E&v%70u127I
+perwindow_default-black...yellow.=\E&v0m0a0b0c1x1y0z7I
+set-green_screen-................=\E&v0m0a1b0c0x0y0z0I

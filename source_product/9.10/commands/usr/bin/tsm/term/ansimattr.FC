@@ -1,0 +1,33 @@
+##--- ATTRIBUTES URBDOIPA ---##
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     475218   ---##
+parm_attribute=\E[%7MMm
+parm_attribute--URBOI-=\E[;%7MMm
+parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1;%s2m
+parm_attribute_out=\E[%s1;%s2;%s3m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+parm_attribute_val--URBDOI=0
+parm_attribute_val-U-=4
+parm_attribute_val-R-=7
+parm_attribute_val-B-=5
+parm_attribute_val-D-O=2
+parm_attribute_val-O-D=1
+parm_attribute_val-I-=8
+exit_attribute_mode--URBDOI=\E[0m
+exit_attribute_mode--URBDOI=\E[m
+parm_attribute_val-*-=37
+parm_attribute_val-*-=40
+##--- MAGIC COOKIE ATTRIBUTES ---##
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##---                                   ---##
+lock_shift_0=\E[10m
+select_character_set_0--=
+lock_shift_1=\E[12m
+select_character_set_1-A-=
+lock_shift_2=\E[11m
+select_character_set_2-P-=

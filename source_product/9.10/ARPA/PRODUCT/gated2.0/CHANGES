@@ -1,0 +1,825 @@
+		Gated changes by version number
+
+Following are the changes between 2.1 and 2.0.1.18
+
+	1.  The subsumtion of host routes in RIP updates was not done
+	    according to the RIP spec.  Changed RIP and HELLO to do
+	    this properly.  Note that a host route will be subsumed
+	    even if the network that subsumes it is not being
+	    announced.  This also allowed the rth_parent field to be
+	    removed, with large routing tables this could cause alot
+	    of overhead when adding routes.
+
+	2.  It was possible to override the metric on when propagating
+	    distance vector (routes) out the same protocol.
+
+	3.  The code that daemonizes (detaches gated from the
+	    terminal) was rewritten to conform to the suggestions in
+	    "Unix Network Programing" by W. Richard Stevens.  This
+	    should prevent the "wait3: no children" messages when
+	    gated is started by /etc/rc.
+	    
+	4.  Specifying trace flags on the command line and also in the
+	    configuration file resulted in tracing being turned off
+	    all together.
+
+	5.  After a reconfiguration, redirects were not reset to off,
+	    even if RIP or HELLO were turned on.  The same applied to
+	    the logic which determined if interfaces should be timed
+	    out.
+
+	6.  The SNMP interface did not properly clean up during
+	    reconfiguration which resulted in a socket being orphaned
+	    at each reconfiguration.
+
+
+Following are the changes between 2.0.1.18 and 2.0.1.14
+
+	1.  Provide definition for IP_MAXPACKET if not defined by
+	    system. 
+
+	2.  Correct some errors in the man pages
+
+	3.  Add support for EGP parameter "propagatedefault" allowing
+	    the default network (0.0.0.0) to be propagated to an EGP
+	    neighbor.
+
+	4.  Removed an autoincrement inside a routine call that is
+	    implemented as a macro on some systems.
+
+	5.  Use the metric to choose the perfered route if the protocol
+	    and AS are the same.
+
+	6.  Internally generated default (when EGP and BGP neighbors are
+	    up) would be removed when the first neighbor went away.  It
+	    would also not work properly through reconfiguration,
+	    especially if default generation were enabled/disabled.
+
+	7.  Remove duplicate calculation in timer_dispatch().
+
+	8.  Specification of "traceoptions none" will turn off
+	    tracing.
+
+	9.  Many values were not reset to their defaults before
+	    initiation of a reconfiguration.  Including policy lists
+	    which specified gateways.
+
+	10. EGP preference and BGP default metric and preference were
+	    missing from the status dump file.
+
+	11. N_interfaces was used to calculate interface policy lists
+	    when a new variable, int_index_max was needed.
+
+	12. Merge SYSV mods from Igor E. Chechik.  Some of these may
+	    be ISC specific.
+
+	13. Fix option processing so switches can follow -t.  Trace
+	    flags must immediately follow the option with no
+	    intervening white space.
+
+	14. Interval times were being printed incorrectly to the East of
+	    GMT.  Use a seperate format for printing intervals than for
+	    printing times.
+
+	15. Added code to check validity of metrics in propagate lists.
+
+	16. The %directory directive no longer changes the current
+	    directory, it now just provides a prefix for %include.
+
+	17. Updated copyright
+
+	18. The trusted gateways clause in the redirect group was
+	    being ignored.
+
+	19. The keyword "none" on the "traceoptions" clause was not
+	    handled correctly.
+
+	20. Too many nested includes would cause a core dump.
+
+	21. It was not possible to leave off all the options on an EGP
+	    group statement.
+
+	22. Gated whould never notice when a trace dump was done and
+	    remove the task.
+
+	23. Finally applied patches for BSD 4.3 Reno.
+
+	24. Forgot to close the routing table when receiving a bad
+	    HELLO checksum.
+
+	25. Block signals during reconfiguration.
+
+	26. Ask kernel to reserve 16k buffers for receiving HELLO
+	    packets.
+
+	27. Forgot to reallocate packet buffer after reconfiguration.
+
+	28. HP/UX specific changes
+
+	29. Changes to compile on Ultrix 4.1.
+
+	
+Following are the changes between 2.0.1.14 and 2.0.1.10:
+
+	1.  Clarify documentation of the order of propagate and
+	    acceptance lists.
+
+	2.  If route is not listed in /etc/services, gated assigned
+	    the RIP port in reverse byte order.
+
+	3.  Systems that do not have underscores in front of nlist
+	    names would dereference a null pointer.
+
+	4.  Fixed defines for IBM RS/6000 when compiler is in BSD mode.
+
+	5.  Trustedgateways clauses were not working properly, needed to
+	    propagate protocol flag into policy lists.
+
+	6.  Add support for "acceptdefault" parameter for EGP neighbors
+	    which allows the default network (0.0.0.0) to be accepted
+	    from an EGP neighbor.
+
+	7.  Add support for EGP parameter "packetsize" which allows the
+	    EGP maximum packet size to be increased at runtime.
+
+	8.  Updated copyright notice.
+
+
+These are the changes between 2.0.1.8 and 2.0.1.10
+
+	1.  Dump was not printing the pid of the main gated process,
+	    instead it was printing the pid of the child spawned to
+	    create the dump file.
+
+	2.  Add warning that BSD 4.3 Reno is NOT supported by this
+	    version of gated.
+
+	3.  Fix core dump caused by allocating one byte too few when
+	    reading kernel version.
+
+	4.  Fix core dump when BGP session is closed remotely and BGP
+	    tries to set the linger parameter.
+
+	5.  Reduce the requested size of RIP/BGP/SNMP kernel buffers
+	    from 48k to 32k.
+
+	6.  Added error checking to fork().
+
+	7.  Fixed compilation error in icmp.c on BSD 4.2 based system
+	    that do not include the IP header in received ICMP
+	    messages. 
+
+	8.  Removed mystery semicolons in snmp.c.
+
+	9.  Added man page submitted by Guy Middleton the University
+	    of Waterloo.
+
+	10. Fixed bugs in EGP poll/repoll code brought to light by
+	    recent changes in MILNET polling intervals.
+
+	11. Fix core dump at startup when using flex as a parser
+	    generator.
+
+	12. Timer bug doubled interval time.
+
+	13. Fix bug reading kernel routes at startup on AIX 3.1 on an
+	    RS/6000.
+	
+These are the changes between 2.0.1.4 and 2.0.1.8
+
+	1.  Improved checking for duplicate interfaces.  Especially
+	    don't look at the IP address of interfaces that are down.
+	    
+	2.  A symbolic link to asm.sed was missing from the compat
+	    directory. 
+
+	3.  A variable was missing from an error message in egp.c.
+
+	4.  Add support for MIB-II ipRouteMetric5.
+
+	5.  BGP and EGP did not locate their policy after a
+	    reconfiguration causing it to revert to the default.
+
+	6.  The source interface was not set properly for RIP and
+	    HELLO broadcasts, resulting in incorrect error messages
+	    from HELLO.
+	    
+	7.  The HELLO header was scrambled after calculating the HELLO
+	    checksum.
+
+	8.  Duplicate interfaces are not treated as a fatal error,
+	    just produce error messages in the syslog.
+
+	9.  Allow specification of EGP parameters P1 and P2 on a per
+	    neighbor basis.
+
+
+These are the changes between 2.0.1.2 and 2.0.1.4
+
+	1.  Missing ioctl() in if_check() would cause gated to exit if
+	    the status of a pointopoint interface changed.
+
+	2.  On a non-broadcast, multi-acess (NBMA) network, such as
+	    X.25, only apply split horizon to the source gateway.
+
+	3.  BGP was not properly maintaining AS path reference counts,
+	    causing various errors.
+	
+	4.  BGP was incorrectly setting the AS path for an EGP route
+	    to the same as an AS path for an Interior route.  BGP was
+	    also passing interior routes on to Internal peers.
+
+	5.  Finish adding support for IBM AIX 3.1 on the RS/6000.
+
+	6.  RIP preference specified in the config file was not being
+	    honored.
+
+	7.  The EGP preference flag had the same value as another flag
+	    causing preference not to be honored.
+
+	8.  EGP incorrectly calculated the number of active peers in
+	    the same AS causing it to think that all peers were lost
+	    when only one was.
+
+	9.  Save the ID of the last EGP HELLO sent in case the I-H-U
+	    response is slow and S gets incremented.
+
+	10. Response to initial EGP Poll on transition to UP state was
+	    not being honored because it not being flagged as sent and
+	    the received update was considered unsolicited.
+
+	11. Save the version number of the last EGP poll received to
+	    improve check for repolls.
+
+	12. EGP Polls in down state should be ignored instead of
+	    causing a fatal error.
+
+	13. EGP Acquisition messages other than Request and Confirm
+	    should not have Hello and Poll intervals, but many
+	    implementations do.  Allow for this extra length.
+
+	
+These are the changes between 2.0 and 2.0.1.2
+
+	1.  Static Interface routes were added with RTF_GATEWAY flag.
+
+	2.  Parsing of 'accept proto [rip|hello] gateway
+	    <gateway_list>' was not handled properly.
+
+	3.  Check for active routing protocols on an interface was
+	    done improperly when deciding to make an interface
+	    passive.
+
+	4.  EGP was not allocating memory properly when building a
+	    sorted list of gateways and networks.
+
+	5.  When accessing an AS path, the wrong pointer was used.
+
+	6.  Our AS was prepended to an AS path in host byte order
+	    instead of network byte order.
+
+	7.  AS path directions were stored in outgoing BGP packet as
+	    shorts instead of chars.
+
+	8.  RIP and HELLO added the interface metric instead of a hop
+	    count to outgoing network.
+
+	9.  Internally generated default was not announced because it
+	    points to the loopback network.  Test for existance was
+	    reversed, causing core dump.
+
+	10. BGP was not setting SO_REUSEADDR delaying a restart of
+	    gated.
+
+	11. Work around compiler problem with High C on IBM/4.3.
+
+	12. BGP was comparing sockaddr_in when port number was
+	    supposed to be different.
+
+	13. String lowercase function was improperly checking length
+	    of internal buffer, causing a core dump when accessing off
+	    the end of the buffer.
+
+	14. Netmask on a P2P link should refer to the destination
+	    network, not the local network.  Caused problems sending
+	    RIP and HELLO networks and subnets
+
+	15. 'Noannounce all' was not being appended to propagate
+	    lists.
+
+	16. EGP was not sending a POLL on transition to UP state.
+
+	17. Missing extern in front of a data definition in egp.h
+
+These are the changes between 1.9.1.7 and 2.0 beta
+
+	1.  New parser.  The config file is parsed with lex and yacc
+	    (flex and bison if you have them).  The grammer has been
+	    totally redefined and is much more consistent.
+
+	2.  Enhanced policy.  Routes can be listened to and propagated
+	    by protocol, AS, interface, source gateway and
+	    route.  The route being used is specified by a
+	    preference.  Metrics are never translated and specifable
+	    by destination and source.  Masks may be used when
+	    matching routes.
+
+	3.  Border Gateway Protocol.  BGP has been implemented
+	    according to RFC-1105.  The exception being that the only
+	    directions supported are internal and horizontal.
+	    Internal BGP has not been fully implemented.  Matching on
+	    AS paths is not yet possible (but being worked on).
+
+	4.  Exterior Gateway Protocol.  EGP was rewritten to be fully
+	    conformant to RFC-904.  Active and Passive modes are
+	    supported.  Unsolicited updates are sent as soon as the
+	    peer is in the UP state, but not at any other time, which
+	    causes network reachability to be exchanged much sooner.
+
+	5.  RIP should be compliant with RFC-1058.  Flash updates are
+	    now supported correctly.
+
+	6.  Network Management.  SNMP MIB-II is supported with
+	    NYSERnet's SNMP 3.4 but patches are required (I have to
+	    check on availability).  Also generates SNMP traps. SGMP
+	    is no longer supported.
+
+	7.  Tracing options have been expanded.  Detailed tracing of
+	    packets and state machines is possible.
+
+	8.  Reconfiguration.  A SIGHUP will cause complete
+	    reconfiguration at any time.  It should be possible to
+	    enable and disable protocols without restarting gated.
+
+	9.  ICMP redirects may be disabled.  This will cause gated to
+	    try to delete any ICMP redirects that have been installed
+	    in the kernel.  Also, tracing of all received ICMP packets
+	    is possible.
+
+	10. Selective compilation.  It is possible to compile gated
+	    with just the protocols required by changing `#define's to
+	    `#undef's in config.h.
+
+	11. Major internal rewrite.  Support for multiple timers per
+	    protocol.  Tasks to deal with events.
+
+	12. Gated state dump on SIGINT will fork() a child on systems
+	    that support fork().  This allows the state dump to start
+	    immediately without affecting the routing protocols.
+
+	13. Point-to-point interfaces (i.e. SLIP) are now referenced
+	    exclusively by their destination address.  This allows
+	    systems that support it to assign the same local address
+	    to many SLIP interfaces.
+
+These are the changes between 1.5 and 1.9.1.2:
+
+	1.  Gated does all string comparisons with strcasecmp and
+	    strncasecmp so configuration files are case independent.
+
+	2.  Gated will allow a static route of protocol rip with a
+	    metric zero (interface route).  Incoming RIP routes with a
+	    metric of zero will be converted to a metric of 1.
+
+        3.  Support for NYSERnet's SNMP 3.1 (with a patch to SNMP).
+
+        4.  Gated was not ignoring RIP packets from itself.
+
+	5.  Additional logging of reasons for EGP errors.  The EGP
+	    metric learned from EGP peers is now stored seperately from
+	    the internal metric.
+
+	6.  Support for reconstitutemetric has been removed.
+
+	7.  Signal processing was improved to prevent the overlapping
+	    processing of two different signals.
+
+These are the changes between 1.3.1.36 and 1.5:
+
+	1.  The EGP code will successfully inform a peer requesting
+	    EGP version 3 or higher that we can only speak EGP version
+	    2.  A future release of gated should support EGP version 3.
+
+	2.  The announcetoAS and noannouncetoAS clauses were added to
+	    control the propogation of exterior routing information
+	    between other autonomous systems and the interior protocols.
+	    The restrict/norestrict parameter specifies whether announce
+	    statements apply when announcing these exterior routes.
+
+	3.  Gated now explictly ignores the default net via EGP
+	    (0.0.0.0) unless the 'acceptdefault' option is used on the
+	    egpneighbor clause.  The generation of default when peering
+	    with an EGP neighbor may be disabled with the 'nogendefault'
+	    option.  Default may be propogated via EGP by using the
+	    'defaultout' option.
+
+	4.  The interior time delay metric of all networks received from
+	    an EGP neighbor may be set with the 'metricin' option of the
+	    egpneighbor clause.  The EGP distance assigned to all
+	    networks advertized via EGP may be set with the
+	    'egpmetricout' option.
+
+	5.  The AS number of an EGP neighbor may be verified with the
+	    'ASin' option of the egpneighbor clause.  The AS number used
+	    when sending packets to an EGP neighbor may be specified on
+	    a per-neighbor basis by using the 'ASout' clause.
+
+	6.  If the 'egpmaxacquire' clause is not specifed, all EGP
+	    neighbors will be acquired.
+
+	7.  The default gateway specified in the 'defaultgateway' clause
+	    will be reinstalled whenever a route to the default net
+	    (0.0.0.0) times out, or the relevent EGP peers are lost.
+
+	8.  When a network enters hold down, a HOLDOWN message is
+	    issued.
+
+	9.  Pointtopoint is now accepted as an alias for pointopoint.
+
+	10. Restrictions on which networks are accepted from an EGP
+	    neighbor is possible by specifying the 'validate' option on
+	    the 'egpneighbor' clause and making use of the 'validAS'
+	    clause.
+
+	11. The egpneighbor clause was enhanced with the 'intf' and
+	    'sourcenet' options.  The 'intf' option allows the
+	    specification of the interface used to source EGP packets
+	    when peering with non-immediate neighbors.  The 'sourcenet'
+	    option is used to specify the source net specified in EGP NR
+	    poll commands.  Both of these options are for EGP testing
+	    purposes only.  Routes learned from non-immediate neighbors
+	    will not be added to the routing table.
+
+	12. The internal metric of routes to directly connected
+	    interfaces is set to the interface metric (translated into a
+	    delay in ms) instead of zero.  The metric advertized out
+	    other interfaces for this net will now be proportional to
+	    the interface metric.  Routes to directly connected
+	    interfaces will still be prefered to other routes, unless
+	    the route to an interface times out.
+
+	13. The file /etc/gated.version is written on startup listing
+	    the gated version, compilation date, start time and pid.
+
+	14. The first version of an interface between gated and
+	    NYSERnet's SGMP 2.2 is installed.
+
+	15. On receipt of a SIGUSR1, the {no,}announcetoAS and validAS
+	    clauses are re-read and replaced if error free.
+
+	16.  Gated now supports SUNOS 4.0, Ultrix 3.0 and VAX/VMS
+	     Multinet.
+
+	17. RIP request packets are processed as specified in RFC1058
+	    with the exception that requests from off-net hosts will use
+	    the interface "closest" to the querying host as the basis
+	    for split-horizion and announcment restrictions.  This is
+	    because UDP does not pass gated any indication of which
+	    interface the packet was destined for.
+
+	    Sun's enhancements to RIP are also supported, except that
+	    the POLL command has split horizon and announcment
+	    restrictions applied to the result.
+
+	18. The default protocol specification has been changed from:
+	    EGP yes, RIP no, HELLO no to RIP yes, EGP no, HELLO no.  If the
+	    configuration file is missing or unreadable, gated will
+	    procede using default configuration information.
+
+	    If the configuration file does not exist, the system has only
+	    one interface, and a default route exists in the kernel's
+	    routing tables, gated will exit with a warning message.
+
+	19. The "hello" and "rip" tracing options now only display the
+	    packet headers.  To display the contents of routing updates,
+	    they must be used in conjunction with the "update" option.
+
+	20. The interface timeout, and detection of interface up/down
+	    and down/up transitions has been improved.
+
+	21. Code has been added to trace ICMP redirects.  The ICMP
+	    redirect processing code has been improved.
+
+
+These are the changes between 1.3.1 and 1.3.1.36:
+
+	1.  The EGP code and been reworked by Thomas Narten.  Most
+	    importantly, the timing has been improved.  In addition,
+	    gated will now log important EGP state changes to the
+	    syslog. 
+
+	    EGP packet processing has been fixed on non-VAXen (i.e.
+	    forward byte order machines).
+
+	    Gated now properly checks for and does not send information
+	    about the shared net in EGP updates.  Information about
+	    other gateways on the same net is propogated correctly.
+
+	    The reason for not including a net in an EGP update is
+	    explained in more detail.
+
+	    If a 'noannounce' clause is used, gated will now send all
+	    non-restricted routes with the metric specified in the
+	    'defaultegpmetric' (or 255) as documented.
+
+	    Only class A, B or C networks are included in EGP updates. 
+	    Updates received with non-class A,B or C networks are
+	    considered to be in error and are ignored.
+
+	    EGP packet tracing has been enhanced.  More detail of EGP
+	    update packets may be obtained by defining EGP_UPDATE_FORMAT
+            in the Makefile.
+
+	    EGP storage allocation errors have been fixed.  These
+	    occured when more than one network was specified on multiple
+	    'egpnetsreachable' clauses or when 'noannounce' statements
+	    were used. 
+
+	    Global and per-neighbor EGP information is now included in
+	    the dump file.
+
+	2.  Sun OS 3.4 does not properly handle two subnetted networks,
+	    gated has been modified to recognize this condition.
+
+	3.  The RIP to HELLO translation table has been updated at the
+	    suggestion of Dave Mills.  HELLO processing has been
+	    modified to more closely resemble that of the Fuzzball. 
+
+	    HELLO routes must be 25% better or worse than the existing
+	    route for a change to occur (better to switch to a HELLO
+	    route, worse to update the metric in use).  Previously the
+	    comparison was a fixed 100ms.
+
+	    Gated now recognizes the Fuzzball holddown bit and ignores
+	    the route, unless it is the current route, then the timer is
+	    reset so that the route does not expire.  A message is
+	    printed when a route in use is in Fuzzball holddown.
+
+	    When the number of nets to be sent exceeds the size of a
+            HELLO packet, partial HELLO packets are generated.  Gated
+	    has always been able to receive partial HELLOs.
+
+	    Gated now sets the date field in the HELLO packet to zero
+	    with the two high-order bits set to indicate that the date
+	    field is invalid.
+
+	4.  A new define is supported, LOG_FACILITY, that allows gated's
+	    syslog output to be redirected on systems that support the
+	    BSD 4.3 syslog facility.  This will assist in dealing with
+	    the volume of syslog information gated can produce.
+
+	5.  An rcsid variable has been added to each source file to aid
+	    in identifing the revision level of gated.  The version ID
+	    of gated in general is derived from the latest revision
+	    level of the individual source files.
+
+	6.  Limited support for fixed metrics.  The 'fixedmetric' clause
+	    in the configuration file allows a fixed metric per
+	    interface per protocol (RIP or HELLO).  All outbound metrics
+	    on the specified interface that are not infinity will be set
+	    to the specified metric.  A default route generated with
+	    'RIP gateway' or 'HELLO gateway' is not affected by a
+	    fixedmetric clause.
+
+	7.  When a currently active route comes in as infinity or
+	    greater, gated logs an UNREACHABLE message.
+
+	8.  IBM PC/RT BSD 4.3 (ACIS) is now supported by gated by use of
+	    the RT43 define in the Makefile.  The HiC complier must be
+	    used as Pcc does not seem to function properly.
+
+	9.  Trace file processing has been enhanced.  The file is
+	    completely closed when tracing is disabled.  Messages are
+	    logged in the syslog when tracing is toggled.  
+
+	    Traceflags may be specified in the configuration file and
+	    may be changed dynamically.
+
+	10. Martian filtering has been added to gated.  Routing
+	    information about networks in the 'martian' list is ignored
+	    from all sources.  The compiled in 'martain' list (in
+	    rt_control.h) may be appended to with the 'martiannets'
+	    clause of the configuration file.  The dump file displays
+	    the list of martian networks in use.
+
+	11. On all systems except BSD42 or UTX32_1_X, getdtablesize() is
+	    used.
+
+	12. Processing of interface timeouts is improved.
+
+	    A message is printed when an interface times out.
+
+	    The metric of the interface route is reset to prevent it
+	    from increasing if a couple of routing packets are missed.
+
+	   EGP packets will reset the interface route timer.  Further
+	   checking has been added to prevent interfaces from timing out
+	   if RIP and HELLO are not being used.
+
+	   MSG_DONTROUTE is used for sendto calls to prevent EGP packets
+	   from taking an alternate path if the interface route has
+	   timed out.
+
+These are the changes in version 1.3.1 of gated from the previous
+versions of gated:
+
+	1.  There is now a version ID number.  This new version
+	    is known as 1.3.1.
+
+	2.  In the gated.conf file, all references to a PTP interface
+	    must use the DESTINATION address.  This is exactly opposite
+	    the old versions which used the source address of a PTP link.
+	    This is the only change you should have to make for
+	    compatibility with your existing gated.conf.
+
+	3.  Split-horizon is implemented properly.  This includes
+	    with flash-updates.  Split horizon has been fixed in the
+	    parallel protocol environment.  (see my message to the
+	    nsfnet mailing list)
+
+	4.  The code has been cleaned up and made as consistent as
+	    possible.  the syslog utility has been used extensively.
+
+	5.  certain source files were merged and renamed for
+	    consistency.
+
+	6.  PTP links are dealt with more consistently.  The kludge for
+	    SLIPnet links is gone.
+
+	7.  There is a 2 minute hold down for all protocols.
+
+	8.  The interface code has been beefed up considerably.
+            You can now change interface flags on the fly without
+	    restarting gated.  gated checks them every 30 seconds.
+	    You can change a netmask, address, metric, and broadcast
+	    address without stopping gated.  You must first ifconfig
+	    the interface down (for about 15 seconds) and then bring
+	    it back up.  gated will make the changes.  You need not
+	    bring the interface down/up for only flag changes.
+
+	9.  Interfaces are dynamically timed out.  An interface timer
+	    will time out when no RIP or HELLO packets are being
+	    received on that interface.  imp interfaces send a
+	    RIP/HELLO packet to itself over the interface. that is
+	    how an imp interface timer is checked.  Interfaces that
+	    have been timed out automatically are re-installed in
+	    the routing tables when they come back.  Of course, if
+	    you are not a RIP or HELLO supplier, interfaces will NOT
+	    be timed out.
+
+	10. A config file option has been added to prevent the timing
+	    out of certain interfaces.  THe sytax is as follows:
+
+	    passiveinterfaces int_addr [int_addr] ......
+
+	    The interfaces listed will not participate in the routing
+	    timeout scheme described in CHANGE #9.   Remember, the
+	    PTP interfaces listed must be specified with their
+	    destination address.
+
+	11. RIP now listens and propagates HOST routes.  This was the
+	    strategy taken for dealing with PTP routes in a consistent
+	    manner.  Any route learned via a HOST redirect wil NOT
+	    be propagated.  A route learned via any REDIRECT will not
+	    be propagated.
+
+	12. The internal gated routing tables have been merged into one.
+	    Also, the hashing fuction for the route table now parallels
+	    the one used by the 4.3BSD kernel.
+
+	13. Support for host static routes and host restrictions have been
+	    added.  THe new config file keywords for the hosts are:
+
+	    announcehost
+	    donotannouncehost
+	    donotlistenhost
+
+	    The whole syntax remains the same as the net restriction and
+	    static syntax:
+
+	    "keyword" host_addr intf int_addr ... proto {rip|egp|hello} ...
+
+	    For static host routes:
+
+	    host host_addr gateway gate_addr metric # {rip|hello|egp}
+
+	    Please see the man page for the complete syntax.
+
+	14. Flash-update code has been fixed.  Split-horizon and
+	    restrictions are applied properly.  Also, instead of sending
+	    out a burst of RIP packets with one changed net in each,
+	    one packet is sent with the changed routes for the flash
+	    update period.
+
+	15. the RIP_TRACE* commands are implemented.
+
+	16. The HELLO default route is now mapped into the UNIX default
+	    when there is no UNIX default route available.  The HELLO
+	    default (net 10) is first processed as net 10 by UNIX.  If
+	    there is no default gateway in the routing tables, UNIX
+	    treats this HELLO net 10 as the UNIX default 0.0.0.0 and
+	    actually installs a default route. This way, an NSFnet
+	    backbone site should never be without a default if their
+	    local default (ARPA gateway) goes away.
+
+	17. The RIP to HELLO, and the HELLO to RIP metric mapping was
+	    changed.  Look in mapmetric() in rt_table.c for the
+	    details.
+
+	18. All metrics are stored internally by gated as time-delay in
+	    milliseconds.  The RIP metric is mapped to HELLO and processed.
+
+	19. The notion of subnet interfaces are supported.  This way,
+	    subnets don't get RIPped where people don't want them to.
+	    If a gateway is gatewaying 2 subnetted class B networks,
+	    the subnet routes are not propagated where they shouldn't be.
+	    Just the Class B network is RIPped to the appropriate interface.
+
+	20. Sending gated a SIGINT, will cause it to dump its routing
+	    knowledge to /usr/tmp/gated_dump.
+	    (kill -INT `cat /etc/gated.pid`)   Once this signal is
+	    received by gated, it will schedule a the dump to take place
+	    within the next 60 seconds (MAXIMUM).
+
+	21. a config option to filter on the source of information for a
+	    specified network or host has been added.  For example:
+
+	    listen 128.84 gateway 128.121.50.1 128.121.51.5 proto rip
+
+	    This means to only listen to information about 128.84 from
+	    gateways 128.121.50.1 and 128.121.50.5 via the protocol rip.
+	    Ignore all other information about 128.84
+
+	    The same is true for a host:
+
+	    listenhost 128.84.1.1 gateway 128.121.50.5 proto rip
+	    
+	    
+	22. Support was added to handle interface metrics for those
+	    primitive systems that don't support it.  In the conf file:
+
+	    interfacemetric int_addr metric#
+
+	    interfacemetric 128.84.253.200 5
+
+	    You must have one line for each interface you want to provide
+	    a metric for.  Also, this will override your systems interface
+	    metric if the system supports it (ala 4.3BSD).
+	    
+	23. Metric Reconstitution was added (even though it is very
+	    dangerous).  This one is for Chuck at Rutgers!  :^)
+	    in the conf file:
+
+	    reconstmetric int_addr metric#
+
+	    reconstmetric 128.84.238.200 6
+
+	    This means that any RIP information coming into this interface
+	    will get its metric set to 6 (except infinity of course).  THis
+	    is a dangerous loop creator.  USE WITH CAUTION.
+
+	24. Sending gated a SIGHUP will toggle its debugging.  Example:
+
+	    Start gated with "-tierp" flags to /tmp/gated.log.  It is now
+	    logging.  Send a kill -HUP `cat /etc/gated.pid`, the following
+	    happens:
+
+		- logging is terminated
+	        - /tmp/gated.log (or whatever you are using!) is closed.
+
+	     rm gated.log or mv it
+
+	     send another kill -HUP:
+
+	        - /tmp/gated.log is created and opened (appended to if
+	          already there)
+		- logging is turned back on (whatever was specified in
+	          the command line)
+
+	     This is useful in having rotating log files much like syslog
+	     does.
+
+	25.  Machines now supported include: SunOS 3.X, BSD4.2, Gould UTX/32
+	     (see Makefile for supported machines)
+
+	26.  Miscellaneous small nagging bugs were fixed.
+
+	27.  Gated now keeps a list of active gateways (participating
+	     in a supported routing protocol) per interface. The list
+	     includes the address of the gateway, what routing protocols
+	     are being used by that gateway and a timer.  I found this
+	     necessary in dealing with split horizon in a parallel
+	     routing protocol environment.
+
+	28.  Gated was linted down to 2 lines of the fluffy stuff....
+
+	29.  The "announce" and "noannounce" statements in the config
+	     file can now be applied on a per interface basis instead
+	     of only globally.  Previous versions of gated only allowed
+	     the specification of either the "announce" or "noannounce"
+	     separate, but never together.  There was no change of
+	     syntax, gated internals were just made smarter.
+	     The first "{no}announce net# intf all ....." will make
+	     gated apply the clause globally because you specified all
+	     interfaces.
+

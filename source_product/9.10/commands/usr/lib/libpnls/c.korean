@@ -1,0 +1,8 @@
+$set 1
+1 yyyy.mm.dd (DD)
+2 yy/mm/dd
+3 12:AMPM
+19 66
+26 4
+30 WWWWWWWWW, OOOOOOOOO dd, yyyy
+1003 DDD, MMM dd, yyyy,

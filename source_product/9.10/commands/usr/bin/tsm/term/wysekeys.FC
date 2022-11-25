@@ -1,0 +1,37 @@
+## FacetTerm  wysekeys  description file 12/08/87
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wysekeys.FC,v 70.1 92/03/09 16:10:26 ssa Exp $
+pkey_key=\Ez%p1%c%s1^?$<80/>
+function_key-@=^A@\r
+function_key-A=^AA\r
+function_key-B=^AB\r
+function_key-C=^AC\r
+function_key-D=^AD\r
+function_key-E=^AE\r
+function_key-F=^AF\r
+function_key-G=^AG\r
+function_key-H=^AH\r
+function_key-I=^AI\r
+function_key-J=^AJ\r
+function_key-K=^AK\r
+function_key-L=^AL\r
+function_key-M=^AM\r
+function_key-N=^AN\r
+function_key-O=^AO\r
+shift_function_key
+function_key-`=^A`\r
+function_key-a=^Aa\r
+function_key-b=^Ab\r
+function_key-c=^Ac\r
+function_key-d=^Ad\r
+function_key-e=^Ae\r
+function_key-f=^Af\r
+function_key-g=^Ag\r
+function_key-h=^Ah\r
+function_key-i=^Ai\r
+function_key-j=^Aj\r
+function_key-k=^Ak\r
+function_key-l=^Al\r
+function_key-m=^Am\r
+function_key-n=^An\r
+function_key-o=^Ao\r

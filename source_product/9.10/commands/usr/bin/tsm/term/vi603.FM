@@ -1,0 +1,30 @@
+## FacetTerm Menu Capabilities for a VISUAL 603  06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: vi603.FM,v 70.1 92/03/09 16:52:45 ssa Exp $
+##-menu-cap-init_string=\E[?7h\E>\E[?1l\E\sF\E[?4l
+##-menu-cap-cursor_address=\E[%i%p1%d;%p2%dH
+##-menu-cap-clear_screen=\E[H\E[J
+##-menu-cap-clr_eol=\E[K
+##-menu-cap-ena_acs=\E)0
+##-menu-cap-enter_alt_charset_mode=^N
+##-menu-cap-exit_alt_charset_mode=^O
+##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\E[m
+##-menu-cap-shadow_attr=\E[m
+##-menu-cap-item_attr=\E[m
+##-menu-cap-box_attr=\E[7m
+##-menu-cap-title_attr=\E[7m
+##-menu-cap-highlight_attr=\E[7m
+##-menu-cap-highlight_blink_attr=\E[5;7m
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\EOA
+##-menu-cap-key_up=\E[A
+##-menu-cap-key_down=\EOB
+##-menu-cap-key_down=\E[B
+##-menu-cap-key_right=\EOC
+##-menu-cap-key_right=\E[C
+##-menu-cap-key_left=\EOD
+##-menu-cap-key_left=\E[D
+## ##-menu-cap-key_ignore=

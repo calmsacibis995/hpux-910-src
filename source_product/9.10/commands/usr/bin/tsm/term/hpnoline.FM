@@ -1,0 +1,50 @@
+## FacetTerm Menu Capabilities for HP emulators w/o line drawing chars 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: hpnoline.FM,v 70.1 92/03/09 16:11:08 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\E&a%p1%dy%p2%dC
+##-menu-cap-clear_screen=\E&a0y0C\EJ
+##-menu-cap-clr_eol=\EK
+## ##-menu-cap-ena_acs=
+## ##-menu-cap-enter_alt_charset_mode=
+## ##-menu-cap-exit_alt_charset_mode=
+## ##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~
+##-menu-cap-keypad_xmit=\E&s1A
+##-menu-cap-no_attr=\E&d@
+##-menu-cap-shadow_attr=\E&d@
+##-menu-cap-item_attr=\E&d@
+##-menu-cap-box_attr=\E&dB
+##-menu-cap-title_attr=\E&dB
+##-menu-cap-highlight_attr=\E&dB
+##-menu-cap-highlight_blink_attr=\E&dC
+## ##-menu-cap-magic_cookie=0
+##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\EA
+##-menu-cap-key_down=\EB
+##-menu-cap-key_right=\EC
+##-menu-cap-key_left=\ED
+##-menu-cap-key_home=\Eh
+##-menu-cap-key_ignore=\E3
+##-menu-cap-key_ignore=\EJ
+##-menu-cap-key_ignore=\E2
+##-menu-cap-key_ignore=\EP
+##-menu-cap-key_ignore=\EM
+##-menu-cap-key_ignore=\ER
+##-menu-cap-key_ignore=\EK
+##-menu-cap-key_ignore=\EJ
+##-menu-cap-key_ignore=\Ep
+##-menu-cap-key_ignore=\Eq
+##-menu-cap-key_ignore=\Er
+##-menu-cap-key_ignore=\Es
+##-menu-cap-key_ignore=\Et
+##-menu-cap-key_ignore=\Eu
+##-menu-cap-key_ignore=\Ev
+##-menu-cap-key_ignore=\Ew
+##-menu-cap-key_ignore=\EQ
+##-menu-cap-key_ignore=\EL
+##-menu-cap-key_ignore=\EF
+##-menu-cap-key_ignore=\EU
+##-menu-cap-key_ignore=\EV
+##-menu-cap-key_ignore=\ES
+##-menu-cap-key_ignore=\ET
+##-menu-cap-key_ignore=\E1

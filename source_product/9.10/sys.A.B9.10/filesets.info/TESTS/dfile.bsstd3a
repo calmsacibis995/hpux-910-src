@@ -1,0 +1,39 @@
+98265
+98624
+98625
+98626
+98628
+98642
+amigo
+apci
+cdfs
+ciper
+cs80
+dos
+gpio
+hpib
+inet
+lan01
+lla
+maxuprc	400
+meas_sys
+nbuf 1024
+netdiag1
+netman
+nfs
+ninode 1024
+nipc
+nproc	500
+parallel
+printer
+ptymas
+ptyslv
+ramdisc
+rje
+scsi
+srm
+stape
+swap auto
+swap cs80 0x070000 0
+tape
+uipc

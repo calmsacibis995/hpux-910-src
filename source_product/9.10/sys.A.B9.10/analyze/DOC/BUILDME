@@ -1,0 +1,14 @@
+1). Update version.c
+2). Correct makefile for standard release (don't forget to change INC and CDEF)
+3). To build an rel1.0 or rel1.1 pre IC3 analyze you will need the pty.c.oldh
+    file, as IND changed the names. This is out of the rcs files.
+.
+4) To build a release 2.0 version you might need to uncomment the SO_SOCKET
+   _EVENT line, as it is not on the trunk I have only added it in as a comment.
+
+5) Because of changes made to the vnode kernel we must temporaily copy
+   all h files into the sys directory. This is because times.h changed
+   and it gets included as h.times.h
+
+
+

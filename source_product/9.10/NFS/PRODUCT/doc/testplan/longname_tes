@@ -1,0 +1,46 @@
+
+.H 1 "Tests with long filenames ( >14 characters ) (Steve Booth)"
+
+NFS compabilility requires that HP machines support filenames
+with more than the traditional maximum of 14 characters, at least
+across NFS boundaries.
+
+The Series 300, under a proposal current as of 5/28/87, will support
+longer filenames ONLY across NFS boundaries, and will enforce the
+14-character limit locally.  UFS (local) filenames will be truncated
+to a maximum of 14 characters, while NFS filenames will be passed to
+the remote NFS server untouched (maximum of 255 characters).  For
+example, an HP NFS server node will truncate all files it creates on
+the local HP system to a maximum of 14 characters.
+
+Series 800 machines, as of 5/28/87, will support long filenames
+locally.
+
+.H 2 "Testing Methodology" 
+
+A sampling of the existing functional tests will be copied into
+a separate subdirectory under the "nfs" directory, and will be modified
+to use long filenames.
+
+The tests that will be copied/modified are:
+    rm, touch, mkdir
+    creat, link, open
+    rename, symlink (symbolic link tests)
+
+Behavioral differences will be expected when these tests are run from
+SUN->HP, HP->HP, and HP->SUN.
+
+
+.H 2 "Schedule Estimates, Assumptions"
+
+.DS
+IMPLEMENT TIME: 2 md  (includes time to characterize SUN/HP differences)
+PERFORM TIME:   5 md
+ASSUMPTIONS: long filename support has been added to the product
+                 at least 3 weeks prior to the second Early Bird release
+             a common filename parsing routine exists which is called by
+                 all relevant commands
+             a common filename parsing routine exists which is called by
+                 all relevant system calls
+RESPONSIBLE ENGINEER: unknown
+.DE

@@ -1,0 +1,17 @@
+#!/bin/sh
+###
+#
+# Short script to get the latest build environment for s800
+#
+###
+
+Nfs="/usr/src/tools.7.0/TOOLS/nfs/working"
+export Nfs
+
+cd $Nfs
+DATE=`date +%m.%d`
+date '+%m:%d:%H:%M:%S  Saving the old s800 build environment'
+find /usr/src/tools.7.0/TOOLS -fstype hfs -print | cpio -ox | compress > /usr//src/tools.7.0/7.0_be_$DATE
+date '+%m:%d:%H:%M:%S  Installing a new s800 build environment'
+/usr/local/bin/getbe -F $Nfs/bin/getberc_800 > $Nfs/log/get_be_800 2>&1 &
+

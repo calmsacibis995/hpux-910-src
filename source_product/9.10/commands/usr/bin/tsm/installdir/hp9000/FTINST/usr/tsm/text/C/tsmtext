@@ -1,0 +1,560 @@
+#############################################################################
+### /usr/tsm/text/C/tsmtext   10/25/90
+#############################################################################
+### Changing TSM text strings.
+### 
+###     Any of the text strings output to the terminal by TSM such
+###     as prompts or user errors can be redefined.  An example of
+###     the use of this feature would be changing the language to something
+###     other than English.
+### 
+###     When TSM starts, it will search for this data file "tsmtext" in the 
+###     following sequence:
+###
+###     ./.tsmtext/$LANG/tsmtext
+###     ./.tsmtext/$C/tsmtext
+###     ./.tsmtext/tsmtext
+###     $HOME/.tsmtext/$LANG/tsmtext
+###     $HOME/.tsmtext/C/tsmtext
+###     $HOME/.tsmtext/tsmtext
+###     /usr/tsm/text/$LANG/
+###     /usr/tsm/text/C/
+###     /usr/tsm/text/
+###
+###     It is recommended that you copy this file to $HOME/.tsmtext/
+###     for customization.
+###
+###     If tsm has not been installed in the standard path, /usr/tsm,
+###     then set the environment variable, $TSMPATH to the location of
+###     tsm directory on your system.
+### 
+###     If this file exists, TSM will read it
+###     looking for lines of the form:
+### 
+###             !text_string_name
+### 
+###     where the  "!"  must be in column 1, and the "text_string_name" 
+###     matches one of the names of the strings that can be redefined.
+### 
+###     Upon finding such a line, the contents of the next line that does
+###     not begin with a "#" replaces the default contents of the text
+###     string.
+### 
+###     For example, a file that contains the following:
+### 
+###             !facet_activating
+###             #Facet process: activating\r\n
+###             FACET/TERM is now activating its windows...\r\n
+### 
+###             !facetterm_window_label
+###             #FACET/TERM Window %d\n
+###             This is FACET/TERM Window Number %d \n
+### 
+###     will change the default messages shown on the lines starting with
+###     the '#' to the new contents shown on the line after them.
+### 
+###     The file "/usr/tsm/text/C/tsmtext" contains all of the valid
+###     text string names and the default contents of the strings
+### 
+###     The processor for these strings understands:
+### 
+###             \r      for carriage return
+###             \n      for line feed
+###             \s      for space
+###             \\      for backslash
+### 
+###     Since the terminal is in raw mode when most of these strings are
+###     output, you will see the combination "\r\n" used for going to the
+###     beginning of the next line. "\s" is used for trailing spaces to
+###     make them visible.
+### 
+###     As you can see by the default contents of the text strings, most
+###     of them are input to printf or sprintf with parameters to fill
+###     in window numbers, etc.  Changing the "%" fields of the strings
+###     should be done only by programmers aware of the consequences of
+###     making an invalid call to sprintf.
+###
+###     Names that begin "in_" are for remapping keys at the corresponding
+###     input prompt.  The syntax is:
+###             key repl_key [repl_key ...] [ \0 key repl_key [repl_key ...] ]
+###     For example:
+###
+###             !get_command_capture_active
+###             #Capture active on '%s' - N=stop Y=new file
+###             Capture active on '%s' - X=stop J=new file
+###
+###             !in_get_command_capture_active
+###             XN\0xn\0JY\0jy
+###             
+###     means X maps to N
+###           x maps to n
+###           J maps to Y
+###           j maps to y
+###             
+###     Y and N would still work unless they were mapped to invalid keys.
+###     This remapping affects the keyboard only - not commands through
+###     ioctls.
+#############################################################################
+
+!number_of_windows
+#\nNumber of windows set to %d\n
+\nNumber of sessions set to %d\n
+
+!facet_line_available
+#Facet process: Facet line # %d is available.\n
+TSM process: TSM line # %d is available.\n
+
+!all_facet_busy
+#Facet process: All Facet lines are busy. (%d)\n
+#Facet process: All psuedo ttys are busy.\n
+TSM process: All pseudo ttys are busy.\n
+
+!driver_not_installed
+#Facet process: Facet driver not properly installed. (%d)\n
+TSM process: TSM driver not properly installed. (%d)\n
+
+
+!assign_facet_busy
+#Facet process: Assigned Facet line is busy.\n
+TSM process: Assigned TSM line is busy.\n
+
+!assign_facet_exist
+#Facet process: Assigned Facet line does not exist. (%d)\n
+TSM process: Assigned TSM line does not exist. (%d)\n
+
+!cannot_open_dev_facet
+#Facet process: can't open %s, error %d\n
+TSM process: can't open %s, error %d\n
+
+!facet_activating
+#Facet process: activating\r\n
+TSM process: activating\r\n
+
+!sender_wait_close
+#Facet process: sender waiting for windows to close...\n
+TSM process: sender waiting for sessions to close...\n
+
+!facet_attempt_kill
+#Facet process: attempting to kill processes that would not hang up...\n
+TSM process: attempting to kill processes that would not hang up...\n
+
+!facet_attempt_list
+#Facet process: attempting to list processes that would not hang up...\n
+TSM process: attempting to list processes that would not hang up...\n
+
+!sender_term_wait_close
+#Facet process: sender terminating - waiting for windows to close...\n
+TSM process: sender terminating - waiting for sessions to close...\n
+
+!sender_term
+#Facet process: sender terminating...\n
+TSM process: sender terminating...\n
+
+!window_is_active
+#\r\n>>>Window %d is active.<<<\r\n
+\r\n>>>Session %d is active<<<\r\n
+
+!window_is_idle
+#\r\n>>>Window %d is idle.<<<\r\n
+\r\n>>>Session %d is idle, Select from "Run menu" to activate<<<\r\n
+
+!user_number
+#FACET/TERM user # %d of %d  - \s
+TSM user # %d of %d  - \s
+
+!too_many_users
+#Sorry - %d FACET/TERM users already active\n
+Sorry - %d TSM users already active\n
+
+!facetterm_window_label
+#FACET/TERM Window %d\n
+TSM Session %d\n 
+
+#!window_printer_mode
+#Transparent print mode\n
+
+!window_mode_prompt
+# >>> FACET/TERM Window %2d %s<<<\s
+>>> TSM Session %2d %s  '?' for Help <<<\s
+
+#!in_window_mode_prompt
+#
+
+### NOTE: window_mode_prompt_bottom window_mode_prompt_top 
+###       window_mode_prompt_full and window_mode_popup 
+###       must all be the same length 
+###       and must be longer than window_mode_prompt_default.
+###       These strings are the second parameter of window_mode_prompt.
+
+#!window_mode_prompt_bottom
+#bottom\s
+
+#!window_mode_prompt_top
+#top   \s
+
+#!window_mode_prompt_full
+#full  \s
+
+#!window_mode_prompt_popup
+#popup \s
+
+#!in_window_mode_prompt_popup
+#
+
+#!window_mode_prompt_default
+#
+
+!full_switch_window
+#Switching to FACET/TERM Window %d
+Switching to TSM Session %d
+
+!full_refresh_window
+#Refreshing FACET/TERM Window %d
+Refreshing TSM Session %d
+
+!screen_saver
+#FACET/TERM - press any key to continue
+TSM - press any key to continue
+
+#!cannot_open_terminal_desc
+#Cannot open %s\n
+
+#!term_not_set
+#Cannot determine terminal type. Environment variable TERM must be set.\r\n
+
+!term_type_is
+#Terminal type is: %s.     FACET/TERM Terminal type is: %s.\r\n\n
+Terminal type is: %s.     TSM Terminal type is: %s.\r\n\n
+
+#!reading_terminal_desc
+#Reading terminal description file...\n
+
+!menu_hotkey_is_control
+#FACET/TERM 'menu hot key' is Control-%c\n
+TSM 'menu hot key' is Control-%c\n
+
+!menu_hotkey_is_char
+#FACET/TERM 'menu hot key' is '%c'\n
+TSM 'menu hot key' is '%c'\n
+
+!hotkey_disabled
+#FACET/TERM 'window mode key' is disabled -  Press Return to start:\s
+TSM 'command mode key' is disabled\r\n\nPress RETURN to start:\s
+
+!hotkey_is_control
+#FACET/TERM 'window mode key' is Control-%c  -  Press Return to start:\s
+TSM 'command mode key' is Control-%c\r\n\nPress RETURN to start:\s
+
+!hotkey_is_char
+#FACET/TERM 'window mode key' is '%c'  -  Press Return to start:\s
+TSM 'command mode key' is '%c'\r\n\nPress RETURN to start:\s
+
+#!press_return_to_exit
+#Press RETURN to exit.\r\n
+
+#!split_screen_disabled
+#Notice: Split screen is disabled.\r\n
+
+!sender_removing_utmp
+#Facet process: sender removing /etc/utmp entries...\n
+TSM process: sender removing /etc/utmp entries...\n
+
+######################################################################
+### NOTE: The cursor for "name_input" is placed at 
+###       the offset of the second % - 2 + the length of the first parameter.
+
+#!name_input
+# >>> %s: %-*.*s <<<\s
+
+#!in_name_input
+#
+
+### NOTE: the text strings beginning with "name_input" are inserted as
+###       the first parameter of "name_input".
+
+#!name_input_capture_file
+#Capture file name
+
+#!name_input_keystroke_file
+#Keystroke cap file
+
+#!name_input_keystroke_play
+#Keystroke play file
+
+#!name_input_run_program
+#Run Program
+
+#!name_input_key_file
+#Key File
+
+#!name_input_global_key_file
+#Gl. Key File
+
+#!name_input_paste_eol_type
+#Paste eol type
+
+!name_input_window_title
+#Window title
+Session title
+
+#!name_input_mapped_key
+#Key and mapping
+
+#!name_input_mapped_key_unmap
+#Key to unmap
+
+#!name_input_paste_script
+#Paste to script
+
+#!name_input_paste_filename
+#Paste to File
+
+######################################################################
+### NOTE: The cursor for "get_command" is placed at 
+###       the offset of the second % - 2 + the length of the first parameter.
+
+#!get_command
+# >>> %s: %s  <<<\s
+
+### NOTE: the text strings beginning with "get_command" are inserted as
+###       the first parameter of "get_command".
+
+#!get_command_capture_active
+#Capture active on '%s' - N=stop Y=new file
+
+#!in_get_command_capture_active
+#
+
+#!get_command_capture_inactive
+#Capture stopped on '%s' - Y=capture
+
+#!in_get_command_capture_inactive
+#
+
+#!get_command_keystroke_active
+#Keystroke active on '%s' - N=stop Y=new file
+
+#!in_get_command_keystroke_active
+#
+
+#!get_command_keystroke_inactive
+#Keystroke stopped on '%s' - Y=capture
+
+#!in_get_command_keystroke_inactive
+#
+
+!get_command_redirect
+#Redirect to Window
+Redirect to Session
+
+#!in_get_command_redirect
+#
+
+!get_command_quit_active
+#WARNING! Windows active. QUIT FACET/TERM ? (Y or N)
+WARNING! Sessions active. QUIT TSM ? (Y or N)
+
+#!in_get_command_quit_active
+#
+
+!get_command_quit_idle
+#QUIT FACET/TERM ? (Y or N)
+QUIT TSM ? (Y or N)
+
+#!get_command_extra_commands
+#Cap Inv Mon Notify Trsp Hang Blk Keys Repl Scr Prt
+
+#!in_get_command_extra_commands
+#
+
+#!get_command_control_chars
+#Break  q=Control-Q  s=Control-S  @=Control-@
+
+#!in_get_command_control_chars
+#
+
+#!get_command_mapped
+#Hotkey Map Filename Unmap
+
+#!in_get_command_mapped
+#
+
+#!get_command_paste_commands
+#paste to Printer Script File Append Overwrite
+
+#!in_get_command_paste_commands
+#
+
+!get_command_window_monitor
+#Window %2d monitor mode (window #, Y or N)
+Session %2d monitor mode (session #, Y or N)
+
+#!in_get_command_window_monitor
+#
+
+!get_command_window_invisible
+#Window %2d invisible to scan (window #, Y or N)
+Session %2d invisible to scan (session #, Y or N)
+
+#!in_get_command_window_invisible
+#
+
+!get_command_window_notify
+#Window %2d notify when current (window #, Y or N)
+Session %2d notify when current (session #, Y or N)
+
+#!in_get_command_window_notify
+#
+
+!get_command_window_transparent
+#Window %2d transparent mode (window #, Y or N)
+Session %2d transparent mode (session #, Y or N)
+
+#!in_get_command_window_transparent
+#
+
+!get_command_window_blocked
+#Window %2d blocked (window #, Y or N)
+Session %2d blocked (session #, Y or N)
+
+#!in_get_command_window_blocked
+#
+
+!get_command_window_printer
+#Window %2d printer mode (window #, Y or N)
+Session %2d printer mode (session #, Y or N)
+
+#!in_get_command_window_printer
+#
+
+#!get_command_send_hangup
+#SEND HANGUP ? (N=No Y=Current A=All K=Kill)
+
+#!in_get_command_send_hangup
+#
+
+#!get_command_screen_saver
+#Activate screen saver ? (Y or N)
+
+#!in_get_command_screen_saver
+#
+
+######################################################################
+### NOTE: the None in "get_window_none" should line up with the second digit 
+###       in the second parameter of "get window".  The cursor is placed at
+###       the offset of the second % - 2 + the length of the first parameter
+###       + 1.  That is, the second digit of the window number.
+
+#!get_window
+# >>> %s %2d      <<<\s
+
+#!in_get_window
+#
+
+#!get_window_none
+# >>> %s  None   <<<\s
+
+#!get_window_menu
+# >>> %s %2d Menu <<<\s
+
+#!get_window_next_active
+# >>> %s  Active <<<\s
+
+### NOTE: the text strings beginning with "get_window" are inserted as
+###       the first parameter of "get_window".
+
+!get_window_idle_window
+#Idle Window
+Idle Session
+
+#!get_window_windows_window
+#Windows Window
+
+######################################################################
+!cut_and_paste
+# >>> Window %2d %-44.44s <<<\s
+>>> Session %2d %-43.43s <<<\s
+
+!in_cut_and_paste
+TS\0ts\0SW\0sw
+
+### NOTE: the text strings beginning with "cut_and_paste" are inserted as
+###       the second parameter of "cut_and_paste".
+
+!block_cut_and_paste_first
+#Block  CUT  RETURN=corner 1  SPACE=quit
+Block CUT: Put cursor on corner 1, RETURN
+
+!block_cut_and_paste_second
+#Block  CUT  RETURN=corner 2  SPACE=quit
+Block CUT: Put cursor on corner 2, RETURN
+
+!stream_cut_and_paste_first
+#Stream CUT  RETURN=corner 1  SPACE=quit
+Text CUT: Place cursor at start, RETURN
+
+!stream_cut_and_paste_second
+#Stream CUT  RETURN=corner 2  SPACE=quit
+Text CUT: Place cursor at end,   RETURN
+
+!wrap_cut_and_paste_first
+#Wrap   CUT  RETURN=corner 1  SPACE=quit
+String CUT: Place cursor at start, RETURN
+
+!wrap_cut_and_paste_second
+#Wrap   CUT  RETURN=corner 2  SPACE=quit
+String CUT: Place cursor at end,   RETURN
+
+#!cut_and_paste_paste
+#PASTING
+
+######################################################################
+#!get_mode_input
+# >>> %-15.15s %-15.15s RETURN=set SPACE=cancel <<< \s
+
+#!in_get_mode_input
+#
+
+### NOTE: the text strings "terminal_modes" and "transparent_print" are
+###       inserted as the first parameter of "get_mode_input".
+
+#!terminal_modes
+#Terminal modes:
+
+#!transparent_print
+#Trans print:
+
+### NOTE: the text strings "transparent_print_off" and "transparent_print_on"
+###       are inserted as the second parameter of "get_mode_input".
+###       The entries "control_8_bit_on_identifier" and 
+###       "control_8_bit_off_identifier" from the terminal description 
+###       file can also be the second parameter.
+
+#!transparent_print_off
+#OFF
+
+#!transparent_print_on
+#ON
+
+######################################################################
+#!register_within
+#Please register # %ld within %d days.\n\n
+
+#!registration_expired
+#Sorry - registration of # %ld was not done within %d days of installation.\n
+
+!receiver_terminating
+#\r\nFacet process: receiver terminating\r\n
+\r\nTSM process: receiver terminating\r\n
+
+#!printer_program_name
+#(Printer)
+
+#!printer_mode_terminated
+#\nPrinter mode terminated by break.\n
+
+#!printer_mode_on
+#\nPrinter mode on.\n
+
+#!printer_mode_off
+#\nPrinter mode off.\n

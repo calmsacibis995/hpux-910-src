@@ -1,0 +1,444 @@
+.H 1 "NFS and the rename() system call (Mike Shipley)"
+The rename(from, to) system call will change the name of a file(from)
+to a new name(to).
+If the new name refers to an existing file, the existing file will be
+purged.
+This should only work when both file names are remote on the same node.
+We have no interest in files that are on the local node.
+
+Since this is a system call, a C program could be used to do the testing.
+It may be possible that the "mv" command will adapt the use of rename
+instead of link() and unlink() which is presently used.  I will specify
+for now that the rename system call is used, but this will be for
+documentational purposes.  The implementation may be different.
+
+I am not trying to specify the names of the files to be used, so there
+will be no consideration in fitting into the scaffold or in terms of
+concurrent testing.  I will adapt the convention of "from" to refer to
+the file that the rename of to be done on and "to" to refer to the file
+that the "from" file is to be named.  I will prepend "/mnt/..." to indicate
+that the files are on a remote node.  I also will assume that the
+appropriate "mount remote_node:/  /mnt" will have been done.
+
+I have added tests for CDF's to the rename tests.
+
+These tests will explore doing rename in situations where the "from" and
+"to" files may or may not exist.
+
+.nf
+RESPONSIBLE ENGINEER: Steve Booth
+DEPENDENCIES: Having a HP-UX kernel that supports rename().
+ISSUES:
+.fi
+
+.sp 2
+.H 2 "The  from  file exists"
+.sp 1
+.nf
+/mnt/from exists, /mnt/to does not exist
+rename(/mnt/from, /mnt/to)  
+RESULT:  should work
+
+/mnt/from exists, /mnt/to exists
+rename(/mnt/from, /mnt/to)  
+RESULT:  should work
+
+with no write permission in parent directory of "from"
+/mnt/from exists, /mnt/to does not exist
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno = EACCES, should check on
+         the existence of "to"
+
+with no write permission in parent directory of "from"
+/mnt/from exists, /mnt/to exists
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno = EACCES, should check on
+         the existence of "to"
+
+with no write permission in parent directory of "to"
+/mnt/from exists, /mnt/to does not exist
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno = EACCES, should check on
+         the existence of "to" and "from"
+
+with no write permission in parent directory of "to"
+/mnt/from exists, /mnt/to exists
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno = EACCES, should check on
+         the existence of "to" and "from"
+.fi
+
+
+.nf
+IMPLEMENT TIME:  1.5  md 
+                   (This is to account for the overhead to
+                    establish the whole series of rename tests.)
+PERFORM TIME:    0.25 md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+.sp 2
+.H 2 "The  from  file does not exist"
+.sp 1
+.nf
+/mnt/from does not exist, /mnt/to does not exist
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno=ENOENT, check on the existence of "to"
+
+/mnt/from does not exist, /mnt/to exists
+rename(/mnt/from, /mnt/to)  
+RESULT:  should not work, errno=ENOENT, check on the existence of "to"
+.fi
+
+.nf
+IMPLEMENT TIME:  0.1  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+
+.sp 2
+.H 2 "The  from  file exists and is a directory"
+.sp 1
+.nf
+acting as non-Super User
+/mnt/from_dir exists, /mnt/to_dir does not exist
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should not work, errno=EPERM
+
+acting as non-Super User
+/mnt/from_dir exists, /mnt/to_dir exists
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should not work, errno=EPERM
+
+\fB NOTE: \fR The following super user tests should be executed twice:
+(1) do everything as superuser except the rename call, and
+(2) do nothing as superuser except the rename call.
+The results in both cases should be identical.
+
+acting as Super User AND both parent directories of "from_dir"
+and "to_dir" have permissions of 0755 (this is to keep 
+"nobody" from having write permission )
+/mnt/from_dir exists, /mnt/to_dir does not exist
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should not work, errno=EACCES
+
+acting as Super User AND both parent directories of "from_dir"
+and "to_dir" have permissions of 0777 (this is to eliminate any
+problems with being "nobody" with NFS)
+/mnt/from_dir exists, /mnt/to_dir does not exist
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should work
+
+acting as Super User AND both parent directories of "from_dir"
+and "to_dir" have permissions of 0777 (this is to eliminate any
+problems with being "nobody" with NFS)
+/mnt/from_dir exists, /mnt/to_dir exists and is an empty directory
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should work
+
+acting as Super User AND both parent directories of "from_dir"
+and "to_dir" have permissions of 0777 (this is to eliminate any
+problems with being "nobody" with NFS)
+/mnt/from_dir exists, /mnt/to_dir exists and is a 
+directory with entries
+rename(/mnt/from_dir, /mnt/to_dir)
+RESULT:  should not work, errno=ENOTEMPTY
+
+acting as Super User AND both parent directories of "from_dir"
+and "to" have permissions of 0777 (this is to eliminate any
+problems with being "nobody" with NFS)
+/mnt/from_dir exists, /mnt/to exists and is a file
+rename(/mnt/from_dir, /mnt/to)
+RESULT:  should not work, errno=ENOTDIR
+
+.fi
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.5  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See the above RESULT's
+.fi
+
+.sp 2
+.H 2 "The files are on different nodes"
+.sp 1
+.nf
+/from exists on local node, /mnt/to does not exist on remote node
+rename(/from, /mnt/to)  
+RESULT:  should not work, errno=EXDEV
+
+/from exists on local node, /mnt/to exists on remote node
+rename(/from, /mnt/to)  
+RESULT:  should not work, errno=EXDEV
+
+/mnt/from exists on remote node, /to does not exist on local node
+rename(/mnt/from, /to)  
+RESULT:  should not work, errno=EXDEV
+
+/mnt/from exists on remote node, /to exists on local node
+rename(/mnt/from, /to)  
+RESULT:  should not work, errno=EXDEV
+
+/mnt/from exists on remote node a, /mnt_1/to does not exist
+on remote node b
+rename(/mnt/from, /mnt_1/to)  
+RESULT:  should not work, errno=EXDEV
+
+/mnt/from exists on remote node a, /mnt_1/to exists on remote node b
+rename(/mnt/from, /mnt_1/to)  
+RESULT:  should not work, errno=EXDEV
+
+.fi
+
+.nf
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    0.5  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See above RESULT's
+.fi
+.sp 2
+.H 2 "Miscellaneous additional tests (Steve Booth)"
+.sp 1
+.nf
+a component of the FROM pathname past the mount point is
+not a directory (e.g., /mnt/<file1>/file2 instead of /mnt/<dir>/file2)
+RESULT: should not work, errno=ENOTDIR
+
+FROM is the parent directory of TO
+(e.g., rename /mnt/FROM /mnt/FROM/TO)
+RESULT: should not work, errno=EINVAL
+
+TO is the parent directory of FROM
+(e.g., rename /mnt/FROM /mnt/TO/FROM)
+RESULT: should not work, errno=ENOTDIR
+
+FROM and TO are the same DIRECTORY
+(e.g., rename /mnt/FROMdir /mnt/FROMdir)
+RESULT: should not work, errno=EINVAL
+
+FROM and TO are the same FILE
+(e.g., rename /mnt/FROM /mnt/FROM)
+RESULT: should not work, errno=EINVAL
+
+TO exists, is a directory, and is a mount point
+(e.g., rename /mnt/FROMDIR /mnt/MOUNTPOINT)
+RESULT: should not work, errno=EBUSY
+
+component of TO is a symbolic link
+RESULT: should work
+
+
+IMPLEMENT TIME: 0.5 md
+PERFORM TIME:   0.5 md
+TYPE OF TEST: functional
+EXPECTED OUTPUT: See above RESULT lines
+
+.sp 2
+.H 2 "General functionality of rename with CDF's"
+.sp 1
+CDF's are Context Dependent Files.  If you have not dealt with them,
+please look at the 6.0 ERS for an explanation as they are too complicated
+to explain in here.  Just for information, a CDF is created by doing a
+mkdir and then a chmod on the new directory.  To remove it, you must
+give the explicit name of the CDF including the "+" at the end of the 
+name.
+.nf
+
+Example:
+    mkdir  the_cdf
+    chmod u+s  the_cdf
+
+    rm -r  the_cdf+
+.fi
+Once you change mod the directory, you will not see it in a ls as long
+as it has nothing in it.  This can be quite confusing.
+.sp 1
+This collection of tests have been written for CDF's.  The scripts are
+not set up to run in the scaffold.  They have an echo line that
+describes each test.  The scripts assume that a file name will be passed
+in to them.  These scripts presently run locally.  After, the scripts
+are in the scaffold, they should be run with a remote file using a full
+path name and also run with a remote file that is relative to a remote
+current directory.
+
+.nf
+
+echo Rename a cdf to (an empty) cdf that exists
+# RESULT The first cdf should replace the second cdf.
+mkdir $1
+chmod u+s $1
+mkdir new_$1
+chmod u+s new_$1
+cat >$1 <<zztop
+hostname cdf
+zztop
+cat >new_${1}+/default <<zztop
+default to die
+zztop
+h=`ls new_${1}+`
+rename $1  new_$1
+h1=`ls new_${1}+`
+echo this $h 
+echo should equal $h1
+echo this should print hostname cdf
+cat new_$1
+rm -r ${1}+ new_${1}+
+
+echo Rename a cdf to a file that exists
+# RESULT The cdf should replace the file.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+touch file_$1
+rename $1  file_$1
+echo this should print hostname cdf
+cat file_$1
+rm -r ${1}+ file_${1}
+
+echo Make a cdf and rename it into another cdf that is empty
+#RESULT  The file in the first cdf should move into the second cdf
+#RESULT  A side effect should be that at first the empty cdf will not be
+#RESULT  listed by a ls.  After the rename, the second cdf will be listed
+#RESULT  by a ls, but the first cdf will no longer be listed.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+h=`ll ${1}+`
+mkdir new_$1
+chmod u+s new_$1
+rename $1  new_$1
+h1=`ll new_${1}+`
+echo this $h 
+echo should equal $h1
+rm -r ${1}+ new_${1}+
+
+echo Make a cdf with two contexts.  Rename it to a another cdf and rename it again
+#RESULT:  The hostname context will be first renamed and then the default 
+#RESULT:  context will then be renamed.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+cat >${1}+/default <<zztop
+default cdf
+zztop
+mkdir new_$1
+chmod u+s new_$1
+rename $1 new_$1
+echo hostname cdf   should be printed
+cat new_$1
+echo
+echo default cdf    should be printed
+cat $1
+rename $1 new_$1
+echo
+echo default cdf    should be printed
+cat new_$1
+rm -r ${1}+ new_${1}+
+
+echo Make a cdf with two contexts.  Rename it to just another file
+#RESULT  The hostname context will be renamed to be an ordinary file leaving
+#RESULT  the cdf with just the default context.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+cat >${1}+/default <<zztop
+default cdf
+zztop
+rename $1 afile
+echo hostname cdf   should be printed
+cat afile
+echo
+echo The ll should fail
+ll afile+
+rename $1 afile
+echo This ll should work
+ll ${1}+
+echo
+echo default cdf    should be printed
+cat afile
+rm -r ${1}+ afile
+
+echo Make a cdf with two contexts and rename it using the + to create a new cdf
+#RESULT  This will create a new cdf with both of the contexts inside it.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+cat >${1}+/default <<zztop
+default cdf
+zztop
+h=`ll ${1}+`
+rename ${1}+ new_$1
+h1=`ll new_${1}+`
+echo this $h 
+echo should equal $h1
+rm -r  new_${1}+
+
+echo Make a cdf, change the permission of the directory and try to do a rename
+#RESULT  Without write permission, the rename should fail.
+mkdir $1
+chmod u+s $1
+cat >$1 <<zztop
+hostname cdf
+zztop
+chmod -w .
+echo These two rename s should fail
+rename $1 new_$1
+rename ${1}+ newer_$1
+ll ${1}+
+chmod 0777 .
+echo Should not be able to rm new_$1 or newer_$1
+rm -r ${1}+ new_$1 newer_$1
+.fi
+
+
+
+.nf
+IMPLEMENT TIME:  0.6  md 
+PERFORM TIME:    0.5  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+
+.sp 2
+.H 2 "Renaming cdf between nodes"
+.sp 1
+This is similar to the tests of renaming files on different nodes.
+.nf
+mkdir /from
+chmod u+s /from
+touch /from
+/from does not exist, /mnt/to does not exist
+rename(/from, /mnt/to)  
+rm -r /from+
+RESULT:  should not work, errno=EXDEV
+
+mkdir /mnt/from
+chmod u+s /mnt/from
+touch /mnt/from
+/mnt/from does not exist, /to does not exist
+rename(/mnt/from, /to)  
+rm -r /mnt/from+
+RESULT:  should not work, errno=EXDEV
+
+.fi
+
+.nf
+IMPLEMENT TIME:  0.3  md 
+PERFORM TIME:    0.1  md
+TYPE OF TEST: functional
+EXPECTED OUTPUT:  See above RESULT's
+.fi
+

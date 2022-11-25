@@ -1,0 +1,9 @@
+$set 1
+1 portmap: fork
+2 portmap cannot create socket
+3 portmap cannot bind
+4 portmap couldn't do udp_create\n
+5 portmap cannot create socket
+6 portmap cannot bind
+7 portmap couldn't do tcp_create\n
+8 run_svc returned unexpectedly\n

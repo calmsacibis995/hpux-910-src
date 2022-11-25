@@ -1,0 +1,68 @@
+Edgar Circenis Feb 1989
+-----------------------
+This is the version of awk described in
+"The AWK Programming Language", by
+A. V. Aho, B. W. Kernighan, and P. J. Weinberger
+(Addison-Wesley, 1988, ISBN 0-201-07981-X).
+
+The program itself is created by
+	make
+which should produce a longish sequence of
+messages like this:
+
+	yacc -d awk.g.y
+	
+	conflicts: 16 shift/reduce, 79 reduce/reduce
+	cc -g  -c y.tab.c
+	rm y.tab.c
+	mv y.tab.o awk.g.o
+	cmp -s y.tab.h prevy.tab.h || (cp y.tab.h prevy.tab.h; echo change maketab)
+	prevy.tab.h: No such file or directory
+	change maketab
+	lex  awk.lx.l
+	cc -g  -c lex.yy.c
+	rm lex.yy.c
+	mv lex.yy.o awk.lx.o
+	cc -g  -c b.c
+	cc -g  -c main.c
+	cc -g  -c parse.c
+	cc maketab.c -o maketab
+	./maketab >proctab.c
+	cc -g  -c proctab.c
+	cc -g  -c tran.c
+	cc -g  -c lib.c
+	cc -g  -c run.c
+	cc -g  awk.g.o awk.lx.o b.o main.o parse.o proctab.o tran.o lib.o run.o    -lm
+
+This produces an executable a.out;  you will eventually
+want to move this to some place like /usr/bin/awk.
+
+The -g option (which generates symbol table information
+for debuggers) can be disabled by removing the line
+	CFLAGS = -g
+from the makefile.  Alternatively, you might replace
+it by
+	CFLAGS = -O
+if your compiler does significant optimization.
+
+If your version of yacc complains about table
+overflow or other problem, try
+	cp sv.y.tab.c y.tab.c
+	cp sv.y.tab.h y.tab.h
+and either adjust the makefile or manually run the
+compilations above without using yacc.
+Similarly, if lex complains,
+	cp sv.lex.yy.c lex.yy.c
+DO NOT REMOVE the sv. files until you're sure that
+yacc and lex can handle the source.
+
+The file awktest.a is an archive containing a large
+number of small test examples.  Unarchive with
+	ar x awktest.a
+and examine the files Compare.*.
+
+The files c?.progs are the programs from the book,
+one file per chapter.  They are stored as awk bundles;
+to unbundle,
+	awk -f unbundle.awk c1.progs
+etc.

@@ -1,0 +1,31 @@
+; This is an example of a secondary master server's boot file.
+;
+; A secondary loads each of the domains that a master has
+; over the network.  Thus on each secondary line, there is
+; an IP address of a master.  The last entry on each line
+; is a file.  When the name server loads the data, it will
+; store the data on disk in this file.  Later, when the
+; server starts during a machine reboot, it will first read
+; the data on disk and then synch up with the master.  Thus,
+; the secondary will have data even if the master is down
+; at start up time.  Backing up the data to a file is
+; optional.  If several master IP addresses are given, 
+; it may not be necessary to store the data on disk.
+; (The master can be either a primary master or a secondary
+; master.)
+;
+; Since no site "owns" the network number 127.0.0, it is 
+; customary that each server has the mapping for 127.0.0.1 
+; to the name "localhost".
+;
+; Hosts_to_named can be used to generate these files from
+; the host table.
+;
+
+directory	/etc/newconfig/bind	; running directory for named
+					; and directory for files
+
+primary		0.0.127.IN-ADDR.ARPA	db.127.0.0
+secondary	cnd.hp.com		15.19.8.1 db.cnd
+secondary	8.19.15.IN-ADDR.ARPA	15.19.8.1 db.15.19.8
+cache		.			db.cache

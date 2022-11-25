@@ -1,0 +1,26 @@
+#!/bin/ksh
+# @(#) $Revision: 66.3 $
+#
+fileset=C-INC
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Remove <stand.h>, it has never been supported but was accidently
+# shipped at one point in time.
+#
+# Remove <errnet.h> and <sys/errnet.h>.  These are connected to RFA
+# functionality which is obsolete.
+#======
+/bin/rm -f /usr/include/stand.h \
+	   /usr/include/errnet.h /usr/include/sys/errnet.h
+
+exit $exitval

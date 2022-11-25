@@ -1,0 +1,998 @@
+#!/bin/ksh
+# @(#) $Revision: 70.6 $
+#
+fileset=UX-CORE
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+master_cxt="$1"
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+fileset_obsolete CORE-SHLIBS
+
+#======
+# /etc/copyright
+#======
+cp_retain /system$CDF/$fileset/copyright /etc/copyright
+
+#======
+# Remove obsolete files
+#======
+s300 && /bin/rm -f /lib$CDF/libk.a
+/bin/rm -f /etc/reconfig /usr/lib/nls/C/nawk.cat
+/bin/rm -rf /etc/fstomnt+ /etc/fstomnt
+s800 && /bin/rm -f /etc/NMUX.download /etc/UMUX.download
+s800 && /bin/rm -f /etc/UMUX8.download /etc/UMUX16.download
+/bin/rm -f /bin$CDF/identify
+
+#======
+# pre-8.0 locale.def files will cause the 8.0 setlocale() to
+# dump core.  These files need to be identified and removed.
+#======
+for i in /usr/lib/nls/*/locale.def
+do
+	if [ -s "$i" ]; then
+		set -- `what $i`
+		case $6 in
+		66.*)
+			;;
+		70.*)
+			;;
+		*) 
+			rm -f $i
+                        temp=`dirname $i`
+                        lang=`basename $temp`
+                        cat <<EOF
+NOTE:    The $i file has been deleted
+         because it is incompatible with 8.0 commands.  If you require
+         the "$lang" language on your system, you must install the
+         appropriate language fileset.
+EOF
+			;;
+		esac
+	fi
+done
+
+#======
+# Fix incorrect directory permissions
+#======
+
+[ -d /usr/mail ] && chmog 0775 bin mail /usr/mail
+[ -d /usr/contrib/bin ] && chmog 0555 bin bin /usr/contrib/bin
+
+if [ -d /usr/local/bin -a -f /.profile ]; then
+   perm=`/bin/ll -d /usr/local/bin | /usr/bin/awk '{print substr($1,9,1)}'`
+   /bin/grep '^[ 	]*PATH' /.profile | /bin/grep /usr/local/bin > /dev/null
+   if [ $? -eq 0 -a "$perm" = "w" ]; then
+      /bin/chmod o-w /usr/local/bin
+      /bin/cat <<EOF
+WARNING: The PATH set in /.profile contains the directory /usr/local/bin.
+	 This directory is writable by all users on this system and may
+	 pose a security problem since it is in the root PATH.  Permissions
+	 on /usr/local/bin have been changed to remove write privileges
+	 for other users.
+	 If you want this directory writable by all users on this system,
+	 you should remove /usr/local/bin from PATH in /.profile (see
+	 /etc/newconfig/.profile).  Then, re-instate the write privileges
+	 with:
+		/bin/chmod o+w /usr/local/bin
+EOF
+   fi
+fi
+
+#======
+# nawk (new awk) is replaced by /usr/bin/awk in 8.0.  If nawk exists,
+# remove it and make it a link to /usr/bin/awk (if it doesn't exist,
+# do nothing)
+#======
+if [ -f /usr/bin$CDF/nawk ]; then
+    /bin/rm -f /usr/bin$CDF/nawk
+    /bin/ln /usr/bin$CDF/awk /usr/bin$CDF/nawk
+    cat <<EOF
+NOTE:    /usr/bin/nawk was found on your system.  This name is obsolete and
+	 has been replaced with /usr/bin/awk.  For backwards compatibility,
+	 /usr/bin/nawk has been linked to /usr/bin/awk.  You should consider
+	 changing any tools that you have that are using the old name,
+	 /usr/bin/nawk to use the new standard name of /usr/bin/awk.  Once
+	 this has been done, it is suggested that you remove /usr/bin/nawk
+	 from your system.
+EOF
+fi
+
+#======
+# Remove the dependency upon the KERN-BLD fileset.  We only needed
+# the dependency for update to work properly.  This allows the
+# KERN-BLD fileset to be reomoved (as long as no other filesets depend
+# upon it).
+#======
+if [ -f /system$CDF/$fileset/index ]; then
+    INDEX=/system$CDF/$fileset/index
+    TMP=/system$CDF/$fileset/indexT$$
+    rm -f $TMP
+    sed -e '/^dep:[ 	]*KERN-BLD/d' < $INDEX > $TMP
+    cp $TMP $INDEX
+    rm -f $TMP
+fi
+
+#======
+# Remove old CDFs for /etc/reboot.  /etc/reboot is no longer a CDF for
+# localroot or remoteroot, it is simply an architecture CDF in a mixed
+# cluster (or not a CDF at all for homogeneous clusters).
+#======
+if [ -H /etc/reboot ]; then
+    if [ -H /system ]; then
+	#
+	# Mixed cluster:
+	#     Remove localroot
+	#     Remove remoteroot+/HP-PA
+	#     Move remoteroot+/HP-MC68020 to HP-MC68020
+	#     Remove remoteroot+
+	cd /etc/reboot+
+	/bin/rm -f localroot remoteroot+/HP-PA
+	if [ -f remoteroot+/HP-MC68020 ]; then
+	    /bin/mv remoteroot+/HP-MC68020 HP-MC68020
+	fi
+	/bin/rm -rf remoteroot+
+	cd /
+    else
+	#
+	# Homogeneous cluster:
+	#     Move /etc/reboot to temp
+	#     Remove /etc/reboot+
+	#     Move temp /etc/reboot
+	#
+	/bin/rm -f /etc/rebootTMP
+	/bin/mv /etc/reboot /etc/rebootTMP
+	/bin/rm -rf /etc/reboot+
+	/bin/mv /etc/rebootTMP /etc/reboot
+    fi
+fi
+/bin/rm -f $newconfig/rebootCDF
+
+#======
+# Make sure that /etc/mnttab exists
+#======
+if [ ! -f /etc/mnttab ]; then
+    /bin/touch /etc/mnttab
+    chmog 644 root root /etc/mnttab
+fi
+
+#======
+# Ensure the correct ownership and permissions of /etc/utmp.  This
+# is to avoid a potential security issue when using NFS.
+# Whe only do this if /etc/utmp doesn't exist, since the system
+# administrator might want it with different permissions.
+#======
+if [ ! -f /etc/utmp ]; then
+    : > /etc/utmp
+    if [ -H /etc/utmp ]; then
+	for i in /etc/utmp+/*; do
+	    chmog 644 root bin $i
+	done
+    else
+	chmog 644 root bin /etc/utmp
+    fi
+fi
+
+#======
+# Make default devices for this machine
+#======
+if [ -x /bin/getcontext ]; then
+    set -- `/bin/getcontext`
+    cxt="$1"
+else
+    cxt=standalone
+fi
+/system$CDF/$fileset/dev.script -u "$cxt" "$master_cxt"
+exitv=$?
+[ $exitv -ne 0 ] && exitval=$exitv
+unset cxt exitv
+
+#======
+# Files that moved to a different place (at 8.0)
+#    /usr/bin/fgrep   -- now /bin/fgrep, linked to /bin/grep
+#    /usr/bin/egrep   -- now /bin/egrep, linked to /bin/grep
+#    /usr/bin/tar     -- now /bin/tar
+#======
+/bin/rm -f /usr/bin$CDF/fgrep /usr/lib/nls/C/fgrep.cat \
+	   /usr/bin$CDF/egrep /usr/lib/nls/C/egrep.cat \
+	   /usr/bin$CDF/tar
+
+#======
+# On a Series 300 machine, we copy /etc/boot to the boot block of our
+# root disk.
+#======
+if hp9000s300; then
+    #
+    # First we update the /etc/mnttab file so that device file for
+    # the root disk is correct
+    #
+    /etc/mount -u >/dev/null
+
+    #
+    # Now find the root entry (should be the first one, but might not
+    # be) and, if found, copy the boot block to the beginning of the
+    # device.
+    #
+    UPDATED=no
+    if [ -f /etc/mnttab ]; then
+	while read device path junk; do
+	    [ "$path" = "/" ] && break
+	done </etc/mnttab
+	if [ "$path" = "/" -a -b "$device" ]; then
+	    /bin/dd if=/etc/boot of=$device bs=8k count=1 2>/dev/null
+	    UPDATED=yes
+	fi
+    fi
+    if [ "$UPDATED" != "yes" ]; then
+	cat <<EOF >&2
+ERROR:   The proper device file for the root device could not be
+	 determined.  Create or rename the proper device file for
+	 the root disk and rerun this customize script.	 Unless you
+	 do, a new boot block will not be installed.
+EOF
+    fi
+fi
+
+#======
+# /etc/brc and /etc/bcheckrc
+#
+#   These files had always been supplied in /etc/newconfig but aren't
+#   considered "configurable".	For the 7.0 release we saved the
+#   original /etc/brc and /etc/bcheckrc as .old files.	For 8.0, we
+#   simply delete the old files that we left around in 7.0.
+#======
+/bin/rm -f /etc/brc.old /etc/bcheckrc.old
+/bin/rm -f $newconfig/brc $newconfig/bcheckrc
+
+#======
+# /etc/rc
+#
+#   Make changes to hfsmount() to support disk quotas.
+#   Incorporate setmount functionality in hfsmount.
+#   Add call to hfsmount() to "remoteroot" case for support of
+#   locally mounted file systems.
+#   Delete setmount function.
+#======
+if [ -f /etc/rc ]; then
+    RCTEMP=/tmp/rctemp$$
+    HFSMNTTEMP=/tmp/hfsmount$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+    # Grab the new definition of hfsmount() from /etc/newconfig/rc
+    if $awk '/^hfsmount\(\)/,/^}/ { print $0 }' $NEWRC > $HFSMNTTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find setmount and invocations of setmount and delete them
+            /^setmount\(\)/,/^}/ { next } # delete setmount function
+            /^[ \t]*setmount[ \t]*$/ { next } # delete invocations of setmount
+	    # find the old hfsmount and replace it
+	    /^hfsmount\(\)/,/^}/ { foundfunc=1 ; next }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <hfsmnttemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    # add call to hfsmount before call to initialize
+	    /^[ 	]+hfsmount[ 	#]*.*$/ {  found_hfsmount=1 }
+	    /^[ 	]+initialize[ 	#]*.*$/ {
+		if (!found_hfsmount) {
+		    found_hfsmount=1
+		    printf "\thfsmount\n"
+		    print
+		    next
+		}
+	    }
+	    /^[ 	]+setparms[ 	#]*.*$/ {
+		if (!found_hfsmount) {
+		    found_hfsmount=1
+		    printf "\thfsmount\n"
+		    print
+		    next
+		}
+	    }
+	    # remove all other calls to hfsmount
+	    /remoteroot\)/	{in_remoteroot=1;}
+	    /localroot\)/	{in_localroot=1;}
+	    /standalone\)/	{in_standalone=1;}
+	    /;;/	{in_remoteroot=in_localroot=in_standalone=0}
+	    /hfsmount/	{ if (in_remoteroot||in_localroot||in_standalone)
+				next
+	    }
+	    { print } # print the line if not previously skipped
+	    ' hfsmnttemp=$HFSMNTTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace hfsmount function in existing $OLDRC
+      	Could not remove setmount function in existing $OLDRC
+	Correct error and rerun this customize to allow use of
+	Disk Quotas functionality and correct operation of hfsmount
+	function.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract hfsmount function from $NEWRC
+	Correct error and rerun this customize to allow use of
+	Disk Quotas functionality.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $HFSMNTTEMP
+fi
+
+
+#======
+# /etc/rc
+#
+#   Make changes to rbootd_start() to support auxiliary swap servers.
+#   Add call to rbootd_start() to "remoteroot" case.
+#======
+if [ -f /etc/rc ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/rbootdrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+    # Grab the new definition of rbootd_start() from /etc/newconfig/rc
+    if $awk '/^rbootd_start\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find the old rbootd_start and replace it
+	    /^rbootd_start\(\)/,/^}/ { foundfunc=1; next }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    # add call to rbootd_start to the remoteroot case before
+	    # cron_start.
+	    # Do nothing if it is already there
+	    /remoteroot\)/ {in_remoteroot=1; found_start=0}
+	    /;;/	   {in_remoteroot=0}
+	    /rbootd_start/ {if (in_remoteroot) found_start=1}
+	    /cron_start/   {
+		if (in_remoteroot && !found_start)
+		    printf "\t\t%s\n", "rbootd_start"
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace rbootd_start function in existing $OLDRC
+	Correct error and rerun this customize to allow use of
+	Auxiliary Swap Server functionality.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract rbootd_start function from $NEWRC
+	Correct error and rerun this customize to allow use of
+	Auxiliary Swap Server functionality.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# /etc/rc
+#
+# replace diag_start() function with newconfig version if diag_start()
+# already exists.
+#======
+if [ -f /etc/rc ] && [ "`grep -c diag_start < /etc/rc`" != 0 ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/diagrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Grab the new definition of diag_start() from /etc/newconfig/rc
+    if $awk '/^diag_start\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find the old diag_start and replace it with new
+	    /^diag_start\(\)/,/^}/ { foundfunc=1; next }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace diag_start function in existing $OLDRC
+	Correct error and rerun this customize to switch to using
+	new diagnostic system.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract diag_start function from $NEWRC
+	Correct error and rerun this customize to switch to using
+	new diagnostic system.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# /etc/rc
+#
+# add envd_start() function with newconfig version if it doesn't exist
+#======
+if [ -f /etc/rc ] && [ "`grep -c envd_start < /etc/rc`" = 0 ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/envdsrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Grab the new definition of envd_start() from /etc/newconfig/rc
+    if $awk '/^envd_start\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find set_state and insert envd_start before it
+	    /^set_state\(\)/,/^}/ { foundfunc=1; }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    #
+	    # Insert call to "envd_start" after "syslogd_start"
+	    #
+	    /remoteroot\)/ {in_case=1}
+	    /localroot\)/  {in_case=1}
+	    /standalone\)/ {in_case=1}
+	    /;;/	   {in_case=0}
+	    /syslogd_start/  {
+		if (in_case)
+		{
+		    print;
+		    printf "\t\t%s\n", "envd_start\t# must be invoked after syslogd_start";
+		    next;
+		}
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace envd_start function in existing $OLDRC
+	Correct error and rerun this customize to support overtemperature
+	sensing.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract envd_start function from $NEWRC
+	Correct error and rerun this customize to support overtemperature
+	sensing.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# /etc/rc
+#
+#   This is executed if diag_start() doesn't already exist.
+#   Replace the delog_start() function with diag_start().
+#   Change calls to delog_start() to diag_start().
+#======
+if [ -f /etc/rc ] && [ "`grep -c diag_start < /etc/rc`" = 0 ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/diagrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Grab the new definition of diag_start() from /etc/newconfig/rc
+    if $awk '/^diag_start\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find the old delog_start and replace it with diag_start
+	    /^delog_start\(\)/,/^}/ { foundfunc=1; next }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    #
+	    # Change call to "delog_start" to "diag_start"
+	    #
+	    /remoteroot\)/ {in_case=1}
+	    /localroot\)/  {in_case=1}
+	    /standalone\)/ {in_case=1}
+	    /;;/	   {in_case=0}
+	    /delog_start/  {
+		if (in_case)
+		{
+		    printf "\t\t%s\n", "diag_start";
+		    next;
+		}
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace delog_start function in existing $OLDRC
+	Correct error and rerun this customize to switch to using
+	new diagnostic system.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract delog_start function from $NEWRC
+	Correct error and rerun this customize to switch to using
+	new diagnostic system.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# /etc/rc
+#
+#   Replace net_start() so that internal customers get one
+#   without SwitchOver/UX, now that it has moved into set_state().
+#======
+if [ -f /etc/rc ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/netstart$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+    # Grab the new definition of net_start() from /etc/newconfig/rc
+    if $awk '/^net_start\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find the old net_start and replace it
+	    /^net_start\(\)/,/^}/ { foundfunc=1; next }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace net_start function in existing $OLDRC
+	Correct error and rerun this customize to allow use of
+	SwitchOver/UX functionality.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract net_start function from $NEWRC
+	Correct error and rerun this customize to allow use of
+	SwitchOver/UX functionality.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# /etc/rc
+#
+#   Add the new switch_over() function to enable SwitchOver/UX
+#   functionality.
+#======
+if [ -f /etc/rc -a s800 ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/switchrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+    # Grab the new definition of switch_over() from /etc/newconfig/rc
+    if $awk '/^switch_over\(\)/,/^}/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find the set_state function and insert switch_over before it
+	    /^switch_over\(\)/,/^}/ { bypass=1 }
+	    { if (bypass) {
+		    print
+		    next
+		}
+	    }
+	    /^set_state\(\)/,/^}/ { foundfunc=1 }
+	    {	if (foundfunc && no_need==0) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    /^[ 	]+set_state[ 	#]*.*$/ {
+		    printf "\tswitch_over\n"
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not add switch_over function to existing $OLDRC
+	Correct error and rerun this customize to allow use of
+	SwitchOver/UX functionality.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract switch_over function from $NEWRC
+	Correct error and rerun this customize to allow use of
+	SwitchOver/UX functionality.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+
+#======
+# /etc/rc
+#
+#   Add sam_init() function with newconfig version if it doesn't exist
+#======
+if [ -f /etc/rc ] && [ "`grep -c sam_init < /etc/rc`" = 0 ]; then
+    RCTEMP=/tmp/rctemp$$
+    FUNCTEMP=/tmp/saminitsrc$$
+    NEWRC=/etc/newconfig/rc
+    OLDRC=/etc/rc
+    awk=/usr/bin/awk
+
+    # Grab the new definition of envd_start() from /etc/newconfig/rc
+    if $awk '/^sam_init\(\)/,/^$/ { print $0 }' $NEWRC > $FUNCTEMP
+    then
+	# Make a patched copy of /etc/rc
+	if $awk '
+	    # find set_state and insert sam_init before it
+	    /^set_state\(\)/,/^}/ { foundfunc=1; }
+	    {	if (foundfunc) {
+		    saveline=$0
+		    while ( getline <functemp == 1) { print }
+		    print saveline
+		    foundfunc=0
+		    next
+		}
+	    }
+	    #
+	    # Insert call to "sam_init" after "audio_start"
+	    #
+	    /remoteroot\)/ {in_case=1}
+	    /localroot\)/  {in_case=1}
+	    /standalone\)/ {in_case=1}
+	    /;;/	   {in_case=0}
+	    /audio_start/  {
+		if (in_case)
+		{
+		    print;
+		    printf "\t\t%s\n", "sam_init";
+		    next;
+		}
+	    }
+	    { print } # print the line if not previously skipped
+	    ' functemp=$FUNCTEMP $OLDRC > $RCTEMP
+	then
+	    cp_set 544 bin bin $RCTEMP $OLDRC
+	else
+	    cat <<EOF >&2
+ERROR:	Could not replace sam_init function in existing $OLDRC
+	Correct error and rerun this customize to increase SAM performance.
+EOF
+	    exitval=1
+	fi
+    else
+	cat <<EOF >&2
+ERROR:	Could not extract sam_init function from $NEWRC
+	Correct error and rerun this customize to increase SAM performance.
+EOF
+	exitval=1
+    fi
+    rm -f $RCTEMP $FUNCTEMP
+fi
+
+#======
+# Add entry to run /etc/recoversl at system boot time (after running
+# /etc/bcheckrc).
+#======
+if [ -s /etc/inittab ] && \
+   [ `grep -c /etc/recoversl < /etc/inittab` = 0 ]; then
+    rm -f /etc/itab$$
+    awk '
+    /bcheckrc/ {
+	print;
+	print "slib::bootwait:/etc/recoversl </dev/console >/dev/console 2>&1 #shared libs";
+	next;
+    }
+    { print }' /etc/inittab > /etc/itab$$
+    cp /etc/itab$$ /etc/inittab
+    rm -f /etc/itab$$
+fi
+
+#======
+# On the Series 800, we have always called the default inittab
+# "inittab.ite", but the 300 uses "inittab".  To make the CDFinfo
+# rules work properly when adding an 800 cnode, we must link
+# /etc/newconfig/inittab.ite to /etc/newconfig/inittab
+#======
+if s800 && [ -f $newconfig/inittab.ite ]; then
+    rm -f /etc/newconfig/inittab
+    ln /etc/newconfig/inittab.ite /etc/newconfig/inittab
+fi
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they dont already exist.
+#
+# NOTE: /etc/passwd is taken care of in custom_setup()
+#======
+#
+#	FROM			TO
+set -- \
+  $newconfig/checklist		/etc/checklist		\
+  $newconfig/group		/etc/group		\
+  $newconfig/inittab		/etc/inittab		\
+  $newconfig/issue		/etc/issue		\
+  $newconfig/motd		/etc/motd		\
+  $newconfig/ttytype		/etc/ttytype		\
+  $newconfig/rc			/etc/rc
+
+while [ $# -gt 0 ]; do
+    [ -f $1 ] && cond_cp $1 $2
+    shift 2
+done
+
+#======
+# Make sure /etc/syslog.conf is a CDF if on a cluster
+#======
+if [ -f /etc/clusterconf -a ! -H /etc/syslog.conf ]; then
+	makecdf /etc/syslog.conf
+fi
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they do not already exist or if
+# they are the same version as in the last release (i.e. they
+# have not been customized).
+#======
+#
+cksum_cp $newconfig/.profile	/.profile	"7695 17" \
+	"2758 17" "8663 17"
+cksum_cp $newconfig/d.profile	/etc/d.profile	"29590 1"
+cksum_cp $newconfig/gettydefs	/etc/gettydefs	"55923 4"
+cksum_cp $newconfig/profile	/etc/profile	"33479 3"
+cksum_cp $newconfig/tztab	/usr/lib/tztab	"17025 14"
+
+if s800; then
+    cksum_cp $newconfig/disktab /etc/disktab$CDF "37721 28" \
+	"25162 32" "10649 27"
+    cksum_cp $newconfig/envd.conf /etc/envd.conf$CDF "48608 3" "60340 3"
+    cksum_cp $newconfig/powerfail /etc/powerfail "37504 1"
+else
+    cksum_cp $newconfig/disktab /etc/disktab$CDF "44147 123" \
+	"26993 108" "2444 126" "26492 126" "34184 154"
+fi
+
+# Do the same for possible cnode-specific CDFs
+#     FROM		      TO		      SUM
+set -- \
+  $newconfig/syslog.conf	/etc/syslog.conf	"20228 1"
+
+while [ $# -gt 0 ]; do
+    if [ -H $2 ]; then
+	for i in $2+/*
+	do
+    	    cksum_cp $1 $i "$3"
+	done
+    	shift 3
+    else
+    	cksum_cp $1 $2 "$3"
+    	shift 3
+    fi
+done
+
+#======
+# Now make sure that ownership and permissions on the rootserver's
+# disk device files are correct.  They need to be root/sys/0640.
+#======
+for file in /dev/dsk/* /dev/rdsk/*
+do
+    if [ -b $file -o -c $file ]; then
+	echo $file
+    fi
+done |
+    (
+	typeset -i num_args
+	typeset files=""
+
+	while read file; do
+	    files="$files $file"
+	    let "num_args = num_args + 1"
+	    if (( num_args >= 20 )); then
+		chmog 0640 root sys $files
+		files=""
+		num_args=0
+	    fi
+	done
+	[ -n "$files" ] && chmog 0640 root sys $files
+    )
+
+#======
+# Now make sure that ownership and permissions on other device files
+# are correct.	These need to be group sys and readable by group for
+# commands like ipcs, ps, iscan, whodo, iostat, etc. to work.
+#======
+if [ -H /dev ]; then
+    directories=`echo /dev+/*`
+    [ "$directories" = '/dev+/*' ] && directories="/dev"
+else
+    directories="/dev"
+fi
+
+for dir in $directories; do
+    for dev in mem kmem swap; do
+	[ -c $dir/$dev -o -b $dir/$dev ] && chmog 640 bin sys $dir/$dev
+    done
+done
+
+#======
+# Make sure that /usr/spool/sockets is writable by all, this is
+# required for the X, starbase and GKS applications to work properly.
+#======
+if [ -d /usr/spool/sockets ]; then
+    if [ -H /usr/spool/sockets ]; then
+	chmog 777 bin bin /usr/spool/sockets+/*
+    else
+	chmog 777 bin bin /usr/spool/sockets
+    fi
+fi
+
+#======
+# /etc/syslogd -- syslogd needs an entry in /etc/services.
+#
+# only do this if there is an /etc/services file.
+#======
+syslog_line="syslog	    514/udp		    # system logging"
+if [ -r /etc/services ]; then
+    if [ "`grep -c '^syslog' /etc/services`" -eq 0 ]; then
+	echo "$syslog_line" >>/etc/services
+    fi
+fi
+# clusters need /etc/syslog.pid to be a CDF, so we'll make it
+# a CDF in all cases.
+if [ -f /etc/clusterconf -a ! -H /etc/syslog.pid ]; then
+	makecdf /etc/syslog.pid
+fi
+
+#======
+# /etc/shutdown.allow -- make sure that it exists and has the correct
+#			 permissions.
+#======
+touch /etc/shutdown.allow
+chmog 644 bin bin /etc/shutdown.allow
+
+#======
+# /etc/src.sh, /etc/src.csh --
+#    If we are updating this system, create these files with the
+#    correct information in them.  If this is an install, then we
+#    simply do nothing, they will get created the first time that
+#    /etc/rc runs.
+#======
+if [ ! -f /etc/src.sh ]; then
+    function last_line
+    {
+	typeset the_line
+	typeset the_last_line
+
+	while read the_line; do
+	    the_last_line="$the_line"
+	done
+	echo "$the_last_line"
+    }
+
+    NAME=`sed -n -e 's/^[ 	]*SYSTEM_NAME="*\([a-zA-Z0-9][^ 	"]*\)"*.*/\1/p' /etc/rc | last_line`
+    if [ "X$NAME" != Xunknown ]; then
+	#
+	# The system name is set, we must create the /etc/src.sh
+	# and /etc/src.csh files.
+	#
+	# First get the TZ.  If it isn't set, assume MST7MDT
+	#
+	TZ_NAME=`sed -n -e 's/^[ 	]*TZ="*\([^ 	"]*\)"*.*/\1/p' /etc/rc | last_line`
+	[ "X$TZ_NAME" = X ] && TZ_NAME=MST7MDT
+
+	rm -f /etc/src.sh /etc/src.csh
+	echo "setenv TZ $TZ_NAME" > /etc/src.csh
+	echo "TZ=$TZ_NAME; export TZ" > /etc/src.sh
+	echo "SYSTEM_NAME=$NAME; export SYSTEM_NAME" >> /etc/src.sh
+
+	chmog 555 bin bin /etc/src.csh /etc/src.sh
+    fi
+fi
+
+#======
+# /etc/eisa_config, /etc/eisa/*, /usr/man/man1m.Z/eisa_config.1m
+#    If applicable, rename the eisa configuration files to what is
+#    expected and issue NOTE to user about how to recover the
+#    eisa_config disk space if it is not needed.
+#======
+if [ -f /etc/eisa/HWP* ]; then
+    for file in /etc/eisa/HWP*
+    do
+	dirnm=`/bin/dirname $file`
+	basnm=`/bin/basename $file`
+	/bin/mv $file $dirnm/!$basnm
+    done
+fi
+
+if [ -f /etc/eisa_config$CDF ]; then
+    /bin/cat <<EOF
+NOTE:    If you have no EISA I/O backplane (available on series 400/700
+         machines) on any system in your cluster, you can safely remove the
+         files /etc/eisa_config$CDF and /usr/man/man1m.Z/eisa_config.1m,
+         as well as the directory /etc/eisa and its contents. This will save
+         you approximately 175K of disk space.
+EOF
+fi
+
+exit $exitval

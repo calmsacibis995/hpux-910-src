@@ -1,0 +1,76 @@
+## FacetTerm  tvi955 COMMON  description file 06/15/89
+##	TVI 955 in embedded attribute mode.
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: tvi955com.FC,v 70.1 92/03/09 16:05:33 ssa Exp $
+### NOT_IN_80 columns_wide=132
+### NOT_IN_80 columns_wide_on=\E[=3h
+### NOT_IN_COMMON columns_wide_off=\E[=3l
+### NOT_IN_80 columns_wide_clears_screen
+##--- MARGINS ---##
+auto_wrap_on=\E[=7h
+auto_wrap_off=\E[=7l
+##--- CLEAR ---##
+clear_all=\E[2J
+clr_eol=\E[0K
+clr_eol=\E[K
+clr_bol=\E[1K
+clear_line=\E[2K
+clr_eos=\E[0J
+clr_eos=\E[J
+##--- CURSOR ---##
+cursor_address_wide=\E[%i%p1%d;%p2%df
+cursor_address_wide=\E[%i;%p2%dH
+cursor_address_wide=\E[%i%p1%d;H
+cursor_address_wide=\E[%i%p1%dH
+cursor_address_wide=\E[%i%p1%d;%p2%dH
+cursor_address_wide_starts=80
+decode_type-0123456789;?=\E[
+cursor_home=\E[;H
+cursor_home=\E[H
+cursor_up=\E[A
+cursor_down=\E[B
+cursor_right=\E[C
+cursor_left=\E[D
+parm_up_cursor=\E[%p1%dA
+parm_down_cursor=\E[%p1%dB
+parm_right_cursor=\E[%p1%dC
+parm_left_cursor=\E[%p1%dD
+##--- SCROLL ---##
+scroll_forward=\E[S
+scroll_reverse=\E[T
+### assumes origin mode on wy60 - change_scroll_region=\E[%i%p1%d;%p2%dr
+##--- INS/DEL ---##
+parm_insert_line=\E[%p1%dL
+### ?? may not have delete line <<<<<<<<<<<<<<<<<<<<<<<<<<<<
+parm_delete_line=\E[%p1%dM
+### NO ## NOT_IMP parm_ich=\E[%p1%d@
+parm_delete_character=\E[%p1%dP
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+enter_appl_keypad_mode=\E[=9h
+exit_appl_keypad_mode=\E[=9l
+### NO enter_cursor_key_mode=
+### NO exit_cursor_key_mode=
+##--- MODE ---##
+### new_line_mode  on=\E[=6h  off=\E[=6l
+pass=\E[=6l
+### key_repeat on=\E[=8h  off=\E[=8l
+pass=\E[=8h
+pass=\E[=8l
+### setup enabled=\E[=11h  disabled=\E[=11l
+### ESC enabled=\E[=12h  disabled=\E[=11l
+### CLR SPC  enabled=\E[13h  disabled=\E[13l
+### BREAK  enabled=\E[14h  disabled=\E[14l
+### margin_bell  on=\E[4h  off=\E[4l
+pass=\E[=4h
+pass=\E[=4l
+### W.P. attribute HI=\E[=5l normal=\E[=5h could not get this to work
+pass=\E[=5l
+pass=\E[=5h
+### status_line_attribute \E[3;%p1%dv   1=reverse 0=norm 2=under 3=revunder
+pass=\E[3;%p1%dv
+### attribute_base char=\EF2 embedded=\EF1 nonembedded=\EF0
+pass=\EF0
+### attribute_base line=\E[=2l  page=\E[=2h
+pass=\E[=2l
+pass=\E[=2h
+use=tvi950com.fc

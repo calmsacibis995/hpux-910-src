@@ -1,0 +1,104 @@
+# Makefile for facetterm  - COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/09 15:40:08 ssa Exp $
+FACETTERM_PROG=		facetterm
+FACETPREFIX=		fct_
+FACETTKEY=		$(FACETPREFIX)key
+USR_FACETTERM_DIR=	/usr/facetterm
+CFLAGS= \
+		$(MACH_CFLAGS) \
+		-DREG=register \
+		$(MACH_MODEL) -I../include
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+PROG=		$(USR_BIN_PROG) $(USR_FACETTERM_SYS_PROG)
+
+USR_BIN_PROG=		$(FACETTERM_PROG)
+USR_BIN_DIR=		/usr/bin
+
+USR_FACETTERM_SYS_PROG=	$(FACETTKEY)
+USR_FACETTERM_SYS_DIR=	$(USR_FACETTERM_DIR)/sys
+
+FACETTERM_OBJ=\
+	facetterm.o commonsend.o \
+	ftdecode.o ftwindow.o ftcommand.o ftmodes.o \
+	ftterm.o fttermio.o \
+	ftoptions.o ftextra.o attribute.o \
+	character.o perwindow.o mode.o \
+	talksend.o ftkeys.o \
+	statusline.o lineattr.o pages.o func.o tabs.o \
+	version.o pc_mode.o check.o output.o control8.o \
+	errors.o clear.o print.o margins.o paste.o graph.o \
+	scroll.o capture.o protect.o foreign.o text.o commonread.o \
+	fixassign.o iswindow.o wincommon.o set.o lines.o onstatus.o \
+	activecom.o rows.o hpattr.o keystroke.o visible.o info.o \
+	tpnotify.o commonopt.o storage.o person.o keyboard.o \
+	meta.o answer.o commandmap.o box.o \
+	fct_ioctl.o substitute.o graphscr.o sideeffect.o \
+	string.o ibmcontrol.o mysystem.o infoanswer.o scramble.o \
+	$(FT_MACH_OBJ)
+
+FACETTKEY_OBJ=\
+	commonkey.o talkkey.o foreign.o textkey.o commonread.o mapped.o \
+	keystroke.o visible.o commonopt.o rstorage.o
+
+all:	$(PROG) done
+
+### facetterm needs root set-user-id ###
+$(FACETTERM_PROG):	$(FACETTERM_OBJ)
+	$(CC) $(MACH_MODEL) -o $(FACETTERM_PROG) $(FACETTERM_OBJ) \
+		 $(MACH_LIBS) $(FT_MACH_LIBS)
+	@echo make facetterm program \"$(FACETTERM_PROG)\" for $(MACH) done
+
+### facettkey needs root set-user-id ###
+$(FACETTKEY):	$(FACETTKEY_OBJ)
+	$(CC) $(MACH_MODEL) -o $(FACETTKEY) $(FACETTKEY_OBJ) $(MACH_LIBS)
+	@echo make facettkey program \"$(FACETTKEY)\" for $(MACH) done
+
+pc_mode.o:	pc_mode.c ../include/aioc.h
+
+# check.o:	check.c ../reg/checkauth.in ../reg/check.h ../reg/shuffle.in
+
+install:	installtext installprog installown
+	@echo install facetterm for $(MACH) done
+
+installtext:
+	@echo installtext facetterm for $(MACH) done - nothing to do
+
+installtextcommon:
+	@echo installtextcommon facetterm for $(MACH) done - nothing to do
+
+installprog:
+	$(STRIPERR)strip                                         $(PROG)
+	Cpioinstall $(FTINSTDIR)$(USR_BIN_DIR)       - $(USR_BIN_PROG)
+	Cpioinstall $(FTINSTDIR)$(USR_FACETTERM_SYS_DIR) - \
+				$(USR_FACETTERM_SYS_PROG)
+	@echo installprog facetterm for $(MACH) done
+
+installown:
+	cd     $(FTINSTDIR)$(USR_BIN_DIR); \
+#		chown root $(USR_BIN_PROG); \
+#		chgrp    0 $(USR_BIN_PROG); \
+#		if [ "$(NO_SUID_ROOT)" != "NO_SUID_ROOT" ] ; then \
+#			chmod 4555 $(USR_BIN_PROG); \
+#		else \
+#			chmod 555 $(USR_BIN_PROG); \
+#		fi ; \
+		ls -l      $(USR_BIN_PROG)
+	cd     $(FTINSTDIR)$(USR_FACETTERM_SYS_DIR); \
+#		chown root $(USR_FACETTERM_SYS_PROG); \
+#		chgrp    0 $(USR_FACETTERM_SYS_PROG); \
+#		if [ "$(NO_SUID_ROOT)" != "NO_SUID_ROOT" ] ; then \
+#			chmod 4555 $(USR_FACETTERM_SYS_PROG); \
+#		else \
+#			chmod 555 $(USR_FACETTERM_SYS_PROG); \
+#		fi ; \
+		ls -l      $(USR_FACETTERM_SYS_PROG)
+	@echo installown facetterm for $(MACH) done
+
+clean:
+	rm -f $(PROG) *.o
+	@echo clean facetterm for $(MACH) done
+
+done:
+	@echo make facetterm for $(MACH) done

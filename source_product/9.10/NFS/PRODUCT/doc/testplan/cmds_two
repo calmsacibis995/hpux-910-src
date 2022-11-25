@@ -1,0 +1,728 @@
+.H 2  "Biod (Cristina Mahon)"
+
+.PP
+Biod is the NFS asynchronous block I/O daemon.  It is used by the
+NFS client to buffer cache handle read-ahead and write-behind.  It is possible
+to start several biod's in parallel.
+.PP
+The command line for biod is:
+.sp
+           biod [nservers]
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  2.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Run biod without being superuser"
+.sp 1
+.PP
+Verify that biod cannot be started if you are not the superuser. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "You must be root to run biod"
+.fi
+.sp 2
+.H 3  "Test biod with extra arguments"
+.sp 1
+.PP
+Biod should only accept one argument, a positive number.  This test invokes biod
+with more than one argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a negative argument"
+.sp 1
+.PP
+This test invokes biod with a negative number as an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with zero for an argument"
+.sp 1
+.PP
+This test invokes biod with an argument that is zero.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Sun returns no error message, but does not start biod.
+       We currently do the same.  An enhancement may be added
+       to return:
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a non-numeric argument"
+.sp 1
+.PP
+This test invokes biod with an argument that is not a number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       Sun returns no error message, but does not start biod.
+       We currently do the same.  An enhancement may be added
+       to return:
+       "usage: biod [<count>] (count >= 1)"
+.fi
+.sp 2
+.H 3  "Test biod with a large number for an argument"
+.sp 1
+.PP
+This test invokes biod with a very large number for an argument.
+The purpose of this test is to create a condition so that biod will be
+unable to fork.  The number to be used should be large enough to provoke 
+that problem.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "biod cannot fork"
+.fi
+.sp 2
+.H 3  "Start biod when another one already running"
+.sp 1
+.PP
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       The second batch of biod daemons should start.
+.fi
+.sp 2
+.H 3  "Test biod without arguments"
+.sp 1
+.PP
+This test invokes biod without an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       one biod should start running.
+.fi
+.sp 2
+.H 3  "Kill biod with signal 15"
+.sp 1
+.PP
+This test kills biod by doing a "kill pid".
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       Biod dies properly.
+.fi
+.sp 2
+
+.H 2  "Nfsd (Cristina Mahon)"
+
+.PP
+Nfsd handles client filesystem requests.  It is possible to start several 
+nfsd's in parallel.
+.PP
+The command line for nfsd is:
+.sp
+           nfsd [nservers]
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Run nfsd without being superuser"
+.sp 1
+.PP
+Verify that nfsd cannot be started if you are not the superuser. 
+You need to change the permissions for nfsd and then try running
+it without being super-user.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "You must be root to run nfsd"
+.fi
+.sp 2
+.H 3  "Test nfsd with extra arguments"
+.sp 1
+.PP
+Nfsd should only accept one argument.  This test invokes nfsd
+with more than one argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a negative argument"
+.sp 1
+.PP
+This test invokes nfsd with a negative number as an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with zero for an argument"
+.sp 1
+.PP
+This test invokes nfsd with an argument that is zero.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a non-numeric argument"
+.sp 1
+.PP
+This test invokes nfsd with an argument that is not a number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "usage: nfsd [servers] (servers >= 1)"
+.fi
+.sp 2
+.H 3  "Test nfsd with a large number for an argument"
+.sp 1
+.PP
+This test invokes nfsd with a very large number for an argument.
+The purpose of this test is to create a condition so that nfsd will be
+unable to fork.  The number to be used should be large enough to provoke 
+that problem.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "nfsd: fork"
+.fi
+.sp 2
+.H 3  "Start nfsd when another one already running"
+.sp 1
+.PP
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       The second nfsd should not start.
+       "nfsd: server already active"
+.fi
+.sp 2
+.H 3  "Test nfsd when portmap not running"
+.sp 1
+.PP
+Nfsd will not be able to register its port number with 
+portmap, but it should not fail badly.  The nfsd should
+continue to run since it uses a well known port.
+.nf
+TYPE OF TEST: 
+       functional (error conditions testing)
+EXPECTED OUTPUT: 
+       "Cannot register service: RPC_TIMED_OUT"     
+.fi
+.sp 2         
+.H 3  "Test nfsd without arguments"
+.sp 1
+.PP
+This test invokes nfsd without an argument.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       one nfsd should start running.
+.fi
+.sp 2
+.H 3  "Kill nfsd with signal 15"
+.sp 1
+.PP
+This test kills nfsd with a "kill pid".
+Nfsd should be started again after this test so that other
+tests won't fail.  This test might be considered a destructive
+test and as such might not belong in the scaffold (especially during
+concurrent testing).
+.sp
+.nf
+TYPE OF TEST: 
+       functional (correct invocation)
+EXPECTED OUTPUT: 
+       Nfsd should die cleanly.
+.fi
+.sp 2
+.H 2 "mountd Test Plan"
+
+This chapter covers the
+.B mountd
+command.  The main use of this command is to allow remote hosts to mount
+a disk on the local system; after the mount is successful, the remote
+host may use NFS to access files on the local file system.
+
+.H 3  "mountd behavior"
+.nf
+RESPONSIBLE ENGINEER:    John A Dilley
+ASSUMPTIONS:             module to be tested is functional
+.fi
+
+.sp
+.H 4 "valid requests"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.50 md
+PERFORM TIME:    3.50 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp
+Test
+.B mountd
+from a remote host by attempting to mount a valid file system.  The
+mount should be successful, and we should be able to successfully use
+NFS to access the file system.  Note: this is done by nearly every NFS
+test already; it is not clear that this would be worthwhile to
+reimplement.
+
+.sp
+.H 4 "invalid requests"
+.sp 1
+.nf
+IMPLEMENT TIME:  1.25 md
+PERFORM TIME:    4.50 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+Test
+.B mountd
+from a remote host by attempting to mount an invalid file system.  The
+mount should fail with an appropriate error message and it should not be
+possible to use
+NFS to access the file system named.  Try using all combinations of:
+file systems which aren't valid (eg. /foo/bar),
+file systems which are already remotely mounted from another system,
+file systems which are not allowed to be NFS mounted (eg. not in /etc/exports),
+file systems which are not permitted to mount on the client (eg. the
+client is not in the allowed list of hosts or netgroups in /etc/exports).
+If time permits, another interesting test would be trying to remotely
+mount a file system from a DUX/diskless client (should not be able to
+mount the rootserver from a diskless client).
+.H 4 "Tests to increase BFA coverage"
+.sp 1
+These tests have been added to increase the BFA coverage of the rpc.mountd 
+command.  They are somewhat destructive tests.
+.AL
+.LI
+Try to mount a directory that does not exist on the remote system.
+.LI
+Use a network group in /etc/exports.
+.LI
+Kill rpc.mountd, remove a colon (:) from /etc/rmtab and bring rpc.mountd
+back up.
+.LI
+Move /etc/exports to another file and bring rpc.mountd back up.
+.LI
+Use an /etc/exports file that contains comments.
+.LI
+Add a "-" as the first character in a line in /etc/exports.
+.LI
+Add a "-" followed by something (as in -l) in /etc/exports.
+For example: / -l
+.LI
+Do a mount that will be refused.
+.LI
+Use pmap_conf with the "-p" option to call rpc.mountd, program 100005, 
+version 1 procedure 0 (NULL_PROC) and procedure 7 (not defined, it will 
+execute the default case on the case statement).
+.LE
+.H 2  "Inetd (Cristina Mahon)"
+
+.PP
+The purpose of this testplan is not to test all the functionality 
+of inetd, but only parts that were affected by the addition of 
+support of RPC based services.  It is implied that the tests 
+previously used to certify inetd will be run again on the new version,
+in addition to the new tests described below.
+.PP
+A line in inetd.conf file for an rpc server entry has the following fields:
+.sp
+.nf
+rpc  
+<socket type>  
+<protocol>  
+<wait/nowait> 
+<user> 
+<server program>
+<program number>
+<version number>
+<server program arguments>
+.fi
+.sp
+.PP
+For the configuration file tests inetd should either be
+reconfigured or killed and started again.  In the interest
+of branch flow coverage both options should be exercised,
+but that might be done outside the functional tests suite.
+On the following tests and examples a "?" stands for a number.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  5.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Have inetd start an rpc server"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf, start inetd and see if server
+correctly invoked:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1 rpcserv 
+.sp
+where rpcserv is a test RPC server and 10000? is the program number for
+that server.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       A service that  communicates with /etc/rpcserv  should be able to
+       start  rpcserv from inetd.  It should not be necessary to write a
+       new rpc service/server for that purpose.  Verify that the program
+       has been  correctly  registered  with  portmap  (program  number,
+       version  number,  correct  port).  Starting  with a  program  not
+       registered  with  portmap  a  rpcinfo  call  should  provide  the
+       information.  By turning  trace on on inetd you can see what port
+       was  assigned to the program in question and match it against the
+       one registered with portmap.
+.fi
+.sp 2
+.H 3 "No executable field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1 
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, field nine"
+.fi
+.sp 2
+.H 3 "No program number field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, missing program number"
+.fi
+.sp 2
+.H 3 "No version number field"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000?
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, missing version number"
+.fi
+.sp 2
+.H 3 "Missing low number in range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? -3 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?,missing low number in range"
+.fi
+.sp 2
+.H 3 "Missing high number in range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1- rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?,missing high number in range"
+.fi
+.sp 2
+.H 3 "Inverted version number range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 3-1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "Configuration file format error, line ?, inverted version range"
+.fi
+.sp
+To be added.
+.sp 2
+.H 3 "Correct version range"
+.sp 1
+.PP
+Enter the following line in /etc/inetd.conf and start inetd:
+.sp
+     rpc dgram udp wait root /etc/rpcserv 10000? 1-3 rpcserv
+.sp
+for example.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       We should be able to verify  that at least  those three  versions
+       have been registered with portmap.
+.fi
+.sp 2
+.H 3 "Change program number"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100009 1-3 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that portmap has  unregistered  the old program number and
+       correctly registered the new one.
+.fi
+.sp 2
+.H 3 "Change version number (single)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 2 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 1 and
+       that version 2 is correctly registered.
+.fi
+.sp 2
+.H 3 "Change version number (high range)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-2 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 3 and
+       that versions 1 and 2 are still correctly registered.
+.fi
+.sp 2
+.H 3 "Change version number (low range)"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1-3 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 2-3 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  the version  number 1 and
+       that versions 2 and 3 are still correctly registered.
+.fi
+.sp 2
+.H 3 "Change location of server"
+.sp 1
+.PP
+Change the following line in /etc/inetd.conf: 
+.sp
+     rpc dgram udp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+to
+.sp
+     rpc dgram udp wait root /tmp/rpcserv 100008 1 rpcserv
+.sp
+and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that when rpcserv is invoked,  the server in /tmp, and not
+       the one in /etc, is executed.
+.fi
+.sp 2
+.PP
+Because the rpc servers are identified by their executable instead
+of their name (they are all called rpc), if you change the executable 
+name the previous server will still be registered with inetd.  The portmap
+might override the old registration of the program number with the
+new one.????
+.sp 2
+.H 3 "Delete rpc server"
+.sp 1
+.PP
+Remove the entry for an rpc server from /etc/inetd.conf and reconfigure inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that  portmap has  unregistered  that  program and all its
+       versions.  If the server is invoked it should not respond.
+.fi
+.sp 2
+.H 3 "Create a TCP based rpc server"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+    rpc stream tcp nowait root /etc/rpcserv 100008 1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that inetd correctly  registers such a server with portmap
+       and that it starts it correctly.   If a TCP based rpc server will
+       be created it should be extremely simple, maybe just a stub.
+.fi
+.sp 2
+.H 3 "Create a TCP based rpc server with wait option"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+     rpc stream tcp wait root /etc/rpcserv 100008 1 rpcserv
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that inetd correctly  registers such a server with portmap
+       and that it starts it correctly.   If a TCP based rpc server will
+       be created it should be extremely simple, maybe just a stub.
+       This might not be allowed, expected output still needs to be 
+       checked.????
+.fi
+.sp 2
+.H 3 "Try an rpc server that uses options"
+.sp 1
+.PP
+A line in the configuration file should be similar to this:
+.sp
+     rpc stream tcp wait root /etc/rpcserv 100008 1 rpcserv -option
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that when the server is invoked it starts with whatever option 
+       was listed in the configuration file.
+.fi
+.sp 2
+.H 3 "Test the security feature of inetd for rpc servers"
+.sp 1
+.PP
+A line in the security file should be similar to this:
+.sp
+     rpcserv 	deny	hostname
+.sp
+where rpcserv is an rpc server started by inetd.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Verify that such a server is denied access from the host.  If the
+       server is a "wait"  option  server once it is started all further
+       contact  between itself and clients does not go through the inetd
+       (until rpcserv is started  again), so the inetd security file has
+       no affect on that.
+.fi
+.sp 2

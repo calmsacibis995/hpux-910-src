@@ -1,0 +1,50 @@
+/*# @(#) $Revision: 51.1 $
+/ was version 27.1 of old uucp
+/ Halgol script to dial a ventel modem. (rdg 4/10/85)
+/
+/ usage: 
+/   /usr/lib/uucp/X25/opx25 -fventel.out -v -nphone# >/dev/culxx </dev/culxx
+/   ie, as from cu:
+/	cu -lcul09 -qem dir
+/	Connected
+/	~&opx25 -fventel.out -v -n9\&2238325 >/dev/cul09 </dev/cul09
+/	
+
+/ first wakeup the modem:
+	echo "attempting wakeup...\r\n"
+	send "\r"
+/ the next command is a trick to waste some time - the modem needs a 
+/ short pause between the CR's - less than 1 second, but more than none.
+/ warning: this might fail if the system is exceptionally slow or fast.
+	run sleep 0
+	send "\r"
+	expect 3 "$"
+	error wfail
+
+/ now dial the number:
+	echo "attempting dial...\r\n"
+	send "k"
+	expect 2 ":"
+	error dfail
+	send "\#\r"
+
+/ wait for ONLINE message:
+	echo "waiting for call to complete...\r\n"
+/ for some phone numbers, the 30 second alarm in the 
+/ next line might not be enough.
+	expect 30 "ONLINE"
+	error cfail
+	echo "\r\ncall completed!\r\n"
+	exit 0
+
+wfail:
+	echo "wakeup failed.\r\n"
+	exit 1
+
+dfail:
+	echo "did not get DIAL: prompt.\r\n"
+	exit 2
+
+cfail:
+	echo "no answer, busy, or timeout - can't tell which.\r\n"
+	exit 3

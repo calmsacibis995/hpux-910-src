@@ -1,0 +1,153 @@
+#!/bin/sh
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lp/model/dumb,v $
+# $Revision: 70.3 $
+
+# lp interface for dumb line printer
+#
+#=======================================================================#
+# OPTIONS RECOGNIZED: ( all may be preceded with a "-" )		#
+#	nb		do not output banner page (to save paper)	#
+#=======================================================================# 
+#########################################################################
+# To set the baud rate of the port replace "BBBB"  below with the 
+# desired baud rate (ie. 9600) and uncomment the following 6 lines.
+# In addition the last four lines before the final exit should be 
+# uncommented. 
+#if [ -t 1 ]                                        #uncomment to set baud.
+#then                                                            #uncomment.
+#  stty raw BBBB -parenb cs8 ixon -istrip clocal <&1 2>/dev/null #uncomment.
+#else                                                            #uncomment.
+#   slp -r 2>/dev/null                                           #uncomment.
+#fi                                                              #uncomment.
+#
+#########################################################################
+PATH="/bin:/usr/bin:/usr/lib"
+export PATH
+
+#sec_class=`getconf SECURITY_CLASS`
+#if [ $? -ne 0 ]
+#then
+	sec_class=0		# Set sec_class for a non-secure system
+#fi
+
+if [ "$sec_class" = "2" ]       # B1 Trusted System
+then
+
+	# B1 system
+
+	model=dumb
+	pr=`basename $0`
+	job="$1" name="$2" dev="$3" title="$4" copies="$5" options="$6"
+	shift 6
+	files="$*"
+	set -- `getopt fl $options`
+	if [ $? != 0 ]
+	then
+		exit 2
+	fi
+	Nofilter= Nolabel=
+
+	for opt in $*
+	do
+		shift
+		case $opt in
+		-f) Nofilter=$opt ;;
+		-l) Nolabel=$opt ;;
+	  	--) break ;;
+		esac
+	done
+
+	options="$*"
+
+	for file in $files
+	do
+		if [ -z "$title" ]
+		then
+			Title=`basename $file`
+		else
+			Title="$title"
+		fi
+
+		i=1
+		while [ $i -le $copies ]
+		do
+			/usr/lib/lprcat $Nofilter $Nolabel $file $model $name $dev
+			i=`expr $i + 1`
+		done | /usr/lib/lpbanner -j $job -t "$Title" -u $name -p $model -d $dev $file
+	done
+
+	exit 0
+fi
+
+# Non-B1 system
+
+banner="yes";
+copies=$4
+
+for i in $5
+do
+	case "$i" in
+	-nb | nb) # do not output banner page
+		banner="";;
+	esac
+done
+
+# Print the standard header
+
+if [ -n "$banner" ]
+then
+	x="XXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXXX"
+	echo "\014\c"
+	echo "$x\n$x\n$x\n$x\n"
+	banner "$2"
+	echo "\n"
+	user=`pwget -n $2 | line | cut -d: -f5`
+	if [ -n "$user" ]
+	then
+		echo "User: $user\n"
+	else
+		echo "\n"
+	fi
+	echo "Request id: $1    Printer: `basename $0`\n"
+	date
+	echo "\n"
+	if [ -n "$3" ]
+	then
+		banner $3
+	fi
+	echo "\014\c"
+fi
+
+# The remaining arguments are files
+
+shift; shift; shift; shift; shift
+files="$*"
+
+# Print the spooled files
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		cat "$file" 2>&1
+		echo "\014\c"
+	done
+	i=`expr $i + 1`
+done
+
+# Print the standard trailer
+
+#echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+#echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n$x\n$x\n$x\n$x"
+#echo "$x\n$x\n$x\n$x\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+#echo "\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n\n"
+#echo "$x\n$x\n$x\n$x\n$x\n$x\n$x\n$x\n"
+
+
+# RS-232 interface insure all buffers are flushed to printer
+#if [ -t 1 ]                                        #uncomment to set baud.
+#then                                                            #uncomment.
+#  stty raw BBBB -parenb cs8 ixon -istrip clocal <&1 2>/dev/null #uncomment.
+#fi                                                              #uncomment.
+exit 0

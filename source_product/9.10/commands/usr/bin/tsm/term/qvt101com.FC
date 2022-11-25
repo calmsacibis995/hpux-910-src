@@ -1,0 +1,301 @@
+## FacetTerm  qvt101com  COMMON description file 11/04/87
+##     generic qvt101 descriptions
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: qvt101com.FC,v 70.1 92/03/09 16:02:32 ssa Exp $
+### >  kB=^AJ^M >  kG=^AO^M >  kJ=^Ab^M >  kK=^Ac^M
+### >  kO=^Ag^M >  kQ=^Ai^M >  kQ=^Aj^M >  kU=^Ao^M
+### char_left CL=^H
+### char_right CR=^L
+### key_page_down PD=\EK
+### key_page_up PU=\EJ
+### ??? EE=\El  ES=\Ek EG#0
+### key_home HM=^^
+### key_line_delete LD=\ER
+### key_line_feed LF=^J
+### ??? MN=- PS=+
+### key_return RT=^M
+### ??? TB=^K
+columns=80
+### ?? columns_wide=number
+### ?? columns_wide_on=
+### ?? columns_wide_off=
+### ?? columns_wide_clears_screen
+lines=24
+### ?? graphics_8_bit
+### NO xon_xoff
+##--- MARGINS ---##
+### NO auto_left_margin
+### ASSUMED auto_right_margin
+### NO eat_newline_glitch
+### ?? auto_wrap_on=
+### ?? auto_wrap_off=
+##--- CLEAR ---##
+clear_screen--P=\E+
+clear_screen--=^Z
+clear_screen--P=\E*
+### ?? clear_all=\E*
+clr_eol=\Et
+### ?? clr_eol_w_attr=\Et
+clr_eos=\Ey
+### ?? clr_eos_w_attr=\Ey
+##--- CURSOR ---##
+cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+### ?? cursor_address_wide =
+cursor_home=^^
+cursor_up=^K
+### NO parm_up_cursor=
+### SAME_AS_NEWLINE cursor_down=\n
+### NO parm_down_cursor=
+cursor_right=^L
+### NO parm_right_cursor=
+### SAME_AS_BACKSPACE cursor_left=^H
+### NO parm_left_cursor=
+### NO ## NOT_IMP column_address=
+### NO ## NOT_IMP row_address=
+### NO ## NOT_IMP cursor_mem_address=
+### NO ## NOT_IMP cursor_to_ll=
+##--- SCROLL ---##
+### NO change_scroll_region=
+### SAME_AS_NEWLINE scroll_forward=\n
+### ?? scroll_could_be_cursor_only
+### NO ## NOT_IMP parm_index=
+### NO scroll_reverse=
+### NO ## NOT_IMP parm_rindex=
+### NO save_cursor=
+### NO restore_cursor=
+##--- INS/DEL ---##
+insert_line=\EE
+### ?? insdel_line_move_col0
+### NO parm_insert_line=
+delete_line=\ER
+### NO parm_delete_line=
+insert_character=\EQ
+### NO insert_padding=
+### NO ## NOT_IMP parm_ich=
+enter_insert_mode=
+exit_insert_mode=
+delete_character=\EW
+### NO parm_delete_character=
+### NO ## NOT_IMP erase_chars=
+### NO ## NOT_IMP enter_delete_mode=
+### NO ## NOT_IMP exit_delete_mode=
+### NO ## NOT_IMP repeat_char=
+##--- ATTRIBUTES URBDOIPA ---##
+### NO ## NOT_IMP set_attributes=
+### NO ## NOTE magic_cookie_glitch=not altchar and protect for standout
+### NOTE magic_cookie_glitch(ug)=1
+### USE_MAGIC attribute-?=
+### USE_MAGIC attribute--?=
+### USE_MAGIC attribute-U=\EG8
+### USE_MAGIC attribute--U=\EG0
+### USE_MAGIC attribute-R=
+### USE_MAGIC attribute-B=
+### USE_MAGIC attribute-D-O=
+### USE_MAGIC attribute-O-D=
+### USE_MAGIC attribute-I=
+attribute-P=\E)
+attribute--P=\E(
+attribute-A=\E$
+attribute--A=\E%
+### ?? attribute_next-A-=
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+### NO exit_attribute_mode--URBDOIPA=
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### standout
+### USE_REVERSE magic=\EG4
+### alt_charset
+### USE_ATTRIBUTE magic=\E$
+### underline
+magic=\EG8
+### reverse
+magic=\EG4
+### blink
+### NO ## magic=
+### dim
+### NO ## magic=
+### bold
+### NO ## magic=
+### secure
+### NO ## magic=
+### protected
+### USE_ATTR magic=
+### alt_charset
+### USE_ATTR magic=
+### exit_attribute_mode
+nomagic=\EG0
+### exit_standout_mode
+### SAME_AS_EXIT nomagic=\EG0
+### exit_underline_mode
+### SAME_AS_EXIT nomagic=\EG0
+### exit_alt_charset_mode
+### USE_ATTRIBUTE nomagic=\E%
+##--- CHARACTER SET ATTRIBUTES ---##
+### ?? lock_shift_0=
+### ?? select_character_set_0--=
+### ?? select_character_set_0--=
+### ?? lock_shift_1=
+### ?? select_character_set_1--=
+### ?? select_character_set_1--=
+### ?? single_shift_2=
+### ?? select_character_set_2--=
+### ?? single_shift_3=
+### ?? select_character_set_3--=
+##--- LINE ATTRIBUTES ---##
+### ?? line_attribute_off=
+### ?? line_attribute=
+### ?? line_attribute=
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+### NOT_IN_COMMON cursor_on=\E.1
+### NOT_IN_COMMON cursor_off=\E.0
+### NOT_IN_COMMON cursor_type=\E.4
+### NOT_IN_COMMON cursor_type=\E.3
+### NOT_IN_COMMON cursor_type_turns_cursor_on
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+### NO enter_appl_keypad_mode=
+### NO exit_appl_keypad_mode=
+### NO enter_cursor_key_mode=
+### NO exit_cursor_key_mode=
+##--- TABS ---##
+### NO ## ASSUMED tab=
+### TBD back_tab=\EI
+clear_all_tabs=\E3
+set_tab=\E1
+##--- FUNCTION KEYS ---##
+key_home=^^
+key_up=^K
+### SAME_AS_NEWLINE key_down=^J
+### SAME_AS_BACKSPACE key_left=^H
+key_right=^L
+### SAME_AS_BACKSPACE key_backspace=^H
+### TBD key_f0=^AH^M
+### TBD key_f1=^A@^M
+### TBD key_f2=^AA^M
+### TBD key_f3=^AB^M
+### TBD key_f4=^AC^M
+### TBD key_f5=^AD^M
+### TBD key_f6=^AE^M
+### TBD key_f7=^AF^M
+### TBD key_f8=^AG^M
+### TBD key_f9=^AH^M
+### NO ## TBD key_f10=
+##--- PRINTER ---##
+##--- STATUS LINE ---##
+status_line=\Ef%s1\r
+status_on=\Eg
+status_off=\Eh
+##--- MISC ---##
+### NO flash_screen=
+### ASSUMED bell=^G
+### ONLY IF PADDING carriage_return=\r
+### NO ## NOT_IMP form_feed=
+### OK_IF_MAGIC transparent_underline
+### NO ## NOT_IMP ceol_standout_glitch
+### NO ## NOT_IMP erase_overstrike
+### NOT_IMP generic_type
+### NO ## NOT_IMP hard_copy
+### NO ## NOT_IMP has_meta_key
+### NO ## NOT_IMP insert_null_glitch
+### NO ## NOT_IMP memory_above
+### NO ## NOT_IMP memory_below
+### NO ## NOT_IMP move_insert_mode
+### NO ## NOT_IMP move_standout_mode
+### NO ## NOT_IMP over_strike
+### NO ## NOT_IMP tilde_glitch
+### NO ## NOT_IMP lines_of_memory=number
+### NO ## NOT_IMP padding_baud_rate=number
+### NO ## NOT_IMP virtual_terminal=number
+### NO ## NOT_IMP command_character=
+### NO ## NOT_IMP down_half_line=
+### NO ## NOT_IMP meta_off=
+### NO ## NOT_IMP meta_on=
+### NOT_IMP newline=^J
+### NO ## NOT_IMP pad_char=
+### NO ## NOT_IMP set_window=
+### NO ## NOT_IMP underline_char=
+### NO ## NOT_IMP up_half_line=
+### NO ## NOT_USED key_a1=
+### NO ## NOT_USED key_a3=
+### NO ## NOT_USED key_b2=
+### NO ## NOT_USED key_c1=
+### NO ## NOT_USED key_c3=
+### NO ## NOT_USED key_catab=
+### NOT_USED key_clear=^AK^M
+### NO ## NOT_USED key_ctab=
+### NOT_USED key_dc=^AL^M
+### NOT_USED key_dl=^Ad^M
+### NOT_USED key_eic=^Ae^M ## NOT_USED key_eic=^Af^M
+### NOT_USED key_eol=^AM^M
+### NOT_USED key_eos=^Al^M
+### NOT_USED key_ic=^Aa^M
+### NOT_USED key_il=^AI^M
+### NO ## NOT_USED key_ll=
+### NOT_USED key_ll=^A\047^M
+### NOT_USED key_npage=^Ag^M
+### NOT_USED key_ppage=^Ah^M
+### NOT_USED key_sf=^AN^M ## NOT_USED key_sr=^Ak^M
+### NO ## NOT_USED key_sr=
+### NOT_USED key_stab=^Am^M ## NOT_USED key_stab=^An^M
+### NO ## NOT_USED lab_f0=
+### NO ## NOT_USED lab_f1=
+### NO ## NOT_USED lab_f2=
+### NO ## NOT_USED lab_f3=
+### NO ## NOT_USED lab_f4=
+### NO ## NOT_USED lab_f5=
+### NO ## NOT_USED lab_f6=
+### NO ## NOT_USED lab_f7=
+### NO ## NOT_USED lab_f8=
+### NO ## NOT_USED lab_f9=
+### NO ## NOT_USED lab_f10=
+##--- MULTIPAGE ---##
+### ?? pages=number
+### ?? display_page_number=
+### ?? parm_display_page_next=
+### ?? parm_display_page_prev=
+### ?? display_page_next=
+### ?? display_page_prev=
+##--- INIT ---##
+### NO enter_ca_mode=
+### NO exit_ca_mode=
+### prot off-??-altchr off-mon off-protoff&scrolon-conv mode-cl
+### SPLITUP init_1string=\E(\EA\E%\EX\E\047\EC\E*\E.3
+### SPLITUP init_1string=\E(\EA\E%\EX\E\047\EC\E*\E0P
+### SPLITUP init_1string=\E0P\Ew\E.4\EG0\E(\EC\E%\EX\E\047\E+\Ef^M\Eg
+### UNKNOWN
+pass=\EA
+### monitor ?off=\Eu off=\EX ?on=\EU
+###?	pass=\Eu
+pass=\EX
+### ?protect submode  off&autoscrollon=\E'  on&autoscrolloff=\
+pass=\E'
+### mode conversational=\EC     ?block=\EB
+pass=\EC
+### protect is reverse
+pass=\E0P
+### ??? auto_page_off=\Ew
+pass=\Ew
+### \EJ
+pass=\EJ
+### NO ## SPLITUP init_2string=
+### NO ## SPLITUP init_3string=
+### init_file=/usr/lib/tabset/std
+### NO ## SPLITUP init_prog=
+### NO ## SPLITUP reset_1string=
+### NO ## SPLITUP reset_2string=
+### NO ## SPLITUP reset_3string=
+### NO ## SPLITUP reset_file=
+### ?? mode-00000000-00000000=
+### ?? ignore=
+### ?? pass=
+### ??? key click off KF=\E< key click on KO=\E>
+pass=\E<
+pass=\E>
+### SYSTEM DEPENDENT ###
+### NCR TOWER 32 ###
+### NOTE horiz_line=k
+### NOTE vert_line=j
+### NOTE up_left_corner=h ## NOTE up_left_corner=f
+### NOTE up_right_corner=e ## NOTE up_right_corner=g
+### NOTE low_left_corner=g ## NOTE low_left_corner=e
+### NOTE low_right_corner=f ## NOTE low_right_corner=h
+### NOTE dn_t_bar=n
+### NOTE up_t_bar=o

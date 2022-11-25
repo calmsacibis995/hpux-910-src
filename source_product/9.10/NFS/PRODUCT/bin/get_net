@@ -1,0 +1,33 @@
+#!/bin/sh
+##	@(#)get_net	$Revision: 1.13.109.1 $	$Date: 91/11/19 13:55:13 $
+#	get_net	--	get networking files from hpcnoe ksrc ...
+# Written by Karl G. Jensen
+##
+PATH=/bin:/usr/bin:$Ksrc/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $Ksrc begin
+
+# GET NETWORKING FILES FROM HPCNOE
+if netunam /net/hpcnoe hawaii:wa8tfg ; then
+    Nsrc=/net/hpcnoe/users/lan/ksrc
+    set -x
+    umask 022
+    cd $Ksrc
+    rm -rf def/net make/net src/net netlink- bin/netcmd+ bin/netcmd-
+    mkdir def/net make/net src/net netlink-
+
+    umask 227
+    cd $Nsrc
+    cp bin/netrelease/netcmd?	$Ksrc/bin
+    cp def/netrelease/*		$Ksrc/def/net
+    cp make/net/*.mk		$Ksrc/make/net
+
+    cd $Nsrc/src/netrelease
+    find . -print | cpio -pdl $Ksrc/src/net 2> /dev/null
+else
+    STATUS=$?
+    ERR=`err`
+    echo "$0\: netunam returned status $STATUS $ERR."
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $Ksrc end

@@ -1,0 +1,173 @@
+.H 2  "Nfsstat (Cristina Mahon)"
+
+.PP
+Nfsd displays statistical information about NFS and RPC.
+It is also used to reinitialize this information.
+.PP
+The command line for nfsstat is:
+.sp
+           nfsstat [ -csnrz ] [hp-ux]
+.sp 
+Most of this tests will probably be interactive tests.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+IMPLEMENT TIME:  0.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Nfsstat with incorrect option"
+.sp 1
+.ad
+.PP
+If nfsstat is invoked with an option other than c, s, n, r or z
+it will return an usage message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       usage: nfsstat [-cnrsz] [hp-ux]
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with no options"
+.sp 1
+.ad
+.PP
+Nfsstat with no options is equivalent to nfsstat -csnr.  It
+returns information about both NFS and RPC clients and servers.
+Perform a mount of a remote filesystem, have a remote system 
+mount a filesystem from this machine, zero the statistics,
+do an ls of a remote directory and have the remote system do
+an ls of the directory it mounted from us.  These actions will
+modify the values for both the server and client information.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+.ad
+       The expected output will have to be dependent in exactly 
+what operations are performed between having the statistics
+checked.
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with combination of options"
+.sp 1
+.ad
+.PP
+The combinations of options are:
+.sp
+.nf
+-c: NFS and RPC client information, 
+-s: NFS and RPC server information, 
+-n: NFS client and server information, 
+-r: RPC client and server information, 
+-cs: client and server NFS and RPC information, 
+-nr: NFS and RPC client and server information, 
+-cn: NFS client information, 
+-cr: RPC client information, 
+-sn: NFS server information, 
+-sr: RPC server information, 
+-rsc: RPC server and client information, 
+-nsc: NFS server and client information,
+-nrsc: NFS and RPC client and server information.
+.fi
+.sp
+Each one of this operation can be tested by hand based
+on some values none to be correct (for example, reading
+a remote directory should increment certain statistics).
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT:
+       The expected output will have to be dependent in exactly 
+what operations are performed between having the statistics
+checked.
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with different kernel"
+.sp 1
+.ad
+.PP
+Run nfsstat on a system that has been booted from a kernel
+other than /hp-ux.  Doing a normal nfsstat without specifying
+the differnet kernel will return statistics for that kernel
+which are probably zeros.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+.ad
+       The correct statistics for whatever has happened on that
+system.  
+.na
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat -z"
+.sp 1
+.ad
+.PP
+Zero all statistics.  It will print the current statistics, then zero
+them.  If you do another nfsstat it will show zeros.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Zero statistics.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat with z option on subsets"
+.sp 1
+.ad
+.PP
+Zero subsets of statistics.  It will print the current statistics, then zero
+the subset.  If you do another nfsstat it will show zeros for that subset.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       Zero statistics for that subset.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat -z without being superuser"
+.sp 1
+.ad
+.PP
+It will print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       Must be root to use z flag.
+.fi
+.na
+.sp 2
+.H 3 "Nfsstat without being superuser"
+.sp 1
+.ad
+.PP
+If /dev/kmem is not readable by everyone, which is the normal
+way we ship it, then we will get an error message to that effect.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       /dev/kmem: Permission denied.
+.fi
+.na
+.sp 2

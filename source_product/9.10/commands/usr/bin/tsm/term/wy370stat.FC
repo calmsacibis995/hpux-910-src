@@ -1,0 +1,17 @@
+## FacetTerm  wy370stat  description file  01/08/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy370stat.FC,v 70.1 92/03/09 16:48:42 ssa Exp $
+function_key_file=sl_16.ftkey
+## status line
+perwindow-320-CLSQF=\E[1$}%300u15\E[0$}
+perwindow_default=\E[1$}\r\E[K\E[0$}
+set-status_line=\E[1$}\r\E[K\E[37;41m%s1\E[m\E[0$}
+perwindow-5-CLSQ----display_top_and_bot_status...................=\E[2$~
+## perwindow_also-.....turn_off_top_and_bottom_status_line_display..=\E[0$~
+## perwindow_also-.....display_top_status_line(local)...............=\E[1$~
+perwindow_also-..................................................=\E[31l
+perwindow_also-..................................................=\E[31h
+perwindow_default-...............................................=\E[2$~
+### out_screen_saver_start=
+out_screen_saver_start=\E[1$}\r\E[K\E[0$}\E[31l
+### out_screen_saver_end=

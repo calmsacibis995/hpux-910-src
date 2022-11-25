@@ -1,0 +1,11 @@
+## FacetTerm  vt320ans COMMON description file 10/31/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: vt320ans.FC,v 70.1 92/03/09 16:56:00 ssa Exp $
+### 1=132_col  2=printer_port  6=selective_erase  7=DRCS  8=UDK  9=national
+answer-..vt320_id=\E[?63;1;2;6;7;8;9c
+question-vt320_id=\E[0c
+question-vt320_id=\E[c
+question-vt320_id=\EZ
+### not a wyse
+pass-identify_test_for_wyse=\E ^D
+pass-identify_clean_up=^D

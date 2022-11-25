@@ -1,0 +1,259 @@
+# Makefile for utility programs  - COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/09 15:37:19 ssa Exp $
+
+USR_BIN_DIR=		/usr/bin
+
+USR_FACET_DIR=		/usr/facet
+USR_FACETTERM_DIR=	/usr/facetterm
+FACETPREFIX=		fct_
+
+FCT_STARTW=	$(FACETPREFIX)startw
+FCT_INVISIBLE=	$(FACETPREFIX)invisible
+FCT_UTMP=	$(FACETPREFIX)utmp$(UTMP_VERSION)
+FCT_ROOT=	$(FACETPREFIX)root
+FCT_VISIBLE=	$(FACETPREFIX)visible
+FCT_PLAY=	$(FACETPREFIX)play
+FCT_ISOPEN=	$(FACETPREFIX)isopen
+
+FCT_RUNWIN=	$(FACETPREFIX)runwin
+FCT_RUNNEW=	$(FACETPREFIX)runnew
+FCT_COMMAND=	$(FACETPREFIX)command 
+FCT_PUTPROG=	$(FACETPREFIX)putprog
+FCT_PASTE=	$(FACETPREFIX)paste
+FCT_INFO=	$(FACETPREFIX)info
+FCT_NOTWIN=	$(FACETPREFIX)notwin
+FCT_CTRLQ=	$(FACETPREFIX)ctrlq
+
+CFLAGS=	\
+		$(MACH_CFLAGS) \
+		-DFCT_NOTWIN=\"$(FCT_NOTWIN)\" \
+		-DFCT_RUNNEW=\"$(FCT_RUNNEW)\" \
+		$(MACH_MODEL) -I../include
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+FACET_BIN_DIR=		$(USR_FACET_DIR)/bin
+FACET_BIN_PROG=		\
+			recvbin recvtext sendbin sendtext \
+			fct_print fct_charset
+
+FACETTERM_BIN_DIR=	$(USR_FACETTERM_DIR)/bin
+FACETTERM_BIN_PROG=	\
+			$(FCT_RUNWIN) \
+			$(FCT_RUNNEW) \
+			$(FCT_COMMAND) \
+			$(FCT_PUTPROG) \
+			$(FCT_PASTE) \
+			$(FCT_INFO) \
+			$(FCT_NOTWIN) \
+			$(FCT_CTRLQ)
+HP_FACETTERM_BIN_PROG=	\
+			$(FCT_RUNWIN) \
+			$(FCT_COMMAND) \
+			$(FCT_INFO)
+
+USR_FACET_SRC_DIR=	$(USR_FACET_DIR)/src
+USR_FACET_SRC=		fct_print.c
+
+# USR_FACETTERM_SRC_DIR=	$(USR_FACETTERM_DIR)/src
+# USR_FACETTERM_SRC=	\
+# 			command.c \
+# 			putprog.c \
+# 			info.c \
+# 			visible.c \
+# 			invisible.c \
+# 			play.c \
+# 			isopen.c
+
+USR_FACETTERM_SYS_DIR=	$(USR_FACETTERM_DIR)/sys
+USR_FACETTERM_SYS_PROG=		\
+			$(FCT_STARTW) \
+			$(FCT_INVISIBLE) \
+			$(FCT_VISIBLE) \
+			$(FCT_PLAY) \
+			$(FCT_ISOPEN)
+NO_SUID_ROOT_USR_FACETTERM_SYS_PROG=		\
+			$(FCT_STARTW) \
+			$(FCT_INVISIBLE) \
+			$(FCT_UTMP) \
+			$(FCT_ROOT) \
+			$(FCT_VISIBLE) \
+			$(FCT_PLAY) \
+			$(FCT_ISOPEN)
+
+USR_FACETTERM_SYS_PROG_SETUID=
+NO_SUID_ROOT_USR_FACETTERM_SYS_PROG_SETUID=	\
+			$(FCT_UTMP) \
+			$(FCT_ROOT)
+
+PROG=			\
+			$(FACET_BIN_PROG) \
+			$(FACETTERM_BIN_PROG) \
+			$(USR_FACETTERM_SYS_PROG) \
+			$(MACH_DEP_PROG)
+
+
+all:	$(PROG) done
+
+$(FCT_STARTW):	fct_startw.o exec_list.o fct_ioctl.o \
+		commonopt.o string.o startutil.o
+	$(CC) -o $(FCT_STARTW) fct_startw.o exec_list.o  fct_ioctl.o \
+		commonopt.o string.o startutil.o
+
+$(FCT_INVISIBLE):	invisible.c
+	$(CC) -o $(FCT_INVISIBLE) $(CFLAGS) invisible.c
+
+$(FCT_UTMP):	fct_utmp.c
+	$(CC) -o $(FCT_UTMP) $(CFLAGS) fct_utmp.c
+
+$(FCT_ROOT):	fct_root.c
+	$(CC) -o $(FCT_ROOT) $(CFLAGS) fct_root.c
+
+$(FCT_VISIBLE):	visible.c
+	$(CC) -o $(FCT_VISIBLE) $(CFLAGS) visible.c
+
+$(FCT_PLAY):	play.c
+	$(CC) -o $(FCT_PLAY) $(CFLAGS) play.c
+
+$(FCT_RUNWIN):	fct_runwin.o exec_list.o fct_ioctl.o \
+		commonopt.o string.o startutil.o
+	$(CC) -o $(FCT_RUNWIN) fct_runwin.o exec_list.o fct_ioctl.o \
+		commonopt.o string.o startutil.o
+
+$(FCT_RUNNEW):	$(FCT_RUNWIN)
+	/bin/rm -f            $(FCT_RUNNEW)
+	/bin/ln $(FCT_RUNWIN) $(FCT_RUNNEW)
+
+$(FCT_COMMAND):	command.c fct_ioctl.o commonopt.o
+	$(CC) -o $(FCT_COMMAND) $(CFLAGS) command.c fct_ioctl.o commonopt.o
+
+$(FCT_PUTPROG):	putprog.c fct_ioctl.o commonopt.o
+	$(CC) -o $(FCT_PUTPROG) $(CFLAGS) putprog.c fct_ioctl.o commonopt.o
+
+$(FCT_PASTE):	fct_paste.c fct_ioctl.o commonopt.o
+	$(CC) -o $(FCT_PASTE) $(CFLAGS) fct_paste.c fct_ioctl.o commonopt.o
+
+$(FCT_INFO):	info.c fct_ioctl.o commonopt.o
+	$(CC) -o $(FCT_INFO) $(CFLAGS) info.c fct_ioctl.o commonopt.o
+
+$(FCT_NOTWIN):	$(FCT_INFO)
+	/bin/rm -f          $(FCT_NOTWIN)
+	/bin/ln $(FCT_INFO) $(FCT_NOTWIN)
+
+$(FCT_ISOPEN):	isopen.c
+	$(CC) -o $(FCT_ISOPEN) $(CFLAGS) isopen.c
+
+$(FCT_CTRLQ):	fct_ctrlq.c
+	$(CC) -o $(FCT_CTRLQ) $(CFLAGS) fct_ctrlq.c
+
+recvtext:	recvbin
+	ln recvbin recvtext
+
+sendtext:	sendbin
+	ln sendbin sendtext
+
+install:	installtext installprog installown 
+	@echo install CMD for $(MACH) done
+
+installtext:
+	Cpioinstall $(FTINSTDIR)$(USR_FACET_SRC_DIR)     - $(USR_FACET_SRC)
+	cd          $(FTINSTDIR)$(USR_FACET_SRC_DIR); \
+#		chown root				   $(USR_FACET_SRC); \
+#		chgrp    0				   $(USR_FACET_SRC); \
+#		chmod  444				   $(USR_FACET_SRC); \
+		ls -l     				   $(USR_FACET_SRC);
+
+	#Cpioinstall $(FTINSTDIR)$(USR_FACETTERM_SRC_DIR) - $(USR_FACETTERM_SRC)
+	#cd          $(FTINSTDIR)$(USR_FACETTERM_SRC_DIR); \
+	#	chown root				$(USR_FACETTERM_SRC); \
+	#	chgrp    0				$(USR_FACETTERM_SRC); \
+	#	chmod  444				$(USR_FACETTERM_SRC); \
+	#	ls -l     				$(USR_FACETTERM_SRC);
+
+	@echo installtext CMD for $(MACH) done
+
+installtextcommon:
+	@echo installtextcommon CMD for $(MACH) done - nothing to do.
+
+installprog:
+	$(STRIPERR)strip         $(FACET_BIN_PROG)
+	Cpioinstall $(FTINSTDIR)$(FACET_BIN_DIR)       - $(FACET_BIN_PROG)
+	if [ -z "$(NO_FACET_USR_BIN_LINK)" ] ; then \
+		Mkdir $(FTINSTDIR)$(USR_BIN_DIR); \
+		for file in $(FACET_BIN_PROG); \
+		do \
+			ln $(LNFORCE) $(FTINSTDIR)$(FACET_BIN_DIR)/$$file \
+				      $(FTINSTDIR)$(USR_BIN_DIR); \
+			ls -l $(FTINSTDIR)$(USR_BIN_DIR)/$$file; \
+		done; \
+	fi
+	$(STRIPERR)strip         $(FACETTERM_BIN_PROG)
+	Cpioinstall $(FTINSTDIR)$(FACETTERM_BIN_DIR)  - $(FACETTERM_BIN_PROG)
+	if [ -z "$(NO_FACETTERM_USR_BIN_LINK)" ] ; then \
+		Mkdir $(FTINSTDIR)$(USR_BIN_DIR); \
+		for file in $(FACETTERM_BIN_PROG); \
+		do \
+			ln $(LNFORCE) $(FTINSTDIR)$(FACETTERM_BIN_DIR)/$$file \
+				      $(FTINSTDIR)$(USR_BIN_DIR); \
+			ls -l $(FTINSTDIR)$(USR_BIN_DIR)/$$file; \
+		done; \
+	fi
+	$(STRIPERR)strip         $(USR_FACETTERM_SYS_PROG)
+	Cpioinstall $(FTINSTDIR)$(USR_FACETTERM_SYS_DIR) - \
+				$(USR_FACETTERM_SYS_PROG)
+	if [ -n "$(MACH_DEP_DIR)" ] ; then \
+		Cpioinstall $(FTINSTDIR)$(MACH_DEP_DIR) - $(MACH_DEP_PROG) ; \
+	fi
+	@echo installprog CMD for $(MACH) done
+
+installown:
+	cd     $(FTINSTDIR)$(FACET_BIN_DIR); \
+#		chown root $(FACET_BIN_PROG); \
+#		chgrp    0 $(FACET_BIN_PROG); \
+#		chmod  555 $(FACET_BIN_PROG); \
+		ls -l      $(FACET_BIN_PROG)
+	if [ -z "$(NO_FACET_USR_BIN_LINK)" ] ; then \
+		cd     $(FTINSTDIR)$(USR_BIN_DIR); \
+#		chown root $(FACET_BIN_PROG); \
+#		chgrp    0 $(FACET_BIN_PROG); \
+#		chmod  555 $(FACET_BIN_PROG); \
+		ls -l      $(FACET_BIN_PROG); \
+	fi
+	cd     $(FTINSTDIR)$(FACETTERM_BIN_DIR); \
+#		chown root $(FACETTERM_BIN_PROG); \
+#		chgrp    0 $(FACETTERM_BIN_PROG); \
+#		chmod  555 $(FACETTERM_BIN_PROG); \
+		ls -l      $(FACETTERM_BIN_PROG)
+	if [ -z "$(NO_FACETTERM_USR_BIN_LINK)" ] ; then \
+		cd     $(FTINSTDIR)$(USR_BIN_DIR); \
+#		chown root $(FACETTERM_BIN_PROG); \
+#		chgrp    0 $(FACETTERM_BIN_PROG); \
+#		chmod  555 $(FACETTERM_BIN_PROG); \
+		ls -l      $(FACETTERM_BIN_PROG); \
+	fi
+	cd     $(FTINSTDIR)$(USR_FACETTERM_SYS_DIR); \
+#		chown root $(USR_FACETTERM_SYS_PROG); \
+#		chgrp    0 $(USR_FACETTERM_SYS_PROG); \
+#		chmod  555 $(USR_FACETTERM_SYS_PROG); \
+		if [ -n "$(USR_FACETTERM_SYS_PROG_SETUID)" ] ; then \
+#			chmod 4555 $(USR_FACETTERM_SYS_PROG_SETUID); \
+		fi; \
+		ls -l      $(USR_FACETTERM_SYS_PROG)
+	if [ -n "$(MACH_DEP_DIR)" ] ; then \
+		cd $(FTINSTDIR)$(MACH_DEP_DIR); \
+#		chown root $(MACH_DEP_PROG); \
+#		chgrp    0 $(MACH_DEP_PROG); \
+#		chmod  555 $(MACH_DEP_PROG); \
+		if [ -n "$(MACH_DEP_SETUID)" ] ; then \
+#			chmod 4555 $(MACH_DEP_SETUID); \
+		fi; \
+		ls -l      $(MACH_DEP_PROG); \
+	fi
+	@echo installown CMD for $(MACH) done
+
+clean:
+	rm -f $(PROG) *.o
+	@echo clean CMD for $(MACH) done
+
+done:
+	@echo make CMD for $(MACH) done

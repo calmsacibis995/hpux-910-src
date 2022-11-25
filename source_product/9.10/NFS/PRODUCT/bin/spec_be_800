@@ -1,0 +1,15 @@
+#!/bin/sh
+###
+#
+# This is a special patch script for the s800 build environment.  This 
+# special # script should be used only to fix up known problems with the 
+# build environment.  For example, to temporary kludge header files as we 
+# wait for GSI to catch up.
+#
+###
+
+date '+%y.%m.%d s800 Build Environment Special Script'
+
+set +x
+
+cp /usr/src/tools.7.0/7.0fixes/dbm.h /usr/src/tools.7.0/TOOLS/usr/include/dbm.h

@@ -1,0 +1,38 @@
+98265
+98624
+98625
+98626
+98628
+98642
+apci
+cdfs
+cs80
+dskless
+gpio
+hpib
+inet
+lan01
+lla
+meas_sys
+netdiag1
+netman
+nfs
+ni
+nipc
+printer
+ptymas
+ptyslv
+ramdisc
+scsi
+stape
+tape
+uipc
+
+fs_async 	1
+maxuprc    	400
+mesg 		1
+nfile     	4096
+nproc      	500
+sema 		1
+shmem 		1
+swap 		auto

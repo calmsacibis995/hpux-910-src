@@ -1,0 +1,15 @@
+# This entry for public login.
+# It provides the default permissions.
+# See the Basic Networking Utilities Guide for more information.
+LOGNAME=nuucp
+
+
+#SAMPLE entry for a system called "sys"
+LOGNAME=sys \
+SENDFILES=yes REQUEST=yes CALLBACK=no \
+READ=/usr/spool/uucppublic \
+WRITE=/usr/spool/uucppublic \
+COMMANDS=rmail:uux:uucp:pr
+
+
+

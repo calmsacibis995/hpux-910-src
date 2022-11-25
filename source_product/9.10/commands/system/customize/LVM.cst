@@ -1,0 +1,34 @@
+#!/bin/ksh
+# @(#) $Revision: 70.5 $
+#
+
+
+#
+#  If /etc/checklist and /local/checklist exist,
+#  at some point in time there must have been
+#  an LVM scratch installation.  /local/checklist
+#  is created by lvm.inst during install.
+#
+#  Install leaves a # in the /etc/checklist file
+#  This customize script must remove it.  Otherwise
+#  bdf reports / mounted on /dev/root.
+#
+
+if [ -r /etc/checklist ] && [ -r /local/checklist ]
+then
+	#
+	# sed out the # if the line looks like
+	# # /dev/vg00/lvol1	/ 	stuff
+
+	/bin/sed -e \
+	's/^#[ 	]*\/dev\/vg00\/lvol1[ 	]*\/[ 	]*\(.*\)/\/dev\/vg00\/lvol1	\/	\1/' \
+	/etc/checklist > /etc/newconfig/checklist.new
+	/bin/mv /etc/checklist /etc/newconfig/checklist.old
+	/bin/mv /etc/newconfig/checklist.new /etc/checklist
+	/bin/rm -rf /local/checklist
+
+fi
+
+echo "-J" >> /etc/conf/gen/.regenrc
+exit 0
+

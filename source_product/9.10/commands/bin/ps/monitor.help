@@ -1,0 +1,1351 @@
+@(#)monitor.help	1.12 88/10/14
+@C
+C SCREEN - CONFIGURATION VALUES / DRIVERS:
+
+  This screen displays the values of configurable kernel parameters and
+  configurable drivers that are configured into the kernel via the
+  config command on the series 300 and 700 (uxgen on the series 800).  
+  This screen may show more data than can be shown in one screenful.  Use 
+  the F key (or "+" or " ") to scroll forward a page and the B key to 
+  scroll backward a page.  These values are static and are changed only 
+  by re-configuring a kernel and re-booting it.  If the kernel running and
+  the /hp-ux file do not match, the values could be incorrect.  See the
+  config or uxgen HP-UX reference manual page and the System Parameters
+  section of the HP-UX System administrator Manual for descriptions of
+  the configuration variables and drivers.
+
+  CONFIGURATION VARIABLES:
+
+    The configurable variables are shown both as decimal and hexadecimal
+    values.  They are all 32 bit integer values.
+
+  DRIVERS:
+
+    The list of drivers shown includes only those drivers that are
+    configured into the kernel (/hp-ux).  The names shown are the same
+    as the names you would include in a dfile for config.  
+@G
+G SCREEN - GLOBAL SYSTEM STATUS:
+
+  This screen shows overall statistics on the system and some miscellaneous
+  other data that does not easily fit or belong in other screens.
+
+  The first line shows the hostname of the system and the time when the
+  system was booted (started up).  What was booted ("/hp-ux, SYSBCKUP or
+  SYSDEBUG) and the device that it was booted from is also displayed on
+  the series 300.  If the system is part of a discless cluster (series 
+  300 only), it's status is also shown:
+
+    Clustered   - The system is clustered as a discless cnode.
+    Root server - The system is the root server for a discless cluster.
+
+  The next section shows information on memory and swap space
+  utilization.  All the values shown are in kilobytes.  It shows the
+  amount of physical memory installed in the system, how much of that
+  memory is available to user processes (not taken up by the operating
+  system), how much of that user memory is free, and what the
+  utilization percentage of the user available memory is.  
+
+  The swap space configured section shows how much swap space the kernel 
+  was configured (via config on the series 300 or via uxgen on the series
+  800) for.  These are listed at the bottom of the screen.  The amount
+  of swap space that is allowed is shown by the swap limit, regardless
+  how much swap device or file system you might have configured for swap.  
+  This limit is dependent on the configurable variable "maxswapchunks".  
+
+  Every time a process is started, a certain amount of swap is "reserved"
+  although it is not actually used yet.  Swap space reserved tells you 
+  how much of the swap has already been reserved.  Actual swap utilization
+  tells you how much actual usage over what the total available swap you 
+  may have (swap configured).  Note that a process may fail due to the 
+  lack of swap space because the amount reserved has reached the swap
+  limit.  If your swap limit is smaller than your swap configured, then
+  you may increase the value of "maxswapchunks" and regen a new kernel
+  to get more space for swap. 
+
+  If your system has file system swap configured, it will also show the
+  file system swap space available and percentage of usage, otherwise
+  it will show "0".
+
+  If the system is part of a discless cluster, then the root server 
+  provides all the swap space available within the discless cluster except 
+  for discless cnodes that have a local swap disc configured.  If it is a 
+  discless cnode without local swap, then only the swap space reserved by 
+  the cnode is displayed.  This is swap space that the root server has 
+  allocated to the cnode that hasn't been used yet.  More swap space is 
+  usually available from the root server.  To see the swap space allocated 
+  per cnode, run the monitor on the root server and look at the K screen.
+
+  The CPU usage is summarized next.  If your system has multi-processors, 
+  then it will show the CPU breakdown and load averages per processor 
+  below the LAN information.  This shows the percentage of time over 
+  the last interval that the CPU was executing user programs (user),
+  the percentage of time the operating system was running to satisfy
+  user requests (sys), the percentage of time the CPU had nothing to do
+  (idle), and the percentage of time the CPU was executing user
+  processes that are running at a lower priority (via the nice command).
+
+  The Local Area Network (LAN) card packets sent and received per second
+  over the last update interval is shown to the right of the CPU usage.
+
+  To the right of the LAN statistics are:
+
+    Context switches:  The rate at which the processor changes which
+                       process it is running due to timeslices or higher
+                       priority processes becoming ready to run.
+
+    Trap calls:        The rate at which processor traps are done (floating
+                       point exceptions for example).
+
+    System calls:      The rate at which operating system calls are made.
+
+    Device interrupts: The rate at which device interrupts are received.
+                       This includes the normal timer interrupts (50 per
+                       second on the series 300 or 100 per second on the
+                       series 800) that the system executes.
+
+  Next are the CPU load averages.  This is the average number of
+  processes that are in the run queue (ready to execute rather than
+  blocked on I/O) on the system over the last 1, 5 and 15 minutes.
+
+  The bottom left section shows the individual swap devices configured
+  in the kernel.  They are identified by the minor number of the swap
+  disc and the number of kilobytes of space available.
+
+  The bottom right section shows the number of transactions per second
+  per disc, the utilization of the disc drive in percent, and the disc
+  name.  The utilization is the percentage of time that the disc is
+  decoding disc requests, seeking, waiting for rotational latencies,
+  writing data, and sending status back to the system on the transaction
+  results.  The name of the file system that this disc drive contains or
+  the minor number of the swap disc if it has no mounted file system.
+  The root file system is indicated by "/".  If the disc is used for
+  swapping, then the size of the swap space is also listed on the series
+  300 only.  On the series 300 systems, only one file system is
+  supported per disc.  The monitor obtains the name of this file system
+  from the /etc/mnttab file based on the data stored by major/minor
+  number that the driver maintains.  If the /etc/mnttab file is not
+  correct, then the data displayed will be inaccurate.  On the series
+  800, no file system name is included since discs are typically divided
+  into pieces, called partitions or sections, with a different file
+  system per partition.  Thus the disc drives can only be identified by
+  their device file minor numbers.  Note that on a series 300 discless
+  client, that only swap devices will be displayed here since no
+  locally mounted file systems are supported on discless clients.
+
+  If more swap devices are configured or discs than can be displayed on
+  one screen, use the F key (or "+" or " ") to scroll forward a page and
+  the B key to scroll backward a page.
+@I
+I SCREEN - I/O STATUS:
+
+  This screen displays information about disc I/O activity.  It shows
+  the number of requests per second made on Amigo (series 300 only) or
+  CS-80 discs by the file system.  SCSI discs (series 300 only) do not
+  yet support the statistics displayed by the monitor as of the 7.0
+  release.
+
+  The file system maintains a buffer cache which is a collection of 4
+  and 8 kilobyte buffers in physical memory.  All file system requests
+  first check to see if the block required from the disc is already in
+  memory, because it has been recently read or written, to avoid having
+  to read data again from the disc that has recently been accessed.  The
+  file system can also collect data to be written to the disc in these
+  buffers and is often able to write data in blocks of 8 kilobytes or
+  larger rather than conducting smaller size writes immediately when
+  requested.  When an application is reading data sequentially in a
+  file, the file system recognizes this and reads the next block after
+  the one requested in the hope that it will be requested next.  These
+  are very important mechanisms in HP-UX to help improve the performance
+  of the file system.  Whether 4 or 8 kilobyte buffers are used depends
+  on the request and the file system it is directed to.  Four kilobyte
+  buffers are used if the file system is set up with 4 kilobyte blocks.
+  If it is set up as 8 kilobyte blocks, then 8 kilobyte buffers are used
+  unless the request made is a write request of 4 kilobytes or less.
+  Note that the file system buffer cache is not used by the virtual
+  memory system.  The virtual memory system does similar caching with
+  all the pages of physical memory it maintains.  The following aspects
+  of the file system buffer cache have data collected by the monitor:
+
+    Buffer reads - Read requests made on the file system buffer cache
+                   either by the user reading a file, the system reading
+                   a file (e.g.  exec'ing a program), or the file system
+                   reading directories, bit maps, inodes, etc.
+
+    Read ahead   - Read requests generated by the file system in
+                   anticipation of the user requesting data in a
+                   sequential fashion in a file.
+
+    Buffer writes - Write requests made on the file system buffer cache
+                    that can not be delayed such as directory writes or
+                    delayed write buffers that need to be freed up so
+                    some other data can be read into it.  These writes
+                    are immediately queued up to be written to disc.
+
+    Delayed writes - Writes that the system does not have to immediately
+                     write to the disc, thus they can be delayed in the
+                     hope that additional data will be written after it
+                     so only one disc write has to be done.
+
+  For each of these 4 areas the monitor shows the following data for the
+  last update interval:
+
+    - The number of requests per second
+    - The average size of those requests in bytes
+    - The total number of bytes involved
+    - How many requests were satisfied by the buffer cache and did not
+      need to read the disc (for read requests only).
+
+  The cache efficiency displayed by the monitor is the percentage of
+  read and read ahead requests that were satisfied by the file buffer
+  cache rather than having to read data from the disc.
+
+  If this system is operating as a discless node (series 300 only), you
+  should be aware that there are file system buffer caches on both the
+  root server and discless client.  As a result, the monitor will also
+  display the rates synchronous read and write requests to the root
+  server.  Synchronous requests are done when the file system is nearly
+  full or when a cnode has a file open for writing and another cnode
+  accesses that file.  Synchronous requests bypass the discless client's
+  file buffer cache to help insure correct system behavior under these
+  conditions.
+
+  The pages in the buffer pool is the number of 4 kilobyte buffers that
+  are in the file system buffer cache.  This value can be changed by the
+  user via the config (series 300) or uxgen (series 800) commands by
+  defining the nbuf configurable parameter to be something different
+  than the default which is based on the amount of memory the system
+  has.  The values above should help you decide if the default value is
+  too large or small for your system.  Choosing a value for nbuf is a
+  trade off between the time spent by processes doing file system I/O
+  against the time spent swapping pages to and from disc by the virtual
+  memory system.  The value of increasing the size of the buffer cache
+  depends on the locality and amount of file system data requests as
+  shown by the statistics above.
+
+  At the bottom, are statistics collected by the disc drivers that show
+  statistics for the first four disc drives.  This includes file system,
+  virtual memory accesses and all other types of requests made on the
+  discs.  Only mounted file systems or swap discs are displayed.  If you
+  are doing raw I/O to a disc that is not a swap disc and is not
+  mounted, then it will not be displayed.  Note that no mounted file
+  systems are supported on series 300 discless clients.  This section
+  can help show the total load on the disc drives and show if the load
+  is well distributed if you have more than one.  All of the values
+  displayed are also reflecting data over the last update interval:
+
+    - Kilobytes per second total data throughput.  This represents how
+      fast the data is going to the disc including delays between
+      accesses, operating system overhead, disc seeks, rotational
+      latencies and the time that it actually takes to transfer the data
+      to the disc.
+
+    - Number of read or write transfers per second.
+
+    - The number of milliseconds spent in each transaction seeking to
+      the correct track on the disc and the rotational latency (time
+      spent waiting for the sector to appear under the read/write head).
+      This does not include the time spent transferring the data to the
+      disc.
+
+    - The utilization of the disc drive in percent.  This is the
+      percentage of time that the disc is decoding disc requests,
+      seeking, waiting for rotational latencies, writing data, and
+      sending status back to the system on the transaction results.
+
+    - The name of the file system that this disc drive contains or the
+      minor number of the swap disc if it has no mounted file system.
+      The root file system is indicated by "/".  If the disc is used for
+      swapping, then the size of the swap space is also listed (series
+      300 only).  On the series 300 systems, only one file system is
+      supported per disc.  The monitor obtains the name of this file
+      system from the /etc/mnttab file based on the data stored by
+      major/minor number that the driver maintains.  If the /etc/mnttab
+      file is not correct, then the data displayed will be inaccurate.
+      On the series 800, no file system name is included since discs are
+      typically divided into pieces, called partitions or sections, with
+      a different file system per partition.  Thus the disc drives can
+      only be identified by their device file minor numbers.
+@K
+K SCREEN - DISKLESS STATUS:
+
+  This screen (series 300 only) shows statistics regarding the discless
+  cnodes that are active and regarding the cluster server processes
+  (CSPs).  CSPs are processes that make operating system requests on
+  behalf of the client on the root server or on behalf of the root
+  server on a client.  Each system in a discless cluster has one CSP
+  called the Limited CSP (LCSP).  This CSP is reserved for certain
+  specific tasks such as handling sync requests and handling crash
+  detection/recovery.  The root server has additional CSP processes
+  called General CSPs (GCSPs).  These are the CSPs that handle most of
+  the tasks such as making read and write requests on behalf of a
+  discless cnode.  GCSP requests are timed out if they exceed 1 second
+  (short), 2 seconds (medium) or 4 seconds (long).  The timeout
+  mechanism is used to decide to spawn additional GCSP processes when a
+  request is found to take a long time to avoid tying up all the GCSPs.
+  The following CSP statistics are displayed in the top section of the K
+  screen:
+
+    - Current Limited CSP request queue length.  This shows how many
+      requests are pending at the current time.  The queue length is
+      only sampled once per update interval so some requests may never
+      be seen.
+
+    - Maximum LCSP queue length since the system started.  This shows
+      the worst case amount of contention for the LCSP.
+
+    - Total number of LCSP requests serviced.
+
+    - The maximum service time for an LCSP request.  This is of interest
+      when there is a lot of contention for the LCSP since there is only
+      one in the system.
+
+    - Current General CSP request queue length.
+
+    - Maximum GCSP request queue length.
+
+    - How many GCSP processes are active.  This includes GCSPs that are
+      servicing requests and those that are idle.
+
+    - How many GCSPs are idle.
+
+    - What the minimum number of GCSPs that were idle at any given time
+      since the system started.
+
+    - Total number of GCSP requests serviced based on the timeout period.
+
+    - Total number of GCSP requests that were timed out per timeout
+      period used.
+
+  The root server discless crash detection mechanism in the operating
+  system attempts to recognize when a cnode is no longer available to
+  participate in the discless cluster so the root server and clients can
+  reclaim resources owned by a cnode when it terminates.  This is
+  analogous to the system closing files for a process when it exits or
+  aborts.  The root server watches for transactions with a cnode or
+  generates it's own transactions periodically to make sure each cnode
+  is alive.  In the next section the crash detection status of each
+  cnode except the root server is shown:
+
+    Active   - A transaction with this cnode has recently been seen
+    Alive    - No transaction with this cnode has recently been seen
+    Retrying - The cnode does not respond readily.  Crash detection is
+               retrying it's attempts to contact this cnode.
+    Failed   - Crash detection has decided that this system has failed
+               but has not yet started cleanup to reclaim it's resources.
+    Cleanup  - The cnode has crashed and all other cnodes have been
+               notified, but cleanup of it's resources is still in progress.
+
+  The second section also shows how many GCSPs are configured for each
+  cnode based on the /etc/clusterconf file, the number of GCSP requests
+  are currently active on this system on behalf of each cnode (mainly
+  useful on the root server), whether the cnode has local swap discs or
+  relies on the root server to provide swap space and how much swap
+  space is allocated in kilobytes for that cnode (only shown if monitor
+  is run on the root server).  The number represented for the swap space 
+  allocated for the root server represents the total swap left that is 
+  available to the root or is actively being used by the root.  If a discless 
+  cnode has a local swap disc, the swap space statistics are shown on the 
+  G screen.  The cnode which the monitor is being run on is shown by a "*".  
+  Cnodes that are not clustered but are in the /etc/clusterconf table are 
+  not listed in this screen.  This data is sorted by cnode name.  If you 
+  would like to reverse the sorting order, the U command can be used to 
+  change it.
+@L
+L SCREEN - LAN STATUS:
+
+  This screen shows statistics that are collected by the LAN card
+  driver.  The device file name (default /dev/ieee on the series 300,
+  /dev/lan0 on the series 800) can be changed using the 'U' command or
+  specifying a device file with the -l option when starting up the
+  monitor.  These statistics are obtained from the lan card driver using
+  the NETSTAT ioctl request.
+
+  Some of the data displayed requires further explanation:
+
+    - The LANIC address is the LAN interface address (also called
+      link-level address or network station address).  This should not
+      be confused with the Internet address which is used by the TCP/IP
+      protocol layer.  The LANIC address is the identifier used by the
+      discless protocol and is identified for each discless cnode in the
+      /etc/clusterconf file.
+
+    - The possible device status values can be; INACTIVE, INITIALIZING,
+      ACTIVE or FAILED.
+
+    - The input/output packet rates are over the last update interval
+      and represent LAN packets received/sent without errors only.
+
+    - "Collisions" are the total number of transmit attempts which were
+      retransmitted due to collisions.  The breakdown by total collisions
+      occurring per packet transmission by number is below on the L screen.
+      Large values, indicate that the LAN traffic is heavy.  Greater than
+      15 retries result in a failure of transmission of that packet.
+
+    - Late collisions my indicate too large a network, a bad LAN card or
+      a bad repeater.
+
+    - Carrier lost or no heartbeat errors typically indicate cable or MAU
+      problems.
+
+    - Undeliverable received packets could not be delivered because the
+      software buffer was overrun when frames were sent faster than they
+      could be received.
+
+    - CRC stands for Cyclical Redundancy Check which is the error
+      detection scheme used for LAN packets.
+
+    - Frame alignment errors count packets that were both misaligned and
+      had bad CRC values so are a subset of those listed under "Bad CRC".
+
+    - Unknown protocol counts the number of packets dropped because the type
+      field or sap field referenced an invalid protocol.
+@M
+M SCREEN - MESSAGE PROTOCOL STATUS:
+
+  The M screen (series 300 only) displays statistics related to the
+  HP-UX diskless protocol.  The screen is divided into five
+  inter-related sections.  The first four are located on the first page
+  of this screen.  The last section is located on the remaining pages.
+  You can use the F key (or "+" or " ") to scroll forward a page and the
+  B key to scroll backward a page as you are looking at these different
+  statistics.
+
+  Section 1 - Diskless protocol buffer allocations:
+  -------------------------------------------------
+    The diskless portion of the HP-UX operating system uses several
+    configurable buffering schemes.  They are termed the dskless_fsbuf 
+    (fsbuf) pools.  These pools are collections of pages which are 
+    manipulated in various ways for handling both inbound and outbound 
+    discless traffic.  They are allocated at cluster time (when 
+    /etc/cluster is executed) on the root server cnode and at kernel 
+    initialization time on the diskless cnodes.
+
+    This section displays statistics regarding the total size of the
+    various pools, the number of resources that are currently available,
+    and the total number of resources that have been allocated or
+    re-allocated since system boot-up time:
+
+    The dskless_mbuf pool is a collection of pages that are chopped up
+    into 128 byte entities called mbufs.  The mbuf pool is statically
+    allocated and cannot grow or shrink.  The number of pages allocated
+    is determined by the configurable parameter "dskless_mbufs".  The
+    total number of mbufs in the pool is thus 32 times the number of
+    pages specified by "dskless_mbufs".  
+
+    The diskless_mbuf pool is the fundamental set of data structures
+    used for all diskless LAN messages.  Prior to generating a request
+    at least 2 mbufs are required, one for holding the basic request
+    information, and one that is "preallocated" for holding the basic
+    reply information.  The pointers to these mbufs are held in a set of
+    data structures called the using_array.  The serving machine will
+    need at least one mbuf for holding the request.  The serving cnodes
+    request mbuf pointer is held in a set of data structures called the
+    serving_array.  Once the serving cnode has satisfied the request,
+    the reply message may reuse the requesting mbuf, or another may be
+    allocated.  There are also several local operations that may require
+    an mbuf which does not result in the transmission of a message.
+    Since both the server and diskless cnodes are both capable of
+    generating requests, the size of the mbuf pool, in pages, is a
+    determined as follows:
+
+      dskless_mbufs = (((SERVING_ARRAY_SIZE+(2*USING_ARRAY_SIZE))/32)+1)
+
+    Mbufs are obsoleted in 8.0 and therefore are no longer displayed.
+
+    The dskless_cbuf pool is a collection of pages that are chopped up
+    into 1 kilobyte entities called cbufs.  The number of pages
+    allocated is determined by the configurable parameter
+    "dskless_cbufs".  The total number of cbufs in the pool is thus 4
+    times the number of pages specified by "dskless_cbufs".
+
+    The base size of the cbuf pool is statically allocated.  It is
+    possible for the cbuf pool to borrow pages from the systems page
+    pool for temporary usage.  If this happens the page(s) are returned
+    back to the correct pool.  A cbuf is used whenever the message
+    portion of a remote request does not fit into a regular mbuf.  If
+    this occurs the mbuf structure contains a pointer to the cbuf which
+    in turn contains the actual message.  The size of the cbuf pool is
+    determined as follows, there is typically one cbuf for every four
+    mbufs.
+
+      dskless_cbufs = (DSKLESS_MBUFS*2)
+
+    Cbufs are also obsoleted in 8.0 and therefore are no longer displayed.
+
+    The dskless_fsbuf pool is a collection of pages (FSPAGE) that are
+    available for allocation under interrupt.  This pool is very similar
+    to the file systems buffer pool in that a buffer header (FSBUF) is
+    allocated for every page.  The number of pages allocated is
+    determined by the configurable parameter "dskless_fsbufs".  An fsbuf
+    is used on the serving cnode if the request also contains data.  If
+    the request is destined for the servers HP-UX filesystem an
+    important optimization results.  Since the filesystems buffer
+    pointers and the dskless_fsbuf pointers are identical, they are able
+    to simply exchange pointers to the data page rather than double
+    copying the data.  As mentioned above, there is a single
+    serving_array entry for each request.  Since diskless cnodes page
+    and swap over the network in either 4k or 8k requests, the
+    dskless_fsbuf pool is sized to be the same as the number of serving
+    array entries.
+
+      dskless_fsbufs = (SERVING_ARRAY_SIZE)
+
+  Section 2 - Types of protocol transactions:
+  -------------------------------------------
+    The HP-UX diskless protocol is a lightweight request/reply protocol.
+    Any cnode may generate a request which will have a corresponding
+    reply.  All replies are ACKed.  If a reply isn't sent within a short
+    timeout period the request is regenerated.  If the original request
+    was in the state of SERVING, then the retry is turned into a
+    SLOW_REQUEST.  This is a method of telling the requester to be
+    patient and stop sending retries for a request that is being worked
+    on.  There is also the concept of a DATAGRAM which is a small
+    message to which there is no reply.
+
+    The statistics in this section tell you the cumulative number of
+    times that the cnode received and/or transmitted REQUESTS, REPLIES,
+    ACKs, SLOW_REQ, and DATAGRAMs.  In addition it displays the RATE of
+    all of these inbound/outbound messages.
+
+  Section 3 -  Transactions dropped due to lack of resources:
+  -----------------------------------------------------------
+    The HP-UX diskless protocol has mechanisms in place to correctly
+    retry a request, reply, or ack if the cnode is temporarily out of
+    critical resources.  Inbound requests and datagrams may be dropped
+    if the cnode was unable to obtain an mbuf, cbuf, fsbuf, fspage, or
+    serving_array entry.  The request may only require a subset of these
+    resources.  The statistics in this section tells you the cumulative
+    number of times that the cnode has dropped either a request or a
+    datagram due to a lack of a particular resource.
+
+  Section 4 - General protocol statistics:
+  ----------------------------------------
+    This section of the M screen deals with more general diskless
+    protocol statistics:
+
+      Request retries: Cumulative number of  request/reply retries that
+      Reply retries:   have  taken  place  since  booting.  It  is  not
+                       unusual to have several retries on a busy system.
+
+      Cnode not clustered: The root server received a  message  from  a
+                       cnode prior  to  the  time that it was clustered
+                       (/etc/cluster).  This  is  an   extremely   rare
+                       situation.
+
+      No avail. using entry:  The  using_array  is a collection of data
+                      structures  that hold stat  information  for each
+                      outbound  request.  If the cnode cannot  obtain a
+                      using_array  entry,  the request  is put to sleep
+                      until this resource is available.  This statistic
+                      is the  cumulative  number of times this resource
+                      was unavailable for immediate allocation.
+
+      Invalid request type: A cnode received a  message  that  did  not
+                      have   a  valid  diskless  protocol  header.  The
+                      message is simply thrown away.
+
+      Recv. not valid member: Cumulative times  a message was  received
+                      from  a  cnode that was not a valid member of the
+                      cluster. If the message was received  by  a  non-
+                      root   server   cnode,   the  message  is  simply
+                      discarded.  If the message  is  received  by  the
+                      root  server, a commit suicide message is sent as
+                      the response.
+
+      Duplicate request: Cumulative times  a retry  of  an  outstanding
+                        request  was  received.  Since  the request was
+                        already  received  and  being   serviced,   the
+                        duplicate  request was dropped.
+
+      No transmit buffer on  card:  Cumulative  times  the  LAN  device
+                      driver   was   unable  to  accept  a  packet  for
+                      transmission  due   to   card   transmit   buffer
+                      unavailability.
+
+      Unexpected message: Cumulative  times a cnode  received  a  reply
+                      packet  that was either out of sequence or to
+                      which an ACK had already been generated.
+
+      Req. out-of-seq: Cumulative times  an  out  of  sequence   multi-
+                      packet  message was received. This results in the
+                      requesting  cnode having to retransmit the entire
+                      request.
+
+      Lost first  packet:  Cumulative  times  the  first  packet  of  a
+                      multipacket request was lost. This results in the
+                      requesting cnode  having to retransmit the entire
+                      request.
+
+      Req. not valid member: Cumulative times  the protocol  layer  was
+                      asked  to  send a message to a site that is not a
+                      valid member of the cluster. This is an extremely
+                      rare  situation  and  the protocol will return an
+                      error to the requesting process.
+
+      Can not send (Flow-cntl): The diskless protocol has  a  built  in
+                      LAN  flow  control  mechanism. It is only used in
+                      the   event   of   local   resource    shortages.
+                      If  a  cnode  receives  a  request that it cannot
+                      handle due to a temporary resource  shortage,  it
+                      will drop the packet and send a special follow-up
+                      message to the requester asking it to  slow-down.
+                      This  statistic is the cumulative number of times
+                      the cnode could not  send  a  packet  to  another
+                      cnode  because  the  target  was  under the flow-
+                      control period.
+
+      Card HW transmit failure:  Cumulative times the LAN device driver
+                      returned an error on a transmission request. This
+                      situation should rarely  happen.  However, if the
+                      LAN  was  either   unterminated  or  broken,  the
+                      diskless   protocol   in   conjunction  with  the
+                      recovery and  selftest  mechanisms may attempt to
+                      reset  the LAN card  which  could  result in this
+                      statistic  being incremented  several times.  The
+                      protocol will continue retries and and attempt to
+                      send   outstanding   messages   until   the   lan
+                      malfunction is corrected.
+
+  Section 5 - Remote request operations:
+  --------------------------------------
+    The diskless portion of the HP-UX operating system communicates by
+    sending and receiving messages to perform various types of remote
+    operations.  The cumulative counts for each diskless message "type"
+    are displayed on pages 2 thru 5.  The descriptions are for the most
+    part self explanatory.
+@N
+N SCREEN - NETWORKED STATUS:
+
+  This screen allows one to observe 13 different major statistics on a
+  number of different systems simultaneously.  The activity of a group
+  of systems can thus be observed.  This is particularly useful to
+  observe the loading of a discless cluster of systems.
+
+  When entering this screen for the first time or via the U command, you
+  can specify a set of system hostnames.  The default is either the last
+  set of names specified or the list of active discless cluster sites if
+  the system the monitor is running on is a member of a discless cluster
+  (series 300 only).
+
+  The monitor will then attempt to invoke the monitor on these systems
+  using remsh in standard out mode (see the description in the main
+  screen help information).  A version of the monitor with a compatible
+  N screen protocol revision number needs to be executable and you need
+  to have permission to access each system via the remsh command for
+  this to work.  The N screen protocol revision ID is displayed on the
+  main menu of the monitor.  This allows future versions of the monitor
+  to define new standard out mode and/or N screen statistics and allow
+  old versions of the monitor to continue to receive N screen data as
+  they expect to receive.
+
+  If not, make sure you have an account under the same user name as you
+  are running currently, you have monitor in your search path on that
+  account, and the .rhosts file allows the system you are running on to
+  have access to that remote system.  There is usually a delay when
+  starting up for all these remsh invocations of the monitor to start up.
+
+  On each system, the monitor program is invoked to write these 13
+  statistics back to this system.  Each update interval, the data is
+  read and displayed.  If a system fails to start up, it will be marked
+  as such.  If nothing is read from a remote system, the same data is
+  displayed until 5 iterations occur without getting new data from a
+  site.  Then this is flagged on further iterations since it appears
+  that the remote system is not responding in a reasonable time.  If the
+  remote system gets ahead and sends more than one set of data in one
+  update interval, only the last set of data is displayed.  The rate
+  values displayed are based on time stamps from the remote system so
+  they are accurate despite any possible transmission or synchronization
+  problems.
+
+  If more systems are specified than can be displayed on one screen, use
+  the F key (or "+" or " ") to scroll forward a page and the B key to
+  scroll backward a page.
+
+  These are the values displayed per system:
+
+    SYSTEM NAME:       Hostname of remote system.
+
+    USER CPU:          User CPU utilization percentage
+
+    SYS CPU:           System CPU utilization percentage
+
+    ACTV DISC:         Aggregate active disc utilization percentage
+
+    USER MEM:          User (total physical memory minus memory used by
+                       the operating system) memory utilization
+                       percentage
+
+    SWAP UTIL:         Swap disc utilization percentage
+
+    LAN PKT:           LAN in/out packet count
+
+  The following four values are returned as 0 on series 800 systems
+  since discless is only supported on the series 300:
+
+    DISKLESS DROPPED:  Discless messages dropped due to lack of memory
+                       resources (mbufs, cbufs, fsbufs, or serving
+                       entries) to receive the data in the message.
+
+    DISKLESS MSG:      Discless messages sent/received
+
+    DISKLESS RETRIES:  Discless message retries
+
+    DISKLESS CSP:      Discless CSP requests
+
+    BLOCK I/Os:        File system block I/O requests that actually had
+                       to access the disc rather than being satisfied by
+                       the file buffer cache.  On a discless client,
+                       this value is approximated by the count of
+                       synchronous/asynchronous read/write messages sent.
+
+    SYS CALLS:         System calls
+
+    PAGES IN+OUT:      VM page read/write requests for both swapped
+                       processes and regular paging activity.
+@R
+R SCREEN - REMOTE UPTIME:
+
+  This screen displays the same data collected by the rwhod daemon
+  process that would be displayed via the ruptime command.  This shows
+  information on systems connected to the same LAN interfaces that this
+  system is directly connected to (systems beyond gateways are not
+  shown).  The rwhod process collects these statistics on the machine it
+  is running and sends it to all other systems running rwhod processes
+  every 3 minutes.  Each rwhod process stores this information in files
+  in the /usr/spool/rwho directory.  The data shown per system is:
+
+    HOSTNAME:       ARPA/BSD hostname of system
+
+    STATUS:         Whether the system is up or down.  This depends
+                    on whether the system has transmitted any new data
+                    in the last 11 minutes.
+
+    TIME:           This is the time in days, hours and minutes since the
+                    system was booted or since the system was shut off
+                    (last data received from it's rwhod process).
+
+    USERS:          Total number of users logged in.
+
+    IDLE:           Total number of users that have been idle more than 1 hour.
+
+    LOAD AVERAGES:  This is the average number of processes that are in
+                    the run queue (ready to execute rather than blocked
+                    on I/O) on the system over the last 1, 5 and 15
+                    minutes.
+
+  The data can be sorted by:  hostname (default), load averages, uptime,
+  or usercount.  Using the U command you can change the sorting order
+  from the default or reverse the order based on the selected sorting
+  key.
+
+  Up to 128 systems can be displayed by the monitor.  If more systems
+  are specified than can be displayed on one screen, use the F key (or
+  "+" or " ") to scroll forward a page and the B key to scroll backward
+  a page.
+@S
+S SCREEN - SINGLE PROCESS INFORMATION:
+
+  The S screen allows one to observe the per process statistics that the
+  system maintains.  This screen may show more data than can be shown in
+  one screenful.  Use the F key (or "+" or " ") to scroll forward a page
+  and the B key (or "-") to scroll backward a page.
+
+  If you type "P" then a process ID is requested to identify the process
+  to be displayed by the S screen.  Use the T screen to identify the
+  process ID of the process you would like to observe.  After you type
+  the process ID for the P command, you will be switched to the S
+  screen.  You can enter or exit the S screen as you wish.  To change
+  the process displayed, use the P command again.
+
+  The time spent by the process in user mode and the time spent in
+  system mode.  System mode is the time spent by the process making
+  system calls.  User time is time spent by the process when it is not
+  in the operating system.  The system accounts for this time by
+  checking each 20 milliseconds to see what the processor is executing
+  and for what process.  Based on this statistical measure, an
+  approximation is made for the time spent per process and how much of
+  that time is spent calling the operating system.  Note that the
+  time shown does not include the time spent by any child processes.
+
+  Many of the following fields are not available in 8.0 due to the design
+  of the VM system which makes the user structures unavailable when they 
+  are swapped out.  Still working on getting these back for the next release.
+
+  Pages reclaimed are the number of page faults the process generated
+  that could be satisfied by returning a page already in the free list
+  to the process.  This is a measure of the caching that the VM system
+  performs with pages placed on the free list when removed from a
+  process.  Pages faulted is the count of pages that had to be brought
+  in from the swap device for the process.  The swap count is the number
+  of times the process was moved out of memory to the swap device due
+  to too much contention for main memory.
+
+  Number of I/O bytes are a total count of how many bytes of data were
+  read or written by this process via the read(2) and write(2) system
+  calls.  This includes data indirectly written by the stdio library.
+  Note that this does not include directories read via the
+  getdirentries(2) call or other I/O generated by other system calls.
+  The number of block input and output operations counts the number of
+  times a file system buffer is read or written to disc (see the I
+  screen help information for a description of the file system buffer
+  mechanisms).  This does not include accesses satisfied by a cache hit.
+  Block I/O can include I/O explicitly done by read(2) or write(2) in
+  addition to other system calls that cause disc I/O such as exec(2),
+  getdirentries(2), etc.
+
+  Voluntary context switches are the count of how often the process
+  stopped running because it had to block for I/O or to obtain a
+  resource that is in use by another process.  Involuntary context
+  switches are the count of how often the process was stopped because it
+  became time to run another process due to a higher priority process
+  becoming ready to run or the process's timeslice has expired.
+
+  Messages sent and received counts the activity generated by the
+  msgop(2) system call.  Signals received counts the number of signals
+  delivered to the process.  The number of open files counts the number
+  of file descriptors the process has allocated to access disc files,
+  pipes, device files, etc.
+
+  The average CPU usage accounts for the total percentage of the CPU
+  time used by the process over a moving time window.  The instantaneous
+  CPU usage accounts for the total percentage the over the last update
+  interval.
+
+  The current and maximum resident set size counts show how many pages
+  the process currently has and the maximum number it ever has had.
+
+  The address space usage section shows the amount of space currently in
+  use by the process for text (the code the process is executing), data
+  (static data plus heap data), shared memory (allocated by shmget(2)),
+  and stack space (dynamic variables) in bytes.  The lay out of these
+  areas differs between the series 300 and 800.
+
+  On the series 300, the space listed is in order of increasing memory
+  addresses.  The system allocates the code and static data at low
+  memory addresses.  It grows the heap from the end of the static data
+  area upwards towards the stack.  The stack grows from high memory
+  addresses downwards towards the heap.  The free space shown shows the
+  amount of memory separating the heap and stack that is available for
+  further growth.  If shared memory is allocated, it is allocated out of
+  this free space between the stack and heap.  If shared memory is
+  allocated the free space between it and the heap and between it and
+  the stack are shown instead.  Note that the usage of graphics or
+  windows libraries may cause shared memory to be allocated for your
+  process that is not directly in your control.  These libraries tend to
+  have mechanisms so you can control the address where their shared
+  memory is allocated.
+
+  The series 800 allocates text starting at low memory to a maximum of
+  3FFFFFFF (hex).  Data is allocated beginning at 40000000 (hex) with
+  the heap beginning immediately after the data region and growing
+  upwards.  The stack begins at 68000000 (hex) and grows upwards
+  towards 7FFFFFFF (hex).  Shared memory is allocated in the range of
+  C0000000 (hex) to EFFFFFFF (hex).  Unlike the series 300, shared
+  memory addresses do not interfer with the maximum size of the stack or
+  heap.  The monitor currently does not display shared memory
+  allocations on the series 800.
+
+  Explanation for the fields in the Address Space Usage:
+
+  Region:
+        DATA        Data region               
+        GRAPHS      Framebuffer lock page   
+        IO          I/O region                
+        LIBTXT      Shared library text region   
+        LIBDAT      Shared library data region  
+        MMAP        Memory mapped file       
+        NLLDRF      Null pointer dereference page 
+        SHMEM       Shared memory region    
+        SIGSTK      Signal stack               
+        STACK       Stack region             
+        TEXT        Text region                
+        UAREA       U area                       
+        UNKNWN      Unknown
+        UNUSD       Unused pregion               
+
+  Vaddr:
+        Virtual offset for the region
+
+  Size:
+        Number of pages mapped by pregion
+
+  Type:
+        PRIV        Private (non-shared) region
+        SHRD        Shared region
+        UNSD	    Region not being used
+        UNKN        Unknown
+
+  Vpgs:
+	Number of valid pages in the region
+
+  The open files display lists the files that the process currently has
+  open.  The file descriptor, open flags, file type, major & minor
+  numbers (for some file types), open count (number of times this file
+  is open), and offset (how many bytes into the file the process has
+  read/written/seeked) are displayed.  For block and character special files,
+  if the file is in the /dev hierarchy, its name is displayed on the next line.
+
+  The flags field consists of bits that are or'd together.
+  Here is their interpretation:
+	00001   FREAD     /* descriptor read/receive'able */
+	00002   FWRITE    /* descriptor write/send'able */
+	00004   FNDELAY   /* no delay */
+	00010   FAPPEND   /* append on each write */
+@T
+T SCREEN - TASKS RUNNING:
+
+  The T screen shows statistics on the processor resources and the
+  processes using those resources.  It shows overall statistics and
+  statistics for each process currently active in the system.
+
+  The system accounts for time spent by the CPU by checking each 20
+  milliseconds to see what the processor is executing and for what
+  process.  Based on this statistical measure, an approximation is made
+  for the time spent by the CPU over the last update interval in the
+  following categories:
+
+    - User CPU:   The time spent in the user process (compute bound
+                  activity).
+    - System CPU: The time spent in the operating system rather than in
+                  in user processes.
+    - Idle CPU:   The time spent by the CPU doing nothing.
+    - Nice CPU:   The time spent by user processes running at lower
+                  priorities (using the nice(2) system call).
+
+  The number of process forks and vforks per second over the update
+  interval are also displayed.  The pages copied (by fork) or not
+  copied (by vfork) are also displayed.
+
+  The load averages are the average number of processes in the run
+  queue over the specified interval.  They help show how heavily loaded
+  the system is and has been over the last 15 minutes.  Processes in
+  the run queue are processes that are not blocked for I/O or other
+  system resources.  They are ready to consume CPU cycles when the system
+  is available.
+
+  If the system has multi-processors, it will display the CPU breakdown,
+  the load averages per CPU, as well as the average of all CPU usage.
+
+  The processes displayed typically take more than one screen to
+  display.  The total number active are shown on the top line.  If more
+  systems are specified than can be displayed on one screen, use the F
+  key (or "+" or " ") to scroll forward a page and the B key to scroll
+  backward a page.
+
+  The processes displayed can be filtered to display only those processes
+  belonging to a specific user or only those processes that are using
+  at least 1 percent of the CPU time by typing changing the appropriate
+  option using the U command.
+
+  Each process is listed with the following information:
+
+    - PID:     This is the process ID of the process.  It is used by
+               the system to uniquely identify the process.
+
+    - PPID:    This is the parent process ID, the process ID of the
+               process that created it.
+
+    - TTY:     This is the last 2 characters on the series 300 or the
+               last 4 characters on the series 800 of the controlling
+               tty of the process.  It identifies which terminal the
+               process was started from or the pty (pseudo tty) used
+               when remotely started by a user on another system.
+
+    - STATE:   This is the current state of the process:
+                 ID - Idle (intermediate state in process creation)
+                 RU - Running (or ready to run)
+                 SL - Sleeping (until a resource is available or I/O complete)
+                 ST - Stopped (process is being traced via ptrace(2))
+                 ZB - Zombie (process has terminated but parent has not
+                      been informed of it's death yet)
+
+    - FLAG:    This is an integer value with each bit defined to signify
+               some state information about the process.  For example
+               the least significant bit (0x00000001 bit mask) is used
+               to indicate if the process is in core (zero if it is
+               swapped).  The values are all defined in the
+               /usr/include/sys/proc.h header file as "flag codes (p_flag)".
+               Some of the more interesting bit masks are:
+
+                 SLOAD    0x00000001  Process is in memory (not swapped)
+                 SSYS     0x00000002  Process is an operating system process
+                 STRC     0x00000010  Process is being traced
+                 SULOCK   0x00000040  Process is locked in memory
+                 SWEXIT   0x00000400  Process is working on exiting
+                 SPHYSIO  0x00000800  Process is doing physical I/O
+                 SVFORK   0x00001000  Process resulted from vfork()
+                 SDATLOCK 0x00040000  Process is data locked
+                 SOUSIG   0x00100000  Process is using the old signal mechanism
+                 STXTLOCK 0x00800000  Process is text locked
+                 SRTPROC  0x04000000  Process is a realtime process
+
+    - PRI:     Priority of the process.  Higher numbers are lower priority.
+               Priorities less than 128 are realtime processes.
+
+    - SYS:     Percentage of total system time consumed by this process over
+               the last update interval.
+
+    - USR:     Percentage of total user time consumed by this process over
+               the last update interval.
+
+    - TEXT:    Total number of pages of memory used for the process's code
+               that is sharable (see ld(1) -N option).
+
+    - DATA:    Total number of pages of memory used for the process's static
+               data and heap data.  Also includes code that is not shareable
+               (see ld(1) -N option).
+
+    - STACK:   Total number of pages of memory used for the process's stack.
+
+    - RSS:     The Resident Set Size (RSS) is the number of pages actually
+               resident in memory.  Note that this includes only pages from
+               DATA and STACK.  TEXT pages are not included since each page
+               can not be accounted to specific processes since the code
+               can be shared by multiple processes.
+
+    - CPU:     On multi-processors systems, CPU will display which CPU the
+	       process is running on.  (On MP systems only)
+
+    - USER:    User name (UID) of the process initiator.
+
+    - COMMAND: This is the name of the program executing.
+@V
+V SCREEN - VIRTUAL MEMORY STATUS:
+
+  The V screen shows the activity of the virtual memory system and a few
+  other miscellaneous statistics.  The rate values shown are in per second
+  units over the last update interval.
+
+  The process totals section shows the number of processes that are
+  ready to run or running, the number that are blocked waiting for disc
+  I/O, the number that are blocked waiting for a page to be read from
+  the swap disc, the number of processes sleeping until some resource is
+  available, and the number of processes that are swapped to disc due to
+  memory contention.
+
+  The upper middle section displays statistics regarding virtual memory
+  pages.  The VIRTUAL section shows statistics on all virtual memory
+  allocated.  The PHYSICAL section shows statistics only on those virtual
+  memory pages that are memory resident.  The difference between the two
+  is made up by pages stored on the swap disc(s).  Text pages are those
+  virtual memory pages used for holding executable code.  Pages that
+  are active are pages belonging to processes that are not blocked for
+  I/O or other resources.
+
+  The left most portion of the middle section shows paging statistics.
+  Total faults counts the number of page faults per second over the last
+  update interval.
+
+  Total reclaims counts the rate at which page faults are satisfied
+  because the page is already in the free list or are found in the mhash
+  list.  The mhash list is a special list of the subset of free list
+  pages that have valid text pages.  This measures the effectiveness of
+  using the free list as a cache.  Free list reclaims shows only the
+  rate at which pages are reclaimed from the free list and does not
+  include mhash list reclaims.
+
+  Pages in transit shows the rate at which pages are accessed while they
+  are in transit to or from the swap disc.  This is a subset of all the
+  pages that may be in transit to or from the swap disc since they may
+  not all be referenced while in transit.
+
+  The remainder of the middle section shows statistics regarding the
+  swapper and pagedaemon processes.  The system uses a Least Recently
+  Used (LRU algorithm) implemented by a clock algorithm to manage the
+  virtual memory pages.  The clock algorithm organizes all the pages
+  around the circumference of an imaginary clock examining pages as the
+  hand of the clock goes by each page.  This LRU algorithm attempts to
+  remove the least recently used pages from processes when the space in
+  memory is less than required.  The swapper process moves processes out
+  completely out of memory when the paging activity is high to help allow
+  other processes to make better progress given more memory.
+
+  The lower left section shows the rate at which processes are swapped
+  in and out of memory over the update interval, the rate pages are
+  swapped in and out of memory as part of process swapping, the rate at
+  which pages are demand filled (rather than loading all the code for a
+  process into memory when exec'ing a process, demand filling causes
+  those pages to be loaded as they are initially accessed), and the rate
+  at which pages are zero demand filled (newly allocated stack or heap
+  storage).
+
+  The middle lower section shows the pages paged in and out and the
+  number of different objects involved in demand filling.
+
+  The lower right corner collects several different rate statistics
+  along with the number of bytes per page for this system.  The rate
+  statistics include:
+
+    Context switches:  The rate at which the processor changes which
+                       process it is running due to timeslices or higher
+                       priority processes becoming ready to run.
+
+    Trap calls:        The rate at which processor traps are done (floating
+                       point exceptions for example).
+
+    System calls:      The rate at which operating system calls are made.
+
+    Device interrupts: The rate at which device interrupts are received.
+                       This includes the normal timer interrupts (50 per
+                       second on the series 300 and 100 per second on the
+                       series 800) that the system executes.
+@*
+MAIN SCREEN - MAIN MENU:
+
+  The monitor is an unsupported program (it should work, but has not
+  been as carefully tested as typical HP products) that allows one to
+  observe how the HP-UX operating system is being used.  It shows data
+  in each major area (processes, memory, I/O, and networking) of the
+  system.  The monitor can be used to determine why your system is
+  running slowly, how to tune an application by observing the system
+  behavior when that application is running, or to learn more about how
+  the HP-UX operating system works.
+
+  The monitor works by making system calls and reading the kernel data
+  structures by reading /dev/kmem.  Because these operations may be
+  separated in time, the data displayed may not be exactly
+  self-consistent since the operating system statistics change
+  continuously.  The monitor runs with all it's pages locked in memory
+  and at an elevated nice priority to help prevent this from occurring.
+
+  Since it is very dependent on the kernel, you must be running a
+  version of the monitor compiled for that kernel.  The version number,
+  date and system it was compiled on is displayed in the lower right
+  hand corner of the main menu in interactive mode (see below).  The
+  monitor abort on newer or older systems with an error message or it
+  may display incorrect data.  When it starts up it examines the file
+  /etc/monitor_data.  If the version number in that file doesn't match
+  or it is older than the /hp-ux, /dev or /dev/pty files/directories,
+  then it will read information out of those three files/directories and
+  write that information to the /etc/monitor_data file.  This is done to
+  help the monitor start up as quickly as possible and still remain
+  synchronized with the state of the system.
+
+  The monitor can be used in two ways.  In the first method, called
+  standard out mode, the monitor writes any one of fifteen possible
+  state variables periodically.  In the second method, called
+  interactive mode, the monitor allows the user to see the data in
+  various screens where, by typing various keys, you can control what
+  data is displayed.  The remainder of this help section will explain
+  standard out mode, the invocation options, and finally the interactive
+  mode screens and command keys.  To get help information on a specific
+  screen in interactive mode, press "?"  when in that screen.  There is
+  also additional data in the monitor manual page.
+
+  STANDARD OUT MODE:
+
+    By including any of the following keywords:
+
+      block    - File system block I/O requests - cache hits
+      csp      - Discless CSP requests (series 300 only)
+      disc     - Aggregate active disc utilization percentage
+      dropped  - Discless messages dropped due to resources (series 300 only)
+      lan      - LAN in/out packet count
+      memory   - User memory utilization percentage
+      msg      - Discless messages sent/received (series 300 only)
+      page     - VM page read/write requests
+      retries  - Discless message retries (series 300 only)
+      rtime    - Milliseconds since startup
+      swap     - Swap disc utilization percentage
+      syscalls - System calls
+      system   - System CPU utilization percentage over the last second
+      time     - Time in HH:MM:SS format
+      user     - User CPU utilization percentage over the last second
+
+    on the command line when starting up the monitor you can have each
+    value displayed once per update interval (defaults to 1 second).
+    This is useful when you want to save data in a file on the system
+    behavior over time or when you have an application that wants to
+    have access to any of these values since you can re-direct the
+    output to a file or pipe it to another process.  For example
+    "monitor time memory syscalls" will display:
+
+      time       memory     syscalls
+      16:24:53    61%       162338057
+      16:24:54    61%       162338480
+
+    This shows the current time, the percentage of user physical memory
+    being used, and the total number of operating system calls made
+    since the system started up.  Each value is printed in a fixed 10
+    character field separated from the other fields by a trailing space.
+    This makes it easy for a program to take this data and process it
+    further.
+
+    Some of these values deserve further discussion.  The "rtime" value
+    is useful when trying to calculate rates based on the cumulative
+    counts that are displayed.  The "memory" value is the percentage
+    utilization of the physical memory in the system minus the physical
+    memory used by the operating system (i.e.  the physical memory
+    available to user programs).  The "dropped" value (series 300 only)
+    is a count of discless protocol messages, received by the system,
+    but had to be ignored (dropped) due to the lack of memory resources
+    (mbufs, cbufs, fsbufs, or serving entries) to receive the data in
+    the message.  The "block" value is the number of file system block
+    (disc) I/O requests that actually had to access the disc rather than
+    being satisfied by the file buffer cache.  On a discless client
+    (series 300 only), this value also includes the number of
+    synchronous read and write messages (see discussion in the I screen
+    help) sent by this system in addition to counting each file system
+    block I/O operation.  The "page" value is the count of pages read or
+    written to the swap space by regular paging plus the pages read or
+    written when entire processes are swapped in and out.
+
+  INVOCATION OPTIONS:
+
+    When invoked in either standard out or interactive mode, the monitor
+    allows one to specify the following:
+
+    -c cmd  - Initial command character (default: ?) for interactive mode
+    -d dur  - Duration of time to run in iterations (stdout mode only)
+    -i int  - Update interval in seconds (default: 1)
+    -l lan  - Device for LAN statistics (default: /dev/ieee on the series 300
+                                                  /dev/lan0 on the series 800)
+    -n kern - Name of kernel file (default: /hp-ux)
+    -r rev  - Don't start if N screen protocol revision ID doesn't match
+    -s lp   - Device for lp spooling (default: NONE)
+
+    The -c option allows you to specify what screen the monitor should
+    start up in initially.  For example, "monitor -c t" will start up
+    the monitor in the tasks screen.  The -r flag is used by programs
+    invoking the monitor that need to track changes in the statistics
+    that can be printed in standard out mode.  The current value of this
+    revision ID is displayed on the main menu.  The monitor uses this
+    when you are in the N screen and it invokes itself on remote systems
+    via remsh.
+
+  INTERACTIVE MODE SCREENS:
+
+    Since there is a lot of information to be displayed by the monitor,
+    the data is broken down into screens listed in the main menu when
+    you start up the monitor.  Most data displayed is shown as a rate
+    value (occurrences per second) over the last update interval.  There
+    are some values that are also shown as cumulative counts since the
+    system was started.  The monitor requires a minimum terminal or
+    window size of 24 lines by 80 characters.  If greater than 24 lines
+    are available (indicated by the TERM or LINES environment
+    variables), then the monitor will use the additional lines in
+    multi-page screens where the data displayed exceeds 24 lines and the
+    "F", "+", or " " keys are used to scroll forward and the "B" or "-"
+    keys scroll backwards.  To enter a specific screen, simply press one
+    of the following keys:
+
+      C - Configuration values / Drivers
+            Shows configured kernel tunable parameters and drivers.
+
+      I - I/O status
+            Shows file system I/O and disc I/O activity.
+
+      G - Global system status
+            Shows overall system status and some miscellaneous statistics
+            most notably in the area of swap space.
+
+      K - Diskless status 
+            Shows statistics on discless Cluster Server Processes (CSPs)
+            and information on each active discless cnode.
+
+      L - LAN status
+            Shows statistics that are collected by the LAN card driver
+            regarding packets transmitted and received.
+
+      M - Message protocol status 
+            Shows statistics collected by the discless protocol code
+            regarding memory used, inbound/outbound activity, error
+            statistics and counts of each unique inbound/outbound message.
+
+      N - Networked status
+            Shows all the statistics printed by the monitor in standard
+            out mode collected from a user specified list of systems that
+            are accessible via the remsh command.
+
+      R - Remote uptime
+            Shows the data collected by the rwhod process (normally printed
+            by the ruptime command) regarding the status of all the systems
+            on the LAN(s) connected to this system.
+
+      S - Single process information
+            Shows per process statistics for a specified process ID.
+
+      T - Tasks running
+            Shows process management statistics and statistics for all the
+            processes running on the system (similar to ps).
+
+      V - Virtual memory status
+            Shows virtual memory management statistics plus information on
+            context switches, trap calls, system calls, and device interrupts.
+
+  INTERACTIVE MODE COMMANDS:
+
+    There are a number of commands available while in any screen of the
+    monitor by simply pressing the following key:
+
+      ? - Help information for the current screen (what you are now reading).
+
+      Q - Quit.  The monitor may also be exited by typing BREAK.  The
+          INTR (typically DEL) and EOF (typically CONTROL-D) can also
+          be used.
+
+      X - Return to the main menu.
+
+     ^L - The CONTROL-L key will re-write the screen if some other process
+          has written to your terminal or window while running the monitor.
+
+      ! - Invoke a shell.  When you exit, you will return to the monitor.
+
+      F - For screens with more data than will fit on a screen, the data is
+          displayed in multiple screens.  See the current screen number and
+          total number of screens in the upper right hand corner (e.g. "3 of
+          5").  This key moves you forward one screen.  The "+" or SPACE key
+          can also be used to move forward a screen.
+
+      B - Move backward a screen.  The "-" key can also be used.
+
+      D - Dump the contents to hard copy.  Spools an image of the screen
+          to the line printer spooler (/usr/bin/lp).  Use the "U" key
+          (see below) to specify a destination device for the -d option to
+          the lp command.  The default is none.
+
+      H - Halt monitor updates.  The monitor will not change the contents of
+          the screen until the user types "R" to resume.  The user may also
+          type "D" to dump the screen or "Q" to exit.  All other keys are
+          ignored.  In the upper right hand corner the string "HALTED" is
+          displayed when the monitor has been halted.
+
+      R - Resume from monitor halt ("H").
+
+      P - Select a process for the S screen.  Type the process ID of the
+          process you want to look at with the S (single process status)
+          screen.  This key will change your mode to the S screen after
+          you type the process ID.  It will not accept process ID 1 since
+          the system does not collect statistics on the init process.
+
+      U - Update configuration variables.  This allows one to change
+          the following values:
+
+            - Update interval (time between screen updates) (defaults to 1)
+            - Hardcopy device passed to /usr/bin/lp with the -d option
+              (defaults to "lp").
+
+          The remaining values are only requested if they are relevant to
+          the screen you are currently in (all are requested if you are
+          in the main menu):
+
+            - Filtering criteria for displaying processes in the T screen:
+                A - All processes (default)
+                N - Processes using at least 1% (Non-zero) of the CPU
+                U - Processes owned by the specified user
+            - If the "U" filtering criteria is specified, the user name
+              to match on is requested.
+            - Reverse the sorting order for the data on the K or R screen
+            - Sorting criteria for the R screen:
+               H - Sort by hostname (default)
+               L - Sort by load averages
+               T - Sort by uptime
+               U - Sort by usercount
+            - The device file for the LAN interface to display statistics
+              for in the G and L screens.
+            - The list of hostnames for the systems to display statistics
+              for in the N screen.  This defaults to the last set of hostnames
+              specified or the list of active cnodes in the discless cluster
+              (series 300 only) that the system belongs (if clustered).
+@@

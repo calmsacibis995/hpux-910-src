@@ -1,0 +1,120 @@
+## FacetTerm  vi603attr COMMON   description file  05/24/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vi603attr.FC,v 70.1 92/03/09 16:51:47 ssa Exp $
+##--- ATTRIBUTES URBDOIPA ---##
+### attribute-U=
+### attribute--U=
+### attribute-R=
+### attribute-B=
+### attribute-D-O=
+### attribute-O-D=
+### attribute-I=
+### attribute-P=
+### attribute-A=
+### attribute--A=
+### attribute_next-A-=
+## define_erasable_char=\E[0"q  =\E[2"q  =\E["q  define_nonerasable_char=\E[1"q
+attribute-h=\E[1"q
+attribute--h=\E[0"q
+attribute--h=\E["q
+attribute--h=\E[2"q
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     475218.. ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA-=\E[;%7MMm
+parm_attribute--URBDOIPA-=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1m
+parm_attribute_out=\E[%s1;%s2m
+parm_attribute_out=\E[%s1;%s2;%s3m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+parm_attribute_val-U-=4
+parm_attribute_val--U=24
+### parm_attribute_val-R-=number
+parm_attribute_val-R-=7
+parm_attribute_val--R=27
+### parm_attribute_val-B-=number
+parm_attribute_val-B-=5
+parm_attribute_val--B=25
+### parm_attribute_val-D-O=number
+parm_attribute_val-D-O=8
+parm_attribute_val--D=28
+### parm_attribute_val-O-D=number
+parm_attribute_val-O-D=1
+parm_attribute_val--DO=22
+## parm_attribute_val-I-=8
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode--URBDOIPA=\E[0m
+exit_attribute_mode--URBDOIPA=\E[m
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ponmlkjihgfedcba ---##
+##---                                               dcba ---##
+### vt220 is ( ) * +
+### lock_shift_0=
+lock_shift_0=^O
+### single_shift_0=
+### select_character_set_0--=
+select_character_set_0-....=\E(B
+select_character_set_0-...a=\E(0
+select_character_set_0-..b.=\E(<
+select_character_set_0-..ba=\E(1
+select_character_set_0-.c..=\E(A
+select_character_set_0-f..a=\E( @
+### select_character_set_0--=
+### lock_shift_1=
+lock_shift_1=^N
+### single_shift_1=
+### select_character_set_1--=
+select_character_set_1-....=\E)B
+select_character_set_1-...a=\E)0
+select_character_set_1-..b.=\E)<
+select_character_set_1-..ba=\E)1
+select_character_set_1-.c..=\E)A
+select_character_set_1-f..a=\E) @
+### select_character_set_1--=
+### lock_shift_2=
+lock_shift_2=\En
+### single_shift_2=
+single_shift_2=\EN
+### select_character_set_2--=
+select_character_set_2-....=\E*B
+select_character_set_2-...a=\E*0
+select_character_set_2-..b.=\E*<
+select_character_set_2-..ba=\E*1
+select_character_set_2-.c..=\E*A
+### select_character_set_2--=
+### lock_shift_3=
+lock_shift_3=\Eo
+### single_shift_3=
+single_shift_3=\EO
+### select_character_set_3--=
+select_character_set_3-....=\E+B
+select_character_set_3-...a=\E+0
+select_character_set_3-..b.=\E+<
+select_character_set_3-..ba=\E+1
+select_character_set_3-.c..=\E+A
+## NOTE 20/20 uses \E+W
+select_character_set_3-f.b.=\E+W
+### select_character_set_3--=

@@ -1,0 +1,87 @@
+#!/bin/sh
+#	@(#)$Revision: 1.4.109.1 $	$Date: 91/11/19 13:53:29 $
+## name: bfasum
+## usage:
+##	bfasum [-d bfadir ] [-f file] 
+##
+## description:  bfasum makes a report of all bfa databases in bfadir and
+##	also makes totals
+##
+## options :
+##	-d : specifies directory where bfa databases reside.  
+##	The default is ./BFA.   
+##	-f : specifies the output file.  The default is bfasum.out
+##
+LIST=bfasum.out
+BFADIR=BFA
+HEADER="MODULE \t\t\t BFA % \t\t\t hit/total"
+KERNSUM=`pwd`/ksum.$$
+USERSUM=`pwd`/usum.$$
+FILTER=$nfs/bin/bfafilt.awk
+BFASUM=$nfs/bin/bfasum.awk
+
+while [ $# -gt 0 ] ; do
+	case $1 in
+	-d) 	BFADIR=$2
+		shift
+		;;
+	-f)	LIST=$2
+		shift
+		;;
+         *) 	echo usage: `basename $0` [-f file] [-d dir]
+		exit 1
+		;;
+	esac
+	shift
+done
+
+if [ ! "$BFADIR" -o ! "$LIST" ]; then
+	echo usage: `basename $0` [-f file] [-d dir]
+	exit 1
+fi
+
+if [ ! -d $BFADIR ]; then
+	echo error: $BFADIR does not exist
+	exit 1
+fi
+
+echo `basename $0` started `date`
+date '+%nCreated:%t%D at 18:18:07n'  >$LIST
+
+echo " " >>$LIST
+echo $HEADER >> $LIST
+echo " " >>$LIST
+
+##
+#	product summary files ... uses BFA report filter tool
+##
+
+bfarpt -f $BFADIR/kbfa	| $FILTER > $KERNSUM
+bfarpt -f $BFADIR/*.B | $FILTER | \
+grep -v "gethostent" | grep -v "getnetent" | grep -v "gprotoent" | \
+grep -v "getservent" | grep -v "rcmd" | grep -v "inetd" | \
+grep -v "version" > $USERSUM
+
+cat $USERSUM | awk '{printf("%-14s \t\t %-7s \t\t %-14s\n", $1, $2, $5); }' >> $LIST 
+##
+# sum user code 
+##
+echo " " >>$LIST
+cat $USERSUM | $BFASUM USER >> $LIST
+##
+# sum kernel code
+##
+grep "[0-9]/[0-9]" $LIST | grep -v "Create" | grep -v "BFA" | sort -n +1 >list_byBFA
+echo " " >>$LIST
+cat $KERNSUM | awk '{printf("%-14s \t\t %-7s \t\t %-14s\n", $1, $2, $5); }' >> $LIST 
+echo " " >>$LIST
+cat $KERNSUM | $BFASUM KERN >> $LIST
+
+##
+#clean up
+##
+
+rm -rf $USERSUM $KERNSUM
+
+echo `basename $0` finished `date`
+exit 0

@@ -1,0 +1,196 @@
+langname	"chinese-s"
+langid	201
+
+hprevision	"$Revision: 70.2 $"
+##################################
+# Set up the LC_ALL category    
+
+LC_ALL
+yesstr	"yes"
+nostr	"no"
+direction	""
+context	""
+END_LC
+
+
+##################################
+# Set up the LC_CTYPE category    
+
+LC_CTYPE
+
+isupper		'A'	'B'	'C'	'D'	'E'	'F'	'G'	'H'
+		'I'	'J'	'K'	'L'	'M'	'N'	'O'	'P'
+		'Q'	'R'	'S'	'T'	'U'	'V'	'W'	'X'
+		'Y'	'Z'
+
+islower		'a'	'b'	'c'	'd'	'e'	'f'	'g'	'h'
+		'i'	'j'	'k'	'l'	'm'	'n'	'o'	'p'
+		'q'	'r'	's'	't'	'u'	'v'	'w'	'x'
+		'y'	'z'
+
+isdigit		'0'	'1'	'2'	'3'	'4'	'5'	'6'	'7'
+		'8'	'9'
+
+isspace		0x9	0xa	0xb	0xc	0xd	' '
+
+ispunct		'!'	'"'	'#'	'$'	'%'	'&'	'''	'('
+		')'	'*'	'+'	','	'-'	'.'	'/'	':'
+		';'	'<'	'='	'>'	'?'	'@'	'['	'\'
+		']'	'^'	'_'	'`'	'{'	'|'	'}'	'~'
+
+iscntrl		0x0	0x1	0x2	0x3	0x4	0x5	0x6	0x7
+		0x8	0x9	0xa	0xb	0xc	0xd	0xe	0xf
+		0x10	0x11	0x12	0x13	0x14	0x15	0x16	0x17
+		0x18	0x19	0x1a	0x1b	0x1c	0x1d	0x1e	0x1f
+		0x7f
+
+isblank		0x9	' '
+
+isxdigit	'0'	'1'	'2'	'3'	'4'	'5'	'6'	'7'
+		'8'	'9'	'A'	'B'	'C'	'D'	'E'	'F'
+		'a'	'b'	'c'	'd'	'e'	'f'
+
+isfirst		0xa1	0xa2	0xa3	0xa4	0xa5	0xa6	0xa7	0xa8
+		0xa9	0xaa	0xab	0xac	0xad	0xae	0xaf	0xb0
+		0xb1	0xb2	0xb3	0xb4	0xb5	0xb6	0xb7	0xb8
+		0xb9	0xba	0xbb	0xbc	0xbd	0xbe	0xbf	0xc0
+		0xc1	0xc2	0xc3	0xc4	0xc5	0xc6	0xc7	0xc8
+		0xc9	0xca	0xcb	0xcc	0xcd	0xce	0xcf	0xd0
+		0xd1	0xd2	0xd3	0xd4	0xd5	0xd6	0xd7	0xd8
+		0xd9	0xda	0xdb	0xdc	0xdd	0xde	0xdf	0xe0
+		0xe1	0xe2	0xe3	0xe4	0xe5	0xe6	0xe7	0xe8
+		0xe9	0xea	0xeb	0xec	0xed	0xee	0xef	0xf0
+		0xf1	0xf2	0xf3	0xf4	0xf5	0xf6	0xf7	0xf8
+		0xf9	0xfa	0xfb	0xfc	0xfd	0xfe
+
+issecond		'!'	'"'	'#'	'$'	'%'	'&'	'''	'('
+		')'	'*'	'+'	','	'-'	'.'	'/'	'0'
+		'1'	'2'	'3'	'4'	'5'	'6'	'7'	'8'
+		'9'	':'	';'	'<'	'='	'>'	'?'	'@'
+		'A'	'B'	'C'	'D'	'E'	'F'	'G'	'H'
+		'I'	'J'	'K'	'L'	'M'	'N'	'O'	'P'
+		'Q'	'R'	'S'	'T'	'U'	'V'	'W'	'X'
+		'Y'	'Z'	'['	'\'	']'	'^'	'_'	'`'
+		'a'	'b'	'c'	'd'	'e'	'f'	'g'	'h'
+		'i'	'j'	'k'	'l'	'm'	'n'	'o'	'p'
+		'q'	'r'	's'	't'	'u'	'v'	'w'	'x'
+		'y'	'z'	'{'	'|'	'}'	'~'	0xa1	0xa2
+		0xa3	0xa4	0xa5	0xa6	0xa7	0xa8	0xa9	0xaa
+		0xab	0xac	0xad	0xae	0xaf	0xb0	0xb1	0xb2
+		0xb3	0xb4	0xb5	0xb6	0xb7	0xb8	0xb9	0xba
+		0xbb	0xbc	0xbd	0xbe	0xbf	0xc0	0xc1	0xc2
+		0xc3	0xc4	0xc5	0xc6	0xc7	0xc8	0xc9	0xca
+		0xcb	0xcc	0xcd	0xce	0xcf	0xd0	0xd1	0xd2
+		0xd3	0xd4	0xd5	0xd6	0xd7	0xd8	0xd9	0xda
+		0xdb	0xdc	0xdd	0xde	0xdf	0xe0	0xe1	0xe2
+		0xe3	0xe4	0xe5	0xe6	0xe7	0xe8	0xe9	0xea
+		0xeb	0xec	0xed	0xee	0xef	0xf0	0xf1	0xf2
+		0xf3	0xf4	0xf5	0xf6	0xf7	0xf8	0xf9	0xfa
+		0xfb	0xfc	0xfd	0xfe
+
+ul		<'A' 'a'>	<'B' 'b'>	<'C' 'c'>	<'D' 'd'>
+		<'E' 'e'>	<'F' 'f'>	<'G' 'g'>	<'H' 'h'>
+		<'I' 'i'>	<'J' 'j'>	<'K' 'k'>	<'L' 'l'>
+		<'M' 'm'>	<'N' 'n'>	<'O' 'o'>	<'P' 'p'>
+		<'Q' 'q'>	<'R' 'r'>	<'S' 's'>	<'T' 't'>
+		<'U' 'u'>	<'V' 'v'>	<'W' 'w'>	<'X' 'x'>
+		<'Y' 'y'>	<'Z' 'z'>
+
+bytes_char	"2"
+alt_punct	""
+code_scheme	"HP15"
+cswidth	""
+END_LC
+
+
+##################################
+# Set up the LC_MONETARY category    
+
+LC_MONETARY
+int_curr_symbol	"CNY "
+currency_symbol	"CNY"
+mon_decimal_point	"."
+mon_thousands_sep	","
+mon_grouping	"\003"
+positive_sign	""
+negative_sign	"-"
+int_frac_digits	"2"
+frac_digits	"2"
+p_cs_precedes	"0"
+p_sep_by_space	"0"
+n_cs_precedes	"1"
+n_sep_by_space	"0"
+p_sign_posn	"3"
+n_sign_posn	"3"
+crncystr	"-CNY"
+END_LC
+
+
+##################################
+# Set up the LC_NUMERIC category    
+
+LC_NUMERIC
+decimal_point	"."
+thousands_sep	","
+grouping	"\003"
+alt_digit	""
+END_LC
+
+
+##################################
+# Set up the LC_TIME category    
+
+LC_TIME
+d_t_fmt	"19%y\304\352%b%.1d\310\325 \320\307\306\332%a, %T"
+d_fmt	"19%y\304\352%b%.1d\310\325 \320\307\306\332%a"
+t_fmt	"%T"
+day_1	"\320\307\306\332\310\325"
+day_2	"\320\307\306\332\322\273"
+day_3	"\320\307\306\332\266\376"
+day_4	"\320\307\306\332\310\375"
+day_5	"\320\307\306\332\313\304"
+day_6	"\320\307\306\332\316\345"
+day_7	"\320\307\306\332\301\371"
+abday_1	"\310\325"
+abday_2	"\322\273"
+abday_3	"\266\376"
+abday_4	"\310\375"
+abday_5	"\313\304"
+abday_6	"\316\345"
+abday_7	"\301\371"
+mon_1	"\322\273\324\302"
+mon_2	"\266\376\324\302"
+mon_3	"\310\375\324\302"
+mon_4	"\313\304\324\302"
+mon_5	"\316\345\324\302"
+mon_6	"\301\371\324\302"
+mon_7	"\306\337\324\302"
+mon_8	"\260\313\324\302"
+mon_9	"\276\305\324\302"
+mon_10	"\312\256\324\302"
+mon_11	"\312\256\322\273\324\302"
+mon_12	"\312\256\266\376\324\302"
+abmon_1	"1\324\302"
+abmon_2	"2\324\302"
+abmon_3	"3\324\302"
+abmon_4	"4\324\302"
+abmon_5	"5\324\302"
+abmon_6	"6\324\302"
+abmon_7	"7\324\302"
+abmon_8	"8\324\302"
+abmon_9	"9\324\302"
+abmon_10	"10\324\302"
+abmon_11	"11\324\302"
+abmon_12	"12\324\302"
+am_str	""
+pm_str	""
+year_unit	"\304\352"
+mon_unit	"\324\302"
+day_unit	"\310\325"
+hour_unit	"\312\261"
+min_unit	"\267\326"
+sec_unit	"\303\353"
+era_fmt		""
+END_LC
+
+

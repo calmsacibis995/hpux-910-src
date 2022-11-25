@@ -1,0 +1,82 @@
+#!/bin/sh
+
+#	@(#)NFS_CMDS customize script:	$Revision: 1.5.109.1 $	$Date: 91/11/19 14:46:39 $
+
+#=============================================================================
+#
+#  This is the customize script for the NFS_CMDS fileset (commands, including
+#  the Yellow Pages and VHE) of the NFS Services product.
+#
+#  This script checks specific files which have been placed in etc/newconfig.
+#  Each file is moved to its "final resting place" if a file by that name
+#  does not already exist there.  If a file by that name DOES already exist,
+#  the file in etc/newconfig is left for the system administrator to contend
+#  with; he/she should refer to /etc/newconfig/README to determine the best
+#  way to handle such a file.
+#
+#  Last, a symbolic link from etc/yp to /usr/etc/yp is created.
+#
+#  Author:	dae
+#
+#=============================================================================
+
+PATH=/bin:/usr/bin:/etc
+export PATH
+
+set --   etc/newconfig/netgroup		etc/netgroup			\
+	 etc/newconfig/netnfsrc		etc/netnfsrc			\
+	 etc/newconfig/netnfsrc2	etc/netnfsrc2			\
+	 etc/newconfig/rpc		etc/rpc				\
+	 etc/newconfig/vhe_list		etc/vhe_list			\
+	 etc/newconfig/vhe_mounter	usr/etc/vhe/vhe_mounter		\
+	 etc/newconfig/vhe_script	usr/etc/vhe/vhe_script		\
+	 etc/newconfig/ypinit		usr/etc/yp/ypinit		\
+	 etc/newconfig/yp_Makefile	usr/etc/yp/Makefile		\
+	 etc/newconfig/ypmake		usr/etc/yp/ypmake		\
+	 etc/newconfig/ypxfr_1perday	usr/etc/yp/ypxfr_1perday	\
+	 etc/newconfig/ypxfr_1perhour	usr/etc/yp/ypxfr_1perhour	\
+	 etc/newconfig/ypxfr_2perday	usr/etc/yp/ypxfr_2perday
+
+#==========
+#  Copy a default configurable file into place if it doesn't exist on the
+#  user's file system.
+#==========
+
+while [ $# -gt 0 ]; do
+	if [ ! -f $2 ]; then
+		cp $1 $2
+		if [ $? != 0 ]; then
+			echo "ERROR:  cannot cp $1 to $2"
+			echo "        Perform this copy manually."
+			EXIT_CODE=1
+		fi
+	fi
+	shift; shift
+done
+
+#==========
+#  Set up the link from etc/yp to usr/etc/yp, if it does not already exist.
+#==========
+
+if [ ! -d etc/yp ] ; then
+	ln -s /usr/etc/yp etc/yp
+	if [ $? -ne 0 ]; then
+		echo "ERROR:  A symbolic link of etc/yp to usr/etc/yp could not be created."
+		echo "        Create this link manually."
+		EXIT_CODE=1
+	fi
+fi
+
+#==========
+#  Remove an outdated fileset.
+#==========
+
+/etc/sysrm VH50969A 2>/dev/null
+rm -rf /system/VH50969A
+
+#==========
+#  Remove an old version of vhe_u_mnt that could cause problems
+#==========
+rm -f /etc/newconfig/vhe_u_mnt
+
+exit ${EXIT_CODE:-0}

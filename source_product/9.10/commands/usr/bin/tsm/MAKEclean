@@ -1,0 +1,17 @@
+:
+# @(#) $Header: MAKEclean,v 66.2 90/09/20 17:38:42 kb Exp $
+set -e
+SHELL=/bin/sh; export SHELL
+here=`pwd`;
+if expr "$PATH" : ".*:$here/bin" > /dev/null
+then
+	:
+else
+	echo OLD PATH = $PATH
+	PATH=:$PATH:$here/bin
+	echo NEW PATH = $PATH
+	export PATH
+fi
+umask 0
+cd MASTER
+make -f Make_hp9000 clean

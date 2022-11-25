@@ -1,0 +1,296 @@
+#! /bin/sh
+#
+# 	@(#)vhe_mounter:	$Revision: 1.31.109.2 $	$Date: 94/06/10 14:28:50 $
+#
+# (c) Copyright 1987 Hewlett-Packard Company
+#
+# Usage:  vhe_mounter 
+#
+
+# Keep other people from reading the temp files
+umask 077
+TMP_DIR=/tmp/vhe.$$
+MNT_LIST=${TMP_DIR}/mnttab$$
+LOCK_FILE=${TMP_DIR}/lock$$
+NFS_MNT=${TMP_DIR}/nfsmnt$$
+TVHE_LIST=${TMP_DIR}/vhe_$$
+VHE_LIST=/etc/vhe_list
+VHE_TEMP=${TMP_DIR}/vhetmp$$
+VHE_PROB_FILE=${TMP_DIR}/vhe_prob$$
+
+# Define variables to be full path specified commands.
+CAT=/bin/cat
+CUT=/usr/bin/cut
+CHMOD=/bin/chmod
+CMP=/bin/cmp
+ECHO=/bin/echo
+GREP=/bin/grep
+HOSTNAME=/bin/hostname
+LN=/bin/ln
+LS=/bin/ls
+MKDIR=/bin/mkdir
+MOUNT=/etc/mount
+RM=/bin/rm
+RMDIR=/bin/rmdir
+SED=/bin/sed
+UMOUNT=/etc/umount
+VHE_GETLIST=/usr/etc/vhe/vhe_getlist
+
+# Set up trap handler so temp files will get removed
+trap "$RM -rf ${TMP_DIR} " 0 
+trap "exit 1" 1 2 3 15 
+
+# Definition of a function that makes sure that a pathname exists
+MAKE_PATH() {
+	DIR2MAKE=$1
+	PUSHD=`pwd`
+	cd /
+	for D in `$ECHO $DIR2MAKE | $SED 's#/# #g'`
+	do
+   	  if [ ! -d $D ]
+   	  then
+      	      if [ -r $D -o -f $D -o -c $D -o -b $D -o -p $D ]
+      	      then
+       		   $ECHO "ERROR: `pwd`/$D exists and is NOT a directory!" >&2
+	   	   $ECHO "       Therefore the pathname $DIR2MAKE cannot be made" >&2
+	   	   $ECHO "       Please rename `pwd`/$D to another name." >&2
+       		   exit 1
+      	      fi
+      	      if $MKDIR $D >/dev/null 2>&1
+	      then :
+	      else
+       		   $ECHO "ERROR: This script is unable to create the directory" >&2
+       		   $ECHO "       $DIR2MAKE   Most likely this is because" >&2
+       		   $ECHO "       it is going over an NFS mount point and" >&2
+       		   $ECHO "       the script no longer has super-user capabilities" >&2
+       		   $ECHO "       through NFS." >&2
+       		   $ECHO "       Please go to the machine that the NFS mount" >&2
+       		   $ECHO "       point refers to and create $DIR2MAKE manually." >&2
+       		   $ECHO "       These are the current NFS mount points." >&2
+       		   $ECHO "" >&2
+		 
+		   # List the current NFS mount points
+		   $MOUNT > $MNT_LIST
+		   exec 3< $MNT_LIST
+		   # Make and zero out the $NFS_MNT file
+		   > $NFS_MNT
+		   while read MNTPT_DIR  ON  FILE_SYS   LEFTOVER <&3
+		   do
+			   # Look for a ":" in $FILE_SYS.  This indicates it is 
+			   # an NFS mount.  It will have the form  
+			   #  Remote_node:Remote_file_system
+			   if $ECHO $FILE_SYS | $GREP : >/dev/null 2>&1
+	 		   then $ECHO "         $MNTPT_DIR $ON $FILE_SYS" >&2
+			   fi
+		   done
+		   exit 1
+	      fi
+      	      $CHMOD 775 $D
+   	  fi
+   	  cd $D
+	done
+   	cd $PUSHD
+}
+
+# Definition of a function that will create a symbolic link
+MAKE_SYMLN() {
+# Because one cannot do something like "ln -s / /home_node" twice,
+# the symbolic link will first be removed before doing the ln
+	THE_LINK=$1
+	LN2MAKE=$2
+	$RM -f $LN2MAKE > /dev/null 2>&1
+
+	# Use this to insure that the path in $LN2MAKE exists
+        MAKE_PATH $LN2MAKE
+	# Now $LN2MAKE will be a directory, so remove it so just
+	# the parent directory pathname will exist
+	$RMDIR $LN2MAKE > /dev/null 2>&1
+	$LN -s $THE_LINK  $LN2MAKE
+}
+
+
+HOME_NODE=`$HOSTNAME`
+set -u
+
+# Create the temporary directory
+success=0
+while [ ${success} = "0" ]
+do
+	${RM} -fr ${TMP_DIR}
+	${MKDIR} ${TMP_DIR}
+	> ${LOCK_FILE}
+
+	# Make sure the directory  has the right permissions and is owned
+	# correctly.
+	check=`${LS} -ld ${TMP_DIR} | ${CUT} -c1-19`
+	if [ "${check}" = "drwx------   2 root" ]; then
+		success=1
+	fi
+done
+
+# Make sure the temporary files don't already exist.  Keeps hackers from
+# creating links with them.
+
+$RM -rf $TVHE_LIST $VHE_TEMP $MNT_LIST $NFS_MNT $VHE_PROB_FILE
+
+# Look and see what is already NFS mounted.  If this script is being 
+# used to add amount when there are existing NSF mounts, then
+# it will notice this and it won't try to remount things.
+$MOUNT > $MNT_LIST
+exec 3< $MNT_LIST
+# Make and zero out the $NFS_MNT file
+> $NFS_MNT
+while read MNTPT_DIR  ON  FILE_SYS   LEFTOVER <&3
+do
+	# Look for a ":" in $FILE_SYS.  This indicates it is an NFS mount
+	# It will have the form  Remote_node:Remote_file_system
+	if $ECHO $FILE_SYS | $GREP : >/dev/null 2>&1
+	then RMT_FILE_SYS=`$ECHO $FILE_SYS | $CUT -d: -f2`
+	     RMT_NODENAME=`$ECHO $FILE_SYS | $CUT -d: -f1`
+	     $ECHO $RMT_NODENAME $RMT_FILE_SYS $MNTPT_DIR >> $NFS_MNT
+	fi
+done
+
+# Get the contents of vhe_list  
+$VHE_GETLIST > $VHE_TEMP
+RET_VALUE=$?
+if [ $RET_VALUE != "0" ]
+then
+	# An error message is printed by $VHE_GETLIST
+	$ECHO "       vhe_mounter is unable to continue" >&2
+	exit 1
+fi
+
+> $TVHE_LIST
+exec 3< $VHE_TEMP
+while read RMT_NODENAME  RMT_FILESYS  NFS_MNTPT MNT_OPTS  LEFTOVER <&3
+do
+	exec 4< $NFS_MNT
+	FOUND=0
+	while read MOUNT_NODENAME  MOUNT_FILESYS  MOUNT_MNTPT <&4
+	do
+		if [ \( $RMT_NODENAME = $MOUNT_NODENAME \) -a \
+		     \( $RMT_FILESYS  = $MOUNT_FILESYS  \) -a \
+		     \( $NFS_MNTPT    = $MOUNT_MNTPT    \) ]
+		then	FOUND=1
+			break
+		fi
+	done
+	if [ $FOUND = "0" ]
+ 	then	$ECHO $RMT_NODENAME $RMT_FILESYS $NFS_MNTPT $MNT_OPTS >> $TVHE_LIST
+	fi
+
+done
+
+exec 3< $TVHE_LIST
+PROBLEM=0
+while read NEXT_NODE FILE_SYS MNTPT_DIR  LEFTOVER <&3
+do
+    if [ $NEXT_NODE != $HOME_NODE ]
+    then
+	   # Does the mount point exist?
+	   if [ -r $MNTPT_DIR ]
+	   then	   if [ -d $MNTPT_DIR ]
+		   then :
+		   else
+			   # There is a file that exists with the name in
+			   # $MNTPT_DIR and is not a directory, so tell the
+			   # caller that it should be removed.
+			   PROBLEM=1
+			   $ECHO "\tThe file $MNTPT_DIR exists" >> $VHE_PROB_FILE
+		   fi
+	   fi
+    else 
+	   # Does the symbolic link exist?
+	   # If so then see if it points to $FILE_SYS.  If this is not true,
+	   # then report a problem.
+	   # If it does not exist as a symbolic link, then see if the
+	   # pathname exits (because part of the path is a symbolic link
+	   # ie. /vhe/homenode/users) and if it refers to $FILE_SYS.
+	   # If it does not refer to $FILE_SYS, then report a problem.
+	   # Finally if you fall through, just make the symbolic link.
+	   if [ -h $MNTPT_DIR ]
+	   then	if $CMP $MNTPT_DIR $FILE_SYS > /dev/null 2>&1
+		then :
+		else
+			# $MNTPT_DIR exists and is a symbolic
+			# link and is NOT the same as $FILE_SYS
+			PROBLEM=1
+	  		$ECHO "\tThe symbolic link $MNTPT_DIR exists and does not point to the" >> $VHE_PROB_FILE
+	  		$ECHO "\tfile system named $FILE_SYS.  A ll of the link will show this" >> $VHE_PROB_FILE
+			$LS -l $MNTPT_DIR >> $VHE_PROB_FILE
+			# Don't bother to look at anymore paths.  If you have
+			# a problem with a symbolic link such that /vhe/node
+			# should point to / and doesn't, you can get really
+			# confused.  So just stop and make the user change
+			# the matching path name.
+			break
+		fi
+	   else	if [ -r $MNTPT_DIR ]
+		then   	if $CMP $MNTPT_DIR $FILE_SYS > /dev/null 2>&1
+			then :
+			else
+				# $MNTPT_DIR exists and is not a symbolic
+				# link and is NOT the same as $FILE_SYS
+				PROBLEM=1
+		    		$ECHO "\tThe file $MNTPT_DIR exists" >> $VHE_PROB_FILE
+			fi
+		else 	MAKE_SYMLN $FILE_SYS $MNTPT_DIR
+		fi
+	   fi
+    fi
+done
+if [ $PROBLEM = "1" ]
+then
+	$ECHO "ERROR: vhe_mounter found a file with the same name as a " >&2
+	$ECHO "       mount point directory or symbolic link contained " >&2
+	$ECHO "       in $VHE_LIST.  This file needs to be renamed." >&2
+	$ECHO >&2
+	$ECHO "The following is a list of such files" >&2
+	$ECHO "(this list can also be found in the file $VHE_PROB_FILE):" >&2
+	$CAT $VHE_PROB_FILE >&2
+      	exit 1
+fi
+
+# Make the mount point directories if needed and then do the NFS mounts
+exec 4< $TVHE_LIST
+while read NEXT_NODE FILE_SYS MNTPT_DIR MNT_OPTS  LEFTOVER <&4
+do
+    if [ $NEXT_NODE != $HOME_NODE ]
+    then
+	if [ -d $MNTPT_DIR ]
+	then	
+		# Just do an umount in case there was a mount done on $MNTPT_DIR
+      		$UMOUNT  $MNTPT_DIR  >/dev/null 2>&1 
+	else
+		# Use this to insure that the path in $MNTPT_DIR exists
+        	MAKE_PATH $MNTPT_DIR 
+	fi
+      	
+ 	OPTIONS=""
+	BACKGROUND_MOUNT=0
+	# If it is desired to have the mount attempts try for awhile until
+ 	# the server is ready for the mount, then set BACKGROUND_MOUNT
+	# to be some value besides 0.
+ 	#
+ 	# By increasing the value for retry, the mount will
+ 	# try longer in the background.
+ 	# If you use the background option, then do
+	# not use  bg and retry  options in the
+ 	# option's field in the $VHE_LIST file as the mount command will
+ 	# get duplicate options and return with an error.
+	if [ $BACKGROUND_MOUNT != "0" ]
+	then 	OPTIONS="-o bg,retry=333"
+	fi
+ 
+ 	if [ $MNT_OPTS ]
+ 	then if [ "$OPTIONS" ]
+ 	     then OPTIONS=${OPTIONS}","${MNT_OPTS}
+ 	     else OPTIONS="-o "${MNT_OPTS}
+ 	     fi
+ 	fi
+       	$MOUNT  $OPTIONS $NEXT_NODE:$FILE_SYS  $MNTPT_DIR 
+    fi
+done 
+
+

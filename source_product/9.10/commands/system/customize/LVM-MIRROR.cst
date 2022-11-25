@@ -1,0 +1,19 @@
+#!/bin/ksh
+
+
+#
+#  The three commands listed below are unique between
+#  the LVM and LVM-MIRROR filesets.
+#
+
+
+for x in lvcreate lvextend lvreduce
+do
+	if [ -r /etc/newconfig/"$x".mir ] ; then
+		/bin/rm -rf /etc/newconfig/$x.old
+		/bin/mv -f /etc/$x /etc/newconfig/$x.old
+		/bin/cp -p -f /etc/newconfig/"$x".mir /etc/$x
+	fi
+done
+
+exit 0

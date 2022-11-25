@@ -1,0 +1,9 @@
+$set 1
+1 You must be root to run %s\n
+2 usage: %s [servers] (servers >= 1)\n
+3 usage: %s [servers] (servers >= 1)\n
+4 nfsd: server already active\n
+5 nfsd: fork
+6 nfsd: NFS system call is not available.\n      Please configure NFS into your kernel.\n
+7 nfsd: needs to be executed with SEC_CHROOT privilege\n
+8 nfsd: Not authorized for network subsystem:  Permission denied\n

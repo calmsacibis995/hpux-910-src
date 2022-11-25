@@ -1,0 +1,23 @@
+#!/bin/sh
+#  @(#)$Revision: 1.3.109.1 $	$Date: 91/11/19 13:52:59 $
+#
+# This script is used to create a remote set of BFA databases. These 
+# databases enable tests which are compiled and executed remotely 
+# to find the associated bfa database.
+#
+cd /users/scaf
+tar cvf  bfadbase.tar \
+         nfs/nfs.bb/rpc/document/auth/bfadbase \
+         nfs/nfs.bb/rpc/document/batched/bfadbase \
+         nfs/nfs.bb/rpc/document/callback/bfadbase \
+         nfs/nfs.bb/rpc/document/rcp/bfadbase \
+         nfs/nfs.bb/rpc/mid-level/registerrpc/bfadbase  \
+         nfs/nfs.bb/rpc/svc_tests/bfadbase \
+         nfs/nfs.bb/rpc/low-level/bfadbase \
+         nfs/nfs.bb/rpc/low-level/authshort/bfadbase \
+         nfs/nfs.bb/rpc/low-level/svc_reg/bfadbase \
+         nfs/nfs.bb/xdr/bfadbase \
+         nfs/nfs.bb/nls/files16bit/bfadbase 
+
+ rcp bfadbase.tar $1.root:/users/scaf
+ remsh $1 -l root "cd /users/scaf ; tar xf  bfadbase.tar ; rm -f bfadbase.tar"

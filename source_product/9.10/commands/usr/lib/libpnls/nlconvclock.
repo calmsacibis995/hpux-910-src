@@ -1,0 +1,94 @@
+
+
+
+#include <stdio.h>
+#include <ctype.h>
+#include <nlinfo.h>
+
+
+#define PMFORMAT 	format_str + 5
+#define AMFORMAT 	format_str + 3
+
+
+int nlconvclock(instr, leninstr, langid, err)
+unsigned char   *instr;
+unsigned short	err[];
+short		leninstr, langid;
+{
+	unsigned char   buff[8], format_str[8], *wrk;
+	unsigned short	hours, minutes;
+
+	err[0] = err[1] = 0;
+
+	nlinfo(L_CLKSPEC, format_str, &langid, err);
+	if (err[0])
+		return(0);
+        
+	if (leninstr < 1) {
+	    err [0] = E_INVALIDSTRINGLENGTH;
+	    return (0);
+        }
+
+	/*
+	 * replace the separator between the hours and minutes with
+	 * a null byte
+	 */
+	memcpy(buff, instr, sizeof(buff));
+	for (wrk = buff; *wrk != format_str[2]  &&  wrk < buff + 3; wrk++)
+		;
+	/*
+	 * check that the separator is where it should be
+	 */
+	if (((format_str[7] == '0')  &&  (wrk != buff + 2))  ||
+		  ((format_str[7] != '0') && (wrk != buff+1 && wrk != buff+2))){
+		err[0] = E_INVALIDTIMEFORMAT;
+		return(0);
+	}
+	*wrk = '\0';
+
+
+	hours = atoi(buff);
+
+
+
+	/*
+	 * minutes
+	 */
+	memcpy(buff, wrk + 1, 2);
+	if (!isdigit(buff[0])  || !isdigit(buff[1])){
+		err[0] = E_INVALIDTIMEFORMAT;
+		return(0);
+	}
+	buff[2] = '\0';
+	minutes = atoi(buff);
+
+
+	/*
+	 * check validity
+	 */
+	if ((hours > (unsigned short) 24)  || 
+	   (minutes > (unsigned short) 59) || 
+	   (hours == (unsigned short) 24 && minutes > (unsigned short) 0)){
+		err[0] = E_INVALIDTIMEFORMAT;
+		return(0);
+	}
+
+
+	/*
+	 * if AMPM format and
+	 *	PM and hours less than 12 - add 12 to hours
+	 *	AM and hours == 12 - make hours = 0
+	 */
+	if (strncmp(format_str, "12", 2) == 0){
+		if (hours > 12){
+			err[0] = E_INVALIDTIMEFORMAT;
+			return(0);
+		}
+		if (strncmp(wrk + 4, PMFORMAT, 2) == 0  &&  hours < 12)
+			hours += 12;
+		else if ((strncmp(wrk + 4, AMFORMAT, 2) == 0) && (hours == 12))
+			hours = 0;
+	}
+
+	return((unsigned int)(hours << 24 | minutes << 16 | 0));
+}

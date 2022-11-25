@@ -1,0 +1,13 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_300/filesets.info/DISKLESS-BLD/RCS/decustomize,v $
+# $Revision: 1.2.62.3 $	$Author: kcs $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/09/17 20:44:55 $
+
+#! /bin/ksh -p
+@(#) $Revision: 1.2.62.3 $
+########################################################################
+#                                                                      #
+# Decustomize script.                                                  #
+#                                                                      #
+########################################################################
+exit 0

@@ -1,0 +1,75 @@
+/hp-ux			./hp-ux
+/disc			/tmp
+/bin/cat
+/bin/cp
+/bin/cpio
+/bin/dd
+/bin/ls
+/bin/ll
+/bin/mkdir
+/bin/mv
+/bin/rm
+/bin/sh
+/bin/-sh		/bin/sh
+/bin/stty
+/bin/sync
+/lib/dld.sl
+/etc/group		./empty
+/etc/mnttab		./empty
+/etc/utmp		./empty
+/etc/passwd		./passwd
+/etc/fsck
+/etc/mknod
+/etc/mount
+/etc/umount
+/etc/unlink
+/etc/reboot
+/etc/recovery.tool	./recovery.tool
+/etc/-recovery.tool	./-recovery.tool
+/etc/inittab		./inittab
+/etc/profile		./profile
+/etc/pre_init_rc	./pre_init_rc
+/etc/rc			./rc
+/dev/console		./console
+/dev/dsk/realroot	./dsk/real.root
+/dev/rdsk/realroot	./rdsk/real.root
+/tmp
+
+#ifdef diskless
+/etc/clusterconf
+#endif
+
+#ifndef dat
+/dev/dsk/root		./dsk/root
+/dev/rdsk/root		./rdsk/root
+#endif
+
+#ifdef small
+/lib/libc.sl		./libc.sl
+/etc/init		/etc/mkrs.init
+/etc/sbtab		./sbtab
+#else
+/lib/libc.sl
+/etc/sbtab
+/etc/init
+/bin/date
+/bin/find
+/bin/ln
+/bin/tar
+/etc/mkfs
+/etc/newfs
+/etc/disktab
+/usr/bin/mediainit
+/usr/bin/lifcp
+/usr/bin/tcio
+#endif
+
+#ifndef S700
+/etc/boot
+#endif
+
+#ifdef S700
+/etc/mkboot
+/etc/diskinfo
+/usr/lib/uxbootlf.700	./uxbootlf.700
+#endif

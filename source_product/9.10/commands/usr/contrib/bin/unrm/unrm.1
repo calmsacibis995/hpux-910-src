@@ -1,0 +1,150 @@
+.\" $Header: unrm.1,v 70.2 94/01/05 16:25:03 ssa Exp $
+.TH unrm 1  "" "Series 300/400 Only"
+.ds )H Hewlett-Packard Company
+.ds ]W HP-UX 9.03: March 1994
+.SH NAME
+unrm \- un-remove a deleted file
+.SH SYNOPSIS
+.B unrm
+.RB [ \|\-l\| ]
+.RB [ \|\-?\| ]
+.RB [ \|\-f\| ]
+.IR filename \ ...
+
+.SH DESCRIPTION
+Use the
+.I unrm
+utility to restore deleted files. 
+.I unrm
+is most successful when used immediately after
+you removing a file.  As time goes by, the chances of restoring
+decrease dramatically. 
+.I unrm 
+with no arguments produces an 
+.I ls -l
+style listing of files that were recently removed.
+
+.SS Options
+.RS
+.TP
+.B \-f
+Forces action without prompts.
+.TP
+.B \-l
+Produces a "long" listing instead of just showing
+files that were owned by you.
+.TP
+.B \-?
+Prints a usage message.
+
+.SS "Specifying Files"
+Files are specified as arguments.  Wildcards are allowed, but be careful
+to quote them properly to keep the shell from expanding them.
+
+.SH EXAMPLES
+Produce a list of recently deleted files owned by the user:
+.IP
+.B unrm
+.PP
+Produce a list of all recently removed files:
+.IP
+.B unrm -l
+.PP
+Restore the recently deleted file "main.c":
+.IP
+.B unrm main.c
+.PP
+Restore some FORTRAN files:
+.IP
+.B unrm *.f
+
+.SH WARNINGS
+.I unrm
+has not been tested on non-typical filesystems (16K, 64K blocksizes,
+striped volumes, etc.). 
+
+.I unrm
+cannot restore files larger than 12 blocks (96k for a filesystem with
+a (default) blocksize of 8K).
+
+.I unrm
+might not give you the right data if you run it repeatedly on
+the same file.
+
+If you truncate a file (cat > file) then 
+.I unrm 
+can't help you.
+
+.I unrm
+can't recover files clobbered with 
+.IR mv .
+
+Directories aren't restorable with 
+.IR unrm . 
+You have to create them yourself.
+
+.I unrm
+restores files to the current directory.  Remember that any filesystem
+activity might cause blocks to be used that were once owned by your
+file.  It's always a good idea to install unrm into a different filesystem
+to avoid this.  If that's not possible, then at least use a different
+directory.
+
+.I unrm
+needs to be installed with group sys and modes 2555. This is
+so it can read 
+.I /dev/kmem
+and
+.I /dev/dsk/*
+and 
+.IR /dev/rdsk/* . 
+Naturally, those devices must be readable by group sys.  Do NOT install 
+.I unrm
+with the setuid bit set, as it 
+was not designed to be a secure setuid application.
+
+To restore a file on a locally mounted filesystem in a diskless
+cluster, run
+.I unrm
+on the cpu that is physically connected
+to the disk that contains the filesystem you are interested in.
+
+.SH Theory of Operation
+Each time a file is unlinked, its name and inode contents are saved
+in a buffer in the kernel.  The data blocks are freed as usual. 
+.I unrm 
+reads the kernel buffer to find out about recently deleted files.
+It can then go out to the raw device and retrieve the data blocks
+directly to restore the file. 
+.PP
+The kernel buffer is relatively small, defaulting to 100 entries. On 
+a busy system, this table might get completely reused in a short 
+period of time.  On a quiet system it might take days.  In either case
+your chances of successfully recovering a file diminish greatly as
+time goes by.  The default size may be changed by using 
+.I adb 
+to modify the kernel variable
+.B unrm_table_size
+in 
+.IR /hp-ux . 
+A reboot is required for this change to take effect, unless you also
+.B set unrm_table
+to 0
+which will cause the table to be re-allocated.
+.BL
+.I unrm
+maintains security by restoring files with their original owners and modes. 
+
+.SH SEE ALSO
+rm(1)
+
+.SH AUTHOR
+.I unrm
+was developed by HP.
+
+.\"
+.\" toc@\f3unrm(1)\f1:\0\0\f4unrm\f1@@@un-remove a deleted file
+.\"
+.\" index@\f4unrm\f1 \- un-remove a deleted file@@@\f3unrm(1)\f1
+.\"
+.\" fileset_database@unrm.1     SWT/9_03

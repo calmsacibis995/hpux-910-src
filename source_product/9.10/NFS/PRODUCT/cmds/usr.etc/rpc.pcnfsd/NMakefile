@@ -1,0 +1,96 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/rpc.pcnfsd sources
+#
+#	Created By:	David Wetchler
+#	Date:		2/3/93
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+SOURCE = pcnfsd_svc.c pcnfsd_xdr.c pcnfsd_v1.c \
+	pcnfsd_v2.c pcnfsd_misc.c pcnfsd_cache.c \
+	pcnfsd_print.c 
+
+OBJECTS = pcnfsd_svc.o pcnfsd_xdr.o pcnfsd_v1.o \
+	pcnfsd_v2.o pcnfsd_misc.o pcnfsd_cache.o \
+	pcnfsd_print.o
+
+TARGETS = pcnfsd 
+HDRS=   pcnfsd.h common.h
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+/*pcnfsd:;	$(TARGETS)
+*/
+pcnfsd:	$(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o pcnfsd $(OBJECTS) $(RPCSVC_LIB) $(LIBCA) 
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+pcnfsd_svc.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_svc.c
+
+pcnfsd_xdr.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_xdr.c
+
+pcnfsd_v1.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_v1.c
+
+pcnfsd_v2.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_v2.c
+
+pcnfsd_misc.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_misc.c
+
+pcnfsd_cache.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_cache.c
+
+pcnfsd_print.o: 
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pcnfsd_print.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build

@@ -1,0 +1,1337 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+              CND 9000/300 6.0 Networking Program Lifecycle
+                 NFS and Networking Convergence for s300
+                 
+ 
+ 
+ 
+
+
+ 
+                              
+                              
+                              
+                               Abstract
+                               
+  This document has two major objectives.  The first of these objectives
+  is to provide logical program milestones or checkpoints.  These
+  logical checkpoints are an outgrowth of each of the individual CND
+  project team schedules which are involved in the series 300 6.0 release.
+  The intent of these  checkpoints is to allow project and program 
+  management to focus on goals which have significance for the majority
+  of the program team.  The second objective of this document is to
+  centralize a list of the major dependencies which the involved project
+  teams have on each other or on external entities.  
+  
+  
+  
+  Authors:   Bill Mowson   2/87 - 3/87
+	     Dan Simula    4/87 - 6/87
+	     Jeff Lindberg 6/87 - 
+  
+
+  
+  
+  
+                            Introduction
+                            
+ Colorado Networking Division has recently undertaken the aggressive
+ goal of completing NFS functionality and networking architecture
+ convergence on the 9000/300 in time for product shipments with 
+ the system 6.0 release in September of 1987.  Subsequently, four
+ project teams within Jim Willits' Technical Systems Networking 
+ section have been mobilized to meet these objectives.  The project
+ teams are organized as follows: 
+   
+ Project Name    Responsibility          Project Manager   #MTS     Start Date
+ 
+ NERFS         NFS code port and fix      Jeff Lindberg     5         8/1/86
+     
+ TRANSFORMERS  NFS code testing           Dan Simula        3        12/19/86
+ 
+ PEKING        Converged kernel port      Dean Thompson     6         8/1/86
+ 
+ SMELTER       Converged NS/ARPA test     Chris Fugitt      5        12/19/86
+     
+ 
+ Other 6.0 program related activities at CND include:
+ 
+ DOC           Technical Documentation    Annette Parsons (NFS)      10/1/86
+                                          Mickie Calkins  (Convergence)
+                                          
+ TECH          Technical Support          Carole Crall               10/1/86
+                                          
+ PROD          Product Marketing          Andy Drol       (NFS)      10/1/86
+                                          Laurie Miller   (Convergence)
+ 
+ QA            Quality Assurance          Chuck Morse                 1/1/87
+ 
+
+ With the number of project teams and MTS's involved in this program
+ and its accelerated schedule, it is anticipated that smooth inter and
+ intra project planning and scheduling will be difficult.  The intent
+ of this document is to provide major program checkpoints to which all
+ involved projects can manage accordingly.  This document was derived
+ from the following documents:
+ 
+    1) Document:  Project Lifecycle for Nerfs 300 program
+       Author:    Mike Shipley
+       Revision:  23 Jan 1987
+       
+    2) Document:  Project Lifecycle Specification - Project Peking
+       Author:    Dean Thompson
+       Revision:  22 Jan 1987
+       
+    3) Document:  Smelter Lifecycle for 300 Program
+       Author:    Chris Fugitt
+       Revision:  22 Jan 1987
+     
+    4) Document:  Project Transformers Lifecycle
+       Author:    Bill Mowson
+       Revision:  23 Jan 1987
+       
+    5) Document:  HP NFS Series 300 and Series 800 Documentation Plan
+       Author:    Annette Parsons          
+       Revision:  23 January 1987
+
+    6) Document:  NFS Product Support Plan
+       Author:    Carole Crall
+       Revision:  31 January 1987
+
+    7) Document:  Documentation Plan for 1.1 and 6.0 NFS and Convergence
+		  Projects
+       Author:    Mickie Calkins
+       Revision:  09 June 1987
+
+ 
+
+ Since this lifecycle is intended to be a reflection and coalescence
+ of the individual project lifecycles, it is anticipated that a new
+ revision of this document will be built after each checkpoint.
+ These updates will consist of two important elements:
+ 
+    1) A program synopsis of the major results, concerns, and issues 
+       which occurred in the last phase of the program.  The last phase of
+       the program is defined as the time between the last checkpoint
+       and its immediate predecessor.  It is hoped that this synopsis
+       will be helpful in:
+           a) creating more effective plans to meet the next checkpoint
+           b) the final post mortem analysis of the project
+       
+       Deliverables and dependencies which are not met on the specified
+       date are denoted with a series of asterisks as follows:
+       
+          *** items which are of high importance to the program team
+              and have not shown significant progress are denoted with
+              three asterisks
+              
+           ** items which are of high importance to the program team
+              and are near completion or partially usable are denoted
+              with two asterisks
+       
+            * items which are of some importance to the program team or
+              have had "negotiated" changes based on new data are
+              denoted with one asterisk
+              
+           
+    2) Updates to the deliverables and dependencies list of the next
+       checkpoint for each project team.  These updates will be based
+       on new data or recent necessary changes in the individual 
+       project plans.  
+   
+                            
+ Checkpoint dates shown in this document are currently targets or goals.
+ These dates will solidify as "bottoms up" schedules become available
+ from the individual project groups.  The goal for finalized checkpoint
+ dates and schedule commitments is February 24th (I/L checkpoint).
+
+                            
+                            
+                            
+                            
+                     Management of Dependencies
+                     
+
+ Key project and program dependencies are listed within this document.
+ These dependencies are sorted first by applicable checkpoint, then by
+ the owner (or holder) of the dependency, and lastly by the time at which
+ they occur.  The following process is recommended for managing the project 
+ dependencies specified within this document:
+
+   1) The owner of the dependency is the manager (and team) that the
+      dependency is on.  For example if the TRANSFORMERS project needs
+      functional NFS code from the NERFS team by March 1st, then the
+      NERFS manager (and team) should own and manage to this dependency 
+      as a deliverable to the TRANSFORMERS team.
+      
+   2) The dependency list should be reviewed regularly at program team
+      meetings.  Major upcoming dependencies should be brought up at
+      program meetings as reminders to the responsible managers.
+      
+   3) Dependencies which are not met become a concern for the program
+      and should be worked out as quickly as possible by the 
+      responsible manager (the owner) and the requesting manager.
+      All dependencies which are not met will be enumerated in this
+      document as the program progresses. 
+
+       
+
+                     
+                     
+ Checkpoint:    Definition Complete
+                   * NERFS checkpoint of Definition Complete
+ 
+ Target Date:   Feb 10th, 1987
+ 
+ Deliverables:
+  
+            NERFS
+             * 1) ERS for NFS functionality (man pages)
+                  - most man pages complete
+                  - project ERS not complete
+            ** 2) NFS performance benchmarks identified
+                  - performance benchmarks not identified
+             * 3) Preliminary NFS system Test plan
+                  - responsibility moved to TRANS group
+             * 4) Review of System Test, Product, and Documentation Plans
+                  - system test plan not complete for review
+               5) Equipment plans in place
+               6) Man pages submitted as RFCs
+             * 7) First project PERT
+                  - PERT redefined to be a schedule
+                            
+            TRANSFORMERS
+               8) Test porting investigation complete           
+               9) NFS Quick Regression Test suite available
+              10) System Test plan template complete  
+            * 11) Start formal DTS on NFS
+                  - code and test environment not stable enough to 
+                    start formal DTS
+              12) Quality metrics defined and system in place   
+
+               
+
+ Dependencies:                         On Whom      By Whom       By When
+ 
+ 1) Usable BFA for NFS kernel and user   SET         NERFS        2/10/87
+  
+ 2) NFS System Test Plan template       TRANS        NERFS        2/6/87   **
+     - had to wait until 2/15 for NERFS inputs to complete test plan
+ 
+ 3) RFA/NFS Examples and comparisons    NERFS        PROD         2/10/87 
+
+
+        
+ 
+                     
+                     
+ Checkpoint:    Design Complete / I to L
+                    * NERFS checkpoint of Design Complete
+                    * TRANS checkpoint of Planning Complete
+                    * PEKING checkpoint of I/L
+                    * SMELTER checkpoint of Start Formal Defect Tracking
+                *** Checkpoint meeting ***
+ 
+ Target Date:   Feb 24th, 1987
+ 
+ Deliverables:
+  
+            NERFS
+            ** 1) 80% NFS functionality including:
+                     a) YP
+                     b) Discless
+                     c) PC-NFS daemon
+                  - code at 88% functionality but YP and PC-NFS daemon
+                    not yet functional 
+             * 2) A self hostable NFS 300 system
+                  - system not yet self hostable but not required in this
+                    timeframe due to 6.0 system slip and lack of equipment
+           *** 3) First official performance benchmark
+                  - performance benchmarks not yet performed
+             * 4) IRS complete and reviewed
+                  - IRS's not needed for development of ported code
+                  - will be completed by MR for support group's use
+               5) All module test plans complete
+               6) Man pages submitted to TWG and NSG
+               7) System build process in place
+               8) Installation procedure defined
+               9) Project metrics identified and in place
+                            
+            TRANSFORMERS
+              10) NFS System Test Plan complete and reviewed
+              11) All project deliverables and dates defined
+              12) NFS Program Lifecycle complete and reviewed
+              13) Scaffold and NFS test environment defined
+                  and implemented
+            * 14) Final 50% and 90% confidence project schedules
+                  - 90% project schedules not generated
+           ** 15) Quick Regression 
+                  - All tests complete except YP and mount because of lack
+                    of functionality in existing code
+                  - QR not being executed as part of build process
+                    
+            PEKING
+              16) Updated PRD and PDS
+              17) Finalized project objectives
+              18) Final project schedule and manpower allocations
+              19) All ES's updated    
+              
+            SMELTER
+              20) Standard test scaffold and tools defined and
+                  implemented
+            * 21) Final A/B and NS service specifications
+                  - minor issue outstanding with NLS in NFT
+              22) Final Test Plans
+              23) Defect Tracking system in place
+            * 24) Quicky regression test operational for A/B and NS services
+                  - functional problems with rlogin
+                  - QR not being executed as part of build process
+            * 25) Skeleton of element 4 in the standard regression suite
+                  operational
+                  - tests runnable but limited test progress made due to
+                    system panics
+              
+            PROD
+              26) Final Product Plan for NFS
+              27) Early release and Beta test sites identified
+              28) Final Product Plan for 6.0 networking
+              29) Product Data Sheet complete
+              30) Schedule complete
+            * 31) Beta Test site plans complete
+                  - Final Beta sites not yet selected 
+            * 32) Price and Financial analysis complete
+                  - NFS Pricing not yet solidified
+              33) Merchandising Plan complete
+ 
+            DOC
+              34) Final Documentation Plan for NFS
+              35) 2nd Draft Documentation Plan for 6.0 Networking
+ 
+            TECH
+              36) Preliminary Addendum of NS ARPA/300 Support plan
+              37) Preliminary Product Support Plan
+              38) Preliminary Training Plan
+              39) Product Demo plan complete
+              40) Beta Test Site plans complete 
+               
+
+ Dependencies:                         On Whom      By Whom       By When
+ 
+ 1) High priority system commands which  ISO         NERFS        2/24/87 **
+    are affected by NFS are functional
+    - don't have mount/unmount yet
+                    
+ 2) Agreement on standard test          TRANS        SMELT        2/13/87 
+    scaffold
+ 
+ 3) Quick Validation Process            TRANS        NERFS        2/24/87 
+ 
+ 4) Build and Distribution process      PEKING       NERFS        2/13/87  ***
+    in place and functional                          SMELT
+    - not running QR tests for NFS or AB/NS
+    - no code sync with IND yet
+ 
+ 5) Shared code agreements finalized    PEKING       SMELT        2/13/87  ***
+    with IND
+    - agreements in place but have
+      not completed code sync
+
+ 6) Services "quicky" tests running     PEKING       SMELT        2/18/87  ***
+    as part of system release
+    - QR not in place for release process
+    
+ 7) Agreement on standard test          SMELT        TRANS        1/30/87  **
+    scaffold
+    - not yet negotiated with IND
+    
+ 8) NS/ARPA Services Specification      SMELT         DOC         2/20/87
+
+ 9) Discless testing agreements          SSO         TRANS        2/6/87
+ 
+ 10) Installation procedures            NERFS         DOC         2/9/87
+                                                      TECH
+
+ 11) Configuration procedures           NERFS         DOC         2/11/87
+                                                      TECH
+ 
+ 12) NFS System Test Plan inputs        NERFS        TRANS        2/13/87
+ 
+ 13) Automatic System Distribution      NERFS        TRANS        2/13/87
+ 
+ 14) Maintenance Procedures             NERFS         DOC         2/18/87
+                                                      TECH
+ 
+ 15) Network error messages             NERFS         DOC         2/20/87  *
+                                                      TECH
+     - moved to a future checkpoint
+ 
+ 16) NFS System Test Plan reviewed      NERFS        TRANS        2/21/87
+ 
+ 17) Defect Turnaround time goals       NERFS        TRANS        2/20/87  *
+     - current "swat team" process is sufficient     
+
+ 18) HP and Sun NFS differences         NERFS         DOC         2/20/87 
+                                                      TECH 
+
+ 19) New NFS and HP-UX reference        NERFS         DOC         2/23/87
+     pages                                            TECH
+ 
+ 20) Project Lifecycles complete         ALL         TRANS        2/10/87 
+
+ 21) All partners using DTS              ALL         SMELT        2/18/87 
+
+ 22) 300 Product structure solidified    PROD         DOC         2/13/87
+
+ 23) Necessary modification for source   IND         PEKING       2/13/87
+     code sharing
+
+ 24) Process for obtaining source        IND         PEKING       2/13/87  *
+     from source control functional
+     - defined but untried
+
+                      
+                      
+ Checkpoint:    Stable System      
+                    * TRANS 24 Hour NFS reliability
+                    * PEKING first build for SSIT 
+ 
+ Target Date:   March 16th, 1987
+ 
+ Deliverables:
+
+            NERFS
+            ** 1) TWG and NSG approval for all affected man pages 
+                  - NSG/TWG process still being defined
+             * 2) ALPHA site release distribution 
+                  - held off until EB1 code from SSO
+ 
+            TRANSFORMERS
+               3) 24 Hour 3 node NFS reliability with Level 1 stress
+               4) Stress test suites complete
+               5) 75% of NFS functional test suites complete
+            ** 6) Initial connectivity test complete
+                  - no PC testing yet due to late staffing
+                  - no VMS testing due to lack of equipment
+                  
+            PEKING
+               7) Source sync with IND completed
+             * 8) Self hosted
+                  - moved goal to April 1st to coincide with first SSIT
+               9) Integrated LAN/NFS build functional
+            * 10) All services and diagnostics functional
+                  - rlogin problem understood but still unfixed (SSO fix)
+            * 11) Bits Delivered to SSIT for first SSIT build
+                  - SSO has slipped this to April 8th, but has not released
+                    a final schedule
+               
+
+ Dependencies:                         On Whom      By Whom       By When
+ 
+ 1) Stable Level A system               NERFS        TRANS         3/2/87
+ 
+ 2) Self hostable NFS system            NERFS        TRANS         3/16/87  *
+    - date changed
+    - lack of usefulness due to 6.0 slip and lack of equipment
+ 
+ 3) Integrated Build                    NERFS        PEKING        3/15/87
+ 
+ 4) Code available for marketing        NERFS/        TECH         3/15/87
+    systems and usability testing      PEKING
+
+ 5) System and command anomalies        NERFS/         DOC         3/15/87
+    listed                             PEKING                          
+
+ 6) NS and ARPA services available      SMELT        PEKING        3/15/87
+ 
+ 7) First pass PC NFS testing complete   TIMO        TRANS         3/16/87  **
+    - late staffing
+
+ 8) One additional 330 system            LAB         TRANS         2/23/87
+
+ 9) NFS Wollongong software avail.       LAB         TRANS         3/2/87   **
+    - lack of funds
+ 
+ 10) One additional 350 system           LAB         TRANS         3/2/87   *
+     - substituted a borrowed 310 and Kcat
+
+ 11) Two additional test systems         LAB         SMELT         2/18/87
+     (330 and 350)
+
+ 12) Take over of hpcndm administration  SET          SMELT        2/18/87
+
+ 13) Additional kernel functionality     IND         PEKING        3/15/87   **
+     - subnetting not expected until 4/15
+     
+ 14) Final Product structure            PROD         PEKING        3/15/87   *
+     - 300 and 800 structures may differ
+     
+ 15) Preliminary on-line man pages        DOC         PEKING        3/15/87   *
+     - not required until 4/1 for SSIT release
+
+ 16) Troubleshooting guides complete     TECH          DOC         3/6/87
+
+ 
+ 
+                     
+                     
+ Checkpoint:    Code Complete / Enter QA
+                     * NERFS code complete checkpoint
+                     * PEKING functionality complete checkpoint
+                     * SMELT 24 Hour reliability milestone
+                *** Checkpoint meeting ***
+ 
+ Target Date:   April 8th, 1987
+ 
+ Deliverables:
+ 
+            NERFS 
+            ** 1) Full NFS functionality available
+               2) 3.2 NFS defect fixes rolled in to kernel
+               3) Performance goals met (75% of SUN)
+            ** 4) All ERSs and IRSs updated
+            ** 5) All QA metrics tools and processes in place
+
+            PEKING
+            ** 6) All kernel level functionalities present
+               7) All administration and diagnostic functions present
+            ** 8) Performance tuning complete (meets must objectives)
+               9) Memory use tuning complete (meets must objectives)
+            **10) Code reviews complete
+                            
+            SMELTER     
+              11) A/B and NS services functionally complete
+          *** 12) System passes 24 Hour three node mixed regression ring of 
+                  300<->300,800 over single LAN and LAN/LAN gateway
+            * 13) Berkeley sockets pass 12 Hour reliability tests to all
+                  nodes which will be supported 
+            * 14) System passes intersystem functional tests to all
+                  supported HP nodes
+              15) System passes 24 Hour homogeneous testing 300<->300,500,800
+              16) System passes 24 Hour gateway connectivity (300 as gateway)
+               
+            DOC
+              17) First draft NFS documentation available 
+
+            TECH
+              18) Usability testing complete
+
+
+ Dependencies:                         On Whom      By Whom       By When
+ 
+ 1) Kernel performance and memory       PEKING       SMELT         4/8/87 **
+    tuning complete  
+ 
+ 2) Networking kernel support,          PEKING       SMELT         4/8/87
+    troubleshooting and timely
+    defect repairs to pass std.
+    regression test suite.
+ 
+ 3) Performance goals met               PEKING       NERFS         4/1/87
+
+ 4) Code portability issues             NERFS         DOC          3/18/87
+    documented                                        TECH
+
+ 5) Inspection of first draft NFS       NERFS         DOC          3/30/87
+    documentation complete              TECH
+                                        DOC
+                                        QA
+
+ 6) 50% of NFS affected commands         ISO         NERFS         4/2/87
+ 
+ 7) NFS corner case test suites         NERFS        TRANS         4/8/87 ***
+ 
+ 8) Scaffold for NFS                    TRANS        NERFS         4/2/87  
+
+ 9) Memory tuning complete,              IND         PEKING        4/1/87 **
+    integrated and under source control 
+
+ 10) Performance tuning complete,        IND         PEKING        4/1/87 
+    integrated and under source control 
+
+ 11) New kernel functions complete,      IND         PEKING        4/1/87  **
+    integrated and under source control
+    including:
+           a) subnetting
+           b) driver trace
+           c) common event logging
+
+ 12) Stable kernel                       SSO         PEKING        4/1/87
+
+ 13) Stable and complete Vnode kernel    SSO         NERFS         4/1/87
+
+ 14) Performance goals met              PEKING       NERFS         4/1/87
+
+ 15) Pty and sendmail location issues     TWG         SMELT        3/25/87 **
+     resolved 
+
+ 17) One additional s330                 LAB          TRANS         3/15/87 ***
+
+ 18) One additional development system   LAB          SMELT         3/25/87 **
+     (350)
+     
+ 19) SUN gateway configuration           LAB          TRANS         4/1/87
+
+ 20) Installation and Configuration      TECH          DOC          3/30/87
+     usability testing complete          QA
+
+
+
+
+Project Checkpoint
+
+EARLY BIRD ONE RELEASE (EB1) 
+	* NERFS first release to SSIT
+	* PEKING first release to SSIT
+	* TRANS 48 Hour NFS reliability
+	* TECH release to EB1 test sites
+
+Target Date:   May 12th, 1987
+
+Deliverables: 							Completed:
+    NERFS
+	1)  IRS written and distributed				  5/01/87
+	2)  Remaining QA metrics tools and processes in place	  5/01/87
+	3)  Code development complete (NLS, error logging)	  8/17/87
+	4)  Release procedure for final SSIT established	  5/01/87
+	5)  Deliver NFS bits to SSIT for EB1	  		  5/01/87
+	7)  Limited alpha site distribution	  		  5/01/87
+	8)  Self hosted on hpcndu/hpcndk	  		  5/01/87
+
+    TRANSFORMERS
+	9)  48 Hour NFS system reliability at Level 2 stress	  4/18/87
+	10) 95% of NFS functional test programs complete	  4/28/87
+	11) Security test suites complete	  		  4/30/87
+	12) System recovery test suites complete	  	  3/22/87
+	13) Error condition test suites complete	  	  4/30/87
+	14) Un*x/Un*x connectivity test suites complete	  	  4/22/87
+
+    PEKING
+	15) Deliver networking bits to SSIT for EB1		  5/01/87
+
+    DOC 
+	16) First draft of NFS documentation reviewed		  4/04/87
+	17) Revised Convergence/NFS documentation plan		  4/30/87
+	18) Convergence/NFS QA plan complete		  	  4/30/87
+	19) On-line Convergence man pages provided		  3/15/87
+	20) On-line README file complete			  3/15/87
+
+    TECH 
+	21) Early Release Support Plan updated and distributed	  4/28/87
+	22) Verification Tool defined		  		  5/22/87
+	23) Draft of troubleshooting for PEKING complete	  4/23/87
+	24) Training Planning Package submitted to ASD		  4/27/87
+	25) Data sheet submitted to ASD		  		  4/27/87
+
+    PROD
+	26) Beta Test Site agreements signed		  	  -------
+	27) Notify MARCOM		  			  -------
+
+ 
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+ 
+1)  Stable Level B quality system       NERFS       TRANS         4/08/87
+								  4/08/87
+
+2)  Solid compilers                     SSO         PEKING        4/15/87
+								  4/08/87
+
+3)  Stable and complete V-node kernel   SSO         NERFS         4/24/87
+								  4/08/87
+
+4)  Final HP-UX pages available         NERFS       DOC           4/30/87
+								  4/30/87
+
+5)  Verification tool defined           NERFS       TECH          4/30/87
+                                        TRANS 			  4/30/87
+
+6)  Gateway connectivity available      TRANS       DOC           4/30/87 
+								  4/30/87
+   
+7)  Latest on-line man pages for         DOC         PEKING        4/30/87
+    CONVERGENCE only 						  4/30/87
+
+8)  List of Beta test sites             PROD        TECH          4/30/87
+								  4/30/87
+
+9)  NFS/Discless interactions info      TECH        DOC           4/30/87
+								  4/30/87
+   
+11) PC test suites complete             TIMO        TRANS         4/30/87
+								  4/30/87
+
+12) 100% of NFS affected commands       ISO         NERFS         5/06/87
+								  6/1/87
+
+
+
+
+Project Checkpoint
+
+EARLY BIRD TWO RELEASE (EB2)                     
+	* PEKING code freeze checkpoint
+	* SMELT 24-hour reliability milestone
+ 
+Target Date:   June 15th, 1987
+ 
+Deliverables: 							Completed:
+    NERFS
+	1)  Discless and NFS inter-operability 			  6/15/87
+	2)  Deliver NFS bits to SSIT for EB2		  	  6/22/87
+
+    TRANS
+	3)  100% of RPC/XDR/YP functional tests completed	  6/12/87
+                      
+    PEKING 
+	4)  Plan in place for code change reviews                 5/28/87
+	5)  Final code with defect fix exceptions		  6/11/87
+	6)  Self host on development system (hpcndhf)		  5/12/87
+	8)  Deliver networking kernel bits to SSIT for EB2	  6/24/87
+
+    SMELTER
+	9)  NS/ARPA services functionally complete		  6/15/87
+	10) All 24-hour reliability testing complete		  see note
+	    note:  all 300 related 24-hour stress-reliability
+	    test configurations passed.  However, still have
+	    outstanding panic in cluster testing.
+	11) NS inter-system functional testing complete		  6/15/87
+	12) Deliver NS/AB bits to SSIT for EB2		  	  6/24/87
+
+    TECH
+	13) Early code release training complete	  	  6/3/87
+	14) BETA site support process in place		  	  5/29/87
+	15) Final troubleshooting guide written and approved 	  6/16/87
+	    by the NFS development team
+
+    DOC
+	17) Using and Administering NFS; 2nd draft available	  5/29/87
+	    (Users' Guide / Admin Guide only)
+	18) Programming with NFS; 1st draft available 		  5/29/87
+	19) EB2 draft copies to partners			  7/09/87
+
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+3)  Networking kernel support,          PEKING      SMELT         as req. 
+    troubleshooting and timely					  okay
+    defect repairs to pass std.
+    regression test suite.
+ 
+4)  Stable system for training		TECH        LAB           5/15/87
+								  5/28/87
+
+5)  Questionnaire and support plans     TECH        NERFS         5/15/87
+    for Beta test sites                 DOC			  5/15/87
+                                        PROD
+                                                  
+6)  Documentation questionnaire for     DOC         TECH          5/15/87
+    BETA test sites				  		  5/15/87
+ 
+7)  On-line versions of man pages  	DOC         PEKING        5/22/87
+    and README files available					  6/22/87
+
+8)  PC NFS testing completed for EB2    TIMO        TRANS         5/24/87
+								  5/24/87
+
+9)  48 Hour reliability for NFS         TRANS       SMELT         5/27/87 
+    and tests in scaffold					   DONE
+
+10) Stable kernel                       SSO         PEKING        5/29/87
+								   DONE
+
+11) Agreement with IND for source       IND         PEKING        5/29/87
+    code freeze					  		  5/28/87
+
+13) Product installation tested         NERFS       DOC           5/29/87
+								  5/12/87
+
+14) Using and Administering NFS;	NERFS	    DOC		  5/29/87
+    Second draft available			    TECH	  5/29/87
+    
+15) Programming with NFS;		NERFS	    DOC		  5/29/87
+    First draft available			    TECH	  5/29/87
+
+16) RND bridge available                LAB         TRANS         5/29/87
+								  5/26/87
+
+17) Stable Level C system		NERFS	    TRANS         6/01/87
+					PEKING			  6/25/87
+
+18) 1st draft of changes to ARPA        PEKING      DOC        	  6/09/87
+    tutorials available      				 	  6/07/87
+
+20) Second draft manuals for training   TECH        DOC           6/15/87
+    (NFS only) (except programming)				  5/29/87
+								  
+
+ 
+ 
+Project Checkpoint
+
+QA STATUS UPDATE   
+ 
+Target Date:   June 22nd, 1987
+
+Deliverables: 							Completed:
+
+    NERFS
+	4)  50% BFA coverage			  		  7/17/87
+	5)  Man pages approved by NSG and TWG		  	  8/12/87
+
+    TRANSFORMERS
+	6)  100% of tests written (per System Test Plan)	  6/22/87
+	7)  120 hour reliability at stress level II	  	  6/29/87
+	8)  Sun gateway testing complete			  6/30/87
+	9)  NFS/Discless interactions testing complete	  	  6/30/87
+ 
+    DOC
+	10) Using and Administering NFS (2nd draft)	  	  6/8/87
+	12) NFS reference page edits complete			  6/18/87
+ 
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+1)  Self hosted with EB2 bits           PEKING      PEKING        6/15/87
+								  6/24/87
+
+2)  Final NS and A/B services           SMELT       PEKING        6/15/87
+    (with exception of defect fixes)				  6/1/87
+ 
+3)  Final man pages available           DOC         PEKING        6/15/87
+								  6/22/87
+ 
+4)  NFS interface definition frozen     ALL         DOC           6/15/87
+								  8/17/87
+
+5)  Begin Sales Training Manual         PROD        PROD          6/15/87
+    and Technical literature  					   DONE
+
+6)  Second Drafts of Using and          NERFS       DOC           6/16/87
+    Administering NFS reviewed					  6/16/87
+
+7)  Edited NFS reference pages          DOC         NERFS         6/18/87
+								  6/22/87
+
+8)  30% access to VMS/NFS system        LAB         TRANS         6/22/87
+								  7/08/87
+
+
+ 
+ 
+Program Checkpoint
+
+BETA SITE RELEASE (EB2 distribution)
+		* TRANS 120 Hour reliability milestone
+		* SMELT 48 Hour reliability milestone
+ 
+Target Date:   July 22nd, 1987
+ 
+Deliverables: 							Completed:
+
+    NERFS
+	1)  Performance goals reconfirmed (using EB2)		  8/07/87
+	2)  ALL STP test cases/suites complete by 7/22		  8/10/87
+	3)  Distribute to alpha sites 				  8/06/87
+ 
+    TRANS
+	5)  120 hour NFS system reliability at level II stress	  6/29/87
+	6)  100% of all test suites complete			  7/14/87
+	7)  Security testing complete			  	  7/10/87
+	8)  Recovery testing complete			  	  7/10/87
+	9)  Error Condition testing complete			  7/13/87
+	10) RND Bridge configuration testing complete		  7/06/87
+	11) Un*x/Un*x connectivity testing complete		  7/14/87
+	12) VMS test suites complete			  	  7/09/87
+
+    SMELTER
+	13) A/B and NS services code frozen 			  8/31/87
+	15) ARPA services pass 24 Hour 	  			  okay
+	    reliability tests to all supported nodes 
+	    (selective testing, not shotgun approach)
+	17) System passes 48 Hour gateway connectivity 	  	  7/14/87
+	    (300 as gateway)
+	18) 48 hour LAN-LAN mixed ring 				  8/28/87
+
+    TECH
+	22) Final TPP submitted/approved			  6/30/87
+
+    DOC
+	25) Programming with NFS; 2nd draft available		   DONE
+	    (not in EB2 distribution)
+	26) Existing ARPA manuals to partners, including	  7/09/87
+	    1st draft of ARPA tutorials, Revised NS + ARPA
+	    references, hard copy of installation read-me
+
+
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+2)  Freeze on product features          ALL          SMELT        7/05/87
+								  8/17/87
+
+3)  Second draft of all NFS manuals	NERFS	     DOC	  7/15/87
+    complete				PEKING			  okay
+
+4)  Convergence ref. pages reviewed     PEKING	     DOC	  7/22/87
+								   DONE
+
+5)  Configuration recommendations for   NERFS        TECH         8/01/87
+    connecting to non-HP systems				  8/12/87
+
+6)  1st draft of changes to ARPA        PEKING      DOC        	  7/20/87
+    overview available      				 	   DONE
+
+8)  NFS/Diskless interaction info	NERFS	     DOC	  7/24/87
+								  8/20/87
+
+9)  Examples for updating multiple	NERFS	     DOC	  7/17/87
+    maps, modifying YP maps					  7/15/87
+
+10)  NFS Virtual Home Environment	NERFS	     DOC	  7/15/87
+     source documentation					  7/16/87
+
+11)  NFS network memory limits		NERFS	     DOC	  7/24/87
+								  8/12/87
+
+12)  NS-ARPA network memory limits	PEKING	     DOC	  7/15/87
+								   DONE
+
+14)  Max number of NFS net connections	NERFS	     DOC	  7/24/87
+								  8/12/87
+
+15)  Source info for YP non-standard	NERFS	     DOC	  7/17/87
+     maps section and changes to YP				  7/17/87
+     master maps section
+
+16)  NFS troubleshooting		TECH	     DOC	  7/17/87
+								  7/20/87
+
+
+
+Program Checkpoint
+
+BASE SYSTEM RELEASE (EB3 will be the Base System)
+		* Product Code Freeze
+		* PEKING Complete QA
+
+Target Date:   August 24, 1987
+
+Deliverables: 							Completed:
+    NERFS
+	1)  Deliver NFS bits to SSIT for EB3/BASE system	  8/27/87
+	2)  BFA code coverage: 60% user code; 70% kernel code      DONE
+	3)  Code reviews complete for high risk code		   DONE
+
+    TRANS
+	4)  Pre-release regression testing completed		  8/24/87
+
+    SMELTER
+	5) System passes 120 Hour three node mixed regression 	   DONE
+	    ring of 300<->300,800 over single LAN and LAN/LAN 
+	    gateway
+    PEKING
+	5)  Deliver networking bits to SSIT for base system 	   DONE
+	    build (EB3)
+	6)  All kernel functional tests completed and executed	   DONE
+
+    TECH
+	7)  Presales course draft complete			  8/17/87
+	8)  Performance testing complete                          8/9/87
+
+    DOC
+	10) Node Manager's guide 1st draft			   DONE
+	11) Overview - final draft				   DONE
+	12) NFS Using/Admin - final draft			   DONE
+	13) Ref man pages - final draft				   DONE
+	14) Programming w/NFS - 2nd draft			   DONE
+	15) ARPA User's Guide - 1st draft			   DONE
+	16) ARPA Tutorials - 1st draft				   DONE
+
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+1)  NFS functional test suites 		TRANS	    SMELT	  8/31/87
+    integrated in Smelter test environ.				  9/7/87
+
+2)  Provide EB2 release to AT&T		SSIT        TECH          8/1/87
+								   DONE
+
+3)  PC NFS testing (90%) completed      TIMO         TRANS        8/14/87
+								  8/27/87
+
+4)  120 Hour reliability in NFS         TRANS        SMELT        8/17/87
+								   DONE
+
+5)  Documentation from lab on		PEKING	     TECH 	  8/01/87
+    multi-homing 				     DOC	  8/01/87
+
+6)  Verification tool complete          LAB          TECH         11/30/87
+    Assistance with using Sun test suite			  -------
+
+7)  All 300/800 NFS differences		NERFS	     TECH	  10/15/87
+    identified							   DONE
+
+8)  Review NFS training complete	NERFS	     TECH	  8/14/87
+								  8/5/87
+
+9)  Review NFS training complete	PEKING	     TECH	  8/14/87
+								  8/5/87
+
+10) Feedback from BETA sites		TECH	     DOC	  8/17/87
+    (only have one formal beta site)				   DONE
+
+11) Move tags to head for all 		SSO CMDS     NERFS	  8/17/87
+    header files and libc library files				   DONE
+
+
+
+Program Checkpoint
+
+FINAL SSIT RELEASE / QA COMPLETE 
+		* NERFS  QA complete checkpoint
+		* PEKING Final release to SSIT checkpoint 
+		* PROD Release to Introduction
+
+	*** Checkpoint meeting ***
+ 
+Target Date:   October 7, 1987
+ 
+Deliverables: 							Completed:
+  
+    NERFS
+	1)  Final integration with SSO code			   DONE
+	2)  Reconfirm performance goals			  	   DONE
+	3)  No major defects in 120 Hour testing		   DONE
+	4)  BFA code coverage (60% user; 70% kernel)  		   10/87
+	5)  Deliver final NFS bits to SSIT			  10/23/87
+	6)  Meet MUST-level FURPS objectives			   DONE
+	7)  Code reviews complete (determined by BFA)		  DROPPED
+	8)  Update NLS message catalogs				   DONE
+    
+    TRANSFORMERS
+	8)  120 Hour system reliability at combined 		  10/20/87
+	    networking stress
+	9)  120 Hour NFS system reliability, level 3 stress	  10/20/87
+	10) All connectivity testing complete			  10/16/87
+	11) All system corner case testing complete		  10/16/87
+	12) All NFS/Discless X-services testing complete	  10/23/87
+	13) Info available for Quality statement 		  10/23/87
+
+    PEKING
+	14) All serious defects fixed			  	  ALMOST*
+		*Still have 4 outstanding at release
+	15) All defect resolved			  		   DONE
+	16) All functional tests pass			  	   DONE
+	17) All ARPA certification complete			   DONE
+	18) All NS certification complete			   DONE
+	19) 120 Hour reliability on all target topologies	   DONE
+	20) Path coverage goals on new code met			   DONE
+	21) Bits delivered to SSIT for final SSIT build		  10/21/87
+ 
+    SMELTER
+	22) System passes all tests for minimum acceptance 	   DONE
+	    level; selective spot testing to reconfirm
+		*Except for scaled back sockets tests, and
+		 postponed Apollo connectivity tests
+
+    TECH
+	4)  Modifications to SE ARPA course complete	  	  -------
+	5)  Draft of CE/SE NFS course complete			  9/14/87
+	6)  Verification tools complete	  			  -------
+	7)  Final PSP's submitted                        	  10/19/87
+	9)  Final version NFS CE/SE course including 800 	  -------
+	24) BETA test NFS customer course			  DROPPED
+	25) Final Beta feedback (10/31)	  			   DONE
+
+    PROD
+	26) Final reports from test sites			   DONE
+	(only have one formal beta site)
+	
+    DOC
+	31) All NFS manuals released to printer 		  11/13/87
+	32) All NS-ARPA manuals to printer        		  11/19/87
+
+    QA
+	33) Statement of quality supporting completion of QA	  
+ 
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+1)  Frozen kernel code available        SSO          NERFS        10/19/87
+                                               			   DONE
+
+2)  Installation testing of final       NERFS        TECH         11/30/87
+    bits                                PEKING			  11/23
+
+3)  Final LAN code available            PEKING       NERFS        10/3/87
+								   DONE
+
+4)  Final NFS commands code available   ISO/SSO      NERFS        10/3/87
+								   DONE
+
+5)  Final 120 Hour network testing      SMELT        TRANS        10/7/87 
+								  10/7/87
+ 
+6)  Final testing of NS and ARPA        SMELT        PEKING       10/7/87
+    services  							   DONE
+
+7)  Move tags to head for all 		SSO CMDS     NERFS	  10/7/87
+    header files and libc library files				   DONE
+
+
+
+Program Checkpoint
+
+INTRODUCTION RELEASE
+		* PROD Release to Introduction
+
+	*** Checkpoint meeting ***
+ 
+Target Date:   October 27th, 1987
+ 
+Deliverables: 							Completed:
+  
+    NERFS
+	1)  Re-deliver final NFS bits to SSIT if needed		   DONE
+    
+    PEKING
+	2)  Re-deliver final Convergence bits to SSIT if needed	   DONE
+ 
+    PROD
+	DUE 11/20:
+	3) Product pricing approved			  	   11/87
+	4) Product introduction scheduled			   11/87
+	5) Submit articles to IS&M News and DS&MA News		   11/87
+	
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+1)  Final kernel code available         SSO          NERFS        10/19/87
+                                               			   DONE
+
+
+
+
+Program Checkpoint
+
+MANUFACTURING RELEASE   
+		*** Checkpoint meeting ***
+
+Target Date:  December 17th, 1987
+ 
+Deliverables: 							Completed:
+
+NOTE:  Need to combine reports for Peking/Smelter and Nerfs/Transformers.
+       (e.g. corporate metrics, quality reports, archive, etc.)
+
+    NERFS
+	1)  All defects resolved			  	  11/15
+	2)  Installability testing complete			  11/24
+	3)  Release celebration planned			  	  [12/31]
+	4)  Corporate metrics complete (include TRANSFORMERS)	  12/4
+	5)  Project post mortem complete or planned		  12/4
+	6)  All code, documentation and tools archived		  12/4
+	6)  Project history notebook				  [12/16]
+	7)  Internal documentation complete			  [12/15]
+	8)  NLS message catalog "translation guides"		  11/30
+	9)  Check that tags are at head for all header files and 
+	    libc library files before final SSIT complete  	  11/23
+
+    TRANSFORMERS
+	8)  NFS retest of final SSIT bits complete 		  11/23
+	10) Project post mortem complete 		  	  11/30
+	11) All NFS tests archived		  		  11/30
+
+    PEKING
+	12) Final product tape installed and verified 		  12/9
+	13) All NS-ARPA code and tests archived 		  12/7
+	14) Final quality report (with SMELTER)   		  -------
+	15) Project post mortem complete		  	  -------
+	16) Corporate metrics submitted (with SMELTER)		  12/9
+
+    SMELT
+	17) Retest of final networking bits 		  	  11/23
+
+    DOC
+	21) Documentation in stock by 12/11 	  		  [12/15]
+
+    TECH
+	22) Release NFS customer course to SDC (12/4)		  N/A
+	23) NS/ARPA customer course modified  		  	  N/A
+	24) Submit field articles        			  11/2/87
+	25) Installability test checkoff		  	  11/24
+	26) Serviceability test checkoff 		  	  11/24
+	27) NCCS set-up                  		  	  -------
+
+    PROD
+	28) CPL becomes effective (12/1)	  		  12/1
+	29) Final payment to SUN for perpetual license 		  [1/15/88]
+ 
+    QA
+	30) Quality summary, and statement of support for         12/11
+	    release of product
+
+Dependencies:				 On	    By		  Date:
+					Whom:      Whom:        (est/comp)
+
+1)  All ordering, pricing, bundling	PROD	     TECH	  11/1/87
+    info solidified for inclusion in				   DONE
+    final support plan.
+
+4)  SE distribution of Manuals          SDC          TECH        12/23/87
+								 --------
+
+5)  SE distribution complete            MANF/SDC     TECH        12/23/87
+								 --------
+
+
+
+APPENDIX A:  Checkpoint Summaries
+
+	
+    Contents:
+
+	       Checkpoint				  Date
+	       ----------				  ----
+
+	[1] Code Complete Checkpoint			4/30/87
+
+	[2] Early Bird One Checkpoint (EB1)		5/12/87
+
+	[3] Early Bird Two Checkpoint (EB2)		6/15/87
+
+
+
+
+PROGRAM CHECKPOINT SUMMARY
+
+Checkpoints: 
+	    Code Complete
+	    April 8th, 1987
+
+	    BETA test release
+	    April 30th, 1987
+
+
+Program Synopsis:
+
+	The primary objective associated with the April 8th code complete 
+	checkpoint was functionally complete NFS and converged networking
+	code.  A number of the checkpoint deliverables were not delivered 
+	as originally planned (see below).  
+
+	The BETA test release checkpoint (4/30) was effectively replaced 
+	by the EB1 and EB2 system release checkpoints.  This replacement
+	was caused by a revised HP-UX 6.0 schedule which forced a 2-1/4
+	calendar month slip.  Numerous deliverables and dependencies 
+	were redefined to account for the expanded project PERT.  In
+	addition, project teams were de-staffed to a level commensurate
+	with the remaining effort.
+
+
+Issues/Concerns:
+
+	[1]  A firm HP-UX 6.0 schedule is required from SSO in order
+	     to solidify the deliverable and dependency dates in this
+	     life cycle.  Until a firm schedule is obtained, it is likely
+	     that this document will undergo frequent, and fairly major,
+	     changes.
+
+Deviations: 					Original  Revised  Completion
+				 		  Date    Estimate   Date
+    NERFS
+
+        - full NFS functionality available	4/08/87	  5/01/87   DONE
+	    o 5 engineering days left
+
+        - All ERSs and IRSs updated		4/08/87   5/01/87   5/01/87
+	    o 3 engineering days left
+
+        - All QA metrics/processes in place	4/08/87   5/01/87   5/01/87
+
+        - Code reviews complete			4/30/87	  6/22/87   DONE
+
+
+    PEKING
+
+        - All kernel functionality present	4/08/87   5/01/87   5/01/87
+
+        - Performance tuning complete		4/08/87   6/01/87   -------
+	    o did not meet RFA MUST objective
+	    o re-evaluating
+
+        - Code reviews complete			4/08/87   5/01/87   5/01/87
+
+
+    SMELTER
+
+        - 24 hour three node regression 	4/08/87   5/15/87   6/15/87
+	  testing; single LAN and LAN-LAN
+
+
+PROGRAM CHECKPOINT SUMMARY
+
+Checkpoint: 
+	    EARLY BIRD ONE RELEASE (EB1)
+	    May 12th, 1987
+
+Program Synopsis:
+
+	The EB1 release represented the first formal release of partner
+	subsystems to the HP-UX 6.0 SSIT process.  The HP-UX 6.0 EB1
+	systems were released from SSIT on May 26th.  The EB1 system
+	was given to a number of alpha-sites and to selected beta-sites 
+	and business opportunities.
+
+	As originally suspected, the EB1 release cycle revealed a number 
+	of process problems.  These problems were related to subsystem
+	builds, testing and delivery to SSIT.
+
+
+
+Issues/Concerns:
+
+	[1] The libc.a library was originally built without YP support.
+	    This caused a turn of the EB1 bits after partner submittals
+	    were complete.  Furthermore, rlogin and telnet services were
+	    not rebuilt with the new libc and were released without the
+	    necessary YP support.
+
+
+
+Deviations: 					Original  Revised  Completion
+				 		  Date    Estimate   Date
+    NERFS
+
+	- NLS Code development complete		5/12/87   -------   8/17/87
+
+
+    PRODUCT MARKETING
+
+	- Beta Test Site agreements signed	5/12/87   -------   -------
+	- Notify MARCOM		  		5/12/87   -------   -------
+
+

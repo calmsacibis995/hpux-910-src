@@ -1,0 +1,82 @@
+.H 2 "showmount Test Plan"
+
+This chapter covers the
+.B showmount
+command.  The main use of this command is to list information about the
+file systems mounted on the local host, or other hosts on the network.
+It provides much the same functionality as the
+.B mount
+command.  The main distinction is that
+.B mount
+only looks on the local host, and is unable to display remote host mount
+table information.
+
+.H 3  "showmount options"
+.nf
+RESPONSIBLE ENGINEER:    John A Dilley
+ASSUMPTIONS:             module to be tested is functional
+.fi
+
+.sp 2
+.H 4 "no options"
+.sp 2
+.nf
+IMPLEMENT TIME:  0.25 md
+PERFORM TIME:    1.0 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B showmount
+with no options.
+It should show the mounted file systems for the local host.
+
+.sp 2
+.H 4 "bad option"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.25 md
+PERFORM TIME:    1.0 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B showmount
+with any option besides "-a", "-d" or "-e".
+It should print the usage error message on stderr
+and exit with a non-zero status.
+Test with more than one host name.
+It should print the usage error message on stderr
+and exit with a non-zero status.
+Note: this test should not attempt to use the "-d" option, since this is
+often used as an undocumented "debug" option.
+Run 
+.B showmount
+with two host names.
+Run 
+.B showmount
+when portmap is not running.
+.sp 2
+.H 4 "good options"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.75 md
+PERFORM TIME:    1.75 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp 1
+Test
+.B showmount
+with all combinations of the valid options listed above.
+Test with the local host, and then a remote host.
+In all cases it should show information about the exported file systems.
+It would be appropriate to verify this information by using the local
+.B mount
+command, either directly or via
+.B remsh
+on the remote host.  This is to verify that
+.B showmount
+is telling the truth about the mounted file systems.

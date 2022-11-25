@@ -1,0 +1,5 @@
+# @(#) $Header: NOTES,v 66.2 90/09/20 12:24:05 kb Exp $
+to make tape:
+	Maketape_hp  from this directory ( does cd to FTINST )
+to check tape:
+	Checktape_hp

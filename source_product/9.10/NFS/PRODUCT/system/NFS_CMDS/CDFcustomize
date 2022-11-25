@@ -1,0 +1,181 @@
+#!/bin/sh
+
+#	@(#)NFS_CMDS CDF customize script:	$Revision: 1.2.109.1 $	$Date: 91/11/19 14:46:34 $
+
+#=============================================================================
+#
+#  This script is for handling Context Dependent Files in the NFS_CMDS
+#  fileset of the NFS Services/300 product on a diskless HP-UX system.
+#	
+#  Options include:
+#	-d <cnode-name>	   Create a diskless system.
+#	-u <cnode-name>	   Update a diskless system.
+#	-a <cnode-name>	   Add a cnode to a cluster.
+#
+#  Author:  dae
+#
+#=============================================================================
+
+FILESET_NAME=/etc/filesets/NFS_CMDS
+
+PATH=/bin:/usr/bin:/etc
+export PATH
+
+##########
+#  The usage function is called to print the usage statement; an error exit
+#  is done.
+##########
+
+usage () {
+	echo "ERROR:  Incorrect usage.  Correct usage is:"
+	echo "        CDFcustomize -d <cnode-name> | -u <cnode-name> | -a <cnode-name>"
+	exit 1
+}
+
+##########
+#  There must be two arguments, the option and the cnode name (which must
+#  be of non-zero length).
+##########
+
+if [ $# -ne 2 ]  ||  [ -z "$2" ]; then
+	usage
+fi
+
+CNODE_NAME="$2"
+ROOT=
+
+##########
+#  We'll continue ONLY if we are disklessizing the system, or if we are 
+#  updating and the system is currently diskless (if the CNODE_NAME is not
+#  'standalone').
+##########
+
+case $1 in
+	-d)	;;
+	-u)	if [ $CNODE_NAME = 'standalone' ]; then
+			exit 0		#  Nothing to do.
+		fi
+		;; 
+	-a) 	exit 0			#  Nothing to do.
+		;;
+	 *)	usage
+		;;
+esac
+
+##########
+#  The function convert_to_cdf converts a file/directory to a CDF where
+#
+#	$1 = name of file/directory to convert
+#	$2 = context to create CDF file/directory under
+#
+#  The conversion assumes that the file becomes the localroot element of
+#  the CDF.
+##########
+
+convert_to_cdf () {
+	FILE=`basename $1`
+	if [ -f $1 ]; then
+		mv -f $1 tmp_$FILE
+		mkdir $1
+		mv -f tmp_$FILE $1/$2
+		chmod u+s $1
+	elif [ -d $1 ]; then
+		mvdir $1 tmp_$FILE
+		mkdir $1
+		mvdir tmp_$FILE $1/$2
+		chmod u+s $1
+	fi
+}
+
+##########
+#  The function fileset_remove removes a filename from a fileset list.
+#
+#	$1 = the file to be removed from the fileset list
+##########
+
+fileset_remove () {
+	mv $FILESET_NAME /tmp/$$fileset
+	grep -v $1 /tmp/$$fileset > $FILESET_NAME
+	rm -f /tmp/$$fileset
+}
+
+##########
+#  /usr/etc/yp/ypxfr.log and /usr/etc/yp/ypserv.log
+#
+#  If the file exists, convert it to a cdf with an element for localroot
+#  (use the existing file).  If no file exists, create the cdf with no element
+#  (rely on autocreation).  Be sure to set the owner, group and permission 
+#  bits the same as the parent.
+##########
+
+	FILES="$ROOT/usr/etc/yp/ypxfr.log $ROOT/usr/etc/yp/ypserv.log"
+
+	LL=`ls -ld $ROOT/usr/etc/yp`
+
+	RWX=`echo $LL | sed 's/ .*//'`
+	OWNER=`echo $LL | awk '{ print $3 }'`
+	GROUP=`echo $LL | awk '{ print $4 }'`
+	USERBITS=`expr "X$RWX" : "X.\(...\)"|sed 's/-//g'`
+	GROUPBITS=`expr "X$RWX" : "X....\(...\)"|sed 's/-//g'`
+	OTHERBITS=`expr "X$RWX" : "X.......\(...\)"|sed 's/-//g'`
+	MODE="u=$USERBITS,g=$GROUPBITS,o=$OTHERBITS"
+
+	for FILE in $FILES ; do
+		if [ ! -H $FILE ]; then
+			if [ -f $FILE ]; then
+				convert_to_cdf $FILE $CNODE_NAME
+			else
+				mkdir $FILE
+				chown $OWNER $FILE
+				chgrp $GROUP $FILE
+				chmod $MODE $FILE
+				chmod u+s $FILE
+			fi
+			fileset_remove $FILE
+			echo "$FILE+" >> $FILESET_NAME
+		fi
+	done
+
+
+##########
+#  /etc/sm, /etc/sm.bak, /etc/state
+#
+#  If the file exists, convert it to a cdf with an element for localroot
+#  (use the existing file).  If no file exists, create the cdf with no element
+#  (rely on autocreation).  Be sure to set the owner, group and permission 
+#  bits the same as the parent.
+##########
+
+	FILES="$ROOT/etc/sm $ROOT/etc/sm.bak"
+
+	for FILE in $FILES ; do
+		if [ ! -H $FILE ]; then
+			if [ -f $FILE ]; then
+				convert_to_cdf $FILE $CNODE_NAME
+			else
+				mkdir $FILE
+				chown root $FILE
+				chgrp other $FILE
+				chmod 755 $FILE
+				chmod u+s $FILE
+			fi
+			fileset_remove $FILE
+			echo "$FILE+" >> $FILESET_NAME
+		fi
+	done
+	FILE="$ROOT/etc/state"
+	if [ ! -H $FILE ]; then
+		if [ -f $FILE ]; then
+			convert_to_cdf $FILE $CNODE_NAME
+		else
+			mkdir $FILE
+			chown root $FILE
+			chgrp other $FILE
+			chmod 644 $FILE
+			chmod u+s $FILE
+		fi
+		fileset_remove $FILE
+		echo "$FILE+" >> $FILESET_NAME
+	fi
+
+exit 0

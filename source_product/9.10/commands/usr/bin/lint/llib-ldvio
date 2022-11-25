@@ -1,0 +1,347 @@
+/* Non standard HP-UX lint library for libdvio */
+/*LINTLIBRARY*/
+/* dvio.h - Definitions for the Device I/O Library */
+
+#include <sys/stdsyms.h>
+#ifndef __STDC__
+#	define __STDC__
+#endif
+
+#ifdef _INCLUDE_HPUX_SOURCE
+
+/* Function prototypes */
+#include <dvio.h>
+#include <sys/types.h>
+
+/* the following four calls are not on the s700 */
+int	gpio_get_status(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; } 
+
+int	gpio_set_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; } 
+
+int	io_burst(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; } 
+
+int	io_dma_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+
+int	hpib_abort(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_address_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_atn_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_bus_status(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_card_ppoll_resp(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_eoi_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_parity_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_pass_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_ppol(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_ppoll_resp_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_ren_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_rqst_srvce(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_spoll(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_status_wait(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	hpib_wait_on_ppoll(int i, int j, int k) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int hpib_io ( int eid, struct iodetail *iovec, size_t iolen ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return(0); }
+
+int	io_eol_ctl(int i, int j, int k) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_get_term_reason(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_interrupt_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_lock(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_unlock(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_reset(int i) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_speed_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_timeout_ctl(int i, long l) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int	io_width_ctl(int i, int j) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+	/* APEX HINT [HPUX->ANSIC,POSIX.1,XPG3,XPG4,POSIX.2,OSF_AES,OSF1,FIPS151_1] 
+	See "Migration from Device I/O Library (DIL) to
+	Standard Instrument Control Library (SICL)" for 
+	porting information. */
+
+#endif  /* _APEX_SOURCE */
+ return 0; }
+
+int (*io_on_interrupt(int a, struct interrupt_struct *b, 
+	int (*c)(int, struct interrupt_struct *d ))) 
+	(int e, struct interrupt_struct *f ) { 
+#ifdef _APEX_SOURCE
+ /* APEX STD [HPUX->HPUX] */ 
+#endif  /* _APEX_SOURCE */
+ return (int (*)())0; }
+
+
+
+#endif /* _INCLUDE_HPUX_SOURCE */

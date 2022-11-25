@@ -1,0 +1,160 @@
+$
+$ (c) Copyright 1990, OPEN SOFTWARE FOUNDATION, INC.
+$ ALL RIGHTS RESERVED
+$
+$
+$
+$ RESTRICTED RIGHTS LEGEND
+$ Use, Duplication or Disclosure by the Government is subject to
+$ restrictions as set forth in paragraph (b)(3)(B) of the rights in
+$ Technical Data and Computer Software clause in DAR 7-104.9(a).
+$ 
+$ @(#)lex.msg1.4  com/cmd/lang/lex,3.1,8943 9/7/89 18:36:27
+$
+$ COMPONENT_NAME: (CMDLANG) Language Utilities
+$
+$ FUNCTIONS: 
+$
+$ ORIGINS: 27
+$
+$ (C) COPYRIGHT International Business Machines Corp. 1988, 1989
+$ All Rights Reserved
+$ Licensed Materials - Property of IBM
+$
+$ US Government Users Restricted Rights - Use, duplication or
+$ disclosure restricted by GSA ADP Schedule Contract with IBM Corp.
+$
+
+$set 1		Commonly used words
+$
+$ These words appear in most messages printed to the user.  For example,
+$ message 2 and 3 are used in the message
+$   "File.l" line 0: warning 2: Unknown option 'u'
+$ All message numbers are immediately followed by a tab character (ASCII 0x09)
+$
+$quote "
+$
+1	"error"
+2	"warning"
+3	"line"
+$
+$ String 4 is used as the colon seperator.  It is used twice in the
+$ above warning message example.
+$
+4	":"
+
+$set 2  Message Text
+$
+$ This set consists of the error messages, warning messages and output
+$ diagnostics given to the user.
+$ All message numbers are immediately followed by a tab character (ASCII 0x09)
+$
+$quote "
+1	"Unknown option !1\n"
+2	"bad state !1 !2\n"
+$ L18N note: Leave '%e' as it is.  It is a source construct.
+3	"Parse tree too big, Try using %e num\n"
+4	"Parse tree too big\n"
+5	"OOPS - calloc returns a 0\n"
+6	"Too many characters pushed\n"
+7	"Character value !1 out of range\n"
+8	"ch table needs redeclaration\n"
+9	"Character !1 used twice\n"
+10	"Character '!1' used twice\n"
+$
+$ L18N note: Leave '%p' as it is.  It is a source construct.
+$
+11	"Too many positions, Try using %p num\n"
+12	"Too many positions\n"
+13	"Non-terminated string\n"
+$
+$ L18N note: Leave '%a' as it is.  It is a source construct.
+$
+14	"Too many transitions, Try using %a num\n"
+15	"Too many transitions\n"
+16	"EOF inside comment\n"
+17	"EOF in string or character constant\n"
+18	"Too many positions for one state - acompute\n"
+19	"No space for char table reverse\n"
+20	"Too many right contexts, try -Xa option\n"
+21	"Character class exceeds max size of !1 bytes\n"
+22	"Executable statements should occur right after %%\n"
+23	"Invalid request !1\n"
+24	"Too late for language specifier\n"
+25	"line !1: !2\n"
+26	"Definitions too long\n"
+27	"Start conditions too long, try -XS option\n"
+28	"Too many large character classes, try -Xc option\n"
+29	"Too many definitions, try -Xd option\n"
+30	"Too many states.  Try using %n num\n"
+$
+$ L18N note: Leave '%n' as it is.  It is a source construct.
+$
+31	"Try using %n num\n"
+32	"Iteration range must be positive\n"
+33	"Too little core to begin\n"
+34	"Too little core for state generation\n"
+35	"Too little core for final packing\n"
+36	"Too little core for parse tree\n"
+37	"Definition !1 not found\n"
+38	"Can't read input file !1\n"
+39	"Can't read standard input\n"
+40	"Substitution strings may not begin with digits\n"
+41	"Lex driver missing, file !1\n"
+42	"Action does not terminate\n"
+43	"Can't open !1 \n"
+44	"Cannot open file !1\n" 
+45	"Non-portable Character Class\n"
+46	"Ratfor not currently supported with lex\n"
+47	"Rules section delimiter missing\n"
+48	"Undefined start condition !1\n"
+49	"No translation given - null string assumed\n"
+$
+$ L18N note: Leave '%o' as it is.  It is a source construct.
+$
+50	"output table overflow, try using %o num\n"
+51	"Premature eof\n"
+52	"Shift Character Found.\n"
+53	"String too long\n"
+$
+$ L18N note: Leave '%k' as it is.  It is a source construct.
+$
+54	"Too many packed character classes, try using %k num\n"
+55	"Too many start conditions used, try -Xs option\n"
+56	"Too many start conditions defined, try -Xs option\n"
+$ 57 is open for use.
+58	"Extra slash removed\n"
+$
+$ Messages 59-62 end up concatenated on a single line.  They are output if
+$ the user has requested a "summary" of the machine generated.  The -v 
+$ option is used to generate the output.  All optional arguments are
+$ filled with integer values.
+$
+59	"!1/!2 nodes(%e), !3/!4 positions(%p), !5/!6 (%n), !7 transitions, "
+60	"!1/!2 packed char classes(%k), "
+61	"!1/!2 packed transitions(%a), "
+62	"!1/!2 output slots(%o)\n"
+63	"Illegal range [!1-!2]. 'From' value > 'To' value\n"
+64	"Illegal range [!1!2-!3!4]. 'From' value > 'To' value\n"
+65	"Elements of a range must belong to the same character set\n"
+66	"Ranges must have same size characters on each end\n"
+67	"Invalid collating symbol [. .]\n"
+68	"Invalid Equivalence Class ([= =])\n"
+69	"Invalid Character Class Expression ([: :])\n"
+70	"Illegal -X option (ignored)\n"
+71	"Table size specified too small (ignored)\n"
+72	"unrecognized table specifier -N!1 (ignored)\n"
+73	"bad transition !1 !2\n"
+74	"Empty Collating Symbol Found ([. .]), ignored.\n"
+75	"Too late for locale specifier\n"
+$
+$ L18N note: Leave '%l' as it is.  It is a source construct.
+$ !1 is replaced with any invalid locale such as japanese or chinese-t.
+$
+76	"Unsupported locale '!1' to %l, proceeding with default locale\n"
+77	"^ operator not supported in CCLs ([ ]) containing multibyte chars\n"
+78	"Can't mix multibyte characters with [. .], [= =], or [: :]\n"
+79	"syntax error - cannot backup\n"
+80	"yacc stack overflow\n"
+81	"syntax error\n"
+82	"unable to allocate space for yacc stacks\n"

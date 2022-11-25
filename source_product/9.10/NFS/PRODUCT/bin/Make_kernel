@@ -1,0 +1,49 @@
+#!/bin/sh
+##	@(#)Make_kernel	$Revision: 1.21.109.1 $	$Date: 91/11/19 13:52:37 $
+#	Make_kernel	--	first phase of the kernel build
+# Written by Darren D. Smith for NFS project
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# This script is actually the overnight kernel build process.
+# Essentially, it gets the latest everything, and puts it in $nfs/kernel/300
+#
+# The essentially plan is:
+#
+# 	1) Get the latest versions of all the sources, saving the previous
+#		nights versions into a SAVEDIR (see get_kernel)
+#	2) Touch all special remote RCS files whose remote target has
+#		been modified (just for curtesy, should not be needed really).
+#		This is done by the checkdate program.   See bin/checkdate.src
+#		for how this is done.
+#	3) Build a cscope of all the latest files.
+#
+#  	NOTE: Also used to do the following, but this was moved into a
+#		seperate script:
+#
+#	4) Get the latest object code and kernel built by the Peking group
+#		This was saved until last to get as much done as possible
+#		before waiting for them to get done.
+
+# NOTE: In the overnight script that runs Make_kernel nfs has been set to $Nfs
+#
+get_kernel >$nfs/log/get_kernel 2>&1
+
+# Make the configurable version of the nfs stuff for kernel
+# NOTE: make_nfsklib now pushes the latest build to other machines...
+#
+make_nfsklib >$nfs/log/make_nfsklib 2>&1
+
+# NOTE: if someone runs this from their local directory, they wont
+# have RCS files.
+echo `date "+%y.%m.%d %T"` checkdate $nfs/rcs begin
+checkdate $nfs/rcs >$nfs/log/checkdate 2>&1
+echo `date "+%y.%m.%d %T"` checkdate $nfs/rcs end
+
+# make the cscope file
+#
+make_cscope $nfs/kernel/300 >$nfs/log/make_kcscope 2>&1
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

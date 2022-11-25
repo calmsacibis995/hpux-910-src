@@ -1,0 +1,20 @@
+:
+# @(#) $Header: MAKEhp9000,v 70.1 92/03/09 15:48:32 ssa Exp $
+set -e
+SHELL=/bin/sh; export SHELL
+unset CFLAGS
+here=`pwd`;
+if expr "$PATH" : ".*:$here/bin" > /dev/null
+then
+	:
+else
+	echo OLD PATH = $PATH
+	PATH=:$PATH:$here/bin
+	echo NEW PATH = $PATH
+	export PATH
+fi
+umask 0
+cd MASTER
+make -f Make_hp9000 clean
+make -f Make_hp9000
+make -f Make_hp9000 installtext installprog

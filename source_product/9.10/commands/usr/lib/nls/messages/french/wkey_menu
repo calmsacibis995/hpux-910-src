@@ -1,0 +1,58 @@
+############################################################################
+# TSM user customizable file: wkey_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# per-session key menu for TSM
+# @(#) $Header: wkey_menu,v 70.1 92/06/11 19:39:15 ssa Exp $
+
+
+# LOCALIZERS
+#  In all the following the items you can localize include:
+#       item_name  you can localize the string following the = sign.
+#  item_selection  which the letter users can enter to select this item
+#                  when the menu is displayed instead of using arrow keys.
+#                  You can change the character to the right of = sign.
+#
+#   You can change the characters after $tsm_hot_key (k in this case) to another
+#   character. But you need to change the key mapping in tsmtext (see
+#   !in_window_mode_prompt in tsmtext).  Do not change the + and - characters.
+#   Do NOT change the string "$tsm_hot_key" itself.
+
+pull_down_menu
+
+item_name=Recharger les touches avec les valeurs TSM par d≈faut       $tsm_hot_keyk+
+item_selection=R
+item_type=ft_command
+item_action=#*k+\r
+
+item_name=charger les touches avec les valeurs par D≈faut du terminal $tsm_hot_keyk-
+item_selection=d
+item_type=ft_command
+item_action=#*k-\r
+
+item_name=charger les touches » partir du Fichier...
+item_selection=F
+item_type=ft_command
+item_action=#*k$0\r
+dialog_box
+# LOCALIZERS
+#  The following prompt can be localized (the part after dialog_item_prompt).
+dialog_item_prompt Fichier de touches de fonction:
+dialog_item_var $0 40

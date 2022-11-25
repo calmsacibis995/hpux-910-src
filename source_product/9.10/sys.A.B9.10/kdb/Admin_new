@@ -1,0 +1,12 @@
+admin -ff2 -fc2 -fd2 $1
+get -e -s $1
+delta -y"Release 53.0: structured format release" $1
+##
+## ADD THE FOLLOWING 3 LINES FOR RELEASE N:
+##
+## admin -ffN -fcN -fdN $1
+## get -e -s $1
+## delta -y"Release N: <Comment>" $1
+##
+echo ""
+echo "Done."

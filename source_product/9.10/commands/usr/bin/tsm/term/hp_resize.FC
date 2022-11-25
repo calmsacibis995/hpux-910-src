@@ -1,0 +1,5 @@
+## FacetTerm  hp_resize COMMOM description file 04/04/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp_resize.FC,v 70.1 92/03/09 16:01:29 ssa Exp $
+answer-..cursor_position=\E&a%p2%dx%p1%dY\r
+question-cursor_position=\E`

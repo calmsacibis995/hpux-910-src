@@ -1,0 +1,62 @@
+/*
+###
+#       NMakefile - nmake style makefile for NFS usr.etc/vhe source
+#
+#       Created By:     Dominic Ruffatto
+#       Date:           1/8/90
+###
+*/
+
+.OPTIONS: 
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+CSOURCE	= vhe_u_mnt.c
+
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	=
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif 
+
+SDIR = $(SRCDIR:/^$/./)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)" 
+
+vhe_u_mnt: 
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o vhe_u_mnt $(SDIR)/vhe_u_mnt.c $(LIBCA)
+
+all:		build
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build

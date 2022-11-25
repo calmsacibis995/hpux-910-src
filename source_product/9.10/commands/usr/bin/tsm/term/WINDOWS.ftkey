@@ -1,0 +1,55 @@
+# Default function key file for terminals without a specified default
+# Include the following in the .facet file: ( remove leading # and tab )
+
+#	function_keys=
+# or
+#	function_keys=WINDOWS.ftkey
+
+## @(#) $Header: WINDOWS.ftkey,v 70.1 92/03/09 16:12:27 ssa Exp $
+
+L1	 Win 1
+1	\h1
+L2	 Win 2
+2	\h2
+L3	 Win 3
+3	\h3
+L4	 Win 4
+4	\h4
+L5	Win-Last
+5	\hl
+L6	Win-Next
+6	\h+\040
+L7	Hot-Key
+7	\h
+L8	Menu
+8	\m
+labels_on
+label_attr_reverse
+label_attr_dim_reverse
+status_line_attr_reverse
+status_line_attr_dim_reverse
+* Win %d  F1-F4: Select  F5: Win-Last  F6: Win-Next  F7: Hot-key  F8: Menu
+##### on window 1 only #####
+W1
+L1	*Win 1
+1	\h1
+* Win %d  F1-F4: Select  F5: Win-Last  F6: Win-Next  F7: Hot-key  F8: Menu
+labels_on
+##### on window 2 only #####
+W2
+L2	*Win 2
+2	\h2
+* Win %d  F1-F4: Select  F5: Win-Last  F6: Win-Next  F7: Hot-key  F8: Menu
+labels_on
+##### on window 3 only #####
+W3
+L3	*Win 3
+3	\h3
+* Win %d  F1-F4: Select  F5: Win-Last  F6: Win-Next  F7: Hot-key  F8: Menu
+labels_on
+##### on window 4 only #####
+W4
+L4	*Win 4
+4	\h4
+* Win %d  F1-F4: Select  F5: Win-Last  F6: Win-Next  F7: Hot-key  F8: Menu
+labels_on

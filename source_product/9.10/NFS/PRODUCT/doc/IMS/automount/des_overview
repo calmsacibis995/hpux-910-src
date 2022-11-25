@@ -1,0 +1,95 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/des_overview,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:30 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "Design Overview"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Overview of Operation"
+
+     Unlike mount, automount does not consult the file /etc/checklist for
+a list of hierarchies to mount.  Instead, it consults a series of maps, 
+which can be either direct or indirect.  The names of the maps can be
+passed to automount from the command line, or from a master map.  A 
+master map can be a local file (usually named /etc/auto.master) on the 
+automount client or the NIS file called auto.master.  
+
+     Please notice that automount is client side only software and does
+not require any special software on the server.  This means that automount
+can transparently mount filesystems from any NFS server on the network
+without worrying which vendor or implementaion it is working with.
+
+     When automount is started, either from the command line or from
+/etc/netnfsrc2, it forks a daemon to serve the mount points specified
+in the maps and makes the kernel believe that the mount has taken place.
+The daemon sleeps until a request is made to access the corresponding
+file hierarchy.  At that time the daemon does the following:
+
+
+.br
+o Intercepts the request
+
+.br
+o Mounts the remote file hierarchy
+
+.br
+o Creates a symbolic link between the requested mount point and the actual
+mount point under /tmp_mnt.
+
+.br
+o Passes the symbolic link to the kernel and steps aside.
+
+.br
+o Unmounts the file hierarchy when a predetermined amount of time has
+passed with the link not being touched (generally five minutes), and 
+resumes its previous position.
+
+
+     Automount mounts everything under the directory /tmp_mnt, and 
+provides a symbolic link from the requested mount point to the actual
+mount point under /tmp_mnt.  For instance, if a user wants to mount a 
+remote directory src under /usr/src, the actual mount point will be
+/tmp_mnt/usr/src, and /usr/src will be a symbolic link to that location.
+Note that, as with any other kind of mount, a mount affected through
+automount on a non-empty mount point will hide the original contents
+of the mount point for as long as the mount is in effect.
+
+     The /tmp_mnt directory is created automatically by automount. Its
+default name can be changed as explained in the man page.
+
+.H 3 "Terminology"
+
+     There are two types of mount points that will be referred to in this
+document:  automount mount points and real or NFS mount points.  
+
+.br
+o The automount mount point is the point in the file hierarchy that automount
+is serving.  Automount will mount remote file systems when this directory 
+entry is referenced.  
+
+.br
+o The real mount point is the one under the /tmp_mnt (default)
+directory.  Accesses to the real mount point through the symbolic link
+which is the automount mount point are what generate the traffic across 
+the network between the NFS client and server systems.
+
+.H 3 "Reminders"
+
+     As mentioned earlier, a server neither knows nor cares whether the
+files it exports are accessed through mount or automount.  Therefore
+you do not need to do anything different on the server for automount
+than for mount.
+
+     A client, however, needs special files for automount.  By default
+automount reads the NIS auto.master file to obtain a list of map files.
+Optionally automount reads a local auto.master file that the user specifies
+to obtain the same information.  Automount also takes map files from the
+command line if any are specified.
+
+     Please refer to the "Installing and Administering NFS Services" manual
+for the details of how to configure and invoke automount.  The specific
+chapter is called "The NFS Automounter".  The automount[1M] man page also 
+provides information and is considered the ERS or External Reference 
+Specification for the automount command.

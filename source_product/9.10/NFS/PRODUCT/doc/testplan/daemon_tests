@@ -1,0 +1,53 @@
+.H 2  "Daemons"
+
+.PP
+Attempts to execute the RPC servers, mountd, rstatd, rusersd, sprayd, 
+and rwalld should fail. These are all processes that are invoked only by 
+other processes.
+.PP
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Mark Kepke 
+.fi
+.sp 2
+.H 3 "Execute commands without options"
+.sp 1
+.PP
+Verify that a call to /usr/etc/rpc.<cmd> (where cmd is mountd, rststd,
+rusersd, sprayd, and rwalld) will fail. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       "/usr/etc/rpc.<cmd>: cannot execute"
+.fi
+.sp 2
+.H 3 "Execute commands with hostname argument"
+.sp 1
+.PP
+Verify that a call to /usr/etc/rpc.<cmd> <hostname> 
+(where cmd is mountd, rststd, rusersd, sprayd, and rwalld 
+and <hostname> is the name of the client node)
+will fail. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       "/usr/etc/rpc.<cmd>: cannot execute"
+.fi
+.sp 2
+.H 3 "As super-user execute commands without options"
+.sp 1
+.PP
+Verify that a super-user call to /usr/etc/rpc.<cmd> (where cmd is 
+mountd, rststd, rusersd, sprayd, and rwalld) will fail. 
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       "<cmd>: getsockname: Socket operation on non-socket"
+.fi
+.sp 2

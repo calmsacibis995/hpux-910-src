@@ -1,0 +1,63 @@
+############################################################################
+# TSM user customizable file: cut_o_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# Cut options menu for TSM 
+# @(#) $Header: cut_o_menu,v 70.1 92/06/11 19:40:36 ssa Exp $
+#
+# LOCALIZERS:
+# In all of the following only item_name and item_selection can be translated. 
+# If needed, translate the string to the right of "=" sign; but do NOT
+# translate $tsm_hot_key. You can translate the letters following $tsm_hot_key
+# if you've changed the key mappings. In such a case, translate cb/ct/cs to 
+# the new mappings. To change mappings see "!in_cut_and_paste" in tsmtext file.
+#
+# The item_selection corresponds to the letter which can be entered by the
+# user to quickly select this item instead of using the arrow keys, when the 
+# sub-submenu is displayed.  
+# WARNING:
+# Make sure you are consistent with key mappings and item_selection letters.
+#
+
+pull_down_menu
+
+# The next item_name corresponds to the first line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+item_name=Block       (Rechteck, neue Zeilenumbrœche)       $tsm_hot_keycb
+item_selection=B
+item_type=tsm_cmd_to_user
+item_action=cb
+
+# The next item_name corresponds to the second line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+item_name=Text        (Zeilen, mit Zeilenumbrœchen)         $tsm_hot_keyct
+item_selection=T
+item_type=tsm_cmd_to_user
+item_action=ct
+
+# The next item_name corresponds to the third line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+item_name=String      (Zeilen, ohne Zeilenumbrœche)         $tsm_hot_keycs
+item_selection=S
+item_type=tsm_cmd_to_user
+item_action=cs

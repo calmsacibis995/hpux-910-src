@@ -1,0 +1,340 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+
+prog=${0##*/}
+exitval=0
+DEFINES=""
+ASFLAGS=""
+VERBOSE=false
+SOURCE=false
+DESTDIR=""
+
+PATH=/bin:/usr/bin:/etc:/lib:/usr/lib:/usr/local/bin:/usr/contrib/bin
+
+#
+# setflags --
+#    setup the right flags for the 300 or 800, based on what is in
+#    CCOPTS, etc.
+#
+function setflags
+{
+    if hp9000s700; then
+	flags="-Dhp9000s700 -D__hp9000s700 -Dhp9000s800 -D__hp9000s800 \
+	       -Uhp9000s200 -U__hp9000s200 -Uhp9000s300 -U__hp9000s300"
+	ASMSRCDIR="s800"
+    elif hp9000s800; then
+	flags="-Dhp9000s800 -D__hp9000s800 \
+	       -Uhp9000s200 -U__hp9000s200 -Uhp9000s300 -U__hp9000s300"
+	ASMSRCDIR="s800"
+    elif hp9000s300; then
+	flags="-Uhp9000s800 -U__hp9000s800 \
+	       -Dhp9000s200 -D__hp9000s200 -Dhp9000s300 -D__hp9000s300"
+	ASMSRCDIR="s300"
+    fi
+    flags="$flags -D_KERNEL -DKERNEL"
+
+    set -- $CCOPTS
+    while [ $# -gt 0 ]; do
+	case "$1" in
+	-D*|-U*)
+	    flags="$flags $1"
+	    shift
+	    ;;
+	*)
+	    shift
+	    ;;
+	esac
+    done
+
+    #
+    # Strip out extra white space
+    #
+    flags=`echo $flags`
+
+    DEFINES="$DEFINES $flags"
+
+    if CCOPTS="$DEFINES" ifdef PIC; then
+	ASFLAGS="$ASFLAGS +z"
+    fi
+}
+
+#
+# mkdefines --
+#    function to extract system call numbers from <sys/syscall.h>,
+#    converting the data from cpp "#define" statements into m4
+#    "define" macro declarations.
+#
+function mkdefines
+{
+    typeset flags=""
+    typeset src_header=""
+    
+    if [ -f syscall.h ]; then
+	src_header=${1:-syscall.h}
+    else
+	src_header=${1:-/usr/include/sys/syscall.h}
+    fi
+
+    #
+    # If "defines.mh" is up to date, don't recreate it
+    #
+    if [ ! -s defines.mh -o $src_header -nt defines.mh ]; then
+	unifdef -u -DKERNEL $DEFINES <$src_header |
+	(
+	    echo "define(\`SYS_syscall',\`0')"
+	    awk '/^#[ 	]*define/ {
+		if (substr($2, 1, 4) == "SYS_")
+		{
+		    x = substr($2, 5, 1);
+		    if (x >= "a" && x <= "z")
+			printf "define(`%s'"'"', `%s'"'"')\n", $2, $3;
+		}
+		if ($2 == "SYSCALLGATE" || $2 == "GATEWAYSID" || $2 == "RS" || $2 == "SYS_CN" || $2 == "SYS_SIGCLEANUP")
+		{
+		    printf "define(`%s'"'"', `%s'"'"')\n", $2, $3;
+		}
+	    }'
+	) >defines.mh
+    fi
+
+    #
+    # On an 800, we also need stuff from <machine/break.h>
+    #
+    if hp9000s800; then
+	if [ -f break.h ]; then
+	    src_header=${2:-break.h}
+	else
+	    src_header=${2:-/usr/include/machine/break.h}
+	fi
+
+	if [ ! -s break.mh -o $src_header -nt break.mh ]; then
+	    unifdef -u -DKERNEL $DEFINES <$src_header |
+	    awk '/^#[ 	]*define/ {
+		str=substr($2,1,4)
+		if (str == "BI1_" || str == "BI2_")
+		{
+		    printf "define(`%s'"'"', `%s'"'"')\n", $2, $3;
+		}
+	    }' >break.mh
+	fi
+    fi
+}
+
+if hp9000s800; then
+    INC='include(mac800.mh)
+    '
+else
+    INC='include(mac300.mh)
+    '
+fi
+
+#
+# Main body --
+#
+set -- `getopt svd:D:U: $*`
+while : ; do
+    case $1 in
+    -s)
+	SOURCE=true
+	shift
+	;;
+    -v)
+	VERBOSE=true
+	shift
+	;;
+    -d)
+	DESTDIR="$2"
+	shift 2
+	;;
+    -D|-U)
+	DEFINES="$DEFINES $1$2"
+	shift 2
+	;;
+    --)
+	shift
+	break
+	;;
+     *)
+	echo "Usage: $prog [-v]" >&2
+	exit 1
+	;;
+    esac
+done
+
+if [ -n "$DESTDIR" -a ! -d "$DESTDIR" ]; then
+    echo "$prog: destination directory \"$DESTDIR\" non-existant" >&2
+    exit 1;
+fi
+
+#
+# Add a trailing "/" to DESTDIR if it doesn't already have one (and its
+# non-null
+#
+case $DESTDIR in
+"" | */)
+    ;;
+*)
+    DESTDIR="$DESTDIR/"
+    ;;
+esac
+
+setflags
+mkdefines
+
+#
+# assemble()
+#
+#    Function that reads from stdin, doing whatever is necessary to
+#    assemble it into $1
+#
+if $SOURCE; then
+    function assemble
+    {
+	output=$1; shift
+
+	m4 $DEFINES $* | sed -e '/^$/d' > ${DESTDIR}${output%.o}.m
+	return 0
+    }
+else
+    if hp9000s800; then
+	function assemble
+	{
+	    output=$1; shift
+
+	    m4 $DEFINES $* | cat /lib/pcc_prefix.s - | sed -e '/^$/d' |
+		as $ASFLAGS > ${DESTDIR}$output
+	    if [ $? -ne 0 ]; then
+		exitval=1
+		return 1
+	    fi
+	    return 0
+	}
+    else
+	function assemble
+	{
+	    output=$1; shift
+
+	    m4 $DEFINES $* | as $ASFLAGS -o ${DESTDIR}$output
+	    if [ $? -ne 0 ]; then
+		exitval=1
+		return 1
+	    fi
+	    return 0
+	}
+    fi
+fi
+
+#
+# Build a command pipeline that will get only the stubs that we want
+# to make (or all if no parameters specified)
+#
+if [ $# -gt 0 ]; then
+    egrep_pattern=""
+    for i; do
+	name=${i%_sl.o}
+	name=${name%.o}
+	name=${name%_p.o}
+	if [ -n "$egrep_pattern" ]; then
+	    egrep_pattern="$egrep_pattern|^$name[ 	]"
+	else
+	    egrep_pattern="^$name[ 	]"
+	fi
+    done
+    grepper="grep -v '^#' | egrep '$egrep_pattern'"
+else
+    grepper="grep -v '^#'"
+fi
+
+/lib/cpp $DEFINES <stubs.data | eval "$grepper" |
+(   while read routine type parm1 parm2 parm3 parm4; do
+	[ -z "$routine" ] && continue
+
+	$VERBOSE && echo "\t$routine"
+	[ -n "$parm1" ] && extra="-D$parm1" || extra=""
+	[ -n "$parm2" ] && extra="$extra -D$parm2"
+	[ -n "$parm3" ] && extra="$extra -D$parm3"
+	[ -n "$parm4" ] && extra="$extra -D$parm4"
+	case $type in
+	boolean)
+	    echo "${INC}BOOLEAN($routine)" | assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	nofail)
+	    echo "${INC}NOFAIL($routine)" | 
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	nofail2)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}NOFAIL2($routine, $parm1)" |
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	syscall)
+	    echo "${INC}SYSCALL($routine)" | assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	syscall2)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}SYSCALL2($routine, $parm1)" |
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	syscall_output)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}SYSCALL($routine)" | assemble $parm1.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+	alias_boolean)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}BOOLEAN($routine,$parm1)" |
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	alias_nofail)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}NOFAIL($routine,$parm1)" |
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	alias_syscall)
+	    [ -n "$parm2" ] && extra="-D$parm2" || extra=""
+	    [ -n "$parm3" ] && extra="$extra -D$parm3"
+	    [ -n "$parm4" ] && extra="$extra -D$parm4"
+	    echo "${INC}SYSCALL($routine,$parm1)" |
+		assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	assembly)
+	    cat $ASMSRCDIR/$routine.s | assemble $routine.o $extra
+	    [ $? -ne 0 ] && exitval=1
+	    ;;
+
+	*)
+	    echo "$prog: unknown type \"$type\" for $routine" >&2
+	    exitval=1
+	    ;;
+	esac
+    done
+    exit $exitval
+)
+
+exit $?

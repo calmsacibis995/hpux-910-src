@@ -1,0 +1,107 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/rexd sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+##
+*/
+
+.OPTIONS: 	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+CSOURCE = rexd.c mount_nfs.c on.c where.c unix_login.c bsdtermio.c
+TARGETS = on rexd
+BSDOBJS = getwd.o killpg.o
+OBJECTS = rexd.o mount_nfs.o on.o where.o unix_login.o bsdtermio$(USCORE).o $(BSDOBJS)
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) $(TARGET) \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+rexd.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS -c $(SDIR)/rexd.c
+
+mount_nfs.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS -c $(SDIR)/mount_nfs.c
+
+on.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS -c $(SDIR)/on.c
+
+where.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS -c $(SDIR)/where.c
+
+unix_login.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS  -c $(SDIR)/unix_login.c
+
+bsdtermio.o:
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS -c $(SDIR)/bsdtermio.c
+
+bsdtermio_.o:
+	$(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/bsdtermio.B $(LDFLAGS) -o bsdtermio_.o -c $(SDIR)/bsdtermio.c
+
+rpc.rexd:	rexd.o mount_nfs.o unix_login.o logging$(USCORE).o bsdtermio$(USCORE).o
+	$(AR) x $(LBSD) $(BSDOBJS)
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS $(LDFLAGS) -o rpc.rexd rexd.o mount_nfs.o unix_login.o bsdtermio$(USCORE).o $(RPCSVC_LIB) logging$(USCORE).o $(LIBCA) $(BSDOBJS) -lV3
+
+on:	on.o where.o bsdtermio$(USCORE).o
+	$(AR) x $(LBSD) $(BSDOBJS)
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS $(LDFLAGS) -o on on.o where.o bsdtermio$(USCORE).o $(RPCSVC_LIB) $(LCURSES) $(LIBCA) $(BSDOBJS)
+
+under:	under.o mount_nfs.o bsdtermio$(USCORE).o
+	$(AR) x $(LBSD) $(BSDOBJS)
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS $(LDFLAGS) -o under under.o mount_nfs.o bsdtermio$(USCORE).o $(RPCSVC_LIB) logging$(USCORE).o $(LIBCA) $(BSDOBJS)
+
+where:	where_main.o where.o bsdtermio$(USCORE).o
+	$(AR) x $(LBSD) $(BSDOBJS)
+	$(CC) $(NMCFLAGS) $(CFLAGS3) -DHFS $(LDFLAGS) -o where where_main.o where.o bsdtermio$(USCORE).o $(RPCSVC_LIB) $(LIBCA) $(BSDOBJS)
+
+logging.o:      $(SDIR)/../logging.c
+	$(CC) $(NMCFLAGS) -c $(SDIR)/../logging.c $(RPCSVC_LIB)
+
+logging_.o:	/source/NFS/$(USER)/cmds/usr.etc/logging.c
+	$(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build
+

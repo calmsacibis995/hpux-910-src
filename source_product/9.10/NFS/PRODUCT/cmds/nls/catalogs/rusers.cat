@@ -1,0 +1,33 @@
+$set 1
+1 collecting responses... 
+2 %*s: 
+3 \n
+4 %s: 
+5 \n
+6 rusers: unknown host name %s\n
+7 0x%08.8x
+8 %.*s
+9 %-*.*s
+10  %.*s
+11 \n
+12 too many hosts on network\n
+13 0x%08.8x
+14 %.*s
+15 \n
+16 %-*.*s
+17  %.*s
+18 \n
+19 %-*.*s 
+20 :
+21 %-*.*s
+22   %.12s  
+23 
+24     ??
+25  (%.*s)
+26 %3d:
+27    :
+28 %02d
+29 %12.12s: 
+30 \t
+31 \n
+32 Usage: rusers [-a] [-h] [-i] [-l] [-u] [host ...]\n

@@ -1,0 +1,115 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/algorithms,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:20 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "Algorithms"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Overall Flow"
+
+	There are two distinct stages in automount's actions:
+
+.br
+The initial stage, boot time, when /etc/netnfsrc2 boots automount.
+
+.br
+The mounting stage, when a user tries to access a file or directory
+in a remote machine.
+
+	At the initial stage, when /etc/netnfsrc2 invokes automount,
+it opens a UDP socket and registers it with the portmapper service as
+an NFS server port.  It then forks off a server daemon that listens for
+NFS requests on the socket.  The parent process proceeds to mount the 
+daemon at its mount points within the file system (as specified by the
+maps).  These are the "automount mount points" that are being mounted.
+This is how the kernel is made to believe that it is mounting a remote
+NFS server.  Through the vfsmount[2] system call automount passes the
+server daemon's port number and an NFS file handle that is unique to 
+each mount point.  The arguments to the vfsmount[2] system call vary
+according to the type of file system; for NFS file systems, the call
+is:
+
+.br
+vfsmount ( MOUNT_NFS, dir_name, OPTS, &args );
+
+where &args contains the network address for the NFS server.  By having
+the network address in &args refer to the local process (the automount
+daemon), automount in fact deceives the kernel into treating it as if 
+it were an NFS server.  Instead, once the parent process completes its
+calls to vfsmount[2] it exits, leaving the daemon to serve its mount
+points.
+
+	The IP address in the original automount from Sun was hard coded
+to the loop back IP address 127.0.0.1.  However to allow automount to 
+work in the cluster environment it was changed to the local IP address
+returned by the gethostbyname(local_host_name) call.  The details are
+in the "Internals" section.  In brief, there is only one automount process
+per cluster.  So if the cluster server is running the one automount daemon,
+the address 127.0.0.1 can not be used by the cnodes to access automount.
+That would cause NFS/RPC messages to be sent to the cnode itself instead
+of to the automount daemon on the server.
+
+	In the second stage, when the user actually requests access to 
+a remote file hierarchy, the daemon intercepts the kernel NFS requests
+and looks up the name in the map associated with the directory.  Taking
+the location (server:pathname) of the  remote file system from the map,
+the daemon then mounts the remote file system under the directory /tmp_mnt.
+It answers the kernel, telling it is a symbolic link.  The kernel sends
+an NFS READLINK request, and automount returns a symbolic link to the real
+mount point under /tmp_mnt.
+
+	The behavior of automount is affected by whether the name is found
+in a direct map or an indirect map.  If the name is found in a direct map
+automount emulates a symbolic link as stated above.  It responds as if a 
+symbolic link exists at its mount point.  In response to a GETATTR, it
+describes itself as a symbolic link.  When the kernel follows up with a 
+READLINK it returns a path to the real mount point for the hierarchy in
+/tmp_mnt.
+
+	If on the other hand, the name is found in an indirect map, the
+automount daemon emulates a directory of symbolic links.  It describes
+itself as a directory.  In response to a READLINK, it returns a path to
+the mount point in /tmp_mnt, and a readdir of the automount mount point
+returns a list of the entries that are CURRENTLY mounted.
+
+	Whatever the case, that is, whether the map is direct or indirect,
+if the file hierarchy is already mounted and the symbolic link has been
+read recently, the cached symbolic link is returned immediately.  Since
+automount is on the same host, the response is much faster than a READLINK
+to a remote NFS server.  On the other hand, if the file hierarchy is not
+mounted, a small delay will occur while the mounting takes place.
+
+.H 2 "The Mount Command Emulation"
+
+.H 2 "The NFSD Emulation"
+
+.nf
+auto_run()
+{
+	int read_fds, n;
+	time_t time();
+	long last;
+	struct timeval tv;
+
+	last = time((long *)0);
+	tv.tv_sec = maxwait;
+	tv.tv_usec = 0;
+	for (;;) {
+		read_fds = svc_fds;
+		n = select(32, &read_fds, (int *)0, (int *)0, &tv);
+		time_now = time((long *)0);
+		if (n)
+			svc_getreq(read_fds);
+		if (time_now >= last + maxwait) {
+			last = time_now;
+			do_timeouts();
+												}
+	}
+}
+.fi
+
+.br
+.br
+.br

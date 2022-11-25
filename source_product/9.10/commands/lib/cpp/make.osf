@@ -1,0 +1,49 @@
+# $Header: make.osf,v 66.6 91/04/02 11:30:48 ssa Exp $
+# @(#) $Revision: 66.6 $
+#
+# makefile -- makefile for OSF /lib/cpp
+
+CC=/bin/cc
+FLAGS=-DOSF -DCXREF -DSTAT_ANAL -DPROTOGEN -DC_PLUS_PLUS
+ARCH=
+OBJECTS = cpp.o cpy.o hpux_rel.o
+default: cpp.trad
+
+cpp.trad:
+	@$(MAKE) -f make.osf clean
+	@$(MAKE) -f make.osf CC="/paXdev/bin/cc" _cpp.trad
+cpp.trad.X:
+	@$(MAKE) -f make.osf clean
+	@$(MAKE) -f make.osf FLAGS="$(FLAGS) -DPAXDEV" ARCH="-Acpu,m68k" cpp.m68k
+	@$(MAKE) -f make.osf clean
+	@$(MAKE) -f make.osf FLAGS="$(FLAGS) -DPAXDEV" ARCH="-Acpu,a88k" cpp.a88k
+	/usr/apollo/bin/xar -cv cpp.trad.X cpp.m68k cpp.a88k
+
+clean:
+	rm -f $(OBJECTS) cpy.c cpp.msg cpp.cat
+
+clobber: clean
+	rm -f cpp.trad cpp.trad.X
+
+_cpp.trad: $(OBJECTS)
+	$(CC) $(LDFLAGS) -o cpp.trad $(OBJECTS)
+
+cpp.m68k:  $(OBJECTS)
+	$(CC) $(ARCH) $(LDFLAGS) -o cpp.m68k $(OBJECTS)
+
+cpp.a88k:  $(OBJECTS)
+	$(CC) $(ARCH) $(LDFLAGS) -o cpp.a88k $(OBJECTS)
+
+cpy.o:  cpy.c yylex.c
+
+cpy.c:  cpy.y
+	yacc cpy.y
+	mv y.tab.c cpy.c
+
+cpp.cat: cpp.c yylex.c cpy.c
+	findmsg cpp.c yylex.c cpy.c >cpp.msg
+	gencat cpp.cat cpp.msg
+
+.c.o:
+	$(CC) -c $(FLAGS) $(ARCH) $*.c
+

@@ -1,0 +1,1303 @@
+############################################################
+############################################################
+#####                                                  #####
+#####           SENDMAIL CONFIGURATION FILE            #####
+#####                                                  #####
+############################################################
+############################################################
+
+#####  @(#)$Revision: 1.28.109.9 $ 
+#####  PATCH_9.03: sendmail.cf $Revision: 1.28.109.9 $ 94/03/24 PHNE_3997
+
+############################################################
+############################################################
+#####                                                  #####
+#####                 CAVEAT EMPTOR                    #####
+#####                                                  #####
+#####  This configuration file is suitable for use on  #####
+#####  most HP-UX systems and can be installed,        #####
+#####  unmodified, as sendmail's configuration file,   #####
+#####  /usr/lib/sendmail.cf                            #####
+#####                                                  #####
+#####  Modifications that reflect this host's mail     #####
+#####  environment may be needed.  HP recommends that  #####
+#####  these be limited to the "Localizations" and     #####
+#####  "Routing Options" described below.              #####
+#####                                                  #####
+#####                                                  #####
+#####  HP will provide support for this configuration  #####
+#####  file if:                                        #####
+#####                                                  #####
+#####   * it is left unmodified; or                    #####
+#####                                                  #####
+#####   * the only changes made are those described    #####
+#####     below under "Localizations" and "Routing     #####
+#####     Options".                                    #####
+#####                                                  #####
+#####  If other changes are made to this file, you     #####
+#####  are on your own.                                #####
+#####                                                  #####
+############################################################
+############################################################
+
+################################################################################
+#  Localizations:                                                              #
+################################################################################
+#                                                                              #
+#      While this configuration file can be used unmodified, it may be         #
+#      appropriate to make some or all of the following changes to this        #
+#      configuration file to incorporate local information or preferences.     #
+#                                                                              #
+#      Detailed descriptions of sendmail.cf syntax and complete list of        #
+#      the configuration options can be found in the documentation.            #
+#                                                                              #
+#  Use the Nameserver               (option I):                                #
+#                                                                              #
+#      If this host is using the domain nameserver, the I option should        #
+#      be set.  In most cases, sendmail will be able to detect whether         #
+#      the nameserver is in use and will automatically do the right            #
+#      thing.  However, in some cases it will incorrectly appear to            #
+#      sendmail as though the nameserver is not being used, for example        #
+#      if the nameserver has not finished loading its data and is not yet      #
+#      responding to queries.  If this host normally uses the nameserver,      #
+#      messages should be deferred when the nameserver is not running.         #
+#                                                                              #
+#      If the I option is set, if an MX record lookup or gethostbyname()       #
+#      call fails because the nameserver is not running, sendmail will         #
+#      defer the message.                                                      #
+#                                                                              #
+#      If the I option is not set, if an MX record lookup fails, sendmail      #
+#      will assume that the nameserver is not being used, and that there       #
+#      are no MX records, and try to connect directly to the host.  If a       #
+#      host name lookup fails, sendmail will assume that there is no           #
+#      entry for the host and return an error.                                 #
+#                                                                              #
+#      By default, the I option is not set.  To set it, uncomment the          #
+#      line:                                                                   #
+#                                                                              #
+#        # OI                                                                  #
+#                                                                              #
+#  Site Hiding                      (macro Y):                                 #
+#                                                                              #
+#      It may be desirable to "hide" the name of a host generating SMTP        #
+#      mail, so that replies need not be directed to the particular host       #
+#      on which the message originated.  This simplifies moving a user's       #
+#      mail home from one host to another, and gives the appearance of         #
+#      mail being generated by a unified organization rather than a            #
+#      collection of hosts.                                                    #
+#                                                                              #
+#      By default the sender of a message routed via SMTP is identified        #
+#      with the header line:                                                   #
+#                                                                              #
+#        From: Full Name <user@host>                                           #
+#                                                                              #
+#      where "host" is the canonical name of the local host (macro w).         #
+#                                                                              #
+#      If the macro Y is defined, the value of macro Y will be appended        #
+#      instead of the local host name.  The macro Y would typically be         #
+#      defined either as the name of a local mail hub, or as the local         #
+#      domain name.  Although the name need not be the name of an actual       #
+#      host, this scheme requires that some host recognize the name and        #
+#      be able to route mail to the originating user.                          #
+#                                                                              #
+#      For example, to identify SMTP mail from the local host as               #
+#      originating from the domain poo.bah.edu, Y should be defined by         #
+#      replacing the line:                                                     #
+#                                                                              #
+#        # DY                                                                  #
+#                                                                              #
+#      with:                                                                   #
+#                                                                              #
+#        DYpoo.bah.edu                                                         #
+#                                                                              #
+#      An outgoing SMTP message from user "fred" at the host "burb"            #
+#      would have the From: header line:                                       #
+#                                                                              #
+#        From: Fred User <fred@poo.bah.edu>                                    #
+#                                                                              #
+#      Assume that the host "porpoise.poo.bah.edu" is to accept and            #
+#      forward mail for the domain poo.bah.edu.  In order for users at         #
+#      other hosts to reply to such messages, there are two things that        #
+#      must be done:                                                           #
+#                                                                              #
+#        1) Replying hosts must be able to map the name poo.bah.edu to an      #
+#           internet address or MX record.                                     #
+#                                                                              #
+#        2) Some host must be prepared to recognize mail addressed to          #
+#           "user@poo.bah.edu" as local, and be able to route such mail        #
+#           appropriately.                                                     #
+#                                                                              #
+#      To satisfy 1), the nameserver for the domain bah.edu must have          #
+#      either an MX record for the name "poo" directing its mail to the        #
+#      host porpoise.poo.bah.edu, or an address record mapping the name        #
+#      "poo" to an internet address belonging to porpoise.poo.bah.edu.         #
+#      Do not make "poo.bah.edu" a CNAME for porpoise.poo.bah.edu,             #
+#      because in that case a recipient may canonicalize the sender            #
+#      address "user@poo.bah.edu" to "user@porpoise.poo.bah.edu", which        #
+#      defeats the purpose of site hiding.  For the same reason, if a          #
+#      replying host uses /etc/hosts or NIS (formerly known as Yellow          #
+#      Pages) to do host name to address mapping, the entry for                #
+#      poo.bah.edu should be a separate line, not a host name alias.           #
+#                                                                              #
+#      To satisfy 2), on porpoise, the name "poo.bah.edu" must be added        #
+#      to class w (see below), and there must be mail aliases for all          #
+#      users on systems with macro Y defined as above.  For example:           #
+#                                                                              #
+#        fred:  fred@burb.poo.bah.edu                                          #
+#                                                                              #
+#  Aliases for Local Host (class w):                                           #
+#                                                                              #
+#      This configuration will automatically recognize that mail to users      #
+#      at the local host or any of its host name aliases or CNAMEs should      #
+#      be delivered locally.  Other host names that you wish to recognize      #
+#      as local can be added to class w as either a simple class               #
+#      definition (Cw) or a file class (Fw).  Any names added to class w       #
+#      must be canonical names.                                                #
+#                                                                              #
+#      For example, by default, only the server cnode of an HP-UX cluster      #
+#      runs the sendmail daemon, and mail from the clients is sent out         #
+#      with headers indicating that it originated on the server.               #
+#                                                                              #
+#      However, you might want the server also to accept mail addressed        #
+#      to users at the clients.  You could have nameserver MX records          #
+#      directing mail for the clients to the server, and make the server       #
+#      recognize the clients' host names as local.  If the clients' names      #
+#      are ick, ack, and ock in the domain urk.com, the class w could be       #
+#      augmented as follows:                                                   #
+#                                                                              #
+#        Cw ick.urk.com ack.urk.com ock.urk.com                                #
+#                                                                              #
+#  Message-ID Header Field                                                     #
+#                                                                              #
+#      Associating a unique Message-ID header line with every message can      #
+#      be useful for tracing messages through the mail system.  This is        #
+#      not the default because it makes the syslog file grow 50% faster.       #
+#      If the configuration file line:                                         #
+#                                                                              #
+#        # H?M?Message-Id: <$t.$i@$w>                                          #
+#                                                                              #
+#      is uncommented, sendmail will generate a Message-ID header line         #
+#      for each message it routes that does not already have one.  The id      #
+#      contains the date (GMT), in the form YYMMDDhhmm, the queue ID           #
+#      associated with the message on the local host, and the local host       #
+#      name.                                                                   #
+#                                                                              #
+#      In any case, if an incoming message already has a Message-ID            #
+#      header line, sendmail will preserve this line.                          #
+#                                                                              #
+#  Postmaster Copy                  (option P):                                #
+#                                                                              #
+#      If this option is set to a valid address, when an undeliverable         #
+#      message is mailed back, a copy of the message header (but not the       #
+#      message body) is delivered to the PostMasterCopy address.  It is        #
+#      suggested that this address be "Postmaster" since RFC 822 requires      #
+#      that there be a valid Postmaster address on all mail systems, and       #
+#      since sendmail also attempts to deliver undeliverable error return      #
+#      messages to Postmaster.                                                 #
+#                                                                              #
+#      Postmaster should be aliased locally to the (local or remote)           #
+#      address of the person responsible for mail system administration.       #
+#                                                                              #
+#      To enable this feature, uncomment the line:                             #
+#                                                                              #
+#        # OPPostmaster                                                        #
+#                                                                              #
+#      If desired, replace "Postmaster" with the appropriate address.          #
+#                                                                              #
+#  Dumb UUCP Hosts                  (class G):                                 #
+#                                                                              #
+#      If your host has UUCP connections to hosts running "dumb",              #
+#      i.e. non-RFC 822 compatible, UUCP mailers, you should define the        #
+#      class G as a list of these hosts.  This will cause UUCP mail to         #
+#      these hosts to be sent via the dumbuucp mailer rather than the          #
+#      normal uucp mailer.  Since "dumb" mailers will not add their host       #
+#      names to the return path in the From:  header field, the dumbuucp       #
+#      delivery agent deletes From:  header fields from mail for such          #
+#      hosts.  In most cases the mail system on the host where final           #
+#      delivery is done will be able to generate a correct return path         #
+#      from other information in the message header.                           #
+#                                                                              #
+#      For example, if your host has UUCP connections to dumb UUCP             #
+#      mailers on hosts rrgh and feh, the class G should be defined,           #
+#      on the line beginning with CG, as follows:                              #
+#                                                                              #
+#        CGrrgh feh                                                            #
+#                                                                              #
+#  Trusted Users                     (T):                                      #
+#                                                                              #
+#      If other hosts login to your host to perform UUCP mail transfers,       #
+#      the login ids used by these systems must be defined as trusted          #
+#      users.  The login id "uucp" is already defined as a trusted user.       #
+#      If necessary, add lines of the form:                                    #
+#                                                                              #
+#        Tusername                                                             #
+#                                                                              #
+#      to the Trusted Users section of this file (lines beginning with T).     #
+#                                                                              #
+#  Logging Level                    (option L):                                #
+#                                                                              #
+#      Logging level determines the classes of events which will be            #
+#      logged by sendmail in /usr/spool/mqueue/syslog.  By default the         #
+#      log level is 10, which reports successful deliveries (and the           #
+#      mailer and host used for delivery), queue daemon startup, alias         #
+#      database rebuilds, and various errors.  More detailed information       #
+#      is reported with higher log levels.  In particular, log level 11        #
+#      reports the MX host (if any) and internet address to which mail         #
+#      was delivered.  Refer to the documentation for details.                 #
+#                                                                              #
+#      Note that log level also affects the information reported by            #
+#      sendmail -bv.  At log level 10 and higher, sendmail also reports        #
+#      the mailer and host that would be used for addresses that are           #
+#      "deliverable."                                                          #
+#                                                                              #
+#      The option L is defined on the line beginning with OL.                  #
+#                                                                              #
+#  Delivery Mode                    (option d):                                #
+#                                                                              #
+#      The default delivery mode is "background":  the user agent              #
+#      invoking sendmail will return immediately, and sendmail will route      #
+#      the mail in the background.  Other options are "interactive":           #
+#      sendmail will not return control to the program invoking it until       #
+#      the mail has been routed; and "queue":  sendmail will put the           #
+#      message in the mail queue and a sendmail queue process will route       #
+#      the message later.  Delivery mode is defined on the line beginning      #
+#      with Od.                                                                #
+#                                                                              #
+#  Error Reporting Mode             (option e):                                #
+#                                                                              #
+#      The default error reporting mode is "p":  if sendmail detects an        #
+#      error before it finishes sending a message, error messages are          #
+#      output to stdout; if errors occur later they are mailed back.           #
+#      Other options are:  "w":  if the sender is logged in, any error         #
+#      messages are written to the sender's terminal, otherwise they are       #
+#      mailed back; "m":  error messages are always mailed; and "q":  no       #
+#      error messages.  Error reporting mode is defined on the line            #
+#      beginning with Oe.                                                      #
+#                                                                              #
+#  Read Timeout                     (option r):                                #
+#                                                                              #
+#      If the program transmitting a message to sendmail hangs, or if an       #
+#      SMTP peer goes down, sendmail's read will time out after this           #
+#      interval.  RFC 1123 section 5.3.2 discusses appropriate values for      #
+#      this timeout.  Refer to the sendmail documentation for the syntax       #
+#      for specifying time intervals.  The read timeout is defined on the      #
+#      line beginning with Or.                                                 #
+#                                                                              #
+#  Queue Timeout                    (option T):                                #
+#                                                                              #
+#      Messages in the mail queue which sendmail has been unable to            #
+#      deliver for this amount of time will be returned to the sender as       #
+#      undeliverable.  Refer to the documentation for the syntax for           #
+#      specifying time intervals.  Queue timeout is defined on the line        #
+#      beginning OT.                                                           #
+#                                                                              #
+#  Queue-Only Load Average          (option x):                                #
+#                                                                              #
+#      In order to limit load on a very busy system, sendmail can be           #
+#      configured to queue up low priority messages rather than attempt        #
+#      delivery immediately if the five-minute load average is greater         #
+#      than some integer value, by default 8.  This value is defined on        #
+#      the line beginning Ox.                                                  #
+#                                                                              #
+#  Refuse-Connections Load Average  (option X):                                #
+#                                                                              #
+#      In order to limit load on a very busy system, the sendmail daemon       #
+#      can be configured not to accept SMTP connections if the five-           #
+#      minute load average is greater than some integer value, by              #
+#      default 12.  This value is defined on the line beginning Ox.            #
+#                                                                              #
+################################################################################
+
+################################################################################
+#  Routing Options:                                                            #
+################################################################################
+#                                                                              #
+#      The supported routing options are described below.  Options for         #
+#      routing SMTP mail, UUCP mail, X.400 mail, and OpenMail mail are         #
+#      described.                                                              #
+#                                                                              #
+#      To implement any of these options, edit a copy of this file             #
+#      according to the instructions for that option.  With minor              #
+#      exceptions, noted where appropriate, the options are independent        #
+#      of each other; you can implement any of them or none of them.           #
+#                                                                              #
+#      Some of these options require that you have installed and               #
+#      configured other software not part of the ARPA/9000 product.            #
+#                                                                              #
+#                                                                              #
+#      Operator precedence:                                                    #
+#                                                                              #
+#      It is generally agreed that mixed addresses, being ambiguous, are       #
+#      abhorrent.  This configuration file interprets address operators        #
+#      in the order '@', '!', '%'.                                             #
+#                                                                              #
+#      Changes to this precedence are not supported!                           #
+#                                                                              #
+#      Mixed addresses are resolved as follows:                                #
+#                                                                              #
+#       Address            Mailer   Host    User                Destination    #
+#       -------            ------   ----    ----                -----------    #
+#       user%hostA@hostB   tcp      hostB   user%hostA@hostB    user@hostA     #
+#       hostA!user@hostB   tcp      hostB   hostA!user@hostB    hostA!user     #
+#       hostA!user%hostB   uucp     hostA   user@hostB          user@hostB     #
+#                                                                              #
+################################################################################
+#  SMTP Mail Routing:                                                          #
+################################################################################
+#                                                                              #
+#      By default, all mail to addresses of the form "user@host" will be       #
+#      routed to "host" using the SMTP protocol over TCP/IP.  If the           #
+#      nameserver is in use, an MX record may direct sendmail to route         #
+#      mail for that host to some other host acting as a "mail exchanger"      #
+#      for the host in the recipient address.  If there is no MX record        #
+#      for the host name, gethostbyname(3n) must be able to return an          #
+#      internet address for the host or else the delivery will fail.           #
+#                                                                              #
+#      You can arrange to mail directly only to certain hosts.  Mail to        #
+#      other hosts can either be rejected as an error, or be passed to a       #
+#      "relay" host for delivery.                                              #
+#                                                                              #
+#  Direct SMTP connection within local domain only:                            #
+#                                                                              #
+#      This option makes sense only if your site uses internet domain          #
+#      style host names.  You can define macro L as the name of the            #
+#      "local domain" and mail directly only to hosts whose canonical          #
+#      names end with that name.  For example, if your local domain is         #
+#      "envy.sins.com", you might define macro L as "envy.sins.com" and        #
+#      define an SMTP relay, in which case sendmail would send directly        #
+#      to "user@porch.envy.sins.com" but relay "user@foyer.pride.sins.com".    #
+#      Alternatively, if your host is on a closed subnet, you might            #
+#      define macro L as "sins.com" and only relay mail (through a host        #
+#      with an interface on an open subnet as well as on your closed           #
+#      subnet) to domains outside sins.com .                                   #
+#                                                                              #
+#      To route only to the local domain, first define macro L.  For           #
+#      example, to route directly to hosts in the domain sins.com, define      #
+#      macro L, on the line beginning DL, as follows:                          #
+#                                                                              #
+#       DLsins.com                                                             #
+#                                                                              #
+#      Then uncomment the line in ruleset 0 following the comment:             #
+#                                                                              #
+#       # connect to hosts in local domain                                     #
+#                                                                              #
+#      Finally, comment out the line in ruleset 0 following the comment:       #
+#                                                                              #
+#       # try to connect to any host for user@domain                           #
+#                                                                              #
+#  Direct SMTP connection to hosts in class S only:                            #
+#                                                                              #
+#      You can define a file class S of hosts to connect to directly.          #
+#      This option does not make much sense if your host runs the              #
+#      nameserver or NIS (formerly called Yellow Pages), since it              #
+#      requires that you keep a static table up to date.  An internal          #
+#      hash table is generated from the file when the configuration file       #
+#      is frozen or, if no frozen configuration file is in use, when           #
+#      sendmail starts up.  Therefore, if the file from which the class        #
+#      is generated changes, the configuration file should be re-frozen        #
+#      and the sendmail daemon killed and restarted.                           #
+#                                                                              #
+#      The file from which this class is defined (by default                   #
+#      /etc/hosts.smtp) should contain only host names to which your host      #
+#      can connect via TCP, as the first word on each line.  It would be       #
+#      appropriate for the file to include host name aliases as well as        #
+#      official host names, and to exclude hosts that do not run an SMTP       #
+#      server.                                                                 #
+#                                                                              #
+#      The file can contain internet domain style names.  The current          #
+#      HP-UX version of sendmail can match multi-token names to class          #
+#      members.                                                                #
+#                                                                              #
+#      To define file class S, first uncomment the line defining class S       #
+#      from /etc/hosts.smtp, following the comment:                            #
+#                                                                              #
+#       # class S defines hosts to which you connect directly for SMTP mail    #
+#                                                                              #
+#      Then uncomment the line in ruleset 0 following the comment:             #
+#                                                                              #
+#       # connect to hosts in class S                                          #
+#                                                                              #
+#      Finally, comment out the line in ruleset 0 following the comment:       #
+#                                                                              #
+#       # try to connect to any host for user@domain                           #
+#                                                                              #
+#  Direct SMTP connection to nobody:                                           #
+#                                                                              #
+#      This option makes sense only if an SMTP relay is also defined.  A       #
+#      host (for example a single user workstation) may wish to send all       #
+#      SMTP mail through a relay.  To arrange this, comment out the line       #
+#      in ruleset 0 following the comment:                                     #
+#                                                                              #
+#       # try to connect to any host for user@domain                           #
+#                                                                              #
+#      Note that this option is not compatible with options 1 or 2 above.      #
+#                                                                              #
+#  SMTP relay:                                                                 #
+#                                                                              #
+#      If you are limiting direct SMTP connections as described above,         #
+#      by default mail to hosts outside the limits will be returned with       #
+#      an error.  If you can connect to another host with wider network        #
+#      connectivity than your host has, you can use that host as an SMTP       #
+#      relay.  Courtesy suggests that you get permission from the              #
+#      administrator of that host before relaying mail through it.             #
+#                                                                              #
+#      Any host name defined as a relay to be reached via SMTP must be an      #
+#      official host name; in a domain naming environment this must be a       #
+#      fully qualified domain name.  The canonicalization operator $[ $]       #
+#      is not applied to relay names.                                          #
+#                                                                              #
+#      To set up an SMTP relay, define the macro S, on the line beginning      #
+#      DS, as the host name (not path) of the relay host.  For example,        #
+#      if you wish to relay through the host blab.bub.edu, define S as         #
+#      follows:                                                                #
+#                                                                              #
+#       DSblab.bub.edu                                                         #
+#                                                                              #
+#      Then uncomment the line in Ruleset 0 following the comment:             #
+#                                                                              #
+#       # pass unresolved SMTP addresses to the SMTP relay                     #
+#                                         (don't relay source routes)          #
+#                                                                              #
+#      Note that if you are not limiting direct SMTP connections in some       #
+#      way, SMTP mail cannot be relayed.                                       #
+#                                                                              #
+################################################################################
+#  UUCP Mail Routing:                                                          #
+################################################################################
+#                                                                              #
+#      By default, mail to addresses of the form "host!user" is routed to      #
+#      the uucp (or dumbuucp) mailer only if "host" is in the class U,         #
+#      generated from the output of uuname(1).  Addresses of this form         #
+#      referring to other host names are treated as errors.                    #
+#                                                                              #
+#      The following UUCP routing options are supported:                       #
+#                                                                              #
+#  pathalias external nameserver for UUCP:                                     #
+#                                                                              #
+#      You can maintain a pathalias database to provide sendmail with          #
+#      information on how to route UUCP mail to hosts to which your host       #
+#      does not have a direct UUCP connection.  This routing information       #
+#      is generated by pathalias(1m).  Mkuupath(1m) creates a hashed           #
+#      database from the routing information, and uupath(1m) is used to        #
+#      access the database.                                                    #
+#                                                                              #
+#      To make sendmail use uupath, first set up the database as               #
+#      described above.  Then uncomment the three lines in Ruleset 0           #
+#      following the comment:                                                  #
+#                                                                              #
+#       # try to get a path to an unresolved UUCP address                      #
+#                                         from pathalias nameserver            #
+#                                                                              #
+#  UUCP relay (via UUCP):                                                      #
+#                                                                              #
+#      If your host has a UUCP path to another host with wider UUCP            #
+#      connectivity than your host has, it may be appropriate to route         #
+#      UUCP mail to hosts to which your host cannot connect through            #
+#      this other host, which will attempt to relay messages to their          #
+#      final destination.  Courtesy suggests that you get permission from      #
+#      the administrator of that host before relaying mail through it.         #
+#                                                                              #
+#      To implement UUCP relaying via UUCP, first define the macro U, on       #
+#      the line beginning DU, as either the relay host name or the path        #
+#      to the relay host.                                                      #
+#                                                                              #
+#      For example, if you wish to relay through the host pzzz, via the        #
+#      path rrgh!frr!feh!pzzz , define U:                                      #
+#                                                                              #
+#       DUrrgh!frr!feh!pzzz                                                    #
+#                                                                              #
+#      If you have a direct UUCP connection to pzzz, define U:                 #
+#                                                                              #
+#       DUpzzz                                                                 #
+#                                                                              #
+#      After defining the UUCP relay, uncomment the three lines in             #
+#      Ruleset 0 following the comment:                                        #
+#                                                                              #
+#       # pass unresolved UUCP addresses to the UUCP relay (via UUCP)          #
+#                                                                              #
+#  UUCP relay (via SMTP):                                                      #
+#                                                                              #
+#      If you can mail via SMTP to the host you wish to use as a UUCP          #
+#      relay, define the macro W, on the line beginning DW, as the name        #
+#      of the UUCP relay host.                                                 #
+#                                                                              #
+#      Note that in this case, the macro W must be a single host name,         #
+#      not a path.  Note also that the name of any host defined as a           #
+#      relay to be reached via SMTP must be an official host name; in a        #
+#      domain naming environment this must be a fully qualified domain         #
+#      name.  The canonicalization operator $[ $] is not applied to relay      #
+#      names.                                                                  #
+#                                                                              #
+#      For example, if domain names are not in use at your site, and           #
+#      if the relay host's official name is pzzz, define W:                    #
+#                                                                              #
+#       DWpzzz                                                                 #
+#                                                                              #
+#      Then uncomment the line in Ruleset 0 following the comment:             #
+#                                                                              #
+#       # pass unresolved UUCP addresses to the UUCP relay (via SMTP)          #
+#                                                                              #
+#      Note that there is some risk of generating ambiguous (mixed)            #
+#      addresses in message headers using this type of relaying, if you        #
+#      are passing mail to hosts whose mail configuration is not under         #
+#      your control.  This may cause some messages to be unreplyable.          #
+#                                                                              #
+#  UUCP to X.400 gateway                                                       #
+#                                                                              #
+#      By default, mail from an X.400 user or gateway via UUCP may not be      #
+#      replyable.  This is due to uucp interpreting the '/' in the name as     #
+#      implying a file transfer.                                               #
+#                                                                              #
+#      If you are using X.400 or OpenMail on this machine, and have UUCP       #
+#      links from this machine, then apply the following changes:              #
+#                                                                              #
+#      Uncomment the line in Ruleset 6 following the comment:                  #
+#                                                                              #
+#      # Recognize mail from uucp for x400 user on this system                 #
+#                                                                              #
+#      Uncomment the line in Ruleset 13 following the comment:                 #
+#                                                                              #
+#      # enable uucp recipient to reply to remote x400 sender                  #
+#                                                                              #
+#      and uncomment the line in Ruleset 13 following the comment:             #
+#                                                                              #
+#      # enable uucp recipient to reply to local x400 sender                   #
+#                                                                              #
+#      This works by adding an extra host name 'hpx400' to the route back      #
+#      to this system; this name is stripped by the line in Ruleset 6.         #
+#                                                                              #
+#      Note that this will mean that a machine called 'hpx400' will not be     #
+#      reachable from this machine via a direct UUCP connection.               #
+#                                                                              #
+#                                                                              #
+################################################################################
+#  X.400 Mail Routing:                                                         #
+################################################################################
+#                                                                              #
+#      By default, mail to X.400 style addresses will be rejected as an        #
+#      error.  The following options permit routing X.400 mail to the          #
+#      X.400/9000 product running on this host or a remote host.               #
+#                                                                              #
+#  X.400 mail via X.400/9000 delivery agent on this host:                      #
+#                                                                              #
+#      If you have installed the X.400/9000 X.400 delivery agent               #
+#      (/usr/lib/x400/x4mailer) on this host, you must enable sendmail to      #
+#      route X.400 mail to this mailer.  Uncomment the line in Ruleset 0       #
+#      following the comment:                                                  #
+#                                                                              #
+#       # resolve X.400 mail: local host is X.400 gateway                      #
+#                                                                              #
+#      For example, if the name of the local host is "buh", and sendmail       #
+#      is configured as described above, it would route mail to the            #
+#      address User_Joe//SomeOrg/US/TELEMAIL////HP@buh to the X.400            #
+#      delivery agent for further routing through the X.400 network.           #
+#                                                                              #
+#      See the X.400/9000 documentation for a complete explanation of          #
+#      X.400 style addresses.                                                  #
+#                                                                              #
+#      The X.400 receiving agent, also implemented by /usr/lib/x400/x4mailer,  #
+#      will be able to hand incoming messages to sendmail for further          #
+#      routing without any changes to the sendmail configuration.              #
+#                                                                              #
+#  X.400 Relay (X.400/9000 delivery agent on a remote host):                   #
+#                                                                              #
+#      If the X.400/9000 X.400 delivery agent runs on a different host,        #
+#      for example, "farfel", sendmail on farfel must be configured to         #
+#      route X.400 mail to the X.400 delivery agent as described above.        #
+#      Sendmail on the local host would route mail addressed, for              #
+#      example, to User_Joe//SomeOrg/US/TELEMAIL////HP@farfel to farfel        #
+#      via SMTP, and sendmail on farfel would hand the mail to the X.400       #
+#      delivery agent for routing through the X.400 network.  This would       #
+#      require no change in the local host's sendmail configuration.           #
+#                                                                              #
+#      So that users need not know which remote host is the X.400              #
+#      gateway, sendmail can be configured to route mail to X.400              #
+#      addresses via a designated X.400 gateway automatically.  Define         #
+#      the macro X, on the line beginning DX, as the name of (not a path       #
+#      to) the X.400 gateway host.  The X.400 relay must be accessible to      #
+#      this host via SMTP and must be defined as an official host name.        #
+#                                                                              #
+#      In a domain naming environment this must be a fully qualified           #
+#      domain name.  The canonicalization operator $[ $] is not applied        #
+#      to relay names.                                                         #
+#                                                                              #
+#      For example, if official name of the X.400 gateway is farfel,           #
+#      define the macro X as follows:                                          #
+#                                                                              #
+#       DXfarfel                                                               #
+#                                                                              #
+#      Then uncomment the line following the comment:                          #
+#                                                                              #
+#       # resolve X.400 mail: remote host is X.400 gateway                     #
+#                                                                              #
+#      If the local host is named "buh", mail addressed to:                    #
+#                                                                              #
+#       User_Joe//SomeOrg/US/TELEMAIL////HP@buh                                #
+#                                                                              #
+#      will automatically be relayed to the X.400 delivery agent on            #
+#      farfel.                                                                 #
+#                                                                              #
+#      See the X.400/9000 documentation for a complete explanation of          #
+#      X.400 style addresses.                                                  #
+#                                                                              #
+################################################################################
+#  OpenMail Routing:                                                           #
+################################################################################
+#                                                                              #
+#      By default, mail to OpenMail style addresses will be rejected as an     #
+#      error.  The following options permit routing OpenMail and X.400 mail    #
+#      to the OpenMail product running on this host or a remote host.          #
+#                                                                              #
+#  OpenMail to OpenMail delivery agent:                                        #
+#                                                                              #
+#      If you have installed the OpenMail internal delivery agent              #
+#      /usr/openmail/bin/xport.in on this host, you must enable sendmail       #
+#      to route mail from other OpenMail systems to local OpenMail users       #
+#      via this mailer.  Uncomment the line in Ruleset 0 following the         #
+#      comment:                                                                #
+#                                                                              #
+#        # resolve mail to OpenMail from remote OpenMail system                #
+#                                                                              #
+#  OpenMail to X.400 delivery agent:                                           #
+#                                                                              #
+#      If you have installed the OpenMail X.400 interface option               #
+#      (/usr/openmail/bin/x400.out) on this host, you must enable              #
+#      sendmail to route mail from OpenMail users to the X.400 network         #
+#      via this mailer.  Uncomment the line in Ruleset 0 following the         #
+#      comment:                                                                #
+#                                                                              #
+#        # resolve mail to X.400 from OpenMail                                 #
+#                                                                              #
+#  OpenMail delivery agent on this host:                                       #
+#                                                                              #
+#      If you have installed the OpenMail delivery agent,                      #
+#      /usr/openmail/bin/unix.in, on this host, you must enable sendmail       #
+#      to route mail to OpenMail users via this mailer.  Uncomment the         #
+#      line in Ruleset 0 following the comment:                                #
+#                                                                              #
+#        # resolve mail to OpenMail: local host is OpenMail gateway            #
+#                                                                              #
+#      For example, if the name of the local host is "warsh", and              #
+#      sendmail is configured as described above, it would route mail to       #
+#      the address User_Joe/SomeOrgUnit@warsh to the OpenMail delivery         #
+#      agent for routing through the OpenMail network.                         #
+#                                                                              #
+#      See the OpenMail documentation for a complete explanation of            #
+#      OpenMail style addresses.                                               #
+#                                                                              #
+#      If the sendmail configuration has not been changed to pass X.400        #
+#      messages to X.400/9000, then the above change will also cause X.400     #
+#      messages to be passed to OpenMail.  For example, the address            #
+#      User_Joe//SomeOrg/US/TELEMAIL////HP@warsh would be passed to the        #
+#      OpenMail delivery agent for further routing through the X.400           #
+#      network.                                                                #
+#                                                                              #
+#      The OpenMail receiving agent will be able to hand incoming messages     #
+#      to sendmail for further routing without any changes to the              #
+#      sendmail configuration.                                                 #
+#                                                                              #
+#  OpenMail Relay (OpenMail delivery agent on a remote host):                  #
+#                                                                              #
+#      If the OpenMail delivery agent runs on a different host, for            #
+#      example, "tortue.ordinary.com", sendmail on tortue must be              #
+#      configured to route OpenMail mail to the OpenMail delivery agent        #
+#      as described above.  Sendmail on the local host would route mail        #
+#      addressed, for example, to User_Joe/SomeOrgUnit@tortue to tortue        #
+#      via SMTP, and sendmail on tortue would hand the mail to the             #
+#      OpenMail delivery agent for further routing through the OpenMail        #
+#      or X.400 networks.  This would require no change to the local           #
+#      host's sendmail configuration.                                          #
+#                                                                              #
+#      So that users need not know which remote host is the OpenMail           #
+#      gateway, sendmail can be configured to route mail to OpenMail           #
+#      addresses via a designated OpenMail gateway automatically.  Define      #
+#      the macro Z, on the line beginning DZ, as the name (not path) of        #
+#      the OpenMail gateway host.  The OpenMail relay must be accessible       #
+#      to this host via SMTP.                                                  #
+#                                                                              #
+#      In a domain naming environment this must be a fully qualified           #
+#      domain name.  The canonicalization operator $[ $] is not applied        #
+#      to relay names.                                                         #
+#                                                                              #
+#      For example, if the official host name of the OpenMail gateway is       #
+#      tortue.ordinary.com, define the macro Z as follows:                     #
+#                                                                              #
+#        DZtortue.ordinary.com                                                 #
+#                                                                              #
+#      Then uncomment the line following the comment:                          #
+#                                                                              #
+#        # resolve mail to OpenMail: remote host is OpenMail gateway           #
+#                                                                              #
+#      If the local host is named "warsh", mail addressed to:                  #
+#                                                                              #
+#        User_Joe//SomeOrg/US/TELEMAIL////HP@warsh                             #
+#                                                                              #
+#      will automatically be relayed to the OpenMail delivery agent on         #
+#      tortue.ordinary.com .                                                   #
+#                                                                              #
+#      See the OpenMail documentation for a complete explanation of            #
+#      OpenMail style addresses.                                               #
+#                                                                              #
+################################################################################
+
+############################################################
+###                 Localizable Options                  ###
+############################################################
+
+# logging level
+OL10
+
+# what to do when an 8-bit message was received and the next MTA (mail
+# transfer agent) down the line will only allow 7-bit messages:
+#   e => encode the message (using MIME) into a 7-bit message
+#   r => reject the message, i.e., bounce it back to the sender
+#   s => send the message anyway and risk data corruption
+OEe
+
+# defer messages to [IPC] mailers if the nameserver is not running
+#OI
+
+# delivery mode
+Odbackground
+
+# error reporting mode
+Oep
+
+# read timeout
+Or5m
+
+# queue timeout interval
+OT3d
+
+# load average at which low priority messages are queued rather than delivered
+Ox8
+
+# load average at which daemon refuses to accept connections
+OX12
+
+# checkpoint queue runs after every N successful deliveries
+OC10
+
+# postmaster address which will receive headers of undeliverable messages
+#OPPostmaster
+
+############################################################
+###		       Other Options			 ###
+############################################################
+###							 ###
+###   HP recommends that these options not be changed.	 ###
+###							 ###
+############################################################
+
+# queue directory
+OQ/usr/spool/mqueue
+
+# Save those UN*X From_ lines
+Of
+
+# location of alias file and reverse-alias file
+OA/usr/lib/aliases
+OV/usr/lib/rev-aliases
+
+# temporary file mode
+OF0600
+
+# default UID
+Ou1
+
+# default GID
+Og1
+
+# location of help file
+OH/usr/lib/sendmail.hf
+
+# recognize old style as well as new style lists in headers
+Oo
+
+# statistics file
+OS/usr/lib/sendmail.st
+
+# wait up to 5 minutes for completion of alias db initialization
+Oa5
+
+# queue up everything before starting transmission
+Os
+
+# send to me, too if in alias expansion
+Om
+
+# if the load average exceeds the x option limit, divide the q option
+# value by the difference (plus one) between the current load average and
+# the x option limit to find the maximum priority value (i.e. minimum
+# priority) of messages to send immediately.
+Oq10000
+
+# value added to message priority per recipient
+Oy1000
+
+# message precedence factor
+Oz1800
+
+# value added to message priority per queue run
+OZ9000
+
+
+############################################################
+###  Configuration-Specific Macro and Class Definitions	 ###
+############################################################
+
+# site hiding: local sender identified as user@my_site instead of user@my_host
+#DY
+
+# class w defines aliases for the local host
+#Cw
+
+# macro L defines the "local domain" to which you connect directly for SMTP mail
+DL
+
+# class S defines hosts to which you connect directly for SMTP mail
+#FS/etc/hosts.smtp %s
+
+# class U defines known direct UUCP connections
+#FU|/usr/bin/uuname %s
+
+# UUCP relay for unresolved ! addresses (via UUCP)
+DU
+
+# UUCP relay for unresolved ! addresses (via SMTP)
+DW
+
+# SMTP relay for unresolved @ addresses
+DS
+
+# X.400 relay if X.400 delivery agent is not local
+DX
+
+# OpenMail relay if OpenMail delivery agent is not local
+DZ
+
+# dumb (not RFC 822 compatible) UUCP hosts
+CG
+
+# pathalias external nameserver program
+DP/usr/bin/uupath
+
+
+############################################################
+###                 Configuration Version                ###
+############################################################
+
+DV16.2
+
+############################################################
+###              Required Macro Definitions              ###
+############################################################
+
+# official domain name of this host for SMTP
+Dj$w
+
+# my name
+DnMAILER-DAEMON
+
+# UNIX header format
+DlFrom $g $d
+
+# delimiter (operator) characters
+Do.:%@!^=/[]|
+
+# format of a total name
+Dq$?x$x <$g>$|$g$.
+
+# SMTP banner
+De$j HP Sendmail ($v/$V) ready at $b
+
+
+############################################################
+###                 Message Precedences                  ###
+############################################################
+
+Pfirst-class=0
+Pspecial-delivery=100
+Pjunk=-100
+
+
+############################################################
+###                   Trusted Users                      ###
+############################################################
+
+Troot
+Tdaemon
+Tuucp
+Tx400
+
+
+############################################################
+###                Header Field Formats                  ###
+############################################################
+
+HReceived: $?sfrom $s $.by $w$?r with $r$.
+	($v/$V) id $i; $b
+HResent-Date: $a
+HDate: $a
+HResent-From: $q
+H?F?From: $q
+H?x?Full-Name: $x
+H?P?Return-Path: <$g>
+HSubject:
+#HPosted-Date: $a
+#HReceived-Date: $b
+#HResent-Message-Id: <$t.$i@$w>
+#H?M?Message-Id: <$t.$i@$w>
+
+
+############################################################
+############################################################
+#####                                                  #####
+#####          Address Rewriting Rulesets              #####
+#####                                                  #####
+############################################################
+############################################################
+
+
+############################################################
+###  Ruleset 1 - Sender Field Pre-rewriting              ###
+############################################################
+
+S1
+R$+			$:$>6$1			strip my_host and canonicalize
+R$*<@$+>$*		$@$1<@$2>$3		already has (remote) domain
+R$+/$*/$*/$*/$*		$:$1/$2/$3/$4/$5<@$w>	@my_domain on local X.400 sender
+
+
+############################################################
+###  Ruleset 2 - Recipient Field Pre-rewriting           ###
+############################################################
+
+S2
+R$+			$:$>6$1			strip my_host and canonicalize
+R$*<@$+>$*		$@$1<@$2>$3		already has (remote) domain
+R$+/$*/$*/$*/$*		$:$1/$2/$3/$4/$5<@$w>	@my_domain on local X.400 recpt
+
+
+############################################################
+###  Ruleset 3 - Address Internalization                 ###
+############################################################
+
+S3
+# handle "From:<>" special case
+R<>			$@$n			null address => MAILER-DAEMON
+
+# basic textual canonicalization
+R$*<$*>$*<$*>$*		$2$3<$4>$5		strip multiple <> <>
+R$*<$*<$+>$*>$*		$1<$2$3$4>$5		strip <> from inside
+R$*<$+>$*		$2			strip phrase and <>
+R$+ at $+		$1@$2			RFC 733 at => RFC 822 @
+
+# source route <@a,@b,@c:user@d> syntax to internal form <@a>:@b:@c:user@d
+R@$+,$+			@$1:$2			change all , to :
+R@$+.UUCP:$+		$@<@$1.UUX>:$2		.UUCP pseudo-domain in route
+R@$+:$+			$@<@$1>:$2		focus on next hop
+
+# The @ delimiter takes precedence.  Leave this alone.
+R$+@$+			$:$1<@$2>		focus on domain
+R$+<$+@$+>		$1$2<@$3>		move gaze right
+R$+<@$+.UUCP>		$@$1<@$2.UUX>		.UUCP pseudo-domain
+R$+<@$+>		$@$1<@$2>		already in internal form
+
+# The ! delimiter.
+R$+^$+			$1!$2			convert obsolete ^ to !
+R$+!$+			$@$2<@$1.UUX>		host!user => user<@host.UUX>
+
+# % is a low precedence @.
+R$+%$+			$:$1<%$2>		focus on domain
+R$+<$+%$+>		$1$2<%$3>		move gaze right
+R$+<%$+>		$1<@$2>			user%host => user@host
+R$+<@$+.UUCP>		$@$1<@$2.UUX>		.UUCP pseudo-domain
+
+# miscellaneous cleanup
+R$+@			$@$1			user@ => user
+R$+%			$@$1			user% => user
+
+
+############################################################
+###  Ruleset 4 - Final Output Post-rewriting             ###
+############################################################
+
+S4
+# special cases
+R$+<@>			$1			null domain
+
+# UUCP must always be presented as host!user
+R$+<@$+.UUX>		$@$2!$1			user<@host.UUX> => host!user
+
+# UUCP hop in source route
+R<@$+.UUX>:$+		<@$1.UUCP>:$2		.UUX in source route => .UUCP
+R<@$+>:$+.UUX$+		<@$1>:$2.UUCP$3		.UUX in source route => .UUCP
+
+# defocus
+R$*<$+>$*		$1$2$3			remove internal form <>
+
+# don't change %s or @s in mixed addresses
+R$+!$+@$+		$@$1!$2@$3		don't interpret it any further
+R$+!$+%$+		$@$1!$2%$3		don't interpret it any further
+
+# restore source route to external form
+R@$+:$+:$+		@$1,$2:$3		all but last : => ,
+R@$+			$@<@$1>			add <> to protect the ,s
+
+# should be exactly one @ in user@domain style address
+R$+%$+			$1@$2			all % => @
+R$+@$+@$+		$1%$2@$3		all but last @ => %
+
+
+#############################################################
+###  Ruleset 0 - {Delivery_Agent, Host, User} Resolution  ###
+#############################################################
+
+S0
+# recognize local host or canonicalize
+R$+			$:$>6$1			anything to ruleset 6 once
+
+# resolve domain-literals (numeric internet addresses) not canonicalized above
+R$*<@[$+]>		$#tcp$@[$2]$:$1@[$2]	user@internet address
+R<@[$+]>:$*		$#tcp$@[$1]$:@[$1]:$2	internet address in source route
+
+# resolve mail to dumb UUCP hosts
+R$+<@$=G.UUX>		$#dumbuucp$@$2$:$1	user@dumb_host.UUX
+
+# resolve mail to other known UUCP hosts
+R$+<@$=U.UUX>		$#uucp$@$2$:$1		user@host.UUX
+R<@$=U.UUX>:$+		$#uucp$@$1$:$2		@host.UUX in source route
+
+# try to get a path to an unresolved UUCP address from pathalias nameserver
+#R$+<@$-.UUX>		$:$>5$2!$1		uupath pathalias routing
+#R$+<@$=G.UUX>		$#dumbuucp$@$2$:$1	to dumb UUCP host
+#R$+<@$=U.UUX>		$#uucp$@$2$:$1		to other known UUCP host
+
+# pass unresolved UUCP addresses to the UUCP relay (via SMTP)
+#R$+<@$+.UUX>		$#tcp$@$W$:$1<@$2.UUX>	to UUCP relay via SMTP
+
+# pass unresolved UUCP addresses to the UUCP relay (via UUCP)
+#R$+<@$+.UUX>		$:$>3 $U!$2!$1		re-internalize with $U
+#R$+<@$=G.UUX>		$#dumbuucp$@$2$:$1	to dumb UUCP relay
+#R$+<@$+.UUX>		$#uucp$@$2$:$1		to UUCP relay
+
+# other UUCP addresses are in error
+R$*<@$+.UUX>$*		$#error$:unable to route to UUCP host name $2
+
+# select hosts to connect with directly for SMTP mail:
+
+# connect to hosts in class S
+#R$+<@$=S>		$#tcp$@$2$:$1<@$2>	user@domain
+
+# connect to hosts in local domain
+#R$+<@$+.$L>		$#tcp$@$2.$L$:$1<@$2.$L>	user@host.localdomain
+
+# try to connect to any host for user@domain
+R$+<@$+>		$#tcp$@$2$:$1<@$2>	user@domain
+
+# try to connect to any host for source route
+R<@$+>:$+		$#tcp$@$1$:<@$1>:$2	source route
+
+# Users must choose at most one of the following lines to pass
+#   unresolved SMTP addresses to the SMTP relay or UUCP relay
+#   (don't relay source routes).  Note: if both lines are
+#   uncommented, only the first one will be in effect.
+#R$+<@$+>		$#tcp$@$S$:$1<@$2>	user@domain to SMTP relay
+#R$+<@$+>		$#uucp$@$S$:$1<@$2>	user@domain to UUCP relay
+
+# other SMTP addresses are in error
+R$*<@$+>$*		$#error$:unable to route to domain $2
+
+# resolve X.400 mail: local host is X.400 gateway
+# X.400 keyword addressing:
+#R/$+=$+/			$#x400$@$w$:/$1=$2/
+# X.400 ordered addressing:
+#R$+/$*/$*/$*/$*		$#x400$@$w$:$1/$2/$3/$4/$5
+
+# resolve X.400 mail: remote host is X.400 gateway
+# X.400 keyword addressing:
+#R/$+=$+/			$#tcp$@$X$:/$1=$2/<@$X>
+# X.400 ordered addressing:
+#R$+/$*/$*/$*/$*		$#tcp$@$X$:$1/$2/$3/$4/$5<@$X>
+
+# resolve keyword addressing mail to OpenMail: local host is OpenMail gateway
+#R/$+=$*			$#openmail$@$w$:/$1=$2
+# resolve keyword addressing mail to OpenMail: remote host is OpenMail gateway
+#R/$+=$*			$#tcp$@$Z$:/$1=$2<@$Z>
+
+# file names, programs, and :include: must resolve to local mailer;
+# explicitly distinguish these from X.400 and OpenMail syntax
+R/$*			$#local$:/$1		to absolute file path name
+R|$*			$#local$:|$1		to a program
+R:include:$*		$#local$::include:$1	to :include: list
+
+# resolve mail to OpenMail: local host is OpenMail gateway
+#R$+/$*			$#openmail$@$w$:$1/$2
+#R$+;$*			$#openmail$@$w$:$1/$2
+
+# resolve mail to OpenMail: remote host is OpenMail gateway
+#R$+/$*			$#tcp$@$Z$:$1/$2<@$Z>
+#R$+;$*			$#tcp$@$Z$:$1/$2<@$Z>
+
+# by default, reject X.400 address as error
+R$+/$*/$*/$*/$*		$#error$:X\.400 delivery agent not configured
+
+# by default, reject OpenMail address as error
+R$+/$*			$#error$:OpenMail delivery agent not configured
+
+# resolve mail to OpenMail from remote OpenMail system
+#Ropenmail		$#omxport$@$w$:openmail
+
+# resolve mail to X.400 from OpenMail
+#Ropenmailx4		$#omx400$@$w$:openmailx4
+
+# other addresses must resolve to local mailer in order for mail to Full.Name,
+# command line aliases, and quoted user names (\user) to be delivered.
+
+# remaining names must be local
+R$+			$#local$:$1		name
+
+
+############################################################
+############################################################
+#####                                                  #####
+#####              Special Rulesets                    #####
+#####                                                  #####
+############################################################
+############################################################
+
+
+############################################################
+###  Ruleset 5 -    Pathalias Nameserver                 ###
+############################################################
+
+S5
+R$+			$:$<P$1			uupath pathalias routing
+R$+			$:$>3$1			re-internalize 
+
+
+############################################################
+###  Ruleset 6 -   Local Host Recognition                ###
+############################################################
+
+S6
+# RFC 822 does not permit hostnames to end in . 
+R$*<@$*.>$*		$1<@$2>$3		strip trailing .
+
+# strip local host
+R$+<@$w>		$>3$1			strip my_host and re-internalize
+R<@$w>:$+		$>3$1			strip my_host and re-internalize
+
+# recognize local host in UUCP syntax
+R$+<@$k.UUX>		$:$1<@$w>		my_host in UUCP syntax
+# Recognize mail from uucp for x400 user on this system
+#R$+<@hpx400.UUX>	$:$1<@$w>		X.400 in UUCP syntax
+R<@$k.UUX>:$+		$:<@$w>:$1		my_host.UUCP in source route
+
+R$*<@$+.UUX>$*		$@$1<@$2.UUX>$3		don't canonicalize host.UUX
+
+# canonicalize host and possibly recurse
+R$*<@$+>$*		$:$1<@$[$2$]>$3		user@host or source route
+R$*<@$=w>$*		$:$>6$1<@$w>$3		recurse if still to my_host
+
+
+############################################################
+############################################################
+#####                                                  #####
+#####       Mailer (Delivery Agent) Definitions        #####
+#####                                                  #####
+############################################################
+############################################################
+
+
+############################################################
+###             local and program mailers                ###
+############################################################
+
+Mlocal,	 P=/bin/rmail,	F=DFMPlms,  S=10,  R=20,  A=rmail -d $u
+Mprog,	P=/bin/sh,  F=DFMPlshu,	 S=10,	R=20,  A=sh -c $u
+
+S10
+R$*<@$+.UUX>		$@$1<@$2.UUX>		don't modify UUCP address
+R$*<@$+>$*		$@$1<@$2>$3		already has domain
+R$+			$:$1<@$w>		add local domain to user
+
+S20
+R$*<@$+.UUX>		$@$1<@$2.UUX>		don't modify UUCP address
+R$*<@$+>$*		$@$1<@$2>$3		already has domain
+R$+			$:$1<@$w>		add local domain to user
+
+
+############################################################
+###                SMTP TCP/IP mailer                    ###
+############################################################
+
+Mtcp,  P=[IPC],	 F=CDFMXmu,  S=11,  R=21,  E=\r\n,  A=IPC $h
+
+S11
+R$*<@$+.UUX>		$@$2!$1<@$w>		add local domain to UUCP address
+R<@$+>:$*		$@<@$w>:@$1:$2		add local domain to source route
+R$+<@$+>		$@$1<@$2>		already has domain
+R$+			$:$1<@$?Y$Y$|$w$.>	add local domain
+
+S21
+R$*<@$+>$*		$@$1<@$2>$3		already has domain
+R$+			$:$1<@$w>		add local domain
+
+
+############################################################
+###                   UUCP mailer                        ###
+############################################################
+
+Muucp,	P=/usr/bin/uux,	 F=DFMUshu,  S=13,  R=23,  A=uux - $h!rmail ($u)
+
+S13
+R$+<@$+.UUX>		$@$2!$1<@$k.UUX>	host!user => my_host!host!user 
+R$+@$+<@$+>		$1%$2<@$3>		all but last @ => %
+# enable uucp recipient to reply to remote x400 sender
+#R$*/$*<@$+>	$@hpx400!$1/$2%$3<@$k.UUX>	user@host => my_host!hpx400!user%host
+R$+<@$+>		$@$1%$2<@$k.UUX>	user@host => my_host!user%host
+R<@$+>:$+		$@<@$k.UUCP>:@$1:$2	prepend @my_host.UUCP to route
+# enable uucp recipient to reply to local x400 sender
+#R$*/$*		$@hpx400!$1/$2<@$k.UUX>		user => my_host!hpx400!user
+R$+			$@$1<@$k.UUX>		user => my_host!user
+
+S23
+
+
+############################################################
+###                Dumb UUCP mailer                      ###
+############################################################
+###     UUCP for hosts running non-RFC 822 mailers       ###
+############################################################
+
+Mdumbuucp,  P=/usr/bin/uux,  F=DMUshux,	 R=23,	A=uux - $h!rmail ($u)
+
+
+############################################################
+###                   X.400 mailer                       ###
+############################################################
+
+Mx400, P=/usr/lib/x400/x4mailer, F=CDMFmn, S=14, R=24, A=x4mailer -f $g $u
+
+S14
+
+S24
+
+
+
+############################################################
+###                  OpenMail mailers                    ###
+############################################################
+
+Mopenmail,  P=/usr/openmail/bin/unix.in,  F=DFLMXmnu,  S=15,  R=25,  A=unix.in
+
+S15
+
+S25
+
+
+Momxport,  P=/usr/openmail/bin/xport.in,  F=LMn, A=xport.in $u
+
+Momx400,  P=/usr/openmail/bin/x400.out,  F=LMn, A=x400.out $u

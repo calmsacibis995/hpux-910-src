@@ -1,0 +1,74 @@
+#!/bin/sh
+##	@(#)1.8	87/04/30
+#	schedule	--	summarize schedule files ...
+##
+FULL=0;
+CHECK=0;
+for ARG
+do
+    case $ARG
+    in
+	-f)
+	   FULL=1
+	   shift
+	   ;;
+	-c)
+	   CHECK=1
+	   shift
+	   ;;
+	-*)
+	   echo ${0}: illegal option $1 -- ignored
+	   shift
+	   ;;
+	*)
+	   break
+	   ;;
+     esac
+done
+
+for FILE in $* ; do
+    echo "Totals for $FILE are:\n"
+    cat $FILE |\
+    awk '
+BEGIN	{ check = 1; }
+	# if the first field is "Checkpoint", then add the second field
+	# (the checkpoint name) to the array "chkpt" and add the third
+	# field (the checkpoint date) to the array "chkdate" ...
+/^Checkpoint/ { chkpt[check] = $2; chkdate[check] = $3; check++; }
+	# if the first field is a number we will add in its values
+/^[0-9]/ {
+	    # add the values to the checkpoint sum arrays and
+	    # the total sum arrays ...
+	    chkdone[check] += $1;
+	    chkleft[check] += $2;
+	    chkorig[check] += $3;
+	}
+END	{
+	# Compile totals for whole file and print them
+	if ( check == 1 ) {
+	    totdone = chkdone[1];
+	    totleft = chkleft[1];
+	    totorig = chkorig[1];
+	}
+	for (chk = 1; chk < check; chk++) {
+	    totdone += chkdone[chk];
+	    totleft += chkleft[chk];
+	    totorig += chkorig[chk];
+	    printf("\tcheckpoint %s on %s:\n", chkpt[chk], chkdate[chk]);
+	    printf("\t\tWork done: %.1f days   \t\tCumulative: %.1f days\n", chkdone[chk], totdone);
+	    printf("\t\tWork left: %.1f days   \t\tCumulative: %.1f days\n", chkleft[chk], totleft);
+	    printf("\t\tOriginal est: %.1f days\t\tCumulative: %.1f days\n", chkorig[chk], totorig);
+	    if ( chkdone[chk] + chkleft[chk] != 0 ) {
+		printf("\t\tPercentage done: %.1f%",chkdone[chk]/(chkdone[chk]+chkleft[chk])*100);
+		printf("\t\tCumulative: %.1f%\n",totdone/(totdone+totleft)*100);
+	    }
+	    printf("\n");
+	}
+	printf("\tTotal work done: %.1f days\n", totdone);
+	printf("\tTotal work left: %.1f days\n", totleft);
+	printf("\tTotal original estimate: %.1f days\n", totorig);
+	if ( totdone+totleft != 0 )
+	   	 printf("\tPercentage done: %.1f%\n" , totdone/(totdone+totleft)*100);
+	printf("\n");
+     }'
+done

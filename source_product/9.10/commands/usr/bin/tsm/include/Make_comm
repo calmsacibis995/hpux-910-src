@@ -1,0 +1,30 @@
+# Makefile for include - COMMON
+# @(#) $Header: Make_comm,v 70.1 92/03/09 15:47:55 ssa Exp $
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+USR_INCLUDE_TEXT=	facetwin.h facetterm.h
+USR_INCLUDE_DIR=	/usr/include
+
+all:
+	@echo ONLY install for include directory
+
+install:	installtext installprog installown
+	@echo install include for $(MACH) done
+
+installtext:
+#	Cpioinstall $(FTINSTDIR)$(USR_INCLUDE_DIR)    - $(USR_INCLUDE_TEXT)
+	@echo installtext include for $(MACH) done - nothing to do
+
+installtextcommon:
+#	Cpioinstall $(FTINSTDIR)$(USR_INCLUDE_DIR)    - $(USR_INCLUDE_TEXT)
+	@echo installtextcommon include for $(MACH) done - nothing to do
+
+installprog:
+	@echo installprog include for $(MACH) done - nothing to do
+
+installown:
+	@echo installown include for $(MACH) done - nothing to do
+
+clean:
+	@echo clean include for $(MACH) done - nothing to do

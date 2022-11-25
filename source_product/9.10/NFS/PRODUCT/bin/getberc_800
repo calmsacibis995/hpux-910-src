@@ -1,0 +1,5 @@
+-d /usr/src/tools.7.0/TOOLS
+-h hpfclc
+-r s800_7.0_gs
+-p nfs
+-m dlr@hpcndk

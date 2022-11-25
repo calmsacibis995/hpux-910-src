@@ -1,0 +1,440 @@
+
+--------------------- Terminal Session Manager Help Text -------- Page  1 of 19
+
+CONTENTS:                            
+                                     
+                Introduction  ................  2  
+                Menu Interface ...............  3  
+                Command Interface ............  4  
+                Session Commands .............  5  
+                Common Commands ..............  6  
+                Cut and Paste ................  7  
+                Cut Types ....................  8  
+                Paste from Cut ...............  9  
+                Printing and Screen Saver .... 10  
+                Function Keys ................ 11  
+                Key Mapping .................. 12  
+                Session Scanning ............. 13  
+                Signals & CTRL Characters .... 14  
+                Data Capture ................. 15  
+                Special Terminal Modes ....... 16  
+                Session Notify ............... 17  
+                Session Monitor .............. 18  
+                Environment and Path ......... 19  
+                                     
+--------------------- Terminal Session Manager Help Text -------- Page  2 of 19
+
+INTRODUCTION:
+
+  TSM is a system that makes your terminal appear to be 10 "terminals".
+  Each of these "terminals", called sessions, can run its own program
+  with its own set of function keys. 
+
+  There are three ways to operate TSM:
+
+        1. By pressing a function key (if they are available).
+        2. By pressing Control-T to access the TSM Menu Interface 
+        3. by pressing Control-W to access the TSM Command Interface.
+
+  If you are using TSM to run a program that needs a Control-W or Control-T,
+  simply press the key TWICE to send the character to the program.
+
+  To SELECT an item or value, use the [Return] key.
+
+  To CANCEL a command or menu selection, use the [ESC] key (or space bar).
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page  3 of 19
+
+MENU INTERFACE:
+
+  When you press Control-T ([CTRL]-[T]), you will see the menu interface.
+
+  Use the terminal's UP and DOWN arrow keys to open a menu and move the
+  cursor to highlight an item, then press [Return] to select the item or
+  press the space bar to cancel.
+
+  +--------------------- TSM Menu    Session 1: SHELL 1 ---------------------+
+  |  Select   Run   Cut & paste   Print   Misc   Quit                        |
+  +--------------------------------------------------------------------------+
+     |  1 SHELL 1   ^W1  |
+     |  2 SHELL 2   ^W2  |
+     |  3 SHELL 3   ^W3  |
+     +-------------------+
+
+  Use the terminal's LEFT and RIGHT arrow keys to switch to another menu.
+
+  Press the space bar to cancel the menu interface. 
+
+
+--------------------- Terminal Session Manager Help Text -------- Page  4 of 19
+
+COMMAND INTERFACE:
+
+  When you press Control-W ([CTRL-[W]), you will see the command interface.
+
+    >>> TSM Session  1    '?' for Help <<<
+
+  At the command interface you can press keys to perform various actions.
+
+  For example: press [1] for session one, 
+                     [2] for session two,
+                     [3] for session three, ...
+            or press
+                     [Space Bar] to cancel, and return to the session,
+            or press
+                     [Return] to refresh the screen, and return to session,
+            or press
+                     [q] to quit TSM (confirm with [Y], cancel with [N]). 
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page  5 of 19
+
+SESSION COMMANDS:
+
+  After pressing [CTRL]-[w] to enter the command interface, you can press:
+
+            [Return]  to refresh current session
+
+         [Space Bar]  to cancel the command interface
+
+                 [-]  for the previous session (or LEFT-cursor or [Backspace] )
+                 [+]  for the next session     (or RIGHT-cursor or [=] )
+
+                 [l]  to return to the LAST session
+
+                 [o]  to OUTPUT the current screen to printer
+
+ [r] <name> [Return]  to RUN a program in an idle session
+
+                 [s]  to start a SHELL in an idle session
+
+ ["]<title> [Return]  put title on session (or ['])
+
+--------------------- Terminal Session Manager Help Text -------- Page  6 of 19
+
+COMMON COMMANDS:
+
+  After pressing [CTRL]-[w] to enter the command interface, you can press:
+
+                 [?]  for this Help text file  (or [h] or [/] )
+
+                 [c]  to CUT text         
+                 [p]  to PASTE text       
+
+                 [g]  load function keys (globally)
+                 [k]  load function keys (current session)
+
+                 [o]  to OUTPUT the current screen to printer
+
+                 [x]  extended commands   
+
+
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page  7 of 19
+
+CUT and PASTE:   (continues on next screen)
+
+  TSM allows you to cut text from one session and paste the text in another.
+  To CUT text: start the command, position the cursor at the start of text,
+  press Return, position the cursor at the end of text, and press Return.
+
+  CUT Command:  [CTRL]-[W]  [c]  <position-1> [Return] <position-2> [Return] 
+
+       where <position-1> and <position-2> are accomplished by using the
+       arrow keys or by using:
+
+   u or up-cursor    -- up one row        |   U -- Up to top row
+   d or down-cursor  -- down one row      |   D -- Down to bottom row
+   l or left-cursor  -- left one column   |   L -- Left to first column
+   r or right-cursor -- right one column  |   R -- Right to last column
+
+                a  (all)     -- pos1 is upper-left, pos2 is lower right
+                e  (end)     -- pos1 at cursor, pos2 at last column
+                c  (corner)  -- switch corner being positioned
+                o  (outline) -- outline area being cut
+
+--------------------- Terminal Session Manager Help Text -------- Page  8 of 19
+
+CUT TYPES:       (continues on next screen)
+
+  The CUT command with a cut-type OPTION:
+
+   [CTRL]-[W]  [C]  <OPTION> <position-1> [Return] <position-2> [Return]
+
+  Where OPTION is one of the following:
+
+     [B] Block cut  -- cuts a rectangle of text (inserting newlines)
+                       [CTRL]-[w] [c] [b] <pos-1> [Return] <pos-2> [Return]
+                        
+     [T] Text cut   -- cuts lines of text (including newlines)
+                       [CTRL]-[w] [c] [t] <pos-1> [Return] <pos-2> [Return]
+
+     [S] String cut -- cuts lines of text (suppressing newlines)
+                       [CTRL]-[w] [c] [s] <pos-1> [Return] <pos-2> [Return]
+
+  CUT remembers and re-uses the last cut OPTION you specified.
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page  9 of 19
+
+PASTE from CUT:
+
+  TSM allows you to cut text from one session and paste the text in another.
+
+  PASTE command:    [CTRL]-[w] [p]
+
+  When you PASTE, text will be entered into the current session, at the
+  cursor, just as if you were typing the text.
+
+  Make sure that the application to which you are pasting text is prepared
+  to accept text. For example, vi should be in insert mode before pasting.
+
+  Additional PASTE commands: [CTRL]-[W] and
+
+        [>] [p]                     paste to printer (uses .tsmprint)
+        [>] [f] <filename> [Return] paste to <filename> (cannot exist)
+        [>] [a] <filename> [Return] paste to <filename> (append)
+        [>] [o] <filename> [Return] paste to <filename> (overwrite)
+
+  TSM will beep if an error occurs during a paste operation.
+
+--------------------- Terminal Session Manager Help Text -------- Page 10 of 19
+
+PRINTING:
+
+  TSM can print to the standard HP-UX lp command. TSM also supports a local
+  printer lp device attached to a terminal. See the TSM User's manual for
+  details on how to connect a local printer.
+
+  To print the current session display use:
+
+    {CTRL]-[W] [o]      to OUTPUT the current screen to printer
+
+
+
+SCREEN SAVER:
+
+  When there is no activity, TSM will blank the screen:  
+
+    [X] [s] [y]          start screen saver 
+    [X] [s] [n]          disable the screen saver
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 11 of 19
+
+FUNCTION KEYS:
+
+  TSM allows you to load function keys for a session or for all sessions
+
+
+  ALL SESSIONS:   [CTRL]-[w] and
+
+  [g] <filename> [Return] Load function key file GLOBALLY - i.e. all sessions
+  [g]  DEFAULT   [Return] Load function keys GLOBALLY to defaults for terminal
+  [g]    [+]     [Return] Reload func keys GLOBALLY to results of load func key
+  [g]    [-]     [Return] Reload func keys GLOBALLY to defaults 
+                                                        (Same as "DEFAULT")
+
+  CURRENT SESSION:  [CTRL]-[w] and
+
+  [k] <filename> [Return] Load function KEY file to session.
+  [k]  DEFAULT   [Return] Load function KEYS to terminals DEFAULT to session.
+  [k]    [+]     [Return] Reload keys to results of all load function key.
+  [k]    [-]     [Return] Reload keys to defaults. (Same as "DEFAULT")
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 12 of 19
+
+KEY MAPPING:
+
+  TSM lets you map an arbitrary sequence of characters to a single keystroke.
+
+  Press [CTRL]-[W] and either [:] or [;] 
+
+  [:] [h] <key> <map> [Return]  map <key> on any session to send <map> 
+                                to this session. 
+
+  [:] [u] <key> [Return]        unmap <key>
+
+  [:] [m] <key> <map>[Return]   remap <key> on current session to <map>
+
+  For example, [CTRL]-[W] [:] [h] [1] foobar [Return]
+  will print the word "foobar" when the [1] key is pressed.
+
+
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 13 of 19
+
+SESSION SCANNING:
+
+  You can scan through the currently active sessions with these commands:
+
+    [CTRL]-[w] and:
+
+           [-]  for the previous session (or LEFT-cursor or [Backspace] )
+           [+]  for the next session     (or RIGHT-cursor or [=] )
+
+  You can hide sessions from the scan:
+
+    [CTRL]-[w] and:
+
+           [X] [I] [Y]          set current session invisible to scan
+           [X] [I] <win#> [Y]   set session <win#> invisible to scan
+           [X] [I] [n]          set current session visible to scan
+           [X] [I] <win#> [N]   set session <win#> visible to scan
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 14 of 19
+
+SIGNALS & CONTROL CHARACTERS:
+
+  You can send control characters and signals (see signals(5)) to a session.
+  
+  CHARACTERS:  use [CTRL]-[w] and
+
+       [.]  [Q]       send Control-Q (XON) to session
+       [.]  [S]       send Control-S (XOFF) to session
+       [.]  [@]       send Control-@ to session
+       [.]  [B]       send break to session
+        null          send break to session if not using PARMRK and not 
+                      using the send_break_to_window option.
+       [Break]        send break to session if not using the 
+                      send_break_to_window option.
+
+  SIGNALS:     use [CTRL]-[W] and:
+
+      [X] [H] [Y]    send SIGHUP to current session
+      [X] [H] [A]    send SIGHUP to all sessions
+      [X] [H] [K]    send SIGKILL to current session
+
+--------------------- Terminal Session Manager Help Text -------- Page 15 of 19
+
+DATA CAPTURE:
+
+  TSM provides for the capture and playback of keystrokes.
+
+
+
+  KEYSTROKE CAPTURE MODE -- use [CTRL]-[W] and:
+
+    [X] [K] [Y] <file> [Return]  start keystroke capture in <file>.key
+    [X] [K] [N]                  stop  keystroke capture
+
+
+
+  KEYSTROKE REPLAY MODE  -- use [CTRL]-[W] and:
+
+    [X] [r] <file> [Return]      start keystroke capture replay of <file>.key
+
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 16 of 19
+
+SPECIAL TERMINAL MODES:
+
+  If you are using a terminal description file which allows applications to
+  switch the terminal from one mode to another, TSM allows you to switch
+  the mode from the keyboard.
+
+    [CTRL]-[W] and:
+
+     [m] <set> [Return]     -- where <set> is:
+
+                                u      or up-cursor     - previous mode name
+                                d      or down-cursor   - next mode name
+                                n or r or right-cursor  - next setting
+                                p or l or left-cursor   - previous setting
+                                backspace               - previous setting
+
+
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 17 of 19
+
+SESSION NOTIFY:   
+
+  When enabled, TSM can notify a program when it is the current session,
+  by sending a CONTROL-Y to the session. -- use [CTRL]-[W] and:
+
+    [X] [N] [Y]          set current session notify when current
+    [X] [N] <win#> [Y]   set session <win#> notify when current
+    [X] [N] [N]          set current session NOT notify when current
+    [X] [N] <win#> [N]   set session <win#> NOT notify when current
+
+ BLOCKED OUTPUT MODE   -- use [CTRL]-[W] and:
+
+    [X] [B] [Y]          set current session blocked when not current
+    [X] [B] <win#> [Y]   set session <win#> blocked when not current
+    [X] [B] [N]          set current session NOT blocked when not current
+    [X] [B] <win#> [N]   set session <win#> NOT blocked when not current
+
+
+
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 18 of 19
+
+SESSION MONITOR:   NOTE: these commands are used for debugging applications.
+
+MONITOR MODE:
+
+  TSM will display control-codes rather than act on them. Use [CTRL]-[W] and:
+
+    [X] [M] [Y]          set current session monitor mode
+    [X] [M] <win#> [Y]   set session <win#> monitor mode
+    [X] [M] [N]          set current session NOT monitor mode
+    [X] [M] <win#> [N]   set session <win#> NOT monitor mode
+
+TRANSPARENT MODE:
+
+  In transparent mode, TSM releases all screen display control to the program.
+
+    [X] [t] [y]          set current session transparent mode
+    [X] [t] <win#> [y]   set session <win#> transparent mode
+    [X] [t] [n]          set current session NOT transparent mode
+    [X] [t] <win#> [n]   set session <win#> NOT transparent mode
+
+
+--------------------- Terminal Session Manager Help Text -------- Page 19 of 19
+
+ENVIRONMENT VARIABLES:
+
+     NOTE: Environment variables must be set before TSM is started.
+
+        TSMHOTKEY -- defaults to "^W"
+        TSMLP     -- name of printer
+        TSMTERM   -- name of terminal type
+
+ENVIRONMENT FILES:
+
+        .tsm      -- TSM configuration file
+        .tsmprint -- printer configuration file
+        .tsmkeys  -- Softkey configuration file
+
+SEARCH PATH:  TSM searches these directories for configuration files:
+
+          first) the current directory -- "."
+         second) your home directory   -- "$HOME"
+          third) TSM's home directory  -- "/usr/tsm"
+
+
+--------------------- Terminal Session Manager Help Text --------- END OF TEXT
+

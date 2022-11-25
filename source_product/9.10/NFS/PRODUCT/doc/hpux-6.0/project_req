@@ -1,0 +1,347 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Nerfs Project Requirements"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'Nerfs Project  Requirements ''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+PROJECT REQUIREMENTS DOCUMENT
+NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:31:35 $
+$Revision: 1.14.109.1 $
+.sp 3
+.ce 1
+Program Team Leader: Jeff Lindberg
+.sp 1
+.ce 4
+Project Managers:
+Jeff Lindberg (s300/s800 NFS)
+Ching-Fa Hwang (s800 NFS)
+Bill Mowson (s300 NFS testing)
+.sp 1
+.ce 1
+Author: Dan Simula
+.sp 3
+.ad
+The NFS development and testing effort is being done 
+by a joint project team consisting of two project groups 
+from CND and one project group from ISO.
+This document addresses only the project-specific requirements 
+for these groups. 
+.sp 1
+Traditionally, all product and project requirements
+were addressed in a single document.  Due to the inter-divisional nature
+of this project, the product and project requirements are addressed
+in separate documents.  For information regarding the requirements 
+of the NFS product, refer to the NFS Product Requirements document.
+.sp 1 
+Unless otherwise stated, all requirements and comments herein refer 
+to both the series 300 and the series 800.
+.na
+.H 1 "PROJECT REQUIREMENTS"
+.H 2 "Personnel"
+.sp 2
+.nf
+.cu 1
+	CND Marketing
+.sp 1
+	    Carole Crall	technical support engineer
+.sp 1
+	    Andy Drol		product marketing
+.sp 1
+	    Chuck Morse		quality assurance
+.sp 1
+	    Carolyn Mozley	technical writer
+.sp 1
+	    Annette Parsons	technical writer
+.sp 2
+.cu 1
+	CND R&D Lab - Development Team
+.sp 1
+	    Jeff Lindberg	NerFS project manager
+.sp 1
+	    John Dilley		RPC user-code
+.sp 1
+	    Dave Erickson	Yellow Pages Service
+.sp 1
+	    Cristina Mahon	NFS user-level code
+.sp 1
+	    Mike Shipley	NFS kernel code
+.sp 1
+	    George Feinberg	NFS kernel code
+.sp 1
+	    Darren Smith	RPC/XDR kernel code
+.sp 2
+.cu 1
+	CND R&D Lab - Testing Team
+.sp 1
+	    Bill Mowson		project manager
+.sp 1
+	    Steve Booth		NFS testing
+.sp 1
+	    Jeff Ellison	NFS testing
+.sp 1
+	    Jim Hunter		NFS testing
+.sp 1
+	    Dan Simula		NFS testing
+.bp
+.cu 1
+	ISO R&D Lab - S800 NFS kernel development
+.sp 1
+	    Ching-Fa Hwang	File Systems project manager
+.sp 1
+	    Brian Byun		NFS kernel
+.sp 1
+	    Herve' Da Costa	NFS kernel
+.sp 1
+	    Adiel Gorel		NFS kernel
+.sp 1
+	    Vincent Hsieh	NFS kernel
+.sp 1
+	    Shyun-Shin Lin	NFS kernel
+.sp 1
+.fi
+.sp 2
+.H 2 "R&D Partners"
+.sp 1
+.ad
+In addition to the project groups directly involved in the NFS
+product, a number of
+other R&D project groups are responsible for various levels of 
+support.  Each group and their relationship to 
+the NFS project groups is described below.
+.na
+.sp 1
+.nf
+	CND - 	PEKING Convergence Group: provide a converged 
+		s300/s800 network architecture.
+		Project Manager: Dean Thompson
+.sp 1
+	CND - 	S300/S800 Services Group: provide cross-testing
+		for ARPA/Berkeley, NS, and NFS services.
+		Project Manager: Chris Fuggit
+.sp 1
+    	IND - 	Transports/LLA Group: s800 network transport support
+		Project Manager: Gregg Levin
+.sp 1
+	ISO   - HP-UX Commands Group: HP-UX commands support
+		Project Manager: Doug Hartman
+.sp 1
+	SSO   - s300 DUX group: s300 vnode/DUX kernel support
+		Project Manager: Joe Cowan
+.sp 1
+	SSO   - s300 kernel group: s300 system support
+		Project Manager: Marcel Meier
+.sp 1
+	SSO   - HP-UX Commands Group: HP-UX commands support 
+		Project Manager: Donn Terry
+.sp 1
+.H 2 "Support from Partners"
+.sp 1
+The Nerfs' project requires the following functionality be provided by
+the appropriate partner(s).
+.sp 2
+.nf
+.cu 1
+Symbolic links
+.sp 1
+Symbolic links are considered necessary for a fully usable
+NFS product.  All major NFS implementations support symbolic 
+	links.
+.sp 1
+Symbolic links will be provided by SSO and ISO for the s300
+and s800 respectively.
+.sp 1
+.cu 1
+Converged network architecture
+.sp 1
+The s300 will require  HP-UX 6.0 with the IND 4.2-based  network
+architecture.  Convergence from the s300 Leaf Node  architecture
+to IND's  4.2-based  network  architecture  is being done by the
+PEKING  project  
+.sp 1
+.cu 1
+HP-UX commands and libraries
+.sp 1
+A number of HP-UX commands and libraries are affected by the 
+existence of NFS.  These commands and libraries will need
+to be modified in order to operate in an NFS environment.
+.sp 1
+The SSO - HPUX commands group and the ISO HPUX commands
+group will be responsible for making the necessary 
+modifications.
+.sp 1
+.H 2 "Man-Month Resources"
+.sp 1
+
+65 engr months - CND NerFS R&D group
+12 engr months - IND R&D
+
+Also include effort estimates for other groups involved
+
+.nf
+NFS testing group - Bill
+Peking convergence - Dean
+Cross services - Chris
+Vnode/DUX support - Joe
+s300 kernel support - Marcel
+s800 kernel support - Ching-Fa
+HP-UX commands - Doug (and Donn) 
+
+
+.H 2 "Travel Expenses"
+.sp 1
+Travel expenses will be incurred for: 
+.nf
+.sp 1
+    CND lab engineers required to work at ISO/IND,
+    CND management to attend meetings at ISO/IND.
+.sp 1
+Estimate expenses (?).
+.bp
+.H 2 "Equipment Requirements"
+.sp 1
+.ad
+This equipment plan addresses the needs of the NFS development group
+and the NFS testing group (i.e., Jeff's and Bill's groups).
+.sp 1
+NOTE:  The Sun systems will be allocated from a common equipment pool.  
+.nf
+
+System Description       Usage by quarter	  Remarks
+
+		  Q1'87  Q2'87   Q3'87   Q4'87
+----------------------------------------------------------------
+	       |       |       |       |       |
+Vax / 4.3BSD   |       |       |       |       | connectivity
+Mt. Xinu's NFS | ----  |  20%  |  40%  |  30%  | testing 
+(Ultrix ?? )   |       |       |       |       |
+	       |       |       |       |       |
+Vax / VMS      | ----  |  20%  |  30%  |  20%  | connectivity
+Wollongong NFS |       |       |       |       | testing
+(server only)  |       |       |       |       |
+	       |       |       |       |       |
+Sun systems    |       |       |       |       |
+ o Sun 2/150   | 100%  | 100%  | 100%  | 100%  | dedicated system
+ o Sun 3/160   |  10%  |  25%  |  25%  |  20%  | shared usage
+ o Sun 3/260   |   0%  |  20%  |  20%  |  20%  | performance tests
+ o Sun 3/x60   |   0%  |  20%  |  20%  |  20%  | connectivity tests
+               |       |       |       |       |
+	       |       |       |       |       |
+HP Vectra      | ----  |  20%  |  30%  |  20%  | connectivity
+PC-NFS         |       |       |       |       | testing
+(client only)  |       |       |       |       |
+	       |       |       |       |       |
+HP s310        | 100%  | 100%  | 100%  | 100%  | test systems 
+	       |       |       |       |       |
+HP s320        | 500%  | 500%  | 450%  | 450%  | test systems 
+	       |       |       |       |       |
+HP s330        | 100%  | 100%  | 100%  | 100%  | test systems 
+HP s330        | 100%  | 100%  | 100%  | 100%  | build system
+HP s330        | 200%  | 200%  | 200%  | 200%  | home system
+	       |       |       |       |       |
+HP s350        | 100%  | 200%  | 250%  | 250%  | test systems
+HP s350        |   0%  | 100%  | 100%  | 100%  | home system
+	       |       |       |       |       |
+HP s840        | ----  | 100%  | ----  | ----  | functional testing
+HP s840        | ----  | ----  | 100%  | ----  | module testing
+HP s840        | ----  | ----  | ----  | 200%  | connectivity tests
+HP s840        | ----  | ----  | 200%  | 200%  | 24/120 hr tests
+HP s840        |   0%  | 100%  | 100%  | 100%  | home/build system
+	       |       |       |       |       |
+.fi
+.sp 1
+.H 2 "Tools"
+.sp 1
+.nf
+	Specific project related tools.
+	    
+	    Software Development and Source Control (SDCS) environment.
+	    This environment supports a source code control system,
+	    development tools and an automated build environment.
+
+	    PFA code coverage tool - required by Spectrum HP-UX
+	    Certification Acceptance Criteria.
+
+	    ICA code coverage tool - code coverage tool used for
+	    determining s800 kernel coverage.
+.fi
+.sp 1
+.H 2 "Key Assumptions"
+.ad
+.sp 1
+The s300 network architecture convergence will be successful
+and will be delivered in a timely manner.
+.sp 1
+The s300 vnode layer support will be provided by SSO.
+.sp 1
+The s800 vnode layer support will be provided by ISO.
+.sp 1
+The HP-UX commands groups (ISO/SSO) will provide technical
+support for changes necessary for NFS compatibility.
+.sp 1
+The HP Internet will be used for exchanging shared source
+code and project information.
+.sp 1
+In the event of semantic differences between NFS commands and
+HP-UX commands, the NFS commands will be modified to avoid 
+conflicting with HP-UX semantics.  User-visible differences
+in the HP-NFS product (i.e., HP vs Sun) will be minimized.
+.sp 1
+.na
+.H 2 "Potential Problems / Contingencies
+.ad 
+.sp 1
+If the s300 network architecture convergence effort is not 
+successful, the NerFS project will port NFS onto the s300
+leafnode architecture.  This could significantly change the
+project's effort estimates and scheduling would need to be
+revised.
+.sp 1
+If the s300 vnode layer is not provided by SSO, CND will 
+provide the necessary resources to provide such support.
+The project schedule will be impacted accordingly.
+.sp 1
+If the s800 vnode layer is not provided by ISO, CND will 
+provide the necessary resources to provide such support.
+The project schedule will be impacted accordingly.
+.sp 1
+If SSO and/or ISO do not provide the necessary resources 
+to modify the HP-UX commands affected by NFS,  CND will
+provide the resources.  The project schedule will be 
+impacted accordingly.
+.sp 1
+If the HP Internet proves to be unreliable, ISO and CND
+will revert back to using magnetic cartridge tapes to
+exchange intermediate releases and project information.
+.sp 1
+.H 2 "Tactics"
+.sp 1
+.H 2 "Project Objectives"
+.sp 1
+These objectives should be strictly related to project-process goals.
+
+	Quality (FURPS)
+.sp 1
+.fi

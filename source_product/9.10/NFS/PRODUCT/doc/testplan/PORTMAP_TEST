@@ -1,0 +1,299 @@
+.H 2  "Portmap (Cristina Mahon)"
+
+.PP
+Portmap implements the program, version to port number mapping for rpc 
+services.  For example, inetd gets a socket for rpc.mountd based on a 
+non-reserved port number (>1023).  It then registers rpc.mountd (its
+program and version number) with portmap and tells portmap what port
+number it will be listening at for rpc.mountd requests.  When a remote
+system wants to mount a filesystem from our system it will call portmap
+and ask portmap for the port number that corresponds to the program and
+version number for rpc.mountd.  Portmap will provide the calling
+program (mount) with that information so that the calling program can
+contact rpc.mountd directly.
+.PP
+The command line for portmap is:
+.sp
+           portmap
+.sp 2
+To exercise certain options in portmap it might be necessary to write a program
+that calls portmap and either requests information/calls procedures or provides
+information.
+.sp
+Note: All these tests must be run as superuser.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Dan Simula
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  3.5  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Make a null procedure call"
+.sp 1
+.PP
+Call the null procedure for portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_NULL)
+EXPECTED OUTPUT: 
+       Portmap will return a NULL.
+.fi
+.sp 2
+.H 3 "Register a program"
+.sp 1
+.PP
+Call portmap and register a program that was not previously registered.
+Check also when the program is the first one to be registered.
+If the registering succeeds, portmap will send a one as the reply.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       When  prompting  for the port number for that  program you should
+       get the information previously supplied.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (diff version)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+different version number.
+Portmap will send a one as the reply if it succeeds in registering the
+program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       When  prompting  for the port number for that  program you should
+       get  the   information   supplied   for  the  new   version.  The
+       information for the old version should still be there.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (same version, diff port)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+the same version number, but a different port number.
+Portmap will return a zero reply, meaning that it did not
+register the program.  For this to succeed, the program, version has first
+to be unset, before it can be set (registered).
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       If prompting for the port number for that program and version you
+       should get the old port number, not the one you just supplied.
+.fi
+.sp 2
+.H 3 "Register a previously registered program (same version, same port)"
+.sp 1
+.PP
+Call portmap and register a program that was previously registered with a
+the same version number and the same port number.
+Portmap will return a reply of one meaning that it succeeded.
+Portmap will basically ignore this call since no information changed.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_SET)
+EXPECTED OUTPUT: 
+       If prompting for the port number for that program and version you
+       should get the old/new port number.
+.fi
+.sp 2
+.H 3 "Unregister registered program and version numbers" 
+.sp 1
+.PP
+Call portmap and unregister a program and a version number of that program
+that have been previously registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of one if successful.  Any attempt
+       to get  information on the program and version  numbers that were
+       just unregistered should fail.
+.fi
+.sp 2
+.H 3 "Unregister only registered program and version numbers" 
+.sp 1
+.PP
+Call portmap and unregister a program and a version number of that program
+that have been previously registered.  The program and version numbers should
+be the only ones registered.  The purpose is to check if portmap correctly
+handles unregistering the last registered program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of one if successful.  Any attempt
+       to get  information on the program and version  numbers that were
+       just unregistered should fail.
+.fi
+.sp 2
+.H 3 "Unregister program never registered" 
+.sp 1
+.PP
+Call portmap and unregister a program that has never been registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of zero, since it couldn't succeed.  
+.fi
+.sp 2
+.H 3 "Unregister version never registered" 
+.sp 1
+.PP
+Call portmap and unregister a version that has never been registered of a 
+registered program.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_UNSET)
+EXPECTED OUTPUT: 
+       Portmap should return a reply of zero, since it couldn't succeed.  
+.fi
+.sp 2
+.H 3 "Acquire information on registered program/version numbers"
+.sp 1
+.PP
+Call portmap and request information on a program number registered.
+We should have the port number that was originally used to register the program
+with so that we can compare to the answer received from portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Portmap  should  return a port number  equal to the port that was
+       originally registered.
+.fi
+.sp 2
+.H 3 "Acquire information on unknown program number"
+.sp 1
+.PP
+Call portmap and request information on a program number not registered.
+This could be done maybe with "mount" if mountd is not registered.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Portmap should return a port equal to zero.
+.fi
+.sp 2
+.H 3 "Acquire information on unknown version number of known program"
+.sp 1
+.PP
+Call portmap and request information on a version number of a registered
+program.  The program will be registered with a different version number.
+This could be done maybe with "mount" if "mountd" is registered with a bogus
+version number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_GETPORT)
+EXPECTED OUTPUT: 
+       Right now it seems that  portmap  will return the port number for
+       the program even if the versions don't match.  Possible bug.
+.fi
+.sp 2
+.H 3 "Acquire information on all registered programs/versions"
+.sp 1
+.PP
+Call portmap and request information on all registered programs.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_DUMP)
+EXPECTED OUTPUT: 
+
+       Portmap  returns  a  list(?)  of all  registered  programs  as an
+       structure.
+.fi
+.sp 2
+.H 3 "Call procedure on local machine"
+.sp 1
+.PP
+This calls a procedure on the local machine that has been registered
+with portmap.  This procedure is only supported for on rpc/udp and calls 
+via rpc/udp.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap returns the remote call result.(?)
+.fi
+.sp 2
+.H 3 "Call nonexistent procedure on local machine"
+.sp 1
+.PP
+This calls a procedure that doesn't exist on the local machine, but
+has been registered with portmap.
+This service of the portmap DOES NOT complain if something goes
+wrong.  This is because the procedure is written to
+support broadcast rpc and the requester could be overrun with complaints
+at the expense of not hearing a valid reply.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Call procedure on local machine with wrong version"
+.sp 1
+.PP
+This calls a procedure that exists on the local machine but that has
+not been registered with this version number.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Call procedure not registered on local machine"
+.sp 1
+.PP
+This calls a procedure that has not been registered with the local 
+portmap.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (PMAPPROC_CALLIT)
+EXPECTED OUTPUT: 
+       Portmap will not return anything.
+.fi
+.sp 2
+.H 3 "Start two portmaps at once"
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should fail. 
+.fi
+.sp 2
+.H 3 "Start portmap without being superuser "
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+       This should fail. 
+.fi
+.sp 2

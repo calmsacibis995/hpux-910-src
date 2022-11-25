@@ -1,0 +1,134 @@
+# $Source: /source/hpux_source/kernel/sys.SWT68K_300/REG.300/RCS/mkdev.sys,v $
+# $Revision: 1.2.84.3 $	$Author: kcs $
+# $State: Exp $   	$Locker:  $
+# $Date: 93/09/17 20:43:08 $
+
+/*  mkdev script */
+
+#set -x
+#cd /dev 
+#mknod=/etc/mknod
+
+# MISCELLANEOUS:
+#dev=console;	$mknod $dev	c	0	0x000000
+#dev=tty;	$mknod $dev	c	2	0x000000
+#dev=mem;	$mknod $dev	c	3	0x000000
+#dev=kmem;	$mknod $dev	c	3	0x000001
+#dev=null;	$mknod $dev	c	3	0x000002
+#dev=swap;	$mknod $dev	c	8	0x000000
+#dev=dsk/0s0;	$mknod $dev	b	255	0xffffff
+
+# TERMINALS:
+#	0xScPoAc where
+#		Sc = card select code
+#		Po = port number (98642); 00 for other cards
+#		Ac = access type
+#	Access type bit fields: 0000 0DCB
+#		D = 0  modem (or modem eliminator)
+#		D = 1  direct connect
+#		C = 0  US modems
+#		C = 1  CCITT mode (for European modem support)
+#		B = 0  call-in port
+#		B = 1  call-out port (for cu* devices)
+#
+#dev=cua01;	$mknod $dev	c	1	0xSc0001
+#dev=cul01;	$mknod $dev	c	1	0xSc0001
+#dev=tty01;	$mknod $dev	c	1	0xSc0000
+#dev=tty0x;	$mknod $dev	c	1	0xScPo04
+
+# DISK DEVICES
+# Device names for disks are assigned sequentially with
+# the names /dev/[r]dsk/Ns0 where N is incremented for
+# each new device. 0s0 is the root device.
+# CS/80 DISKS:
+#dev=dsk/1s0;	$mknod $dev	b	0	0xScBa00 
+#		$mknod r$dev	c	4	0xScBa00
+# Amigo disks
+# 9121.0
+#dev=dsk/2s0;	$mknod $dev	b	2	0xScBa00
+#	    	$mknod r$dev	c	11	0xScBa00
+# 9121.1
+#dev=dsk/3s0;	$mknod $dev	b	2	0xScBa10
+#	    	$mknod r$dev	c	11	0xScBa10
+
+# CARTRIDGE TAPE DEVICES
+# Device names for cartridge tapes are assigned sequentially
+# with the names /dev/[r]ct/cN where N is incremented for
+# each new device.
+#dev=ct/c0;	$mknod $dev	b	0	0xScBa10
+#		$mknod r$dev	c	4	0xScBa10
+# Cartridge tape on a dual controller
+#dev=ct/c1;	$mknod $dev	b	0	0xScBa00
+#		$mknod r$dev	c	4	0xScBa00
+
+# MAGNETIC TAPE DEVICES: 
+# Device names for magnetic tapes are assigned sequentially
+# with the names /dev/[r]mt/N[hml]{n} where N is incremented
+# for each new device.
+#	0xScBaFg where
+#	      Fg = flag bit fields
+#		0xC0 = for extracting density bits
+#		0x30 = for extracting unit number bits
+#		0x08 = don't accept block that crosses eot
+#		0x04 = don't enable immediate report
+#		0x02 = don't reposition on read-only closes
+#		0x01 = don't rewind on close (n)
+#
+#		0x00 = 800 bpi;  low density (l)
+#		0x40 = 1600 bpi; medium density (m)
+#		0x80 = 6250 bpi; high density (h)
+#
+# 7970/7971
+#dev=rmt/0m;	$mknod $dev	c	5	0xScBa02
+#dev=rmt/0mn;	$mknod $dev	c	5	0xScBa03
+# 7974 opt 800 (800 BPI)
+#dev=rmt/0l;	$mknod $dev	c	9	0xScBa02
+#dev=rmt/0ln;	$mknod $dev	c	9	0xScBa03
+# 7974/7978 (1600 BPI)
+#dev=rmt/0m;	$mknod $dev	c	9	0xScBa42
+#dev=rmt/0mn;	$mknod $dev	c	9	0xScBa43
+# 7978 (6250 BPI)
+#dev=rmt/0h;	$mknod $dev	c	9	0xScBa82
+#dev=rmt/0hn;	$mknod $dev	c	9	0xScBa83
+
+# PRINTERS: 
+#	0xScBa0F where
+#	       F = flag bit fields
+#		0x1 = Raw Mode
+#		0x2 = Printers without overprint capability
+#		0x4 = Upper-case only printers
+#		0x8 = No page eject on open and close
+#
+#dev=lp;	$mknod $dev	c	7	0xScBa0F
+#dev=ciper;	$mknod $dev	c	26	0xScBa0F
+
+# GRAPHICS DRIVERS
+#dev=console;	$mknod $dev	c	12	0x000000
+#dev=crtxx;	$mknod $dev	c	12	0xSc0200
+
+# SRM
+#dev=srm_node0;	$mknod $dev	c	13	0x000000
+#dev=srm_node1;	$mknod $dev	c	13	0x000001
+
+# PTYMAS and PTYSLV
+#dev=ptym0;	$mknod $dev	c	16	0xSc0000
+#dev=ptys0;	$mknod $dev	c	17	0xSc0000
+#dev=ptym1;	$mknod $dev	c	16	0xSc0001
+#dev=ptys1;	$mknod $dev	c	17	0xSc0001
+
+# IEEE802 and ETHERNET
+#dev=lan;	$mknod $dev	c	18	0xSc0000
+#dev=ieee;	$mknod $dev	c	18	0xSc0000
+#dev=ether;	$mknod $dev	c	19	0xSc0000
+
+# PLOTTERS / DIGITIZERS / PRINTERS (RAW MODE) / HP-IB(4):
+#dev=hpib-device;  $mknod $dev	c	21	0xScBa00
+#dev=hpib-channel; $mknod $dev	c	21	0xSc1F00
+
+# GPIO
+#dev=gpio;	$mknod $dev	c	22	0xSc0000
+
+# KEYBOARDS / HIL DEVICES
+#dev=raw_8042;	$mknod $dev	c	23	0x000000
+#dev=mousen;	$mknod $dev	c	24	0x0000n0
+#dev=nimitzn;	$mknod $dev	c	25	0x0000n0

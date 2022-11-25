@@ -1,0 +1,36 @@
+KEYSHELL SOURCE FILES
+=====================
+README           - the current version of this file
+Makefile         - nmake(1) rules for building keyshell
+makefile         - make(1) rules for building keyshell
+bugs             - list of weighted known keyshell defects
+
+builtins.cpp     - softkey definitions for built-in keyshell commands
+code.h           - internal code constants for builtins.cpp
+config.[ch]      - routines to read softkey definition files
+display.[ch]     - terminal output routines
+edit.[ch]        - common command-line editing module
+emacs.[ch]       - emacs-mode command-line filter module
+extents.[ch]     - extent list management and error detection
+global.[ch]      - global data structures and routines
+help             - general help message file
+hpux_rel.c       - global keyshell revision number
+intrinsics.c     - built-in keyshell commands and .keyshellrc management
+keyboard.[ch]    - terminal input routines
+keyshell.[ch]    - MAIN KEYSHELL ENTRY POINTS FROM KSH
+keyshellrc       - default rc file for softkeys.cpp
+kshhooks.h       - keyshell hooks included in ksh88/sh/edit.c
+messages.[ch]    - routines to handle NLS messages
+softkeys.cpp     - softkey definitions for default softkey commands
+translate.[yh]   - yacc code to parse editrules and create HP-UX commands
+vi.[ch]          - vi-mode command-line filter module
+word.[ch]        - routines to identify ksh word boundaries
+
+buffer.[ch]      - generic simple buffered i/o module
+chunk.[ch]       - generic high-level memory allocation routines
+clist.[ch]       - generic character list routines
+hierarchy.[ch]   - generic node hierarchy handling routines
+linklist.[ch]    - generic code to handle linked lists
+quote.[ch]       - generic routines to read and parse quoted words
+select.[ch]      - generic portable interface to select(2)
+string2.[ch]     - generic string handling routines (above string(3))

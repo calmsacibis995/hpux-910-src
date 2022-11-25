@@ -1,0 +1,768 @@
+.\" $Header: eisa_config.1m,v 66.1 91/02/27 16:08:23 ssa Exp $
+.TH eisa_config 1M
+.ds )H Hewlett-Packard Company
+.ds ]W HP-UX Release 8.0: January 1991
+.SH NAME
+eisa_config \- \s-1EISA\s0 configuration tool
+.SH SYNOPSIS
+.B eisa_config
+.PP
+.B eisa_config
+.RB [ \|\-c
+.IR cfgfile\| ]
+.PP
+.B eisa_config
+.RB [ \|\-n
+.IR scifile\| ]
+.SH DESCRIPTION
+.I eisa_config
+is a specialized program for configuring
+.SM EISA
+and
+.SM ISA
+(referred to collectively as E/ISA)
+.SM I/O
+boards on
+.SM HP-UX
+workstations equipped with
+.SM EISA
+backplanes.
+It is used each time the
+.SM E/ISA
+configuration is to be changed in any way; i.e., whenever an
+.SM EISA
+or
+.SM ISA
+board is added to the system, removed from the system,
+or moved to a different location in the system.
+.I eisa_config
+should be run before any physical board configuration
+or installation changes are made.
+.PP
+.I eisa_config
+interprets information stored in configuration files and uses it
+to configure system resources needed to properly interact with
+.SM E/ISA
+boards.
+Even though they may be physically present in the computer,
+.SM E/ISA
+boards cannot be used by the
+.SM HP-UX
+operating system until configuration by
+.I eisa_config
+is complete.
+.PP
+The
+.I eisa_config
+command takes one of three forms:
+.RS
+.TP 25
+.B eisa_config
+Use interactive commands to examine or modify configuration.
+.I eisa_config
+prompts for a command, executes it, reports the results
+of command execution, then prompts for the next command.
+.TP
+.BI "eisa_config \-c " cfgfile
+Check configuration
+.SM (CFG)
+file (discussed below).
+This option is used mostly by
+.SM E/ISA
+board developers.
+It simply checks the specified
+.SM CFG
+file to verify that it follows correct grammar and can be used by
+.IR eisa_config .
+This option does not affect current configuration in any way.
+.TP
+.BI "eisa_config \-n " scifile
+Non-target mode.
+This option uses the contents of
+.I scifile
+instead of non-volatile memory
+.SM (NVM)
+to set up
+.SM E/ISA
+configuration, and is most commonly used for creating
+identical configurations on multiple workstations.
+.RE
+.SS Assigning Resources
+Depending on their design, internal capabilities,
+and their role in system operation,
+.SM E/ISA
+boards use various combinations of one or more system resources such as
+.SM DMA
+channels, interrupt lines, memory, etc.
+Also, given boards do not always use a full set of system resources;
+for example,
+.SM EISA
+provides 11 interrupt lines, but a given board
+might be able to use only lines 3, 5, and 6.
+Thus a means for the board to determine what resources are to be used
+must be provided.
+.PP
+.SM ISA
+boards use physical switches or jumpers on the board
+to specify what resources are to be used.
+The person installing the board sets the switches or jumpers
+as specified by the board's manufacturer and based on system needs.
+There are thousands of different kinds of
+.SM ISA
+boards, but unfortunately there are no standard conventions
+for switch and jumper usage.
+This results in much confusion and numerous configuration problems.
+For example, it is easy to inadvertently assign
+a given resource to two different boards,
+but often very difficult to diagnose the problem.
+.PP
+.SM EISA
+boards usually have no switches or jumpers for resource assignment.
+Instead, each
+.SM EISA
+board has a corresponding configuration
+.SM (CFG)
+file that tells the system how the board can be used
+and what resources it needs.
+.I eisa_config
+is the
+.SM HP-UX
+system program that interprets the various
+.SM CFG
+files for all boards in the system,
+then builds a conflict-free configuration.
+.SS Configuration Files
+All
+.SM EISA
+boards have a corresponding
+.SM CFG
+file.
+.SM ISA
+boards, when used in
+.SM HP-UX
+systems, must also have a corresponding
+.SM CFG
+file.
+Although
+.I eisa_config
+cannot automatically configure an
+.SM ISA
+board, it can use the contents of the
+.SM CFG
+file to determine what switch or jumper settings on an
+.SM ISA
+board can be used to prevent resource conflicts.
+.PP
+.I eisa_config
+expects to find a
+.SM CFG
+file for each
+.SM E/ISA
+board connected to the workstation.
+The administrator is responsible for making sure that these
+.SM CFG
+files are present in directory
+.BR /etc/eisa .
+.SM CFG
+files corresponding to boards being used
+should always be kept in this directory.
+Do not remove them after
+.I eisa_config
+is run the first time, because they will be needed every time
+the configuration is changed, such as when a new board is added
+or one is removed.
+Do not change the file names of the
+.SM CFG
+files.
+The file name has a specific format which is used by
+.I eisa_config
+to automatically match a board with its
+.SM CFG
+file.
+.PP
+.SM CFG
+files are normally supplied by the
+.SM E/ISA
+board manufacturer.
+Two scenarios apply:
+.RS
+.TP 3
+\(bu
+If the
+.SM E/ISA
+board is supplied by HP, the
+.SM CFG
+file corresponding to the board is loaded into
+.B /etc/eisa
+as part of normal operating system installation.
+It should never be removed.
+.TP
+\(bu
+If the
+.SM E/ISA
+board is not supplied by HP,
+install both the
+.SM CFG
+file and the software driver for the board from
+.SM HP-UX\c
+-readable media supplied by the board manufacturer.
+Copy the
+.SM CFG
+file to directory
+.B /etc/eisa
+where it must remain as long as the card is present in the system.
+.RE
+.PP
+All
+.SM CFG
+files must follow a grammar specified in the
+.SM EISA
+bus specification.
+The most basic building block in the
+.SM CFG
+grammar is the
+.IR board .
+Each board has several attributes including board
+.SM ID
+(to match with a board's ID register), manufacturer,
+.SM ASCII
+text describing what the board does,
+what kinds of slots the board can go in,
+whether the board has a readable
+.SM ID
+register, and various other capability attributes.
+.PP
+Each file can also contain lists of board-wide resources (such as
+.SM I/O
+registers, switches, and jumpers) and how they should be initialized.
+.PP
+A board can be treated as a set of one or more
+.I functions
+where a given board contains a single function or multiple functions.
+An example of a two-function board is one
+having both a serial port and a parallel printer port.
+Each function has a separate block in that board's
+.SM CFG
+file.
+Each function has a name, a type, and a set of configuration
+.IR choices .
+.PP
+Each
+.I choice
+block has a name and a set of attributes.
+These attributes include what resources the choice requires
+and whether the function is enabled or disabled by that choice.
+Initialization is also usually specified within a choice.
+A given choice might require that certain registers
+be initialized to a specified value
+and that switches be set in a certain way.
+.SS Configuration Processing
+.SM E/ISA
+configuration is handled as follows:
+.RS
+.TP 3
+\(bu
+.I eisa_config
+builds a conflict-free configuration, then saves the configuration in
+.SM EISA
+non-volatile memory
+.SM (NVM).
+.TP
+\(bu
+Appropriate drivers and device files must be installed
+before rebooting the system.
+.TP
+\(bu
+Next time the operating system is rebooted, the
+.SM HP-UX
+kernel initializes the specified
+.SM E/ISA
+boards according to the contents of
+.SM NVM.
+.RE
+.PP
+If a board is currently present in the system,
+but has no corresponding configuration data in
+.SM NVM,
+the
+.SM EISA
+board cannot be used until the
+.I eisa_config
+program is run again and the new board is accounted for in
+.SM NVM.
+A newly installed or existing
+.SM E/ISA
+board is not usable until
+.I eisa_config
+has added it and the system has been rebooted
+with the necessary drivers and device special files installed.
+See
+.SM EXAMPLES
+for an illustration of how to add a new board to the system.
+.PP
+In addition to writing to
+.SM NVM,
+.I eisa_config
+also automatically saves the current configuration to an
+.SM SCI
+file called
+.BR /etc/eisa/system.sci .
+.SM SCI
+files can also be created by the interactive
+.B save
+command (see below).
+The
+.SM E/ISA
+subsystem can also be initialized from an
+.SM SCI
+file, rather than from
+.SM NVM
+by using the
+.B eisa_config \-n
+command form discussed earlier.
+.SM SCI
+files are quite useful when a site
+has several identically-configured workstations.
+Run
+.I eisa_config
+on one system and save the configuration in an
+.SM SCI
+file.
+Copy this file to other systems, then use it to initialize
+those systems.
+Remember that the configuration must be saved to
+.SM NVM
+and the system rebooted before the
+.SM E/ISA
+boards can be used.
+.SS Drivers and Device Files
+Running
+.I eisa_config
+is not the only task necessary when adding an
+.SM E/ISA
+board to a system.
+Corresponding
+.SM I/O
+drivers must be added to the kernel
+and appropriate device files must be created.
+These steps are the same as is required for any
+.SM I/O
+card, and can be performed either before or after running
+.IR eisa_config .
+The important thing to remember is that the
+.SM E/ISA
+board cannot be used until
+.I all
+necessary tasks are complete.
+.SS Interactive Commands
+If the command form
+.B eisa_config
+is used,
+.I eisa_config
+runs in interactive mode.
+Interactive mode conducts configuration changes
+by using a series of keyboard commands.
+.I eisa_config
+prompts for a command, executes it,
+displays the results of executing the command,
+then prompts for the next command.
+Interactive commands are broadly grouped into five categories:
+.RS
+.TP 12
+.I action
+Alter the configuration in some way.
+.TP
+.I display
+Show current configuration.
+.TP
+.I cfg
+Manage
+.SM CFG
+files.
+.TP
+.I comments
+Display help and comments information found in
+.SM CFG
+files.
+.TP
+.I help
+Help for using
+.I eisa_config
+interactive commands
+.RE
+.PP
+The
+.I action
+commands are:
+.RS
+.TP 20
+.BI add " cfgfile slotnum"
+Adds a board to the current configuration.
+.I cfgfile
+specifies which
+.SM CFG
+file corresponds to the board and
+.I slotnum
+identifies the slot where the board resides.
+.TP
+.BI remove \ slotnum
+Remove a board from the current configuration.
+.I slotnum
+identifies the slot where the board currently resides.
+.TP
+.BI move " curslotnum newslotnum"
+Move a board that is currently configured in one slot to a different slot.
+.I curslotnum
+and
+.I newslotnum
+specify the current and new slot numbers, respectively.
+.TP
+.BI change " slotnum functionnum choicenum"
+Change the choice used for a given function.
+All three arguments,
+.IR slotnum ,
+.IR functionnum ,
+and
+.I choicenum
+are required.
+The function number
+.RI ( functionnum )
+and choice number
+.RI ( choicenum )
+can be obtained by using the
+.B show board
+command on the slot in question.
+Function numbers are of the format
+.BI F num
+and choice numbers are of the format
+.BI CH num\fR.
+Note that a board must already be part of the configuration
+before the change command can be used.
+.IP
+When
+.I eisa_config
+adds a board, it selects a choice for each function.
+Generally, the first choice for each function is selected (the default).
+However, in order to resolve conflicts,
+.I eisa_config
+may select a different choice for a given function.
+When specifying a choice for a particular function by use of the
+.B change
+command,
+.I eisa_config
+always uses that choice; it does not select a different one,
+even when a conflict needs to be resolved.
+.TP
+.BR save \ [\|\fIfilename\fP\|]
+Save the current configuration.
+If the current configuration is not conflict-free,
+a warning is produced and the save is not done.
+If you specify a file name, the save is done to that file;
+otherwise, the save is done to
+.SM NVM
+(and the
+.B /etc/eisa/system.sci
+file).
+Note that the
+.B quit
+command also (optionally) saves the configuration
+to
+.SM NVM
+(and file
+.BR /etc/eisa/system.sci ).
+.IP
+When the configuration is saved to
+.SM NVM,
+a log file is created that provides
+a brief desription of the new configuration.
+The log file is named
+.BR /etc/eisa/config.log ,
+and contains information generated by a
+.B show
+command, followed by a
+.B show board
+command, followed by a
+.B show switch
+command.
+.TP
+.BR init \ [\|\fIfilename\fP\|]
+Initialize the configuration.
+The initial configuration is retrieved from a file
+if one has been specified.
+Otherwise, it is retrieved from
+.SM NVM.
+Note that an implicit
+.B init
+is done when
+.I eisa_config
+is first started.
+This command should only be used when the current configuration
+.I eisa_config
+is dealing with is incorrect.
+For example, if you make some changes
+that you decide you do not want,
+you can use this command to start over.
+.TP
+.B quit
+Leave
+.IR eisa_config .
+If the configuration is conflict-free and has been changed,
+you are asked if you want to save the configuration (to
+.SM NVM\s0).
+If any switches or jumpers have to be changed
+as a result of this new configuration,
+you are notified of these changes prior to saving the configuration.
+Be sure that all switches and jumpers match what
+.I eisa_config
+has specified before booting the system.
+.IP
+When the configuration is saved to
+.SM NVM,
+a log file is created that provides
+a brief desription of the new configuration.
+The log file is named
+.BR /etc/eisa/config.log ,
+and contains information generated by a
+.B show
+command, followed by a
+.B show board
+command, followed by a
+.B show switch
+command.
+.RE
+.PP
+The
+.I show
+(display) commands are:
+.RS
+.TP 20
+.B show
+List all slots and their current status;
+i.e., whether occupied by a particular board, or empty.
+.TP
+.BI "show slots " cfgfile
+List all of the slots that could accept the board
+corresponding to the
+.SM CFG
+file
+.IR cfgfile .
+.TP
+.BR "show board" \ [\|\fIcfgfile\fP\|\(or\|\fIslotnum\fP\|]
+List the basic attributes for the selected board or boards.
+Includes a list of all the functions on the board
+and a list of all available choices for each function.
+If the board is currently part of the configuration,
+the currently selected choice is marked.
+The default choice is the first choice listed for each function.
+If a board is not specified (either by
+.SM CFG
+file name or slot number),
+information is displayed for each of board
+installed and configured in the system.
+.TP
+.B "show switch " [ \|changed\| ]\ [\|\fIslotnum\fP\|]
+List the switch and jumper settings (both default and required)
+for the boards in the configuration.
+If the keyword
+.B changed
+is used, only those switches and jumpers that were changed
+from the previous configuration are displayed.
+If a slot number is specified, only switches and jumpers
+on the board in that slot are displayed.
+Note that
+.B show switch
+supports all combinations of
+.B changed
+and
+.IR slotnum .
+.RE
+.PP
+There are two kinds of
+.I cfg
+commands:
+.RS
+.TP 20
+.B cfgtypes
+List the types of boards that have
+.SM CFG
+files in directory
+.B /etc/eisa
+and how many
+.SM CFG
+files in
+.B /etc/eisa
+are of each type.
+.TP
+.BR cfgfiles \ [\|\fItype\fP\|]
+List all
+.SM CFG
+files that are currently available for use in the
+.B /etc/eisa
+directory.
+If a specific board
+.I type
+is specified, only
+.SM CFG
+files of that type are displayed.
+.RE
+.PP
+.I comment
+commands extract the help and comments text provided in the specified
+.SM CFG
+file or files.
+Both help and comments are displayed if they are available.
+Each command form accepts as an argument either a
+.SM CFG
+file or a slot number identifying which board you want help for.
+.RS
+.TP 20
+.BR "comment board" \ [\|\fIcfgfile\fP\|\(or\|\fIslotnum\fP\|]
+Display board-level help and comments.
+.TP
+.BR "comment function" \ [\|\fIcfgfile\fP\|\(or\|\fIslotnum\fP\|]
+Display function-level help and comments.
+.TP
+.BR "comment choice" \ [\|\fIcfgfile\fP\|\(or\|\fIslotnum\fP\|]
+Display choice-level help.
+.TP
+.BR "comment switch" \ [\|\fIcfgfile\fP\(or\|\fIslotnum\fP\|]
+Display help and comments for switches and/or jumpers as appropriate.
+.RE
+.IP
+Note that all arguments (except the type of comments requested)
+are optional.
+If no optional argument is specified, all available comments
+for the specified file or board are extracted.
+For example:
+.RS
+.TP 20
+.B comment board 1
+Display help and comments available for
+the board currently configured in slot 1.
+.TP
+.B comment board
+Display help and comments available for
+.I all
+currently configured boards.
+.RE
+.PP
+The
+.I help
+commands explain how to use the
+.I eisa_config
+interactive commands.
+If no other arguments are given, help is displayed
+for all of the interactive commands.
+Alternatively, any valid command can be used
+as a argument to the help command.
+Help is then given for the specified command only.
+.RS
+.TP 20
+.B help
+Display a brief explanation of all valid
+.I eisa_config
+interactive commands.
+.TP
+.BR help \ [\|\fIcmdname\fP\|]
+Display an explanation of the command specified.
+.RE
+.SH EXAMPLES
+Add a new
+.SM E/ISA
+board to the system:
+.RS
+.TP 3
+1.
+Load the
+.SM CFG
+file (from media provided by the manufacturer) into directory
+.B /etc/eisa
+if the file is not already present.
+.TP
+2.
+Run
+.IR eisa_config .
+.I eisa_config
+reads the contents of
+.SM NVM
+to obtain current system configuration.
+.TP
+3.
+Use the interactive
+.B add
+command to add the new board.
+.I eisa_config
+reads the corresponding
+.SM CFG
+file to obtain needed configuration information.
+.TP
+4.
+Exit
+.IR eisa_config ,
+noting any required switch or jumper settings.
+.I eisa_config
+generates a new configuration and writes it to
+.SM NVM.
+The required switch and jumper settings are also saved in the log file
+.BR /etc/eisa/config.log .
+.TP
+5.
+Add the correct software drivers for the board
+(and board devices) to the kernel, and use
+.IR mknod (1M)
+to create any needed device special files.
+.TP
+6.
+Shut down and disconnect power to the system.
+.TP
+7.
+Install the
+.SM E/ISA
+board after changing any switch or jumper settings
+required by
+.IR eisa_config .
+.TP
+8.
+Reboot the system.
+When the system is running again, the contents of
+.SM NVM
+will match the
+.SM E/ISA
+boards present in the system
+and the newly added board can be used immediately.
+.RE
+.PP
+This procedure can also be used to add multiple new boards
+at the same time.  Simply use the
+.B add
+command once for each board and alter the other steps as appropriate.
+.SH AUTHOR
+.I eisa_config
+was developed by HP and Compaq.
+.SH FILES
+.TP 23
+/etc/eisa/\s-1!XXX0000\s0
+.SM CFG
+files
+.TP
+/etc/eisa/config.log
+log file containing current
+.SM E/ISA
+configuration
+.TP
+/etc/eisa/system.sci
+mirror image of configuration saved to
+.SM NVM
+.SH SEE ALSO
+config(1M),
+mknod(1M).
+.\"
+.\" index	\fIeisa_config\fR \- \s-1EISA\s0 configuration tool 	 \fBeisa_config(1M)\fR
+.\" index	\s-1EISA\s0 configuration tool 	 \fBeisa_config(1M)\fR
+.\" index	\s-1ISA\s0 configuration tool 	 \fBeisa_config(1M)\fR
+.\" index	configuration tool, \s-1EISA\s0 	 \fBeisa_config(1M)\fR
+.\" index	tool, \s-1EISA\s0 configuration 	 \fBeisa_config(1M)\fR
+.\"
+.\" toc	\fBeisa_config(1M)\fR:\0\0\fIeisa_config\fR 	 \s-1EISA\s0 configuration tool
+.\"
+.\" fileset_database	eisa_config.1m XXX-MAN

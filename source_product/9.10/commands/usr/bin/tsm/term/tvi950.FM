@@ -1,0 +1,26 @@
+## FacetTerm Menu Capabilities for televideo 950 955 terminals 07/22/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: tvi950.FM,v 70.1 92/03/09 16:53:50 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=^Z
+##-menu-cap-clr_eol=\ET
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\E$
+##-menu-cap-exit_alt_charset_mode=\E%
+##-menu-cap-acs_chars=jHkGlFmEqKtMuLvOwNxJnI
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\EG0
+##-menu-cap-shadow_attr=\EG0
+##-menu-cap-item_attr=\EG0
+##-menu-cap-box_attr=\EG4
+##-menu-cap-title_attr=\EG4
+##-menu-cap-highlight_attr=\EG4
+##-menu-cap-highlight_blink_attr=\EG6
+##-menu-cap-magic_cookie=1
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^K
+##-menu-cap-key_down=^V
+##-menu-cap-key_right=^L
+## ##-menu-cap-key_left=
+## ##-menu-cap-key_ignore=

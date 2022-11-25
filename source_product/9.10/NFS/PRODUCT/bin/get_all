@@ -1,0 +1,96 @@
+#!/bin/sh
+##	@(#)get_all	$Revision: 1.22.109.1 $	$Date: 91/11/19 13:54:48 $
+#	get_all	--	get all sources from the SCCS top level
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+umask 022
+cd $Nfs
+
+# REMOVE THE CURRENT WORKING DIRECTORIES
+WORKDIRS='kernel cmds include man doc'
+/bin/rm -rf $WORKDIRS
+
+# BUILD NEW WORKING FILES FROM SCCS
+for DIR in `cd $Nfs/sccs; /bin/find $WORKDIRS -type d -print`
+   do
+
+   # MAKE WORKING DIRECTORIES AS NEEDED
+   cd $Nfs
+   for D in `/bin/echo $DIR | /bin/sed 's#/# #g'`
+   do
+      if [ ! -d $D ]
+      then
+         /bin/mkdir $D
+	 /bin/chmod 775 $D
+      fi
+      cd $D
+   done
+
+   # GET THE WORKING FILES FROM SCCS
+   /usr/bin/get $Nfs/sccs/$DIR
+done
+
+# LINK THE KERNEL FILES THAT ARE NOT PART OF SCCS 
+
+#cd $Nfs/sccs/kernel/300
+#for FILE in *
+#do  
+#   if [ -f $FILE ]
+#   then
+#       ln $Nfs/sccs/kernel/300/$FILE $Nfs/kernel/300/$FILE
+#   fi
+#done
+  
+#for DIR in `cd $Nfs/sccs/kernel/300; /bin/find * -type d -print`
+#do
+
+   # MAKE WORKING DIRECTORIES AS NEEDED
+#   cd $Nfs/kernel/300
+#   for D in `/bin/echo $DIR | /bin/sed 's#/# #g'`
+#   do
+#      if [ ! -d $D ]
+#      then
+#         /bin/mkdir $D
+#	 /bin/chmod 775 $D
+#      fi
+#      cd $D
+#   done
+
+   # LINK THE WORKING FILES FROM ORIGINALS
+#   if [ $DIR != "nfs" ]
+#   then
+#      for FILE in `ls $Nfs/sccs/kernel/300/$DIR`
+#      do
+#         ln $Nfs/sccs/kernel/300/$DIR/$FILE $Nfs/kernel/300/$DIR/$FILE
+#      done
+#   fi
+#done
+
+# BUILD NEW WORKING FILES FROM RCS
+#for DIR in `cd $Nfs/rcs; /bin/find $WORKDIRS -type d -print`
+#   do
+
+   # MAKE WORKING DIRECTORIES AS NEEDED
+#   cd $Nfs
+#   for D in `/bin/echo $DIR | /bin/sed 's#/# #g'`
+#   do
+#      if [ ! -d $D ]
+#      then
+#         /bin/mkdir $D
+#	 /bin/chmod 775 $D
+#      fi
+#      cd $D
+#   done
+
+   # GET THE WORKING FILES FROM RCS
+#   co $Nfs/rcs/$DIR
+#done
+
+# GET NETWORKING SOURCE FILES
+if [ -w $Nfs/log/get_net ]
+then
+   $Nfs/bin/get_net > $Nfs/log/get_net 2>&1
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

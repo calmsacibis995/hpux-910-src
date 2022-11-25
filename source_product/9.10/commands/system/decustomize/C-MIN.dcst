@@ -1,0 +1,23 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+fileset=C-MIN
+exitval=0
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+
+#
+# Since C-MIN can only be removed if C is not present (or will also
+# be removed), we can safely remove /bin/cc.  All other files will be
+# removed automatically based on what is listed in /etc/filesets/C-MIN.
+#
+rm -f /bin$CDF/cc
+
+exit $exitval

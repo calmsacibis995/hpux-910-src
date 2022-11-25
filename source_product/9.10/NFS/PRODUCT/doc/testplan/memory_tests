@@ -1,0 +1,187 @@
+.bp
+.H 1 "Memory Tests"
+.R
+
+Memory testing will consist of setting up certain memory parameters and
+then running the functional tests.
+
+.H 2  "Configurations to be run"
+
+.nf
+      A)  300 --> 300 
+          300 <-- 300,   achieved by EB3
+      B)  800 --> 800
+          800 <-- 800,   achieved by IC3
+
+          RESPONSIBLE ENGINEER: Thomas Bartz
+.fi
+
+
+.H 2  "Test Selection"
+
+Following preliminary setup of the memory parameters, the nfs functional
+tests (e.g., prog.fu) will be run in one direction at first, and later
+bidirectionally (one stream and dual streams).
+
+.H 2 "Special Setup"
+
+    There are some configurable parameters in the kernel that the system 
+administrator can alter which affect the memory pool.  This test plan takes 
+advantage of this ability to artificially alter the network memory so we can 
+test the system at upper boundary conditions.  The parameters used in this 
+plan are 'netmemthresh', 'netmemmax', and 'nmbclusters'.  The following 
+paragraphs give a brief description of them and the concept of memory 
+reservation.
+
+    'netmemmax' is the maximum amount of memory that can be allocated to the 
+network.  However, memory is allocated only as it is needed.  If "full memory 
+reservation" is in force, then for each connection established, the maximum 
+memory that could ever be used by that connection is reserved whether or not 
+that much memory is required.  When full memory reservation is disabled, 
+connections will be established as long as SOME memory exists in the pool, but 
+only a minimum amount of memory is actually allocated.  Then as packets are 
+sent and received, additional memory is allocated "on the fly" according to the 
+amount of data that must be stored.
+
+    By default, memory is reservation enabled when the system brings up 
+networking.  As connections are established and memory is reserved, the amount 
+of memory allocated to the network grows.  When enough connections exist so 
+the level of allocated memory exceeds 'netmemthresh', memory reservation is 
+automatically turned off once and forevermore (regardless of the number of 
+connections that are up any any time thereafter).  
+
+    Whether memory reservation is in effect or not, as each connection is 
+established, the memory required to create it is compared with the amount of 
+memory remaining in the pool.  Contrary to what one may think, this comparison 
+is made with the parameter 'nmbclusters,' rather than with 'netmemmax.' 
+Nmbclusters represents the number of 2kbyte mbuf clusters which may be 
+allocated to the network.  Normally its value is derived directly from 
+netmemmax, but one can alter it through adb to artifically saturate the network 
+pool.
+
+.nf
+    The kernel parameters can be altered by executing
+
+              adb -k -w /hp-ux /dev/kmem
+.fi
+
+to enter adb and making modifications to these variables in either the object 
+file (/hp-ux) or the core file (/dev/kmem), as appropriate, with adb commands.  
+(See adb(1)).  Since /hp-ux is the kernel object file, modifications made there 
+will stay intact until overwritten, but modifications made to the core file 
+/dev/kmem will only remain as long as the system is not rebooted.   For the 
+system under test, "nm -xv" can be used to determine the addresses for the 
+parameters to be changed, or use the symbols in adb itself.  Once the addresses 
+are determined, they can be altered with adb.
+
+     For more information regarding these parameters and their effects, please 
+refer to "Care and Feeding of Your HP-UX Networking Memory System," by Peter 
+Notess.
+
+
+.H 2 "Preliminary Measurements"
+
+First, we need to determine the maximum amount of memory used when running the
+functional test suite.  
+
+.nf
+    1) Reboot the test system with reservation on (set netmemthresh to 
+       -1 in /hp-ux).   (Be sure to set netmemmax to a sufficiently large
+       value so the system won't run out of memory.  When testing the
+       300, this will probably require a 350 with 8M of memory.)
+
+    2) After the system is up and networking is running, do a "netstat -m"
+       do see how much memory has been allocated to the network.  (This is
+       shown as "___kbytes allocated to network".)   Call this value 
+       INIT.RSV
+
+    3) Run the nfs functional tests to the remote system from the system
+       under test.
+
+    4) After the tests have executed (and passed) do another "netstat -m"
+       to see how much total memory had to be allocated to the nework to
+       execute the functional tests.  Call this value FINAL.RSV.FROM
+
+    5) The amount of additional memory required to run the functional tests
+       with reservation on from the system under test is then 
+
+               RSV.FROM = (FINAL.RSV.FROM - INIT.RSV)
+
+    6) Repeat the above tests, but run the functional tests from the remote to 
+       the system under test.  Determine the additional memory required to 
+       run the functional tests to the system under test with reservation on, 
+       RSV.TO
+
+    7) Repeat the above steps after powering up the system without reservation
+       (change netmemthresh to 0 in /hp-ux and reboot).  Determine the maximum
+       amount of memory that was
+       actually used after running the tests by 
+       reading the "___kbytes allocated to network" line from netstat -m output.
+       Call these values NORSV.FROM and NORSV.TO 
+.fi
+
+.nf
+    NOTE 1:  If the test system is powered up with insufficient memory 
+             (especially in the case of reservation on), this process
+             may take a few iterations.  If possible, powerup with more
+             memory (value of netmemmax) than you're sure you'll need.
+
+    NOTE 2:  Record what networking processes you are running on your
+             system and whether running as a ypserver or a ypmaster, etc
+             so another person could duplicate your configuration in the
+             future and use your values for RSV.TO, RSV.FROM, NORSV.TO and
+             NORSV.FROM without having to repeat the above steps.
+.fi
+
+
+
+.H 2 "The Actual Test"
+
+(1) With reservation on (netmemthresh = -1), boot up the test system so 
+that netmemmax exceeds 
+.nf
+          
+          max(FINAL.RSV.FROM, FINAL.RSV.TO) + (0.5 * max(RSV.TO, RSV.FROM))  
+
+.fi
+This is simply to ensure that we have enough memory available to
+run the tests as described below.  After the system is up, also modify 
+nmbclusters (in /dev/kmem) to
+.nf
+ 
+                [(FINAL.RSV.FROM + (0.1 * RSV.FROM)) div 2048] 
+
+.fi
+(2) Now execute one stream of the functional tests from the system under
+test to the remote.  All tests should pass because ample memory
+should be allocated.
+
+(3) Next execute two streams of the functional tests simultaneously.
+Failures that occur should be due only to running out of memory and
+the system should handle the problems in a robust manner.
+
+(4) Without rebooting or changing the system, start a single fresh stream
+to the remote.  All tests should pass again.
+
+(5) Set nmbclusters to
+.nf
+
+        [(FINAL.RSV.TO + (0.1 * RSV.TO)) div 2048] 
+
+.fi
+and repeat steps (2)-(4) from the remote to the system under test.
+
+(6) Repeat steps 1-5 with reservation off (netmemthresh = 0), setting 
+nmbclusters to
+.nf
+       
+        [(FINAL.NORSV.FROM + 0.1 * (NORSV.FROM)) div 2048 ] 
+ 
+.fi
+when running the tests FROM the system under test.  Set nmbclusters to
+.nf
+ 
+        [(FINAL.NORSV.TO + 0.1 * (NORSV.TO)) div 2048 ] 
+          
+.fi
+when running the tests TO the system under test.

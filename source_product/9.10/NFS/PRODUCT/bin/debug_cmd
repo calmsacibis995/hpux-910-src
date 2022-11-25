@@ -1,0 +1,7 @@
+#!/bin/sh
+##	@(#)debug_cmd	$Revision: 1.13.109.1 $	$Date: 91/11/19 13:54:20 $
+#	debug_all	--	make all commands with debug flag
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+exec make_cmd debug

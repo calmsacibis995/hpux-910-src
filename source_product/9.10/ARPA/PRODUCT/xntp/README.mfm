@@ -1,0 +1,50 @@
+# $Source: /source/hpux_source/networking/rcs/arpa90_800/xntp/RCS/README.mfm,v $
+# $Revision: 1.2.109.1 $	$Author: mike $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/10/21 15:23:31 $
+
+5/3/94 -mfm.
+
+This is a copy of IND's xntp source from hpindda:$ARCHIVE/inet10*/xntp/*
+with the exception that Stone/* is a directory I created to contain the
+P.D.  source for xntp which I obtained from Ken Stone.
+
+7/12/94 -mfm.
+I've had no luck yet doing a master build from this directory.  I may
+have to build a master Makefile.  nmake builds from within the
+subdirectories seem to work.
+
+Findings so far:  
+
+	qq.  It appears that the subdirectory makes are all using nmake
+	instead of make.  nmake is ninstallable from catalog.hp.  It
+	seems to work ok here right out of the box.
+
+	qq.  I don't understand the Makefile.tmpl and Makefile.in files.
+	nmake apparently doesn't need them.
+
+	qq.  The Makefile.ms and Makefile.mo files are created during
+	the nmake run.  Don't bother to save them in RCS.
+
+	qq.  To build debuggables in the subdirectories, do nmake
+	-DDebug debug 2>&1|tee log.
+
+	qq.  Be sure to build the stuff in the lib subdirectory first.
+
+	qq. nmake -DDebug debug doesn't build debuggables in the lib
+	subdirectory.
+
+	qq.  The Config.hpux file is not used by the subdirectory nmakes
+	if builds are started from within the subdirectories.  However,
+	most of the Makefiles include all the config stuff.  Somebody
+	has already edited them to do this.
+
+	qq.  Series 300/400 for 9.03 has adjtime as an entry point in
+	the kernel so the adjtime.a lib isn't required.  The same is not
+	true for Series 700/800.
+
+	qq.  ./authstuff/Makefile.in makes a utility called authspeed as
+	well as ones called authcert and md5.  ./authstuff/Makefile
+	doesn't make the authcert or md5 utilities but it looks like the
+	correct make for HPUX.  BTW, nothing in this subdirectory is
+	intended to be installed.

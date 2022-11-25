@@ -1,0 +1,46 @@
+# Function key file for terminals with 8 labels and 8 function keys
+# Include the following in the .facet file: ( remove leading # and tab )
+
+#	function_keys=lab8_8.ftkey
+
+## @(#) $Header: lab8_8.ftkey,v 66.3 90/09/28 15:49:04 kb Exp $
+
+label_attr_reverse
+label_attr_dim_reverse
+L1	 Win 1
+1	\h1
+L2	 Win 2
+2	\h2
+L3	 Win 3
+3	\h3
+L4	 Win 4
+4	\h4
+L5	Win-Last
+5	\hl
+L6	Win-Next
+6	\h+\040
+L7	Hot-Key
+7	\h
+L8	Menu
+8	\m
+labels_on
+##### on window 1 only #####
+W1
+L1	*Win 1
+1	\h1
+labels_on
+##### on window 2 only #####
+W2
+L2	*Win 2
+2	\h2
+labels_on
+##### on window 3 only #####
+W3
+L3	*Win 3
+3	\h3
+labels_on
+##### on window 4 only #####
+W4
+L4	*Win 4
+4	\h4
+labels_on

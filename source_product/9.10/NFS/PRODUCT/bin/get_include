@@ -1,0 +1,22 @@
+#!/bin/sh
+##	@(#)get_include	$Revision: 1.16.109.1 $	$Date: 91/11/19 13:54:54 $
+#	get_include	--	get any changed include files
+# Written by Cristina Mahon for the NFS project
+# Script to get any include files that have changes from their
+# real source control location
+##
+echo `date "+%y.%m.%d %T"` $0 $Nfs begin
+
+# Check to see if the real sccs or rcs file in the remote system
+# has been modified.  If a file has been modified touch out fake
+# rcs version of it.
+echo `date "+%y.%m.%d %T"` checkdate $Nfs/rcs/include begin
+checkdate $Nfs/rcs/include
+echo `date "+%y.%m.%d %T"` checkdate $Nfs/rcs/include end
+
+# Get the include files that have been modifed from their real
+# source control location.
+cd $Nfs/include
+make -f $Nfs/bin/include.mk
+
+echo `date "+%y.%m.%d %T"` $0 $Nfs end

@@ -1,0 +1,54 @@
+# 	@(#)NIS Makefile:	$Revision: 1.20.109.1 $	$Date: 91/11/19 14:20:45 $  
+
+#==============================================================================
+#									      |
+#	(c) Copyright 1987, Hewlett-Packard Co.				      |
+#	(c) Copyright 1986, Sun Microsystems, Inc.			      |
+#									      |
+#  This is the Makefile for building the Network Information Service (NIS) maps (databases)   |
+#  on a master server from their ASCII file counterparts.  See the following  |
+#  reference pages for more information:				      |
+#									      |
+#	domainname(1), ypcat(1), ypmatch(1), yppasswd(1), ypwhich(1),	      |
+#	makedbm(1M), ypinit(1M), ypmake(1M), yppasswdd(1M),		      |
+#	yppoll(1M), yppush(1M), ypset(1M), ypxfr(1M), ypfiles(4).	      |
+#									      |
+#  Note that this Makefile calls the ypmake shell script, once per named map, |
+#  to create each map.  Use the ypmake shell script directly, for efficiency. |
+#  For example, use							      |
+#			/usr/etc/yp/ypmake hosts passwd group		      |
+#  instead of								      |
+#			cd /usr/etc/yp; make hosts passwd group		      |
+#									      |
+#  since make will call /usr/etc/yp/ypmake three times, once per map.	      |
+#									      |
+#  However,								      |
+#			cd /usr/etc/yp; make				      |
+#									      |
+#  calls /usr/etc/yp/ypmake only once, using ALL_MAPS as an argument.	      |
+#									      |
+#==============================================================================
+
+ALL_MAPS	= ${PASSWD} ${GROUP} ${HOSTS} ${NETWORKS} ${RPC} ${SERVICES} \
+		  ${PROTOCOLS} ${NETGROUP} ${VHE_LIST}
+DIR 		= /etc
+DOM 		= `domainname`
+GROUP		= group	group.bygid group.byname
+HOSTS		= hosts hosts.byaddr hosts.byname
+NETGROUP	= netgroup netgroup.byhost netgroup.byuser
+NETWORKS	= networks networks.byaddr networks.byname
+NOPUSH 		= ""
+PASSWD		= passwd passwd.byname passwd.byuid
+PWFILE		= ${DIR}/passwd
+PROTOCOLS	= protocols protocols.byname protocols.bynumber
+RPC		= rpc rpc.bynumber
+SERVICES	= services services.byname
+VHE_LIST	= vhe_list
+
+all:
+	@/usr/etc/yp/ypmake DIR=${DIR} DOM=${DOM} NOPUSH=${NOPUSH} \
+		PWFILE=${PWFILE} ${ALL_MAPS}
+
+${ALL_MAPS}:
+	@/usr/etc/yp/ypmake DIR=${DIR} DOM=${DOM} NOPUSH=${NOPUSH} \
+		PWFILE=${PWFILE} $@

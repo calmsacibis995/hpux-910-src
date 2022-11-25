@@ -1,0 +1,148 @@
+#	@(#)$Revision: 1.22.109.1 $	$Date: 91/11/19 13:51:25 $
+#		First line of a pair:
+#  Local Filename			Installed Filename
+#		Second line of a pair:
+#  Permission	Owner		Group
+
+/nfs/working/cmds/bin/800/domainname		/bin/domainname
+   555		bin		bin
+/nfs/working/cmds/etc/800/biod			/etc/biod
+   544		root		other
+/nfs/working/cmds/etc/800/fsirand		/etc/fsirand
+   544		root		other
+/nfs/working/cmds/etc/netgroup			/etc/netgroup
+   644		root		bin
+/nfs/working/cmds/etc/inetd.conf		/etc/newconfig/inetd.conf
+   644		root		bin
+/nfs/working/cmds/etc/800/nfsd			/etc/nfsd
+   544		root		other
+/nfs/working/cmds/etc/800/inetd			/etc/inetd
+   544		root		other
+/nfs/working/cmds/etc/800/pcnfsd			/etc/pcnfsd
+   544		root		other
+/nfs/working/cmds/etc/800/portmap			/etc/portmap
+   544		root		other
+/nfs/working/cmds/etc/netnfsrc			/etc/newconfig/netnfsrc
+   544		root		other
+/nfs/working/cmds/etc/rpc			/etc/newconfig/rpc
+   644		root		bin
+/nfs/working/cmds/etc/800/ypbind			/etc/ypbind
+   544		root		other
+/nfs/working/cmds/ucb/800/rup			/usr/bin/rup
+   4555		root		other
+/nfs/working/cmds/ucb/800/rusers			/usr/bin/rusers
+   4555		root		other
+/nfs/working/cmds/usr.bin/800/ypcat			/usr/bin/ypcat
+   555		bin		bin
+/nfs/working/cmds/usr.bin/800/ypwhich		/usr/bin/ypwhich
+   555		bin		bin
+/nfs/working/cmds/usr.bin/800/ypmatch		/usr/bin/ypmatch
+   555		bin		bin
+/nfs/working/cmds/usr.bin/800/yppasswd		/usr/bin/yppasswd
+   555		bin		bin
+/nfs/working/cmds/usr.etc/800/nfsstat		/usr/etc/nfsstat
+   4555		root		other
+/nfs/working/cmds/usr.etc/800/rpc.mountd		/usr/etc/rpc.mountd
+   544		root		other
+/nfs/working/cmds/usr.etc/800/rpc.rstatd		/usr/etc/rpc.rstatd
+   544		root		other
+/nfs/working/cmds/usr.etc/800/rpc.rusersd		/usr/etc/rpc.rusersd
+   544		root		other
+/nfs/working/cmds/usr.etc/800/rpc.rwalld		/usr/etc/rpc.rwalld
+   544		root		other
+/nfs/working/cmds/usr.etc/800/rpc.sprayd		/usr/etc/rpc.sprayd
+   544		root		other
+/nfs/working/cmds/usr.etc/800/rpc.ypassd		/usr/etc/rpc.yppasswdd
+   500		root		other
+/nfs/working/cmds/usr.etc/800/rpcinfo		/usr/etc/rpcinfo
+   555		bin		bin
+/nfs/working/cmds/usr.etc/800/rwall			/usr/etc/rwall
+   555		bin		bin
+/nfs/working/cmds/usr.etc/800/showmount		/usr/etc/showmount
+   555		bin		bin
+/nfs/working/cmds/usr.etc/800/spray			/usr/etc/spray
+   555		bin		bin
+/nfs/working/cmds/usr.etc/yp/800/makedbm		/usr/etc/yp/makedbm
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/revnetgroup/800/revnetgroup	/usr/etc/yp/revnetgroup
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/800/stdhosts		/usr/etc/yp/stdhosts
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/ypinit		/etc/newconfig/ypinit
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/ypmake		/etc/newconfig/ypmake
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/make.script	/usr/etc/yp/Makefile
+   400		root		other
+/nfs/working/cmds/usr.etc/yp/800/yppoll		/usr/etc/yp/yppoll
+   555		root		other
+/nfs/working/cmds/usr.etc/yp/800/yppush		/usr/etc/yp/yppush
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/800/ypset		/usr/etc/yp/ypset
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/800/ypxfr		/usr/etc/yp/ypxfr
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/ypxfr_1perda	/etc/newconfig/ypxfr_1perday
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/ypxfr_1perhr	/etc/newconfig/ypxfr_1perhour
+   500		root		other
+/nfs/working/cmds/usr.etc/yp/ypxfr_2perda	/etc/newconfig/ypxfr_2perday
+   500		root		other
+/nfs/working/cmds/usr.etc/vhe/vhe_altlog	/usr/etc/vhe/vhe_altlog
+   555		root		other
+/nfs/working/cmds/usr.etc/vhe/vhe_mounter	/usr/etc/vhe/vhe_mounter
+   500		root		other
+/nfs/working/cmds/usr.etc/vhe/vhe_u_mnt		/usr/etc/vhe/vhe_u_mnt
+   4555		root		other
+/nfs/working/cmds/usr.etc/ypserv/800/ypserv		/usr/etc/ypserv
+   500		root		other
+/nfs/working/cmds/usr.etc/ypserv/800/longfiles		/usr/etc/yp/longfiles
+   500		root		other
+/nfs/working/cmds/usr.lib/librpcsvc/800/librpcsvc800.a	/usr/lib/librpcsvc.a
+   444		bin		bin
+/nfs/working/include/nfs/nfs.h			/usr/include/nfs/nfs.h
+   444		bin		bin
+/nfs/working/include/nfs/nfs_clnt.h		/usr/include/nfs/nfs_clnt.h
+   444		bin		bin
+/nfs/working/include/nfs/rnode.h		/usr/include/nfs/rnode.h
+   444		bin		bin
+/nfs/working/include/rpc/auth.h			/usr/include/rpc/auth.h
+   444		bin		bin
+/nfs/working/include/rpc/auth_unix.h		/usr/include/rpc/auth_unix.h
+   444		bin		bin
+/nfs/working/include/rpc/clnt.h			/usr/include/rpc/clnt.h
+   444		bin		bin
+/nfs/working/include/rpc/pmap_clnt.h		/usr/include/rpc/pmap_clnt.h
+   444		bin		bin
+/nfs/working/include/rpc/pmap_prot.h		/usr/include/rpc/pmap_prot.h
+   444		bin		bin
+/nfs/working/include/rpc/rpc.h			/usr/include/rpc/rpc.h
+   444		bin		bin
+/nfs/working/include/rpc/rpc_msg.h		/usr/include/rpc/rpc_msg.h
+   444		bin		bin
+/nfs/working/include/rpc/svc.h			/usr/include/rpc/svc.h
+   444		bin		bin
+/nfs/working/include/rpc/svc_auth.h		/usr/include/rpc/svc_auth.h
+   444		bin		bin
+/nfs/working/include/rpc/types.h		/usr/include/rpc/types.h
+   444		bin		bin
+/nfs/working/include/rpc/xdr.h			/usr/include/rpc/xdr.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/mount.h		/usr/include/rpcsvc/mount.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/rstat.h		/usr/include/rpcsvc/rstat.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/rusers.h		/usr/include/rpcsvc/rusers.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/rwall.h		/usr/include/rpcsvc/rwall.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/spray.h		/usr/include/rpcsvc/spray.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/yp_prot.h		/usr/include/rpcsvc/yp_prot.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/ypclnt.h		/usr/include/rpcsvc/ypclnt.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/yppasswd.h		/usr/include/rpcsvc/yppasswd.h
+   444		bin		bin
+/nfs/working/include/rpcsvc/ypv1_prot.h		/usr/include/rpcsvc/ypv1_prot.h
+   444		bin		bin

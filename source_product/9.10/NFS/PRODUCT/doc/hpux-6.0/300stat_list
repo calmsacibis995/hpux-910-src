@@ -1,0 +1,173 @@
+$Revision: 1.11.109.1 $	$Date: 91/11/19 14:30:06 $
+
+MODULE		|  RESP. ENG.	|  TEST ENG.	| PORTED | TESTED | SIZE | BFA |
+		|		|		|	 |	  |	 |     |
+biod.c		|	mak	|	jwe	|   Y	 |    D   |   66 |100  |
+nfsd.c		|	mak	|	jwe	|   Y    |    D   |  114 |68.75|
+portmap.c	|	mak	|	jwe	|   Y    |    D   |  382 | 76.2|
+fsirand.c	|	mak	|	mak	|   Y    |    -   |  157 |  -  |
+inetd.c		|	jad	|	jwe	|   Y    |    D   | 2021 |  %  |
+gtnetgrent.c	|	jad	|	jwe	|   Y    |    -   |  283 |  0  |
+getrpcent.c	|	jad	|	jwe	|   Y    |    -   |  232 |  0  |
+innetgr.c	|	jad	|	jwe	|   Y    |    -   |  302 |  0  |
+gethostent.c	|	jad	|	jwe	|   Y    |    -   |  293 |  NA |
+getnetent.c	|	jad	|	jwe	|   Y    |    -   |  325 |  NA |
+getservent.c	|	jad	|	jwe	|   Y    |    -   |  243 |  NA |
+rcmd.c		|	jad	|	jz	|   Y    |    L   |  342 |  NA |
+gprotoent.c	|	jad	|	jwe	|   Y    |    -   |  286 |  NA |
+nfsstat.c	|	mak	|	mak	|   Y    |    -   |  365 |  -  |
+ypbind.c	|	dae	|	jz	|   Y    |    D   |  721 |  59 |
+domainname.c	|	dae	|	jz	|   Y    |    D   |   40 | 100 |
+yperrstrng.c	|	dae	|	jz	|   Y    |    D   |   68 | 23.5|
+yp_all.c	|	dae	|	jz	|   Y    |    D   |   77 | 22.2|
+yp_bind.c	|	dae	|	jz	|   Y    |    D   |  489 |  53 |
+yp_enum.c	|	dae	|	jz	|   Y    |    D   |  393 | 27.8|
+yp_master.c	|	dae	|	jz	|   Y    |    D   |  126 | 22.7|
+yp_match.c	|	dae	|	jz	|   Y    |    D   |  135 | 41.2|
+yp_order.c	|	dae	|	jz	|   Y    |    D   |  116 |  0  |
+ypprot_err.c	|	dae	|	jz	|   Y    |    D   |   39 | 40  |
+ypv1_xdr.c	|	dae	|	jz	|   Y    |    D   |   48 |  0  |
+ypxdr.c		|	dae	|	jz	|   Y    |    D   |  240 | 76.5|
+ypcat.c		|	dae	|	jz	|   Y    |    D   |  244 | 58.1|
+ypmatch.c	|	dae	|	jz	|   Y    |    D   |  226 | 71  |
+yppasswd.c	|	dae	|	jz	|   Y    |    D   |  173 | 6.45|
+ypwhich.c	|	dae	|	jz	|   Y    |    D   |  488 |  44 |
+rpc.ypassd.c	|	dae	|	jz	|   Y    |    D   |  301 |  -  |
+makedbm.c	|	dae	|	jz	|   Y    |    D   |  240 |  25 |
+stdhosts.c	|	dae	|	jz	|   Y    |    D   |   55 |  0  |
+ypmake		|	dae	|	jz	|   Y    |    D   |  315 |  NA |
+yppoll.c	|	dae	|	jz	|   Y    |    D   |  393 | 40.6|
+yppush.c	|	dae	|	jz	|   Y    |    D   |  634 | 40.7|
+ypset.c		|	dae	|	jz	|   Y    |    D   |  268 | 51.1|
+ypxfr.c		|	dae	|	jz	|   Y    |    D   | 1289 |  0  |
+revnetgroup/	|	dae	|	jz	|   Y    |    D   |  530 |  -  |
+ypxfr_2perda	|	dae	|	NA	|   Y    |    NA  |   17 |  NA |
+ypxfr_1perda	|	dae	|	NA	|   Y    |    NA  |   18 |  NA |
+ypxfr_1perh 	|	dae	|	NA	|   Y    |    NA  |   11 |  NA |
+ypserv/		|	dae	|	jz	|   Y    |    D   | 1678 |  2  |
+libdbm/dbm.c	|	dae	|	jz	|   Y    |    D   |  507 | 66.7|
+dbm.h		|	dae	|	NA	|   Y    |    NA  |   34 |  NA |
+yppaswdxdr.c	|	dae	|	jz	|   Y    |    D   |   70 |  0  |
+yp_prot.h	|	dae	|	NA	|   Y    |    NA  |  348 |  NA |
+ypclnt.h	|	dae	|	NA	|   Y    |    NA  |   65 |  NA |
+ypv1_prot.h	|	dae	|	NA	|   Y    |    NA  |  123 |  NA |
+yppasswd.h	|	dae	|	NA	|   Y    |    NA  |   19 |  NA |
+pcnfsd.c	|	jad	|	jad/md	|   Y    |    L   |  419 |  -  |
+auth_none.c	|	jad	|	jz	|   Y    |    N   |   68 | 62.5|
+auth_unix.c	|	jad	|	jz	|   Y    |    M   |  256 |  -  |
+clnt_perr.c	|	jad	|	jz	|   Y    |    M   |  175 | 21.4|
+clnt_simpl.c	|	jad	|	jz	|   Y    |    N   |   78 | 37.5|
+clnt_raw.c	|	jad	|	jz	|   Y    |    M   |  140 |  -  |
+clnt_tcp.c	|	jad	|	jz	|   Y    |    M   |  348 | 37.2|
+clnt_udp.c	|	jad	|	jz	|   Y    |    M   |  345 | 44.7|
+pmap_maps.c	|	jad	|	jz	|   Y    |    N   |   56 |  0  |
+pmap_clnt.c	|	jad	|	jz	|   Y    |    N   |  128 |54.55|
+svc_authux.c	|	jad	|	jz	|   Y    |    N   |  122 |  -  |
+pmap_prot.c	|	jad	|	jz	|   Y    |    N   |   42 |  25 |
+pmap_rmt.c	|	jad	|	jz	|   Y    |    N   |  291 | 45.7|
+rpc_prot.c	|	jad	|	jz	|   Y    |    N   |  435 | 26.5|
+pmap_port.c	|	jad	|	jz	|   Y	 |    N	  |   60 | 75  |
+rpc_alloc.c	|	jad	|	jz	|   Y	 |    N	  |   45 | 75  |
+svc.c		|	jad	|	jz	|   Y    |    M   |  409 | 49  |
+svc_auth.c	|	jad	|	jz	|   Y    |    M   |   53 | 100 |
+xdr_refer.c	|	jad	|	jz	|   Y    |    N   |   61 |  50 |
+svc_raw.c	|	jad	|	jz	|   Y    |    M   |   90 |  -  |
+svc_simple.c	|	jad	|	jz	|   Y    |    M   |  109 |  -  |
+svc_tcp.c	|	jad	|	jz	|   Y    |    M   |  305 | 5.71|
+svc_udp.c	|	jad	|	jz	|   Y    |    M   |  186 | 47.6|
+xdr.c		|	jad	|	jz	|   Y    |    L   |  382 | 65.2|
+xdr_array.c	|	jad	|	jz	|   Y    |    L   |   85 |  20 |
+xdr_float.c	|	jad	|	jz	|   Y    |    N   |  209 |  0  |
+xdr_mem.c	|	jad	|	jz	|   Y    |    L   |  132 | 66.7|
+xdr_rec.c	|	jad	|	jz	|   Y    |    L   |  419 | 37.3|
+xdr_stdio.c	|	jad	|	jz	|   Y    |    L   |  124 |  -  |
+xdr_fh.c	|	jad	|	jz	|   Y	 |    L	  |   35 |  -  |
+authux_pro.c	|	jad	|	jz	|   Y    |    N   |   67 |  100|
+rup.c		|	jad	|	jad	|   Y    |    -   |  293 |  38 |
+rusers.c	|	jad	|	jad	|   Y    |    -   |  396 | 61.4|
+check_exit.c    |	jad	|	jad	|   Y	 |    -   |   71 |  0  |
+rpc.ruserd.c	|	jad	|	jad	|   Y    |    -   |  247 | 53.1|
+rpc.mountd.c	|	jad	|	jad	|   Y    |    -   |  728 |35.45|
+rpc.rstatd.c	|	jad	|	jad	|   Y    |    -   |  435 | 18.9|
+rpc.rwalld.c	|	jad	|	jad	|   Y    |    -   |  119 | 35.7|
+rpc.sprayd.c	|	jad	|	jad	|   Y    |    -   |  126 |  50 |
+rpcinfo.c	|	jad	|	jad	|   Y    |    -   |  220 |  75 |
+rwall.c		|	jad	|	jad	|   Y    |    -   |  138 | 72.2|
+showmount.c	|	jad	|	jad	|   Y    |    -   |  163 |  80 |
+spray.c		|	jad	|	jad	|   Y    |    -   |  264 | 51.3|
+mountxdr.c	|	jad	|	jz	|   Y    |    N   |  102 | 37.5|
+rstatxdr.c	|	jad	|	jz	|   Y    |    N   |  236 |  8.6|
+rusersxdr.c	|	jad	|	jz	|   Y    |    N   |  109 | 36.8|
+rwallxdr.c	|	jad	|	jz	|   Y    |    N   |   15 |  0  |
+sprayxdr.c	|	jad	|	jz	|   Y    |    N   |   19 |  40 |
+util.c		|	jad	|	jz	|   Y    |    N   |   16 |  50 |
+rpc.h		|	inc	|	NA	|   Y    |    NA  |   32 |  NA |
+pmap_prot.h	|	inc	|	NA	|   Y    |    NA  |   67 |  NA |
+auth.h		|	inc	|	NA	|   Y    |    NA  |  137 |  NA |
+auth_unix.h	|	inc	|	NA	|   Y    |    NA  |   44 |  NA |
+clnt.h		|	inc	|	NA	|   Y    |    NA  |  255 |  NA |
+pmap_clnt.h	|	inc	|	NA	|   Y    |    NA  |   38 |  NA |
+rpc_msg.h	|	inc	|	NA	|   Y    |    NA  |  159 |  NA |
+svc.h		|	inc	|	NA	|   Y    |    NA  |  249 |  NA |
+svc_auth.h	|	inc	|	NA	|   Y    |    NA  |   14 |  NA |
+types.h		|	inc	|	NA	|   Y    |    NA  |   33 |  NA |
+xdr.h		|	inc	|	NA	|   Y    |    NA  |  226 |  NA |
+mount.h		|	inc	|	NA	|   Y    |    NA  |   57 |  NA |
+rstat.h		|	inc	|	NA	|   Y    |    NA  |  101 |  NA |
+rusers.h	|	inc	|	NA	|   Y    |    NA  |   35 |  NA |
+rwall.h		|	inc	|	NA	|   Y    |    NA  |   12 |  NA |
+spray.h		|	inc	|	NA	|   Y    |    NA  |   30 |  NA |
+nfs_server.c	|	kern	|	fm	|   Y    |    -   | 1115 |62.66|
+nfs_subr.c	|	kern	|	fm	|   Y    |    -   |  685 |56.25|
+nfs_vfsops.c	|	kern	|	fm	|   Y    |    -   |  438 |29.51|
+nfs_xdr.c	|	kern	|	fm	|   Y    |    -   |  695 |78.21|
+nfs_vnops.c	|	kern	|	fm	|   Y    |    -   | 1237 |78.49|
+auth_kern.c	|	kern	|	dds	|   Y    |    -   |  133 |46.15|
+clnt_kudp.c	|	kern	|	dds	|   Y    |    -   |  512 |41.67|
+kudp_fsend.c	|	kern	|	dds	|   Y    |    -   |  234 |39.13|
+subr_kudp.c	|	kern	|	dds	|   Y    |    -   |  146 |39.13|
+svc_kudp.c	|	kern	|	dds	|   Y    |    -   |  312 |71.05|
+xdr_mbuf.c	|	kern	|	dds	|   Y    |    -   |  230 |45.95|
+svc_authux.c	|	kern	|	dds	|   Y    |    -   |  122 |37.58|
+rpc_prot.c	|	kern	|	dds	|   Y    |    -   |  435 |21.18|
+svc.c		|	kern	|	dds	|   Y    |    -   |  409 |60.53|
+svc_auth.c	|	kern	|	dds	|   Y    |    -   |   53 |66.67|
+xdr.c		|	kern	|	dds	|   Y    |    -   |  382 |65.15|
+xdr_array.c	|	kern	|	dds	|   Y    |    -   |   85 |  0  |
+xdr_mem.c	|	kern	|	dds	|   Y    |    -   |  132 |26.67|
+authux_pro.c	|	kern	|	dds	|   Y    |    -   |   67 |  0  |
+
+KERNEL BFA: 56.03%
+
+KEY:
+Porting:
+
+jad: John Dilley
+dae: Dave Erickson
+dds: Darren Smith
+fm: Mike Shipley
+kern: Darren Smith or Mike Shipley
+inc: Include files, tested/ported through programs that use them
+
+Testing:
+
+md: Marie Dotts
+jz : Jason Zions
+jwe: Jeff Elison
+mak: Mark A. Kepke
+NA: Not Applicable
+
+Testing status:
+
+- : Tests not started or written
+N : Tests being written
+L : Low number of tests done
+M : Medium number of tests done
+H : High number of tests done
+D : All tests done
+
+TOTAL: 		34231
+
+Note: BFA numbers were obtained by running the normal functional tests.
+      The library tests were recompiled with BFA.  The rpc daemons and
+      rwall, rpcinfo, spray, showmount, rup, rusers.

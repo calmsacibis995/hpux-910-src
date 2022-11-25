@@ -1,0 +1,350 @@
+#!/bin/sh
+
+#   @(#)ypinit:	$Revision: 1.31.109.2 $	$Date: 93/10/25 14:46:39 $  
+
+#==============================================================================
+#									      |
+#	(c) Copyright 1987, 1988 Hewlett-Packard Company		      |
+#	(c) Copyright 1984 Sun Microsystems, Inc.  			      |
+#									      |
+#  This is the ypinit shell script.  It is used to set up a populated	      |
+#  Network Information Service directory structure on either a master or slave server.	      |
+#  See the following reference pages for more information:		      |
+#									      |
+#	domainname(1), ypcat(1), ypmatch(1), yppasswd(1), ypwhich(1),	      |
+#	makedbm(1M), vhe_mounter(1M), ypinit(1M), ypmake(1M),		      |
+#	yppasswdd(1M), yppoll(1M), yppush(1M), ypset(1M), ypxfr(1M),	      |
+#	vhe_list(4), ypfiles(4).					      |
+#									      |
+#  The exit values from this script are:				      |
+#									      |
+#	0:	Normal termination.					      |
+#	1:	Some error occurred during processing:			      |
+#		One or more unrecognized arguments were passed;		      |
+#		ypinit quit by user's request when errors encountered;	      |
+#		hostname: either not set or equal to master's name;	      |
+#		domainname: could not be retrieved or is not set;	      |
+#		$NIS_DIR does not exist;					      |
+#		Problems removing or creating $NIS_DIR/$DEF_DOM;		      |
+#		ypxfr error(s) occurred when initializing a slave server;     |
+#		Error(s) occurred when creating a master server's maps.	      |
+#									      |
+#==============================================================================
+
+#==========
+#  MASTER_MAPS:	the list of maps to be created on the master, using ypmake(1M).
+#		Their sources are ASCII files, generally in /etc.  If you have
+#		modified the ypmake(1M) shell script to build a new, custom NIS 
+#		map, add its name to the MASTER_MAPS list.  By doing so, any
+#		new NIS slave servers will automatically copy the map when they
+#		are initialized.
+#
+#  ALL_MAPS:	the list of maps which should be copied to the slave from a
+#  		master NIS server.  This includes all MASTER_MAPS plus the
+#  		"hand-made" map, ypservers.
+#
+#		The ethers map is not built on HP master
+#		NIS servers, though it may exist on a non-HP master NIS server
+#		and get copied to an HP slave NIS server.  As a result, it
+#		is included in the ALL_MAPS list.
+#
+#  SERVER_LIST: a temporary file to contain a list of NIS servers.
+#
+#  NIS_DIR:	The directory which contains the directories whose names
+#		are domains; each, in turn, contains maps for the domain.
+#		NIS_DIR also contains the makedbm(1M), ypmake(1M) and ypxfr(1M)
+#		commands.
+#==========
+
+MASTER_MAPS="group.bygid group.byname \
+	hosts.byaddr hosts.byname netgroup netgroup.byhost \
+	netgroup.byuser networks.byaddr networks.byname passwd.byname \
+	passwd.byuid protocols.byname protocols.bynumber rpc.bynumber \
+	services.byname mail.aliases vhe_list"
+ALL_MAPS="$MASTER_MAPS ethers.byaddr ethers.byname mail.aliases ypservers"
+SERVER_LIST=/tmp/ypinit.$$
+NIS_DIR=/usr/etc/yp
+
+handle_signal () {
+	echo "\nABORT (ypinit)."
+	rm -rf $SERVER_LIST $NIS_DIR/$DEF_DOM
+	echo "\n*****  ALL DATABASES BUILT THUS FAR HAVE BEEN DISCARDED  *****"
+	echo "\nYou must run ypinit all over again to create a complete set of databases.\n"
+	exit 1
+}
+
+quit () {
+	rm -rf $SERVER_LIST $NIS_DIR/$DEF_DOM
+	echo "\nBy your request, ypinit is quitting as a result of the error."
+	echo "\n*****  ALL DATABASES BUILT THUS FAR HAVE BEEN DISCARDED  *****"
+	echo "\nDetermine what the problem is, fix it and run ypinit all over again to create"
+	echo "a complete set of databases.\n"
+	exit 1
+}
+
+usage () {
+	echo '\nUsage:  ypinit -m [DOM=domain_name]' >& 2
+	echo '        ypinit -s master_server [DOM=domain_name]' >& 2
+	echo "\n-m: make this machine a master Network Information Service server" >& 2
+	echo "-s: make this machine a slave Network Information Service server; \"master_server\" is the" >& 2
+	echo "    existing master NIS server from which the databases are copied.\n" >& 2
+	echo '"domain_name" is the NIS domain name to initialize; if not supplied, DOM' >& 2
+	echo 'defaults to the name returned by domainname(1).\n' >& 2
+	exit 1
+}
+
+#==========
+#  Check the arguments for correctness.
+#==========
+
+while [ -n "$1" ]; do
+   case "$1" in 
+
+	DOM=*)	eval $1
+		if [ -z "$DOM" -o -n "$DEF_DOM" ]; then
+			usage
+		fi
+		DEF_DOM=$DOM;;
+
+	*=*)	echo "\nERROR (ypinit):  unknown option \"$1\"" >& 2
+		usage;;
+
+	-m)	if [ $INIT_FLAG ]; then
+			usage
+		fi
+		INIT_FLAG=SET;;
+
+	-s)	shift
+		case "$1" in
+			-* | *=*)	usage;;
+			*)		if [ -z "$1" -o -n "$INIT_FLAG" ]; then
+						usage
+					fi;;
+		esac
+		INIT_FLAG=SET
+		MASTER_SERVER=$1
+		INIT_SLAVE_SERVER=TRUE;;
+
+	*)	usage;;
+
+   esac
+   shift
+done
+
+if [ -z "$INIT_FLAG" ]; then
+	usage
+fi
+
+#==========
+#  Check some requisite conditions.
+#==========
+
+PATH=/bin:/usr/bin:/etc
+export PATH
+
+HOST=`hostname`
+
+if [ $? -lt 0 ]; then
+	echo "\nCan't get the local host's name using hostname(1).\n" >& 2
+	exit 1
+fi
+
+if [ -z "$HOST" ]; then
+	echo "\nThe local host's name hasn't been set.  Please set it.\n" >& 2
+	exit 1
+fi
+
+if [ "$HOST" = "$MASTER_SERVER" ]; then
+	echo "\nThe host specified should be a running master NIS server, not this machine.\n" >& 2
+	exit 1
+fi
+
+if [ -z "$DEF_DOM" ]; then
+	DEF_DOM=`domainname`
+	if [ $? -ne 0 ]; then 
+		echo "\nCan't get $HOST's NIS domain name using domainname(1).\n" >& 2
+		exit 1
+	fi
+	if [ -z "$DEF_DOM" ]; then
+		echo "\n$HOST's NIS domain name hasn't been set." >& 2
+		echo "Please set it using domainname(1).\n" >& 2
+		exit 1
+	fi
+fi
+
+if [ ! -d $NIS_DIR ]; then
+	echo "\nThe directory $NIS_DIR doesn't exist.  Restore it from the update tape.\n" >& 2
+	exit 1
+fi
+
+if [ $INIT_SLAVE_SERVER ]; then
+	if [ "`ypwhich 2>&1`" = "$HOST" ]; then
+		echo "\nYou must bind to a NIS server other than $HOST before you can continue." >& 2
+		echo "Use ypset(1M) to do this.\n" >& 2
+		exit 1
+	fi
+fi
+
+#==========
+#  Prepare for the database transfers (slave) or builds (master).
+#==========
+
+echo "You will be required to answer a few questions to install the Network Information Service."
+echo "All questions will be asked at the beginning of this procedure.\n"
+echo "Do you want this procedure to quit on non-fatal errors? [y/n: n]  \c"
+read DOEXIT
+
+case $DOEXIT in
+	y* | Y*)	QUIT_ON_ERROR=TRUE;;
+	*)		echo "OK, but please remember to correct anything which fails."
+			echo "If you don't, some part of the system (perhaps the NIS itself) won't work.";;
+esac
+
+echo ""
+
+if [ -d $NIS_DIR/$DEF_DOM ]; then
+	echo "Can the existing directory \"$NIS_DIR/$DEF_DOM\""
+	echo "and its contents be destroyed? [y/n: n]  \c"
+	read KILL_OLD_DIR
+
+	case $KILL_OLD_DIR in
+		y* | Y*)	rm -rf $NIS_DIR/$DEF_DOM
+				if [ $? -ne 0 ]; then
+					echo "\nFATAL ERROR:  can't remove directory $NIS_DIR/$DEF_DOM.\n" >& 2
+					exit 1
+				fi;;
+
+		*)		echo "OK - please clean it up by hand, and run ypinit again."
+				exit 0;;
+	esac
+fi
+
+mkdir $NIS_DIR/$DEF_DOM
+
+if [ $? -ne 0 ]; then
+	echo "\nFATAL ERROR:  can't make new directory $NIS_DIR/$DEF_DOM.\n" >& 2
+	exit 1
+fi
+
+#==========
+#  Catch hangup, interrupt and kill signals.
+#==========
+
+trap handle_signal 1 2 15
+
+#==========
+#  Set up the slave's databases, copying them from the master to this machine.
+#==========
+
+if [ $INIT_SLAVE_SERVER ]; then
+	echo "There will be no further questions.  The remainder of the procedure, copying"
+	echo "the databases from $MASTER_SERVER, will take a few minutes.\n"
+	echo "Note that if your master NIS server, $MASTER_SERVER, is an HP machine, it is"
+	echo "expected that the NIS databases ethers.byaddr, ethers.byname and mail.aliases"
+	echo "will not exist for you to copy.  As a result, you may ignore any \"no such map\""
+	echo "error messages produced when those maps are attempted to be transferred."
+	echo "This may also be true if $MASTER_SERVER is not an HP machine.\n"
+	echo "If your master NIS server, $MASTER_SERVER, is not an HP machine, it is expected"
+	echo "that the NIS database vhe_list will not exist for you to copy, and you may"
+	echo "ignore any \"no such map\" error messages seen when it is attempted to be"
+	echo "transferred.  This may also be true if $MASTER_SERVER is an HP machine and"
+	echo "its ypmake(1M) is from an older release.\n"
+
+	for MAP in $ALL_MAPS; do
+		echo "Transferring $MAP for domain $DEF_DOM from $MASTER_SERVER..."
+		$NIS_DIR/ypxfr -h $MASTER_SERVER -c -d $DEF_DOM $MAP
+		if [ $? -ne 0 ]; then
+			if [ $QUIT_ON_ERROR ]; then
+				quit
+			fi
+			EXIT_CODE=1
+		fi
+	done
+
+	if [ $EXIT_CODE ]; then
+		echo "\n$HOST has been set up as a slave Network Information Service server with errors." >& 2
+		echo "Please remember to correct the errors, and run ypinit again." >& 2
+	else
+		echo "\n$HOST has been set up as a slave Network Information Service server without any errors."
+	fi
+
+	echo "\nAt this point, make sure that /etc/passwd, /etc/hosts, /etc/networks,"
+	echo "/etc/group, /etc/protocols, /etc/services, /etc/rpc and /etc/netgroup have been"
+	echo "edited so that when the Network Information Service is activated, the databases you have just"
+	echo "created will be used in addition to or instead of the /etc ASCII files."
+
+	exit ${EXIT_CODE:-0}
+fi
+
+#==========
+#  Set up the master's databases: build the ypservers map and all of the maps
+#  listed in MASTER_MAPS.
+#==========
+
+while [ HOST_LIST_INCORRECT ]; do
+	echo $HOST > $SERVER_LIST
+	echo "\nAt this point, you must construct a list of the hosts which will be"
+	echo "NIS servers for the \"$DEF_DOM\" domain."
+	echo "This machine, $HOST, is in the list of Network Information Service servers."
+	echo "Please provide the hostnames of the slave servers, one per line."
+	echo "When you have no more names to add, enter a <ctrl-D> or a blank line.\n"
+	echo "	next host to add:  $HOST"
+	echo "	next host to add:  \c"
+
+	while read NIS_SERVER; do
+		if [ `expr length "$NIS_SERVER"` -eq 0 ]; then
+			break
+		fi
+		echo "	next host to add:  \c"
+		echo $NIS_SERVER >> $SERVER_LIST
+	done
+
+	echo "\nThe current list of NIS servers looks like this:\n"
+	cat $SERVER_LIST
+	echo "\nIs this correct?  [y/n: y]  \c"
+	read HLIST_OK
+
+	case $HLIST_OK in
+		n* | N*)	echo "Let's try the whole thing again...";;
+		*)		break;;
+	esac
+done
+
+echo "\nThere will be no further questions. The remainder of the procedure should take"
+echo "5 to 10 minutes.\n"
+
+echo "Building the ypservers database... \c"
+$NIS_DIR/makedbm $SERVER_LIST $NIS_DIR/$DEF_DOM/ypservers
+
+if [ $? -ne 0 ]; then
+	echo "\nCouldn't build NIS database $NIS_DIR/$DEF_DOM/ypservers.\n" >& 2
+	if [ $QUIT_ON_ERROR ]; then
+		rm -f $SERVER_LIST
+		quit
+	fi
+	EXIT_CODE=1
+else
+	echo "ypservers build complete."
+fi
+
+rm -f $SERVER_LIST
+
+echo "\nRunning $NIS_DIR/ypmake:"
+$NIS_DIR/ypmake NOPUSH=1 $MASTER_MAPS PWFILE=/etc/passwd DOM=$DEF_DOM
+
+if [ $? -ne 0 ]; then
+	if [ $QUIT_ON_ERROR ]; then
+		quit
+	fi
+	EXIT_CODE=1
+	echo "\n$HOST has been set up as a master Network Information Service server with errors." >& 2
+	echo "Please remember to correct the errors, and run ypinit again." >& 2
+else
+	echo "\n$HOST has been set up as a master Network Information Service server without any errors."
+fi
+
+echo "\nIf there are running slave NIS servers, run yppush(1M) now for any databases"
+echo "which have been changed.  If there are no running slaves, run ypinit on"
+echo "those hosts which are to be slave servers."
+
+exit ${EXIT_CODE:-0}

@@ -1,0 +1,25 @@
+                commandes mailx
+type [listemsg]                 imprimer les messages
+next                            aller au message suivant et l'imprimer
+edit [listemsg]                 modifier les messages
+from [listemsg]                 imprimer les lignes d'en-tÁtes des messages
+delete [listemsg]               supprimer les messages
+undelete [listemsg]             restaurer les messages supprimÅs
+save [listemsg] fichier         sauvegarder les messages dans le fichier
+reply [message]                 rÅpondre au message, È tous les destinataires
+Reply [listemsg]                rÅpondre È tous les messages
+preserve [listemsg]             garder les messages dans la boÑte aux lettres
+mail utilisateur                expÅdier le message È l'utilisateur spÅcifiÅ
+quit                            sortir et garder les messages non lus
+xit                             sortir et garder tous les messages
+header                          imprimer page des en-tÁtes de messages actifs
+!                               passage au shell
+cd [rÅpertoire]                 passer È un autre rÅpert ou au rÅpert initial
+list                            afficher toutes les commandes(sans explication)
+top [listemsg]                  imprimer les cinq premiÉres lignes des messages
+z [-]                           afficher 10 en-tÁtes page suivante [prÅcÅdente]
+
+
+[listemsg] est facultatif; pour afficher les messages par numÅro,
+expÅditeur, objet ou type.  La valeur par dÅfaut est le message
+en cours.

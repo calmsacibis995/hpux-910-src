@@ -1,0 +1,16 @@
+$set 1
+1 Bad fds bits in main loop select mask
+2 Invalid timeout in main loop select
+3 ypinit() fork failure
+4 Can't catch process exit signal
+5 Can't create udp server
+6 Can't create tcp server
+7 Can't register V%d udp service
+8 Can't register V%d tcp service
+9 Can't register V%d udp service
+10 Can't register V%d tcp service
+11 YPPROC_NULL can't reply to rpc call
+12 YPPROC_CLEAR can't reply to rpc call
+13 YPOLDPROC_NULL can't reply to rpc call
+14 Usage:  %s [-l log_file]\n
+15 The log file "%s" cannot be opened.\n%s aborted.\n

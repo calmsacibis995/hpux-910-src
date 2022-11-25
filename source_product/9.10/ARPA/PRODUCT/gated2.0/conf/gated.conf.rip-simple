@@ -1,0 +1,9 @@
+#
+#	Config file gated-alpha on risci
+#
+
+traceoptions internal external route rip update ;
+
+rip yes ;
+
+snmp no ;

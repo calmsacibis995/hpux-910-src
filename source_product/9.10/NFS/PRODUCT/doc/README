@@ -1,0 +1,164 @@
+2.0_how_to:
+	Document describing how to restore the development environment
+	and how to rebuild the s800 NFS product shipped with release 2.0.
+	Use nroff -mm.
+
+300stat_list:
+	Status list for NFS files in terms of testing and BFA coverage.
+	It might be out of date.
+
+6.0_how_to:
+	Document describing how to restore the development environment
+	and how to rebuild the s300 NFS product shipped with release 6.0.
+	Use nroff -mm.
+
+6.2_how_to:
+	Document describing how to restore the development environment
+	and how to rebuild the s300 NFS product shipped with release 6.2.
+	Use nroff -mm.
+
+AB-YP-DUX:
+	Interaction of Diskless with Arpa/Berkeley Services, NFS and Yellow 
+	Pages.
+
+DE.Detail.mm:
+	Detailed description of the development environment used by the
+	NFS project and the scripts that are part of it.  Document in 
+	nroff -mm format.
+
+DE.Over.mm:
+	Overview of the advantages of the development environment used
+	by the NFS project.  Document in nroff -mm format.
+
+ERS:
+	External Reference Specification for the NFS 300 and NFS 800
+	projects.  To print use tbl ERS | nroff -mm -rN2.
+
+FURPS.stmt:
+	Statement of congruence with FURPS objectives for NFS/300
+	project.  To print use pr.
+
+IMS.RPC.mm:
+	RPC/XDR Internal Maintenance Specification.  To print use
+	nroff -mm.
+
+IMS.YP.mm:
+	RPC/XDR Internal Maintenance Specification.  To print use
+	nroff -mm.
+
+MR_checklist:
+	This is a checklist of items that must be completed prior to the MR
+	meeting for the NFS Services/300 project.
+
+NFS-Diskless:
+	This paper examines the interdependencies of file and file system
+	operations between NFS server/client nodes and diskless clusters.
+	To print it use nroff -mm.
+
+PDS.2.0:
+	Product datasheet for NFS/Services 800 product release 2.0.
+
+PDS.6.0:
+	Product datasheet for NFS/Services 300 product release 6.0.
+
+PDS.6.2:
+	Product datasheet for NFS/Services 300 product release 6.2 and
+	NFS/Servives 800 product release 3.0.
+
+QA_report:
+	A "wrapper" for the QA report to be provided to the CND QA department
+	just prior to MR.
+
+RFA-NFS-DUX:
+	This paper summarizes the interactions between three remote
+	file access methods Diskless (formerly DUX, Distributed HP-UX),
+	NFS (Network File System) and RFA (Remote File Access).
+	To print it use nroff -mm.
+
+code.sharing:
+	This paper discusses the method for sharing the NFS/RPC kernel code
+	associated with the NFS/300 and NFS/800 products.
+	To print it use nroff -mm.
+
+eng_time:
+	This document synopsizes the engineering time spent (restricted to
+	Jeff Lindberg's group) during the life of the NFS project.
+
+gobots_lc:
+	Lifecycle for the "Transformers" NFS 300 testing group.
+
+hpux_nfs_sun:
+	This document is automatically included in the ERS.  It lists
+	the differences between SUN NFS and HP NFS and the differences
+	between HP-UX and HP NFS.
+
+include_file:
+	List of include files that are shipped with the NFS product.
+
+issues:
+	List of issues that were open at the beginning of the project
+	and their resolutions.
+
+lc_800.2.0:
+	Lifecycle document for the NFS 800 project release 2.0.  Use 
+	tbl | nroff -mm	to print it.
+
+lc_800.3.0:
+	Lifecycle document for the NFS 800 project release 3.0.  Use 
+	tbl | nroff -mm	to print it.
+
+life_cycle:
+	Original lifecycle document.  Now out of date.
+
+lifecycle300:
+	Intermediate lifecycle document for NFS 300.  Now out of date.
+
+lifecycle800:
+	Original basis for lc_800.  Now out of date.
+
+media_label:
+	The label used on the NFS archive tapes that are provided to
+	manufacturing just prior to MR.
+
+module_names:
+	Name of all the modules that are correct choices for the
+	module_fixed field of the DTS reports.
+
+nfs_irs:
+	Internal Reference Specification for the implementation of
+	SUN's Network File System on the HP9000/3XX.  This paper
+	discusses only the kernel portions of the NFS implementation.
+	It also describes the kernel RPC/XDR interfaces.
+
+nls_cookbook:
+	This document describes what steps have been taken to localize
+	NFS.  It also describes all the messages that are part of the
+	message catalogs for the NFS commands.  To print this document
+	use nroff -mm.
+
+partner_tp:
+	A brief test plan describing the tests to be performed on the NFS
+	portion of the "partner bits."  This plan is provided to SSIT prior
+	to beginning testing of final bits for a given release.
+
+product_req:
+	Product Requirements Document (PRD) for NFS/300 and NFS/800.
+	To print it use tbl | nroff -mm.
+
+program_lc:
+	6.0 Networking Program Lifecycle (NFS and convergence).
+
+project_req:
+	Project Requirements Document for NFS.  To print this use 
+	tbl | nroff -mm.
+
+schedule:
+	Directory containing the schedule files for the members of the 
+	NFS 300 and 800 development projects.
+
+syscall_list:
+	List of system calls that needed to be added to HP-UX to allow
+	NFS to be ported to HP-UX.
+
+testplan:
+	Directory containing the different portions of the NFS testplan.

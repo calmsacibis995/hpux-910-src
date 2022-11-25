@@ -1,0 +1,313 @@
+#!/bin/ksh
+
+usage="\
+	\t$0: -p [ch | co | in] [ -R <release> ] [ -r <rcs tag>] \n
+	\t    [ -g ] [ -u O ] [ -a archive ] [ -a shared ] [ -D define ] \n
+	\t    [ -U undefine ] [ -m make_rule ] [ -n ] target\n\n
+	\t-R release      The release to build, e.g 9_03 [9_1] \n
+        \t-g              Produce debugable code   (cc -g) \n
+        \t-u O            Turn off optimization    (default with -g) \n
+	\t-a archive      Produce code bound with archive libraries \n
+        \t-a shared       Produce code bound with shared libraries \n
+        \t-D define       Additional cpp macro to define (cc -D) \n
+        \t-L path         Library path \n
+        \t-U undefine     Additional cpp macro to undefine (cc -U) \n
+	\t-n 		  Do not strip the executable (always use for shared libs)\n
+	\t-r rcs_tag	  tag to build with [SWT/9_03] \n
+	\t-m make_rule	  make file target [default] \n
+	\t-p ch[echout]	Checkout phase \n
+	\t-p co[mpile]	Compile phase \n
+	\t-p in[stall]	Install phase \n
+        \ttarget          Full pathname of a target to build or fileset name"
+
+
+# defaults...
+m_rule=default
+p_arg=0
+coflag=0
+chflag=0
+insflag=0
+gflag=0
+nflag=0
+aflag=0
+uflag=0
+rflag=0
+release="9_1"
+rcs_tag="-rSWT/9_03"
+num_dash_r=1
+target=""
+otherdefs=
+otherundefs=
+srcbase=/hpux/src.rcs
+
+GCCOPTS="-DCRYPT -DSHARED_LIBS -DSYMLINKS -DHP_NFS -DNFS -DHPNFS -DNFS3_2 -DDISKLESS -DDUX -DCNODE_DEV -DLONGFILENAMES -DLONGFILENAME -DBSDJOBCTL -DQUOTA -DOLD_RFA -DSWFS -DHDBuucp -DNLS -DNLS8 -DNLS16 -DHFS -DCDROM -DPSTAT -D_NAMESPACE_CLEAN -DUT_HOST -DACLS -DAUDIT -DSHADOWPWD -DGETMOUNT -DLOCAL_DISK -DGT_64_FDS -DEUC -DAES -g"
+
+CCOPTS="-DCRYPT -DSHARED_LIBS -DSYMLINKS -DHP_NFS -DNFS -DHPNFS -DNFS3_2 -DDISKLESS -DDUX -DCNODE_DEV -DLONGFILENAMES -DLONGFILENAME -DBSDJOBCTL -DQUOTA -DOLD_RFA -DSWFS -DHDBuucp -DNLS -DNLS8 -DNLS16 -DHFS -DCDROM -DPSTAT -D_NAMESPACE_CLEAN -DUT_HOST -DACLS -DAUDIT -DSHADOWPWD -DGETMOUNT -DLOCAL_DISK -DGT_64_FDS -DEUC -DAES -O -s"
+export CCOPTS
+
+NCCOPTS="-DCRYPT -DSHARED_LIBS -DSYMLINKS -DHP_NFS -DNFS -DHPNFS -DNFS3_2 -DDISKLESS -DDUX -DCNODE_DEV -DLONGFILENAMES -DLONGFILENAME -DBSDJOBCTL -DQUOTA -DOLD_RFA -DSWFS -DHDBuucp -DNLS -DNLS8 -DNLS16 -DHFS -DCDROM -DPSTAT -D_NAMESPACE_CLEAN -DUT_HOST -DACLS -DAUDIT -DSHADOWPWD -DGETMOUNT -DLOCAL_DISK -DGT_64_FDS -DEUC -DAES -O"
+
+CCCOPTS="-DCRYPT -DSHARED_LIBS -DSYMLINKS -DHP_NFS -DNFS -DHPNFS -DNFS3_2 -DDISKLESS -DDUX -DCNODE_DEV -DLONGFILENAMES -DLONGFILENAME -DBSDJOBCTL -DQUOTA -DOLD_RFA -DSWFS -DHDBuucp -DNLS -DNLS8 -DNLS16 -DHFS -DCDROM -DPSTAT -D_NAMESPACE_CLEAN -DUT_HOST -DACLS -DAUDIT -DSHADOWPWD -DGETMOUNT -DLOCAL_DISK -DGT_64_FDS -DEUC -DAES -s"
+
+LPATH="/lib:/usr/lib"
+
+set -- `getopt L:m:U:D:gnu:a:p:R:r: $*`
+if [ $? -ne 0 ]
+then
+    echo $usage
+    exit 2
+fi
+
+while [ $# -gt 1 ]; do
+   case $1 in
+   -p)
+       if [ "$2" = "co"    -o "$2" = "com"    -o "$2" = "comp" -o \
+	    "$2" = "compi" -o "$2" = "compil" -o "$2" = "compile" ]
+       then
+	   coflag=1
+       fi
+       if [ "$2" = "ch"    -o "$2" = "che"    -o "$2" = "chec" -o \
+	    "$2" = "check" -o "$2" = "checko" -o "$2" = "checkou"  -o \
+	    "$2" = "checkout" ]
+       then
+	   chflag=1
+       fi
+       if [ "$2" = "in"    -o "$2" = "ins"    -o "$2" = "inst" -o \
+	    "$2" = "insta" -o "$2" = "instal" -o "$2" = "install" ]
+       then
+	   insflag=1
+       fi
+       if [ $chflag -eq 0 -a $coflag -eq 0 -a $insflag -eq 0 ]
+       then
+	   echo $usage
+	   exit 2
+       fi
+       p_arg=1
+       shift 2
+       ;;
+   -R)
+       release=$2
+       shift 2
+       ;;
+   -m)
+       m_rule=$2
+       shift 2
+       ;;
+   -g)
+       gflag=1
+       CCOPTS=$GCCOPTS
+       if [ $uflag -eq 1 ]
+       then
+	   echo "-u and -g are incompatible"
+	   echo $usage
+	   exit 2
+       fi
+       if [ $nflag -eq 1 ]
+       then
+	   echo "-g implies -n"
+       fi
+       shift
+       ;;
+   -n)
+       if [ $gflag -eq 1 ]
+       then
+	   echo "-g implies -n"		# CCOPTS already set by -g
+       else
+           CCOPTS=$NCCOPTS
+       fi
+       shift
+       ;;
+   -u)
+       uflag=1
+       CCOPTS=$CCCOPTS
+       if [ $gflag -eq 1 ]
+       then
+	   echo "-u and -g are incompatible"
+	   echo $usage
+	   exit 2
+       fi
+       shift 2
+       ;;
+   -a)
+       if [ $aflag -eq 1 ]
+       then
+	   echo "Only one -a option permitted"
+	   echo $usage
+	   exit 2
+       fi
+       if [ "$2" = "shared" -o "$2" = "archive" ]
+       then
+           aflag=1
+           LDOPTS="-a $2"
+       else
+	   echo "The argument to -a must be shared or archive"
+	   echo $usage
+	   exit 2
+       fi
+       shift 2
+       ;;
+   -r)
+       if [ $rflag -eq 0 ]
+       then
+	   rflag=1
+	   num_dash_r=0
+	   rcs_tag=""
+       fi
+       rcs_tag="$rcs_tag -r$2"
+       num_dash_r=`expr $num_dash_r + 1`
+       shift 2
+       ;;
+   -D)
+       otherdefs="$otherdefs -D$2"
+       shift 2
+       ;;
+   -L)
+       LPATH="$2:$LPATH"
+       shift 2
+       ;;
+   -U)
+       otherundefs="$otherundefs -U$2"
+       shift 2
+       ;;
+   *)
+       target=$2
+       shift
+       ;;
+   esac
+done
+
+CCOPTS="$CCOPTS $otherdefs $otherundefs"
+export CCOPTS
+#echo LDOPTS=$LDOPTS
+#echo CCOPTS=$CCOPTS
+#echo aflag=$aflag
+#echo coflag=$coflag
+#echo chflag=$chflag
+#echo insflag=$insflag
+#echo gflag=$gflag
+#echo uflag=$uflag
+#echo p_arg=$parg
+#echo rcs_tag=$rcs_tag
+#echo release=$release
+#echo target=$target
+
+if [ "$target" = "" ]
+then
+    echo "A target is required"
+    echo $usage
+    exit 2
+fi
+if [ $p_arg -eq 0 ]
+then
+    echo "a phase must be specified"
+    echo $usage
+    exit 2
+fi
+
+#
+# I'm not happy about this, but I need to special case 8_3 libc
+#
+if [ "$target"  = "/lib/libc" -a \
+     "$release" = "8_3" ]
+then
+    if [ $chflag -eq 1 ]
+    then			# use the correct checkout tags
+	req_rcs_tags="-rPATCH/9_0 -rXPG4_SOFT -rREL/9_0MR"
+	set -- $rcs_tag
+	count=0
+	xpg4=0			# required tags (XPG4_SOFT, PATCH/9_0,
+	patch=0			# and REL/9_0MR)
+	rel=0
+	while ( test $count -lt $num_dash_r )
+	do
+	    count=`expr $count + 1`
+	    if [ "$1" = "-rPATCH/9_0" ]
+	    then
+		patch=1
+	    fi
+	    if [ "$1" = "-rXPG4_SOFT" ]
+	    then
+		xpg4=1
+	    fi
+	    if [ "$1" = "-rREL/9_0MR" ]
+	    then
+		rel=1
+	    fi
+	    shift
+	done
+	if [ $patch -eq 0 -o $xpg4 -eq 0 -o $rel -eq 0 ]
+	then
+	    echo "To build the 9.0 (8_3) version of libc, the sources must"
+	    echo "be extracted with the -rPATCH/9_0 -rXPG4_SOFT and"
+	    echo "-rREL/9_0MR tags.  Do you want these tags prepended"
+	    echo "to your current set of tags ($rcs_tag) or quit? [y,n,q] \c"
+	    ans="x"
+	    while ( test "$ans" = "x" )
+	    do
+		read ans
+		if [ "$ans" = "x" ]
+		then
+		    ans = "y"
+		fi
+		if [ "$ans" = "y" -o "$ans" = "n" -o "$ans" = "q" ]
+		then
+		    break
+		else
+		    ans="x"
+		    echo "Please answer y or n or q\c"
+		fi
+	    done
+	    if [ "$ans" = "y" ]
+	    then
+		rcs_tag="$req_rcs_tags $rcs_tag"
+	    fi
+	    if [ "$ans" = "q" ]
+	    then
+		exit
+	    fi
+	fi
+    fi
+    if [ $coflag -eq 1 ]
+    then				# set the correct compile flags
+	dashi="-I/usr/include/8_3head"
+	CCOPTS="$CCOPTS $dashi"
+	export CCOPTS
+    fi
+fi # end of libc for 8_3
+
+
+mkdir -p Report.sl
+chmod 777 Report.sl
+if [ $chflag -eq 1 ]
+then
+    fco -RM -r$rcs_tag $srcbase$target > Report.sl/checkout \
+        2>Report.sl/checkout.err
+fi
+
+curdir=`pwd`
+
+if [ $coflag -eq 1 ]
+then
+    rm -f $curdir/Report.sl/compile.err
+    touch $curdir/Report.sl/compile.err
+    echo "LDOPTS=\"$LDOPTS\"" > Report.sl/env
+    echo "CCOPTS=\"$CCOPTS\"" >> Report.sl/env
+    echo "LPATH=\"$LPATH\"" >> Report.sl/env
+    echo "export LPATH LDOPTS CCOPTS" >> Report.sl/env
+    ! /etc/chroot /Build/$release \
+      /bin/ksh -c "cd $curdir ; . Report.sl/env ; \
+      /bin/make $m_rule > $curdir/Report.sl/compile 2>&1 \
+      ; echo \$? > $curdir/exit_status"
+    if [ `cat $curdir/exit_status` -ne 0 ]
+    then
+       cp $curdir/Report.sl/compile $curdir/Report.sl/compile.err
+    fi
+    rm -f $curdir/exit_status $curdir/Report.sl/env
+fi
+
+if [ $insflag -eq 1 ]
+then
+    ! /etc/chroot /Build/$release \
+      /bin/ksh -c "cd $curdir ; make install > Report.sl/install \
+      2>Report.sl/install.err"
+fi

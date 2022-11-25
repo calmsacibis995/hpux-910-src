@@ -1,0 +1,44 @@
+$set 1
+1 yppoll:  hostname exceeds %d characters\n
+2 yppoll:  NIS domain name exceeds %d characters\n
+3 yppoll:  mapname exceeds %d characters\n
+4 yppoll:  getdomainname system call failed\n
+5 yppoll:  the NIS domain name hasn't been set on this machine\n
+6 yppoll:  gethostname system call failed\n
+7 yppoll:  %s was not found in /etc/hosts or the NIS hosts map\n
+8 Can't create UDP connection to %s\n
+9 Reason
+10 Can't make YPPROC_ORDER call to ypserv at %s.\n\t
+11 Reason
+12 Can't create V1 UDP connection to %s.\n\t
+13 Reason
+14 Can't make YPPROC_POLL call to ypserv at %s.\n\t
+15 yppoll
+16 Can't make YPPROC_MASTER call to ypserv at %s.\n\t
+17 Reason
+18 Domain %s is supported.\n
+19 Map %1$s has order number %2$d.\n
+20 The master server is %s.\n
+21 Domain %s is supported.\n
+22 Map %1$s has order number %2$d.\n
+23 Can't get master for map %1$s.\n\tReason:  %2$s\n
+24 Domain %s is supported.\n
+25 Can't get order number for map %1$s.\n\tReason:  %2$s\n
+26 The master server is %s.\n
+27 Can't get any map parameter information.\n
+28 Can't get order number for map %1$s.\n\tReason:  %2$s\n
+29 Can't get master for map %1$s.\n\tReason:  %2$s\n
+30 Ill-formed response returned from ypserv on host %s.\n
+31 Domain %s is supported.\n
+32 Map %1$s has order number %2$d.\n
+33 The master server is %s.\n
+34 Unknown master server.\n
+35 Map %s is not supported.\n
+36 Map %1$s does not exist at %2$s.\n
+37 Domain %s is not supported.\n
+38 Can't get hostname\n
+39 \n
+40 Couldn't get NIS server %d\n
+41 Usage:  yppoll [-h host] [-d domain] mapname\n\n where   host is either a name or an internet address of the form ww.xx.yy.zz\n
+42 yppoll: can't reach master at %s\n
+43 yppoll: now trying %s\n

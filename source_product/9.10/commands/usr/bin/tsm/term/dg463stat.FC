@@ -1,0 +1,15 @@
+## FacetTerm  dg463stat  description file  12/13/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: dg463stat.FC,v 70.1 92/03/09 16:55:57 ssa Exp $
+function_key_file=sl_15.ftkey
+perwindow-5-CLSQAF-e-------status_line_on_25th_line..............=\E[2$~
+perwindow_also-...........terminal_status_on_25th_line...........=\E[1$~
+perwindow_also-...........blank_25th_line........................=\E[0$~
+perwindow_default-...............................................=\E[1$~
+## status line
+perwindow-320-CLSQAF--e-------=\E[1$}%300u15\E[0$}
+set-status_line=\E[2$~\E[1$}\r\E[K\E[7m%s1\E[m\E[0$}
+### out_screen_saver_start=
+out_screen_saver_start=\E[0$~
+### out_screen_saver_end=
+out_screen_saver_end=\E[1$~

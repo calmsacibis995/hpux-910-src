@@ -1,0 +1,30 @@
+#!/bin/sh
+##	@(#)make_cmd	$Revision: 1.15.109.1 $	$Date: 91/11/19 13:56:21 $
+#	make_cmd	--	make from checked_out sources
+# Written for NFS project by Cristina Mahon
+# This script finds out if there are any files checked out and compiles
+# them if the developer wants it (by having a file by the name of make_cmd
+# in their log directory).
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+SHELL=/bin/sh		# Make "csh" and "make" play together properly
+export PATH SHELL
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs begin
+
+umask 022
+cd $nfs
+if [ -d checkout -a -s checkout ] ; then
+    CHECKED_OUT=`cd checkout ; find * -type f -print 2>/dev/null`
+fi
+if [ "$CHECKED_OUT" ] ; then
+    MAKEFILES=`find $nfs/cmds/libc $nfs/cmds/usr.lib $nfs/cmds/bin $nfs/cmds/etc $nfs/cmds/ucb $nfs/cmds/usr.bin $nfs/cmds/usr.etc -name Makefile -print`
+    for REMAKE in `fgrep -l "$CHECKED_OUT" "$MAKEFILES"`
+    do  
+	cd `dirname $REMAKE`
+	make $*
+    done
+else
+    echo No files are checked out.
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs end

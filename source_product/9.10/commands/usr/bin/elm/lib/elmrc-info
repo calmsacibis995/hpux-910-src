@@ -1,0 +1,189 @@
+alternatives
+# Alternative addresses that I could receive mail from (usually a
+# forwarding mailbox) and don't want to have listed...
+# (no default. for example: "alternatives = host1!host2!yourname")
+
+calendar
+# Where to save calendar entries
+# (the default is "$HOME/calendar")
+
+editor
+# what editor to use (none or builtin = simulate Berkeley Mail)
+# (the default is $EDITOR, otherwise "/usr/bin/vi")
+
+escape
+# The character to prefix commands to the builtin editor 
+# (the default is "~")
+
+fullname
+# The full user name for outbound mail
+# (the default is your gecos field of "/etc/passwd")
+
+mailbox
+# The default non-incoming mailbox for saving messages you receive
+# (the default is "$HOME/mbox")
+
+maildir
+# Where to save my mail to, default directory
+# (the default is "$HOME/Mail")
+
+pager
+# Program to use for displaying messages ('builtin' is recommended)
+# (the default is "builtin")
+
+prefix
+# Prefix sequence for including message text in other messages...
+# (the default is "> ")
+
+print
+# How to print a message ('%s' is the filename)
+# (the default is "pr %s | lp")
+
+savemail
+# Where to automatically save copies of your OUTBOUND messages
+#
+# (note that this should be different from `mailbox' which is the 
+# default mailbox for INCOMING mail after having been in your central
+# incoming mailbox (/usr/mail/$LOGNAME)
+# (the default is "$HOME/mbox")
+
+shell
+# The shell to use for shell escapes
+# (the default is $SHELL, otherwise "/bin/sh")
+
+signature
+# ".signature" files to append to outbound messages...
+# (no default. for example: "signature = filename")
+
+localsignature
+# Local ".signature" files to append to appropriate messages...
+# (no default. for example: "localsignature = filename")
+# If you want to use a file for both local and remote, then
+# you set only "signature = filename". 
+
+remotesignature
+# Remote ".signature" files to append to appropriate messages...
+# (no default. for example: "remotesignature = filename")
+# If you want to use a file for both local and remote, then
+# you set only "signature = filename". 
+
+sortby
+# How to sort mailboxes, by default
+# (the default is "received")
+
+weedout
+# What headers I DON'T want to see, ever.
+# (the default is ">From" "In-Reply-To:" "References:" "Newsgroups:"
+# "Received:" "Apparently-To:" "Message-Id:" "Content-Type:" 
+# "From" "Mailer:")
+
+timeout
+# Set the main prompt timeout for resynching...
+# (the default is "600" seconds 10 minites)
+
+userlevel
+# Are we good at it?  0=beginner, 1=intermediate, 2+ = expert!
+# (the default is "0")
+
+alwaysdelete
+# Should we always delete messages we've marked for deletion
+# (the default is "ON")
+
+alwaysleave
+# Should we always leave messages as pending 
+# (the default is "ON")
+
+arrow
+# Should we use the "->" rather than the inverse video bar?
+# (the default is "OFF")
+
+ask
+# Should the questions as we leave be displayed or auto-answered?
+# (the default is "ON")
+
+askbcc
+# Would you like to be asked for Blind-Carbon-Copies information
+# (the default is "OFF")
+
+askcc
+# Would you like to be asked for Carbon-Copies information each msg?
+# (the default is "ON")
+
+autocopy
+# Automatically copy message being replied to into buffer? 
+# (the default is "OFF")
+
+copy
+# Save a copy of all outbound messages? 
+# (the default is "OFF")
+
+expand
+# Should we expand TAB to SPACE in your message when you send 
+# messages.
+# (the default is "OFF")
+
+forms
+# We might mail out AT&T Mail Forms
+# (the default is "OFF")
+
+keep
+# When we've deleted all the messages in a folder, if this option is
+# set we'll preserve the empty folder for future access.  Otherwise
+# empty folders are always deleted.
+# (the default is "OFF")
+
+keypad
+# We're running on an HP terminal and want HOME, PREV, NEXT, etc...
+# (the default is "ON")
+
+menu
+# Should we display the three-line 'mini' menu?
+# (the default is "ON")
+
+movepage
+# When using the page commands (+ - <NEXT> <PREV>) change the current
+# message pointer...
+# (the default is "OFF")
+
+names
+# Let's just show the names, though, when expanding aliases...
+# (the default is "OFF")
+
+noheader
+# When messages are copied into the outbound buffer, don't include headers
+#(the default is "ON")
+
+pointnew
+# Start up by pointing to the first new message received, if possible
+# (the default is "ON")
+
+resolve
+# Emulate the mailx message increment mode (only increment after 
+# something has been 'done' to a message, either saved or deleted,
+# as opposed to simply each time something is touched)
+# (the default is "ON")
+
+savename
+# Save messages, incoming and outbound, by login name of sender/recipient
+# (the default is "ON")
+
+skipdeleted
+# Should our current message pointer skip the deleted messages.
+# (the default is "OFF")
+
+softkeys
+# We're running on an HP terminal and want softkeys available too!
+# (this is effective with "keypad=ON")
+# (the default is "ON")
+
+titles
+# Display message title when displaying pages of message
+#(the default is "ON")
+
+warnings
+# Tell us about addresses to machines we can't directly get to?
+# (the default is "ON")
+
+weed
+# Enable the weedout list to be read...
+# (the default is "ON")

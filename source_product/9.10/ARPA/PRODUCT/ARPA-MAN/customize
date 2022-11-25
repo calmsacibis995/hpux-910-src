@@ -1,0 +1,6 @@
+#!/bin/sh
+
+# Customize script for the ARPA man pages
+
+exit 0
+

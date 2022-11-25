@@ -1,0 +1,59 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/testplan/RCS/automount_tests,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:39:21 $
+
+Funtional testing
+-----------------
+ - Basic tests
+   - Loop back NFS automounts
+     - direct maps
+     - indirect maps
+   - Remote NFS automounts
+     - direct maps
+     - indirect maps
+ - Automount Options and command line
+   -m  Suppress initialization of directory-map pairs listed in the auto.master
+       NIS database.
+   -n  Disable dynamic mounts.
+   -T  Tracing.  Expand each NFS call and display it on the standard output.
+   -v  Verbose.  Log status messages to the console.
+   -D  Set environment variable with the -D option.  Also make sure automount
+       inherits other environment variables.  Make sure environment variables
+       are processed correctly in maps with and without braces.
+   -f  Read a local file for initialization, ahead of the auto.master NIS map.
+   -M  Where to mount temporary file systems.
+   -tl Time to leave file sytems mounted.
+   -tm Time between attempts to mount a filesystem.
+   -tw Time between attempts to unmount a filesystem.
+ - Automount Maps
+   - Map types
+     - NIS
+       - auto.master and NIS map file and inluding from NIS map file
+     - Included Maps
+       - local map file includes local map file NIS and map file
+     - Special Maps
+       - -hosts
+       - -passwd / auto.home ; ~ tilde character
+       - -null
+   - substitutions
+   - subdirectories
+   - syntax - \; "the directory" etc.
+   - hierarchical mappings and mount points
+   - multiple server locations
+ - errors, failures
+
+System testing
+--------------
+ - run the filesystem tests over automounted filesystems
+ - bdf
+ - mount
+ - umount
+ - tables 
+   - /etc/mtab should be read upon SIGHUP signal
+ - sytem interfaces
+   - vfsmount
+ - shutdown testing
+ - errors, failures
+
+BFA testing

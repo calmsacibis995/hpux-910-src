@@ -1,0 +1,343 @@
+## FacetTerm  jtermattr  COMMON  description file 05/15/91
+##   jterm terminal emulator attributes
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: jtermattr.FC,v 70.1 92/03/09 16:52:38 ssa Exp $
+##--- ATTRIBUTES               URBOIA onmkji ---##
+##---                          URBOIA onmkji ---##
+##--- CHARACTER SETS ---##
+attribute-..-IA-=^Ag
+attribute-I.-.A-=^At
+attribute-.A-I.-=^AG
+attribute_next-A-I=^AS
+attribute_next-I-A=^As
+## Monochrome attributes
+attribute-...U......-OBR.onmjki=^D1
+attribute-..R.......-OB.Uonmjki=^D2
+attribute-..RU......-OB..onmjki=^D3
+attribute-.B........-O.RUonmjki=^D4
+attribute-.B.U......-O.R.onmjki=^D5
+attribute-.BR.......-O..Uonmjki=^D6
+attribute-.BRU......-O...onmjki=^D7
+attribute-O.........-.BRUonmjki=^D8
+attribute-O..U......-.BR.onmjki=^D9
+attribute-O.R.......-.B.Uonmjki=^D:
+attribute-O.RU......-.B..onmjki=^D;
+attribute-OB........-..RUonmjki=^D<
+attribute-OB.U......-..R.onmjki=^D=
+attribute-OBR.......-...Uonmjki=^D>
+attribute-OBRU......-....onmjki=^D?
+## Set Colors 0-black 1-blue 2-green 3-cyan 4-red 5-magenta 6-yellow 7-white
+## Black background
+attribute-.......jki-OBRUonm...=^E00
+attribute-.......jk.-OBRUonm..i=^E10
+attribute-.......j.i-OBRUonm.k.=^E20
+attribute-.......j..-OBRUonm.ki=^E30
+attribute-........ki-OBRUonmj..=^E40
+attribute-........k.-OBRUonmj.i=^E50
+attribute-.........i-OBRUonmjk.=^E60
+attribute-..........-OBRUonmjki=^E70
+attribute-O......jki-.BRUonm...=^E80
+attribute-O......jk.-.BRUonm..i=^E90
+attribute-O......j.i-.BRUonm.k.=^E:0
+attribute-O......j..-.BRUonm.ki=^E;0
+attribute-O.......ki-.BRUonmj..=^E<0
+attribute-O.......k.-.BRUonmj.i=^E=0
+attribute-O........i-.BRUonmjk.=^E>0
+attribute-O.........-.BRUonmjki=^E?0
+## Blue background
+attribute-......mjki-OBRUon....=^E01
+attribute-......mjk.-OBRUon...i=^E11
+attribute-......mj.i-OBRUon..k.=^E21
+attribute-......mj..-OBRUon..ki=^E31
+attribute-......m.ki-OBRUon.j..=^E41
+attribute-......m.k.-OBRUon.j.i=^E51
+attribute-......m..i-OBRUon.jk.=^E61
+attribute-......m...-OBRUon.jki=^E71
+attribute-O.....mjki-.BRUon....=^E81
+attribute-O.....mjk.-.BRUon...i=^E91
+attribute-O.....mj.i-.BRUon..k.=^E:1
+attribute-O.....mj..-.BRUon..ki=^E;1
+attribute-O.....m.ki-.BRUon.j..=^E<1
+attribute-O.....m.k.-.BRUon.j.i=^E=1
+attribute-O.....m..i-.BRUon.jk.=^E>1
+attribute-O.....m...-.BRUon.jki=^E?1
+## Green background
+attribute-.....n.jki-OBRUo.m...=^E02
+attribute-.....n.jk.-OBRUo.m..i=^E12
+attribute-.....n.j.i-OBRUo.m.k.=^E22
+attribute-.....n.j..-OBRUo.m.ki=^E32
+attribute-.....n..ki-OBRUo.mj..=^E42
+attribute-.....n..k.-OBRUo.mj.i=^E52
+attribute-.....n...i-OBRUo.mjk.=^E62
+attribute-.....n....-OBRUo.mjki=^E72
+attribute-O....n.jki-.BRUo.m...=^E82
+attribute-O....n.jk.-.BRUo.m..i=^E92
+attribute-O....n.j.i-.BRUo.m.k.=^E:2
+attribute-O....n.j..-.BRUo.m.ki=^E;2
+attribute-O....n..ki-.BRUo.mj..=^E<2
+attribute-O....n..k.-.BRUo.mj.i=^E=2
+attribute-O....n...i-.BRUo.mjk.=^E>2
+attribute-O....n....-.BRUo.mjki=^E?2
+## Cyan background
+attribute-.....nmjki-OBRUo.....=^E03
+attribute-.....nmjk.-OBRUo....i=^E13
+attribute-.....nmj.i-OBRUo...k.=^E23
+attribute-.....nmj..-OBRUo...ki=^E33
+attribute-.....nm.ki-OBRUo..j..=^E43
+attribute-.....nm.k.-OBRUo..j.i=^E53
+attribute-.....nm..i-OBRUo..jk.=^E63
+attribute-.....nm...-OBRUo..jki=^E73
+attribute-O....nmjki-.BRUo.....=^E83
+attribute-O....nmjk.-.BRUo....i=^E93
+attribute-O....nmj.i-.BRUo...k.=^E:3
+attribute-O....nmj..-.BRUo...ki=^E;3
+attribute-O....nm.ki-.BRUo..j..=^E<3
+attribute-O....nm.k.-.BRUo..j.i=^E=3
+attribute-O....nm..i-.BRUo..jk.=^E>3
+attribute-O....nm...-.BRUo..jki=^E?3
+## Red background
+attribute-....o..jki-OBRU.nm...=^E04
+attribute-....o..jk.-OBRU.nm..i=^E14
+attribute-....o..j.i-OBRU.nm.k.=^E24
+attribute-....o..j..-OBRU.nm.ki=^E34
+attribute-....o...ki-OBRU.nmj..=^E44
+attribute-....o...k.-OBRU.nmj.i=^E54
+attribute-....o....i-OBRU.nmjk.=^E64
+attribute-....o.....-OBRU.nmjki=^E74
+attribute-O...o..jki-.BRU.nm...=^E84
+attribute-O...o..jk.-.BRU.nm..i=^E94
+attribute-O...o..j.i-.BRU.nm.k.=^E:4
+attribute-O...o..j..-.BRU.nm.ki=^E;4
+attribute-O...o...ki-.BRU.nmj..=^E<4
+attribute-O...o...k.-.BRU.nmj.i=^E=4
+attribute-O...o....i-.BRU.nmjk.=^E>4
+attribute-O...o.....-.BRU.nmjki=^E?4
+## Magenta background
+attribute-....o.mjki-OBRU.n....=^E05
+attribute-....o.mjk.-OBRU.n...i=^E15
+attribute-....o.mj.i-OBRU.n..k.=^E25
+attribute-....o.mj..-OBRU.n..ki=^E35
+attribute-....o.m.ki-OBRU.n.j..=^E45
+attribute-....o.m.k.-OBRU.n.j.i=^E55
+attribute-....o.m..i-OBRU.n.jk.=^E65
+attribute-....o.m...-OBRU.n.jki=^E75
+attribute-O...o.mjki-.BRU.n....=^E85
+attribute-O...o.mjk.-.BRU.n...i=^E95
+attribute-O...o.mj.i-.BRU.n..k.=^E:5
+attribute-O...o.mj..-.BRU.n..ki=^E;5
+attribute-O...o.m.ki-.BRU.n.j..=^E<5
+attribute-O...o.m.k.-.BRU.n.j.i=^E=5
+attribute-O...o.m..i-.BRU.n.jk.=^E>5
+attribute-O...o.m...-.BRU.n.jki=^E?5
+## Yellow background
+attribute-....on.jki-OBRU..m...=^E06
+attribute-....on.jk.-OBRU..m..i=^E16
+attribute-....on.j.i-OBRU..m.k.=^E26
+attribute-....on.j..-OBRU..m.ki=^E36
+attribute-....on..ki-OBRU..mj..=^E46
+attribute-....on..k.-OBRU..mj.i=^E56
+attribute-....on...i-OBRU..mjk.=^E66
+attribute-....on....-OBRU..mjki=^E76
+attribute-O...on.jki-.BRU..m...=^E86
+attribute-O...on.jk.-.BRU..m..i=^E96
+attribute-O...on.j.i-.BRU..m.k.=^E:6
+attribute-O...on.j..-.BRU..m.ki=^E;6
+attribute-O...on..ki-.BRU..mj..=^E<6
+attribute-O...on..k.-.BRU..mj.i=^E=6
+attribute-O...on...i-.BRU..mjk.=^E>6
+attribute-O...on....-.BRU..mjki=^E?6
+## White background
+attribute-....onmjki-OBRU......=^E07
+attribute-....onmjk.-OBRU.....i=^E17
+attribute-....onmj.i-OBRU....k.=^E27
+attribute-....onmj..-OBRU....ki=^E37
+attribute-....onm.ki-OBRU...j..=^E47
+attribute-....onm.k.-OBRU...j.i=^E57
+attribute-....onm..i-OBRU...jk.=^E67
+attribute-....onm...-OBRU...jki=^E77
+attribute-O...onmjki-.BRU......=^E87
+attribute-O...onmjk.-.BRU.....i=^E97
+attribute-O...onmj.i-.BRU....k.=^E:7
+attribute-O...onmj..-.BRU....ki=^E;7
+attribute-O...onm.ki-.BRU...j..=^E<7
+attribute-O...onm.k.-.BRU...j.i=^E=7
+attribute-O...onm..i-.BRU...jk.=^E>7
+attribute-O...onm...-.BRU...jki=^E?7
+## Black background, blinking
+attribute-.B.....jki-O.RUonm...=^E08
+attribute-.B.....jk.-O.RUonm..i=^E18
+attribute-.B.....j.i-O.RUonm.k.=^E28
+attribute-.B.....j..-O.RUonm.ki=^E38
+attribute-.B......ki-O.RUonmj..=^E48
+attribute-.B......k.-O.RUonmj.i=^E58
+attribute-.B.......i-O.RUonmjk.=^E68
+attribute-.B........-O.RUonmjki=^E78
+attribute-OB.....jki-..RUonm...=^E88
+attribute-OB.....jk.-..RUonm..i=^E98
+attribute-OB.....j.i-..RUonm.k.=^E:8
+attribute-OB.....j..-..RUonm.ki=^E;8
+attribute-OB......ki-..RUonmj..=^E<8
+attribute-OB......k.-..RUonmj.i=^E=8
+attribute-OB.......i-..RUonmjk.=^E>8
+attribute-OB........-..RUonmjki=^E?8
+## Blue background, blinking
+attribute-.B....mjki-O.RUon....=^E09
+attribute-.B....mjk.-O.RUon...i=^E19
+attribute-.B....mj.i-O.RUon..k.=^E29
+attribute-.B....mj..-O.RUon..ki=^E39
+attribute-.B....m.ki-O.RUon.j..=^E49
+attribute-.B....m.k.-O.RUon.j.i=^E59
+attribute-.B....m..i-O.RUon.jk.=^E69
+attribute-.B....m...-O.RUon.jki=^E79
+attribute-OB....mjki-..RUon....=^E89
+attribute-OB....mjk.-..RUon...i=^E99
+attribute-OB....mj.i-..RUon..k.=^E:9
+attribute-OB....mj..-..RUon..ki=^E;9
+attribute-OB....m.ki-..RUon.j..=^E<9
+attribute-OB....m.k.-..RUon.j.i=^E=9
+attribute-OB....m..i-..RUon.jk.=^E>9
+attribute-OB....m...-..RUon.jki=^E?9
+## Green background, blinking
+attribute-.B...n.jki-O.RUo.m...=^E0:
+attribute-.B...n.jk.-O.RUo.m..i=^E1:
+attribute-.B...n.j.i-O.RUo.m.k.=^E2:
+attribute-.B...n.j..-O.RUo.m.ki=^E3:
+attribute-.B...n..ki-O.RUo.mj..=^E4:
+attribute-.B...n..k.-O.RUo.mj.i=^E5:
+attribute-.B...n...i-O.RUo.mjk.=^E6:
+attribute-.B...n....-O.RUo.mjki=^E7:
+attribute-OB...n.jki-..RUo.m...=^E8:
+attribute-OB...n.jk.-..RUo.m..i=^E9:
+attribute-OB...n.j.i-..RUo.m.k.=^E::
+attribute-OB...n.j..-..RUo.m.ki=^E;:
+attribute-OB...n..ki-..RUo.mj..=^E<:
+attribute-OB...n..k.-..RUo.mj.i=^E=:
+attribute-OB...n...i-..RUo.mjk.=^E>:
+attribute-OB...n....-..RUo.mjki=^E?:
+## Cyan background, blinkin:
+attribute-.B...nmjki-O.RUo.....=^E0;
+attribute-.B...nmjk.-O.RUo....i=^E1;
+attribute-.B...nmj.i-O.RUo...k.=^E2;
+attribute-.B...nmj..-O.RUo...ki=^E3;
+attribute-.B...nm.ki-O.RUo..j..=^E4;
+attribute-.B...nm.k.-O.RUo..j.i=^E5;
+attribute-.B...nm..i-O.RUo..jk.=^E6;
+attribute-.B...nm...-O.RUo..jki=^E7;
+attribute-OB...nmjki-..RUo.....=^E8;
+attribute-OB...nmjk.-..RUo....i=^E9;
+attribute-OB...nmj.i-..RUo...k.=^E:;
+attribute-OB...nmj..-..RUo...ki=^E;;
+attribute-OB...nm.ki-..RUo..j..=^E<;
+attribute-OB...nm.k.-..RUo..j.i=^E=;
+attribute-OB...nm..i-..RUo..jk.=^E>;
+attribute-OB...nm...-..RUo..jki=^E?;
+## Red background, blinking
+attribute-.B..o..jki-O.RU.nm...=^E0<
+attribute-.B..o..jk.-O.RU.nm..i=^E1<
+attribute-.B..o..j.i-O.RU.nm.k.=^E2<
+attribute-.B..o..j..-O.RU.nm.ki=^E3<
+attribute-.B..o...ki-O.RU.nmj..=^E4<
+attribute-.B..o...k.-O.RU.nmj.i=^E5<
+attribute-.B..o....i-O.RU.nmjk.=^E6<
+attribute-.B..o.....-O.RU.nmjki=^E7<
+attribute-OB..o..jki-..RU.nm...=^E8<
+attribute-OB..o..jk.-..RU.nm..i=^E9<
+attribute-OB..o..j.i-..RU.nm.k.=^E:<
+attribute-OB..o..j..-..RU.nm.ki=^E;<
+attribute-OB..o...ki-..RU.nmj..=^E<<
+attribute-OB..o...k.-..RU.nmj.i=^E=<
+attribute-OB..o....i-..RU.nmjk.=^E><
+attribute-OB..o.....-..RU.nmjki=^E?<
+## Magenta Background, blinking
+attribute-.B..o.mjki-O.RU.n....=^E0=
+attribute-.B..o.mjk.-O.RU.n...i=^E1=
+attribute-.B..o.mj.i-O.RU.n..k.=^E2=
+attribute-.B..o.mj..-O.RU.n..ki=^E3=
+attribute-.B..o.m.ki-O.RU.n.j..=^E4=
+attribute-.B..o.m.k.-O.RU.n.j.i=^E5=
+attribute-.B..o.m..i-O.RU.n.jk.=^E6=
+attribute-.B..o.m...-O.RU.n.jki=^E7=
+attribute-OB..o.mjki-..RU.n....=^E8=
+attribute-OB..o.mjk.-..RU.n...i=^E9=
+attribute-OB..o.mj.i-..RU.n..k.=^E:=
+attribute-OB..o.mj..-..RU.n..ki=^E;=
+attribute-OB..o.m.ki-..RU.n.j..=^E<=
+attribute-OB..o.m.k.-..RU.n.j.i=^E==
+attribute-OB..o.m..i-..RU.n.jk.=^E>=
+attribute-OB..o.m...-..RU.n.jki=^E?=
+## Yellow background, blinking
+attribute-.B..on.jki-O.RU..m...=^E0>
+attribute-.B..on.jk.-O.RU..m..i=^E1>
+attribute-.B..on.j.i-O.RU..m.k.=^E2>
+attribute-.B..on.j..-O.RU..m.ki=^E3>
+attribute-.B..on..ki-O.RU..mj..=^E4>
+attribute-.B..on..k.-O.RU..mj.i=^E5>
+attribute-.B..on...i-O.RU..mjk.=^E6>
+attribute-.B..on....-O.RU..mjki=^E7>
+attribute-OB..on.jki-..RU..m...=^E8>
+attribute-OB..on.jk.-..RU..m..i=^E9>
+attribute-OB..on.j.i-..RU..m.k.=^E:>
+attribute-OB..on.j..-..RU..m.ki=^E;>
+attribute-OB..on..ki-..RU..mj..=^E<>
+attribute-OB..on..k.-..RU..mj.i=^E=>
+attribute-OB..on...i-..RU..mjk.=^E>>
+attribute-OB..on....-..RU..mjki=^E?>
+## White background, blinking
+attribute-.B..onmjki-O.RU......=^E0?
+attribute-.B..onmjk.-O.RU.....i=^E1?
+attribute-.B..onmj.i-O.RU....k.=^E2?
+attribute-.B..onmj..-O.RU....ki=^E3?
+attribute-.B..onm.ki-O.RU...j..=^E4?
+attribute-.B..onm.k.-O.RU...j.i=^E5?
+attribute-.B..onm..i-O.RU...jk.=^E6?
+attribute-.B..onm...-O.RU...jki=^E7?
+attribute-OB..onmjki-..RU......=^E8?
+attribute-OB..onmjk.-..RU.....i=^E9?
+attribute-OB..onmj.i-..RU....k.=^E:?
+attribute-OB..onmj..-..RU....ki=^E;?
+attribute-OB..onm.ki-..RU...j..=^E<?
+attribute-OB..onm.k.-..RU...j.i=^E=?
+attribute-OB..onm..i-..RU...jk.=^E>?
+attribute-OB..onm...-..RU...jki=^E??
+### attribute_next-A-.
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                              ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+### parm_attribute_out=\E[%s1;%s2m
+### parm_attribute_out=\E[%s1;%s2;%s3m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+### parm_attribute_val-R-=number
+### parm_attribute_val-B-=number
+### parm_attribute_val-D-O=number
+### parm_attribute_val-O-D=number
+### parm_attribute_val-I-=number
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode-..........-OBRUonmjki=^D0
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+
+### attribute-I=
+### attribute-P=
+### attribute-A=
+### attribute--A=
+### attribute_next-A-=

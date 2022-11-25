@@ -1,0 +1,67 @@
+/**			version.[mstr]c			**/
+
+/*
+ *  @(#) $Revision: 70.1.1.1 $
+ *
+ *  (c) Copyright Hewlett-Packard Company, 1986, 1987, 1988, 1989
+ *  (c) Copyright Yokogawa-Hewlett-Packard Ltd., 1988, 1989
+ *
+ *  Acknowledgment is made to Dave Taylor for his creation of
+ *  the original version of this software.
+ *
+ *
+ *  This file is used to have an easy-to-read summary of the
+ *  various options used when building the current binary.  It
+ *  is intended purely to know what compile options selected
+ *  by 'elm -v'.    The version with "COMPILE_TIME" as a
+ *  string below should be called "version_id.mstr" -- the
+ *  '.c' file will be created on-the-fly each time the source
+ *  changes.
+ *
+ */
+
+#include <stdlib.h>
+#include "headers.h"
+
+static char *part1[] = {
+	"(c) Copyright Hewlett-Packard Company, 1986, 1987, 1988, 1989",
+	"(c) Copyright Yokogawa-Hewlett-Packard Ltd., 1988, 1989",
+	"" };
+
+static char *part2[] = {
+	"----------------------------------",
+	"built COMPILE_TIME",
+	"----------------------------------",
+
+#include "version_id.h"
+
+	"" };
+
+extern char *HPUX_ID;
+
+void
+show_version_id()
+{
+	/*
+	 *  this routine is called if the user specifies "elm -v" on
+	 *  the starting line.  It is supposed to display all these
+	 *  strings and then QUIT and LEAVE immediately.  What fun.
+	 */
+
+	register int i = 0;
+	
+	strcpy( VERSION, HPUX_ID+5 );
+
+	printf( "\nElm Version and Identification Information:\n\n" );
+
+	printf( "\tElm %s\n", VERSION );
+	for ( i=0; part1[i][0] != '\0'; i++ )
+	  printf( "\t%s\n", part1[i] );
+
+	for ( i=0; part2[i][0] != '\0'; i++ )
+	  printf( "\t%s\n", part2[i] );
+
+	printf( "\n" );
+
+	exit( 0 );
+}

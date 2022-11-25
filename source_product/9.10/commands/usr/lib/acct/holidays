@@ -1,0 +1,20 @@
+* Prime/Nonprime Table for HP-UX Accounting System
+*
+* Curr	Prime	Non-Prime
+* Year	Start	Start
+*
+  1995	0800	1700
+*
+* Day of	Calendar	Company
+* Year		Date		Holiday
+*
+    2		Jan 2		New Year's Day
+   51		Feb 20		Presidents' Day
+  104		Apr 14		Spring Holiday
+  149		May 29		Memorial Day
+  184		Jul 3		Floater
+  185		Jul 4		Independence Day
+  247		Sep 4		Labor Day
+  327		Nov 23		Thanksgiving Day
+  328		Nov 24		Day after Thanksgiving
+  359		Dec 25		Christmas

@@ -1,0 +1,155 @@
+#!/bin/ksh
+
+#
+# $Revision: 1.1.109.1 $
+#
+
+#
+#  Initialize globals
+#
+PATH=/bin:/usr/bin:/etc
+fileset=ARPA-RUN
+script=/system/$fileset/decustomize
+arch=$1
+op=$2
+inetd_running=""
+inetd_logging=""
+daemons="bootpd fingerd ftpd gated named named-xfer remshd rexecd rlogind \
+         rwhod telnetd tftpd sendmail"
+
+
+#
+# kill_daemon
+#
+#       Kill a daemon if it is running.  Also, kill it If it's standing
+#       still.
+#
+
+function kill_daemon
+{
+    #
+    # The daemon to kill is the first argument.
+    #
+    daemon=$1
+
+    # 
+    # Grab the pids of all instances of the daemon and kill 'em all
+    # graveyard dead.
+    #
+    if [ -n "$daemon" ] ; then
+        pid="`ps -e | grep "$daemon" | sort -r | awk '{print $1}' 2>&-`"
+        if [ -n "$pid" ]; then
+            kill -15 $pid >&- 2>&-
+            sleep 3
+            kill -9 $pid >&- 2>&-
+        fi
+    fi
+}
+
+
+
+###
+#
+#    Decustomize ARPA-RUN
+#
+###
+
+if [ "$op" = "check" ] ; then
+
+
+    #
+    # Removability check - you can only remove ARPA-RUN on a standalone.
+    # 
+
+    case "`getcontext 2>&-`" in
+        #
+        #  Let's hope nobody names their system standalone ...
+        #
+        *standalone*)
+            exit 0
+            ;;
+
+        #
+        #  If it's not a standalone, it's gotta keep ARPA-RUN around.
+        #
+        *)
+            cat <<-EOF >&2
+ERROR:   The ARPA-RUN fileset is required for administration of diskless
+         clusters.  It may only be removed from standalone systems.
+EOF
+            exit 1
+            ;;
+    esac
+
+
+elif [ $# -eq 1 ] ; then
+
+
+    #
+    # Comment out any entries referring to ARPA-RUN daemons in inetd.conf
+    #
+        if [ -f /etc/inetd.conf ] ; then
+                SEDFILE=/tmp/arpa.1.$$
+                TMPCONF=/tmp/arpa.2.$$
+                for daemon in $daemons ; do
+                        echo "s/.*$daemon.*/#&/"
+                done >$SEDFILE 2>&-
+                sed -f $SEDFILE /etc/inetd.conf >$TMPCONF 
+                mv $TMPCONF /etc/inetd.conf >&- 2>&-
+                rm -f $TMPCONF $SEDFILE
+        fi
+
+        #
+        # Reconfigure inetd
+        #
+        /etc/inetd -c 1>&- 2>&-
+
+
+        #
+        # Give it a second or two to work.
+        #
+        sleep 2
+
+
+    #
+    # Now kill any daemons that may be running.
+    #
+
+    for daemon in $daemons ; do
+        kill_daemon $daemon
+    done
+
+
+    #
+    # Graciously remove any files created by or for ARPA-RUN daemons.
+    #
+
+    arpa_run_files="/etc/bootpd.dump \
+                    /etc/ftpusers \
+                    /etc/gated.conf \
+                    /etc/gated.pid \
+                    /etc/named.boot \
+                    /etc/named.pid \
+                    /usr/lib/aliases \
+                    /usr/lib/aliases.dir \
+                    /usr/lib/aliases.pag \
+                    /usr/lib/sendmail.cf \
+                    /usr/lib/sendmail.fc \
+                    /usr/lib/sendmail.st \
+                    /usr/tmp/gated_dump \
+                    /usr/tmp/named.run \
+                    /usr/tmp/named.stats \
+                    /usr/tmp/named_dump.db \
+                    /usr/tmp/xfer.ddt* \
+                    /usr/tmp/xfer.trace \
+                    /usr/tmp/dead.letter"
+
+    rm -f $arpa_run_files       
+
+    #
+    # That's all, folks!
+    #
+
+    exit 0
+
+fi

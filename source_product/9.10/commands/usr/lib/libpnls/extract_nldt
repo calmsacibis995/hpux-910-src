@@ -1,0 +1,166 @@
+
+
+#include <stdio.h>
+#include <fcntl.h>
+#include <string.h>
+#include <time.h>
+#include <ctype.h>
+#include <langinfo.h>
+#include <nlinfo.h>
+
+#define LC_ESCAPE	'~'
+#define LC_DAYABBR	'D'
+#define LC_DAYFULL	'W'
+#define LC_DAYNUM	'd'
+#define LC_MONABBR	'M'
+#define LC_MONFULL	'O'
+#define LC_MONNUM	'm'
+#define LC_YEAR		'y'
+#define LC_YRNATNL	'N'
+
+/*
+ *	the following code is used extensively, and was therefore put into
+ *	a macro in order to make the code more readable.
+ */
+#define NLCHARTYPE(c) n->char_set_definition[(unsigned char)c]
+
+
+#ifndef TRUE
+#define TRUE  1
+#define FALSE 0
+#endif
+
+
+/*
+ *	extract date info from date string
+ */
+extract_nldt(langid, f, lenf, s, n, ltim)
+short		langid;
+unsigned char   *f;			/* format string */
+int		lenf;			/* length of format string */
+unsigned char   *s;			/* formatted string */
+struct l_info	*n;
+struct tm 	*ltim;
+{
+	struct l_info	*getl_info();
+	unsigned char 	*malloc(), *fs, buff[5], *fEnd, *sEnd;
+	void free ();
+	 
+	int	allocated, noofbytes;
+
+	ltim->tm_mday = ltim->tm_mon = ltim->tm_year = -1;
+
+	if (langid == -1)  {
+	    _nl_errno = 2;
+	    return (0);
+	}
+
+	if (n == NULL)  {
+		if ((n = getl_info(langid)) == NULL)  {
+		    _nl_errno = 2;
+		    return (0);
+		}
+        }
+
+	fEnd = f + lenf;
+	sEnd = s + lenf;
+	allocated = FALSE;
+	fs = s;
+
+
+	if (isaltdig(n->alt_digits)){
+	    allocated = TRUE;
+	    fs = malloc(lenf);
+	    convalt(fs, s, sEnd, ALTTOASCII, n);
+	}
+
+	for ( ; f < fEnd; ){
+	   if (NLCHARTYPE(*f)==NLI_FIRSTOF2) {
+	       f = f + 2;
+	       fs= fs+ 2;
+           }
+           else switch (*f){
+		case LC_DAYNUM:
+			if (*(f + 1) == LC_DAYNUM){
+				strncpy(buff, fs, 2);
+				buff[2] = '\0';
+				ltim->tm_mday = atoi(buff);
+				f = f + 2;
+				fs = fs + 2;
+			}
+			else {
+				f = f + 1;
+				fs = fs + 1;
+			}
+			break;
+		case LC_MONNUM:
+			if (*(f + 1) == LC_MONNUM){
+				/*
+				**	month may be 1 or 2 bytes
+				*/
+				noofbytes = (*(fs + 1) == *(f + 2)) ? 1 : 2;
+				strncpy(buff, fs, noofbytes);
+				buff[noofbytes] = '\0';
+				ltim->tm_mon = atoi(buff) - 1;
+				f = f + 2;
+				fs = fs + noofbytes;
+			}
+			else {
+				f = f + 1;
+				fs = fs + 1;
+			}
+			break;
+		case LC_YEAR:
+			if (strncmp(f, "yyyy", 4) == 0){
+				strncpy(buff, s, 4);
+				buff[4] = '\0';
+				ltim->tm_year = atoi(buff) - 1900;
+				f = f + 4;
+				fs = fs + 4;
+			}
+			else if (strncmp(f, "yy", 2) == 0){
+				strncpy(buff, fs, 2);
+				buff[2] = '\0';
+				ltim->tm_year = atoi(buff);
+				f = f + 2;
+				fs = fs + 2;
+			}
+			else {
+				f = f + 1;
+				fs = fs + 1;
+			}
+			break;
+		case LC_YRNATNL:
+			if (strncmp(f, "Nyy", 3) == 0){
+			        /*
+				sprintf(s, "%s", get_nyr(f));
+			        */
+				f = f + 3;
+				fs = fs + 3;
+			}
+			else {
+				f = f + 1;
+				fs = fs + 1;
+			}
+			break;
+		case LC_ESCAPE:
+			f = f  + 2;   /* Skip escape and character */
+			fs= fs + 1;   /* Skip character */
+			break;
+		default:
+			f = f + 1;
+			fs = fs + 1;
+			break;
+		}
+	}
+
+	/*
+	 * 	alt digits
+	 */
+
+
+	if (isvalidgregorian(ltim))
+		return (0);
+	else
+		return (1);
+}

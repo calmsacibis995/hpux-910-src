@@ -1,0 +1,147 @@
+# FacetTerm terminal description install - COMMON
+# @(#) $Header: Make_comm,v 70.1 92/03/09 15:48:42 ssa Exp $
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+FTINSTDIRBASE=	../$(MACH)
+FTINSTDIRFROMBASE=	   FTINST$(MACH_FILES_TOP_DIR)
+
+FACETNAME=	facet
+ALIAS_TEXT=	.$(FACETNAME)alias
+
+NEWTERM_TEXT=	*.fi *.ftkey *.fc *.fm *.fk $(ALIAS_TEXT)
+NEWTERM_DIR=	/usr/facetterm/newterm
+
+.SUFFIXES:	.fi .FS .FL .fc .FC .fm .FM
+.FS.fi:
+	@echo 1>&2 "$*.FS --> $*.fi $(TSM_NAMES)"
+	@if [ -n "$(TSM_NAMES)" ] ; then \
+		grep -v '^###' $*.FS | sed -e 's/ FacetTerm / TSM /' > $*.fi;\
+	else \
+		grep -v '^###' $*.FS > $*.fi; \
+	fi
+
+.FL.fi:
+	@echo 1>&2 "$*.FL --> $*.fi $(TSM_NAMES)"
+	@if [ -n "$(TSM_NAMES)" ] ; then \
+		grep -v '^###' $*.FL | sed -e 's/ FacetTerm / TSM /' > $*.fi;\
+	else \
+		grep -v '^###' $*.FL > $*.fi;\
+	fi
+
+.FC.fc:
+	@echo 1>&2 "$*.FC --> $*.fc $(TSM_NAMES)"
+	@if [ -n "$(TSM_NAMES)" ] ; then \
+		grep -v '^###' $*.FC | sed -e 's/ FacetTerm / TSM /' > $*.fc;\
+	else \
+		grep -v '^###' $*.FC > $*.fc;\
+	fi
+
+.FM.fm:
+	@echo 1>&2 "$*.FM --> $*.fm $(TSM_NAMES)"
+	@if [ -n "$(TSM_NAMES)" ] ; then \
+		grep -v '^###' $*.FM | sed -e 's/ FacetTerm / TSM /' -e 's/ Facet / TSM /' > $*.fm;\
+	else \
+		grep -v '^###' $*.FM > $*.fm;\
+	fi
+
+all:
+	@echo TO DO MAKE OF TERM  - GO TO DIRECTORY AND RUN gentext
+
+all.hp:	gentext
+
+gentext:
+	              MACH=$(MACH) \
+	MACH_FILES_TOP_DIR=$(MACH_FILES_TOP_DIR) \
+	$(MAKE) -e -f Make_comm `ls *.FS | sed 's/\.FS$$/\.fi/'; echo done`
+	              MACH=$(MACH) \
+	MACH_FILES_TOP_DIR=$(MACH_FILES_TOP_DIR) \
+	$(MAKE) -e -f Make_comm `ls *.FC | sed 's/\.FC$$/\.fc/'; echo done`
+	              MACH=$(MACH) \
+	MACH_FILES_TOP_DIR=$(MACH_FILES_TOP_DIR) \
+	$(MAKE) -e -f Make_comm `ls *.FM | sed 's/\.FM$$/\.fm/'; echo done`
+
+done:
+	@echo =========
+
+install:	installtext installprog installown
+	@echo install term for $(MACH) done
+
+install.hp:	installtext.hp installprog.hp installown.hp
+
+installtext.hp:	installtextcommon
+
+installtext:
+	echo $(FTINSTDIRFROMBASE)$(NEWTERM_DIR) > $(FTINSTDIRBASE)/DIR_newterm
+	if [ -f "$(MACH)/$(ALIAS_TEXT)M" ] ; then \
+		cd $(MACH); \
+		Cpioinstall ../$(FTINSTDIR)$(NEWTERM_DIR) - $(ALIAS_TEXT)M; \
+#		chown root  ../$(FTINSTDIR)$(NEWTERM_DIR)/$(ALIAS_TEXT)M;   \
+#		chgrp    0  ../$(FTINSTDIR)$(NEWTERM_DIR)/$(ALIAS_TEXT)M;   \
+#		chmod 444   ../$(FTINSTDIR)$(NEWTERM_DIR)/$(ALIAS_TEXT)M;   \
+		ls -l       ../$(FTINSTDIR)$(NEWTERM_DIR)/$(ALIAS_TEXT)M;   \
+	fi
+	@echo install term for $(MACH) done - also common.
+
+installtextcommon:
+	set -f; \
+	for i in $(NEWTERM_TEXT); do \
+		set +f; \
+		Cpioinstall $(FTINSTDIR)$(NEWTERM_DIR) - $$i; \
+	done
+	cd $(FTINSTDIR)$(NEWTERM_DIR); \
+		set -f; \
+		for i in $(NEWTERM_TEXT); \
+		do \
+			set +f; \
+#			chown root $$i; \
+#			chgrp    0 $$i; \
+#			chmod 444  $$i; \
+		done
+	ls -l $(FTINSTDIR)$(NEWTERM_DIR)/$(ALIAS_TEXT)
+	touch LINST.$(MACH)
+	@echo installtextcommon term for $(MACH) done
+
+
+installprog:
+	@echo installprog term for $(MACH) done - nothing to do
+
+installprog.hp:	installprog
+
+installown:
+	@echo installown term for $(MACH) done - nothing to do
+
+installown.hp:	installown
+
+clean:
+	@echo TO DO CLEAN OF TERM  - GO TO DIRECTORY AND RUN cleanit
+
+clean.hp:	cleanit
+
+cleanit:
+	rm -f *.fi *.fc *.fm
+	@echo clean term for $(MACH) done
+
+ALL_ATTRS:	ALL_ATTRS.EX ALL_ATTRS.TI
+
+ALL_ATTRS.EX:	ALL_ATTRS.FS
+	set +e; \
+	if [ -f ALL_ATTRS.EX ] ; then mv ALL_ATTRS.EX ALL_ATTRS.EX+ ; fi ; \
+		exit 0
+	sed -e "s/^## /### /" \
+	    -e "s/^### ##/##/" \
+	    -e "/^### TI_TO_FI /d" \
+	    ALL_ATTRS.FS > ALL_ATTRS.EX
+	set +e; \
+	if [ -f ALL_ATTRS.EX+ ] ; then diff ALL_ATTRS.EX+ ALL_ATTRS.EX ; fi ; \
+		exit 0
+
+ALL_ATTRS.TI:	ALL_ATTRS.FS
+	set +e; \
+	if [ -f ALL_ATTRS.TI ] ; then mv ALL_ATTRS.TI ALL_ATTRS.TI+ ; fi ; \
+		exit 0
+	sed -e "s/^## /### /" \
+	    -e "s/^### ##/##/" \
+	    ALL_ATTRS.FS > ALL_ATTRS.TI
+	set +e; \
+	if [ -f ALL_ATTRS.TI+ ] ; then diff ALL_ATTRS.TI+ ALL_ATTRS.TI ; fi ; \
+		exit 0

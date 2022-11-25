@@ -1,0 +1,14 @@
+$set 1
+1 ypcat:  getdomainname system call failed\n
+2 ypcat:  the NIS domain name hasn't been set on this machine\n
+3 ypcat:  can't bind to an NIS server for domain %1$s.\n        Reason:  %2$s\n
+5 Use "%1$s" for map "%2$s"\n
+6 %.*s 
+7 %.*s\n
+8 ypcat:  %s\n
+9 ypcat:  can't get the first record from the NIS map.\n        Reason:  %s\n
+10 %.*s 
+11 %.*s\n
+12 ypcat:  can't get the next record from the NIS map.\n        Reason:  %s\n
+13 Usage:  ypcat [-k] [-t] [-d domain] mname\n        ypcat -x\n\nwhere   mname may be either a mapname or a map nickname\n        -k prints keys as well as values\n        -t inhibits map nickname translation\n        -x prints a list of map nicknames and their corresponding mapnames\n
+14 ypcat:  NIS domain name exceeds %d characters\n

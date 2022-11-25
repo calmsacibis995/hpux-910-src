@@ -1,0 +1,12 @@
+#!/bin/sh
+##	@(#)Make_bfa	$Revision: 1.17.109.1 $	$Date: 91/11/19 13:52:13 $
+#	Make_bfa	--	make all commands with the bfa flag
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs begin
+
+cd $nfs/cmds
+$nfs/bin/MAKE $* bfa
+
+echo `date "+%y.%m.%d %T"` $0 $1 $nfs end

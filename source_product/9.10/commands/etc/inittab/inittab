@@ -1,0 +1,13 @@
+init:2:initdefault:
+stty::sysinit:stty 9600 clocal icanon echo opost onlcr ienqak ixon icrnl ignpar </dev/systty
+brc1::bootwait:/etc/bcheckrc </dev/console >/dev/console 2>&1 # fsck, etc.
+slib::bootwait:/etc/recoversl </dev/console >/dev/console 2>&1 #shared libs
+brc2::bootwait:/etc/brc >/dev/console 2>&1	    # boottime commands
+link::wait:/bin/sh -c "rm -f /dev/syscon; \
+		       ln /dev/systty /dev/syscon" >/dev/console 2>&1
+cwrt::bootwait:cat /etc/copyright >/dev/syscon      # legal requirements
+rc  ::wait:/etc/rc </dev/console >/dev/console 2>&1 # system initialization
+powf::powerwait:/etc/powerfail >/dev/console 2>&1   # power fail routines
+lp  ::off:nohup sleep 999999999 </dev/lp & stty 9600 </dev/lp
+cons:012456:respawn:/etc/getty -h console console	    # system console
+vue :34:respawn:/etc/vuerc			# VUE validation and invocation

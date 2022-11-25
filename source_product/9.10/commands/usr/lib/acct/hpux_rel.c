@@ -1,0 +1,4 @@
+static char *HPUX_ID = "@(#) $Revision: 70.11.12.2 $";
+/* This is an extra file added to multi-file commands and libraries to
+   provide HPUX version control
+*/

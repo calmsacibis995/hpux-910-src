@@ -1,0 +1,589 @@
+#! /bin/ksh
+# @(#) $Revision: 70.2 $    
+
+###################################################################
+# mkrs - construct a recovery system.  This version applies to
+#        series 300, 400, and 700 release 8.0 and later.
+###################################################################
+
+export PATH=/bin:/etc:/usr/local/bin:/usr/bin:.
+flag=0
+
+# the device file major number of supported recovery system types
+cs80_block_major=0
+cs80_char_major=4
+scsi_block_major=7
+scsi_char_major=47
+hpib_dat_char_major=9
+scsi_dat_char_major=54
+scsi_new_dat_char_major=121
+
+# Set up default recovery system device file name
+rs_dev=/dev/update.src
+if [ ! -c $rs_dev ] 
+then
+	rs_dev=/dev/rct/c0
+	if [ ! -c $rs_dev ] 
+	then
+		rs_dev=/dev/rct
+		[ ! -c $rs_dev ] && rs_dev=UNKNOWN
+	fi
+fi
+
+# Set up default root disk device file name
+root_dev=/dev/dsk/0s0
+if [ ! -b $root_dev ] 
+then
+	root_dev=/dev/root
+	if [ ! -b $root_dev ] 
+	then
+		root_dev=/dev/hd
+		[ ! -b $root_dev ] && root_dev=UNKNOWN
+	fi
+fi
+
+# Set up some default values
+verbose="/dev/null"
+media_type=ct
+swap_dev_minor=
+
+# determine machine type (300, 400, 700)
+case `uname -m` in
+	9000/3* | BOBCAT)	sys=300 ;;
+	9000/4*)		sys=400 ;;
+	9000/7*)		sys=700 ;;
+	9000/8*)		echo "s800 recovery systems are not supported"
+				exit 1 ;;
+	*)			sys=UNKNOWN ;;
+esac
+
+# process command line options
+quick=0
+small=
+more_args=
+for arg
+do
+    while [ 1 ]
+    do
+	case $arg in
+	  -q*)  quick=1 ;;
+	  -s*)	small="-Dsmall" ;;
+	  -v*)	verbose="/dev/tty" ;;
+	  -f*)	rs_dev=`expr $arg : '-.\(.*\)'` || rs_dev=UNKNOWN 
+		break ;;
+	  -r*)	root_dev=`expr $arg : '-.\(.*\)'` || root_dev=UNKNOWN 
+		break ;;
+	  -m*)	sys=`expr $arg : '-.\(.*\)'` || sys=UNKNOWN 
+		break ;;
+	  -t*)	media_type=`expr $arg : '-.\(.*\)'` || media_type=UNKNOWN
+		break ;;
+	  -\?)	cat <<EOF
+usage: mkrs [-v]		# verbose
+	    [-s]		# minimize recovery system image size
+	    [-q]		# quick (requires extra space in /usr/tmp)
+	    [-t<media_type>]	# ct = cartridge tape
+				# dat = SCSI DAT tape
+				# od = magneto-optical disk
+				# hd = hard disk
+	    [-f<recovery_dev>]	# device file corresponding to recovery device
+	    [-r<root_dev>]	# device file corresponding to root disk
+	    [-m<series>]	# 300/400/700
+EOF
+		exit 1
+		break ;;
+	  *)	case UNKNOWN in
+		  $rs_dev)	rs_dev=$arg ;;
+		  $root_dev)	root_dev=$arg ;;
+		  $sys)		sys=$arg ;;
+		  $media_type)	media_type=$arg ;;
+		  *)		more_args="$more_args $arg" ;;
+		esac
+		break ;;
+	esac
+	arg=`expr "$arg" : '-.\(.*\)'` || break
+    done
+done
+
+# get some temporary working space
+work=/usr/tmp/work$$
+mkdir $work || exit 1
+
+# cleanup subroutine
+cleanup='echo $1;
+	cd /usr/tmp;
+	if [ $flag -eq 1 ]; then
+		case $media_type in
+		ct)	tcio -urV $rs_dev_r 2>/dev/null;;
+		dat)	mt offl $rs_dev_r 2>/dev/null;;
+		esac;
+	fi;
+	rm -rf /dev/$$rs_dev /dev/$$root_dev;
+	rm -rf $work;
+	trap 0 1 2 3;
+	exit'
+
+# cleanup on error exits
+error_cleanup="set \"mkrs aborted.\"; eval $cleanup"
+trap "$error_cleanup" 0 1 2 3
+
+# do some validity checking
+if [ "$sys" = "UNKNOWN" -o "$sys" = "" ]
+then
+	echo "$0: cannot determine machine type, use -m [300|400|700] option."
+       	exit 1
+fi
+
+if [ "$sys" != "300" -a "$sys" != "400" -a "$sys" != "700" ]
+then
+	echo "$0: $sys is an invalid machine type, use -m [300|400|700]."
+       	exit 1
+fi
+
+case $media_type in
+  dat|ct|od|hd)	break ;;
+  *)		echo "$0: unknown media type \"$media_type\"\nvalid media types are: \"ct\", \"dat\", \"od\", and \"hd\"."
+		exit 1 ;;
+esac
+
+if [ $rs_dev = UNKNOWN ]
+then
+	echo "$0: unknown or non-existent recovery device."
+	exit 1
+fi
+
+# add leading slash if it is not present then see if it starts with /dev
+
+[ `expr substr $rs_dev 1 1` != / ] && rs_dev=/$rs_dev
+if [ `expr substr $rs_dev 1 4` != /dev ]
+then
+	echo "$0: recovery device file name must start with /dev"
+	exit 1
+fi
+
+# figure out whether rs_dev is a block or char device file and
+# create the character file if it does not exist.
+
+rs_dev_major=`ll $rs_dev | awk '{print $5}'`
+rs_dev_minor=`ll $rs_dev | awk '{print $6}'`
+if [ -b $rs_dev ]
+then
+	rs_dev_bmajor=$rs_dev_major
+	rs_dev_r=$work/$$rs_dev
+	rs_dev_b=$rs_dev
+	if [ $rs_dev_major = $cs80_block_major ] 
+	then
+		mknod $rs_dev_r c $cs80_char_major $rs_dev_minor
+		rs_dev_cmajor=$cs80_char_major
+		rs_dev_type=cs80
+	elif [ $rs_dev_major = $scsi_block_major ] 
+	then
+		mknod $rs_dev_r c $scsi_char_major $rs_dev_minor
+		rs_dev_cmajor=$scsi_char_major
+		rs_dev_type=scsi
+	else
+		echo "$0: $rs_dev is not a supported device"
+		exit 1
+	fi
+elif [ -c $rs_dev ]
+then
+        rs_dev_cmajor=$rs_dev_major
+        rs_dev_b=/dev/$$rs_dev
+        rs_dev_r=$rs_dev
+        if [ $rs_dev_major = $cs80_char_major ]
+        then
+                mknod $rs_dev_b b $cs80_block_major $rs_dev_minor
+                rs_dev_bmajor=$cs80_block_major
+                rs_dev_type=cs80
+        elif [ $rs_dev_major = $scsi_char_major ]
+        then
+                 mknod $rs_dev_b b $scsi_block_major $rs_dev_minor
+                 rs_dev_bmajor=$scsi_block_major
+                 rs_dev_type=scsi
+	elif [ $rs_dev_major != $scsi_dat_char_major \
+		-a $rs_dev_major != $scsi_new_dat_char_major \
+		-a $rs_dev_major != $hpib_dat_char_major ]
+        then
+                echo "$0: $rs_dev is not a supported device"
+                exit 1
+        fi
+else
+	echo "$0: $rs_dev is not a device file."
+	exit 1
+fi
+
+if [ $root_dev = UNKNOWN ]
+then
+	echo "$0: unknown or non-existent root device."
+	exit 1
+fi
+
+# Now do the same for root as was just done for the recovery device.
+# add leading slash if it is not present then see if it starts with /dev
+
+[ `expr substr $root_dev 1 1` != / ] && root_dev=/$root_dev
+if [ `expr substr $root_dev 1 4` != /dev ]
+then
+	echo "$0: root device file name must start with /dev or dev"
+	exit 1
+fi
+
+root_dev_major=`ll $root_dev | awk '{print $5}'`
+if [ "$root_dev_major" = 255 ]; then
+	echo "$0: root device file must not be a \"magic\" device file"
+	exit 1
+fi
+root_dev_minor=`ll $root_dev | awk '{print $6}'`
+if [ -b $root_dev ]
+then
+	root_dev_bmajor=$root_dev_major
+	root_dev_r=/dev/$$root_dev
+	root_dev_b=$root_dev
+	if [ $root_dev_major = $cs80_block_major ] 
+	then
+		mknod $root_dev_r c $cs80_char_major $root_dev_minor
+		root_dev_cmajor=$cs80_char_major
+		root_dev_type=cs80
+	elif [ $root_dev_major = $scsi_block_major ] 
+	then
+		mknod $root_dev_r c $scsi_char_major $root_dev_minor
+		root_dev_cmajor=$scsi_char_major
+		root_dev_type=scsi
+	else
+		echo "$0: $root_dev is not a supported device"
+		exit 1
+	fi
+elif [ -c $root_dev ]
+then
+	root_dev_cmajor=$root_dev_major
+	root_dev_b=/dev/$$root_dev
+	root_dev_r=$root_dev
+	if [ $root_dev_major = $cs80_char_major ] 
+	then
+		mknod $root_dev_b b $cs80_block_major $root_dev_minor
+		root_dev_bmajor=$cs80_block_major
+		root_dev_type=cs80
+	elif [ $root_dev_major = $scsi_char_major ] 
+	then
+		mknod $root_dev_b b $scsi_block_major $root_dev_minor
+		root_dev_bmajor=$scsi_block_major
+		root_dev_type=scsi
+	else
+		echo "$0: $root_dev is not a supported device"
+		exit 1
+	fi
+else
+	echo "$0: $root_dev is not a device file."
+	exit 1
+fi
+
+# make sure that the recovery device is not the root device.
+if [ $rs_dev_minor = $root_dev_minor ]
+then
+	echo "$0: the recovery device $rs_dev is the same as the root device $root_dev."
+	exit 1
+fi
+
+swap_dev_minor=${swap_dev_minor:-$root_dev_minor}
+
+if [ $sys = "300" -o $sys = "400" -o $sys = "700" ]
+then
+	swap_dev_minor=`/etc/mkrs.tool dev`
+	swap_start=`/etc/mkrs.tool start`
+	swap_size=`/etc/mkrs.tool size`
+fi
+
+if [ "$swap_size" -eq 0 ]
+then
+	echo "$0: unable to locate any swap space."
+	exit 1
+fi
+
+# try to figure out what kind of recovery device we are working with
+prod_id=`diskinfo $rs_dev_r 2>/dev/null | awk '/product id/ {print $3}'`
+case $prod_id in
+  *6300.650*)	media_type=od
+		break ;;
+esac
+
+if [ $media_type = ct ]
+then
+	if [ "$rs_dev_cmajor" = "$hpib_dat_char_major" \
+	     -o "$rs_dev_cmajor" = "$scsi_new_dat_char_major" \
+	     -o "$rs_dev_cmajor" = "$scsi_dat_char_major" ]; then
+		media_type=dat
+		if [ "$rs_dev_cmajor" = "$hpib_dat_char_major" ]; then
+			echo "WARNING: DAT recovery systems may be created on, but cannot"
+			echo "be booted from HP-IB DAT drives"
+		fi
+	else
+		m_type=`diskinfo $rs_dev_r 2>/dev/null |
+			awk '/type:/ {print $2}'`
+		case $m_type in
+	  		tape)
+				break ;;
+	  		direct|fixed|flexible)
+				media_type=hd
+				break ;;
+	  		*)
+				set "Unknown recovery device type"
+				eval $cleanup
+				break ;;
+		esac
+	fi
+fi
+
+# give the user a chance to back out
+case $media_type in
+ct)	type=tape
+	break ;;
+dat)	type="DAT tape"
+	break ;;
+od)	type="optical disk"
+	break ;;
+hd)	type=disk
+	break ;;
+esac
+
+if [ $media_type = dat -a $sys = 700 -a -z "$small" ]; then
+	echo "WARNING: s700 DAT recovery systems must be built with the -s option"
+	echo "         . . . setting -s option . . ."
+	small="-Dsmall"
+fi
+
+echo "\
+Building a series $sys $type recovery system on $rs_dev
+for the disk corresponding to $root_dev.
+Are you sure you want to continue (y/n)? \c"
+read response
+if [ "$response" != "y" -a "$response" != "Y" ]
+then
+	exit 1
+fi
+
+# remind the user to supply media
+echo "Place media in drive, once busy light remains off hit <Return>.\c"
+read response
+
+# Find out if we are a diskless server.
+if [ -x /bin/getcontext ] &&  set -- `getcontext` && cnodename=$1 &&
+	[ "$cnodename" != standalone ]
+then
+	cnodes -s || /etc/cluster
+	SYSTEM_NAME=$cnodename
+	rootname=`cnodes -r`
+	if [ "$SYSTEM_NAME" = "$rootname" ]
+	then
+		state=localroot
+	else
+		state=remoteroot
+	fi
+else
+	state=standalone
+fi
+
+# If we are a diskless server, we want to include /etc/clusterconf in
+# the recovery system.
+if [ "$state" = "localroot" ]
+then
+	diskless="-Ddiskless"
+else
+	diskless=""
+fi
+
+
+if [ $sys = "300" -o $sys = "400" ]; then
+	# create a configuration subroutine for series
+	# 300/400 recovery system boot and recovery kernel.
+	config='echo "cs80\nscsi\nscsitape\nramdisc\nhpib\n98624\n98625\n98626\n98628\n98642\nswap $root_dev_type $swap_dev_minor $swap_start $swap_size\nmaxusers 1\nmesg 0\nsema 0\nshmem 0" > $work/flop || exit 1;
+		cd $work;
+		config flop || exit 1;
+		make -f config.mk >$verbose 2>&1 || exit 1;
+		strip hp-ux  >/dev/null 2>&1;
+		rm -f conf* *.o flop;'
+elif [ $sys = "700" ]; then
+	# create a configuration subroutine for series
+	# 700 recovery system boot kernel.
+	b_config='echo "scsi\nscsitape\neisa\nsim0\nCharDrv\nasio0\nram\nroot ram F00200\noption RAMFS\nswap $root_dev_type $swap_dev_minor $swap_start $swap_size\nmaxusers 1\nmesg 0\nsema 0\nshmem 0" > $work/flop || exit 1;
+		cd $work;
+		config flop || exit 1;
+		make -f config.mk OFILES=$work/RAMFS.o >$verbose 2>&1 || exit 1;
+		strip hp-ux  >/dev/null 2>&1;
+		rm -f conf* *.o flop;'
+	# create a configuration subroutine for series
+	# 700 recovery system recovery kernel.
+	r_config='echo "scsi\nscsitape\neisa\nsim0\nCharDrv\nasio0\nswap $root_dev_type $swap_dev_minor $swap_start $swap_size\nmaxusers 1\nmesg 0\nsema 0\nshmem 0" > $work/flop || exit 1;
+		cd $work;
+		config flop || exit 1;
+		make -f config.mk >$verbose 2>&1 || exit 1;
+		strip hp-ux  >/dev/null 2>&1;
+		rm -f conf* *.o flop;'
+fi
+
+#-----------------------------------------------
+# Create custom files needed on recovery system
+#-----------------------------------------------
+
+>> /etc/sbtab     # if this file doesn't exist then create one
+
+cd $work
+
+# create /etc/passwd
+echo "Creating /etc/passwd for recovery system" > $verbose
+echo "root::0:1::/:/bin/sh" > passwd     # default entry for root
+
+# create /etc/inittab
+echo "Creating /etc/inittab for recovery system" > $verbose
+echo "\
+is:1:initdefault:
+st::sysinit:stty 9600 clocal icanon echo opost onlcr ienqak ixon icrnl ignpar < /dev/systty
+sl::wait:(rm -f /dev/syscon; ln /dev/systty /dev/syscon;) 1>/dev/console 2>&1
+co::respawn:/etc/-recovery.tool </dev/console>/dev/console 2>&1" >inittab
+
+# create /etc/profile
+echo "Creating /etc/profile for recovery system" > $verbose
+echo "\
+trap \"\" 1 2 3
+PATH=.:/bin:/etc
+echo \"\\\nWelcome to the HP-UX Recovery System.\\\n\"
+TZ=MST7MDT
+stty ixon -ixany echoe erase \^h kill \^u intr \^c 
+export PATH TZ TERM TERMCAP
+trap \"cd $HOME; echo logout\" 0
+trap 1 2 3 " > profile || exit 1
+
+# create /etc/rc
+echo "Creating /etc/rc for recovery system" > $verbose
+echo "\
+if [ ! -c /dev/console ]
+then
+	/bin/rm -f /dev/console
+	/etc/mknod /dev/console c 0 0
+fi
+/bin/rm -f /etc/mtab
+PATH=/bin:/etc:/usr/bin
+TZ=MST7MDT
+export TZ PATH
+stty 9600 clocal icanon echo opost onlcr ienqak ixon icrnl ignpar">rc || exit 1
+
+# create device files
+echo "Creating device files for recovery system" > $verbose
+mknod console c 0 0 || exit 1
+mkdir dsk rdsk || exit 1
+mknod dsk/real.root b $root_dev_bmajor $root_dev_minor || exit 1
+mknod rdsk/real.root c $root_dev_cmajor $root_dev_minor || exit 1
+if [ $media_type != "dat" ]
+then
+	mknod dsk/root b $rs_dev_bmajor $rs_dev_minor || exit 1
+	mknod rdsk/root c $rs_dev_cmajor $rs_dev_minor || exit 1
+fi
+
+if [ ! -z "$small" ]
+then
+	# create /etc/sbtab for "small" systems
+	head -20 /etc/sbtab > sbtab
+
+	# create stripped versions of /lib/libc.sl for "small" systems
+	cp /lib/libc.sl .
+	strip ./libc.sl
+fi
+
+# create /etc/pre_init_rc
+echo "#!/bin/sh" > pre_init_rc
+chmod 544 pre_init_rc
+
+# create an empty file
+>> empty
+
+# copy /etc/mkrs.tool here so that recovery.tool and -recovery.tool
+# become linked in the recovery system
+cp /etc/mkrs.tool ./recovery.tool
+ln ./recovery.tool ./-recovery.tool
+
+# Create LIF volume with correct AUTO file for s700.
+if [ $sys = "700" ]; then
+	cp /etc/mkrs.boot ./uxbootlf.700
+	lifrm uxbootlf.700:AUTO
+	echo "hpux boot disc(;0)/hp-ux" > auto_file
+	lifcp -r -T-12289 -K2 auto_file uxbootlf.700:AUTO
+	rm auto_file
+fi
+
+# Create a configuration file for the recovery system kernel.
+# This is used both as a boot and recovery kernel on s300/s400.
+# On s700, it is used as a recovery kernel only.  The boot
+# kernel is built later.
+echo "Creating recovery kernel for recovery system" > $verbose
+if [ $sys = "300" -o $sys = "400" ]; then
+	eval $config
+elif [ $sys = "700" ]; then
+	eval $r_config
+fi
+
+#--------------------------------------------
+# Create recovery system
+#--------------------------------------------
+
+# create a mkfs proto file
+echo "Creating proto file for recovery system" > $verbose
+if [ $sys = "700" ]; then
+    boot_block=""
+elif [ $media_type = "dat" ]; then
+    boot_block="-b /etc/mkrs.boot"
+else
+    boot_block="-b /etc/boot"
+fi
+/lib/cpp -DS$sys -D$media_type $small $diskless /etc/mkrs.data |
+/bin/sed -e '/\#/d' -e '/^$/d' |
+/usr/lib/gen_proto -p 7 $boot_block > mkfs.proto
+
+# create the recovery system using a mkfs proto file
+if [ $media_type = "dat" ]; then
+    if [ $sys = "700" ]; then
+	#create DAT file system image file
+	echo "Creating RAM recovery system image in "$work/RAMFS >$verbose
+	>> $work/RAMFS		# create if it doesn't exist
+	/etc/mkfs -L $work/RAMFS mkfs.proto >$verbose || exit 1
+	# put RAM filesystem into object file
+	/usr/lib/pksom -y ramfsbegin -s ramfssize $work/RAMFS $work/RAMFS.o
+	rm -f $work/RAMFS
+	echo "Creating recovery system boot kernel" >$verbose
+	eval $b_config
+	# add our kernel to the lif volume as: RECOVER
+	cp /etc/mkrs.boot .
+	/usr/bin/lifcp -r -T-12290 -K2 ./hp-ux ./mkrs.boot:RECOVER
+	rm -f $work/hp-ux
+	flag=1
+	# for s700 DAT tape, boot ROM requires 2k byte block size!!!
+	echo "Copying recovery system to recovery device" >$verbose
+	/bin/dd if=mkrs.boot of=$rs_dev bs=2k conv=sync >$verbose || exit 1
+    else
+	#create DAT file system image file
+	echo "Creating RAM recovery system image in "$work/RAMFS >$verbose
+	>> $work/RAMFS		# create if it doesn't exist
+	/etc/mkfs -L $work/RAMFS mkfs.proto >$verbose || exit 1
+	flag=1
+	# for DAT tape, boot ROM requires 256 byte block size!!!
+	echo "Copying RAM file system and kernel to recovery device" >$verbose
+	cat $work/RAMFS ./hp-ux |
+		/bin/dd of=$rs_dev bs=256 conv=sync >$verbose || exit 1
+    fi
+elif [ $quick -eq 1 ]; then
+    echo "Creating recovery system image in "$work/fs_image >$verbose
+    >> $work/fs_image	# create if it doesn't exist
+    /etc/mkfs -L $work/fs_image mkfs.proto >$verbose || exit 1
+    flag=1
+    /bin/dd if=$work/fs_image of=$rs_dev bs=64k conv=sync >$verbose || exit 1
+    if [ $sys = "700" ]; then
+	/etc/mkboot -s 700 -u -v $work/dsk/root >$verbose 2>&1
+    fi
+else
+    echo "Creating recovery system" >$verbose
+    flag=1
+    /etc/mkfs -L $rs_dev mkfs.proto >$verbose || exit 1
+    if [ $sys = "700" ]; then
+	/etc/mkboot -s 700 -u -v $work/dsk/root >$verbose 2>&1
+    fi
+fi
+
+# all done
+set "Recovery system complete"; eval $cleanup

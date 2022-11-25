@@ -1,0 +1,87 @@
+#!/bin/sh
+##	@(#)wait_for	$Revision: 1.11.109.1 $	$Date: 91/11/19 13:58:37 $
+#	wait_for	--	wait until a file exists or we time out
+# Written by Darren D. Smith for NFS project
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin >&2
+##
+# wait_for:  Wait until "$FILE" exists or until a "timeout" occurs.
+# usage is
+#
+# 	wait_for file overnight stophour
+#
+# where "file" is the name of the file whose existence is to be checked.
+# 	"overnight" is the hour (on a 24-hour clock) that the overnight
+#		processes start.  This is used as a "trigger" point to make
+#		us wait until the next day if necessary.
+#	"stophour" is the hour that we are to "timeout" and return an error.
+#
+# NOTE: interactive access doesn't wait...
+#
+# EXAMPLE:
+#
+# wait_for /net/hpcndhf/source/sys/WOPR/hp-ux 22 05
+#
+##
+FILE=$1		# File to check existence of...
+OVERNIGHT=$2	# hour that overnight script starts
+STOPHOUR=$3	# hour to quit checking at
+
+
+SLEEPTIME=300	# 5 minutes between checks of the file.
+
+if [ ! -f $FILE ]
+then
+	if [ -t ]
+	then
+		echo "$0\: $FILE does not exist!" >&2
+		echo `date "+%y.%m.%d %T"` $0 $nfs abort >&2
+		exit 1
+	fi
+	echo `date "+%y.%m.%d %T"` $0 begin waiting for $FILE >&2
+
+	# calculate timeout values to check, taking into account
+	# that the script may have been started before midnight
+	# (therefore use Julian dates...)
+	# if CURRENT time is greater than the time the
+	# overnight scripts start, then we actually
+	# don't want to timeout until the next day.
+	CURRENTHOUR=`date "+%H"`
+	CURRENTDAY=`date "+%j"`
+	if [ $CURRENTHOUR -ge $OVERNIGHT -a $CURRENTHOUR -gt $STOPHOUR ]
+	then
+		STOPDAY=`expr $CURRENTDAY + 1`
+	else
+		STOPDAY=$CURRENTDAY
+	fi
+	
+	while [ ! -f $FILE ]
+	do
+		# check for timeout
+		CURRENTHOUR=`date "+%H"`
+		CURRENTDAY=`date "+%j"`
+		if [ $CURRENTDAY -ge $STOPDAY -a $CURRENTHOUR -ge $STOPHOUR ]
+		then
+			break;
+		fi
+		sleep $SLEEPTIME
+	done
+
+	if [ ! -f $FILE ]
+	then
+	    echo `date "+%y.%m.%d %T"` $0\: timed out waiting for $FILE >&2
+	    exit 1
+	fi
+		
+	# Just being parinoid.. If the file just got created, then sleep a
+	# few minutes to give it time to become fully created....
+	sleep $SLEEPTIME
+
+fi
+
+# If we get here, the file now exists....
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end >&2
+exit 0

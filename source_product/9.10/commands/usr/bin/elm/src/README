@@ -1,0 +1,81 @@
+###########################################################
+#
+#     README first.  
+#
+###########################################################
+
+
+1. ELM mail system has one main program and four utilities.
+   The directory structure is:
+     
+ RCS -+- Makefile ... Makefile for entire ELM mail system
+      |- README   ... this file
+      |- bin      ... directory for executable command
+      |- src      ... contain all source files of elm mailer
+      |- hdrs     ... contain all header files used elm and utilities
+      |- utils    ... contain source files of utilities
+      |- man      ... contain manpages of elm and utilities
+      +- lib      ... contain help files and elmrc file template.
+
+
+( 'elm mailer' is '/usr/bin/elm' and 'utilities' are '/usr/bin/elmalias'
+  '/usr/bin/mailfrom', '/usr/bin/newmail', '/usr/bin/readmail' )
+
+The Makefile has following entries.
+
+all: This compiles all sources which live in './src' and './utils'.
+     This executes Makefile in './src' and './utils' directory.
+     Executable objects are put into './bin' directory.
+
+elm: This compiles elm program only. This means executing 
+     Makefile in './src' directory.
+
+utils: This compiles utility programs only. This means executing
+       Makefile in './utils' directory.
+
+install: This compiles all sources and install the command and
+         manpage into right directory.
+
+uninstall: This removes all installed files.
+
+source: This is for installation by a media.
+        If you use this entry, you must define 'TAPE' 
+	variable in Makefile.
+
+lint: This is for lint output.
+
+clean: This removes compiles objects '*.o' and './bin/*' files.
+
+Makefile for PFA is also existing. The file name is 'Make_pfa' 
+and this residents in both 'src' and 'utils' directory.
+
+
+2. Location of programs.
+
+ELM programs must to be placed in following directory.
+
+	elm  		- /usr/bin
+	elmalias 	- /usr/bin
+	mailfrom 	- /usr/bin
+	newmail 	- /usr/bin
+	readmail 	- /usr/bin
+
+'elm' must have group 'mail' and mode '2755'.
+Help files  and 'elmrc' template file must be in:
+
+	elm-help.0(command help file)	- /usr/lib/elm
+	elm-help.1(alias help file)	- /usr/lib/elm
+	elm-help.2(option help file)	- /usr/lib/elm
+	elmrc-info(elmrc file template)	- /usr/lib/elm
+
+Manpages location for elm, elmalias, mailfrom, newmail, readmail:
+
+	/usr/man/man1
+
+###########################################################
+
+The file src/encode.c has been moved underneath the crypt
+subdirectory in the Shared Source.  To build the elm source
+without CRYPT, an empty encode.c file should suffice.
+
+Mark Egeland	egeland@hpfcla

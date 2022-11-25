@@ -1,0 +1,4 @@
+## FacetTerm Menu Capabilities for HP terminal emulator "hpterm" on X  06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hpterm.FM,v 70.1 92/03/09 16:11:03 ssa Exp $
+use=hpnoline.fm

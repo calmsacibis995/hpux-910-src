@@ -1,0 +1,21 @@
+#!/bin/sh
+##	@(#)takedown	$Revision: 1.20.109.1 $	$Date: 91/11/19 13:58:01 $
+#	takedown	--	takedown a development environment tree
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+WORKDIRS="bin cmds include kernel man doc tmp system test releases 3.2-4.3"
+# Remove working directories
+echo \\n\\n\\t\\c
+cd $nfs
+for WORK in $WORKDIRS
+do  echo " $WORK\c"
+    rm -rf $WORK
+done
+echo \\n
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

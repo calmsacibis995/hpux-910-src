@@ -1,0 +1,34 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+exitval=0
+
+PATH=/bin:/usr/bin:/etc
+
+#
+# This fileset may be removed, assuming that all filesets that
+# depend on it have been/are being removed too.
+#
+if [ "$2" = "check" ]; then
+    exit 0
+fi
+
+#
+# Kill /etc/rbootd, if it is running
+#
+patt=' rbootd
+ /etc/rbootd'
+
+pid="`ps -e | fgrep "$patt" | awk '{print $1}'`"
+if [ -n "$pid" ]; then
+    kill -15 $pid >/dev/null 2>&1
+    sleep 3
+    kill -9 $pid >/dev/null 2>&1
+fi
+
+#
+# Remove log and configuration files.
+#
+/bin/rm -rf /usr/adm/rbootd.log /etc/boottab /usr/boot
+
+exit $exitval

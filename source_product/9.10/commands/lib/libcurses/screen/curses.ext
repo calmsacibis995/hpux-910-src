@@ -1,0 +1,20 @@
+/* @(#) $Revision: 70.1 $ */     
+/*
+ * External variables for the library
+ *
+ */
+
+/* LINTLIBRARY */
+
+# define CURSES	/* We are internal to curses */
+
+# ifdef NONSTANDARD
+#  include "RecStruct.h"
+#  include "VTio.h"
+# endif ITC
+
+# include "curses.h"
+# include <termio.h>
+# include <term.h>
+# include "curshdr.h"
+# include <unctrl.h>

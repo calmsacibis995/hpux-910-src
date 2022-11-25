@@ -1,0 +1,93 @@
+#! /bin/ksh
+allargs=$*
+HPUXDEFS="
+	-DARCH42
+	-DBSDIPC
+	-DBSDJOBCTL
+	-DBSDPORT
+	-DCDROM
+	-DCOMPAT
+	-DDISKLESS
+	-DDOTDOT
+	-DDUX
+	-DFSD_KI
+	-DHFS
+	-DHPNFS
+	-DHP_NFS
+	-DINET
+	-DKERNEL_TUNE_DLB
+	-DLAN
+	-DLANRFA
+	-DLOCKF
+	-DMBUFFLAGS
+	-DMBUF_XTRA_STATS
+	-DMESG
+	-DMOREFILES
+	-DNARPA
+	-DNENHANCE
+	-DNFS
+	-DNFS3_2
+	-DNS
+	-DNSCONFIG
+	-DNSDIAG
+	-DNSIPC
+	-DNS_NAMING_GLOBALS
+	-DNS_QA
+	-DPOSIX
+	-DPRIVGRP
+	-DPROCESSLOCK
+	-DPXP
+	-DQUOTA
+	-DRTPRIO
+	-DSEMA
+	-DSHMEM
+	-DSOCKET
+	-DSYMLINKS
+	-D_NAMESPACE_CLEAN
+	-D__hpux
+	-D__unix
+	-Dhpux
+	-Dunix
+	-DACLS
+	-DAUDIT
+	-DSHADOWPWD
+	-DGETMOUNT
+	-DLOCAL_DISK
+	-DGT_64_FDS
+	-DEUC
+	-DSWFS
+	-DUT_HOST
+	-UASYNCIO
+	-UBELL5_2
+	-UBSD_ONLY
+	-UDISPATCHLCK
+	-UFS_TUNE1
+	-UHPUXTTY
+	-UINTRLVE
+	-UKERNEL
+	-UOLDHPUXTTY
+	-UPERFORM_MEM
+	-UPLOCKSIGNAL
+	-USDF
+	-UTEMPORARY_OBJECT_COMPAT
+	-U_ANSIC_CLEAN
+	-UASYNCIO
+	-U__hp9000s500
+	-U__pdp11
+	-U__u3b
+	-U__u3b5
+	-U__vax
+	-Uhp9000s500
+	-Updp11
+	-Uu3b
+	-Uu3b5
+	-Uvax"
+
+cd /src/usr/include
+for head in $allargs
+do
+    cat $head | /usr/local/bin/unifdef $HPUXDEFS > /usr/include/$head
+done
+cd /usr/include
+/usr/local/bin/chmog 444 bin bin *
+

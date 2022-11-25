@@ -1,0 +1,34 @@
+	Descriptions of user-contributed files in /nfs/bin
+
+in, out, unout
+	Front-end scripts for checkin/checkout/uncheckout.  These will
+	prepend the path through your development enviroment onto the
+	file names supplied, and invoke checkin, checkout or uncheckout.
+
+sdiff
+	Front-end for sccsdiff.  Like in, out, and unout , sdiff takes a
+	list of files in the current directory and prepends the proper
+	path information to /nfs/sccs/..../s.FILE and then does the
+	diff.  These are to keep you from having to type long path
+	names; not an issue if you love to type...
+
+install
+	Sun compatible install program; install is used by Sun Makefiles
+	to put source code in the desired destination with the desired
+	user, group and mode bits.  Note that /nfs/bin must be before
+	/etc in your $PATH for the Makefile to get the right version!
+	The latest version looks in your environment for $INSTALL_OPTS,
+	and uses those as options to install; this is especially useful
+	to apply the "-c" option (copy, don't move) to all installs.
+
+maketd
+	This script goes takes all the C source and header files named
+	on the command line and determines which header files they
+	include.  It is used by the "depend" target in the Makefiles to
+	make the dependency lists used to create new executables when a
+	header file changes.
+
+Make_install
+	This script is similar to the other Make_* scripts, but it makes
+	the install target in the Makefiles.  This will actually call
+	the Make_cmd script with an argument of "install".

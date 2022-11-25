@@ -1,0 +1,16 @@
+Welcome to the series 300 kernel debugger!
+
+kdb.man is the manual page for the kernel debugger. Use 'nroff -man' to
+look at it
+
+kdb.irs is the IRS for the kernel debugger. Use 'nroff -mm' to look at it.
+
+CHANGES is a file I use to describe the major features of different releases.
+
+Admin_new is a script I used to bump sccs levels
+
+The rest is source or used to build the source
+
+Makefile is the name of the makefile.
+
+Read the manual entry first. Read the IRS second. Read the code last.

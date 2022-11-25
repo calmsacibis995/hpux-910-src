@@ -1,0 +1,654 @@
+\"
+\" This is nroff/troff source.  To generate the output file type:
+\"	tbl tape.fmt | troff -me
+\"
+.de SE
+.sp 1
+.sh \\$1 "\\$2 \\$3 \\$4 \\$5 \\$6 \\$7 \\$8 \\$9"
+.sp 1
+..
+.de $C			\" enter chapters in index
+.sh 1 _
+.(x t
+\fB\\$1\ \\$2\ \ \\$3\fP
+.)x
+..
+.de $0			\" enter sections in index
+.(x t
+\ \ \ \ \\$2 \\$1
+.)x
+..
+.he ''''
+.fo ''''
+.po 1.25i
+.sp 1i
+.fo 'HP Confidential'\*(td'%'
+.ce 100
+.b "Fbackup/frecover Media Format Specification"
+.sp 2
+.b "System Independent Software"
+.b "Information Software Operation"
+.sp 1
+.b "February 11, 1987"
+.b "Revised: \*(td"
+.sp 1
+.b "Version: 4.0"
+.sp 3
+.b "Abstract"
+.sp 1
+.ce 0
+The device containing the backup data may either be a regular file or a
+peripheral device.  If a device is selected rather than a regular file,
+then end-of-file (EOF)
+marks are place in well defined, strategic locations on the device media;
+otherwise the backup is contained in a single file.
+.bp
+.SE 1 "Introduction"
+There are five kinds of entities which are found on
+.b "volumes"
+of media used by
+.bi "fbackup"
+and
+.bi "frecover".
+These entities are (1)
+.b "ANSI standard labels",
+(2)
+.b "Volume headers",
+(3)
+.b "Indices",
+(4)
+.b "Backup data",
+and (5)
+.b "Check point data records".
+Each is described below.
+If the backup media is not a regular file, the
+.b "ANSI standard label",
+.b "Volume header",
+and
+.b "Index"
+are each followed by an end-of-file
+.b "(EOF)"
+mark; groups of
+.b "Backup data"
+records are also separated by a
+.b "Check point data record"
+and an
+.b "EOF"
+mark.
+Table I shows the
+.b "volume"
+formats.  Note that two consecutive
+.b "EOF"
+marks signify the end of media (
+.b "EOM").
+If the backup media is a regular file, checkpoint records and EOF's are
+not included.  For completion, the remainder of this document includes
+checkpoint
+records as well as EOFs.
+.SE 2 "Glossary"
+The following terms are used in this document and retain the
+corresponding definitions:
+.SE 3 "text"
+Text strings are ASCII strings with a broadened definition to include
+the additional characters for international language support.
+.SE 3 "block"
+Blocks are defined to be 512 bytes in length in all revisions prior to 8.0,
+and are 1024 bytes in all 8.0 and 8.0X releases with the exceptions of 
+8.01 and 8.02.
+.SE 3 "record"
+Records are defined to be an integer multiple number of blocks of
+data.
+.SE 1 "Requirements and Assumptions"
+.SE 2 "File Order"
+In order for frecover to locate files in a more efficient manner, all
+files on the backup device are in alphabetical order.  Depending on the
+LANG variable when fbackup was run, the order of files may vary.
+.SE 2 "Directory Data"
+In order to restore a file system to an equivalent state, frecover
+requires that directory data be backed up.  The directory data contains
+only the names of each file currently in the directory.  Each file name
+is followed by a NULL (\\0) character.  The rest of the data is padded
+with NULLS to the end of the size of the directory.  Note that file names
+will never require more space than is currently allocated for a
+directory entry.
+.SE 2 "Links"
+Data for hard links is only backed up once.  Inode information for each
+reference to the actual link is backed up for each link.
+.SE 1 "Field Descriptions"
+This section describes the fields that define the
+.b "fbackup/frecover media format".
+.SE 2 "Tape Label"
+This label was intended to be an ANSI standard label, but this is not
+currently supported.  It consists of the following ASCII string,
+"ANSI standard label not yet implemented".
+.br
+If the backup media is not a regular file, the tape label is followed by an
+.b "EOF"
+mark.  The tape label is of fixed length.
+.SE 2 "Volume Header"
+The
+.b "volume header"
+is of fixed length and
+is composed of the following fields.  If the backup media is not a regular
+file, the volume header is followed by an
+.b "EOF"
+mark.
+.SE 3 "Magic Field"
+The magic field is a 14 byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the value "FBACKUP LABEL".
+.SE 3 "Machine Field"
+The machine field is a UTSLEN byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the result of
+.b "uname -m".
+.SE 3 System Name Field"
+The system name field is a UTSLEN byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the result of
+.b "uname -s".
+.SE 3 "Release Field"
+The release field is a UTSLEN byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the result of
+.b "uname -r".
+.SE 3 "Node Name Field"
+The node name field is a UTSLEN byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the result of
+.b "uname -n".
+.SE 3 "User Name Field"
+The user name field is a UTSLEN byte wide text string.  On valid
+.b "fbackup/frecover"
+media it will contain the result of
+.b "cuserid(LIBS)".
+.SE 3 "Record Size Field"
+The record size field is a 8 byte wide text string.  This field represents
+a five digit decimal number that defines the maximum length in bytes of
+any data record.
+.SE 3 "Time Field"
+The time field is a 64 byte wide text string.  The time is
+represented as defined by ctime(LIBC) and is padded with nulls.
+.SE 3 "Media Use Field"
+The media use field is a 5 byte wide text string.  This field represents
+a decimal number that defines the number of times that this media has been
+used for backup.
+.SE 3 "Volume Number Field"
+The volume number field is a 5 byte wide text string.  This field contains
+a '#' character followed by three decimal digits and defines the current
+volume of the backup media.
+.SE 3 "Checkpoint Frequency"
+The checkpoint frequency field is a 5 byte wide text string.  This field
+contains a decimal representation of the frequency of backup data record
+checkpointing.
+.SE 3 "Index Size"
+Index size
+is a text string containing the decimal representation
+of the size of the index in bytes.  This field is 8 bytes
+wide.
+.SE 3 "Backup Identification Tag"
+This field is composed of two items, the process id (pid) of the
+process that backed up the file and the start time of that process.
+Both items are 12 bytes wide.  This field is present in the volume header
+as well as each file header in order
+to serve as a basis for file header certification.
+.SE 3 "Language"
+This field is required for sorting purposes.  Since files are required
+to be in alphabetical order, the order may change depending on the selected
+language.  This field is 32 bytes wide contains the value returned by
+getenv("LANG").
+.SE 3 "FSM (Fast Search Marker) Frequency"
+The FSM Frequency is used for DDS tapes to speed the recovery of selected
+files.  A maker (also called as "set mark") is placed after every fsmfreq
+files are written to tape, so that the tape may later be fast searched to
+these points more quickly than reading every byte on the DDS tape.
+The default value for fsmfreq is 200, and the field itself is 5-bytes of ASCII.
+.SE 3 "Reserved"
+The reserved field is a 1024 byte wide text string and is reserved for
+future use.
+.SE 2 "Index"
+An index is the list of files that will be attempted to be backed up.
+The index on each volume of the backup media defines on which volume a
+particular file resides.  By necessity, the indices on all but the last volume
+are accurate only for the previous volumes.  An index entry is composed of
+two fields; the volume number and the absolute path name of a file.
+.SE 3 "Volume Number"
+The volume number is a 5 byte wide text string.  This field contains
+a '#' character followed by three decimal digits and a space
+and defines the current
+volume of the backup media.
+.SE 3 "File Name"
+The file name field is a variable length text string with a maximum
+length of MAXPATHLEN.  It contains the absolute path name of the file
+followed by a null character ('\\0').
+.SE 2 "Checkpoint Data Record"
+The checkpoint record is composed of six character fields.  These values
+are used by fbackup to recover from error conditions.
+.SE 3 "filenum"
+The filenum field is 12 bytes wide and contains the ASCII representation
+of the file number.
+.SE 3 "trecnum"
+The trecnum field is 12 bytes wide and contains the ASCII representation
+of the tape record number of the following (data) record.  For example,
+if a checkpoint precedes tape record number 600, trecnum will be the
+ASCII representation of 600.
+.SE 3 "retrynum"
+The retrynum field is 12 bytes wide and contains the ASCII representation
+of the number of retries on the file at this point.
+.SE 3 "datasize"
+The datasize field is 12 bytes wide and contains the ASCII representation
+of the size of the file in bytes.
+.SE 3 "blknum"
+The blknum field is 12 bytes wide and contains the ASCII representation
+of the current block number of the file.
+.SE 3 "blktype"
+The blktype field is 1 byte wide and contains the
+type of block, either header, trailer, or data.
+.SE 2 "Backup Data Record"
+Backup data records are composed of sets of a file header, file data, and
+a file trailer.  These sets need not be aligned on record boundaries (except
+the first record) and may span records.  If the backup media is not a regular
+file, the checkpoint frequency field in the volume header defines the number
+of data records written between EOFs (see table 1).
+File headers, file data, and file trailers are all
+guaranteed to terminate on a 512 or 1024 byte (block) boundary with unused
+space padded with null ('\\0') characters.  All data in each header
+and trailer
+block is represented in text.  Both file headers and file trailers are
+designed to be expandable in order to accommodate the future
+requirements of trusted systems.  The format of this information is
+based on blocks of which there are two types, a beginning
+block and a continuation block.  Furthermore, they both contain a
+common set of information to insure file integrity.  The fields in
+the common set include a block type identifier, a last block
+indicator, a block identification tag, and a block checksum value.
+.SE 3 "Header/Trailer Common Set"
+The common set of information shared by the file header and file
+trailer is described as follows.
+.SE 4 "Block Type Identifier"
+This field is 4 bytes wide and contains one of the three values,
+"BOH", "COH", "BOT". "BOH" stands for beginning of header,
+"COH" stands for continuation of header, and "BOT" stands for beginning
+of trailer.
+All values are terminated with a null character.
+.SE 4 "Last Block Indicator"
+This field is 4 bytes wide and contains one of the three values, "MOR",
+"EOT", or "EOH".  Where "EOT" stands for end
+of trailer block, "EOH" stands for end of header block and "MOR"
+implies that more header/trailer blocks follow.
+.SE 4 "Block Magic Value"
+This field is 12 bytes wide and is used to determine the block type
+(either header or trailer).
+.SE 4 "Block Checksum Value"
+This field is 12 bytes wide and is used to insure the integrity of
+the block.
+.SE 3 "File Header"
+The file header is composed of a variable number of header blocks,
+each of which consists of a common set of information followed by
+file header specific information.
+Additionally, the first header block contains the backup
+identification tag, file
+identification tag, and up to the first 444 characters of the file
+name (see table IV).
+The information following the file name is of variable format
+and designed for expandability.
+.sp 1
+.SE 4 "Backup Identification Tag"
+This field is composed of two items, the process id (pid) of the
+process that backed up the file and the start time of that process.
+Both items are 12 bytes wide.
+.SE 4 "File Identification Tag"
+This field is 12 bytes wide and is used to verify file integrity
+.SE 4 "File Name"
+This field is of variable length and is terminated by a NULL
+character ('\\0').
+.sp 1
+The remaining fields in a file header are represented by a field
+identifier followed by a colon (:) followed by a value followed by a
+NULL (\\0) character.  Field values in this section are determined by
+their respective field identifiers and may be presented in any order.
+.sp 1
+.SE 4 "Size of File"
+st_size:value where value is the text representation of the decimal
+number of bytes contained in the file.  Value is terminated by a null
+character.  Note that this value will be zero for the link backup.
+.SE 4 "Inode Number"
+st_ino:value where value is the text representation of the decimal value of
+the inode number of the corresponding file.
+.SE 4 "Mode"
+st_mode:value where value is the text representation of the decimal
+value of the corresponding file mode.
+.SE 4 "Access Time"
+st_atime:value where value is the text representation of the decimal
+value of the last time the file was accessed (time(OS) format).
+.SE 4 "Modification Time"
+st_mtime:value where value is the text representation of the decimal
+value of the last time the file was modified (time(OS) format).
+.SE 4 "Change Status Time"
+st_ctime:value where value is the text representation of the decimal
+value of the last time the associated inode was changed
+(time(OS) format).
+.SE 4 "Link"
+st_nlink:value where value is the text representation of the decimal
+value of the number of hard links to the corresponding file.
+.SE 4 "Link Name"
+link_to:value where value is the absolute path name to which this file
+is linked.  This field is meaningful only if link (above) is greater
+than one.
+.SE 4 "Device Identifier"
+st_dev:value where value is the text representation of the decimal
+value of the device.
+.SE 4 "Blocked Device Id"
+st_rdev:value where value is the text representation of the decimal
+value of the raw device.
+.SE 4 "Number of Blocks"
+st_blocks:value where value is the text representation of the
+decimal value of the number of blocks used to contain this file.
+.SE 4 "Block Size"
+st_blksize:value where value is the text representation of the
+decimal value of the size of blocks for the file system where this
+file resided during the backup.
+.SE 4 "Cluster Node Identifier"
+st_rcnode:value where value is the text representation of the
+decimal value of the cluster node identifier.
+.SE 4 "Access Control List"
+st_acl:value where value is "1" if there are optional ACL entries,
+"0" if there's no optional ACL entries.
+.sp 1
+nacl_entries:value where value is the text representation of the
+decimal value of the number of ACL entries of the file.
+.sp 1
+acl_uid:value where value is the text representation of the
+decimal value of the user id for the ACL entry.he file.
+.sp 1
+acl_gid:value where value is the text representation of the
+decimal value of the group id for the ACL entry.he file.
+.sp 1
+acl_mode:value where value is the text representation of the
+decimal value of the mode for the ACL entry.he file.
+.sp 1
+.SE 4 "User Login Name"
+loginname:value where value is the login name of the owner of the
+corresponding file.
+.SE 4 "Group Name"
+groupname:value where value is the name of the group for the
+corresponding file.
+.SE 3 "File Data"
+The file data are the contents of the file named by the file header.
+.SE 3 "File Trailer"
+The file trailer is composed of one
+trailer block, which contains a common set of information
+(see 2.4.1) followed
+by file trailer specific information.
+Additionally, the trailer block contains the file identification
+tag and
+file status flag (see table V).
+The information following the file status flag is
+of variable format and designed for expandability to the size of one block.
+.SE 4 "File Identification Flag"
+This field is 12 bytes wide and is used to determine file integrity.
+.SE 4 "File Status Flag"
+This field is 2 bytes wide and is used to determine file integrity.
+.sp 2
+The remaining fields in the file trailer are represented by a field
+identifier followed by a colon (:) followed by a value followed by
+a NULL character ('\\0').  Field values in this section
+are determined by their respective field identifiers which may be
+presented in any order.
+.SE 4 "User Identification"
+st_uid:value where value is the text representation of the decimal
+value of the user id (uid).
+.SE 4 "Group Identification"
+st_gid:value where value is the text representation of the decimal
+value of the group id (gid).
+.SE 4 "Remote Flag"
+st_remote:value where value is the text representation of the decimal
+value defining the remote status of the corresponding file.
+.SE 4 "Network Device"
+st_netdev:value where value is the text representation of the network
+special device.
+.SE 4 "Network Inode"
+st_netino:value where value is the text representation of the network
+file system inode number.
+.sp 1
+.(b
+.ce 100
+Table I - Sequential Media Volume formats
+.ce 0
+.TS
+tab(:) allbox center;
+cfB s
+c s.
+Volume 1 to v of v
+_
+ANSI standard label
+EOF
+Volume header
+EOF
+.T&
+c c.
+Cumulative index:index record 1
+\^:index record 2
+\^:. . .
+\^:index record r
+.T&
+c s
+c c.
+EOF
+Checkpoint:checkpoint record
+backup data:data record 1
+\^:data record 2
+\^:. . .
+\^:data record N
+.T&
+c s
+c|c.
+EOF
+Checkpoint:checkpoint record
+backup data:data record 1
+\^:data record 2
+\^:. . .
+\^:data record N
+.T&
+c s
+c s
+c c.
+EOF
+\. . .
+Checkpoint:checkpoint record
+backup data:data record 1
+\^:data record 2
+\^:. . .
+\^:data record n
+.T&
+c s.
+EOF
+EOF
+.TE
+.)b
+.(b
+.ce 100
+Table II - Volume Header
+.ce 0
+.TS
+tab(:) allbox center;
+c l.
+Byte Location:Contents
+_
+0-13:Magic Field
+14-22:Machine Identification
+23-31:System Identification
+32-40:Release Identification
+41-49:Node Identification
+50-58:User Identification
+59-66:Media Block Size
+67-130:Backup Start Time
+131-135:Media Use
+136-140:Media Volume Number
+141-145:Checkpoint Frequency
+146-153:Index Size
+154-177:Backup Identification Tag
+178-1177:Reserved
+.TE
+.)b
+.
+
+
+
+.(b
+.ce 100
+Table III - Index
+.ce 0
+.TS
+tab(:) allbox center;
+c c.
+\# Volume Number:First File Name
+\...:...
+\# Volume Number:Last File Name
+.TE
+.)b
+.
+
+
+
+.(b
+.ce 100
+Tabel IV - Checkpoint Data Record
+.ce 0
+.TS
+tab(:) allbox center;
+c l.
+Byte Location:Contents
+_
+0-11:File Number
+12-23:Tape Record Number
+24-35:Retry Number
+36-47:Data Size
+48-59:Block Number
+60:Block Type
+.TE
+.)b
+.
+.bp
+
+.(b
+.ce 100
+Table V - File Header
+.ce 0
+.TS
+tab(:) center;
+|cw(1i)|l|.
+_
+Byte Location:Contents
+=
+0-31:Common Area
+_
+32-55:Backup Identification Tag
+_
+56-67:File Identification Tag
+_
+68-n:File Name
+_
+(n+1)-512:Variable Portion*
+_
+.T&
+|cw(1i) s|
+|cw(1i)|l|.
+\...
+_
+0-31:Common Area
+_
+32-n:Variable Portion
+_
+(n+1)-512:Unused And Null Filled
+_
+.T&
+|c l|.
+*:T{
+Note that the file name
+as well as any other variable
+portion of the file header
+may span block boundaries.
+T}
+_
+.TE
+.)b
+.
+
+
+
+.(b
+.ce 100
+Table VI - File Trailer
+.ce 0
+.TS
+tab(:) center;
+|cw(1i)|l|.
+_
+Byte Location:Contents
+=
+0-31:Common Area
+_
+32-43:File Identification Tag
+_
+44-45:Status
+_
+46-512:Variable Portion*
+_
+.T&
+|cw(1i) s|
+|cw(1i)|l|.
+\...
+_
+0-31:Common Area
+_
+32-n:Variable Portion
+_
+(n+1)-512:Unused And Null Filled
+_
+.T&
+|cw(1i) l|.
+*:T{
+Note that variable
+portions of the file trailer
+may span block boundaries.
+T}
+_
+.TE
+.)b
+
+
+
+.(b
+.ce 100
+Table VII - Common Area
+.ce 0
+.TS
+tab(:) allbox center;
+c l.
+Byte Location:Contents
+_
+0-3:T{
+Type
+.br
+BOH, COH, or BOT
+T}
+4-7:T{
+Block Terminator
+.br
+MOR, EOH, or EOT
+T}
+8-19:Block Magic Value
+20-31:Block Checksum
+.TE
+.)b
+.
+.bp 1
+.de $C			\" ignore sections now
+..
+.ro
+.(l C
+Table of Contents
+.)l
+.sp 2
+.xp t

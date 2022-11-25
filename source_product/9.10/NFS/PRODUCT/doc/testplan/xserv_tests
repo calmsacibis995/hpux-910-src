@@ -1,0 +1,168 @@
+.\" .PH "''''"
+.\" .PF "''\\\\nP''"
+.\" .ds HF 3 3 3 3 3 3 3	\" all headings are bold
+.\" .nr Hb 7
+.\" .nr Hs 7
+.\" .pl 66
+.\" .ll 70
+.\" .po -5
+.\" .ad b
+.H 1 "Cross-Services Tests (Jim Hunter)"
+.sp 1
+.H 2 "NFS/RFA Cross-Services Discussion (Jim Hunter)"
+.H 3 "Introduction"
+.sp 1
+The objective of the NFS/RFA cross services tests is to isolate defects
+peculiar to NFS and RFA interactions which would not be found through other 
+testing processes.
+.sp 2
+.H 3 "Scope of the tests"
+.sp 1
+The success or failure of the tests will be determined using the following
+criteria outlined below and if appropriate, an analysis of the end state
+of the system.
+.sp 1
+.BL
+.LI
+The system should not crash or hang.
+.LI
+The integrity of both services should be preserved.
+.LE
+.sp 2
+.H 3 "Implementation Goals"
+.sp 1
+.BL
+In order to implement the model outlined above, the following are identified
+as desirable goals:
+.LI
+Ability to measure results and detect failures.
+.LI
+Flexibility to integrate with the scaffold.
+.LE
+.sp 2
+.H 2 "RFA -> NFS"
+.sp 1
+The time estimates to perform the following tests are based on executing the
+test once.
+.sp 1
+.nf
+RESPONSIBLE ENGINEER: Paul Van Farowe
+DEPENDENCY: Server changes to RFA have been made and tested.
+ISSUE: Will the RFA changes be allowed in the real code.
+.fi
+.sp 1
+The following node configuration will be used:
+.sp 1
+.DS
+	   ----------          ----------          ----------
+          | NODE A  |          | NODE B |          | NODE C |
+	   ----------          ----------          ----------
+
+	   netunam /net/B      mount C:/ /mnt
+.DE
+.sp 2
+.H 3 "Series 3xx"
+.sp 1
+Run one instance of RFA functional tests continuously for 24 hours from node A
+through the NFS mount point on node B to a file system on node C.  Node A
+should be a series 300.  All tests should complete with no errors.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Series 5xx"
+.sp 1
+Run one instance of RFA functional tests continuously for 24 hours from node A
+through the NFS mount point on node B to a file system on node C.  Node A
+should be a series 500.  All tests should complete with no errors.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Series 8xx"
+.sp 1
+Run one instance of RFA functional tests continuously for 24 hours from node A
+through the NFS mount point on node B to a file system on node C.  Node A
+should be a series 800.  All tests should complete with no errors.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 2 "NFS -> RFA"
+.sp 1
+.DS
+RESPONSIBLE ENGINEER: Paul Van Farowe
+.DE
+.sp
+This configuration will not be supported due to an RFA path-parsing limitation.
+The problem lies somewhere in the parsing of the RFA connection path.  However,
+any attempt to use this configuration should produce an appropriate error
+message.
+.sp 1
+The time estimates to perform the following tests are based on executing the
+test once.
+.sp 1
+The following node configuration will be used:
+.sp 1
+.DS
+	   ----------          ----------          ----------
+          | NODE A  |          | NODE B |          | NODE C |
+	   ----------          ----------          ----------
+
+	   mount B:/ /mnt       netunam /net/C
+.DE
+.sp 2
+.H 3 "RFA NOT inherited by nfsd"
+.sp 1
+Create the RFA connection AFTER the NFS daemons have been started so that
+the NFS daemons do NOT inherit the RFA connection.  Attempt to 'cd' to or
+'ls' /mnt/net/C/*  and verify that an appropriate error message is returned.
+
+Note that this test need only be executed a two or three times
+before release to verify the proper behavior.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "RFA IS inherited by nfsd"
+.sp 1
+Create the RFA connection BEFORE the NFS daemons have been started so that
+the NFS daemons DO inherit the RFA connection.  Attempt to 'cd' to or 'ls'
+/mnt/net/C/*  and verify that an appropriate error message is returned.
+Verify that all tests fail with an appropriate error
+message.  Note that this test need only be executed a two or three times
+before release to verify the proper behavior.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.sp 2
+.H 3 "Mount remote file system through RFA"
+.sp 1
+.DS
+	   ----------          ----------          ----------
+          | NODE A  |          | NODE B |          | NODE C |
+	   ----------          ----------          ----------
+
+	   netunam /net/B
+	   mount C:/ /net/B/mnt
+.DE
+.sp 1
+Create a RFA connection from node A to node B.  Then attempt to mount node
+C's file system onto a mount point on node B through RFA.  The mount command
+should not be able to handle the network special file and the mount will
+fail with a networking error.
+.sp 1
+.nf
+IMPLEMENT TIME:  0.0  md 
+PERFORM TIME:    1.0  md
+.fi

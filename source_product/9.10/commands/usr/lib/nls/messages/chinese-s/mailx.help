@@ -1,0 +1,23 @@
+               mailx  命令
+ type [msglist]			 打印信息
+ next 				 转到下一个信息打印
+ edit [msglist]			 编辑信息
+ from [msglist]			 给信息标题行
+ delete [msglist] 		 删除信息
+ undelete [msglist] 		 恢复删除信息
+ save [msglist] file 		 把信息附加到文件后
+ reply [message] 		 回答全部接收者的信息
+ Reply [msglist] 		 回答信息的发送者
+ preserve [msglist] 		 保留邮箱中的信息
+ mail user 			 邮给指定用户
+ quit 				 退出，保留未读信息
+ xit  				 退出，保留所有信息
+ header 			 打印激活信息标题页
+ !   				 shell  转移
+ cd[directory] 			 改变当前目录, 默认值为源目录
+ list 		  		 列全部命令（无解释）
+ top [msglist] 			 打印信息的前5行
+ z [-] 				 显示下（前）一页 10 个标题
+
+ [msglist] 表示选项。可是信息的号码、来源、标题或类型。用来指定信息。
+ 默认值是当前信息。

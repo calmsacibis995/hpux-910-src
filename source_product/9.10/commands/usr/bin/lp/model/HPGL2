@@ -1,0 +1,129 @@
+#!/bin/sh
+#  $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lp/model/HPGL2,v $
+#  $Revision: 72.1.1.1 $
+
+# HPGL2:  lp interface for HP7550A, HP7596A, HP7570A plotter.
+#
+#=====================================================================
+# OPTIONS RECOGNIZED:
+#
+# Do not initialize
+#	ni		do not initialize Plotter
+#				(default initialize)
+# Do not eject a page at the end of the plot
+#	np		do not eject page
+#				(default eject)
+#
+# CGM (Computer Graphics Metafile) output:
+#	cgm		translate CGM to HP-GL
+#
+#	cgmne		translate CGM to HP-GL
+#			(if error override and print anyway)
+#
+#======================================================================
+#
+# NOTE:
+#	 The cgmtohpgl program needs a device file name in "-d" option.
+#	  (It cannot output to standard output.) 
+# 
+
+plotfilter=/usr/lib/plotdvr 
+cgmfilter=/usr/lib/cgmtohpgl
+log=/usr/spool/lp/log
+
+if [ -z "$LANG" ]
+then
+	LANG="C"
+	export LANG
+fi
+
+# save the arguments to the model
+plotter=`basename $0`
+reqid=$1
+user=$2
+title=$3
+copies=$4
+
+# get device file names
+devicefile="/usr/spool/lp/member/$plotter"
+devicename=`cat $devicefile | line`
+interfacename="/usr/spool/lp/interface/$plotter"
+
+# Set up RS-232C interface if this is a tty port
+if [ -t 1 ]
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+fi
+
+# Determine which options have been invoked
+initialize=""
+inputfile="def"
+send_PG="true"
+
+for i in $5
+do
+    case "$i" in
+    -ni | ni)  # do not initialize
+	initialize="-i";;
+
+    -np | np) # do not eject a page
+	send_PG="false";;
+
+    cgm | cgm) # CGM file input
+	if [ ! -x "$cgmfilter" ]
+	then
+	    echo "$0: $reqid: cgmfilter is not supported on this system" >>$log
+	    exit 4;
+	fi
+	inputfile="cgm";;
+
+    cgmne | cgmne) # if error override and print anyway
+	if [ ! -x "$cgmfilter" ]
+	then
+	    echo "$0: $reqid: cgmfilter is not supported on this system" >>$log
+	    exit 4;
+	fi
+	inputfile="cgmne";;
+
+    esac
+done
+
+# Handle disable and cancel traps.
+trap "trap 15;kill -15 0;exit 0" 15
+
+# Assume that the rest of the arguments are files
+shift; shift; shift; shift; shift
+files="$*"
+
+# plot the spooled file
+
+i=1
+while [ $i -le $copies ]
+do
+	for file in $files
+	do
+		case "$inputfile" in
+			def)	$plotfilter -l$reqid -u$user -e\
+				$initialize $file <$devicename 2>>$log;;
+                        cgm)    $cgmfilter  -d$devicename -l$reqid -u$user -e\
+					$initialize $file 2>>$log;;
+			cgmne)	$cgmfilter  -d$devicename -l$reqid -u$user -e\
+				        -c $initialize $file 2>>$log;;
+			*);;
+		esac
+		if $send_PG
+		then
+		    echo ";PG;\n"
+		fi
+	done
+	i=`expr $i + 1`
+done
+
+# Insure all buffers are flushed to plotter
+if [ -t 1 ]
+then
+	stty 9600 opost onlcr -parenb cs8 ixon -istrip clocal tab3 <&1 2>/dev/null
+fi
+
+exit 0
+

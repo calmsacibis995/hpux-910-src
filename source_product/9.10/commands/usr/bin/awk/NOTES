@@ -1,0 +1,38 @@
+3/27/91 - Edgar Circenis
+
+Support for numeric and string constants (ala POSIX.2)
+
+6/20/89 - Edgar Circenis
+
+The official POSIX 1003.2 regular expression routines are now being used.
+There is a problem where patterns like (a*)* have exponential execution
+time based on the length of the input string (try aaaaaaaaaaaaaab).  This
+is because the regex routines create nfa's.
+
+Pattern space RE's are compiled using the REG_NOSUB flag.  All others are
+compiled without it.
+
+4/21/89 - Edgar Circenis
+
+Nawk now uses the POSIX 1003.2 regular expression routines through the
+regexp front end routines.  I made a copy of <regexp.h> and modified the
+parameters passed to regcomp() so that ERE compilation would take place.
+
+Each regular expression is currently stored in a 1K buffer.  It is possible
+to determine exactly how much space is used by a compiled ERE, but moving
+compiled expressions around in buffers has so far proved unsuccessful.
+
+GENERAL NOTES - Edgar Circenis
+
+Regular expressions are compiled by the routine makedfa().
+They are put into the array fatab and entries are reused on a
+least frequently used basis.
+
+Each line of input is matched against every pattern in an awk program
+by the function matchop() to determine whether the associated code is
+to be executed.
+
+The routines match(), pmatch(), and nematch() all seem to do the same
+thing (as far as I can tell), so I made them into front end routines that
+call xmatch().  This is the routine that actually matches ERE's.
+If a match is found, the function returns 1, else 0.

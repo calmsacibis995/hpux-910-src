@@ -1,0 +1,38 @@
+* This dfile is useful for creating a small kernel for systems
+* that are low on memory.
+
+* disk drivers
+*
+* Comment out either of these lines if you do not have that type of drive.
+cs80
+scsi
+
+* networking
+uipc
+inet
+lan01
+
+* Comment out this next line if you do not use nfs
+nfs
+
+* pseudo terminal drivers
+ptymas
+ptyslv
+
+* Uncomment the following line if you are not using an MC68040 processor
+* mc68040 0
+
+* parameters
+
+dskless_node 	0
+server_node 	0
+ndilbuffers 	1
+semmni 		20
+shmmni 		100
+nfile 		200
+nflocks 	20
+maxusers 	2
+ninode 		200
+nproc 		120
+maxuprc		100
+maxswapchunks	64

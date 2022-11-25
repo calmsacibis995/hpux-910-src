@@ -1,0 +1,83 @@
+.H 2 "mountd Test Plan"
+
+This chapter covers the
+.B mountd
+command.  The main use of this command is to allow remote hosts to mount
+a disk on the local system; after the mount is successful, the remote
+host may use NFS to access files on the local file system.
+
+.H 3  "mountd behavior"
+.nf
+RESPONSIBLE ENGINEER:    John A Dilley
+ASSUMPTIONS:             module to be tested is functional
+.fi
+
+.sp
+.H 4 "valid requests"
+.sp 1
+.nf
+IMPLEMENT TIME:  0.50 md
+PERFORM TIME:    3.50 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+.sp
+Test
+.B mountd
+from a remote host by attempting to mount a valid file system.  The
+mount should be successful, and we should be able to successfully use
+NFS to access the file system.  Note: this is done by nearly every NFS
+test already; it is not clear that this would be worthwhile to
+reimplement.
+
+.sp
+.H 4 "invalid requests"
+.sp 1
+.nf
+IMPLEMENT TIME:  1.25 md
+PERFORM TIME:    4.50 md
+TYPE OF TEST:    functional
+EXPECTED OUTPUT: no output if the test passes
+.fi
+Test
+.B mountd
+from a remote host by attempting to mount an invalid file system.  The
+mount should fail with an appropriate error message and it should not be
+possible to use
+NFS to access the file system named.  Try using all combinations of:
+file systems which aren't valid (eg. /foo/bar),
+file systems which are already remotely mounted from another system,
+file systems which are not allowed to be NFS mounted (eg. not in /etc/exports),
+file systems which are not permitted to mount on the client (eg. the
+client is not in the allowed list of hosts or netgroups in /etc/exports).
+If time permits, another interesting test would be trying to remotely
+mount a file system from a DUX/diskless client (should not be able to
+mount the rootserver from a diskless client).
+.H 4 "Tests to increase BFA coverage"
+.sp 1
+These tests have been added to increase the BFA coverage of the rpc.mountd 
+command.  They are somewhat destructive tests.
+.AL
+.LI
+Try to mount a directory that does not exist on the remote system.
+.LI
+Use a network group in /etc/exports.
+.LI
+Kill rpc.mountd, remove a colon (:) from /etc/rmtab and bring rpc.mountd
+back up.
+.LI
+Move /etc/exports to another file and bring rpc.mountd back up.
+.LI
+Use an /etc/exports file that contains comments.
+.LI
+Add a "-" as the first character in a line in /etc/exports.
+.LI
+Add a "-" followed by something (as in -l) in /etc/exports.
+For example: / -l
+.LI
+Do a mount that will be refused.
+.LI
+Use pmap_conf with the "-p" option to call rpc.mountd, program 100005, 
+version 1 procedure 0 (NULL_PROC) and procedure 7 (not defined, it will 
+execute the default case on the case statement).
+.LE

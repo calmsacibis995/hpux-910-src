@@ -1,0 +1,129 @@
+/* @(#) $Revision: 64.1 $ */      
+#ifndef NLS
+#define nl_msg(i, s) (s)
+#else NLS
+#define NL_SETN 1	/* set number */
+#include <msgbuf.h>
+#include <locale.h>
+#endif NLS
+ /* t1.c: main control and input switching */
+
+
+#
+# include "t..c"
+#include <signal.h>
+# ifdef gcos
+/* required by GCOS because file is passed to "tbl" by troff preprocessor */
+# define _f1 _f
+extern FILE *_f[];
+# endif
+
+# ifdef unix
+# define MACROS "/usr/lib/tmac.s"
+# define PYMACS "/usr/lib/tmac.m"
+# endif
+
+# ifdef gcos
+# define MACROS "cc/troff/smac"
+# define PYMACS "cc/troff/mmac"
+# endif
+
+# define ever (;;)
+
+main(argc,argv)
+	char *argv[];
+{
+# ifdef unix
+int badsig();
+signal(SIGPIPE, badsig);
+# endif
+# ifdef gcos
+if(!intss()) tabout = fopen("qq", "w"); /* default media code is type 5 */
+# endif
+exit(tbl(argc,argv));
+}
+
+
+tbl(argc,argv)
+	char *argv[];
+{
+char line[512];
+/* required by GCOS because "stdout" is set by troff preprocessor */
+
+#ifdef NLS || NLS16			/* initialize to the current locale */
+	if (!setlocale(LC_ALL, "")) {
+		fputs(_errlocale("tbl"), stderr);
+		putenv("LANG=");
+	}
+	nl_catopen("tbl");	/* To open message catalog of "tbl" */
+#endif NLS || NLS16
+
+tabin=stdin; tabout=stdout;
+setinp(argc,argv);
+while (gets1(line))
+	{
+	fprintf(tabout, "%s\n",line);
+	if (prefix(".TS", line))
+		tableput();
+	}
+fclose(tabin);
+return(0);
+}
+int sargc;
+char **sargv;
+setinp(argc,argv)
+	char **argv;
+{
+	sargc = argc;
+	sargv = argv;
+	sargc--; sargv++;
+	if (sargc>0)
+		swapin();
+}
+swapin()
+{
+	while (sargc>0 && **sargv=='-')
+		{
+		if (match("-ms", *sargv))
+			{
+			*sargv = MACROS;
+			break;
+			}
+		if (match("-mm", *sargv))
+			{
+			*sargv = PYMACS;
+			break;
+			}
+		if (match("-TX", *sargv))
+			pr1403=1;
+		if (match("-", *sargv))
+			break;
+		sargc--; sargv++;
+		}
+	if (sargc<=0) return(0);
+# ifdef unix
+/* file closing is done by GCOS troff preprocessor */
+	if (tabin!=stdin) fclose(tabin);
+# endif
+	if (match(*sargv, "-"))
+		tabin=stdin;
+	else
+	tabin = fopen(ifile= *sargv, "r");
+	iline=1;
+# ifdef unix
+/* file names are all put into f. by the GCOS troff preprocessor */
+	fprintf(tabout, ".ds f. %s\n",ifile);
+# endif
+	if (tabin==NULL)
+		error((nl_msg(1, "Can't open file")));
+	sargc--;
+	sargv++;
+	return(1);
+}
+# ifdef unix
+badsig()
+{
+signal(SIGPIPE, 1);
+ exit(0);
+}
+# endif

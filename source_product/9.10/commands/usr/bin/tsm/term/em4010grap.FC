@@ -1,0 +1,9 @@
+## FacetTerm  em4010grap  COMMON description file  11/26/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: em4010grap.FC,v 70.1 92/03/09 16:47:57 ssa Exp $
+ignore=\E[?38h
+graph_screen_on=\E^L
+graph_screen_on_side_effect=clear_screen,scroll_region,character_set
+graph_screen_off=\E%!2
+graph_screen_off_side_effect=clear_screen
+out_graph_screen_off=\E^L\E%!2\E[?7h

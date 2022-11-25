@@ -1,0 +1,66 @@
+#ifdef hpux
+#ifdef V4FS
+  #!/usr/bin/sh
+#else
+  #!/bin/sh
+#endif /* V4FS */
+#endif /* hpux */
+
+case "`echo 'a\c'`" in
+    *c) n='-n'
+	c=''
+	;;
+    a)  n=''
+	c='\c'
+	;;
+esac
+
+case `cat /dev/null | ./md5` in
+d41d8cd98f00b204e9800998ecf8427e) echo "(null) OK"
+	;;
+    *)  echo "(null) FAILED!"
+	;;
+esac
+
+case `echo $n "a$c" | ./md5` in
+0cc175b9c0f1b6a831c399e269772661) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+
+case `echo $n "abc$c" | ./md5` in
+900150983cd24fb0d6963f7d28e17f72 ) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+
+case `echo $n "message digest$c" | ./md5` in
+f96b697d7cb7938d525a2f31aaf161d0) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+
+case `echo $n "abcdefghijklmnopqrstuvwxyz$c" | ./md5` in
+c3fcd3d76192e4007dfb496cca67e13b ) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+
+case `echo $n "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$c" | ./md5` in
+d174ab98d277d9f5a5611c2c9f419d9f ) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+
+case `echo $n "12345678901234567890123456789012345678901234567890123456789012345678901234567890$c" | ./md5` in
+57edf4a22be3c955ac49da2e2107b67a ) echo OK
+	;;
+    *)  echo "FAILED!"
+	;;
+esac
+

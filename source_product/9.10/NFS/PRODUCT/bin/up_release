@@ -1,0 +1,225 @@
+#!/bin/sh
+#	@(#)$Revision: 1.21.109.1 $	$Date: 91/11/19 13:58:27 $
+#
+# Written by Cristina Mahon for the NFS project.
+# This script changes the sccs level of all the files. 
+# It should be run before giving the bits to SSIT for a release.
+# Other changes to be done by hand: mark end of $Nfs/log/update file
+# and change admin level in checkin script.
+#
+# Usage: up_release [-r revision#] [-s] [-c] [-k] [-l]
+#
+#  	where: -r should always be present
+#		revision# is the name of the revision level we want to
+#			  update the files to
+#		-s tells the script to update only the shared include files
+#		-c tells the script to update everything but the kernel files 
+#		   and shared include files
+#		-k tells the script to update the kernel files only
+#		-l tells the script to update libc routines only.
+
+# All sccs files other than the routines in libc, the kernel files and 
+# the header files shared with ISO/IND
+
+SCCSDIRS=". bin cmds cmds/bin cmds/etc cmds/ucb cmds/usr.bin cmds/usr.etc cmds/usr.etc/yp cmds/usr.etc/yp/revnetgroup cmds/usr.etc/ypserv cmds/usr.lib/libdbm cmds/usr.lib/librpcsvc include/rpcsvc doc man man/man1 man/man1m man/man2 man/man3 man/man4 man/man7"
+
+# All the rest of the sccs files (Makefiles mainly) for the s800 
+SCCS800="cmds/bin/800 cmds/etc/800 cmds/libc/net/800 cmds/libc/yp/800 cmds/libc/rpc/800 cmds/ucb/800 cmds/usr.bin/800 cmds/usr.etc/800 cmds/usr.etc/yp/800 cmds/usr.etc/yp/revnetgroup/800 cmds/usr.etc/ypserv/800 cmds/usr.lib/libdbm/800 cmds/usr.lib/librpcsvc/800 system/NFS"
+
+# All the files that are part of libc
+LIBS="cmds/libc/net cmds/libc/rpc cmds/libc/yp"
+
+# Header files shared with ISO/IND
+SHAREDDIR="include/nfs include/rpc"
+
+# RPC files that are used by the user level commands
+USERRPC="s.authux_pro.c s.rpc_prot.c s.svc.c s.svc_auth.c s.svc_authux.c s.xdr.c s.xdr_array.c s.xdr_mem.c s.auth_none.c s.auth_unix.c s.clnt_perr.c s.clnt_raw.c s.clnt_simpl.c s.clnt_tcp.c s.clnt_udp.c s.pmap_clnt.c s.pmap_maps.c s.pmap_port.c s.pmap_prot.c s.pmap_rmt.c s.svc_raw.c s.svc_simple.c s.svc_tcp.c s.svc_udp.c s.xdr_float.c s.xdr_rec.c s.xdr_refer.c s.xdr_stdio.c s.rpc_alloc.c s.xdr_fh.c"
+
+# RPC files that are kernel only
+KERNRPC="s.auth_kern.c s.clnt_kudp.c s.kudp_fsend.c s.subr_kudp.c s.svc_kudp.c s.xdr_mbuf.c"
+
+# Usage:
+
+if [ $# -eq 0 -o $# -gt 3 ] ; then
+    echo "Usage: $0 [-r revision#] [-s] [-c] [-k] [-l]"
+    echo "The -c, -k and -s options are mutually exclusive"
+    echo "If -c, -k or -s is not used the revision level of all the files is"
+    echo "raised"
+    echo "-s means include files shared with ISO/IND"
+    echo "-c means everything but the shared include files and kernel and libc"
+    echo "-k means kernel files"
+    echo "-l means libc routines"
+    exit 1
+fi
+
+if [ $1 = "-r" ] ; then
+	REV=$2
+fi
+
+# Setup what type of files we are dealing with
+
+if [ "$3" != "-s" -a "$3" != "-c" -a "$3" != "-k" -a "$3" != "-l" ] ; then
+	SHARED=1
+	REST=1
+	KERN=1
+	LIBC=1
+elif [ "$3" = "-s" ] ; then
+	SHARED=1
+	REST=0
+	KERN=0
+	LIBC=0
+elif [ "$3" = "-c" ] ; then
+	SHARED=0
+	REST=1
+	KERN=0
+	LIBC=0
+elif [ "$3" = "-k" ] ; then
+	KERN=1
+	REST=0
+	SHARED=0
+	LIBC=0
+elif [ "$3" = "-l" ] ; then
+	KERN=1
+	REST=0
+	SHARED=0
+	LIBC=1
+fi
+
+# Get the comment for the delta 
+echo "Comment for delta?"
+read COMMENT
+
+# Go to the main SCCS directory
+cd $Nfs/sccs
+
+# The kernel deals with its files separately so DIRS should be nothing for
+# it.
+if [ $SHARED = 1 -a $REST = 1 -a $LIBC = 1 ] ; then
+	DIRS="$SHAREDDIR $SCCSDIRS $SCCS800 $LIBS"
+elif [ $REST = 1 ] ; then
+	DIRS="$SCCSDIRS $SCCS800"
+elif [ $SHARED = 1 ] ; then
+	DIRS="$SHAREDDIR" 
+elif [ $LIBC = 1 ] ; then
+	DIRS="$LIBS"
+else
+	echo "Don't know what files to up the release level"
+fi
+
+for DIR in $DIRS
+do 
+	cd $DIR
+	# The files in the rpc directory have to be divided in user level
+	# or kernel files
+	if [ "$DIR" = "cmds/libc/rpc" ]
+	then 
+		for FILE in $USERRPC
+		do	
+			echo "admin -ff$REV -fc$REV -fd$REV $FILE"
+			admin -ff$REV -fc$REV -fd$REV $FILE
+			echo "get -e -r$REV $FILE"
+			get -e -r$REV $FILE
+			delta -y"$COMMENT" $FILE
+		done
+	else
+		for FILE in `ls s.*`
+		do	
+			echo "admin -ff$REV -fc$REV -fd$REV $FILE"
+			admin -ff$REV -fc$REV -fd$REV $FILE
+			echo "get -e -r$REV $FILE"
+			get -e -r$REV $FILE
+			delta -y"$COMMENT" $FILE
+		done
+	fi
+	cd $Nfs/sccs
+done
+
+# Special cases 
+
+# I want to do these if I'm doing all the files since they are not shared
+# files or kernel only files.
+if [ $REST = 1 ] ; then
+
+	cd $Nfs/sccs/include
+	admin -ff$REV -fc$REV -fd$REV s.dbm.h
+	get -e -r$REV s.dbm.h
+	delta -y"$COMMENT" s.dbm.h
+	admin -ff$REV -fc$REV -fd$REV s.Makefile
+	get -e -r$REV s.Makefile
+	delta -y"$COMMENT" s.Makefile
+
+fi
+
+# The kernel contains nfs files (other than the 3 header files that
+# are shared with the user level code) and the rpc files that are kernel
+# only.
+
+if [ $KERN = 1 ] ; then
+
+	cd $Nfs/sccs/kernel/300/nfs
+	for FILE in `ls s.*`
+	do	
+     	    if [ $FILE != "s.nfs.h" -a $FILE != "s.nfs_clnt.h" -a $FILE != "s.rnode.h" ]
+    	    then
+		admin -ff$REV -fc$REV -fd$REV $FILE
+		get -e -r$REV $FILE
+		delta -y"$COMMENT" $FILE
+    	    fi
+	done
+	cd $Nfs/sccs/cmds/libc/rpc
+	for FILE in $KERNRPC
+	do	
+		admin -ff$REV -fc$REV -fd$REV $FILE
+		get -e -r$REV $FILE
+		delta -y"$COMMENT" $FILE
+	done
+
+fi
+
+# Update main NFS directory with new versions
+
+cd $Nfs
+
+for DIR in $DIRS
+do
+	cd $DIR
+	get $Nfs/sccs/$DIR
+	cd $Nfs
+done
+
+# Special handling for dbm.h and kernel
+
+if [ $REST = 1 ] ; then
+	cd $Nfs/include
+	get $Nfs/sccs/include/s.dbm.h
+	get $Nfs/sccs/include/s.Makefile
+fi
+
+if [ $KERN = 1 -o $SHARED = 1 ] ; then
+	cd $Nfs/kernel/300/rpc
+	$Nfs/bin/Get $Nfs/sccs/kernel/300/rpc
+
+	cd $Nfs/kernel/300/nfs
+	$Nfs/bin/Get $Nfs/sccs/kernel/300/nfs
+fi
+
+cd $Nfs/bin
+
+if [ $REST = 1 ] ; then
+	chmod 555 800_subm 800transfer Admin Debug_all Debug_cmd Delta Get \
+		  Get.hold Get.old MAKE Make Make_all Make_bfa Make_cmd \
+		  Make_cmd800 Make_install Make_kern_2 Make_kernel Prs Rmdel \
+		  Sccs.c Sccsdiff Unget backup bfa_libc bfatrans changes \
+		  checkdate checked_out checkin checkout clist.h create_rel \
+		  debug_all debug_cmd do_netunam fullbackup get_800inc get_all \
+		  get_include get_kernel get_kobjects get_libc get_net \
+		  get_smelter headtrans in inc_depend include.mk install \
+		  lines lines_change listtd make_all make_bfa make_cmd \
+		  make_cscope make_kbfa make_ktrig make_nfsklib make_path \
+		  maketd mergeBFA nfs.mst out overnight rmt_include rmtci \
+		  rmtrcs sdiff setup setup_rel takedown transfer uncheckout \
+		  unifdef unifdef.800 unout unshared.fil up_release vdiff \
+		  vmake vmake.old wait_for whohas workingcpp
+	chmod 444 800_files 800sub_files
+	chmod 555 $Nfs/cmds/usr.etc/yp/ypxfr_* $Nfs/cmds/usr.etc/yp/ypinit $Nfs/cmds/usr.etc/yp/ypmake $Nfs/cmds/etc/netnfsrc
+fi

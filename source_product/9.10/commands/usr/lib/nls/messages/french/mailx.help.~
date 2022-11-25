@@ -1,0 +1,23 @@
+-------------------- ~ ESCAPES ----------------------------
+~~              Entrer un tilde
+~a,~A           Ins≈rer la variable 'sign'
+~b utilisateurs Ajouter des utilisateurs » la liste Bcc (transm confidentielle)
+~c utilisateurs Ajouter des utilisateurs la la liste Cc (copie conforme)
+~d              Lire le fichier dead.letter
+~e              Modifier le tampon des messages
+~m messages     Ins≈rer des messages d≈cal≈s d'une tabulation vers la droite
+~f messages     Ins≈rer des messages sans d≈calage d'une tab vers la droite
+~h              Listes TO (°), Subject (Objet) et Cc (Copie conf)
+~p              Imprimer le tampon des messages
+~q,~Q           Sortir, sauvegarder la lettre dans $HOME/dead.letter
+~x              Sortir sans sauvegarder la lettre
+~r fichier      Lire un fichier dans le tampon des messages
+~s objet        D≈finir l'objet
+~t utilisateurs Ajouter des utilisateurs » la liste TO (°)
+~v              Appeler un ≈diteur de texte pour le message
+~w fichier      Enregistrer le message dans le fichier
+~.              Mettre fin » l'entr≈e
+~!commande      Ex≈cuter une commande dans le shell
+~|commande      ‹tablir un conduit entre le message et la commande
+~:commande      Ex≈cuter la commande mailx standard
+-----------------------------------------------------------

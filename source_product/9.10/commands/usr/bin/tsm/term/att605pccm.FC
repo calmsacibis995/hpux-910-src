@@ -1,0 +1,41 @@
+## FacetTerm  att605pccm (with simultask) COMMON description file 12/21/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: att605pccm.FC,v 70.1 92/03/09 16:45:20 ssa Exp $
+##-- PC MODE -- ##
+pc_mode_on-25=\E[50;1|
+pc_mode_off-24=\E[50;0|
+out_pc_mode_on_1=\E[50;1|$<500/>
+### out_pc_mode_on_2=
+### out_pc_mode_on_3=
+out_pc_mode_off_1=\E[50;0|$<1200/>
+### out_pc_mode_off_2=
+### out_pc_mode_off_3=
+pc_mode_se_on_switch_only
+pc_mode_does_clear_screen
+### pc_mode_on_turns_auto_wrap_off
+### pc_mode_off_turns_auto_wrap_on
+### pc_mode_on_switch_page_number_0
+### pc_mode_off_switch_page_number_0
+### pc_auto_wrap_on=
+### pc_auto_wrap_off=
+### pc_cursor_on=
+### pc_cursor_off=
+### pc_cursor_type=
+### pc_cursor_type=
+pc_mode_sets_cursor_on
+pc_mode_resets_insert_mode
+pc_mode_resets_appl_keypad_mode
+pc_mode_resets_scroll_region
+pc_mode_resets_character_set
+pc_mode_resets_attributes
+pc_mode_resets_save_cursor
+pc_mode_resets_origin_mode
+## screen_blank=off labels=user
+pc_mode_sets_mode-00000100-00000704
+pc_mode_defaults_function_keys
+### NOT_IMP pc_mode_resets_print_on_line
+### NOT_IMP pc_mode_resets_origin_mode
+pc_split_divider= \315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315\315
+### NOTE: split_divider_end must reverse split_divider_start to default
+## pc_split_divider_start=
+## pc_split_divider_end=

@@ -1,0 +1,37 @@
+## FacetTerm  altos2keys   description file  06/05/89
+## function key identifiers for altos2 compatible programming
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: altos2keys.FC,v 70.1 92/03/09 15:56:16 ssa Exp $
+function_key-01=^A@\r
+function_key-02=^AA\r
+function_key-03=^AB\r
+function_key-04=^AC\r
+function_key-05=^AD\r
+function_key-06=^AE\r
+function_key-07=^AF\r
+function_key-08=^AG\r
+function_key-09=^AH\r
+function_key-10=^AI\r
+function_key-11=^AJ\r
+function_key-12=^AK\r
+function_key-13=^AL\r
+function_key-14=^AM\r
+function_key-15=^AN\r
+function_key-16=^AO\r
+shift_function_key
+function_key-17=^A`\r
+function_key-18=^Aa\r
+function_key-19=^Ab\r
+function_key-20=^Ac\r
+function_key-21=^Ad\r
+function_key-22=^Ae\r
+function_key-23=^Af\r
+function_key-24=^Ag\r
+function_key-25=^Ah\r
+function_key-26=^Ai\r
+function_key-27=^Aj\r
+function_key-28=^Ak\r
+function_key-29=^Al\r
+function_key-30=^Am\r
+function_key-31=^An\r
+function_key-32=^Ao\r

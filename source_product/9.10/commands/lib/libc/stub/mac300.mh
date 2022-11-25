@@ -1,0 +1,217 @@
+ifdef(`MACRO_COMMENTS',`
+# @(#) $Revision: 66.1 $
+#
+# macros.mh -- Various macros used to create system call stubs on
+#              the Series 300.
+#
+# The following macros may be used, for the various classes of system
+# calls:
+#
+#   SYSCALL()    -- For system calls returning -1 or a value
+#		    Ex: open(), read(), write()
+#
+#   BOOLEAN()   -- For system calls that return 0 or -1
+#		    Ex: close(), stat()
+#
+#   NOFAIL() -- For system calls that dont return anything.
+#		    Ex: sync()
+#
+# An optional second argument may be supplied to these macros which
+# will be used as an alternate entry point for the routine.
+#
+# The following defines may be used to control the behavior of the
+# macros:
+#
+#  _NAMESPACE_CLEAN  -- Make primary name for call "_name", define
+#                       secondary symbol "name".
+#  NOSECDEF	     -- Disable _NAMESPACE_CLEAN flag, even if defined
+#  DSECDEF	     -- Make primary name for call "__name", define
+#			secondary symbol "name".  Only effective when
+#			_NAMESPACE_CLEAN is defined
+#
+#  PIC		     -- Generate Position Independent Code
+#  PROFILE	     -- Generate code for profiling (cc -p)
+#  ALTERNATE_RET_REG -- Return value is in d1 instead of d0
+#')
+
+include(`defines.mh')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _strip_underscores(string) --
+#    strips 1 or 2 leading underscores from its first argument
+#
+#')
+define(`_strip_underscores',`translit(`
+define(`_var',$1)
+ifelse(substr(_var, 0, 1), `_',`
+define(`_var', substr(_var, 1))')
+ifelse(substr(_var, 0, 1), `_',`
+define(`_var', substr(_var, 1))')
+defn(`_var')
+', `
+')')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _declarations(call, alias, type) --
+#    Generates the symbol declaration stuff (global and sglobal
+#    statements)
+#
+#')
+define(`_declarations', `
+ifdef(`_NAMESPACE_CLEAN',`
+ifdef(`NOSECDEF',`
+	global _$1		# primary symbol
+ifelse($2,`',`',`
+	global _$2		# primary symbol (alias)')',`
+ifdef(`DSECDEF',`
+	global ___$1		# primary symbol
+ifelse($2,`',`',`
+	global ___$2		# primary symbol (alias)')',`
+	global __$1		# primary symbol
+ifelse($2,`',`',`
+	global __$2		# primary symbol (alias)')
+')
+	sglobal _$1		# secondary symbol
+ifelse($2,`',`',`
+	sglobal _$2		# secondary symbol (alias)')')',`
+	global _$1		# primary symbol
+ifelse($2,`',`',`
+	global _$2		# primary symbol (alias)')
+')
+ifelse($3,`nofail',`',`
+	global __cerror		# Error routine (sets errno)
+')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _labels(call, alias) --
+#    Generates the entry point labels
+#
+#')
+define(`_labels', `
+ifdef(`_NAMESPACE_CLEAN',`
+ifdef(`NOSECDEF',`',`
+ifdef(`DSECDEF',`
+___$1:
+ifelse($2,`',`',`
+___$2:')',`
+__$1:
+ifelse($2,`',`',`
+__$2:')
+')')')
+_$1:
+ifelse($2,`',`',`
+_$2:')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _profcall(call) --
+#    Generates code to call mcount for this routine
+#
+#')
+define(`_profcall', `
+ifdef(`PROFILE',`
+ifdef(`PIC',`
+	mov.l	&DLT,%a0		# Get address of profiling
+	lea.l	-6(%pc,%a0.l),%a0	# counter variable
+	mov.l	p_$1(%a0),%a0
+	bsr.l	mcount			# call profiling routine
+',`
+	mov.l	&p_$1,%a0		# address of profiling counter
+	jsr	mcount			# call profiling routine
+')')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _dotrap(num, name) --
+#    Generates code to call mcount for this routine
+#
+#')
+define(`_dotrap', `
+ifelse($1, `',`
+	mov.l	,%d0			# UNDEFINED CALL $1',`
+ifelse(eval($1 < 128), 1, `
+	movq	&$1,%d0		# sysent[$1] is $2', 1, 1, `
+	mov.l	&$1,%d0		# sysent[$1] is $2
+')
+')
+	trap	&0			# trap to kernel
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _doreturn(type) --
+#    Generates code to return to the caller, possibly calling
+#    cerror()
+#
+#')
+define(`_doreturn', `
+ifdef(`NEVER_RETURNS',`
+ifdef(`PIC',`
+	bra.l	__cerror		# call failed, set errno',`
+	jmp	__cerror		# call failed, set errno
+')',`
+ifdef(`ABORT_AFTER_TRAP',`
+	short	0x4e72			# stop at zero priority
+	short	0x2000',`
+ifdef(`ALTERNATE_RET_REG',`
+	mov.l  %d1,%d0
+')
+ifelse($1,`nofail',`
+	rts				# call never fails, return
+',`
+	bcc.b	noerror			# call succeeded
+ifdef(`PIC',`
+	bra.l	__cerror		# call failed, set errno',`
+	jmp	__cerror		# call failed, set errnor
+')
+noerror:
+ifelse($1,`bool',`
+	movq	&0,%d0			# call succeeded, set return val to 0
+')
+	rts				# return
+')
+')
+')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _profdata(name) --
+#    Generates a data location for profiling
+#
+#')
+define(`_profdata', `
+ifdef(`PROFILE',`
+		data
+p_$1:	long	0
+')
+')
+
+ifdef(`MACRO_COMMENTS',`
+#
+# _docall(entry_name, sysent_name, type, alias) --
+#    Generate a system call stub
+#
+#')
+define(_docall,`
+define(`_call_num', defn(`SYS_'_strip_underscores($2)))
+_declarations($1, $4, $3)
+_labels($1, $4)
+_profcall($1)
+_dotrap(_call_num, $2)
+_doreturn($3)
+_profdata($1)
+')
+
+define(SYSCALL,  `_docall($1, $1, `normal', $2)')
+define(BOOLEAN,  `_docall($1, $1, `bool',   $2)')
+define(NOFAIL,   `_docall($1, $1, `nofail', $2)')
+define(SYSCALL2, `_docall($1, $2, `normal', $3)')
+define(BOOLEAN2, `_docall($1, $2, `bool',   $3)')
+define(NOFAIL2,  `_docall($1, $2, `nofail', $3)')

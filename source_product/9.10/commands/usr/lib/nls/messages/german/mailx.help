@@ -1,0 +1,23 @@
+               mailx-Befehle
+type [Nachr-Liste]           Druckt Nachrichten
+next                         Geht zur nÃchsten Nachrichten und druckt diese
+edit [Nachr-Liste]           Editiert Nachrichten
+from [Nachr-Liste]           Zeigt Nachrichtenœberschriften
+delete [Nachr-Liste]         LŒscht Nachrichten
+undelete [Nachr-Liste]       Stellt gelŒschte Nachrichten wieder her
+save [Nachr-Liste] Datei     HÃngt Nachrichten an Datei an
+reply [Nachricht]            Beantwortet Nachrichten an alle EmpfÃnger 
+Reply [Nachr-Liste]          Beantwortet Nachrichten an die Autoren 
+preserve [Nachr-Liste]       Schreibt Nachrichten in Mailbox
+mail user                    Post an angegebenen Benutzer
+quit                         Beendet, speichert ungelesene Nachrichten
+xit                          Beendet, speichert alle Nachrichten
+header                       Druckt Seite mit €berschriften aktiver Nachrichten
+!                            ErmŒglicht die Eingabe von Shell-Befehlen
+cd [Verzeichnis]             Wechsel in Verzeichnis oder in Heimverzeichnis
+list                         Listet alle Befehle ohne ErlÃuterungen
+top [Nachr-Liste]            Druckt die 5 obersten Zeilen von Nachrichten
+z [-]                        Zeigt nÃchste [vorherige] Seite mit 10 €ber-
+                             schriften
+[Nachr-Liste] ist optional und gibt Nachrichten œber Nummern, Autor, Inhalt oder
+Typ an. Standardwert ist die gegenwÃrtige Nachricht.

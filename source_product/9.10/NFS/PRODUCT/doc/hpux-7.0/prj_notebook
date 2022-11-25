@@ -1,0 +1,664 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Release 7.0 NFS Project Notebook"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'Release 7.0 NFS Project Notebook''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 
+RELEASE 7.0 NFS PROJECT NOTEBOOK
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:33:38 $
+$Revision: 1.1.109.1 $
+.sp 3
+.ce 2
+Project Manager: Dave Matthews
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document is intended as a source of reference for project related
+decisions and tasks that need to be accomplished to complete the port of 
+NFS 3.2 to the s300.
+It contains information about:
+.BL
+.LI
+7.0 release milestones that affect the NFS project, 
+.LI
+definitions of the tasks that need to be accomplished to complete release 
+7.0 (as defined in the viewpoint plan),
+.LI
+closed issues and the reasons for the decision reached and
+.LI
+potential problems and opportunities.
+.LE
+.bp
+.na
+.H 1 "Release 7.0 Project Milestones"
+.sp
+.ad
+This section defines the milestones that affect the NFS project during the
+7.0 release.  It includes the date of the milestone as well as the deliverables
+expected for that particular milestone.
+.na
+.sp 2
+.H 2 "Phase 1 exit"
+.sp
+.ad
+\fBMilestone Date\fR: 07/14/88
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Define FLURPS objectives
+.LI
+Complete preliminary Product Requirements Document (PRD)
+.LI
+Develop preliminary test plans (done for s300 6.5)
+.LI
+Identify external dependencies
+.LI
+Develop Product Data Sheets (PDS)
+.LI
+Develop project life cycle
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+Requirements
+.LI
+RC Checkpoint
+.LE
+.na
+.sp 2
+.H 2 "Phase 2 exit"
+.sp
+.ad
+\fBMilestone Date\fR: 10/12/88
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Finalize Product Requirements Document (PRD)
+.LI
+Plan performance objectives
+.LI
+Conduct test plan review (done for s300 6.5)
+.LI
+Complete external reference specifications (ERS)
+.LI
+Complete R&D localization plan
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+Investigation
+.LI
+SystemSpec
+.LI
+Plan
+.LI
+Test Plan
+.LI
+I/L Checkpoint
+.LE
+.na
+.sp 2
+.H 2 "Functional Complete"
+.sp
+.ad
+\fBMilestone Date\fR: 01/01/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Complete code development phase 
+.LI
+Complete test development phase (done for 6.5)
+.LI
+Complete one pass of automated functional tests
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+7.0 integration
+.LI
+S800 Kernel
+.LI
+Code Complete
+.LI
+NFS 3.2 Cmds
+.LI
+First Draft
+.LE
+.na
+.sp 2
+.H 2 "Phase 3 Exit"
+.sp
+.ad
+\fBMilestone Date\fR: 02/01/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Integrate System
+.LI
+Complete localization tools and localization kits
+.LI
+Complete software integration tests
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+7.0 Build (optional)
+.na
+.sp 2
+.H 2 "Begin Integration Cycle 1"
+.sp
+.ad
+\fBMilestone Date\fR: 02/20/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Reach Level B Certification (0/.5/3, 48 CHO)
+.LE
+.na
+.sp
+\fBTasks\fR:
+.BL
+.LI
+Prelim Tests
+.LI
+IC1 Quality
+.LE
+.sp 2
+.H 2 "Begin Integration Cycle 2"
+.sp
+.ad
+\fBMilestone Date\fR: 04/10/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Reach Level C Certification (0/0/1, 120 CHO)
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+IC2 Quality
+.LE
+.na
+.sp 2
+.H 2 "Begin Integration Cycle 3"
+.sp
+.ad
+\fBMilestone Date\fR: 05/15/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Maintain Level C Certification
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+IC3 Quality
+.LE
+.na
+.sp 2
+.H 2 "Bit Release"
+.sp
+.ad
+\fBMilestone Date\fR: 07/24/89
+.sp
+\fBTasks\fR:
+.BL
+.LI
+MR Deliverables
+.LE
+.na
+.sp 2
+.H 2 "Phase 4 Exit"
+.sp
+.ad
+\fBMilestone Date\fR: 07/25/89
+.sp
+\fBMilestone Deliverables\fR:
+.BL
+.LI
+Send Corporate Metrics to Software Engineering Lab
+.LI
+Archive source code and tests
+.LI
+Schedule post-mortem meeting
+.LI
+Archive project information with process engineering group
+.LI
+Report final CND development metrics
+.LE
+.sp
+\fBTasks\fR:
+.BL
+.LI
+MR Checkpoint
+.LE
+.na
+.sp 3
+.H 1 "Task Definitions"
+.sp
+.ad
+This section lists all the tasks involved in releasing NFS on the 7.0 release.
+Under each task is a list of activities that form the task as well as any 
+possible problems related to that task that might arise.
+.sp
+.H 2 "Requirements"
+.sp
+Activities:
+.BL
+.LI
+Create and maintain PDS
+.LI
+Create and maintain PRD
+.LE
+.H 2 "RC Checkpoint"
+.sp
+Activities:
+.BL
+.LI
+Help prepare RC checkpoint
+.LE
+.H 2 "7.0 integration"
+.sp
+Activities:
+.BL
+.LI
+Attend weekly teleconferences 
+.LI
+Help develop the section's integration/build process
+.LE
+.H 2 "Investigation"
+.sp
+Activities:
+.BL
+.LI
+NLS investigation
+.LI
+Security investigation
+.LE
+.H 2 "SystemSpec"
+.sp
+Activities:
+.BL
+.LI
+Create ad maintain system specification document
+.LE
+.H 2 "Plan"
+.sp
+Activities:
+.BL
+.LI
+Participate in creating and udpating task list
+.LI
+Participate in creating and maintaining viewpoint plan
+.LI
+Create and maintain project notebook
+.LI
+Plan transition of NFS kernel code to California
+.LI
+Help develop top-down and bottom-up estimates
+.LE
+.H 2 "Test Plan"
+.sp
+Activities:
+.BL
+.LI
+Testplan for enhancements to nettrfmt
+.LE
+.H 2 "7.0 Build"
+.sp
+Activities:
+.BL
+.LI
+Set up databases
+.LI
+Make ownership and access changes to commands
+.LI
+Consult with Robert on nfs specific problems
+.LE
+.H 2 "Nitely Integrat"
+.sp
+Activities:
+.BL
+.LI
+Baby-sit process (take care of day-to-day problems) 
+.LE
+.H 2 "S800 Kernel"
+.sp
+Activities:
+.BL
+.LI
+Communicate changes to 300 kernel to 800 kernel engineers.
+.LI
+Plan and coordinate integration of lock manager with 800 file system,
+plan for when we can acquire and start testing with 800
+kernel, etc.
+.LI
+Consult on problems with port of NFS 3.2 code as needed during
+transition of code to CA.
+.LI
+Trouble shoot 300 panics that occur for 7.0 that are associated with
+NFS 3.2 code at CND or in Fort Collins.
+.LE
+.H 2 "I/L Checkpoint"
+.sp
+Activities:
+.BL
+.LI
+Help prepare I/L checkpoint (slides, etc)
+.LE
+.H 2 "Code Complete"
+.sp
+Activities:
+.BL
+.LI
+Fix known bugs 
+.LI
+Add clean rpc detection process to nettrfmt
+.LI
+Add filters to nettrfmt
+.LI
+NFS 3.2 file handles
+.LI
+Provide support necessary for pre-release of CD-ROM code on 300.
+.LE
+.H 2 "Kernel Trans"
+.sp
+Activities:
+.BL
+.LI
+Consult on problems with NFS code as required, with time here tapering
+off between 6.5 IC3, MR,  and 7.0
+.LI
+Trouble shoot 300 panics only if necessary.
+.LE
+.H 2 "Prelim Tests"
+.sp
+Activities:
+.BL
+.LI
+Determine packet generation scheme
+.LI
+Implement test plan
+.LE
+.H 2 "NFS 3.2 Cmds"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "BFA Coverage"
+.sp
+Activities:
+.BL
+.LI
+Increase BFA coverage on NFS commands if needed
+.LI
+Increase BFA coverage on nettrfmt if needed
+.LE
+.H 2 "Commands CPE"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "Performance"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "First Draft"
+.sp
+Activities:
+.BL
+.LI
+Work with documentation to incorporate any new features
+.LE
+.H 2 "Review Draft"
+.sp
+Activities:
+.BL
+.LI
+Review new changes to documentation and new documentation format
+.LE
+.H 2 "Complete Tests"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "Tag header/libc"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "IC1 Quality"
+.sp
+Activities:
+.BL
+.LI
+Gather metrics
+.LI
+Update project notebook
+.LE
+.H 2 "IC1 PartnerTest"
+.sp
+Activities:
+.BL
+.LI
+Grab IC1 test environment
+.LE
+.H 2 "IC2 Quality"
+.sp
+Activities:
+.BL
+.LI
+Gather metrics
+.LI
+Update project notebook
+.LE
+.H 2 "IC2 PartnerTest"
+.sp
+Activities:
+.BL
+.LI
+Grab IC2 test environment
+.LE
+.H 2 "IC3 Quality"
+.sp
+Activities:
+.BL
+.LI
+Gather metrics
+.LI
+Update project notebook
+.LE
+.H 2 "IC3 PartnerTest"
+.sp
+Activities:
+.BL
+.LI
+Grab IC3 test environment
+.LE
+.H 2 "Tag RCS files"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "IC4 PartnerTest"
+.sp
+Activities:
+.BL
+.LI
+Grab IC4 test environment
+.LI
+Gather metrics
+.LI
+Update project notebook
+.LE
+.H 2 "MR Deliverables"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.H 2 "MR Checkpoint"
+.sp
+Activities:
+.BL
+.LI
+.LE
+.na
+.sp 3
+.H 1 "Issues"
+.sp
+.ad
+This section lists decisions made on several issues that affect NFS and
+the reason behind those decisions.  It is supposed to serve as a reference
+for the future.  It will be filled at the end of the project based on
+the issues files that we are updating at the end of each group meeting.
+.na
+.sp 3
+.H 1 "Potential problems and opportunities"
+.sp
+.ad
+This section lists and rates potential problems and opportunities that the NFS
+project might be faced with, as well as, proposed solutions for the problems.
+The information in this section was arrived at through a group brainstorming
+meeting.
+.sp
+.AL
+.LI
+Performance
+.BL
+.LI
+Probability: High
+.LI
+Severity: High
+.LI
+Steps:
+.BL
+.LI
+communicate problem
+.LE
+.LE
+.LI
+s800 integration (kernel)
+.BL
+.LI
+Probability: Low
+.LI
+Severity: High
+.LI
+Steps:
+.BL
+.LI
+dds full time
+.LI
+someone else to help
+.LI
+travel budget (for trips to CA)
+.LE
+.LE
+.LI
+New build and integration scheme
+.BL
+.LI
+Probability: Low
+.LI
+Severity: Medium
+.LI
+Steps:
+.BL
+.LI
+start late, good plans with Arsenal
+.LI
+build optional
+.LE
+.LE
+.LI
+Kernel ownership
+.BL
+.LI
+Probability: Medium
+.LI
+Severity: Medium/Low
+.LI
+Steps:
+.BL
+.LI
+decide RPC w/IND ASAP
+.LE
+.LE
+.LI
+S300 kernel debugging help
+.BL
+.LI
+Probability: Low
+.LI
+Severity: Medium
+.LI
+Steps:
+.BL
+.LI
+dds critical path
+.LI
+someone else to help
+.LE
+.LE
+.LI
+Commands porting problems
+.BL
+.LI
+Probability: Low
+.LI
+Severity: Low
+.LI
+Steps:
+.BL
+.LI
+Closely monitor CPE effort
+.LE
+.LE
+.LE
+.sp 2
+.TC 2 2 4 0 "RELEASE 7.0 NFS PROJECT NOTEBOOK" "TABLE OF CONTENTS"

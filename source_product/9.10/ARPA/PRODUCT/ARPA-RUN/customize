@@ -1,0 +1,264 @@
+#!/bin/ksh
+
+#
+# $Revision: 1.19.109.5 $
+#
+
+#
+# Initialize globals
+#
+PATH=/bin:/usr/bin
+ARCH=$1
+FILESET=ARPA-RUN
+
+if [ -H /usr/bin ]
+then
+  newfiles="/etc/bootptab /etc/netbsdsrc /etc/smtpd \
+          /usr/lib/sendmail+/$ARCH \
+          /usr/bin+/$ARCH/mailq /usr/bin+/$ARCH/newaliases"
+else
+  newfiles="/etc/bootptab /etc/netbsdsrc /etc/smtpd \
+          /usr/lib/sendmail \
+          /usr/bin/mailq /usr/bin/newaliases"
+fi
+
+
+#
+# copy
+#
+#   This function copies its first parameter to it's second parameter,
+#   preserving the mode of the destination file.
+#
+#   The ugly awk script converts an 'ls -l' representation of file mode
+#   to the octal value needed by chmod.  There are probably easier ways
+#   to do this, but they're probably not near as fun.
+#
+
+function copy
+{
+    SRC=$1
+    DST=$2
+
+
+    if test ! -f $SRC ; then
+        return 1
+    fi
+
+    if test -f $DST ; then
+        DSTMODE=`ll $2 | 
+                 awk '{
+                        mbit ["r"] = 4; mbit ["w"] = 2; 
+                        mbit ["x"] = 1; mbit ["s"] = 1; 
+                        mbit ["t"] = 1; mbit ["-"] = 0;
+                        mbit ["S"] = 0; mbit ["T"] = 0;
+                        whofactor = 100;  whobit = 4;
+                        for (who = 1; who <= 3; who++) {
+                            for (perm = 1; perm <= 3;  perm++) {
+                                permchar = substr($1, (who-1)*3 + perm+1, 1);
+                                mode += mbit[permchar] * whofactor;
+                            }
+                            if (index("sS", permchar))
+                                mode += whobit * 1000;
+                            whofactor /= 10;
+                            whobit /= 2;
+                        }
+                        if (index("tT", permchar))
+                            mode += 1000;
+                        print mode;
+                      }'`
+        DSTOWNER=`ll $2 | awk '{print $3}'`
+        DSTGROUP=`ll $2 | awk '{print $4}'`
+        mv $DST `dirname $DST`/\#`basename $DST`
+        cp $SRC $DST
+        chmod $DSTMODE $DST
+        chown $DSTOWNER $DST
+        chgrp $DSTGROUP $DST
+    else
+        cp $SRC $DST
+    fi
+
+    return 0
+}   
+
+
+###
+#
+#  Customize ARPA-RUN
+#
+##
+
+#
+# The first argument to this script is the architecture of the bits
+# that are being updated.  Bail out if it does not exist.
+#
+if [ -z "$ARCH" ] ; then
+    echo 'ERROR:   First argument must specify architecture for customize.' >&2
+    exit 1
+fi
+
+#
+# Remove any old versions of ARPA directories.
+#
+
+if [ -H /system ]
+then
+  /bin/rm -rf /system+/$ARCH/ARPA /system+/$ARCH/ARPA_MAN 
+else
+  /bin/rm -rf /system/ARPA /system/ARPA_MAN 
+fi
+
+if [ -H /etc/filesets ]
+then
+  /bin/rm -rf /etc/filesets+/$ARCH/ARPA /etc/filesets+/$ARCH/ARPA_MAN
+else
+  /bin/rm -rf /etc/filesets/ARPA /etc/filesets/ARPA_MAN
+fi
+
+#
+# Copy configuration files to /etc from /etc/newconfig
+# only if they don't already exist in the /etc directory;
+#
+
+for i in netbsdsrc bootptab ; do
+if [ -H /etc/newconfig ]
+then
+    test !  -f /etc/$i && cp /etc/newconfig+/$ARCH/$i /etc
+else
+    test !  -f /etc/$i && cp /etc/newconfig/$i /etc
+fi
+done
+
+cat <<-EOF 
+NOTE:    The example files aliases and sendmail.cf should be copied from
+         /etc/newconfig to /usr/lib and edited by the system administrator
+         if necessary.
+NOTE:    The 9.0 ARPA-RUN fileset contains new services and configuration
+         files.  You may wish to compare your existing /etc/netbsdsrc,
+         /etc/services, and /etc/inetd.conf files with those in
+         /etc/newconfig.
+EOF
+
+
+#
+# Sendmail has been installed as /usr/lib/sendmail.NEW. It is now
+# copied to /usr/lib/sendmail so that the modes of the existing
+# sendmail are preserved.
+#
+
+sendmail_copied="no"
+if [ ! -H /usr/lib/sendmail ] 
+then
+    SM_DEST=/usr/lib/sendmail
+else
+    if [ -f /usr/lib/sendmail+/HP-PA -o -f /usr/lib/sendmail+/HP-MC68020 ] 
+    then
+        SM_DEST=/usr/lib/sendmail+/$ARCH
+    else
+        SM_DEST=/usr/lib/sendmail
+    fi
+fi
+copy /usr/lib/sendmail.NEW $SM_DEST &&
+sendmail_copied="yes" &&
+rm -f /usr/lib/sendmail.NEW
+
+
+#
+# Tell the installer to refreeze the sendmail configuration file if it
+# has been frozen before
+#
+
+if [ -r /usr/lib/sendmail.fc ]
+then
+cat <<-EOF 
+WARNING: A new version of /usr/lib/sendmail has been installed which
+         invalidates your frozen configuration file.  Once you have
+         completed any local modifications to /usr/lib/sendmail.cf you
+         should refreeze the configuration file by running /etc/freeze.
+EOF
+fi
+
+
+#
+# Create symbolic links from /usr/lib/sendmail to /usr/bin programs.
+#
+
+if [ -H /usr/bin ]
+then
+  /bin/rm -f /usr/bin+/$ARCH/mailq /usr/bin+/$ARCH/newaliases 
+else
+  /bin/rm -f /usr/bin/mailq /usr/bin/newaliases 
+fi
+
+/bin/rm -f /etc/smtpd
+
+if [ -H /usr/bin ]
+then
+  ln -s /usr/lib/sendmail /usr/bin+/$ARCH/mailq
+  ln -s /usr/lib/sendmail /usr/bin+/$ARCH/newaliases
+else
+  ln -s /usr/lib/sendmail /usr/bin/mailq
+  ln -s /usr/lib/sendmail /usr/bin/newaliases
+fi
+ln -s /usr/lib/sendmail /etc/smtpd
+
+
+#
+# Update /etc/filesets/ARPA-RUN
+#
+#   First, remove /usr/lib/sendmail.NEW
+#
+
+if [ "$sendmail_copied" = "yes" ] ; then
+  if [ -H /etc/filesets ] ; then
+    grep -v '^/usr/lib/sendmail.NEW' </etc/filesets+/$ARCH/$FILESET >/tmp/$FILESET
+    cp /tmp/$FILESET /etc/filesets+/$ARCH/$FILESET
+  else
+    grep -v '^/usr/lib/sendmail.NEW' </etc/filesets/$FILESET >/tmp/$FILESET
+    cp /tmp/$FILESET /etc/filesets/$FILESET
+  fi
+  rm -f /tmp/$FILESET
+fi
+
+#
+#   Then add new files to the list.
+#
+
+for i in $newfiles ; do
+if [ -H /etc/filesets ]
+then
+    echo $i >>/etc/filesets+/$ARCH/$FILESET
+else
+    echo $i >>/etc/filesets/$FILESET
+fi
+done
+
+#
+# Remove aux and config files for the old version of GateD used prior
+# to 9.00 
+#
+oldgatedfiles="aux/chek aux/delchek aux/redchek conf/cornell conf/jvnca\
+	conf/jcnvb conf/lanl conf/psc-gw conf/sdsc conf/terp conf/trantor \
+	conf/uiuc.donald conf/uiuc.uxc conf/uminn conf/usan conf/wisc.steer"
+
+for i in $oldgatedfiles
+do
+    if [ -H /etc/newconfig ]
+    then
+	rm -f /etc/newconfig+/$ARCH/gated/$i
+    else
+	rm -f /etc/newconfig/gated/$i
+    fi
+done
+
+if [ -f /etc/gated.conf ] || [ -H /etc/gated.conf ]
+then
+cat <<-EOF 
+NOTE:    The pre-9.00 /etc/gated.conf configuration file is not compatible 
+         with the gated provided in 9.00. You will need to make a new
+         configuration file prior to running gated. 
+
+         See /etc/newconfig/gated/README.conv for details on conversion.
+EOF
+fi
+
+exit 0

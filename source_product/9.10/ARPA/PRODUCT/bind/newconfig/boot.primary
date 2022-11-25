@@ -1,0 +1,32 @@
+; This is an example of a primary master server's boot file.
+;
+; The directory is the running directory for the name server.
+; The name server will make the directory it's "running" directory.
+;
+; Each primary line lists a domain and a file.  Names in the file
+; that do not end in a dot are relative the the domain.
+;
+; The first file (db.cnd) contains data associated with the host names.
+; Most often these are address (A) and mail exchanger (MX) data.
+;
+; The files containing network numbers are mappings from IP addresses
+; to hostnames.  There will be 1 file for each network number.
+;
+; Since no site "owns" the network number 127.0.0, it is 
+; customary that each server has the mapping for 127.0.0.1 
+; to the name "localhost".
+; 
+; Fill in the db.cache with accessible root servers.  If you
+; have access to the ARPANET root servers, use those.
+;
+; Hosts_to_named can be used to generate these files from
+; the host table.
+;
+
+directory	/etc/newconfig/bind	; running directory for named
+					; and directory for files
+
+primary		cnd.hp.com		db.cnd
+primary		0.0.127.IN-ADDR.ARPA	db.127.0.0
+primary		8.19.15.IN-ADDR.ARPA	db.15.19.8
+cache		.			db.cache

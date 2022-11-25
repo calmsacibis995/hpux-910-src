@@ -1,0 +1,37 @@
+# $Source: /misc/source_product/9.10/commands.rcs/usr/bin/lex/make.osf,v $
+# $Revision: 70.2 $
+
+# Common makefile for command lex.
+
+OBJECTS = main.o sub1.o sub2.o header.o parser.o hpux_rel.o
+SOURCES = $(OBJECTS:.o=.c)
+YACC = /paXdev/bin/yacc
+XAR = /usr/apollo/bin/xar
+CCX = /paXdev/bin/cc
+CFLAGSX = -DOSF -DNLS -UPAXDEV
+CFLAGS = -DOSF -UNLS -DPAXDEV
+
+default: 	lex lex.X
+
+lex.X:	$(SOURCES)
+	/bin/rm -f $(OBJECTS)
+	$(CC) $(CFLAGS) -A cpu,a88k -o lex.a88kbin $(SOURCES)
+	$(LD) -A cpu,a88k lex.a88kbin -o lex.a88k
+	/bin/rm -f $(OBJECTS)
+	$(CC) $(CFLAGS) -A cpu,m68k -o lex.m68kbin $(SOURCES)
+	$(LD) -A cpu,m68k lex.m68kbin -o lex.m68k
+	$(XAR) -cv lex.X lex.m68k lex.a88k
+
+lex:	$(SOURCES) lex.cat
+	/bin/rm -f $(OBJECTS)
+	$(CCX) $(CFLAGSX) -o lex $(SOURCES)
+
+lex.cat	: lex.msg
+	xmkcatdefs lex lex.msg > lex.cat.in
+	gencat lex.cat lex.cat.in
+
+clean:
+	/bin/rm -f *.o
+
+clobber:  clean
+	/bin/rm -f lex lex.X *a88* *m68*

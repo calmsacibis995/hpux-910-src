@@ -1,0 +1,81 @@
+############################################################################
+# TSM user customizable file: paste_o_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# paste options menu for TSM
+# @(#) $Header: paste_o_menu,v 70.1 92/06/11 19:40:47 ssa Exp $
+#
+# LOCALIZERS:
+# In all of the following only item_name and item_selection can be translated. 
+# If needed, translate the string to the right of "=" sign; but do NOT
+# translate $tsm_hot_key. You can translate the letters following $tsm_hot_key
+# if you've changed the key mappings. In such a case, translate >p/>f/>a/>o to 
+# the new mappings. To change mappings see "!in_cut_and_paste" in tsmtext file.
+#
+# The item_selection corresponds to the letter which can be entered by the
+# user to quickly select this item instead of using the arrow keys, when the 
+# sub-submenu is displayed.  
+# WARNING:
+# Make sure you are consistent with key mappings and item_selection letters.
+#
+
+pull_down_menu
+
+# The next item_name corresponds to the first line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+
+# The next item_name corresponds to the second line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+
+# The next item_name corresponds to the third line of the sub-submenu 
+# displayed when "cUt options" is selected from the "Cut & paste" submenu. 
+#
+
+
+item_name=zum Drucker (mit .tsmprint)       $tsm_hot_key>p
+item_selection=D
+item_type=ft_command
+item_action=>p
+
+item_name=in Neue datei                     $tsm_hot_key>f
+item_selection=N
+item_type=ft_command
+item_action=>f$0\r
+dialog_box
+dialog_item_prompt Neue Datei:
+dialog_item_var $0 25
+
+item_name=an datei AnfÏgen                  $tsm_hot_key>a
+item_selection=A
+item_type=ft_command
+item_action=>a$0\r
+dialog_box
+dialog_item_prompt AnfÏgen an Datei:
+dialog_item_var $0 25
+
+item_name=datei ÏBerschreiben               $tsm_hot_key>o
+item_selection=B
+item_type=ft_command
+item_action=>o$0\r
+dialog_box
+dialog_item_prompt Ûberschreibe Datei:
+dialog_item_var $0 25

@@ -1,0 +1,94 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/notes,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:54 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "Notes"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Automount Notes"
+
+   This section provides some general information about automount and
+some of its related files.  For instance it is worth mentioning how automount
+is started through /etc/netnfsrc2 and how it fits into the diskless cluster
+environment.
+
+.H 2 "Automount and Diskless"
+
+     Automount is a CDF as are all program files that can exist in a 
+heterogeneous cluster environment.  There should only be one automount
+daemon running on each cluster.  When automount calls vfsmount to let
+the kernel know that it is the NFS server for the corresponding mount
+point, it gives the kernel the loop back IP address of the node it
+is running on.  When any node in the cluster accesses an automount
+mount point that IP address is used to contact the automount daemon.
+Automount originally used the loop back address 127.0.0.1 for 
+communications with automount.  That does not work in a cluster environment
+since automount is not running on each cluster node.
+
+.H 2 "Automount Invocation"
+
+     Here is the section from /etc/netnfsrc2 that starts automount taking
+into consideration the issue of diskless.
+
+##
+# Start the automount daemon with the mount points specified in the
+# auto.master NIS map.  If NIS is not running or the auto.master map
+# is not available, automount will exit silently.  Note that this is
+# done only on standalone systems and diskless root servers.
+##
+
+.nf
+	if [ -f /bin/getcontext ] ; then
+	    /bin/getcontext | /bin/grep localroot > /dev/null
+            if [ $? -eq 0 ] ; then
+		if [ -f /usr/etc/automount ]; then
+		    /usr/etc/automount && echo "    starting up the Automount daemon" && echo "\t/usr/etc/automount"
+	            set_return
+		fi
+	    fi
+	else
+    	    if [ -f /usr/etc/automount ]; then
+		/usr/etc/automount && echo "    starting up the Automount daemon" && echo "\t/usr/etc/automount"
+		set_return
+    	    fi
+   	fi
+.fi
+
+.H 2 "Automount Integration Files"
+
+.H 3 "Installdb Entry"
+
+The following is the installdb entry for automount.
+
+.nf
+install_target           : /usr/etc/automount
+fileset                  : NFS-RUN
+type                     : file
+status                   : di----
+processor                : 378
+mode                     : 0544
+owner                    : bin
+group                    : bin
+link_source              : 
+misc                     : 
+responsible_project      : nfs
+.fi
+
+
+.H 3 "CDF Entries"
+
+The following are the architecture specific CDF entries for automount.
+
+.nf
+install_target           : /usr/etc/automount
+keyword                  : createcdf
+rules                    : save ARCH
+responsible_project      : nfs
+
+install_target           : /usr/etc/automount
+keyword                  : update
+rules                    : load ARCH
+responsible_project      : nfs
+.fi

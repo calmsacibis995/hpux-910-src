@@ -1,0 +1,43 @@
+############################################################################
+# TSM user customizable file: misc_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# Misc operations menu for TSM
+# @(#) $Header: misc_menu,v 66.5 90/11/21 17:29:56 jag Exp $
+
+pull_down_menu
+
+item_name=Per-session function keys...   $tsm_hot_keyk
+item_selection=P
+item_type=menu
+item_action=wkey_menu
+
+item_name=Global function keys...        $tsm_hot_keyg
+item_selection=G
+item_type=menu
+item_action=gkey_menu
+
+item_name=Session title...               $tsm_hot_key"
+item_selection=S
+item_type=ft_command
+item_action=#*"$0\r
+dialog_box
+dialog_item_prompt Enter new title for session $current_window_number:
+dialog_item_var $0 20

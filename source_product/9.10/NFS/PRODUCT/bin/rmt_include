@@ -1,0 +1,43 @@
+#!/bin/sh
+# 	@(#)$Revision: 1.11.109.1 $	$Date: 91/11/19 13:57:22 $
+# Script to pick up files that are on a remote system 
+# Written by Cristina Mahon
+
+RCSDIR=/mnt/azure/root.port/sys.rcs.2.0
+# Touch file with new date so that we will not loose any files 
+# during the time we do the find.
+
+cd /mnt/azure/cmahon
+touch new.date
+
+# Find all the files that have changed since the last time we looked
+# and compare to the files we are interested on (unshared.files).  
+# After sending it through uniq -d only the duplicate ones will be left.
+
+find $RCSDIR -newer old.date -print > iso.files
+mv new.date old.date
+cat iso.files unshared.files | sort | uniq -d > changed_files
+
+if [ ! -d sys ] ; then
+	mkdir sys
+fi
+if [ ! -d machine ] ; then
+	mkdir machine
+fi
+# Get the files that have changed and put them on the remote system on a
+# temporary location.
+for FILE in `cat changed_files`
+do
+	if [ `dirname $FILE` = "$RCSDIR/h/RCS" ] ; then
+		cd sys
+		co -r56 $FILE
+		rcp `basename $FILE` hpcndu.nfsmgr:/tmp/800include/sys
+		cd ..
+	fi
+	if [ `dirname $FILE` = "$RCSDIR/machine/RCS" ] ; then
+		cd machine
+		co -r56 $FILE
+		rcp `basename $FILE` hpcndu.nfsmgr:/tmp/800include/machine
+		cd ..
+	fi
+done

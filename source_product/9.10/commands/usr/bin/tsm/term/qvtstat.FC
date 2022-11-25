@@ -1,0 +1,16 @@
+## FacetTerm qvtstat  qume status lines  12/06/90
+## Copyright (c) Structured Software Solutions, Inc 1990.  All Rights Reserved.
+## @(#) $Header: qvtstat.FC,v 70.1 92/03/09 16:50:10 ssa Exp $
+function_key_file=sl_16.ftkey
+### out_screen_saver_start=
+### normal status_line_attribute=\EA10 blank_status_line=\Ez(\r
+out_screen_saver_start=\Eh
+### out_screen_saver_end=
+##				status_line
+perwindow-81-CSQLF---=\Ef%78s1\r
+perwindow_default-...=\Ef\r
+perwindow-2-CSQLF---------status_line_on..=\Eg
+perwindow_also-...........status_line_off.=\Eh
+perwindow_default-........................=\Eh
+set-status_line=\Ef%78s1\r\Eg
+## -------------- end of order_group 'S' ------------------------------

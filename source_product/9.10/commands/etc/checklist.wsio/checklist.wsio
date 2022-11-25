@@ -1,0 +1,6 @@
+# Sample /etc/checklist file.
+# THIS FILE MUST BE MODIFIED TO MATCH YOUR CONFIGURATION (see CHECKLIST(4)).
+# /dev/dsk/cEd6s0	/	hfs	defaults	0 1 # s300 root volume
+# /dev/dsk/cEd6s0	...	swap	end		    # s300 swap
+# /dev/dsk/c201d6s0	/	hfs	defaults	0 1 # s700 root volume
+# /dev/dsk/c201d6s0	...	swap	end		    # s700 swap

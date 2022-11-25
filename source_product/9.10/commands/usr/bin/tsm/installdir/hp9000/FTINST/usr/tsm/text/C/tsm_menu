@@ -1,0 +1,66 @@
+############################################################################
+# TSM user customizable file: tsm_menu, Run a program menu definitions.
+#
+# TSM will search along the following paths (in order) for this file name.
+#     ./.tsmtext/$LANG/
+#     ./.tsmtext/C/
+#     ./.tsmtext/
+#     $HOME/.tsmtext/$LANG/
+#     $HOME/.tsmtext/C/
+#     $HOME/.tsmtext/
+#     /usr/tsm/text/$LANG/
+#     /usr/tsm/text/C/
+#     /usr/tsm/text/
+#
+# It is recommended that you copy this file to $HOME/.tsmtext/
+# for customization.
+#
+# If tsm has not been installed in the standard path, /usr/tsm,
+# then set the environment variable, $TSMPATH to the location of
+# tsm directory on your system.
+############################################################################
+# main menu bar for TSM control menu
+# @(#) $Header: tsm_menu,v 66.7 90/11/21 17:31:24 jag Exp $
+
+menu_bar
+menu_title=TSM Menu    Session $current_window_number: $current_window_title
+
+item_name=Select
+item_selection=S
+item_type=intrinsic
+item_action=win_menu
+# item_auto_select
+
+item_name=Run
+item_selection=R
+item_type=menu
+item_action=prog_menu
+
+item_name=Cut & paste
+item_selection=C
+item_type=menu
+item_action=cut_paste_menu
+
+item_name=Print
+item_selection=P
+item_type=menu
+item_action=print_menu
+
+item_name=Misc
+item_selection=M
+item_type=menu
+item_action=misc_menu
+
+item_name=Quit
+item_selection=Q
+item_type=intrinsic
+item_action=quit_tsm
+dialog_box
+dialog_item_prompt This will shut  down  TSM 
+dialog_item_prompt and cause all TSM sessions
+dialog_item_prompt to be terminated.
+
+item_name=Help
+item_selection=H
+item_type=ft_command
+item_action=?

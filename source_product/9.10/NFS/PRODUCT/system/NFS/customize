@@ -1,0 +1,403 @@
+#! /bin/sh
+
+# @(#)customize: $Revision: 1.3.109.1 $ $Date: 91/11/19 14:46:28 $
+# $Locker:  $
+
+#
+# customize script for NFS_RUN fileset (Network File System)
+
+#=============================================================================
+#
+#  This is the customize script for the NFS_RUN fileset (kernel segment and 
+#  commands, including the Yellow Pages and VHE) of the NFS Services product.
+#
+#  This script checks specific files which have been placed in etc/newconfig.
+#  Each file is moved to its "final resting place" if a file by that name
+#  does not already exist there.  If a file by that name DOES already exist,
+#  the file in etc/newconfig is left for the system administrator to contend
+#  with; he/she should refer to /etc/newconfig/README to determine the best
+#  way to handle such a file.
+#
+#  Last, a symbolic link from etc/yp to /usr/etc/yp is created.
+#
+#
+#=============================================================================
+#
+# Remove the old version of vhe_u_mnt first
+#
+rm -f /etc/newconfig/vhe_u_mnt
+#
+set --   etc/newconfig/netgroup		etc/netgroup			\
+	 etc/newconfig/netnfsrc		etc/netnfsrc			\
+	 etc/newconfig/rpc		etc/rpc				\
+	 etc/newconfig/vhe_list		etc/vhe_list			\
+	 etc/newconfig/vhe_mounter	usr/etc/vhe/vhe_mounter		\
+	 etc/newconfig/vhe_script	usr/etc/vhe/vhe_script		\
+	 etc/newconfig/ypinit		usr/etc/yp/ypinit		\
+	 etc/newconfig/yp_Makefile	usr/etc/yp/Makefile		\
+	 etc/newconfig/ypmake		usr/etc/yp/ypmake		\
+	 etc/newconfig/ypxfr_1perday	usr/etc/yp/ypxfr_1perday	\
+	 etc/newconfig/ypxfr_1perhour	usr/etc/yp/ypxfr_1perhour	\
+	 etc/newconfig/ypxfr_2perday	usr/etc/yp/ypxfr_2perday
+
+#==========
+#  Copy a default configurable file into place if it doesn't exist on the
+#  user's file system.
+#==========
+
+while [ $# -gt 0 ]; do
+	if [ ! -f $2 ]; then
+		cp $1 $2
+		if [ $? != 0 ]; then
+			echo "ERROR:  cannot cp $1 to $2" # logfile
+			echo "        Perform this copy manually." # logfile
+			echo "<Hit RETURN to continue>" # logfile       
+			echo "ERROR:  cannot cp $1 to $2" > /dev/console
+			echo "        Perform this copy manually." > /dev/console 
+			echo "<Hit RETURN to continue>" > /dev/console
+	                read xx
+			EXIT_CODE=1
+		fi
+	fi
+	shift; shift
+done
+
+#==========
+#  Set up the link from etc/yp to usr/etc/yp, if it does not already exist.
+#==========
+
+if [ ! -d etc/yp ] ; then
+	ln -s /usr/etc/yp etc/yp
+	if [ $? -ne 0 ]; then
+		echo "ERROR:  A symbolic link of etc/yp to usr/etc/yp could not be created." # logfile
+		echo "        Create this link manually." # logfile
+		echo "<Hit RETURN to continue>" # logfile       
+		echo "ERROR:  A symbolic link of etc/yp to usr/etc/yp could not be created." > /dev/console
+		echo "        Create this link manually." > /dev/console
+		echo "<Hit RETURN to continue>" > /dev/console
+                read xx
+		EXIT_CODE=1
+	fi
+fi
+
+#
+# Now do all the configuration stuff.
+#
+
+TERM=hp
+export TERM
+clear > /dev/console
+stty echo
+
+echo 'This is the NFS customize script. ' # logfile
+echo 'This is the NFS customize script. ' > /dev/console
+
+cd /etc/conf/gen
+while :
+do
+	echo 'What is the name of your uxgen input file ? <S800> ' # logfile
+	echo 'What is the name of your uxgen input file ? <S800> ' >/dev/console
+	 read uxgenname
+
+	if test x"$uxgenname" = x
+	then uxgenname=S800
+	fi
+
+	echo 'Is the file name' $uxgenname ' correct (y/n/q) ? ' # into logfile
+	echo 'Is the file name' $uxgenname ' correct (y/n/q) ? ' > /dev/console
+	read yy
+
+	case $yy in
+		q*) exit 1;;
+		y*) uxgenname=`basename $uxgenname`
+
+		    if test ! -f $uxgenname
+		    then echo 'File ' $uxgenname 'does not exist.'> /dev/console
+		         echo 'File ' $uxgenname 'does not exist.' # logfile
+		    else
+ 		      break
+ 		    fi;;
+	esac
+
+done
+
+
+#
+# Now we will analyze the uxgen input file to see if we can possibly
+# use it.  This consists of locating the include lines, the one
+# lan0 or lan1 include line, and making sure the nsbsdipc0 definition is no
+# longer present.  The subsystem declarations must also be present in
+# the /etc/master file.  If any of these turn up false, the customize
+# script will continue no further.
+#
+
+grep "subsystem" /etc/master > /dev/null
+if test $? -ne 0
+then echo 'The core kernel has not been updated.' # into logfile
+     echo 'Consult the installation guide, then update the kernel.'  # logfile
+     echo "<Hit RETURN to continue>"  # logfile     
+     echo 'The core kernel has not been updated.' > /dev/console
+     echo 'Consult the installation guide, then update the kernel.'>/dev/console	
+     echo "<Hit RETURN to continue>" > /dev/console
+     read xx
+     exit 1
+fi
+
+grep "filesystem" /etc/master > /dev/null
+if test $? -ne 0
+then echo 'The core kernel must be updated first.' # into logfile
+     echo 'Consult the installation guide, then update the kernel.'  # logfile
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'The core kernel must be updated first.' > /dev/console
+     echo 'Consult the installation guide, then update the kernel.'>/dev/console
+     echo "<Hit RETURN to continue>" > /dev/console
+     read xx
+     exit 1
+fi
+
+# find out the machine type to determine NIO/CIO
+# major number for CIO is 50 and for NIO is 51
+
+uname -m > type
+
+if [ `cat type` = "9000/810" ] ; then
+
+# NIO system
+	grep "lan1" $uxgenname | grep "lu 0 address" > /dev/null
+	if test $? -ne 0
+	then echo 'You do not have the required lan1 line.' # into logfile
+	     echo 'You will have to update manually.  Consult the'  # logfile
+	     echo 'installation guide.'   # logfile
+     	     echo "<Hit RETURN to continue>" # logfile      
+	     echo 'You do not have the required lan1 line.' > /dev/console
+	     echo 'You will have to update manually.  Consult the' > /dev/console
+	     echo 'installation guide.' > /dev/console
+     	     echo "<Hit RETURN to continue>" > /dev/console
+	     read xx
+	     exit 0
+	fi
+else
+# CIO system
+	grep "lan0" $uxgenname | grep "lu 0 address" > /dev/null
+	if test $? -ne 0
+	then echo 'You do not have the required lan0 line.' # into logfile
+	     echo 'You will have to update manually.  Consult the'
+	     echo 'installation guide.'
+     	     echo "<Hit RETURN to continue>" # logfile     
+	     echo 'You do not have the required lan0 line.' > /dev/console
+	     echo 'You will have to update manually.  Consult the' > /dev/console
+	     echo 'installation guide.' > /dev/console
+     	     echo "<Hit RETURN to continue>" > /dev/console
+	     read xx
+	     exit 0
+	fi
+fi
+
+if test ! -f /etc/conf/lib/libnfs.a
+then echo 'The library libnfs.a is not present.  This update' > /dev/console
+     echo 'will not work.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console
+     echo 'The library libnfs.a is not present.  This update' # into logfile
+     echo 'will not work.'
+     echo "<Hit RETURN to continue>" # logfile       
+     read xx
+     exit 0
+fi
+
+cp $uxgenname $uxgenname.n
+
+grep "include" $uxgenname.n | grep "nsdiag0" > /dev/null
+if test $? -ne 0
+then sed -e '/#include/a\
+     include nsdiag0;
+     ' \
+     $uxgenname.n > $uxgenname.n1
+     mv $uxgenname.n1 $uxgenname.n
+fi
+
+grep "include" $uxgenname.n | grep "nsnsipc0" > /dev/null
+if test $? -ne 0
+then sed -e '/#include/a\
+     include nsnsipc0;
+     ' \
+     $uxgenname.n > $uxgenname.n1
+     mv $uxgenname.n1 $uxgenname.n
+fi
+
+grep "include" $uxgenname | grep "nfs" > /dev/null
+if test $? -ne 0
+then sed -e '/#include/a\
+     include nfs;
+     ' \
+     $uxgenname.n > $uxgenname.n1
+     mv $uxgenname.n1 $uxgenname.n
+fi
+
+if test -f /etc/conf/lib/librfa.a	# only do this if RFA lib is present
+then grep "include" $uxgenname.n | grep "nsrfa0" > /dev/null
+     if test $? -ne 0
+     then sed -e '/#include/a\
+    	 include nsrfa0;
+         ' \
+         $uxgenname.n > $uxgenname.n1
+         mv $uxgenname.n1 $uxgenname.n
+     else
+        sed -e 's/\/\*.*include.*nsrfa0;.*\*\//include	nsrfa0;/p' \
+	    $uxgenname.n > $uxgenname.n1
+            mv $uxgenname.n1 $uxgenname.n
+     fi
+else echo 'RFA will not be configured into this kernel.' > /dev/console
+     echo 'RFA will not be configured into this kernel.' # into logfile
+fi
+
+uname -m > type
+
+if [ `cat type` = "9000/810" ] ; then
+
+# NIO system
+	sed -e 's/\/\*.*include.*nsnsipc0;.*\*\//include	nsnsipc0;/p' \
+	    -e 's/\/\*.*include.*nsdiag0;.*\*\//include		nsdiag0;/p' \
+            -e 's/\/\*.*include.*nfs;.*\*\//include		nfs;/p' \
+	    -e 's/\/\*.*lan1.*lu \(.*\) address \(.*\);.*\*\//lan1	lu \1 address \2;/p' \
+	    $uxgenname.n > $uxgenname.n1
+            mv $uxgenname.n1 $uxgenname.n
+else
+# CIO system
+	sed -e 's/\/\*.*include.*nsnsipc0;.*\*\//include	nsnsipc0;/p' \
+            -e 's/\/\*.*include.*nsdiag0;.*\*\//include		nsdiag0;/p' \
+            -e 's/\/\*.*include.*nfs;.*\*\//include		nfs;/p' \
+	    -e 's/\/\*.*lan0.*lu \(.*\) address \(.*\);.*\*\//lan0	lu \1 address \2;/p' \
+	    $uxgenname.n > $uxgenname.n1
+            mv $uxgenname.n1 $uxgenname.n
+fi
+
+if test $? -ne 0
+then echo 'Parsing of input file failed.' # into logfile
+     echo 'You will have to perform the kernel generation'
+     echo 'manually as outlined in the installation guide.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Parsing of input file failed.' > /dev/console
+     echo 'You will have to perform the kernel generation' > /dev/console
+     echo 'manually as outlined in the installation guide.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     exit 1
+fi
+
+rm type   # remove /etc/conf/gen/type file we built to test for NIO
+
+mv $uxgenname $uxgenname.bk
+if test $? -ne 0
+then echo 'Storage of old uxgen input file failed.' # into logfile
+     echo 'You will need to make enough room in the root'
+     echo 'partition then restart the update process.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Storage of old uxgen input file failed.' > /dev/console
+     echo 'You will need to make enough room in the root' > /dev/console
+     echo 'partition then restart the update process.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     exit 1
+fi
+
+mv $uxgenname.n $uxgenname
+if test $? -ne 0
+then echo 'Storage of new uxgen input file failed.' # into logfile
+     echo 'You will need to make enough room in the root'
+     echo 'partition then restart the update process.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Storage of new uxgen input file failed.' > /dev/console
+     echo 'You will need to make enough room in the root' > /dev/console
+     echo 'partition then restart the update process.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     mv $uxgenname.bk $uxgenname
+     exit 1
+fi
+
+#
+# At this point, check to make sure the link tape has been updated.  If it
+# has not, then we do not want to do the uxgen yet, but we do want the
+# "include nfs;" line to remain uncommented.  So in this case, we do not
+# replace the uxgen input file with the original version like we do when
+# other errors occur.
+#
+
+if test ! -f /etc/conf/lib/libns.a
+then echo 'The link tape has not been updated yet.  You must do'
+     echo 'that first before a new kernel can be created.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'The link tape has not been updated yet.  You must do' > /dev/console
+     echo 'that first before a new kernel can be created.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     exit 0
+fi
+
+if test ! -f /etc/conf/lib/libprot.a
+then echo 'The link tape has not been updated yet.  You must do'
+     echo 'that first before a new kernel can be created.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'The link tape has not been updated yet.  You must do' > /dev/console
+     echo 'that first before a new kernel can be created.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     exit 0
+fi
+
+echo 'Creating new kernel using the configuration file' $uxgenname # into log
+echo 'Creating new kernel using the configuration file' $uxgenname>/dev/console
+uxgen $uxgenname
+if test $? -ne 0
+then echo 'Uxgen could not complete.  You will have to perform' # into logfile
+     echo 'the kernel generation manually as outlined in the '
+     echo 'installation guide.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Uxgen could not complete.  You will have to perform' > /dev/console
+     echo 'the kernel generation manually as outlined in the ' > /dev/console
+     echo 'installation guide.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     mv $uxgenname.bk $uxgenname
+     exit 1
+fi
+
+cd ../$uxgenname
+if test $? -ne 0
+then echo 'Could not change into the new directory ../'$uxgenname # into logfil
+e
+     echo 'You will have to perform the kernel generation'
+     echo 'manually as outlined in the installation guide.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Could not change into the new directory ../'$uxgenname > /dev/consol
+e
+     echo 'You will have to perform the kernel generation' > /dev/console
+     echo 'manually as outlined in the installation guide.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     mv $uxgenname.bk $uxgenname
+     exit 1
+fi
+
+echo 'Installing new hp-ux' # into logfile
+echo 'Installing new hp-ux' > /dev/console
+mv hp-ux /
+if test $? -ne 0
+then echo 'Storage of new kernel failed.' # into logfile
+     echo 'You will need to make enough room in the root'
+     echo 'partition then restart the update process.'
+     echo "<Hit RETURN to continue>" # logfile       
+     echo 'Storage of new kernel failed.' > /dev/console
+     echo 'You will need to make enough room in the root' > /dev/console
+     echo 'partition then restart the update process.' > /dev/console
+     echo "<Hit RETURN to continue>" > /dev/console  
+     read xx
+     mv /etc/conf/gen/$uxgenname.bk /etc/conf/gen/$uxgenname
+     exit 1
+fi
+
+sleep 10
+clear > /dev/console
+exit ${EXIT_CODE:-0}
+
+

@@ -1,0 +1,19 @@
+$set 1
+1 rcmd: %s: Unknown host\n
+2 rcmd: connect: %s
+3 rcmd: write: Setting up stderr
+4 rcmd: Connection timeout\n
+5 rcmd: select
+6 rcmd: accept
+7 rcmd: primary connection shut down\n
+8 rcmd: recv
+9 rcmd: select
+10 rcmd: socket: Protocol failure in circuit setup\n
+11 rcmd: Lost connection\n
+12 rresvport: socket
+13 setsockopt SO_KEEPALIVE
+14 rresvport: bind
+15 rresvport: socket: All ports in use\n
+16 ruserok: getdomainname
+17 Warning: .rhosts is a soft link.\r\n
+18 Warning: Bad .rhosts ownership.\r\n

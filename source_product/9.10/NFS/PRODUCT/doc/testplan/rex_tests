@@ -1,0 +1,1589 @@
+.H 1 "Remote Execution (REX) Test Plan"
+This chapter describes the tests for NFS 3.2 remote execution (REX)
+functionality. A very brief overview of the REX functionality is given
+here. A more detailed description can be found in the following documents:
+.nf
+
+	1) NFS 3.2 ERS
+	2) \fB on(1) \f and \fB rexd(1M) \f man pages.
+	3) Using and Administrating NFS
+
+.fi
+REX is used to executed a command on a remote machine (the server) in
+an environment similar to that of the invoking user on the local
+machine (the client). Thus, under the proper conditions, running a
+command locally and running a command remotely via REX will produce
+the exact same results.  REX simulates the invoking user's
+environment by NFS mounting the user's current working file system on
+the server and copying the user's environment variables to the server.
+As this
+scheme is not sufficient to completely mirror the user's environment
+there are several cases where the same command run locally and
+remotely will not produce the same result.
+
+Remote execution consists of two parts. The 
+.ft B
+on(1)
+.ft
+command and the remote
+execution daemon (
+.ft B
+rexd(1M)
+.ft 
+)
+The 
+.ft B
+on(1)
+.ft
+command provides the user interface on the client and 
+.ft B
+rexd(1M) 
+.ft 
+provides the server to carry out command execution on the remote machine.
+REX allows both non-interactive and interactive commands to be executed.
+
+There are many similarities between the functionality provided by REX and the
+functionality provided by
+.ft B
+remsh(1)
+.ft 
+and 
+.ft B
+rlogin(1).
+.ft
+Several of the tests which are used for
+.ft B
+remsh(1)
+.ft
+will be ported for use in testing REX functionality. 
+For the most part the \fB rlogin(1) \f tests were specific to rlogin,
+hence they will not be ported.
+In order to test the interactive nature of REX, the tests for \fB vi(1) \f
+will be ported to work with REX.
+Several new tests
+have also been added to cover REX specific functionality.
+
+All functional tests should function correctly on discless clients 
+and discless servers. A discless client and server must be one of 
+the configurations provided in the test ring.
+
+The remainder of the document is arranged in several sections, each of which
+describes a related group of tests (called a test suite) for REX. 
+Below you will find a list of the
+test suits (in the order which they appear in this plan) and a brief 
+description of the suite.
+.nf
+
+           \fI HP   to   HP \f
+.sp 1
+\fBTest Suite          Description \f
+remshport/a_quick   Port of \fB remsh(1) \f quicky tests.
+remshport/errs      Port of \fB remsh(1) \f error tests.
+remshport/func      Port of \fB remsh(1) \f functional tests.
+remshport/signals   Port of \fB remsh(1) \f signals tests.
+nonint/func1        Noninteractive \fB on(1) \f tests.
+nonint/func2        Noninteractive \fB on(1) \f tests.
+nonint/func3        Noninteractive \fB on(1) \f tests.
+interact            Interactive \fB on(1) \f tests.
+interact/viport     Port of \fB vi(1) \f tests.
+isolate/access    \fB  rexd(1M) \f options tests (isolated)
+isolate/export    \fB  rexd(1M) \f options tests (isolated)
+isolate/mnt       \fB  rexd(1M) \f options tests (isolated)
+.sp 1
+.I            Connectivity
+.sp 1
+\fBTest Suite          Description \f
+noninteract         Noninteractive \fB on(1) \f tests.  
+interact/hp2sun     Interactive \fB on(1) \f tests which test hp to sun.
+interact/sun2hp     Interactive \fB on(1) \f tests which test sun to hp.
+.fi
+.sp 3
+.H 2  "HP TO HP TESTS"
+.sp 2
+This section contains the tests suites which are run between HP 
+machines only. 
+
+.H 3  "Ported remsh(1) Quicky Tests"
+.sp 2
+.fi
+The following test suite consists of tests ported form the
+.ft B
+remsh(1M)
+.ft
+test suite located in ab.services/remsh/a_quicky.
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/rex/remshport/a_quicky
+IMPLEMENT TIME : 1 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : nfs/rex/remshport/a_quicky/README
+.sp 2
+.H 4 "test.01"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : data on stdout
+How test Works  : cat TFILE on remote host to stdout
+EXPECTED OUTPUT : contests of TFILE on stdout
+.sp 2
+.H 4 "test.02"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : data on stderr
+How test Works  : ls NO_FILE
+EXPECTED OUTPUT : NO_FILE not found
+.sp 2
+.H 4 "test.03"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : data on stdout and stderr
+How test Works  : cat TFILE, ls NO_FILE
+EXPECTED OUTPUT : contests of $TFILE on stdout and NO_FILE not found
+		  on stderr.
+.fi
+.sp 3
+.H 3  "Ported remsh(1) Errs Tests"
+.sp 2
+The following test suite consists of tests ported form the
+.ft B
+remsh(1M)
+.ft
+test suite located in ab.services/remsh/errs. Special configuration 
+requirements exist for test.B and test.D[1-4]. See the environment section of
+the test description for the special configuration requirements.
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/rex/remshport/errs
+IMPLEMENT TIME : 1 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without 
+		 the -r option.
+MORE INFO      : nfs/rex/remshport/errs/README
+.sp 2
+.H 4 "test.C[1-4]"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on to unknow host 
+How test Works  : execute "on UNKNOWN_HOST CMD" where UNKNOW_HOST is
+		  not in /etc/hosts.
+EXPECTED OUTPUT : on: unknown host UNKNOWN_HOST
+.sp 2
+.H 4 "test.D[1-4]"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on to bogus host
+How test Works  : execute "on BOGUS_HOST CMD"
+EXPECTED OUTPUT : on: cannot connect to server on BOGUS_HOST
+Environment     : host name BOGUS_HOST must exist in /etc/hosts but
+		  must have an unused internet address.
+.sp 2
+.H 4 "test.G"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on with an unknown option
+How test Works  : execute "on -UNKNOWN_OPT HOST CMD"
+EXPECTED OUTPUT : Unknown option -UNKNOWN_OPT followed by output of
+		  CMD
+.sp 2
+.H 4 "test.L[1-4]"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on without a hostname or command specified
+How test Works  : execute "on", execute "on -i" and "on -d -i -n"
+EXPECTED OUTPUT : Usage: on [-i|-n] [-d] host [cmds [args] ... ]
+.fi
+.sp 3
+.H 3  "Ported remsh(1) Functional Tests"
+.sp 2
+The following test suite consists of tests ported form the
+.ft B
+remsh(1M)
+.ft
+test suite located in ab.services/remsh/func.
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/rex/remshport/func
+IMPLEMENT TIME : 1 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : nfs/rex/remshport/func/README
+.sp 2
+.H 4 "test.A"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : sending data to stdout
+How test Works  : execute "on HOST cat TFILE1"
+EXPECTED OUTPUT : contents of TFILE1
+.sp 2
+.H 4 "test.B"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : sending data to stderr
+How test Works  : execute "on HOST ls NO_FILE"
+EXPECTED OUTPUT : error message on stderr and status
+.sp 2
+.H 4 "test.C"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : sending data to stderr and stdout
+How test Works  : execute "on HOST cat TFILE1 NO_FILE"
+EXPECTED OUTPUT : contents of TFILE1 followed by an error message
+.sp 2
+.H 4 "test.E"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : access to super user files
+How test Works  : execute "on HOST cat TROOTFILE"
+EXPECTED OUTPUT : "cat: cannot open TROOTFILE" if not root, otherwise 
+		  "on  HOST: rexd: root execution not allowed"
+.sp 2
+.H 4 "test.F"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : catting binary file with rex.
+How test Works  : execute "on HOST cat TBINARY"
+EXPECTED OUTPUT : status only (no other output)
+.sp 2
+.H 4 "test.G"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : catting large files with rex
+How test Works  : execute "on HOST cat TBIGFILE"
+EXPECTED OUTPUT : status only (no other output)
+.fi
+.sp 3
+.H 3  "Ported remsh(1) Signal Tests"
+.sp 2
+The following test suite consists of tests ported form the
+.ft B
+remsh(1M)
+.ft
+test suite located in ab.services/remsh/signal.
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/rex/remshport/signals
+IMPLEMENT TIME : 1 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the 
+		 -r option.
+MORE INFO      : nfs/rex/remshport/signals/README
+.sp 2
+.H 4 "signals"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : Sending and receiving signals via rex
+How test Works  : A parent process spawns a child which executes 
+		  "on HOST on.child". on.child is a process written
+		  for REX testing. It handles signals by returning
+		  a message indicating what signal was sent. The
+		  parent process sends signals to the child. These
+		  signals are received by sigrecv and a message is 
+		  written to stdout.
+EXPECTED OUTPUT : Acknowledgement of signals received by the remote
+		  process.
+.fi
+.sp 3
+.H 3  "Non-Interactive Command Tests"
+.sp 2
+The following test suites tests non interactive 
+.ft B
+on(1)
+.ft 
+commands. It also contains tests which verify that the client's environment
+is properly simulated on the server. That is, it verifies that environment
+variables are copied over. Tests to verify that the client's working file 
+system is mounted in the proper place are located in the isolated tests.
+
+This test suite was rewritten from the original plan to leverage the 
+technology used in the FST test suite. Hence, this section varies from 
+the original test plan.
+
+This section covers the following test suites.
+
+.nf
+
+       nfs/new/rex/nonint/func1
+       nfs/new/rex/nonint/func2
+       nfs/new/rex/nonint/func3
+
+.fi
+.sp 2
+.H 4 "../rex/nonint/func1"
+.nf
+
+ Name:        ../rex/nonint/func1/rexf1_tests
+
+ Purpose:     This file contains the function tests which test
+              the basic noninteractive functionality of rex.
+
+ Description: In this test suite the basic noninteractive
+              functionality or rex is tested. The code executed
+              by rex and on varies depending on whether the
+              user's current working directory is physically
+              located on the client, nfs mounted form the server
+              or nfs mounted from a thrid node. Therefore, in this
+              suite we have test cases which do functionally the
+              same thing only with a different current working
+ 
+              Each test is written as a function named test_case_n.
+              This allows us to execute  run_test_case which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suit easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/nonint/func1
+IMPLEMENT TIME : 4 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : nfs/new/rex/nonint/func1/rexf1_tests
+.sp 2
+.nf
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : Verify that the command actually runs on the 
+                    remote system.
+ How Test Works   : on ${NODE1NAME} hostname
+ Expected Results : ${NODE1NAME}
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name        : test_case_2
+ What's Tested    : on with debug output
+ How Test Works   : on -d ${NODE1NAME} echo hello
+                    awk the results of the on
+ Expected Results : no output form the diff of the output files.
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name        : test_case_3
+ What's Tested    : Make sure environment variables are copied to the
+                    server. Also, tests that we can redirect stdout
+                    to a file in ${TESTDIR}.
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    Execute printenv locally to print the environment to
+                    a file.
+                    Execute on printenv to print the environment to a
+                    file.
+                    Diff the two files.
+ Expected Results : No output from the Diff
+
+.H 5 "test_case_4"
+.nf
+.sp 1
+ Test Name        : test_case_4
+ What's Tested    : Make sure environment variables are copied to the
+                    server. Also, tests that we can redirect stdout
+                    to a file in ${MYLOCALDIR} and execute files in
+                    ${MYLOCALDIR}.
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+                    Execute printenv locally to print the environment to
+                    a file.
+                    Execute on printenv to print the environment to a
+                    file.
+                    Diff the two files.
+ Expected Results : No output from the Diff
+
+.H 5 "test_case_5"
+.nf
+.sp 1
+ Test Name        : test_case_5
+ What's Tested    : Make sure environment variables are copied to the
+                    server. Also, tests that we can redirect stdout
+                    to a file in ${MYREMOTEDIR} and execute files in
+                    ${MYREMOTEDIR}.
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+                    Execute printenv locally to print the environment to
+                    a file.
+                    Execute on printenv to print the environment to a
+                    file.
+                    Diff the two files.
+ Expected Results : No output from the Diff
+
+.H 5 "test_case_6"
+.nf
+.sp 1
+ Test Name        : test_case_6
+ What's Tested    : Make sure that a command which invokes a command
+                    works.
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME}  /bin/time ls ${TFILE1}
+                    awk the output for fields from /bin/time
+ Expected Results : found real field
+                    found user field
+                    found sys field
+
+.H 5 "test_case_7"
+.nf
+.sp 1
+ Test Name        : test_case_7
+ What's Tested    : Make sure that a command which invokes a command
+                    works
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+                    on ${NODE1NAME}  /bin/time ls ${TFILE1}
+                    awk the output for fields from /bin/time
+ Expected Results : found real field
+                    found user field
+                    found sys field
+
+.H 5 "test_case_8"
+.nf
+.sp 1
+ Test Name        : test_case_8
+ What's Tested    : Make sure that a command which invokes a command
+                    works
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+                    on ${NODE1NAME}  /bin/time ls ${TFILE1}
+                    awk the output for fields from /bin/time
+ Expected Results : found real field
+                    found user field
+                    found sys field
+
+.H 5 "test_case_9"
+.nf
+.sp 1
+ Test Name        : test_case_9
+ What's Tested    : Compilation on a C source file
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME} cc ${SRCFILE} -o ${OBJFILE}
+ Expected Results : normal return and creation of ${OBJECTFILE}
+
+.H 5 "test_case_10"
+.nf
+.sp 1
+ Test Name        : test_case_10
+ What's Tested    : Compilation on a C source file
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+                    on ${NODE1NAME} cc ${SRCFILE} -o ${OBJFILE}
+ Expected Results : normal return and creation of ${OBJECTFILE}
+
+.H 5 "test_case_11"
+.nf
+.sp 1
+ Test Name        : test_case_11
+ What's Tested    : Compilation on a C source file
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+                    on ${NODE1NAME} cc ${SRCFILE} -o ${OBJFILE}
+ Expected Results : normal return and creation of ${OBJECTFILE}
+.fi
+.sp 2
+.H 4 "../rex/nonint/func2"
+.nf 
+
+ Name:        ../rex/nonint/func1/rexf2_tests
+
+ Purpose:     This file contains the functional tests which test
+              the basic noninteractive functionality of rex.
+
+ Description: In this test suite the basic noninteractive
+              functionality of rex is tested. The code executed
+              by rex and on varies depending on whether the
+              user's current working directory is physically
+              located on the client, nfs mounted form the server
+              or nfs mounted from a thrid node. Therefore, in this
+              suite we have test cases which do functionally the
+              same thing only with a different current working
+
+              Each test is written as a function named test_case_n.
+              This allows us to execute  run_test_case which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suit easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/nonint/fuc2
+IMPLEMENT TIME : 4 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : nfs/new/rex/nonint/func2/rexf2_tests
+
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : Test the use of ls with the on command on several
+                    different directories.
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    ls directories locally and store results in a file
+                    ls directories remotely and store results in a file
+                    diff results of the local and remote ls commands
+ Expected Results : no output from the diff commands
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name        : test_case_2
+ What's Tested    : Test the use of ls with the on command on several
+                    different directories.
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    ls directories locally and store results in a file
+                    ls directories remotely and store results in a file
+                    diff results of the local and remote ls commands
+ Expected Results : no output from the diff commands
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name        : test_case_3
+ What's Tested    : Test the use of ls with the on command on several
+                    different directories.
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    ls directories locally and store results in a file
+                    ls directories remotely and store results in a file
+                    diff results of the local and remote ls commands
+ Expected Results : no output from the diff commands
+
+.fi
+.sp 2
+.H 4 "../rex/nonint/func3"
+.nf
+
+ Name:        ../rex/nonint/func3/rexf3_tests
+
+ Purpose:     This file contains the function tests which test
+              the basic noninteractive functionality of rex.
+
+ Description: In this test suite the more complex noninteractive
+              functionality or rex is tested. The code executed
+              by rex and on varies depending on whether the
+              user's current working directory is physically
+              located on the client, nfs mounted form the server
+              or nfs mounted from a thrid node. Therefore, in this
+              suite we have test cases which do functionally the
+              same thing only with a different current working
+              directory. Although the functional part of these
+              test cases is usually simple, they are written as
+              seperate functions so that test cases based on similar
+              functionality only need to be updated in one place.
+
+              Each test is written as a function named test_case_n.
+              This allows us to execute  run_test_case which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suit easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/nonint/func3
+IMPLEMENT TIME : 4 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : nfs/new/rex/nonint/func3/rexf3_tests
+
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : Circular on command
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME} on ${NODE0NAME} hostname
+                    on ${NODE1NAME} on ${NODE0NAME} cat ${TFIE2} \\
+                     | wc -w
+ Expected Results : ${NODE0NAME}
+                    results of hostname and cat | wc -w
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name        : test_case_2
+ What's Tested    : Circular on command with -n option
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on -n ${NODE1NAME} on ${NODE0NAME} hostname
+                    on -n ${NODE1NAME} on ${NODE0NAME} cat ${TFIE2} \\
+                     | wc -w
+ Expected Results :  ${NODE0NAME}
+                     results of hostname and cat | wc -w
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name        : test_case_3
+ What's Tested    : on output piped to a local command
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME} cat ${TFILE2} | wc -w
+ Expected Results : ${TFILE2_SIZE}
+
+.H 5 "test_case_4"
+.nf
+.sp 1
+ Test Name        : test_case_4
+ What's Tested    : on -n output piped to a local command
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on -n ${NODE1NAME} cat ${TFILE2} | wc -w
+ Expected Results : ${TFILE2_SIZE}
+
+.H 5 "test_case_5"
+.nf
+.sp 1
+ Test Name        : test_case_5
+ What's Tested    : on output piped to another on command
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME} cat ${TFILE2} | on ${NODE1NAME} wc -w
+ Expected Results : ${TFILE2_SIZE}
+
+.H 5 "test_case_6"
+.nf
+.sp 1
+ Test Name        : test_case_6
+ What's Tested    : on output piped to another on command
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on -n ${NODE1NAME} cat ${TFILE2} | on -n 
+                    ${NODE1NAME} wc -w
+ Expected Results : 0
+
+.H 5 "test_case_7"
+.nf
+.sp 1
+ Test Name        : test_case_7
+ What's Tested    : on with output piped to another on command
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+                    on ${NODE1NAME} cat ${TFILE2} | on ${NODE1NAME} wc -w
+                    on -n ${NODE1NAME} cat ${TFILE2} | on -n 
+                    ${NODE1NAME} wc -w
+ Expected Results : ${TFILE2_SIZE}
+
+.H 5 "test_case_8"
+.nf
+.sp 1
+ Test Name        : test_case_8
+ What's Tested    : on with output piped to another on command
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+                    on ${NODE1NAME} cat ${TFILE2} | on ${NODE1NAME} wc -w
+                    on -n ${NODE1NAME} cat ${TFILE2} | on -n 
+                    ${NODE1NAME} wc -w
+ Expected Results : ${TFILE2_SIZE}
+
+.H 5 "test_case_9"
+.nf
+.sp 1
+ Test Name        : test_case_9
+ What's Tested    : output from both stdin and stderr to the same file
+ How Test Works   : This version runs with ${TESTDIR} as the cwd
+                    on ${NODE1NAME} ls prog.fu ${NOFILE} 2>&1
+ Expected Results : ${NOFILE} not found
+                    prog.fu
+
+.H 5 "test_case_10"
+.nf
+.sp 1
+ Test Name        : test_case_10
+ What's Tested    : output from both stdin and stderr to the same file
+ How Test Works   : This version runs with ${MYLOCALDIR} as the cwd
+                    on ${NODE1NAME} ls prog.fu ${NOFILE} 2>&1
+ Expected Results : ${NOFILE} not found
+                    prog.fu
+
+.H 5 "test_case_11"
+.nf
+.sp 1
+ Test Name        : test_case_11
+ What's Tested    : output from both stdin and stderr to the same file
+ How Test Works   : This version runs with ${MYREMOTEDIR} as the cwd
+                    on ${NODE1NAME} ls prog.fu ${NOFILE} 2>&1
+ Expected Results : ${NOFILE} not found
+                    prog.fu
+
+.sp 3
+.H 3  "Interactive Command Tests"
+.sp 1
+The following test suit tests interactive 
+.ft B
+on(1)
+.ft 
+commands. These tests use the vuser tool which allows us to simulate
+an interactive user session for a command. For more information see 
+the user documentation and man pages for vuser.
+.nf
+
+ Author        :       Dominic Ruffatto
+ What's Tested :       Rex in interactive mode (i.e. on -i)
+ How it Works  :       This file, prog.fu creates a stdout.fu by 
+                       sed'ing the file called outfile to reflect the 
+                       machine names used for NODE0NAME and NODE1NAME.
+                       Next, we create the vuser source files by 
+                       concatenating init and 6_?.  This source is 
+                       compiled and run by the vuser tool.  All output 
+                       from the virtual user session is sent to stdout.
+                       This output should match the the stdout.fu file 
+                       created at the beginning of the test.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/interact
+IMPLEMENT TIME : 10 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : 
+.sp 2
+.H 4 "6_1"
+.nf
+
+ Type of Test         : functional
+ What's tested        : more(1) of a file
+ How test works       : execute "on -i SERVER more FILE"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER more FILE
+                        file with --More-- breaks
+
+                        PROMPT test passed
+
+.H 4 "6_3"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's teste         : man(1) of a non-existing commmand
+ How test works       : execute "on -i SERVER boguscmd"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER man boguscmd
+                        No manual entry for boguscmd.
+
+                        PROMPT test passed
+
+.H 4 "6_4"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start the default shell for the user
+ How test works       : execute "on -i SERVER".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 4 "6_5"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/csh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/csh
+                        CPROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        CPROMPT exit
+                        CPROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 4 "6_6
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/sh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/sh
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.sp 3
+.H 3  "Interactive vi Tests"
+.sp 2
+.fi
+This test suite tests the use of \fB vi(1) \f with the \fB on(1) \f command. 
+It is a port of
+the tests from the HPUX 300 commands group.
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/rex/interact/viport
+IMPLEMENT TIME : 5 ed  (just a wild guess)
+DEPENDENCIES   : These tests will be ported from the HPUX command 
+		 group. Some of the current tests are failing for 
+		 the local case. These tests will not be expected
+		 to work for the remote case. All other tests should 
+		 pass for the remote case. No test plan was provided
+		 by HPUX commands. We will add a description of the 
+		 test cases here as they are ported.
+MORE INFO      : nfs/rex/interact/viport/README
+
+.sp 3
+.H 3  "Isolated rexd Tests "
+.sp 1
+.fi
+This test suite tests the \fB rexd(1M) \f on the server started with different 
+options. These tests must be isolated because they modify files in 
+/etc on the server. This may screw up other tests if they are running
+at the same time.
+
+This section covers the following test suites.
+
+.nf
+
+       nfs/new/rex/isolate/access
+       nfs/new/rex/isolate/export
+       nfs/new/rex/isolate/mnt
+
+.fi
+.sp 2
+.H 4 "../rex/isolate/access"
+.nf
+
+ Name:        ../rex/isolate/access
+
+ Purpose:     This file contains the isolated tests to test a
+              rexd configured with the -r option. The -r options
+              limits access to the server via /etc/hosts.equiv and
+              ${HOME}/.rhost. Note that rexd's use of this security
+              mechanism is not equivelant to it's use by remsh and
+              rlogin due to limitations in the protocol.
+
+              There is also one test for the case where a user does
+              There is also one test for the case where a user does
+              not exist on the server. This case is independent of
+              the -r option.
+
+ Description: These tests are designed to be run between HP machines.
+              The tests are isolated because they modify a system
+              files (/etc/inetd.conf, /etc/hosts.equiv, ${HOME}/.rhosts
+              and /etc/passed).
+
+              NOTE: All but one of the tests assumes that the prog
+              has reconfigured NODE1 to run rexd with the -r option.
+              The one test needs rexd configured on NODE1 without
+              the -r option recongifures rexd on it's own and restores
+              the previous configuration when it completes.
+
+              Each test is written as a function named test_case_n.
+              This allows us to execute  runrex_cases which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suit easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/isolate/access
+IMPLEMENT TIME : 6 ed  (just a wild guess)
+DEPENDENCIES   : These tests must be run isolated and must be able
+		 to modify the /etc/inetd.conf /etc/hosts.equiv and 
+		 the user's .rhosts files on the remote machine.
+
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : A server with no /etc/hosts.equiv and no 
+                    ${HOME}/.rhosts file for the user.
+ How Test Works   : Make sure there is not .rhosts for the user on 
+                    the server and no /etc/hosts.equiv on the server.
+                    on ${NODE1NAME} hostname
+ Expected Results : on ${NODE1NAME}: rexd: User id ${REX_USER} 
+                    denied access
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name        : test_case_2
+ What's Tested    : A server with an /etc/hosts.equiv file that does 
+                    not contain the client host name and a user with
+                    no .rhosts file.
+ How Test Works   : Remove the .rhost for the user on the server.
+                    Create a /etc/host.equiv file on the server that
+                    does not contain the client.
+                    on ${NODE1NAME} hostname
+ Expected Results : on ${NODE1NAME}: rexd: User id ${REX_USER} 
+                    denied access
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name        : test_case_3
+ What's Tested    : A server with no /etc/hosts.equiv file and a
+                    .rhosts file for the user on the remote system that
+                    does not have the user equivalenced to him/her self
+                    from the client. Another user is equivalenced from
+                    the client.
+ How Test Works   : Make sure that there is no /etc/hosts.equiv on
+                    the server.
+                    Make sure the user has a .rhost file without him/her
+                    self equivalenced from the client and an entry
+                    equivalencing another user from the client.
+                    on ${NODE1NAME} hostname
+ Expected Results : on ${NODE1NAME}: rexd: User id ${REX_USER}
+                    denied access
+
+.H 5 "test_case_4"
+.nf
+.sp 1
+ Test Name        : test_case_4
+ What's Tested    : A server with an /etc/hosts.equiv file which does
+                    not contain the client and a user which has a 
+                    .rhosts file on the server that does not have 
+                    him/her self equivalenced from the client.
+ How Test Works   : Create the /etc/hosts.equiv file on the server.
+                    Create the .rhosts file on the server
+                    on ${NODE1NAME} hostname
+ Expected Results : on ${NODE1NAME}: rexd: User id ${REX_USER} 
+                    denied access
+
+.H 5 "test_case_5"
+.nf
+.sp 1
+ Test Name        : test_case_5
+ What's Tested    : A server with a /etc/hosts.equiv file which does
+                    contain the client and a users with no .rhosts 
+                    file on the server.
+ How Test Works   : Create a /etc/hosts.equiv on the server which
+                    contains the client.
+                    Make sure the user does not have a .rhosts file
+                    on the server.
+                    on ${NODE1NAME} hostname
+ Expected Results : ${NODE1NAME}
+
+.H 5 "test_case_6"
+.nf
+.sp 1
+ Test Name        : test_case_6
+ What's Tested    : A server with no .rhosts file and a user with a
+                    .rhosts file on the server which equivalences the
+                    user to him/her self from the client host.
+ How Test Works   : Make sure /etc/hosts.equiv does not exist on the
+                    server.
+                    Create the .rhosts file.
+                    on ${NODE1NAME} hostname
+ Expected Results : ${NODE1NAME}
+
+.H 5 "test_case_7"
+.nf
+.sp 1
+ Test Name        : test_case_7
+ What's Tested    : A Server with an /etc/hosts.equiv file which
+                    includes the client and a user with a .rhosts
+                    file on the server which equivalences the user
+                    to him/her self from the client.
+ How Test Works   : Create /etc/hosts.equiv on the server
+                    Create .rhosts on the server
+                    on ${NODE1NAME} hostname
+ Expected Results : ${NODE1NAME}
+
+.H 5 "test_case_8"
+.nf
+.sp 1
+ Test Name        : test_case_8
+ What's Tested    : On to a server with no uid matching the invoking
+                    user's uid.
+ How Test Works   : Reconfigure rexd on the server to start without the
+                    -r option.
+                    Save a copy of the server's /etc/passwd on 
+                      /tmp/passed. 
+                    Remove ${REX_USER} from the server's
+                      /etc/passwd file.
+                    on ${NODE1NAME} hostname
+                    Restore /etc/passwd on the server
+                    Reconfigure rexd on the server with the same
+                    configuration it had before this test case.
+ Expected Results : on ${NODE1NAME}: rexd: User id ${REX_USER_UID} 
+                     not valid
+
+.fi
+.sp 2
+.H 4 "../rex/isolate/export"
+.nf
+
+ Name:        ../rex/isolate/export
+
+ Purpose:     This file contains the isolated tests to test the
+              error conditions with can arise if the host which
+              has the user's current working directory does not
+              have that file system exported to the server.
+
+ Description: These tests are designed to be run between HP machines.
+              The tests are isolated because they modify a system
+              file (/etc/exports).
+
+              NOTE: These tests require that NODE1 does not have
+              any of NODE0's file systems mounted. If this is not
+              the case the test prints and error message and exits.
+
+              Each test is written as a function named test_case_n.
+              This allows us to execute  runrex_cases which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suite easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/isolate/export
+IMPLEMENT TIME : 6 ed  (just a wild guess)
+DEPENDENCIES   : These tests must be run isolated and must be able
+		 to modify the /etc/inetd.conf /etc/exports.
+
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : The client's current working directory is in a 
+                    filesystem that is not exported to anyone.
+ How Test Works   : Make sure NODE1 does not have any of NODE0's file
+                    systems mountd.
+                    Create an empty /etc/exports file
+                    cd /
+                    on ${NODE1NAME} hostname
+                    cd ${TESTDIR}
+ Expected Results : on ${NODE1NAME}: rexd: / not exported by 
+                     ${NODE0NAME}
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name: test_case_2
+ What's Tested    : The client's current working directory is in a 
+                    file system that is not exported to anyone.
+ How Test Works   : Make sure NODE1 does not have any of NODE0's file
+                    systems mountd.
+                    Create an empty /etc/exports file where / is
+                    exported but not to ${NODE1NAME}
+                    cd /
+                    on ${NODE1NAME} hostname
+                    cd ${TESTDIR}
+ Expected Results : on ${NODE1NAME}: rexd: not exported list for /
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name: test_case_3
+ What's Tested: Client's current working directory is located on
+                a host that is not running mountd(1M).
+ How Test Works   : Make sure NODE1 does not have any of NODE0's file
+                    systems mountd.
+                    Configure NODE0 not to run mountd(1M)
+                    Kill mountd(1M) on NODE0 if it is already running
+                    /etc/inetd -c
+                    cd ${LOCALTMP}
+                    on ${NODE1NAME} hostname
+                    cd ${TESTDIR}
+
+ Expected Results:  on ${NODE1NAME}: rexd: Host ${NODE0NAME} is 
+                    not running mountd.
+
+.fi
+.sp 2
+.H 4 "../rex/isolate/mnt"
+.nf
+
+ Name:        ../rex/isolate/mnt
+
+ Purpose:     This file contains the isolated tests to test the
+              -m option of rexd.
+
+ Description: These tests are designed to be run between HP machines.
+              The tests are isolated because they modify a system
+              file (/etc/inetd.conf).
+
+              NOTE: These tests require that NODE1 does not have
+              any of NODE0's file systems mounted. If this is not
+              the case the test prints and error message and exits.
+
+              Each test is written as a function named test_case_n.
+              This allows us to execute  runrex_cases which will
+              run all of the test cases specified by the variable
+              $RunList. This allows us to run subsets of the test
+              suit easily.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/isolate/mnt
+IMPLEMENT TIME : 6 ed  (just a wild guess)
+DEPENDENCIES   : These tests must be run isolated and must be able
+		 to modify the /etc/inetd.conf /etc/exports.
+
+.H 5 "test_case_1"
+.nf
+.sp 1
+ Test Name        : test_case_1
+ What's Tested    : Does the test use the mount dir specified with 
+                    the -m option to rexd. Also, makes sure the 
+                    directory used as the mount point is removed after 
+                    the test.
+ How Test Works   : Make sure that NODE1 does not have any of NODE0's
+                     file systems mounted.
+                    on ${NODE1NAME} pwd >f.tmp.1_1
+                    check to see that the path is as expected.
+ Expected Results : output from a grep of f.tmp.1_1
+
+.H 5 "test_case_2"
+.nf
+.sp 1
+ Test Name: test_case_2
+ What's Tested    : Does the test use the default mount dir 
+                    /usr/spool/rexd. Also, makes sure the directory 
+                    used as the mount point is removed after the test.
+ How Test Works   : Make sure that NODE1 does not have any of NODE0's
+                    file systems mounted.
+                    on ${NODE1NAME} pwd >f.tmp.2_2
+                    check to see that the path is as expected.
+ Expected Results : output from a grep of f.tmp.2_2
+
+.H 5 "test_case_3"
+.nf
+.sp 1
+ Test Name: test_case_3
+ What's Tested: Change the mount point of rexd to a file instead
+                of a directory.
+ How Test Works: Make sure that NODE1 does not have any of NODE0's 
+                 file systems mounted.
+                 Configure rexd to use a file as directory for 
+                 creating mount points and execute an on command.
+                 Attempt an on command.
+ Expected Results: on: rexd: ${REX_MNTFILE} is not a directory
+
+.H 5 "test_case_4"
+.nf
+.sp 1
+ Test Name: test_case_4
+ What's Tested: Change the mount point of rexd to a non-existant
+                 file/directory.
+ How Test Works: Make sure that NODE1 does not have any of NODE0's 
+                 file systems mounted.
+                 Configure rexd to use a file as directory for 
+                 creating mount points and execute an on command.
+                 Atempt and on command.
+ Expected Results: on: rexd: mountdir ${REX_NOFILE} is not a directory
+
+.H 5 "test_case_5"
+.nf
+.sp 1
+ Test Name: test_case_5
+ What's Tested    : Test use the -m with no file name specified.
+                    Also, makes sure the directory used as the mount
+                     point is removed after the test.
+ How Test Works   : Make sure that NODE1 does not have any of NODE0's
+                    file systems mounted.
+                    on ${NODE1NAME} pwd >f.tmp.5_1
+                    check to see that the path is as expected.
+ Expected Results : In this case rexd will use the default mountdir
+                    which is /usr/spool/rexd so we expect output
+                    from a grep of f.tmp.5_1.
+
+.H 5 "test_case_6"
+.nf
+.sp 1
+ Test Name: test_case_6
+ What's Tested: Executing a shell script in a directory under
+                -m mountdir where the test user is the owner of 
+                mountdir and the modes on mountdir are 000 and 500. 
+                The second cases assures us that ./f.script failed 
+                due to the permissions on the  directory and not
+                some other reason.
+ How Test Works: Make sure NODE1 does not have any of NODE0's file
+                 systems mountd.
+                 Configure rexd to create mount points in ${REX_MNTDIR}
+                 Chown REX_USER mountdir
+                 chmod 000 mountdir
+                 on ${NODE1NAME} ./f.script
+                 chmod 500 mountdir
+                 on ${NODE1NAME} ./f.script
+                 ...
+ Expected Results: on ${NODE1NAME}: rexd: ./f.script: Can't execute
+                   output from f.script
+
+.fi
+.sp 3
+.H 2  "CONNECTIVITY TESTS"
+.sp 2
+This section contains test suites that are run between HP and other 
+vendor's machines. Currently these machines are only run between HP and
+Sun systems with a single stream.
+
+.sp 3
+.H 3  "Non-Interactive Command Tests"
+.sp 2
+The following test suit tests non interactive 
+.ft B
+on(1)
+.ft 
+commands between HP and Sun machines. It is derived from the original 
+noninteractive test suite for HP to HP systems. That test suite has 
+since been rewriten in the FST style and looks quite different from 
+this one.
+It also contains tests which verify that the clients environment
+is properly simulated on the server. That is, it verifies that environment
+variables are copied over, the clients file system is mounted in the 
+proper place and the the current working directory of the client is 
+set properly.
+
+The behavior of on is different depending \fBon(1)\f and \fBrexd(1M) is 
+different depending on the user's current working directory. Therefore,
+this test suite is run from 3 different current working directories. 
+.nf
+
+       1) A current working directory which is physically
+          located on NODE0NAME. (not an NFS mount)
+       2) A current working directory which is physically
+          located on NODE1NAME (NFS mounted on NODE0NAME).
+       3) A current working directory which is physically 
+          located on a third node (note NODE0NAME or NODE1NAME)
+          if a scaffold server is in use. Otherwise, this case
+          will be the same as case 1 above.
+
+.nf
+
+Note: Sun 3.5 systems can lose data when the Sun 3.5 system 
+      is the server. Hence certain test cases may periodically 
+      fail.
+
+.fi
+.nf
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : cts_nfs.unx/new/rex/noninteract
+IMPLEMENT TIME : 4 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : cts_nfs.unx/new/rex/noninteract/README
+.sp 2
+.H 3 "test.a"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : Make sure we have reached the proper host
+How test Works  : Execute "on HOST hostname"
+EXPECTED OUTPUT : stdout should contain the name of HOST
+.sp 2
+.H 3 "test.b"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : Make sure a command which invokes a command works
+How test Works  : Execute "on HOST /bin/time ps -ef >>/dev/null"
+EXPECTED OUTPUT : Output of /bin/time after executing the ps command.
+.sp 2
+.H 3 "test.c"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on with debug output
+How test Works  : on -d ${NODE1NAME} echo hello 1>tmp.out1.$$
+EXPECTED OUTPUT : a bunch of info. Use awk to compare results.
+                  Sun 4.0 debug output differs slightly from 3.5
+                  but this is handled by the test.c script.
+.sp 2
+.H 3 "test.d"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : Make sure environment variables are copied to 
+                  the server.
+How test Works  : Execute "print.env >>env.local" and 
+		  "on HOST print.env >>env.remote".
+EXPECTED OUTPUT : Contents of env.local = contents on env.remote.
+Notes           : print.env is a tool written exclusively for rex 
+		  testing.
+.sp 2
+.H 3 "test.e"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : Compilation of a C source file.
+How test Works  : Execute "on HOST cc FILE.c  -o FILE".
+EXPECTED OUTPUT : normal message produced by successful cc
+Notes		: Object file created with server's cc. Thus,
+		  an object file compatible with the server not the 
+		  client is created.
+.sp 2
+.H 3 "test.f"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : circular on 
+How test Works  : execute "on HOST on CLIENT_HOST hostname
+EXPECTED OUTPUT : CLIENT_HOST on stdout
+.sp 2
+.H 3 "test.h"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : on command piped to a local command.
+How test Works  : Execute "on HOST ls | wc -l"
+EXPECTED OUTPUT : number of files in the current working directory
+.sp 2
+.H 3 "test.j"
+.nf
+.sp 1
+TYPE OF TEST    : functional
+What's Tested   : put output from both stdout and stderr in
+                  the same file.
+How test Works  : on ${NODE1NAME} ls prog.fu ${NOFILE} 2>&1
+EXPECTED OUTPUT : ${NOFILE} not found
+                  prog.fu
+
+.sp 3
+.H 3  "Interactive Command Tests"
+.sp 2
+The following test suit tests interactive 
+.ft B
+on(1)
+.ft 
+commands. These tests use the vuser test tool to simulate an 
+interactive user. Since this tool does not exist on Sun systems
+we test Sun to HP connectivity by rlogining into the Sun from 
+the HP (via the vuser program) and running the tests Sun to HP.
+Hence, this suite tests HP to Sun and Sun to HP connectivity when
+run on an HP test system and does not need to run when the suite 
+is run on Sun systems.
+
+There are two tests suites which are very similar. One is called 
+hp2sun and the other is called sun2hp. The main difference is that
+the sun2hp test suite first logs into the Sun and then runs the 
+test from NODE1NAME to NODE0NAME.
+
+.H 4 "hp2sun"
+.nf
+
+ Author        :       Mark Kean (ported from Dominic Ruffatto)
+ What's Tested :       Rex in interactive mode (i.e. on -i)
+ How it Works  :       This file, prog.fu creates a stdout.fu by 
+                       sed'ing the file called outfile to reflect the 
+                       machine names used for NODE0NAME and NODE1NAME.
+                       Next, we create the vuser source files by 
+                       concatenating init and 6_?.  This source is 
+                       compiled and run by the vuser tool.  All output 
+                       from the virtual user session is sent to stdout.
+                       This output should match the the stdout.fu file 
+                       created at the beginning of the test.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/interact/hp2sun
+IMPLEMENT TIME : 10 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : 
+.sp 2
+.H 5 "6_1"
+.nf
+
+ Type of Test         : functional
+ What's tested        : more(1) of a file
+ How test works       : execute "on -i SERVER more FILE"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER more FILE
+                        file with --More-- breaks
+
+                        PROMPT test passed
+
+.H 5 "6_3"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's teste         : man(1) of a non-existing commmand
+ How test works       : execute "on -i SERVER boguscmd"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER man boguscmd
+                        No manual entry for boguscmd.
+
+                        PROMPT test passed
+
+.H 5 "6_4"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start the default shell for the user
+ How test works       : execute "on -i SERVER".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 5 "6_5"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/csh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/csh
+                        CPROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        CPROMPT exit
+                        CPROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 5 "6_6
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/sh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/sh
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+
+.H 4 "sun2hp"
+.nf
+
+ Author        :       Mark Kean (ported from Dominic Raffatto)
+ What's Tested :       Rex in interactive mode (i.e. on -i)
+ How it Works  :       These tests are similar to the other interactive
+                       test suites except that a function called rlog 
+                       is called to rlogin to NODE1NAME. Then the test
+                       is run from NODE1NAME to NODE0NAME. 
+                       This file, prog.fu creates a stdout.fu by 
+                       sed'ing the file called outfile to reflect the 
+                       machine names used for NODE0NAME and NODE1NAME.
+                       Next, we create the vuser source files by 
+                       concatenating init and 6_?.  This source is 
+                       compiled and run by the vuser tool.  All output 
+                       from the virtual user session is sent to stdout.
+                       This output should match the the stdout.fu file 
+                       created at the beginning of the test.
+
+RESPONSIBLE ENGINEER: 
+TEST LOCATION  : nfs/new/rex/interact/sun2hp
+IMPLEMENT TIME : 10 ed  (just a wild guess)
+DEPENDENCIES   : Server must have rexd(1M) configured without the
+		 -r option.
+MORE INFO      : 
+.sp 2
+.H 5 "6_1"
+.nf
+
+ Type of Test         : functional
+ What's tested        : more(1) of a file
+ How test works       : execute "on -i SERVER more FILE"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER more FILE
+                        file with --More-- breaks
+
+                        PROMPT test passed
+
+.H 5 "6_3"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's teste         : man(1) of a non-existing commmand
+ How test works       : execute "on -i SERVER boguscmd"
+ EXPECTED OUTPUT      : PROMPT on -i SERVER man boguscmd
+                        No manual entry for boguscmd.
+
+                        PROMPT test passed
+
+.H 5 "6_4"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start the default shell for the user
+ How test works       : execute "on -i SERVER".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 5 "6_5"
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/csh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/csh
+                        CPROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        CPROMPT exit
+                        CPROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+
+.H 5 "6_6
+.nf
+.sp 1
+ Type of Test         : functional
+ What's tested        : Start a C shell explicitly
+ How test works       : execute "on -i SERVER /bin/sh".
+                        execute an ls command
+ EXPECTED OUTPUT      : PROMPT mkdir test_dir
+                        PROMPT cd test_dir
+                        PROMPT touch test_file1 test_file2 ... test_file7
+                        PROMPT on -i SERVER /bin/sh
+                        PROMPT ls
+                        test_file1  test_file3  test_file5  test_file7
+                        test_file2  test_file4  test_file6
+                        PROMPT exit
+                        PROMPT
+                        PROMPT rm test_file?
+                        PROMPT cd ..
+                        PROMPT rmdir test_dir
+                        PROMPT test passed
+

@@ -1,0 +1,65 @@
+
+.H 1 "Reliability (Jeff Elison)"
+
+.H 2 "Goals"
+.nf
+
+a) 24 hour reliability
+b) 48 hour reliability
+c) 120 hour reliability
+d) Maintain a log of failures/crashes
+
+.fi
+.H 2 "Basic Test Configuration"
+.nf
+
+a) 24 hour reliability configuration:
+             ________                  ________
+            |        | -------------> |        |
+            |  9K    |                |  9K    |
+            |        | <------------- |        |
+             --------                  --------
+
+b) 48 hour reliability configuration:
+          ________                ________                ________
+         |        | -----------> |        | -----------> |        |
+         |  9K    |              |  9K    |              |  9K    |
+         |        | <----------- |        | <----------- |        |
+          --------                --------                --------
+
+b) 120 hour reliability configuration:
+          ________                ________                ________
+         |        | -----------> |        | -----------> |        |
+         |  9K    |              |  9K    |              |  9K    |
+         |        | <----------- |        | <----------- |        |
+          --------                --------                --------
+.fi
+
+.H 2 "Vital Statistics"
+.nf
+
+RESPONSIBLE ENGINEER: Jeff Elison
+PERFORM TIME:   45.0  md
+a)  24 hour - 20 md
+b)  48 hour - 10 md
+c) 120 hour - 15 md
+TYPE OF TESTS: quick regression, functional tests, stress tests, and
+               special cases
+EXPECTED OUTPUT: no failed messages in ...scaf/RESULTS/<resultsfile>
+
+.fi
+.H 2 "Development Strategy"
+.nf
+
+a) 24 hour reliability
+Phase I: Quick Regression Suite  5md
+Phase II: Stress Suite subset    5md
+Phase III: Functionality Suite   5md
+Phase IV: all of the above       5md
+
+b) 48 hour reliability               10md
+Quick Regression, Functionality, Stress subset, and special cases
+
+c) 120 hour reliability              15md
+Quick Regression, Functionality, Stress subset, and special cases
+.fi

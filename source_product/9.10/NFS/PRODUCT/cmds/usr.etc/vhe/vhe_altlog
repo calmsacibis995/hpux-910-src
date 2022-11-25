@@ -1,0 +1,16 @@
+#! /bin/sh
+#
+# 	@(#)vhe_altlog:	$Revision: 1.11.109.1 $	$Date: 91/11/19 14:20:02 $
+#
+# (c) Copyright 1987 Hewlett-Packard Company
+#
+# Usage:  vhe_altlog
+#
+# Allows a user who has their home node down and who cannot get logged on
+# to gain limited access to this local system.
+ECHO=/bin/echo
+SU=/bin/su
+
+$ECHO "Enter your login name: \c"
+read LOG
+exec $SU $LOG

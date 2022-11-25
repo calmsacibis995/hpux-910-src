@@ -1,0 +1,106 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/yp sources.
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS) /source/NFS/$(USER)/cmds/usr.etc/ypserv
+
+CSOURCE = mkalias.c makedbm.c stdhosts.c yppush.c ypset.c yppoll.c ypxfr.c
+
+LDLIBRARIES = /usr/lib/libndbm.a
+
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	=
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS) 
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+SDIR = $(SRCDIR:/^$/./)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA -B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		DBM_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/libdbm/libdbm.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+mkalias:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o mkalias $(SDIR)/mkalias.c $(DBM_LIB) $(LDLIBRARIES) $(LIBCA)
+
+makedbm:
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN $(LDFLAGS) -o makedbm $(SDIR)/makedbm.c $(DBM_LIB) $(LIBCA)
+
+stdhosts:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o stdhosts $(SDIR)/stdhosts.c $(DBM_LIB) $(LIBCA)
+
+yppush:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o yppush $(SDIR)/yppush.c $(DBM_LIB) $(LIBCA)
+
+ypset:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o ypset $(SDIR)/ypset.c $(DBM_LIB) $(LIBCA)
+
+yppoll:
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o yppoll $(SDIR)/yppoll.c $(DBM_LIB) $(LIBCA)
+
+ypxfr:		trans_map$(USCORE).o
+	$(CC) $(NMCFLAGS) -DDBINTERDOMAIN $(LDFLAGS) -o ypxfr $(SDIR)/ypxfr.c trans_map$(USCORE).o $(DBM_LIB) $(LIBCA)
+
+trans_map.o:	/source/NFS/$(USER)/cmds/usr.etc/ypserv/trans_map.c
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -c $(SDIR)/../ypserv/trans_map.c $(DBM_LIB) $(LIBCA)
+
+trans_map_.o:	/source/NFS/$(USER)/cmds/usr.etc/ypserv/trans_map.c
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -c /source/NFS/$(USER)/cmds/usr.etc/ypserv/trans_map.c -B-d/bfa/NFS/$(USER)/databases/trans_map.B $(DBM_LIB) -o trans_map_.o $(LIBCA)
+
+yp_Makefile:
+	$(CP) $(SDIR)/make.script yp_Makefile
+
+ypxfr_1perday:
+	$(CP) $(SDIR)/ypxfr_1perda ypxfr_1perday
+
+ypxfr_1perhour:
+	$(CP) $(SDIR)/ypxfr_1perhr ypxfr_1perhour
+
+ypxfr_2perday:
+	$(CP) $(SDIR)/ypxfr_2perda ypxfr_2perday
+
+ypserv.log:;	/bin/touch ypserv.log
+
+ypxfr.log:;	/bin/touch ypxfr.log
+
+
+all:		build
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms make?a*
+
+debug:		build

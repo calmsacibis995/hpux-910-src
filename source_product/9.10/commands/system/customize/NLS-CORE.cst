@@ -1,0 +1,24 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+#
+fileset=NLS-CORE
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsoleted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Remove iconv tables with incorrect names.  Files with the correct names
+# are available via updating this fileset: NLS-CORE.
+#======
+rm -f /usr/lib/iconv/direct/chte}roc15
+rm -f /usr/lib/iconv/direct/roc15}chte
+
+exit $exitval
+

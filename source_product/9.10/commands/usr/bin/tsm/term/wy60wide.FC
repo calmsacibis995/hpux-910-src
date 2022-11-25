@@ -1,0 +1,15 @@
+## FacetTerm  wy60wide (80/132 column)  COMMON description file  12/21/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: wy60wide.FC,v 70.1 92/03/09 16:51:18 ssa Exp $
+### columns=80
+columns=80
+### columns_wide=132
+columns_wide=132
+### columns_wide_mode_on_default
+### columns_wide_on=
+columns_wide_on=\E`;
+### columns_wide_off=
+columns_wide_off=\E`:
+### columns_wide_clears_screen
+### columns_wide_mode_on_mode_bit-08000000
+### parm_mode_val-COLSWIDE-00000000=

@@ -1,0 +1,3 @@
+#!/bin/sh
+# Remote version of ct
+echo "ct must be run on the root server"

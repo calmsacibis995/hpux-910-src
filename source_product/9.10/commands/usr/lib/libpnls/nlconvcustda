@@ -1,0 +1,75 @@
+
+
+
+#include <stdio.h>
+#include <time.h>
+#include <nlinfo.h>
+
+unsigned short nlconvcustdate(instr, leninstr, langid, err)
+unsigned char	*instr;
+unsigned short	err[];
+short		leninstr, langid;
+{
+	int	beg, end;
+	struct tm xtime;
+	struct l_info *getl_info(), *n;
+
+	err[0] = err[1] = 0;
+
+	if (langid == -1)  {
+		err[0] = E_LNOTCONFIG;
+		return((short)0);
+        }
+
+
+	/*
+	 * get the starting and ending bytes of the string
+	 *	(i.e. strip the blanks from the front and the back
+	 */
+	if (leninstr < 1) {
+		err[0] = E_INVALIDSTRINGLENGTH;
+		return((short)0);
+        }
+
+	if (begin_end(instr, (int)leninstr, &beg, &end)  == -1){
+		err[0] = E_INVALIDDATEFORMAT;
+		return((short)0);
+	}
+
+	instr += beg;
+
+
+	/*
+	 * check the length of the string == 13
+	 */
+	if (end - beg + 1 > LENCUSTDATEFORMAT){
+		err[0] = E_INVALIDSTRINGLENGTH;
+		return((short)0);
+	}
+
+	/*
+	 * get the format for the custom date
+	 */
+	if ((n = getl_info(langid)) == NULL) {
+	     err[0] = E_LNOTCONFIG;
+	     return((short)0);
+        }
+
+
+	/*
+	 * extract the date from instr and place it in xtime
+	 */
+	if (extract_nldt(langid, n->cust_date_format, LENCUSTDATEFORMAT, 
+				instr, n, &xtime)){
+		err[0] = E_INVALIDDATEFORMAT;
+		return((short)0);
+	}
+
+
+	/*
+ 	 * update xtime with julian date
+	 */
+	getjulian(&xtime);
+
+	return((unsigned short)(xtime.tm_year << 9 | (xtime.tm_yday + 1)));
+}

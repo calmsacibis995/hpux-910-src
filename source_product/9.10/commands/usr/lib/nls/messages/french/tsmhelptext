@@ -1,0 +1,440 @@
+
+----------------------- TSM Texte d'aide ------------------------ Page  1 de 19
+
+CONTENU :
+
+                Introduction  .................  2
+                Interface de menus ............  3
+                Interface de commandes ........  4
+                Commandes sessions ............  5
+                Commandes courantes ...........  6
+                Couper coller .................  7
+                Options de type Couper ........  8
+                Coller ce qui a ≈t≈ Coup≈ .....  9
+                Impression/≈conomiseur d'≈cran. 10
+                Touches de fonction ........... 11
+                Affectation des touches........ 12
+                Passage d'une session » l'autre 13
+                Signaux et caract…res Ctrl .... 14
+                Enregistrement de touches ..... 15
+                Modes sp≈ciaux de terminal .... 16
+                Annonce de session ............ 17
+                Moniteur de session ........... 18
+                Environnement et Chemin........ 19
+
+----------------------- TSM Texte d'aide ------------------------ Page  2 de 19
+
+INTRODUCTION :
+
+  TSM est un syst…me qui transforme votre terminal en 10 terminaux virtuels.
+  Chacun de ces derniers, appel≈s "sessions", permet d'ex≈cuter un programme
+  » l'aide d'une s≈rie de touches de fonction lui ≈tant associ≈es.
+
+  Vous pouvez ex≈cuter TSM de l'une des trois faµons suivantes :
+
+        1. Appuyez sur une touche de fonction (le cas ≈ch≈ant).
+        2. Appuyez sur Ctrl-T pour acc≈der » l'interface de menus TSM.
+        3. Appuyez sur Ctrl-W pour acc≈der » l'interface de commandes TSM.
+
+  Si vous ex≈cutez un programme qui n≈cessite l'entr≈e de Ctrl-W ou Ctrl-T,
+  appuyez deux fois sur cette combinaison pour envoyer le caract…re au
+  programme.
+
+  Pour s≈lectionner une option ou une valeur, appuyez sur [Retour].
+
+  Pour annuler une commande ou une s≈lection, appuyez sur [ESC] (ou sur
+  la barre d'espacement).
+
+----------------------- TSM Texte d'aide ------------------------ Page  3 de 19
+
+INTERFACE DE MENUS :
+
+  Pour afficher l'interface de menus, appuyez sur Ctrl-T ([CTRL]-[T]).
+
+  Pour ouvrir un menu et mettre une option en ≈vidence, utilisez
+  les touches fl≈ch≈es vers le HAUT ou vers le BAS; puis, appuyez sur [Retour]
+  pour s≈lectionner l'option ou sur la barre d'espacement pour annuler.
+
+  +--------------------- Menu TSM    Session 1: SHELL 1 ---------------------+
+  |  S≈lectionner   Ex≈cuter   CouperColler   Imprimer   Divers   Fin   Aide |
+  +--------------------------------------------------------------------------+
+     |  1 SHELL 1   ^W1  |
+     |  2 SHELL 2   ^W2  |
+     |  3 SHELL 3   ^W3  |
+     +-------------------+
+
+  Pour passer » un autre menu, utilisez les touches fl≈ch≈es vers la GAUCHE
+  ou vers la DROITE.
+
+  Pour sortir de l'interface de menus, appuyez sur la barre d'espacement.
+
+----------------------- TSM Texte d'aide ------------------------ Page  4 de 19
+
+INTERFACE DE COMMANDES :
+
+  Pour afficher l'interface de commandes, appuyez sur Ctrl-W ([CTRL-[W]).
+
+    >>> TSM Session  1    '?' pour afficher l'Aide <<<
+
+  Dans l'interface de commandes, vous pouvez s≈lectionner des options en
+  appuyant sur diff≈rentes touches.
+
+  Exemple: appuyez sur [1] pour afficher la session UN,
+                   sur [2] pour afficher la session DEUX,
+                   sur [3] pour afficher la session TROIS, ...
+            ou sur
+                 [Barre d'espacement] pour annuler et r≈afficher la session,
+            ou sur
+                 [Retour] pour r≈g≈n≈rer l'≈cran et r≈afficher la session,
+            ou sur
+                 [q] pour sortir de TSM (confirmer avec [O], annuler avec [N]).
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page  5 de 19
+
+COMMANDES SESSIONS :
+
+  Une fois dans l'interface de commandes, vous pouvez appuyez sur :
+ 
+              [Retour] pour r≈g≈n≈rer l'≈cran de la session en cours
+  [Barre d'espacement] pour sortir de l'interface de commandes
+
+                   [-]  pour revenir » la session pr≈c≈dente (ou fl…che GAUCHE
+                        ou [retour arri…re])
+                   [+]  pour passer » la session suivante    (ou fl…che DROITE
+                        ou [=])
+
+                   [l]  pour passer » la DERNI£RE session
+
+                   [o]  pour IMPRIMER le contenu de l'≈cran
+
+   [r]  <nom> [Retour]  pour EX‹CUTER un programme dans une session inactive
+
+                   [s]  pour lancer un SHELL dans une session inactive
+
+     ["]<nom> [Retour]  pour donner un nom » la session (ou ['])
+----------------------- TSM Texte d'aide ------------------------ Page  6 de 19
+
+COMMANDES COURANTES :
+
+  Une fois dans l'interface de commandes, vous pouvez appuyer sur :
+
+                   [?]  pour OBTENIR ce fichier d'aide (ou [a] ou [/] )
+
+                   [c]  pour COUPER du texte
+                   [p]  pour COLLER du texte
+
+                   [g]  pour charger toutes les touches de fonction
+                   [k]  pour charger les touches de fonction de la session
+                        en cours
+
+                   [o]  pour IMPRIMER le contenu de l'≈cran
+
+                   [x]  pour avoir acc…s aux commandes ≈tendues
+
+
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page  7 de 19
+
+COUPER/COLLER :   (suite » l'≈cran suivant)
+
+  TSM vous permet de couper du texte d'une session et de le coller dans une
+  autre.  Pour COUPER : Entrez la commande, amenez le curseur au d≈but du
+  texte, appuyez sur Retour, amenez le curseur » la fin, puis appuyez sur
+  Retour.
+
+COMMANDE COUPER : [CTRL]-[W]  [c]  <position-1> [Retour] <position-2> [Retour]
+
+  pour amener le curseur » la <position-1> et » la <position-2>, utilisez les
+  touches fl≈ch≈es ou les touches de d≈placement suivantes :
+
+   u ou fl…che haut   -- une ligne vers le haut     |  U -- premi…re ligne
+   d ou fl…che bas    -- une ligne vers le bas      |  D -- derni…re ligne
+   l ou fl…che gauche -- une colonne vers la gauche |  L -- premi…re colonne
+   r ou fl…che droite -- une colonne vers la droite |  R -- derni…re colonne
+
+          a  (tout)   -- pos1 coin sup≈rieur gauche, pos2 coin inf≈rieur droit
+          e  (fin)    -- pos1 au curseur, pos2 » la derni…re colonne
+          c  (marque) -- revenir au premier caract…re s≈lectionn≈
+          o  (zone)   -- imprimer la zone identifi≈e
+----------------------- TSM Texte d'aide ------------------------ Page  8 de 19
+
+OPTIONS ASSOCI‹ES ° COUPER :       (suite » l'≈cran suivant)
+
+  Commande COUPER accompagn≈e d'une OPTION :
+
+  [CTRL]-[W]  [C]  <OPTION> <position-1> [Retour] <position-2> [Retour]
+
+  Les OPTIONS sont les suivantes :
+
+[B] couper Bloc   - couper un rectangle de texte (changements de lignes ins≈r≈s)
+                    [CTRL]-[w] [c] [b] <pos-1> [Retour] <pos-2> [Retour]
+
+[T] couper Texte  - couper des lignes de texte (changements de lignes inclus)
+                    [CTRL]-[w] [c] [t] <pos-1> [Retour] <pos-2> [Retour]
+
+[C] couper Cha—ne - couper des lignes de texte (changements de lignes exclus)
+                    [CTRL]-[w] [c] [c] <pos-1> [Retour] <pos-2> [Retour]
+
+  COUPER retient et r≈utilise la derni…re OPTION sp≈cifi≈e.
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page  9 de 19
+
+COLLER ce qui a ≈t≈ COUP‹ :
+
+  TSM permet de couper du texte d'une session et de le coller dans une autre.
+
+  Commande COLLER :    [CTRL]-[w] [p]
+
+  Quand vous COLLEZ du texte, il est ins≈r≈ dans la session en cours, »
+  l'emplacement du curseur, comme si vous l'aviez entr≈.
+
+  Assurez-vous que l'application dans laquelle vous collez le texte est pr¡te
+  » le recevoir. Exemple : vi doit ¡tre en mode insertion.
+
+  Commandes COLLER suppl≈mentaires : [CTRL]-[W] et
+
+   [>] [p]                        coller dans l'imprimante  (selon .tsmprint)
+   [>] [f] <nom_fichier> [Retour] coller dans <nom_fichier> (doit ¡tre nouveau)
+   [>] [a] <nom_fichier> [Retour] coller dans <nom_fichier> (ajout)
+   [>] [r] <nom_fichier> [Retour] coller dans <nom_fichier> (remplacement)
+
+  TSM ≈met un signal sonore si une erreur se produit pendant l'op≈ration.
+
+----------------------- TSM Texte d'aide ------------------------ Page 10 de 19
+
+IMPRESSION :
+
+  TSM peut ≈tablir un conduit avec la commande standard lp d'HP-UX pour
+  l'impression ou prendre en charge une imprimante lp locale reli≈e » un
+  terminal. Pour plus de d≈tails sur la faµon de connecter une imprimante
+  locale, reportez-vous au manuel d'utilisation de TSM.
+
+  Pour imprimer le contenu de l'≈cran en cours, entrez :
+
+    [CTRL]-[W] [o]
+
+
+‹CONOMISEUR D'‹CRAN :
+
+  Lorsque le terminal est inactif, TSM occulte le contenu de l'≈cran :
+
+    [X] [s] [o]          mettre l'≈conomiseur d'≈cran en service
+    [X] [s] [n]          mettre l'≈conomiseur d'≈cran hors service
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 11 de 19
+
+TOUCHES DE FONCTION :
+
+  TSM vous permet de charger les touches de fonction pour une session ou
+  pour toutes les sessions.
+
+  TOUTES LES SESSIONS :   [CTRL]-[w] et
+
+  [g] <fich> [Retour] Charger les touches de fonction pour toutes les sessions.
+  [g] D‹FAUT [Retour] Charger les touches par d≈faut du terminal.
+  [g]  [+]   [Retour] Recharger les touches pr≈alablement charg≈es.
+  [g]  [-]   [Retour] Recharger toutes les touches par d≈faut
+                                                   (‹quivalent » "D‹FAUT")
+  SESSION EN COURS :  [CTRL]-[w] et
+
+  [k] <fich> [Retour] Charger le FICHIER de touches dans la session.
+  [k] D‹FAUT [Retour] Charger touches de fonction par D‹FAUT dans la session.
+  [k]  [+]   [Retour] Recharger les touches de fonction pr≈alablement charg≈es.
+  [k]  [-]   [Retour] Recharger les touches par d≈faut
+                                                   (‹quivalent » "D‹FAUT")
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 12 de 19
+
+AFFECTATION DE TOUCHES :
+
+  TSM permet d'affecter une s≈quence de caract…res » une seule touche.
+
+  Appuyez sur [CTRL]-[W] et sur [:] ou [;]
+
+
+  [:] [h] <touche> <affectation> [Retour]  affecter la <touche> » toutes les
+                                           sessions.
+
+  [:] [u] <touche> [Retour]                annuler l'affectation de la <touche>
+
+  [:] [m] <touche> <affectation> [Retour]  r≈tablir l'<affectation> de la
+                                           <touche> dans la session en cours.
+
+  Exemple : [CTRL]-[W] [:] [h] [1] Hewlett-Packard [Retour]
+  affiche le mot "Hewlett-Packard" lorsque vous appuyez sur [1].
+
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 13 de 19
+
+  PASSAGE D'UNE SESSION ° L'AUTRE :
+
+  Pour passer d'une session active » l'autre, entrez :
+
+    [CTRL]-[w] et :
+
+           [-]  pour revenir » la session pr≈c≈dente (ou fl…che GAUCHE ou
+                [Retour arri…re])
+           [+]  pour passer » la session suivante (ou fl…che DROITE ou [=])
+
+  Pour sauter une session :
+
+    [CTRL]-[w] et :
+
+           [X] [I] [O]          sauter la session en cours
+           [X] [I] <ses#> [O]   sauter la session <ses#>
+           [X] [I] [n]          r≈tablir l'affichage de cette session
+           [X] [I] <ses#> [N]   r≈tablir l'affichage de la session <ses#>
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 14 de 19
+
+SIGNAUX ET CARACT£RES DE CONTRﬂLE :
+
+  Vous pouvez transmettre des caract…res de contr¬le et des signaux (voir
+  la page de manuel signals(5)) » une session.
+
+  CARACT£RES :  entrez [CTRL]-[w] et
+       [.]  [Q]   transmettre Ctrl-Q (XON) » la session
+       [.]  [S]   transmettre Ctrl-S (XOFF) » la session
+       [.]  [@]   transmettre Ctrl-@ » la session
+       [.]  [B]   transmettre le caract…re d'interruption » la session
+         null     transmettre le caract…re d'interruption » la session si
+                  PARMRK et l'option send_break_to_window ne sont pas utilis≈s.
+       [Intrp]    transmettre le caract…re d'interruption » la session
+                  si l'option send_break_to_window n'est pas utilis≈e.
+
+  SIGNAUX :     entrez [CTRL]-[W] et
+      [X] [H] [O] transmettre SIGHUP » la session en cours
+      [X] [H] [T] transmettre SIGHUP » toutes les sessions
+      [X] [H] [K] transmettre SIGKILL » la session en cours
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 15 de 19
+
+ENREGISTREMENT DE TOUCHES :
+
+  TSM permet l'enregistrement et le rappel des s≈quences de frappe.
+
+
+
+  MODE D'ENREGISTREMENT DES S‹QUENCES DE FRAPPE -- entrez [CTRL]-[W] et :
+
+    [X] [K] [O] <fichier> [Retour]  commencer l'enregistrement des
+                                    s≈quences de frappe dans <fichier>.key
+    [X] [K] [N]                     arr¡ter l'enregistrement des s≈quences
+                                    de frappe
+
+
+  RAPPEL DES S‹QUENCES DE FRAPPE  -- entrez [CTRL]-[W] et :
+
+  [X] [r] <fichier> [Retour]        rappeler les s≈quences de frappe
+                                    enregistr≈es dans <fichier>.key
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 16 de 19
+
+  MODES SP‹CIAUX DE TERMINAL :
+
+  Si vous utilisez un fichier de description de terminal qui permet aux
+  applications de faire passer le terminal d'un mode » l'autre, TSM vous
+  permet de changer de mode » partir du clavier.
+
+    [CTRL]-[W] et :
+
+    [m] <d≈finition> [Retour]  <d≈finition> ≈tant :
+
+                               u      ou fl…che haut   - nom du mode pr≈c≈dent
+                               d      ou fl…che bas    - nom du mode suivant
+                               n ou r ou fl…che droite - d≈finition suivante
+                               p ou l ou fl…che gauche - d≈finition pr≈c≈dente
+                               retour arri…re          - d≈finition pr≈c≈dente
+
+
+
+
+
+
+----------------------- TSM Texte d'aide ------------------------ Page 17 de 19
+  ANNONCE DE SESSION :
+
+  Lorsque cette option est d≈finie, TSM peut annoncer au programme qu'il
+  s'agit de la session en cours, en transmettant un Ctrl-Y » la session.
+  -- Entrez [CTRL]-[W] et :
+
+[X] [N] [O]    d≈finir une annonce pour cette session quand elle est en cours
+[X] [N] <ses#> [O]     d≈finir une annonce pour la session <ses#> quand elle
+                       est en cours
+[X] [N] [N]            ne pas d≈finir d'annonce pour cette session quand
+                       elle est en cours
+[X] [N] <ses#> [N]     ne pas d≈finir d'annonce pour la session <ses#> quand
+                       elle est en cours
+  MODE D'AFFICHAGE INTERROMPU   -- entrez [CTRL]-[W] et
+
+[X] [B] [O]   interrompre l'affichage quand la session n'est pas celle en cours
+[X] [B] <ses#> [O]     interrompre l'affichage quand la session <ses#> n'est
+                       pas en cours
+[X] [B] [N]            ne pas interrompre l'affichage quand la session n'est
+                       pas celle en cours
+[X] [B] <ses#> [N]     ne pas interrompre l'affichage quand la session <ses#>
+                       n'est pas en cours
+----------------------- TSM Texte d'aide ------------------------ Page 18 de 19
+
+  MONITEUR DE SESSION :
+    REMARQUE : ces commandes servent aux applications de d≈bogage.
+
+MODE MONITEUR:
+
+TSM affiche les codes de contr¬le au lieu de les ex≈cuter. Entrez [CTRL]-[W] et
+
+  [X] [M] [O]          d≈finir le mode moniteur pour la session en cours
+  [X] [M] <ses#> [O]   d≈finir le mode moniteur pour la session <ses#>
+  [X] [M] [N]          ne pas d≈finir le mode moniteur pour la session en cours
+  [X] [M] <ses#> [N]   ne pas d≈finir le mode moniteur pour la session <ses#>
+
+MODE TRANSPARENT:
+
+  En mode transparent, TSM transmet le contr¬le de l'affichage au programme.
+
+  [X] [t] [o]        d≈finir le mode transparent pour la session en cours
+  [X] [t] <ses#> [o] d≈finir le mode transparent pour la session <ses#>
+  [X] [t] [n]        ne pas d≈finir le mode transparent pour la session en cours
+  [X] [t] <ses#> [n] ne pas d≈finir le mode transparent pour la session <ses#>
+
+----------------------- TSM Texte d'aide ------------------------ Page 19 de 19
+
+  VARIABLES ENVIRONNEMENTALES :
+     REMARQUE : Les variables environnementales doivent ¡tre d≈finies avant le
+                lancement de TSM.
+
+        TSMHOTKEY -- "^W" par d≈faut
+        TSMLP     -- nom de l'imprimante
+        TSMTERM   -- nom du type de terminal
+
+  FICHIERS ENVIRONNEMENTAUX :
+
+        .tsm      -- fichier de configuration de TSM
+        .tsmprint -- fichier de configuration de l'imprimante
+        .tsmkeys  -- fichier de configuration des touches de fonction
+
+  CHEMIN DE LA RECHERCHE : TSM recherche les fichiers de configuration
+                           dans les r≈pertoires suivants :
+
+                  1) le r≈pertoire en cours       -- "."
+                  2) votre r≈pertoire initial     -- "$HOME"
+                  3) le r≈pertoire initial de TSM -- "/usr/tsm"
+
+----------------------- TSM Texte d'aide ------------------------- FIN DU TEXTE
+

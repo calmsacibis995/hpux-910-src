@@ -1,0 +1,73 @@
+## FacetTerm  AT386char  description file  08/28/89
+## Meta sequences sent from the Vpix AT386 terminal description ( supplied
+##    with FacetTerm ) to indicate pc chars.
+## Driver will not accept the escape sequences for pc compatible mode that
+##    are documented in driver(7) per tech support.
+## Vpix will not allow 11 char sequences ( 7 maximum ).
+## Workaround is to have Vpix send meta-sequence which is artificial but
+##    short, and FacetTerm sends real sequence which works.
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: AT386char.FC,v 70.1 92/03/09 15:52:19 ssa Exp $
+magic=\E[1y
+out_magic=\E[11m\001\E[10m
+magic=\E[2y
+out_magic=\E[11m\002\E[10m
+magic=\E[3y
+out_magic=\E[11m\003\E[10m
+magic=\E[4y
+out_magic=\E[11m\004\E[10m
+magic=\E[5y
+out_magic=\E[11m\005\E[10m
+magic=\E[6y
+out_magic=\E[11m\006\E[10m
+magic=\E[7y
+out_magic=\E[11m\007\E[10m
+magic=\E[10y
+out_magic=\E[11m\010\E[10m
+magic=\E[11y
+out_magic=\E[11m\011\E[10m
+magic=\E[12y
+out_magic=\E[11m\012\E[10m
+magic=\E[13y
+out_magic=\E[11m\013\E[10m
+magic=\E[14y
+out_magic=\E[11m\014\E[10m
+magic=\E[15y
+out_magic=\E[11m\015\E[10m
+magic=\E[16y
+out_magic=\E[11m\016\E[10m
+magic=\E[17y
+out_magic=\E[11m\017\E[10m
+magic=\E[20y
+out_magic=\E[11m\020\E[10m
+magic=\E[21y
+out_magic=\E[11m\021\E[10m
+magic=\E[22y
+out_magic=\E[11m\022\E[10m
+magic=\E[23y
+out_magic=\E[11m\023\E[10m
+magic=\E[24y
+out_magic=\E[11m\024\E[10m
+magic=\E[25y
+out_magic=\E[11m\025\E[10m
+magic=\E[26y
+out_magic=\E[11m\026\E[10m
+magic=\E[27y
+out_magic=\E[11m\027\E[10m
+magic=\E[30y
+out_magic=\E[11m\030\E[10m
+magic=\E[31y
+out_magic=\E[11m\031\E[10m
+magic=\E[32y
+out_magic=\E[11m\032\E[10m
+## even this trick will not work for an escape char - ignored by driver
+magic=\E[33y
+out_magic=<
+magic=\E[34y
+out_magic=\E[11m\034\E[10m
+magic=\E[35y
+out_magic=\E[11m\035\E[10m
+magic=\E[36y
+out_magic=\E[11m\036\E[10m
+magic=\E[37y
+out_magic=\E[11m\037\E[10m

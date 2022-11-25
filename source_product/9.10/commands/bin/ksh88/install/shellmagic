@@ -1,0 +1,3 @@
+/* HPUX_ID: @(#) $Revision: 66.1 $ */
+#! /bin/echo
+exit 1

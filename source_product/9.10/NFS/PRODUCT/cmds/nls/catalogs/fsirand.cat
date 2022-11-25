@@ -1,0 +1,18 @@
+$set 1
+1 Usage: fsirand [-p] special\n
+2 fsirand: Cannot open %s\n
+3 fsirand: Seek to superblock failed\n
+4 fsirand: Read of superblock failed %d\n
+5 fsirand: Not a superblock\n
+6 fsid: %x %x\n
+7 fsirand: lseek to %d failed\n
+8 fsirand: premature EOF\n
+9 ino %1$d gen %2$x\n
+10 fsirand: lseek to %d failed\n
+11 fsirand: premature EOF\n
+12 fsirand: Seek to superblock failed\n
+13 fsirand: Write of superblock failed %d\n
+14 fsirand: Seek to alternative superblock failed\n
+15 fsirand: Read of alternative superblock failed %1$d %2$d\n
+16 fsirand: Not an alternative superblock\n
+17 fsirand: Write of alternative superblock failed\n

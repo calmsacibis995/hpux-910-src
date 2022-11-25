@@ -1,0 +1,38 @@
+#!/bin/sh
+# @(#) $Revision: 64.1 $
+#
+#
+#	This shell sends uucp status information to an administrator.
+#	It should started by a line in /usr/lib/crontab.
+#	e.g.
+#
+# 48 8,12,16 * * * /usr/lib/uucp/uudemon.admin > /dev/null
+#
+set +e
+
+export PATH
+PATH=/bin:/usr/bin
+MAILTO=uucp
+LOGDIR=/usr/spool/uucp/.Log
+ULOG=$LOGDIR/uucico
+TMP=/tmp/uu$$
+
+(uustat -p; uustat -q) > $TMP
+if [ -s $TMP ]
+then
+	mailx -s "uustatus" $MAILTO < $TMP
+fi
+
+if [ -d $ULOG ]
+then
+	if [ ! -z "`ls -A $ULOG`" ]
+	then
+		grep passwd $ULOG/* > $TMP
+		if [ -s $TMP ]
+		then
+			mailx -s "passwd check" $MAILTO < $TMP
+		fi
+	fi
+fi
+
+rm -f $TMP

@@ -1,0 +1,92 @@
+.\"
+.de xx
+.sp \\$2                
+.ti -\w'\\$1: 'u
+\&\\$1: \c
+..
+.\"\&\\$1: \c
+.\" Print with - "mm -rN2 <file>"
+.\"
+.\" This indicates to use the mm macros, and don't print
+.\" a page number on the header page.
+.\" To use Tbl, add "-t"
+.\"
+.SP 1i
+.ce           \" put title on next line
+Chunking
+.SP 0.75i
+.\" set up page indentation 
+.po 0i
+.in 1.65i
+.ll 7.0i
+.\" start items
+.xx "WHAT" 1
+Maintain a list of projects for the group to work on a "chunk" at a
+time;  things that should be done but usually get put aside for higher 
+priority activities.
+.xx "MOTIVATION" 2
+Continually finding things that could be fixed but we never
+get the time.
+.sp
+Too many conversations that end "why can't we do this better"
+and "there's got to be a better way".
+.xx EFFECT 2
+Have a group mechanism to get certain tasks done 
+.sp
+Completing "passed over" items
+.sp
+Catching things that may slip through the cracks and be forgotten
+.sp
+Better code for customer.
+.xx STATUS 2     
+11/17/88:  Adapted from Arsenal for use by NFS team.  Project chunking
+notebook started.
+.\"
+.\" go to next page
+.\"
+.bp
+.\"
+.\" use this page for more detail, more of the narration
+.\"
+.xx IMPLEMENTATION 0
+The team chunking coordinator keeps lists of active and proposed chunks.
+This is reviewed monthly at the last team meeting of the month
+to get status updates and
+decide what should be done during the next month.  New ideas are added
+to the list and prioritized.  Volunteers are
+usually taken for tasks, depending on interest, background and time
+available.  Chunking coordinator creates a "task sheet" for new tasks, 
+and records of finished
+projects are kept in a notebook to track all the activities and results.
+.sp
+Types of chunking items include: fixing broken things, developing new
+processes, organizing group standards, tying up loose ends.
+Areas of chunking items include: missing code features,
+test technology, testing processes, processes for interacting with other
+groups,  development environment and processes, general team processes,
+system admin., and any other area we spend a significant amount of time 
+on.
+Items are large and small; any area that needs attention can be put
+on the list.
+.sp
+Once an item is on the list and volunteers are assigned, the volunteers work
+out with the project manager time to be spent on a given task.
+.xx EFFORT 2   
+Chunking coordinator: writing up reports and keeping current list
+of activities - 1 hr/week.
+.sp
+Others spend time doing chunking activities; this is reflected in
+the individual reports and allocated in monthly objectives.
+.xx "LIMITATIONS" 2
+The list of proposed activities grows much faster than the capacity to
+work on different items.
+.sp
+Chunking activities don't get done during hectic times.
+.xx "INSIGHTS" 2
+This provides a very useful process for dealing with things that don't have
+to be fixed, but it's better if they were.  It acts as a group 
+"grass catcher" list.
+.xx "FUTURE WORK" 2
+Continue to use the process and dedicate time to these tasks.
+.sp
+Refine the process to add minimal overhead cost.

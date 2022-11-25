@@ -1,0 +1,32 @@
+53.8 -- last release before notime and assertions release--bumped deltas
+60.6 -- fixed limitation of LST name pool to 32K, now it is 65K, should perhaps
+	use long instead of ushort to make it effectively unlimited.
+61.0 -- BC-JR release; ctrl-c works; l x added; 10 parameters on 'J'; <num>
+	command is same as <expr>.
+61.2 -- change def of 'C' format to print chars in a string as well as printing
+	line-feeds and tabs. Put out all tabs as a bunch of blanks
+61.3 -- remote boot, put sr to 7 when enter via panic
+61.4 -- ksh command line editting; put '/' in front of kernel file name;
+	auto-boot on Kfile
+61.5 -- interruptable auto-boot
+61.6 -- goofed up changing hp-ux CDF name (it is still root)
+61.7 -- really changed CDF name; couldn't get quite back to 61.6
+	(something is different, I don't know what (only 4 bytes))
+62.1 -- relocatable debugger; EB2 debugger
+62.2 -- re-fixed the double entry of debugger problem
+62.2X - first tried the format change to remove need for *<constant> to go 
+	indirect
+63.0 -- 6.0 release debugger--many changes.
+63.3 -- add 68030 support; 6.2 release debugger
+63.4 -- re-initialize tty each time entering debugger
+63.5 -- remove re-initialize of tty each time entering debugger (messes
+	up remote console)
+63.6 -- Makefile no longer compiled with -D68030, but source files with that 
+	define remained.  Modified files Ksys.c and var.c to remove that ifdef.
+65.0 -- Support for write protected kernel text pages  (except for page 0)
+65.1 -- Bug fix of the *prefix null dereference.
+65.2 -- Bug fix: Kasm.s wasn't doing IC_CLR on 030; Also changed basic.h and
+	Kins.c to compile correctly under 6.5.  Removed uint re-define.
+66.2 -- renamed revno.c to hpux_rel.c
+66.4 -- added support for 68040
+66.5 -- s300/s800 convergence changed much of a.out debug information

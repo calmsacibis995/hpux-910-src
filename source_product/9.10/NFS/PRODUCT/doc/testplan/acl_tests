@@ -1,0 +1,917 @@
+.H 1 "NFS and Access Control Lists"
+.ad
+ACLs are a mechanism to provide greater access control to files by adding
+greater granularity to the individual user/group mechanism.  ACLs can be
+permissive or restrictive, for example, a specific user can be
+granted or denied access to a file beyond the file's base mode bits.
+See the NFS ERS for more details.
+.sp
+The ACL implementation has the HP-UX kernel return the effective mode bits in 
+calls like stat().  The effective mode bits are a "summary" of the permissions 
+a user has for a certain object.  With that solution ACLs become transparent
+to NFS.
+.sp
+HP-UX will start supporting ACLs at releases 6.5 on the s300 and 4.0 
+on the s800.  To support ACLs several new system calls, library routines
+and commands were introduced and some existing commands were modified.
+.sp
+All these tests have to be run on an HP system.
+.na
+.sp 2
+.H 2 "New System Calls and Library Routines"
+.sp 
+.ad
+The new system calls introduced are [f]setacl(), [f]getacl() and getaccess().  
+[f]setacl() and [f]getacl() are not supported over NFS since the current NFS 
+protocol is not able to transfer the information they require.  Getaccess(), 
+on the other hand, is supported.
+.sp
+The new library routines introduced are acltostr(), strtoacl() and
+[f]settuple().  The library calls acltostr() and strtoacl() don't deal
+with files and therefore are not affected by NFS and will not be
+tested here.  The [f]settuple() call is not supported over NFS since it
+based on the [f]getacl(2) and [f]setacl(2) system calls.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES: 
+ISSUES:
+IMPLEMENT TIME: 0.7 ed
+PERFORM TIME:
+.fi
+.na
+.sp 2
+.H 3 "Setacl system call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The system call \fBsetacl\fR sets an existing file's access control list
+or deletes optional tuples from it.  Its format is:
+.sp
+.nf
+\fBint setacl\fI(path, ntuples, acl)
+\fBchar *\fIpath\fR;
+\fBint \fIntuples\fR;
+\fBstruct acl_tuple \fIacl[]\fR;
+.sp
+.fi
+where \fIpath\fR points to a path name of a file and \fIntuples\fR tells 
+how many valid tuples are defined in the \fIacl\fR parameter.
+.sp
+This test creates a file on an NFS mounted file system and attempts to 
+set the access control list for that file using its path name.  The system 
+call setacl should return -1 and set EOPNOTSUPP, otherwise the test will 
+fail.  The test will print a message saying whether it succeeded or failed 
+and the value of errno.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.sp
+.na
+.sp 2
+.H 3 "Fsetacl system call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The system call \fBfsetacl\fR sets an existing file's access control list
+or deletes optional tuples from it.  Its format is:
+.sp
+.nf
+\fBint fsetacl\fI(fd, ntuples, acl)
+\fBint \fIfd\fR;
+\fBint \fIntuples\fR;
+\fBstruct acl_tuple \fIacl[]\fR;
+.sp
+.fi
+where \fIfd\fR is the file descriptor of an open file and \fIntuples\fR tells 
+how many valid tuples are defined in the \fIacl\fR parameter.
+.sp
+This test creates a file on an NFS mounted file system, opens that
+file and attempts to set the access control list for that file using its file
+descriptor.  The system call fsetacl should return -1 and set errno to 
+EOPNOTSUPP, otherwise the test will fail.  The test will print a message 
+saying whether it succeeded or failed and the value of errno.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Getacl system call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The system call \fBgetacl\fR returns all tuples in an existing file's access 
+control list.  Its format is:
+.sp
+.nf
+\fBint getacl\fI(path, ntuples, acl)
+\fBchar *\fIpath\fR;
+\fBint \fIntuples\fR;
+\fBstruct acl_tuple \fIacl[]\fR;
+.sp
+.fi
+where \fIpath\fR points to a path name of a file and \fIntuples\fR tells 
+what the number of tuples to report on is.
+.sp
+This test creates a file on an NFS mounted file system and attempts to 
+get the access control list for that file using its path name.  The system 
+call getacl should return -1 and set errno to EOPNOTSUPP, otherwise the test 
+will fail.  The test will print a message saying whether it succeeded or 
+failed and the value of errno.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Fgetacl system call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The system call \fBfgetacl\fR returns all tuples in an existing file's access 
+control list.  Its format is:
+.sp
+.nf
+\fBint fgetacl\fI(fd, ntuples, acl)
+\fBint \fIfd\fR;
+\fBint \fIntuples\fR;
+\fBstruct acl_tuple \fIacl[]\fR;
+.sp
+.fi
+where \fIfd\fR is the file descriptor of an open file and \fIntuples\fR tells 
+what the number of tuples to report on is.
+.sp
+This test creates a file on an NFS mounted file system, opens that
+file and attempts to get the access control list for that file using its file
+descriptor.  The system call fgetacl should return -1 and set errno to 
+EOPNOTSUPP, otherwise the test will fail.  The test will print a message 
+saying whether it succeeded or failed and the value of errno.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Getaccess system call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: second user will have access to file
+.fi
+.sp
+The system call \fBgetaccess\fR tell what access rights a specific user
+identity has to an existing file.
+.sp
+.nf
+\fBint getaccess \fI(path, uid, ngroups, gidset, label, privs)
+\fBchar	*\fIpath\fR;
+\fBunsigned short	\fIuid\fR;
+\fBint	\fIngroups\fR;
+\fBint	\fIgidset[]\fR;
+\fBvoid	*\fIlabel\fR;
+\fBvoid	*\fIprivs\fR;
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, does a chmod 0 to
+disallow access to the file and runs the command chacl on the NFS server to 
+set the ACL of that file to allow a second user (not the owner of that file) 
+to have full permissions on the file and verifies that that second user has 
+full access to the file by calling getaccess(2) on the NFS client.
+.sp
+The expected result is that the second user will have read/write/execute
+access to the file on the NFS mounted file system.  
+.sp
+The test then does a chmod 777 on that same file to allow access to the file 
+to everyone (in the process dropping any previously existing ACLs) and runs 
+the command chacl on the NFS server to set the ACL of that file to disallow 
+a second user (not the owner of that file) access to the file (0 permissions)
+and verifies that that second user has no permissions to the file by calling 
+getaccess(2) on the NFS client.
+.sp
+The expected result is that the second user will have zero permissions
+to the file on the NFS mounted file system.  
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.na
+.sp 2
+.H 3 "Settuple library call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The library call \fBsettuple\fR adds, modifies or deletes one tuple in
+an existing file's access control list.  Its format is:
+.sp
+.nf
+\fBint settuple\fI(path, uid, gid, mode)
+\fBchar *\fIpath\fR;
+\fBunsigned short \fIuid, gid\fR;
+\fBint \fImode\fR;
+.sp
+.fi
+where \fIpath\fR points to a path name of a file, \fIuid\fR and \fIgid\fR
+form a tuple identifier, and \fImode\fR is the new tuples access mode bits
+to be set.
+.sp
+This test creates a file on an NFS mounted file system and attempts to 
+add a tuple to that file's access control list using the file's path name.  
+The library call settuple should return a -1 and set the errno to EOPNOTSUPP, 
+otherwise the test will fail.  The test will print a message saying whether it 
+succeeded or failed and the value of errno.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Fsettuple library call"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+The library call \fBfsettuple\fR adds, modifies or deletes one tuple in
+an existing file's access control list.  Its format is:
+.sp
+.nf
+\fBint fsettuple\fI(fd, uid, gid, mode)
+\fBint \fIfd\fR;
+\fBunsigned short \fIuid, gid\fR;
+\fBint \fImode\fR;
+.sp
+.fi
+where \fIfd\fR an open file descriptor and \fIuid\fR and \fIgid\fR
+form a tuple identifier, and \fImode\fR is the new tuples access mode bits
+to be set.
+.sp
+This test creates a file on an NFS mounted file system, opens that 
+file and using the file's open file descriptor attempts to add a tuple to its
+access control list.  The library call fsettuple should return a -1 and set 
+the errno to EOPNOTSUPP, otherwise the test will fail.  The test will print 
+a message saying whether it succeeded or failed and the value of errno.
+.na
+.sp 2
+.H 2 "New Commands"
+.sp 
+.ad
+The new commands introduced into HP-UX to deal with ACLs are getaccess,
+lsacl and chacl.  We support getaccess and the -F option of chacl.  We
+do not support lsacl.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES: 
+ISSUES:
+IMPLEMENT TIME: 1.4 ed
+PERFORM TIME:
+.fi
+.sp
+These tests can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Getaccess command"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: test should succeed
+.fi
+.sp
+Getaccess lists access rights to a file.  Its format is:
+.sp
+.nf
+\fBgetacess\fR [ \fB-u\fR \fIuser\fR ] [ \fB-g \fIgroup\fR[,\fIgroup\fR]...] [ \fB-nv\fR ]
+\fBgetacess -r \fR[ \fB-nv\fR ] \fIfiles\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, does a chmod 0 to
+disallow access to that file to all users and runs the command chacl on the 
+NFS server to set the ACL of that file to allow a second user (not the owner 
+of that file) to have full permissions on the file and verifies that that 
+second user has full access to the file by calling getaccess(1) on the NFS
+client.  This test will use all the options to the getaccess command.
+.sp
+The expected result is that the second user will have read/write/execute
+access to the file on the NFS mounted file system.  If that is the 
+case the test will print a message saying it succeeded.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.na
+.sp 2
+.H 3 "Lsacl command"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Lsacl lists access control lists on files.
+.sp
+.nf
+\fBlsacl\fR [ \fB-v\fR ] \fIfiles\fR...
+\fBlsacl -l\fI files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, does a chmod 0 to
+disallow access to that file to all users and runs the command 
+chacl on the NFS server to set the ACL of that file to allow a second user 
+(not the owner of that file) to have full permissions on the file and 
+then runs lsacl on the local system to list the ACL for that file.
+.sp
+The expected result is that lsacl will fail with a 1 (since we are 
+trying to deal with only one file and therefore there was only one
+failure) and print the error message corresponding to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.na
+.sp 2
+.H 3 "Chacl command: no options"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl changes the access control list on a file.  Its format is:
+.sp
+.nf
+\fBchacl\fI acl files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system and attempts to add 
+an ACL to that file by doing a chacl.  This will fail by returning a 1 and 
+printing the error message that corresponds to EOPNOTSUPP.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.na
+.sp 2
+.H 3 "Chacl command: -r option"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -r replaces for a file the old ACLs with the given ACL.
+Its format is:
+.sp
+.nf
+\fBchacl -r\fI acl files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, executes
+a chacl on the NFS server to add an ACL and attempts to replace that
+ACL with a new one through the chacl -r command (on the local system).  
+This will fail by returning a 1 and printing the error message that 
+corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -d option"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -d deletes specified tuples from the ACLs on a file.
+Its format is:
+.sp
+.nf
+\fBchacl -d\fI acl files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, executes
+a chacl on the NFS server to add an ACL and attempts to delete a tuple
+from that ACL through the chacl -d command on the local system.  
+This will fail by returning a 1 and printing the error message that 
+corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -f option, local-remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -f copies the ACL from the \fIfromfile\fR to the specified files.
+Its format is:
+.sp
+.nf
+\fBchacl -f\fI fromfile tofiles\fR...
+.sp
+.fi
+.sp
+This test creates a local file and a file on an NFS mounted file system, 
+executes a chacl on the local system to add an ACL to the local file and 
+attempts to copy the ACL from that file to the remote file by using 
+chacl -f.  This will fail by returning a 1 and printing the error message that 
+corresponds to EOPNOTSUPP.
+.sp
+This test can be run when the remote system is a non-HP-UX system.
+.sp 2
+.H 3 "Chacl command: -f option, remote-local"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -f copies the ACL from the \fIfromfile\fR to the specified files.
+Its format is:
+.sp
+.nf
+\fBchacl -f\fI fromfile tofiles\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system and a local file, 
+executes a chacl on the NFS server to add an ACL to the remote file and 
+attempts to copy the ACL from that file to the local file by using 
+chacl -f on the local system.  This will fail by returning a 1 and printing 
+the error message that corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -f option, remote-remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -f copies the ACL from the \fIfromfile\fR to the specified files.
+Its format is:
+.sp
+.nf
+\fBchacl -f\fI fromfile tofiles\fR...
+.sp
+.fi
+.sp
+This test creates two files on an NFS mounted file system, 
+executes a chacl on the NFS server to add an ACL to one of the remote files
+and attempts to copy the ACL from that remote file to the other remote file 
+by using chacl -f on the local system.  This will fail by returning a 1 and 
+printing the error message that corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -z option"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -z deletes optional tuples.  
+Its format is:
+.sp
+.nf
+\fBchacl -z\fI files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, executes a chacl on 
+the NFS server to add an ACL to that file and attempts to delete all optional
+tuples on that file by using chacl -z on the local system.  This will fail by 
+returning a 1 and printing the error message that corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -Z option"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: EOPNOTSUPP
+.fi
+.sp
+Chacl -Z deletes all tuples (zeroing the access).
+Its format is:
+.sp
+.nf
+\fBchacl -Z\fI files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, executes a chacl on 
+the NFS server to add an ACL to that file and attempts to delete all 
+tuples on that file by using chacl -Z on the local system.  This will fail 
+by returning a 1 and printing the error message that corresponds to EOPNOTSUPP.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Chacl command: -F option"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: This option should succeed over NFS.
+.fi
+.sp
+Chacl -F folds optional tuples into base tuples.
+Its format is:
+.sp
+.nf
+\fBchacl -F\fI files\fR...
+.sp
+.fi
+.sp
+This test creates a file on an NFS mounted file system, executes a chacl on 
+the NFS server to add an ACL to that file that makes the file not accessible
+to the owner, executes chacl -F on the local system on that file and as 
+another user does an ll on the file to see whether the owner of the file has 
+access to it.  
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 2 "Changes To Current Commands"
+.sp 
+.ad
+Several commands were modified to handle ACLs.  We need to verify that those
+commands still operate correctly over NFS and that they correctly handle files 
+with an ACL over NFS.  The first objective, operating correctly, can be 
+accomplished by our current tests.  The second one requires new tests that
+create files that contain ACLs and attempt to deal with them.
+.sp
+The commands that we will be checking are cp, mv, ln, ls -l, rm, chmod
+and find.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES: Stable error messages from HP-UX commands
+ISSUES:
+IMPLEMENT TIME: 1 ed
+PERFORM TIME:
+.fi
+.na
+.sp 2
+.H 3 "Copy: cp remote local"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: loose ACL during copy over NFS
+.fi
+.sp
+This test creates a file on an NFS mounted file system, runs chacl on the
+NSF server to create an ACL for that file and copies that file to the local
+system.  The expected result is that the file will be copied to the local
+system, but its ACL will not exist.  To determine that we can use lsacl
+on the local file.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Copy: cp local remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: loose ACL during copy over NFS
+.fi
+.sp
+This test creates a file on the local system, runs chacl on the local system 
+to create an ACL for that file and copies that file to the remote system.
+The expected result is that the file will be copied to the remote 
+system, but its ACL will not exist.  To determine that we can use lsacl
+on the remote file.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Move: mv local remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: Move will not be done
+.fi
+.sp
+The mv command asks for permission to overwrite a file if the access
+permission of the target file forbids writing and the standard input 
+is a terminal.  This is done by printing the access permission portion of 
+the file's st_mode value and is followed by a "+" if there are any optional 
+tuples in the file's access control list.
+.sp
+Over NFS we will have the effective mode bits for the file since stat_mode
+contains the base mode bits modified by the ACL.  So, if in our test
+we have a file that is writable by everyone according to the base mode
+bits, but not writable by a user because of a tuple on its ACL we should
+be prompted about whether the file should be overwritten or not.
+.sp
+This test creates a local file and a file on an NFS mounted file system, 
+does a chmod so that all users can write to the remote file, runs chacl 
+on the NFS server to create an ACL for the remote file that disallows a 
+second user to  write to that file and attempts to move the local file 
+to the remote file.  
+.sp
+Mv should prompt the user on whether to overwrite the file (without a "+"
+after the prompt).  If the test specifies that the file should not be 
+overwriten, mv should not overwrite it.
+.sp
+The expected result is that the local file will not be moved to the remote 
+file. 
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Link: ln local remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: Link will succeed
+.fi
+.sp
+The ln command asks for permission to overwrite a file if the access
+permission of the target file forbids writing and the standard input 
+is a terminal.  This is done by printing the access permission portion of 
+the file's st_mode value and is followed by a "+" if there are any optional 
+tuples in the file's access control list.
+.sp
+Over NFS we will have the effective mode bits for the file since stat_mode
+contains the base mode bits modified by the ACL.  So, if in our test
+we have a file that is writable by everyone according to the base mode
+bits, but not writable by a user because of a tuple on its ACL we should
+be prompted about whether the file should be overwritten or not.
+.sp
+This test creates a local file and a file on an NFS mounted file system, 
+does a chmod so that all users can write to the remote file, runs chacl on
+the NFS server to create an ACL for the remote file that disallows a second 
+user to write to that file and attempts to link the local file to the 
+remote file.  
+.sp
+Ln should prompt the user on whether to overwrite the file (without a "+"
+after the prompt).  If the test specifies that the file should not be 
+overwriten, ln should not overwrite it.
+.sp
+The expected result is that the local file will not be linked to the remote 
+file. 
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Ls -l"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: Ls -l will not show that ACLs exist
+.fi
+.sp
+Ls -l prints a "+" after the mode value if there are any optional tuples
+in the file's access control list.
+.sp
+This test creates a file on an NFS mounted file system, runs chacl on the NFS 
+server to create an ACL for the remote file and does an ls -l of that file.
+The expected result is that ls -l will not show a "+" following the mode
+bits for that file.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Remove: rm remote"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: File will be removed
+.fi
+.sp
+If a file has no write permission in its access control list and 
+the standard input is a terminal rm prints its st_mode value and
+a "+" if there are optional tuples in the file's access control list.
+.sp
+This test creates a file on an NFS mounted file system, does a chmod
+777 to allow all users write access to the file, runs chacl on the NFS 
+server to create an ACL for the remote file (the ACL should not allow
+any write permission) and does an rm of that file.
+.sp
+The expected result is that rm will prompt the user on whether the
+file should be deleted and will not show a "+" following the mode
+bits for that file.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Chmod"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: Chmod will drop ACLs
+.fi
+.sp
+When a user does a chmod on a file the ACLs are dropped.
+This test creates a file on an NFS mounted file system, runs chacl on the 
+NFS server to create an ACL for the remote file, does a chmod to anything
+on that file and then checks on the NFS server (through lsacl) whether that 
+file still contains an ACL.
+The expected result is that the ACL for that file has been dropped even
+though the chmod occurred remotely.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 3 "Find -acl"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: Option not supported over NFS
+.fi
+.sp
+This test creates a file on an NFS mounted file system, runs chacl on 
+the NFS server to create an ACL for the remote file and then runs
+"find -acl +" on the directory where the remote file exists to attempt
+to find the remote file with the ACL.
+.sp
+The expected result is that the option will not work over NFS and an error
+message will be printed?
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp
+.na
+.sp 2
+.H 2 "ACLs over NFS"
+.sp 
+.ad
+This section of the testplan will deal with how NFS handles files whose
+permissions are determined by ACLs.  In other words, if a user is granted
+or restricted access to a file because of the ACL on the local system the
+same permissions should apply over NFS.
+.sp
+The current NFS protocol (version 2) performs access checking by having
+the server send access information to the client (when the client
+performs an operation like open() or access() for example).  The client then 
+checks to see whether access is allowed.  For operations like read() and 
+write() the server checks whether the client can perform the operation.
+.sp
+The ACL implementation allows the effective mode bits to be passed back
+from the server to the client.  In that way if a user is denied access
+to a file based on the ACLs, the client system will realize that when it
+checks the access and will not allow the open() or access() and then have
+a read() or write() denied.
+.sp
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES: 
+ISSUES:
+IMPLEMENT TIME: 0.5 ed
+PERFORM TIME:
+.fi
+.na
+.sp 2
+.H 3 "Base mode bits allow access, ACL denies access"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: all operations should be denied
+.fi
+.sp
+This test creates a shell script and a directory on an NFS mounted file 
+system, does a chmod 777 so that all users will be allowed rwx access to the 
+file and directory, then executes chacl on the NFS server to add a tuple to 
+the ACL list to deny a second user (not the owner of the file) any access to 
+that file and that directory.  The directory created by the test contains a 
+file in it.
+.sp
+The second user then attempts to read, execute and modify(write) the shell 
+script over NFS.  All these operations should be denied.
+The second user also attempts to create a file in the directory, to search for
+a file in that directory and to read a file in that directory.  All these
+operations should be denied.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.sp 2
+.H 3 "Base mode bits deny access, ACL allows access"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: all operations should be allowed
+.fi
+.sp
+This test creates a shell script and a directory on an NFS mounted file 
+system, does a chmod 0 so that all users will be denied any access to the file
+and the directory, then executes chacl on the NFS server to add a tuple to the 
+ACL list that allows a second user (not the owner of the file) rwx permission 
+to that file and directory.  The directory created by the test contains a 
+file in it.
+.sp
+The second user then attempts to read, execute and modify(write) the shell 
+script over NFS.  All these operations should succeed.
+The second user also attempts to create a file in the directory, to search for
+a file in that directory and to read a file in that directory.  All these
+operations should succeed.
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.na
+.sp 2
+.H 3 "ACLs in mount points and remotely mounted directories"
+.ad
+.sp 
+.nf
+TYPE OF TEST: functional 
+EXPECTED OUTPUT: ls -l should return permissions of remote directory
+.fi
+.sp
+This test verifies that ACLs do not interfer with the correct behavior
+of NFS when they are present on the directory that is the NFS mount 
+point or on the remote directory being mounted.
+.sp
+This test creates a local directory owned by root and with base mode bits of 
+555 modified through optional tuples to be 400 for another user and a remote 
+directory with base mode bits of 444 (owned by who runs the test) and modified 
+through optional tuples to have 777 permissions for another user.
+After that it mounts the remote directory on the local directory and does an
+"ls -ld" of that directory as another user to find out its permissions.  We 
+expect the permissions to be that of the remote directory and for the 
+ACLs to correctly modify the base mode bits.  Therefore, the "ls -ld" should
+return the same permissions as the permissions the other user had for the 
+remote directory before that directory was mounted (474 and owned by who runs
+the test).
+.sp
+This test CANNOT be run when the remote system is a non-HP-UX system or
+an HP-UX system that does not support ACLs (s800 before release 4.0 and 
+s300 before release 6.5).
+.na

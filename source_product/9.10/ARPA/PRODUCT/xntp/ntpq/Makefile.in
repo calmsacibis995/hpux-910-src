@@ -1,0 +1,58 @@
+# $Source: /source/hpux_source/networking/rcs/arpa90_800/xntp/ntpq/RCS/Makefile.in,v $
+# $Revision: 1.2.109.1 $	$Author: mike $
+# $State: Exp $   	$Locker:  $
+# $Date: 94/10/27 10:43:09 $
+
+#
+# Makefile.in,v 3.1 1993/07/06 01:09:26 jbj Exp
+#
+PROGRAM=	ntpq
+#
+# ntpq - control mode query program
+#
+COMPILER= gcc -pipe -Wall -g -O2 -finline-functions -fdelayed-branch -fomit-frame-pointer
+COPTS=		@COPTS@
+BINDIR=		@bindir@
+DEFS=		@DEFS@
+RESLIB=		@RESLIB@
+COMPAT=		@COMPAT@
+#
+INCLUDE=	@INCLUDE@
+CFLAGS=		$(COPTS) $(DEFS) $(INCLUDE)
+CC=		@CC@
+LIB=		@LIB@
+LINTLIB=	../lib/llib-llibntp.ln
+MAKE=		make
+#
+OBJS=	ntpq.o ntpq_ops.o
+SOURCE=	ntpq.c ntpq_ops.c
+
+all:	$(PROGRAM)
+
+$(PROGRAM): $(OBJS) version.o $(LIB)
+	$(CC) $(COPTS) -o $@ $(OBJS) version.o $(LIB) $(RESLIB) $(COMPAT)
+
+install:	$(PROGRAM)
+	install -c -m 0755 $(PROGRAM) $(BINDIR)
+
+tags:
+	ctags *.c *.h
+
+depend:
+	mkdep $(CFLAGS) $(SOURCE)
+
+clean:
+	rm -f $(PROGRAM) *.o *.out tags make.log Makefile.bak lint.errs
+
+distclean:	clean
+	rm -f Makefile
+
+lint:	$(LINTLIB)
+	lint -x -u $(DEFS) $(INCLUDE) $(LINTLIB) $(SOURCE) >lint.errs
+
+../lib/llib-llibntp.ln:
+	cd ../lib ; $(MAKE) $(MFLAGS) lintlib
+
+../libc/libntp.a:
+	cd ../libntp ; $(MAKE) $(MFLAGS)
+

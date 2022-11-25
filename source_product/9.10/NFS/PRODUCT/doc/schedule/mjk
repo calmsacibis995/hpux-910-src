@@ -1,0 +1,129 @@
+# This is my schedule for the work on NFS on the s800.
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	. building nightly/weekly development systems for group distributions
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. Coordinate with partners since it is mainly based on interrupts
+#
+# 0.1 = 48 min
+# 0.2 = 1h 36 min
+# 0.3 = 2h 24 min
+# 0.4 = 3h 12 min
+# 0.5 = 4h
+# 0.6 = 4h 48 min
+# 0.7 = 5h 36 min
+# 0.8 = 6h 24 min
+# 0.9 = 7h 12 min
+
+NAME: Mark Kean 
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+ .8	0	.8	Train		New Hire Training
+	
+5.2	0  	7	Train		Read NFS/300 second draft
+     					manuals:
+					-NFS/800 Product Data Sheet
+					-Networking Overview NS-ARPA NFS
+					-Using and Administering NFS
+					-Programming with NFS
+                                          * tryout examples
+
+.5	 0      .5      Train           Read NFS tech. Documentation
+					-NFS Product Requirements Doc.
+					-NFS/800 Lifecycle
+					-NFS Development Environ.
+
+1       0       1       Train		Read Misc. documentation
+					-Scaffold training
+                                        -Partner Specifications
+	
+1.5     0       1.5     Metr            learn basic use of BFA and Triggers 
+
+1	0 	1	Metr	 	learn basic use PFA	
+
+Checkpoint	IC1	08/03/87	Full Functional Complete (IC1)
+
+1	0	5	Dev		300/800 user code reviews
+					(maybe kernel too)
+
+1.8	0  	1.8	Train		Read NFS/300 second draft
+     					manuals:
+					-Using and Administering NFS
+					-Programming with NFS
+                                          * tryout examples
+
+6.9	3.1 	10 	Sup		Learn to modify and create makefiles
+                                        used with NFS/800. Understand 
+                                        modifications required for PFA. 
+
+2	0	2	Sup		Contact for integration cycles.
+                                        -verifying that correct bits/files
+					 are delivered and built.
+					-coordination: changes/exceptions
+					 to usual schedule/process.
+					-identify specific tasks and 
+					 determine which group is responsible
+					 for task completion (smelter or us)
+ 
+1.4	0	3	Dev		Debugging/bug fixes for the user
+					code (kernel problems too).
+ 
+.6	0	0	Train		Learning Shell Programming
+
+.3	0	0	Sup		Reveiw of BFA/Triggers Doc.
+
+1.5	0	0	Metr		Investigating use of BFA vs. PFA
+					for NFS800
+
+2	0	0	Test		Executing and exaiming results of
+					functional tests for NFS800.
+	
+Checkpoint	IC2	09/07/87	Level A - 24 hour reliability (IC2)
+
+2.1	1.9	4	Dev		300/800 user code reviews
+					(maybe kernel too)
+
+1.7	1.3	3	Sup		Contact for integration cycles.
+                                        -verifying that correct bits/files
+					 are delivered and built.
+					-coordination: changes/exceptions
+					 to usual schedule/process.
+
+4.0	1	3	Dev		Debugging/bug fixes for the user
+					code (kernel problems too).
+ 
+.2	9.8	10	Test		Performance measurement 
+
+1.7	0	2	Train		Testing Fundamentals course 
+					-Sept. 15-16 	
+
+1.5	26.5	28	Metr		BFA numbers
+					. adapt makefiles to do it
+					. actual measurements
+					. work to bring up numbers?
+
+0	7	7	Doc		Documentation review and consulting
+					. Leverage information from 300
+
+Checkpoint	IC3	10/12/87	Level B - 48 hour reliability (IC4)
+
+
+Checkpoint	IC4	11/16/87	Level C - 120 hour reliability (IC5)
+
+0	6	6	Tech		Consulting with tech support and
+					review of training class.
+
+Checkpoint	IC5	12/21/87	Level C - 120 hour reliability (IC5)
+
+Checkpoint	IC6	01/25/88	Final Bits
+
+# Checkpoint	IntIntg	06/15/87	Initial Integration
+
+Checkpoint 	END
+

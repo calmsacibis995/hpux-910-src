@@ -1,0 +1,5 @@
+# @(#) $Revision: 27.1 $      
+cd $d
+ulimit $l
+umask $m
+$<

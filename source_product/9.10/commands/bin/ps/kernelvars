@@ -1,0 +1,293 @@
+#! /bin/sh
+
+echo 'struct nlist nl[] = {'
+
+/lib/cpp <<'EOF' |
+/* Warning: If you change the nl structure, be sure you delta a new version
+	    because the monitor uses the whatstring to identify if the
+	    monitorfile must be updated because it is out of synch with the
+	    nl structure.  Also be careful when debugging with copies that
+	    have sccs keywords instead of ids. */
+
+#ifdef hp9000s200
+_proc
+_forkstat
+_cp_time
+_total
+_sum
+/* _desscan */  /* No longer in use by kernel as of 9.0 release */
+_lotsfree
+_desfree
+/* _maxpgio */  /* No longer in use by kernel as of 9.0 release */
+_maxslp
+_minfree
+_dk_time
+_dk_xfer
+_dk_wds
+_dk_seek
+_dk_mspw
+_avenrun
+_freemem
+_lockable_mem
+_maxmem
+_physmem
+_swdevt
+_bufpages
+_nswdev
+_fswdevt
+_nswapfs
+_nswapdev
+_swchunk
+_maxswapchunks
+_dk_devt
+_boottime
+_msus
+_sysname
+
+/* THESE ARE DRIVER VARIABLES */
+_ac_open		X_FIRST_DRIVER
+_amigo_open
+_atalk_link
+_autoch_ioctl
+_autox0_ioctl
+_ciper_open
+_cdfs_link
+_cs80_open
+_dskless_link
+_dos_open
+_dragon_isr		/* fpa */
+_eeprom_ioctl
+_etest_ioctl
+_gpio_link
+_hpib_open
+_inet_link
+_lla_open
+_meas_sys_ioctl
+_mf_open		/* Obsolete as of the 5.2 release */
+_netdiag1_ioctl
+_nfs_link
+_ni_ioctl
+_nipc_link
+_nm_ioctl
+_nsdiag0_open
+_lp_open		/* printer */
+_pdix25_read
+_pdn0_open		/* x25 */
+_pt_open		/* plot */
+_ptym_open		/* ptymas */
+_ptys_open		/* ptyslv */
+_ram_open		/* ramdisc */
+_rdu_read
+_rfai_link		/* rfa */
+_rje_open
+_scsi_link
+_scsitape_iocl		
+_snalink_open
+_swapspc_cnt
+_swapspc_max
+_srm629_open		/* srm */
+_stp_open		/* stape */
+_tp_open		/* tape */
+_uipc_link
+_vme_open
+_stealth_open		/* vme2 */
+_vtest_open		/* vmetest */
+_x25ip_link
+_x25pa_link
+_xns_link
+_ti9914_link		/* 98624 */
+_simon_link		/* 98625 */
+_sio626_link		/* 98626 */
+_sio628_link		/* 98628 */
+_sio642_link		/* 98642 */ X_LAST_DRIVER
+
+/* THESE ARE OS CONFIGURATION VARIABLES */
+
+_acctresume		X_FIRST_CONFIG
+_acctsuspend
+_check_alive_period
+_dos_mem_byte
+_dskless_fsbufs
+_dskless_initialized
+_file
+_maxdsiz
+_maxssiz
+_maxtsiz
+_maxuprc
+_max_ptys
+_minswapchunks
+_nbuf
+_ncallout
+_ncdnode
+_nfile
+_nflocks
+_netisr_priority
+_ninode
+_nproc
+_npty
+_num_cnodes
+_shminfo
+_shmall			/* This is really a subfield of shminfo */
+_shmmax			/* It's patched in mode_c(). */
+_shmmin			/* ditto */
+_shmmni			/* ditto */
+_shmseg			/* ditto */
+_shmbrk			/* ditto */
+_shmmaxaddr
+_timeslice
+_unlockable_mem 		X_LAST_CONFIG
+
+/* NOT CONFIG VARS, BUT ARE USED BY MONITOR */
+
+_my_site
+_my_site_status
+_swaptab
+_swapMAXSWAPTAB
+_nsp
+_num_nsps
+_free_nsps
+_csp_stats
+_clustab
+_ncsp
+_cleanup_running
+_failed_sites
+_retrysites			X_LASTENTRY
+#endif hp9000s200
+
+#ifdef hp9000s800
+
+/* THESE ARE OS STATE VARIABLES */
+
+proc
+procNPROC
+forkstat
+cp_time
+total
+sum
+/* desscan */  /* No longer in use by kernel as of 9.0 release */
+lotsfree
+desfree
+/* maxpgio */  /* No longer in use by kernel as of 9.0 release */
+maxslp
+minfree
+dk_time
+dk_time1
+dk_time2
+dk_time3
+dk_xfer
+dk_xfer1
+dk_xfer2
+dk_xfer3
+dk_wds
+dk_wds1
+dk_wds2
+dk_wds3
+dk_seek
+dk_seek1
+dk_seek2
+dk_seek3
+dk_mspw
+dk_mspw1
+dk_mspw2
+dk_mspw3
+avenrun
+freemem
+lockable_mem
+maxmem
+physmem
+swdevt
+fswdevt
+nswapfs
+nswapdev
+swapspc_cnt
+swapspc_max
+swchunk
+maxswapchunks
+bufpages
+cons_mux_dev
+dk_ndrive1
+dk_ndrive2
+dk_ndrive3
+boottime
+
+/* THESE ARE OS CONFIGURATION VARIABLES */
+
+acctresume		X_FIRST_CONFIG
+acctsuspend
+dmmax
+dmmin
+dmshm
+dmtext
+dskless_fsbufs
+dskless_initialized
+file
+maxdsiz
+maxssiz
+maxtsiz
+maxuprc
+minswapchunks
+nbuf
+ncallout
+ncdnode
+netisr_priority
+nfile
+nflocks
+ngcsp
+ninode
+nproc
+npty
+ntext
+runningprocs
+num_cnodes
+selftest_period
+timeslice
+unlockable_mem		X_LAST_CONFIG
+
+/* NOT CONFIG VARS, BUT ARE USED BY MONITOR */
+my_site
+my_site_status
+swaptab
+swapMAXSWAPTAB
+nsp
+num_nsps
+free_nsps
+csp_stats
+clustab
+ncsp
+cleanup_running
+failed_sites
+retrysites		X_LASTENTRY
+#endif hp9000s800
+
+EOF
+
+awk '
+	BEGIN {
+		count=0
+	}
+
+	/[_a-z]/ {
+		print "	{\"" $1 "\"},"
+		name=$1
+		if (substr(name, 1, 1)=="_")		# leading underscore?
+			name=substr(name, 2)		# trash it
+
+		# convert name to uppercase
+		for (i=1; i<=length(name); i++) {
+			c = substr(name, i, 1)
+			n = index("abcdefghijklmnopqrstuvwxyz", c)
+			if (n>0)
+				c = substr("ABCDEFGHIJKLMNOPQRSTUVWXYZ", n, 1)
+			name = substr(name, 1, i-1) c substr(name, i+1)
+		}
+
+		print "#define X_" name, count
+
+		for (i=2; i<=NF; i++)			# additional defines
+			print "#define", $i, count	# same as main one
+		count++
+	}
+
+'
+
+echo '\t{ NULL }\n};'

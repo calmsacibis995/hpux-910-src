@@ -1,0 +1,58 @@
+# Makefile for facet program COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/09 15:39:18 ssa Exp $
+CFLAGS= \
+		$(MACH_CFLAGS) \
+		-DFACET -DLOGIN_REQUIRED -DPCCOMMANDACK \
+		$(MACH_MODEL) -I../include
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+USR_BIN_DIR=	/usr/bin
+USR_BIN_PROG=	facet
+
+all:	$(USR_BIN_PROG) done
+
+FACET_OBJ = \
+	facet.o common.o version.o check.o fixassign.o \
+	iswindow.o wincommon.o activecom.o wins.o \
+	restart.o conpipe.o commonopt.o info.o
+
+### facet needs root set-user-id ###
+facet:	$(FACET_OBJ)
+	cc $(MACH_MODEL) -o facet $(FACET_OBJ) $(MACH_LIBS)
+	@echo make facet program for $(MACH) done
+
+# check.o:	check.c ../reg/checkauth.in ../reg/check.h ../reg/shuffle.in
+
+install: installtext installprog installown
+	@echo install facet for $(MACH) done
+
+installtext:
+	@echo installtext facet for $(MACH) done - nothing to do
+
+installtextcommon:
+	@echo installtextcommon facet for $(MACH) done - nothing to do
+
+installprog:
+	strip                                    $(USR_BIN_PROG)
+	Cpioinstall $(FTINSTDIR)$(USR_BIN_DIR) - $(USR_BIN_PROG)
+	@echo installprog facet for $(MACH) done
+
+installown:
+	cd          $(FTINSTDIR)$(USR_BIN_DIR); \
+#		chown root $(USR_BIN_PROG); \
+#		chgrp    0 $(USR_BIN_PROG); \
+#		if [ "$(NO_SUID_ROOT)" != "NO_SUID_ROOT" ] ; then \
+#			chmod 4555 $(USR_BIN_PROG); \
+#		else \
+#			chmod 555 $(USR_BIN_PROG); \
+#		fi ; \
+		ls -l $(USR_BIN_PROG)
+	@echo installown facet for $(MACH) done
+
+clean:
+	rm -f $(USR_BIN_PROG) *.o
+	@echo clean facet for $(MACH) done
+
+done:
+	@echo make facet for $(MACH) done

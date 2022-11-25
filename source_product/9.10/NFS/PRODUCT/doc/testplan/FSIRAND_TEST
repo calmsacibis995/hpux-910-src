@@ -1,0 +1,98 @@
+.H 2  "Fsirand (Cristina Mahon)"
+
+.ad
+.PP
+Fsirand installs random inode generation numbers on all the
+inodes on the specified device and also installs a filesystem
+ID in the superblock.
+.PP
+The command line for fsirand is:
+.sp
+           fsirand [ -p ] device_name
+.sp 
+WARNING: Fsirand must be used only on an unmounted filesystem
+that has been checked with fsck.  The only exception is that it
+can be used on the root filesystem in single-user mode, if the
+system is immediately re-booted afterwards.
+.sp
+Due to the high risk involved in using this command, these tests
+should probably be interactive tests.
+.sp 2
+.nf
+RESPONSIBLE ENGINEER: Cristina Mahon
+DEPENDENCIES:
+ISSUES:
+IMPLEMENT TIME:  1.0  md 
+PERFORM TIME:    1.0  md
+.fi
+.na
+.sp 2
+.H 3 "Fsirand -p"
+.sp 1
+.PP
+This should print the current inode, generation number pair.
+.sp
+.nf
+TYPE OF TEST: 
+       functional 
+EXPECTED OUTPUT: 
+       A list of inode generation numbers.
+.fi
+.sp 2
+.H 3 "Fsirand without arguments"
+.sp 1
+.PP
+This should print an usage message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Usage: fsirand [-p] special"
+.fi
+.sp 2
+.H 3 "Fsirand with unknown device"
+.sp 1
+.PP
+This should print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Cannot open <device>"
+.fi
+.sp 2
+.H 3 "Fsirand with unknown option"
+.sp 1
+.PP
+This should print an error message.
+.sp
+.nf
+TYPE OF TEST: 
+       functional (error checking)
+EXPECTED OUTPUT: 
+       "Cannot open <device>" where device is the unknown option.
+.fi
+.sp 2
+.H 3 "Run fsirand"
+.sp 1
+.PP
+.ad
+First run fsirand -p on that device and save the information.
+Then run fsirand on that device and verify, through another fsirand -p,
+that the inode, generation pairs have changed.  
+Make sure the disk is unmounted!
+.sp
+.nf
+TYPE OF TEST: 
+       functional
+EXPECTED OUTPUT: 
+.ad
+       The output of the second fsirand -p should be different from 
+the first and the disk should be correct (an fsck should not detect
+any errors).
+.na
+.fi
+.na
+.sp 2

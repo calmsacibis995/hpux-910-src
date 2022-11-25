@@ -1,0 +1,762 @@
+short map[] = { 1, 3, 0, 2, 1 };
+
+void nlkeycompare (string1,length1,string2,length2,result,langid,error,colltab) 
+unsigned char *string1;
+int length1;
+unsigned char *string2;
+int length2;
+short *result;
+short langid;
+short error[2];
+unsigned short *colltab;
+{
+ unsigned char *s1, *s2;
+ unsigned short *table;
+ int options[1];
+ int flag;
+ void nlinfo ();
+ int malloc ();
+ int nlcompare ();
+ int table_length;
+ void free ();
+
+ flag = *error = *(error+1) = 0;
+
+ if (length1 > length2) *error =  7;
+ else if (!colltab) {
+	 flag = 1;
+         nlinfo (27,&table_length,&langid,error);
+         if (!*error) {
+             colltab = (short *) malloc (table_length * 2);
+             nlinfo (11,colltab,&langid,error);
+         }
+ }
+
+ if (!*error) if ((*(colltab+2) < 1) || (*(colltab+2) >4)) *error = 3;
+
+ if (*error) {
+     *result = 0;
+     return;
+ }
+
+ s1 = (unsigned char *) string1;
+ s2 = (unsigned char *) string2;
+ table = (unsigned char *) colltab;
+ *options = 19;
+
+ *result = nlcompare (s1,s2,length1,length2,table,options);
+ *result = map[(*result)+2];
+
+ if (flag) free (colltab);
+
+}
+
+
+#define TRUE                   1
+#define FALSE                  0
+#define NULL                   0
+#define EQUAL                  0
+#define BLANK                  ' '
+
+#define ODD(value)             (value & 1)
+#define LVALUE(value)          ((unsigned char) (value >> 8))
+#define RVALUE(value)          ((unsigned char) (value))
+#define CASEVALUE(value)       ((value) & 0x3F)
+#define HALFVALUE(value)       ((value) >> 1)
+
+#define RETURN(a,b)            if (a>b) return(1); if(a<b) return(-1);
+#define BREAKTIE               {if (!tie || TIE0) return(EQUAL);             \
+                                if(TIE2)                                     \
+                                     {if (tie>0) return(2);else return(-2);} \
+                                else {if (tie>0) return(1);else return(-1);} \
+                               }
+
+#define LANG                   (*(table+1))
+#define CLASS                  (*(table+2))
+#define BINARY                 (!table || (CLASS==1))
+#define UNIQUE                 (CLASS==2)
+#define EUROPEAN               (CLASS==3)
+#define ASIAN                  (CLASS==4)
+#define ASCII                  (!table && !options)
+
+#define FLAG2to1               (*(table+5))
+#define TAB2to1                (table+FLAG2to1)
+
+#define CLANGUAGE              (!len1&& !len2&& (!options || !(ODD(*options))))
+
+#define COBOL                  (*options &  4)
+#define LITERAL                (*options &  8)
+#define GENERIC                (*options & 10)
+#define TIE2                   (*options & 16)
+#define TIE0                   (*options & 32)
+
+#define ADVANCE(s,length)      {s++;length--;} 
+#define ADVANCE1(s,length)     ADVANCE(s,length)
+#define ADVANCE2(s,length)     if ((length==1) && LITERAL) \
+                                {s=str2;length=length2;} else ADVANCE(s,length);
+
+#define NEXT1(s)               s++
+#define NEXT2(s)               {s++; if (!*s && LITERAL) s = str2; }
+
+#define MORE(s)                s++; while(DONTCARE(*s)) s++;
+#define MORE1(s)               MORE(s)
+#define MORE2(s)               MORE(s); if (!*s && LITERAL) s = str2;
+  
+#define SINGLE(c)              (!(*(ctab+c) & 0xC0))
+#define ORDER(c)               ((c)? LVALUE (*(ctab+c)) : 0)
+#define CASE(c)                (CASEVALUE (*(ctab+c)))
+
+#define DOUBLE(c)              (*(ctab+c) & 0x80)
+#define DORDER(c)              (LVALUE (*(dtab+CASE(c))))
+#define DCASE(c)               (CASEVALUE (*(dtab+CASE(c))))
+
+#define PARTIAL(c)             !(DOUBLE (c))
+#define DONTCARE(c)            (!*(ctab+c))
+#define UORDER(c)              ((ODD(c))? RVALUE (*(ctab+(HALFVALUE(c)))) :\
+                                          LVALUE (*(ctab+(HALFVALUE(c)))))
+      
+#ifdef MPE
+#define ONEBYTE(s)             ATTRIB(*s)-6
+#define TWOBYTE(s)             !(ONEBYTE(s))
+#define ATTRIB(c)              ((ODD(c))? RVALUE (*(atab+(HALFVALUE(c)))) :\
+                                          LVALUE (*(atab+(HALFVALUE(c)))))
+#endif
+
+#ifndef MPE
+#include "nlinfo.h"
+#define ONEBYTE(s)             pcharset[(unsigned char)*s]
+#define TWOBYTE(s)             !(ONEBYTE(s))
+#endif
+
+#define BSCAN(indx,val,c)     {val [0] = ORDER (*c);                      \
+                               wk=c; ptab=TAB2to1 + CASEVALUE(*(ctab+*c));\
+                               NEXT/**/indx(wk); /* NEXT1 or NEXT2 */     \
+                               if (!*wk) while ((*ptab - 0xFFFF)) ptab+=2;\
+                               else while (*ptab - 0xFFFF) {              \
+                                     if (RVALUE(*ptab) == *wk) {/*found*/ \
+                                         NEXT/**/indx(c);                 \
+                                         val[0]= LVALUE(*(ptab+1));       \
+                                         break;                           \
+                                     }                                    \
+                                     ptab +=2;                            \
+                                   }                                      \
+                                val [1] = CASEVALUE (*(ptab+1));          \
+                               }
+
+#define PSCAN(indx,val,c)     {val [0] = ORDER (*c);                      \
+                               wk=c; ptab=TAB2to1 + CASEVALUE(*(ctab+*c));\
+                               len=len/**/indx; ADVANCE/**/indx(wk,len);  \
+                               if (!len) while ((*ptab - 0xFFFF)) ptab+=2;\
+                               else while (*ptab - 0xFFFF) {              \
+                                 if (RVALUE(*ptab) == *wk) { /*found*/    \
+                                    ADVANCE/**/indx(s/**/indx,len/**/indx);\
+                                    val[0]= LVALUE(*(ptab+1));             \
+                                    break;                                 \
+                                   }                                       \
+                                   ptab +=2;                               \
+                               }                                           \
+                               val [1] = CASEVALUE (*(ptab+1));            \
+                              }
+
+#ifdef MPE
+#define PRIORITY(value,c,flag) {                                            \
+                               rtab = table + *(table+10);                  \
+                               if (flag) *value=(unsigned int)(*value<<8)+c;\
+                               while (LVALUE(*value) < LVALUE (*rtab)    || \
+                                      LVALUE(*value) > LVALUE (*(rtab+1))|| \
+                                      RVALUE(*value) < RVALUE (*rtab)    || \
+                                      RVALUE(*value) > RVALUE (*(rtab+1)))  \
+                                             rtab +=3;                      \
+                               *(value+1) = *(rtab+2);                      \
+                              }
+#endif
+
+#ifndef MPE
+#define PRIORITY(value,c,flag) {                                            \
+                               if (flag) *value=(unsigned int)(*value<<8)+c;\
+                               *(value+1) = c;                              \
+                              }
+#endif
+
+
+int nlcompare (s1,s2,len1,len2,table,options) 
+register unsigned char *s1;
+register unsigned char *s2;
+register int len1;
+register int len2;
+register unsigned short *table;
+register unsigned int *options;
+{
+ register int tie, len, length2;
+ register unsigned char *str2, *wk;
+
+ int first [4], second [4];
+ int index1, index2;
+ int unbalanced, widechar;
+
+ register unsigned short *ctab;  /* Character collation table    */
+ register unsigned short *ptab;  /* Two-to-one collation :   ch  */
+ register unsigned short *dtab;  /* One-to-two collation :   ae  */
+ register unsigned short *rtab;  /* Ranges collation table       */
+ register unsigned short *atab;  /* Character attribute table    */
+
+#ifndef MPE
+ unsigned char *pcharset;         /* To collate Asian characters */
+ struct l_info *n, *getl_info();  /* To collate Asian characters */
+#endif
+
+ str2 = s2;  
+
+ if (ASCII) {
+
+    while(*s1 == *s2) {if(!*s1) return(EQUAL);else {NEXT1(s1);NEXT1(s2);};}
+    if (*s1>*s2) return (1); else return (-1);
+ }
+
+ else if (BINARY) {
+
+    if (CLANGUAGE) {
+
+        while(*s1== *s2) if(!*s1) return(EQUAL);else {NEXT1(s1);NEXT2(s2);};
+
+        if (COBOL) if (!*s2) while (*s1==BLANK) s1++;
+                   else if (!*s1 && !GENERIC) while (*s2==BLANK) s2++;
+
+        if (GENERIC && !*s1) return(EQUAL); 
+        RETURN (*s1,*s2);
+        return (EQUAL);
+    } 
+    
+    else {
+          if (len1 < 0) len1 = 0;
+          if (len2 < 0) len2 = 0;
+          length2 = len2;
+
+          while (len1 && len2) {
+                 if (*s1 == *s2) { ADVANCE1(s1,len1); ADVANCE2(s2,len2);}
+                 else {if (*s1 > *s2) return (1); else return (-1);}
+          }
+
+          if (COBOL) if(!len2) while((*s1==BLANK)&&len1) ADVANCE(s1,len1)
+                     else if (!len1 && !GENERIC) 
+                           while((*s2==BLANK)&&len2) ADVANCE(s2,len2);
+
+          if (GENERIC && !len1) return(EQUAL); 
+          RETURN (len1,len2);
+          return (EQUAL);
+          }
+ }
+
+ else if (EUROPEAN) {
+
+       ctab = table + *(table+3);  
+       ptab = table + *(table+5); 
+       dtab = table + *(table+7); 
+       tie  = EQUAL;
+       unbalanced = FALSE;
+      
+       if (CLANGUAGE) {
+      
+           if (LITERAL) {
+              /* Supress don't care arrays to avoid infinite loops */
+              while (*s2 && DONTCARE (*s2)) s2++;
+              str2 = s2;
+           }
+      
+           while (*s1 && *s2) {
+
+              if (!FLAG2to1) while (*s1 == *s2) {
+                  if (!*s1) BREAKTIE;
+                  MORE1(s1); 
+                  MORE2(s2);
+              }
+
+              else while (*s1 == *s2) {
+                      if (!*s1) BREAKTIE;
+                      if (!SINGLE(*s1) && !DOUBLE(*s1)) break;
+                      MORE1(s1); MORE2(s2);
+              }
+
+              if (DONTCARE(*s1)) {MORE1(s1);}
+              if (DONTCARE(*s2)) {MORE2(s2);}
+
+              if (!*s1) if (GENERIC) BREAKTIE else break;
+              if (!*s2) break;
+
+              if (SINGLE (*s1) && SINGLE (*s2)) {
+                  RETURN (ORDER(*s1),ORDER(*s2));
+                  if (!tie) tie = CASE (*s1) - CASE (*s2);
+              }
+      
+              else if (PARTIAL (*s1) && PARTIAL (*s2)) {
+                    if(SINGLE(*s1)){first[0]=ORDER(*s1);first[1]=CASE(*s1);}
+                    else BSCAN(1,first,s1);
+                    if(SINGLE(*s2)){second[0]=ORDER(*s2);second[1]=CASE(*s2);}
+                    else BSCAN(2,second,s2);
+                    RETURN (first[0],second[0]);
+                    if (!tie) tie = first [1] - second [1];
+              }
+      
+              else if (DOUBLE (*s1) && DOUBLE (*s2)) {
+                     RETURN (ORDER(*s1),ORDER(*s2)); 
+                     RETURN (DORDER(*s1),DORDER(*s2)); 
+                     if (!tie) tie = DCASE (*s1) - DCASE (*s2);
+              }
+
+              else if (DOUBLE(*s1)) {
+
+                     RETURN (ORDER(*s1),ORDER(*s2));
+                     if (!tie) tie = DCASE (*s1) - CASE (*s2);
+
+                     wk = s2; MORE2 (wk); 
+                     if (!*wk) {s2= wk; break;}
+                      
+                     if (!DOUBLE(*wk)) {
+                        MORE2 (s2); 
+
+                        if (SINGLE(*s2)) {
+                           second [0] = ORDER (*s2);
+                           second [1] = CASE (*s2);
+                        }
+                        else BSCAN (2,second,s2);
+                
+                        RETURN (DORDER(*s1),second[0]);
+                        if (!tie) tie = DCASE (*s1) - second [1];
+                    }
+                    else unbalanced = TRUE;  
+              }
+
+              else if (DOUBLE(*s2)) {
+      
+                     RETURN (ORDER(*s1),ORDER(*s2));
+                     if (!tie) tie = CASE (*s1) - DCASE (*s2);
+
+                     wk= s1; MORE1(wk); 
+                     if (!*wk) {s1= wk; break;}
+         
+                     if (!DOUBLE(*wk)) {
+                         MORE1 (s1);
+                         if (SINGLE(*s1)) {
+                            first [0] = ORDER (*s1);
+                            first [1] = CASE (*s1);
+                         }
+                         else BSCAN (1,first,s1);
+                
+                         RETURN (first[0],DORDER(*s2));
+                         if (!tie) tie = first [1] - DCASE (*s2);
+                     }
+                     else unbalanced = TRUE;  
+                  }
+
+                  first[2]  = first[3] = 0; 
+                  second[2] = second[3] = 0; 
+
+                  index1 = NULL;
+                  index2 = NULL;
+
+                  while (unbalanced) {
+                        if (index1 == NULL) {
+                           if (SINGLE(*s1)) {
+                              first [0] = ORDER (*s1);
+                              first [1] = CASE (*s1);
+                              index1 = 1;
+                           }
+                           else if (DOUBLE(*s1)) {
+                                    first [0] = ORDER (*s1);
+                                    first [1] = DCASE (*s1);
+                                    first [2] = DORDER (*s1);
+                                    first [3] = DCASE (*s1);
+                                    index1 = 2;
+                           }
+                           else {
+                                 BSCAN (1,first,s1);
+                                 index1 = 1;
+                           }
+
+                           if (*s1) {MORE1 (s1);}
+                        }
+
+                        if (index2 == NULL) {
+                           if (SINGLE(*s2)) {
+                              second [0] = ORDER (*s2);
+                              second [1] = CASE (*s2);
+                              index2 = 1;
+                           }
+                           else if (DOUBLE(*s2)) {
+                              second [0] = ORDER (*s2);
+                              second [1] = DCASE (*s2);
+                              second [2] = DORDER (*s2);
+                              second [3] = DCASE (*s2);
+                              index2 = 2;
+                           }
+                           else {
+                              BSCAN (2,second,s2);
+                              index2 = 1;
+                           }
+
+                           if (*s2) {MORE2 (s2);}
+                        }
+
+                        if (index1 == 2) {
+                           first [0] = first [2];
+                           first [1] = first [3];
+                           first [2] = first [3] = 0;
+                        }
+
+                        if (index2 == 2) {
+                          second [0] = second [2];
+                          second [1] = second [3];
+                          second [2] = second [3] = 0;
+                        }
+
+                        RETURN (first[0],second[0]);
+                        if (!tie) tie = first[1] - second[1];
+
+                        if (index1-- == index2--) {
+                            RETURN (first[2],second[2]);
+                            if (!tie) tie = first[3] - second[3];
+                            unbalanced = FALSE;
+                        }
+                  }
+
+                  if (GENERIC && !*s1) BREAKTIE;
+                  if (*s1 && *s2) {MORE1 (s1); MORE2 (s2);}
+           }
+
+    if (COBOL) 
+       if (!*s2) while (*s1==BLANK) {MORE(s1);}
+       else if (!*s1 && !GENERIC) while (*s2==BLANK) {MORE(s2);}
+    
+    if (GENERIC && !*s1) BREAKTIE;
+    RETURN (ORDER (*s1),ORDER (*s2));
+    BREAKTIE;
+}
+
+else {
+   if (len1 < 0) len1 = 0;
+   if (len2 < 0) len2 = 0;
+   length2 = len2;
+
+   if (LITERAL) {
+      /* Supress don't care arrays to avoid infinite loops */
+      while (length2) if (DONTCARE (*str2++)) length2--; else break;
+      if (length2) { str2 = s2;  length2 = len2;} else len2 = 0;
+   }
+
+   while (len1 && len2) {
+   
+     if (!FLAG2to1) while (!(*s1 - *s2) && len1 && len2) 
+                       { ADVANCE1(s1,len1); ADVANCE2(s2,len2);}
+     else while (!(*s1- *s2) && len1 && len2) 
+             if (!SINGLE(*s1)&&!DOUBLE(*s1)) break;
+             else {ADVANCE1(s1,len1);ADVANCE2(s2,len2);}
+  
+     while (DONTCARE (*s1) && len1) ADVANCE1(s1,len1);
+     while (DONTCARE (*s2) && len2) ADVANCE2(s2,len2);
+
+     if (!len1) if (GENERIC) BREAKTIE else break;
+     if (!len2) break;
+  
+     if (SINGLE (*s1) && SINGLE (*s2)) {
+        RETURN (ORDER (*s1),ORDER (*s2));
+        if (!tie) tie = CASE (*s1) - CASE (*s2);
+     }
+  
+     else if (PARTIAL (*s1) && PARTIAL (*s2)) {
+        if(SINGLE(*s1)){first[0]=ORDER(*s1);first[1]=CASE(*s1);}
+        else PSCAN(1,first,s1);
+        if(SINGLE(*s2)){second[0]=ORDER(*s2);second[1]=CASE(*s2);}
+        else PSCAN(2,second,s2);
+        RETURN (first [0],second [0]);
+        if (!tie) tie = first [1] - second [1];
+      }
+  
+      else if (DOUBLE (*s1) && DOUBLE (*s2)) {
+        RETURN (ORDER(*s1),ORDER(*s2)); 
+        RETURN (DORDER(*s1),DORDER(*s2)); 
+        if (!tie) tie = DCASE (*s1) - DCASE (*s2);
+      }
+  
+      else if (DOUBLE(*s1)) {
+        RETURN (ORDER (*s1),ORDER (*s2)); 
+        if (!tie) tie = DCASE (*s1) - CASE (*s2);
+
+        wk=s2; len=len2;
+        ADVANCE2(wk,len);while (DONTCARE(*wk)&&len) ADVANCE2(wk,len);
+        if (!len) {len2 = 0; break;}
+
+        if (!DOUBLE (*wk)) {
+  
+          ADVANCE2(s2,len2); 
+          while (DONTCARE (*s2) && len2) ADVANCE2(s2,len2);
+
+          if (SINGLE(*s2)) {
+             second [0] = ORDER (*s2);
+             second [1] = CASE (*s2);
+          }
+          else PSCAN (2,second,s2);
+     
+          RETURN (DORDER (*s1),second [0]);
+          if (!tie) tie = DCASE (*s1) - second [1];
+        }
+        else unbalanced = TRUE;  
+      }
+
+      else if (DOUBLE(*s2)) {
+
+        RETURN (ORDER (*s1),ORDER (*s2)); 
+        if (!tie) tie = CASE (*s1) - DCASE (*s2);
+
+        wk=s1; len=len1;
+        ADVANCE1(wk,len);while (DONTCARE(*wk)&& len) ADVANCE1(wk,len);
+        if (!len) {len1 = 0; break;}
+
+        if (!DOUBLE (*wk)) {
+
+           ADVANCE1(s1,len1); 
+           while (DONTCARE (*s1) && len1) ADVANCE1(s1,len1);
+
+           if (SINGLE(*s1)) {
+              first [0] = ORDER (*s1);
+              first [1] = CASE (*s1);
+           }
+           else PSCAN (1,first,s1);
+     
+           RETURN (first [0],DORDER (*s2));
+           if (!tie) tie = first [1] - DCASE (*s2);
+        }
+        else unbalanced = TRUE;  
+      }
+
+      first[2]  = first[3] = 0; 
+      second[2] = second[3] = 0; 
+
+      index1 = NULL;
+      index2 = NULL;
+
+      while (unbalanced) {
+           if (index1 == NULL) {
+             if (SINGLE(*s1)) {
+                first [0] = ORDER (*s1);
+                first [1] = CASE (*s1);
+                index1 = 1;
+             }
+             else if (DOUBLE(*s1)) {
+                first [0] = ORDER (*s1);
+                first [1] = DCASE (*s1);
+                first [2] = DORDER (*s1);
+                first [3] = DCASE (*s1);
+                index1 = 2;
+             }
+             else { 
+                PSCAN (1,first,s1);
+                index1 = 1;
+             } 
+  
+             if (len1) ADVANCE1(s1,len1);
+                while (DONTCARE(*s1) && len1) ADVANCE1(s1,len1); 
+           } 
+
+           if (index2 == NULL) {
+             if (SINGLE(*s2)) {
+                second [0] = ORDER (*s2);
+                second [1] = CASE (*s2);
+                index2 = 1; 
+             } 
+             else if (DOUBLE(*s2)) {
+                second [0] = ORDER (*s2);
+                second [1] = DCASE (*s2);
+                second [2] = DORDER (*s2); 
+                second [3] = DCASE (*s2); 
+                index2 = 2;
+             } 
+             else { 
+                PSCAN(2,second,s2);
+                index2 = 1; 
+             } 
+
+             if (len2) ADVANCE2(s2,len2);
+             while (DONTCARE(*s2) && len2) ADVANCE2(s2,len2); 
+             } 
+  
+             if (index1 == 2) {
+                first [0] = first [2];
+                first [1] = first [3];
+                first [2] = first [3] = 0;
+             }
+
+             if (index2 == 2) { 
+                second [0] = second [2];
+                second [1] = second [3]; 
+                second [2] = second [3] = 0;
+             }
+  
+             RETURN (first[0],second[0]);
+             if (!tie) tie = first[1] - second[1];
+
+             if (index1-- == index2--) {
+                RETURN (first[2],second[2]);
+                if (!tie) tie = first[3] - second[3];
+                unbalanced = FALSE;
+             }
+        } 
+  
+        if (GENERIC && !len1) BREAKTIE;
+        if (len1 && len2) {ADVANCE1(s1,len1); ADVANCE2(s2,len2);}
+               
+   }
+
+   if (COBOL) {
+     if(!len2) while((DONTCARE(*s1)||(*s1==BLANK))&&len1) ADVANCE(s1,len1) 
+     else if (!len1 && !GENERIC) 
+             while ((DONTCARE(*s2)||(*s2==BLANK))&&len2) ADVANCE(s2,len2);
+   }
+   else {
+        while (DONTCARE(*s1)&&len1) ADVANCE1(s1,len1);
+        while (DONTCARE(*s2)&&len2) ADVANCE2(s2,len2);
+   }
+    
+   if (GENERIC && !len1) BREAKTIE; 
+   RETURN (len1,len2);
+   BREAKTIE;
+
+ }
+}
+
+else if (ASIAN) {
+
+#ifndef MPE
+       if ((n = getl_info(LANG)) == NULL) return (0);
+       pcharset = (unsigned char *) n->char_set_definition;
+#endif
+
+#ifdef MPE
+       atab = table + *(table+12);  
+#endif
+
+       if (CLANGUAGE) {
+
+          widechar = FALSE;
+
+          while (*s1 == *s2) {
+             if (!*s1) return (EQUAL);
+             if (widechar) widechar = FALSE;
+             else if (TWOBYTE(s1)) {*first = *second = *s1;widechar = TRUE;}
+             NEXT1 (s1); NEXT2 (s2);
+          }
+
+          if (*s1 && *s2) {
+
+              if (!widechar) { 
+
+                  *first = *s1;
+                  *second = *s2;
+          
+                  if  (ONEBYTE (s1)) PRIORITY (first,*s1,FALSE)
+                  else { NEXT1 (s1); PRIORITY (first,*s1,*s1);}
+          
+                  if  (ONEBYTE (s2)) PRIORITY (second,*s2,FALSE)
+                  else { NEXT2 (s2); PRIORITY (second,*s2,*s2);}
+
+              } else { PRIORITY(first,*s1,TRUE); PRIORITY(second,*s2,TRUE); }
+    
+              RETURN (*(first+1),*(second+1));
+              RETURN (*first,*second);
+         }
+
+         if (COBOL) 
+            if (!*s2) while ( *s1== BLANK) s1++;
+            else if (!*s1 && !GENERIC) while (*s2==BLANK) s2++;
+           
+         if (GENERIC && !*s1) return(EQUAL);
+         RETURN (*s1,*s2); 
+         return (EQUAL);
+
+      }
+      else {
+         if (len1 < 0) len1 = 0;
+         if (len2 < 0) len2 = 0;
+         length2 = len2;
+
+         widechar = FALSE;
+
+         while (len1 && len2) {
+               if (*s1 - *s2) break;
+               if ((len1==1) && (len2==1)) return (EQUAL);
+               if (widechar) widechar = FALSE;
+               else if(TWOBYTE(s1)) {*first= *second= *s1;widechar=TRUE;}
+               ADVANCE1 (s1,len1); ADVANCE2 (s2,len2);
+         }
+
+
+         if (len1 && len2) {
+
+              if (!widechar) {
+
+                  *first = *s1;
+                  *second = *s2;
+          
+                  if (ONEBYTE (s1)) PRIORITY (first,*s1,FALSE)
+                  else { ADVANCE1 (s1,len1); PRIORITY (first,*s1,len1);}
+          
+                  if (ONEBYTE (s2)) PRIORITY (second,*s2,FALSE)
+                  else { ADVANCE2 (s2,len2); PRIORITY (second,*s2,len2);}
+
+              } else { PRIORITY(first,*s1,TRUE); PRIORITY(second,*s2,TRUE); }
+    
+              RETURN (*(first+1),*(second+1));
+              RETURN (*first,*second);
+         }
+
+         if (COBOL)  
+           if (!len2) while ((*s1==BLANK) && len1) ADVANCE(s1,len1)
+           else if(!len1&&!GENERIC) while((*s2==BLANK)&&len2) ADVANCE(s2,len2);
+           
+         if (GENERIC&& !len1) return(EQUAL);
+         RETURN (len1,len2); 
+         return (EQUAL);
+      }
+ } 
+
+ else if (UNIQUE) {
+
+   ctab = table + *(table+3);  
+
+   if (CLANGUAGE) {
+       while (*s1== *s2) if(!*s1) return(EQUAL); else {NEXT1(s1); NEXT2(s2);};
+
+        while (*s1 && *s2) {
+           RETURN (UORDER(*s1),UORDER(*s2));
+           NEXT1 (s1); NEXT2 (s2);
+        }
+
+        if (COBOL) 
+          if (!*s2) while (*s1 == BLANK) s1++;
+          else if (!*s1 && !GENERIC) while (*s2==BLANK) s2++;
+
+        if (GENERIC && !*s1) return(EQUAL);
+        RETURN (*s1,*s2);
+        return (EQUAL);
+   }
+  
+   else {
+     if (len1 < 0) len1 = 0;
+     if (len2 < 0) len2 = 0;
+     length2 = len2;
+
+     while (len1 && len2) {
+         RETURN (UORDER(*s1),UORDER(*s2));
+         ADVANCE1(s1,len1); ADVANCE2(s2,len2);
+     }
+
+     if (COBOL) 
+      if (!len2) while ((*s1==BLANK) && len1) ADVANCE (s1,len1)
+      else if (!len1&&!GENERIC) while((*s2==BLANK)&&len2) ADVANCE(s2,len2);
+
+      if (GENERIC && !len1) return(EQUAL);
+      RETURN (len1,len2); 
+      return (EQUAL);
+   }
+ }  
+}
+

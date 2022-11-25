@@ -1,0 +1,11 @@
+## FacetTerm  vi603stat  description file  12/17/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: vi603stat.FC,v 70.1 92/03/09 16:56:19 ssa Exp $
+## status line
+perwindow-320-CLSQF---------...msg_status_line.....=\EP2;0~%300u12\E\\
+perwindow_also-....................................=\EP2;~%300u12\E\\
+perwindow_also-....................................=\EP2~%300u12\E\\
+perwindow_also-................normal_status_line..=\EP2;1~\E\\
+perwindow_default-.................................=\EP2;1~\E\\
+set-status_line=\EP2;0~%s1\E\\
+out_screen_saver_start=\EP2;0~\E\\

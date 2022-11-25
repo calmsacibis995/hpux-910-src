@@ -1,0 +1,249 @@
+# @(#) $Revision: 70.1 $       
+
+langname	"italian"
+langid		9
+
+hprevision	"$Revision: 70.1 $"
+
+###########################################################################
+# Set up the LC_ALL category
+
+LC_ALL
+yesstr		"si"				# yes string
+nostr		"no"				# no string
+direction	""				# left-to-right orientation
+END_LC
+
+
+###########################################################################
+# Set up the LC_CTYPE category
+
+LC_CTYPE
+isupper		'A' - 'Z'			# true if an upper case char
+		0xa1 - 0xa7  0xad  0xae  0xb1  0xb4  0xb6
+		0xd0  0xd2  0xd3  0xd8  0xda - 0xdc  0xde - 0xe1
+		0xe3  0xe5 - 0xe9  0xeb  0xed  0xee  0xf0
+islower		'a' - 'z'			# true if a lower case char
+		0xb2  0xb5  0xb7  0xc0 - 0xcf  0xd1  0xd4 - 0xd7
+		0xd9  0xdd  0xde  0xe2  0xe4  0xea  0xec  0xef
+		0xf1
+isdigit		'0' - '9'			# true if a digit
+isspace		' '		0x9 - 0xd	# true if a space
+ispunct		'!' - '/'	':' - '@' 	# true if a punctuation char
+		'[' - '`'	'{' - '~'
+		168 - 172	175 176 179
+		184 - 191	242 - 254
+iscntrl		0x0 - 0x1f	0x7f		# true if a control char
+		128 - 159	255
+isblank		' '				# true if a blank char
+isxdigit	'0' - '9'	'a' - 'f'	# true if a hex digit
+		'A' - 'F'
+
+tolower         < 'A' 'a' >	< 'B' 'b' >	# < upper  lower>
+		< 'C' 'c' > 	< 'D' 'd' >
+		< 'E' 'e' >	< 'F' 'f' >
+		< 'G' 'g' >	< 'H' 'h' >
+		<0x49 0x69>	<0x4a 0x6a>	# hex constants can be used
+		<0113 0153>	<0114 0154>	# octal constants can be used
+		< 77  109 >	< 78  110 >	# decimal constants can be used
+		< 'O' 'o' >	< 'P' 'p' >	# literal constants can be used
+		< 'Q' 'q' >	< 'R' 'r' >
+		< 'S' 's' >	< 'T' 't' >
+		< 'U' 'u' >	< 'V' 'v' >
+		< 'W' 'w' >	< 'X' 'x' >
+		< 'Y' 'y' >	< 'Z' 'z' >
+		<0xa1 0xc8>	<0xa2 0xc0>
+		<0xa3 0xc9>	<0xa4 0xc1>
+		<0xa5 0xcd>	<0xa6 0xd1>
+		<0xa7 0xdd>	<0xad 0xcb>
+		<0xae 0xc3>	<0xb4 0xb5>
+		<0xb6 0xb7>	<0xd0 0xd4>
+		<0xd2 0xd6>	<0xd3 0xd7>
+		<0xd8 0xcc>	<0xda 0xce>
+		<0xdb 0xcf>	<0xdc 0xc5>
+		<0xdf 0xc2>	<0xe0 0xc4>
+		<0xe1 0xe2>	<0xe3 0xe4>
+		<0xe5 0xd5>	<0xe6 0xd9>
+		<0xe7 0xc6>	<0xe8 0xca>
+		<0xe9 0xea>	<0xeb 0xec>
+		<0xed 0xc7>	<0xee 0xef>
+		<0xf0 0xf1>	<0xb1 0xb2>
+
+toupper 	< 'a' 'A' >	< 'b' 'B' >	# < upper  lower>
+		< 'c' 'C' > 	< 'd' 'D' >
+		< 'e' 'E' >	< 'f' 'F' >
+		< 'g' 'G' >	< 'h' 'H' >
+		<0x69 0x49>	<0x6a 0x4a>	# hex constants can be used
+		<0153 0113>	<0154 0114>	# octal constants can be used
+		<109   77 >	< 110  78 >	# decimal constants can be used
+		< 'o' 'O' >	< 'p' 'P' >	# literal constants can be used
+		< 'q' 'Q' >	< 'r' 'R' >
+		< 's' 'S' >	< 't' 'T' >
+		< 'u' 'U' >	< 'v' 'V' >
+		< 'w' 'W' >	< 'x' 'X' >
+		< 'y' 'Y' >	< 'z' 'Z' >
+		<0xc8 0xa1>	<0xc0 0xa2>
+		<0xc9 0xa3>	<0xc1 0xa4>
+		<0xcd 0xa5>	<0xd1 0xa6>
+		<0xdd 0xa7>	<0xcb 0xad>
+		<0xc3 0xae>	<0xb5 0xb4>
+		<0xb7 0xb6>	<0xd4 0xd0>
+		<0xd6 0xd2>	<0xd7 0xd3>
+		<0xcc 0xd8>	<0xce 0xda>
+		<0xcf 0xdb>	<0xc5 0xdc>
+		<0xc2 0xdf>	<0xc4 0xe0>
+		<0xe2 0xe1>	<0xe4 0xe3>
+		<0xd5 0x49>	<0xd9 0xe6>
+		<0xc6 0xe7>	<0xca 0xe8>
+		<0xea 0xe9>	<0xec 0xeb>
+		<0xc7 0xed>	<0xef 0xee>
+		<0xf1 0xf0>	<0xb2 0xb1>
+bytes_char	"1"
+alt_punct	""				# no alternative punctuation
+END_LC
+
+
+###########################################################################
+# Set up the LC_COLLATE category
+
+# dictionary collating sequence:
+# space, decimal digits,
+# alphabetic characters, punctuation,
+# control characters
+
+LC_COLLATE
+modifier	"fold"
+sequence	' ' 0xa0 '0' - '9'
+		( 'A' [0xd3 'E'] 'a' [0xd7 'e'] 0xe0 0xc4 0xa1 0xc8 0xa2 0xc0
+		  0xd8 0xcc 0xd0 0xd4 0xe1 0xe2 )
+		( 'B' 'b' ) ( 'C' 'c' 0xb4 0xb5 ) ( 'D' 'd' 0xe3 0xe4 )
+		( 'E' 'e' 0xdc 0xc5 0xa3 0xc9 0xa4 0xc1 0xa5 0xcd ) ( 'F' 'f' )
+		( 'G' 'g' ) ( 'H' 'h' )
+		( 'I' 'i' 0xe5 0xd5 0xe6 0xd9 0xa6 0xd1 0xa7 0xdd) ( 'J' 'j' )
+		( 'K' 'k' ) ( 'L' 'l' ) ( 'M' 'm' ) ( 'N' 'n' 0xb6 0xb7 ) 
+		( 'O' 'o' 0xe7 0xc6 0xe8 0xca 0xdf 0xc2 0xda 0xce 0xe9 0xea 
+		  0xd2 0xd6 ) ( 'P' 'p' ) ( 'Q' 'q' ) ( 'R' 'r' )
+		( 'S' [0xde 'S'] 's' 0xeb 0xec ) ( 'T' 't' )
+		( 'U' 'u' 0xed 0xc7 0xad 0xcb 0xae 0xc3 0xdb 0xcf ) ( 'V' 'v' )
+		( 'W' 'w' ) ( 'X' 'x' ) ( 'Y' 'y' 0xee 0xef ) ( 'Z' 'z' )
+		( 0xf0 0xf1 ) 0xb1  0xb2  0xf2 - 0xf5  '(' ')' '[' ']' 
+		'{' '}'  0xfb  0xfd  '<' '>' '=' '+' '-'  0xfe  0xf7  0xf8
+		0xb3  '%' '*' '.' ',' ';' ':'  0xb9  '?'  0xb8  '!'
+		'/' '\'  '|' '@' '&' '#'  0xbd  '$'  0xbf  0xbb  0xaf
+		0xbc  0xbe  0xba  '"' '`' ''' '^' '~'  0xa8 - 0xac  '_'
+		0xf6  0xb0  0xf9  0xfa  0xfc  0x0 - 0x1f  0x80 - 0x9f
+		0x7f  0xff
+
+modifier	"nofold"
+sequence	' ' 0xa0 '0' - '9'
+		( 'A' [0xd3 'E'] 0xe0 0xa1 0xa2 0xd8 0xd0 0xe1 ) 'B'
+		( 'C' 0xb4 ) ( 'D' 0xe3 ) ( 'E' 0xdc 0xa3 0xa4 0xa5 )
+		'F' 'G' 'H' ( 'I' 0xe5 0xe6 0xa6 0xa7 ) 'J' 'K' 'L' 'M'
+		( 'N' 0xb6 ) ( 'O' 0xe7 0xe8 0xdf 0xda 0xe9 0xd2 ) 'P' 'Q' 'R'
+		( 'S' 0xeb ) 'T' ( 'U' 0xed 0xad 0xae 0xdb )
+		'V' 'W' 'X' ( 'Y' 0xee ) 'Z' 0xf0
+		( 'a' [0xd7 'e'] 0xc4 0xc8 0xc0 0xcc 0xd4 0xe2 ) 'b'
+		( 'c' 0xb5 ) ( 'd' 0xe4 ) ( 'e' 0xc5 0xc9 0xc1 0xcd )
+		'f' 'g' 'h' ( 'i' 0xd5 0xd9 0xd1 0xdd ) 'j' 'k' 'l' 'm'
+		( 'n' 0xb7 ) ( 'o' 0xc6 0xca 0xc2 0xce 0xea 0xd6 ) 'p' 'q' 'r'
+		( [0xde 'S'] 's' 0xec ) 't' ( 'u' 0xc7 0xcb 0xc3 0xcf )
+		'v' 'w' 'x' ( 'y' 0xef ) 'z' 0xf1
+		0xb1  0xb2  0xf2 - 0xf5  '(' ')' '[' ']' 
+		'{' '}'  0xfb  0xfd  '<' '>' '=' '+' '-'  0xfe  0xf7  0xf8
+		0xb3  '%' '*' '.' ',' ';' ':'  0xb9  '?'  0xb8  '!'
+		'/' '\'  '|' '@' '&' '#'  0xbd  '$'  0xbf  0xbb  0xaf
+		0xbc  0xbe  0xba  '"' '`' ''' '^' '~'  0xa8 - 0xac  '_'
+		0xf6  0xb0  0xf9  0xfa  0xfc  0x0 - 0x1f  0x80 - 0x9f
+		0x7f  0xff
+END_LC
+
+
+###########################################################################
+# Set up the LC_MONETARY category
+
+LC_MONETARY
+int_curr_symbol		"ITL."
+currency_symbol		"Lit."
+p_cs_precedes		"1"
+p_sep_by_space		"1"
+n_cs_precedes		"1"
+n_sep_by_space		"1"
+mon_decimal_point	","
+mon_thousands_sep	"."
+mon_grouping		"\3"
+positive_sign		""
+p_sign_posn		"1"
+negative_sign		"-"
+n_sign_posn		"1"
+int_frac_digits		"2"
+frac_digits		"2"
+crncystr		"-Lit."
+END_LC
+
+
+###########################################################################
+# Set up the LC_NUMERIC category
+
+LC_NUMERIC
+decimal_point	","			# RADIXCHAR: radix character
+thousands_sep	"."			# THOUSEP: thousands separator
+grouping	"\3"
+alt_digit	""			# no alternative digits
+END_LC
+
+
+###########################################################################
+# Set up the LC_TIME category
+
+LC_TIME
+d_t_fmt		"%A, %.1d/%m/%Y  %.1H:%M:%S"	# date & time string
+d_fmt		"%A, %.1d %B %Y"
+t_fmt		"%.1H:%M:%S"
+day_1		"domenica"			# weekday names
+day_2		"lunedÙ"
+day_3		"martedÙ"
+day_4		"mercoledÙ"
+day_5		"giovedÙ"
+day_6		"venerdÙ"
+day_7		"sabato"
+abday_1		"dom"				# weekday abbreviations
+abday_2		"lun"
+abday_3		"mar"
+abday_4		"mer"
+abday_5		"gio"
+abday_6		"ven"
+abday_7		"sab"
+mon_1		"gennaio"			# month names
+mon_2		"febbraio"
+mon_3		"marzo"
+mon_4		"aprile"
+mon_5		"maggio"
+mon_6		"giugno"
+mon_7		"luglio"
+mon_8		"agosto"
+mon_9		"settembre"
+mon_10		"ottobre"
+mon_11		"novembre"
+mon_12		"dicembre"
+abmon_1		"gen"				# month abbreviations
+abmon_2		"feb"
+abmon_3		"mar"
+abmon_4		"apr"
+abmon_5		"mag"
+abmon_6		"giu"
+abmon_7		"lug"
+abmon_8		"ago"
+abmon_9		"set"
+abmon_10	"ott"
+abmon_11	"nov"
+abmon_12	"dic"
+am_str		""				# AM string
+pm_str		""				# PM string
+year_unit	""				# the unit of year
+mon_unit	""				# the unit of month
+day_unit	""				# the unit of day
+hour_unit	""				# the unit of hour
+min_unit	""				# the unit of minute
+sec_unit	""				# the unit of second
+era_fmt		""				# era format
+END_LC

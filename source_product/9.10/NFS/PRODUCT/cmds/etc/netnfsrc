@@ -1,0 +1,366 @@
+#!/bin/sh
+##	@(#)netnfsrc:	$Revision: 1.51.109.9 $	$Date: 92/08/18 13:48:27 $
+#	netnfsrc	--	NFS startup file
+##
+#	Depending on the configuration parameters you set within,
+#	this script sets up some or all of the following:
+#	NIS specific:
+#	    domainname	--	the NIS domain name
+#
+#	and starts up some or all of the following programs:
+#	    portmap	--	RPC (program_#,version) -> port_# mapper
+#	    nfsd	--	NFS daemons
+#	    biod	--	async BIO daemons
+#	    pcnfsd	--	PC-NFS daemon
+#	NIS specific:
+#	    ypbind	--	NIS client process (all NIS nodes)
+#	    ypserv	--	NIS server process (NIS server only)
+#	    yppasswdd	--	NIS password daemon (NIS master server only)
+##
+#	NFS_CLIENT	--	1 if this node is an NFS client, 0 if not
+#	NFS_SERVER	--	1 if this node is an NFS server, 0 if not
+#	Note:	it is possible for one host to be a client, a server, both
+#		or neither!  This system is an NFS client if you will be
+#		NFS mounting remote file systems; this system is a server
+#		if you will be exporting file systems to remote hosts.
+#	See Also:  nfsd(1M), mount(1M).
+##
+NFS_CLIENT=0
+NFS_SERVER=0
+##
+#       START_MOUNTD    --      1 if this script should start rpc.mountd.
+#                               0 if /etc/inetd.conf has an entry for mountd.
+#       Note:   rpc.mountd should be started from netnfsrc. However, it
+#               can be started from either netnfsrc or inetd, and 
+#               MUST only be configured in one place.
+##
+START_MOUNTD=0
+##
+#	NIS_MASTER_SERVER  --  1 if this node is the master NIS server, 0 if not
+#	NIS_SLAVE_SERVER   --  1 if this node is a slave NIS server, 0 if not
+#	NIS_CLIENT         --  1 if this node is a NIS client, 0 if not
+#
+#	Note:	- NIS_MASTER_SERVER and NIS_SLAVE_SERVER are mutually exclusive,
+#		  i.e., only one, not both, should be set if either is set.
+#		- All NIS servers must also be NIS clients, so if you set either
+#		  NIS_MASTER_SERVER or NIS_SLAVE_SERVER to 1, you should set
+#		  NIS_CLIENT to 1, too.
+#		- Refer to NFS administration manual and ypinit(1M) for the
+#		  steps required to create NIS servers.
+##
+NIS_MASTER_SERVER=0
+NIS_SLAVE_SERVER=0
+NIS_CLIENT=0
+##
+#	NISDOMAIN	--	the NIS domain name
+#	See Also:  domainname(1).
+##
+NISDOMAIN=
+NISDOMAIN_ERR=""
+##
+#	PCNFS_SERVER	--	1 if this node is a server for PC-NFS requests.
+#				This variable controls the startup of the
+#				pcnfsd(1M) server.  See Also:  pcnfsd(1M).
+##
+PCNFS_SERVER=0
+
+##
+#	The following code tests to see if the host has a local	file system.  
+#	If there are NO local file systems, then we will not start nfsd.
+##
+#	NOTE:	This is an automated test, you should not have to modify it!
+#		LFS is zero if we have a local file system.
+##
+
+# save the return status of the first error
+returnstatus=0
+
+##
+#   set_return sets returnstatus to be the exit value
+#   of the previous command only if returnstatus is not
+#   already set
+#   This prevents it from being reset.
+##
+set_return () {
+
+save=$?
+
+if [ $returnstatus = 0 ] ; then
+   returnstatus=$save
+fi
+
+}
+
+/etc/mount -l | /bin/grep / >/dev/null	
+LFS=$?
+
+echo	"    starting NFS networking"	>&2
+
+##
+#	Set the NIS domain name.
+#	(See domainname(1).)
+##
+if [ "$NISDOMAIN" -a -f /bin/domainname ] ; then
+    echo "\t/bin/domainname $NISDOMAIN"
+    /bin/domainname $NISDOMAIN
+    if [ $? -ne 0 ] ; then
+	echo "Error:  NIS domain name not set"	>&2
+	NISDOMAIN_ERR=TRUE
+    fi
+else
+    echo "\tNIS domain name not set"
+    NISDOMAIN_ERR=TRUE
+fi
+
+##
+#	Start the portmapper -- should be started first
+#	Note: portmap must be started before inetd!
+#	Needs to be started on ARPA clients (only dependent upon inetd)
+#	(See portmap(1M).)
+##
+if [ -f /etc/portmap ] ; then
+    echo "\t/etc/portmap"
+    /etc/portmap
+    if [ $? -ne 0 ] ; then
+	echo	"Error:  NFS portmapper NOT powered up"	>&2
+	exit 1
+    fi
+fi
+
+##
+#	Start up the Network Information Service if the NIS domain name was 
+#	set OK, and this node is to be either a NIS server or NIS client.
+#	Note: the NIS must be started before trying to mount remote file systems
+##
+if [ "$NISDOMAIN_ERR" -o \( $NIS_MASTER_SERVER -eq 0 -a $NIS_SLAVE_SERVER -eq 0\
+	-a $NIS_CLIENT -eq 0 \) ] ; then
+    echo "    Network Information Service not started."
+else
+    echo "    starting up the Network Information Service"
+    ##
+    #	Check the NIS_* values.
+    ##
+    HOSTNAME=`hostname`
+
+    if [ $NIS_MASTER_SERVER -ne 0 -o $NIS_SLAVE_SERVER -ne 0 ]; then
+	NIS_SERVER=TRUE
+    fi
+
+    if [ $NIS_MASTER_SERVER -ne 0 -a $NIS_SLAVE_SERVER -ne 0 ]; then
+	echo "\tNOTICE:   both NIS_MASTER_SERVER and NIS_SLAVE_SERVER variables are set;  "
+	echo "\t          $HOSTNAME will be only a NIS slave server."
+	NIS_MASTER_SERVER=0
+    fi
+
+    if [ $NIS_CLIENT -eq 0 ]; then
+	echo "\tNOTICE:   $HOSTNAME will be a NIS server, but the NIS_CLIENT variable is"
+	echo "\t          not set; $HOSTNAME will also be a NIS client."
+	NIS_CLIENT=1
+    fi
+
+##
+#	The verify_ypserv function determines if it is OK to start ypserv(1M)
+#	(and yppasswdd(1M) for the master NIS server).  It returns its result
+#	in the variable NISSERV_OK - if non-null, it is OK to start ypserv(1M);
+#	if it is null, ypserv(1M) will not be started.
+#
+#	First, the filesystem containing /usr/etc/yp is examined to see if it
+#	supports long or short filenames.  Once this is known, the proper list
+#	of standard NIS map filenames is examined to verify that each map exists
+#	in the NIS domain subdirectory.  If any map is missing, verify_ypserv
+#	sets NISSERV_OK to null and returns.
+##
+
+verify_ypserv() {
+	##
+	#	LONGNAMES are the names of the NIS maps on a filesystem that
+	#	supports long filenames.
+	##
+
+	LONGNAMES="group.bygid.dir group.bygid.pag group.byname.dir \
+		   group.byname.pag hosts.byaddr.dir hosts.byaddr.pag \
+		   hosts.byname.dir hosts.byname.pag networks.byaddr.dir \
+		   networks.byaddr.pag networks.byname.dir networks.byname.pag \
+		   passwd.byname.dir passwd.byname.pag passwd.byuid.dir \
+		   passwd.byuid.pag protocols.byname.dir protocols.byname.pag \
+		   protocols.bynumber.dir protocols.bynumber.pag \
+		   rpc.bynumber.dir rpc.bynumber.pag services.byname.dir \
+		   services.byname.pag ypservers.dir ypservers.pag"
+
+	##
+	#	SHORTNAMES are the names of the NIS maps on a filesystem that
+	#	supports only short filenames (14 characters or less).
+	##
+
+	SHORTNAMES="group.bygi.dir group.bygi.pag group.byna.dir \
+		    group.byna.pag hosts.byad.dir hosts.byad.pag \
+		    hosts.byna.dir hosts.byna.pag netwk.byad.dir \
+		    netwk.byad.pag netwk.byna.dir netwk.byna.pag \
+		    passw.byna.dir passw.byna.pag passw.byui.dir \
+		    passw.byui.pag proto.byna.dir proto.byna.pag \
+		    proto.bynu.dir proto.bynu.pag rpc.bynu.dir \
+		    rpc.bynu.pag servi.byna.dir servi.byna.pag \
+		    ypservers.dir ypservers.pag"
+
+	NISSERV_OK=TRUE
+
+	if `/usr/etc/yp/longfiles`; then
+		NAMES=$LONGNAMES
+	else	
+		NAMES=$SHORTNAMES
+	fi
+
+	for NAME in $NAMES ; do
+		if [ ! -f /usr/etc/yp/$NISDOMAIN/$NAME ] ; then
+			NISSERV_OK=
+			return
+		fi
+	done
+}
+
+    ##
+    #	Start up ypserv and ypbind
+    #	Note:	only systems with local disks should serve NIS databases;
+    #		any system may be a NIS client, however.  All NIS servers are
+    #		also NIS clients.
+    #	(See ypserv(1M).)
+    #
+    #   Note:   For HP-UX 9.0 release, ypbind function has been changed.
+    #   Executing /etc/ypbind without -ypset  option, actually
+    #   rejects ypset request.
+    #   (See ypserv(1M).)
+    ##
+    if [ "$NIS_SERVER" -a -f /usr/etc/ypserv ] ; then
+	verify_ypserv
+	if [ "$NISSERV_OK" ] ; then
+		/usr/etc/ypserv && echo "\t/usr/etc/ypserv"
+                set_return 
+	else
+		echo "\tWARNING:  /usr/etc/ypserv not started:  either"
+		echo "\t          -  the directory /usr/etc/yp/$NISDOMAIN does not exist or"
+		echo "\t          -  some or all of the $NISDOMAIN NIS domain's"
+		echo "\t             maps are missing."
+		echo "\t          To initialize $HOSTNAME as a NIS server, see ypinit(1M)."
+                returnstatus=1
+	fi
+    fi
+    if [ $NIS_CLIENT -ne 0 -a -f /etc/ypbind ] ; then
+	/etc/ypbind  && echo "\t/etc/ypbind "
+        set_return 
+
+        ##
+        #   check if the NIS domain is bound. If not disable NIS
+        ##
+        CNT=0;
+        MAX_NISCHECKS=2
+        NIS_CHECK=YES
+	echo "	Checking NIS binding."
+        while [ ${CNT} -le ${MAX_NISCHECKS} -a "${NIS_CHECK}" = "YES" ]; do
+	    /usr/bin/ypwhich 2>&1 | /bin/fgrep 'not bound
+ypwhich' > /dev/null
+
+	    if [ $? -eq 0 ]; then
+	        CNT=`expr $CNT + 1`
+	        if [ ${CNT} -le 2 ]; then
+		    sleep 5
+	        else
+		    echo "	Unable to bind to NIS server using domain ${NISDOMAIN}."
+		    echo "	Disabling NIS"
+	 	    /bin/domainname ""
+		    /bin/ps -e | /bin/grep ypbind | \
+				kill -15 `/usr/bin/awk '{ print $1 }'` 
+		    NIS_CHECK=NO
+		    returnstatus=1
+		    break;
+	        fi
+	    else
+	        echo "	Bound to NIS server using domain ${NISDOMAIN}."
+	        NIS_CHECK=NO
+	    fi
+        done
+    fi
+    ##
+    #	Start the NIS password daemon
+    #	NOTE:	this is started ONLY on the master NIS server;
+    #		only systems with local disks should be NIS servers.
+    #	(See yppasswdd(1M).)
+    ##
+    if [ $NIS_MASTER_SERVER -ne 0 -a -f /usr/etc/rpc.yppasswdd ] ; then
+	if [ "$NISSERV_OK" ] ; then
+    		echo "\t/usr/etc/rpc.yppasswdd"
+    		/usr/etc/rpc.yppasswdd /etc/passwd -m passwd PWFILE=/etc/passwd
+		set_return 
+	else
+		echo "\tWARNING:  /usr/etc/rpc.yppasswdd not started:  refer to the"
+		echo "\t          reasons listed in the WARNING above."
+	        returnstatus=1
+	fi
+    fi
+    ##
+fi
+
+##
+#       Read in /etc/exports
+##
+if [ $LFS -eq 0 -a $NFS_SERVER -ne 0 -a -f /etc/exports ] ; then
+    > /etc/xtab
+    /usr/etc/exportfs -a  && echo "    Reading in /etc/exports" 
+    set_return 
+fi
+##
+#	Start mountd
+##
+if [ $NFS_SERVER -ne 0 -a $START_MOUNTD -ne 0 -a -f /usr/etc/rpc.mountd ] ; then
+    /usr/etc/rpc.mountd && echo "    starting up the mountd" && echo "\t/usr/etc/rpc.mountd"
+    set_return 
+fi
+##
+#	Start the NFS daemons -- four was determined to be the optimal
+#	number to start for performance reasons.
+#	Note:	nfsd should only be started on NFS servers; only systems
+#		with local file systems may be NFS servers.
+#	(See nfsd(1M).)
+##
+if [ $LFS -eq 0 -a $NFS_SERVER -ne 0 -a -f /etc/nfsd ] ; then
+    /etc/nfsd 4 && echo "    starting up the NFS daemons" && echo "\t/etc/nfsd 4"
+    set_return 
+fi
+##
+#	If this system is an NFS client, start the BIO daemons -- four
+#	was determined to be the optimal number to start for performance
+#	reasons.
+#
+#	(See mount(1M) and nfsd(1M).)
+##
+if [ $NFS_CLIENT -ne 0 ] ; then
+	if [ -f /etc/biod ] ; then
+    		/etc/biod 4 && echo "    starting up the BIO daemons" && echo "\t/etc/biod 4"
+	        set_return 
+fi
+	/bin/cat /dev/null > /etc/nfs.up
+fi
+
+##
+#	Start the PC-NFS daemon (see pcnfsd(1M)) on systems with local disks.
+##
+if [ $LFS -eq 0 -a $PCNFS_SERVER -ne 0 -a -f /etc/pcnfsd ] ; then
+    /etc/pcnfsd && echo "    starting up the PC-NFS daemon" && echo "\t/etc/pcnfsd"
+    set_return 
+fi
+
+##
+#	If this system is an NFS client or an NFS server, start the Lock
+#       Manager daemon and the Status Monitor daemon.
+##
+if [ $NFS_CLIENT -ne 0 -o $NFS_SERVER -ne 0 ] ; then
+    if [ -f /usr/etc/rpc.statd ] ; then
+	/usr/etc/rpc.statd && echo "    starting up the Status Monitor daemon" && echo "\t/usr/etc/rpc.statd"
+        set_return 
+    fi
+    if [ -f /usr/etc/rpc.lockd ] ; then
+	/usr/etc/rpc.lockd && echo "    starting up the Lock Manager daemon" && echo "\t/usr/etc/rpc.lockd"
+        set_return 
+    fi
+fi
+
+exit $returnstatus

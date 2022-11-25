@@ -1,0 +1,12 @@
+# @(#) $Revision: 63.1 $      
+*
+*	Messages for help command.
+*
+-1
+"not found"
+No helpful information associated with your argument was found.
+If you're sure you've got it right, do a "help stuck".
+-2
+"argument too long"
+Please limit arguments to less than fifty (50) characters.
+

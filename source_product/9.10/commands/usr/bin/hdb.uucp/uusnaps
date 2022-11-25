@@ -1,0 +1,90 @@
+#! /bin/sh
+# @(#) $Revision: 66.1 $
+#
+# Show pending uucp activity (rework uusnap output into something nicer).
+
+# Usage: <script> (arguments are ignored)
+
+# Runs uusnap, sorts the results into a Pareto chart by number of commands,
+# then adds totals, etc.  Puts a "*" on lines where the number of commands
+# and data files are not equal.  Totals line also reports excess or missing
+# data files, given that for simple uux transactions:
+#
+#	data = (cmds * 2) + xqts
+
+# Depends on uusnap output format, which includes a variable number of fields:
+#
+#	hp-dcde   2 Cmds   2 Data    ---   
+#	hppsde    1 Cmd     ---      ---   
+#	hpisla    1 Cmd    1 Data    ---   
+#	hpcnoe    7 Cmds   7 Data   1 Xqt  
+
+
+# Initialize, collect data:
+#
+# Lines commented out add comparison of actual transaction file count
+# to total directory size (including empty entries).
+
+	PATH="/bin:/usr/bin:/usr/local/bin:/usr/contrib/bin"
+	starcol=35			# column in which to put "*".
+
+{
+#	ls -ld /usr/spool/uucp			# get directory size.
+	uusnap | sort -nr +1 -2 +2 -3 +3 -4	# force desired sorting.
+}	|
+
+
+# Process data into nicer report:
+
+	awk '
+
+#	(NR == 1) {				# first line.
+#	    dirsize = $5;			# save directory size.
+#	    next;
+#	}
+
+	{
+	    field = 2;
+
+	    for (item = 1; item <= 3; item++)	# get counts.
+	    {
+		if ($field == "---")		# zero of this item.
+		{
+		    count [item] = 0;
+		    field += 1;
+		}
+		else
+		{
+		    total [item] += (count [item] = $field);
+		    field += 2;
+		}
+	    }
+
+	    printf ("%s", substr ($0, 1, '$starcol' - 1));
+
+	    if (count [1] != count [2])		# commands != data.
+		printf (" * ");
+	    else
+		printf ("   ");
+
+	    printf ("%s\n", substr ($0, '$starcol'));
+	}
+
+	END {
+	    printf ("%11d%9d%9d\n", total [1],  total [2],  total [3]);
+
+	    Total = total [1] + total [2] + total [3];
+
+#	    printf ("%-20s%9d        (%.0f%s of directory total size)\n", \
+#		"Total files:", Total, int ((2400.0 * Total) / dirsize), "%");
+
+	    printf ("%-20s%9d   (%d directory bytes)\n", "Total files:", \
+		Total, Total * 24);
+
+	    delta = total [2] - (2 * total [1]) - total [3];	# data files.
+
+	    if (delta > 0)
+		printf ("%-20s%9d\n", "Excess data files:", delta);
+	    else if (delta < 0)
+		printf ("%-20s%9d\n", "Missing data files:", -delta);
+	}'

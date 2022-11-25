@@ -1,0 +1,7 @@
+## FacetTerm vt240graph  description file 6/20/88
+## 20/20 graphics
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt240graph.FC,v 70.1 92/03/09 16:08:32 ssa Exp $
+graph_mode_clear=\EPps(a[0,479][799,0])w(i2v)s(e)t(s1)s(i0)\E\\
+graph_mode_clear=\EPpp[0,0]w(i0p1s[,420])v[799]w(i2p1s0)w(i2p1)\E\\
+graph_mode_start=\EPp%s1\E\\

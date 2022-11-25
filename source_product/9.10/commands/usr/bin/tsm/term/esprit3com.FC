@@ -1,0 +1,132 @@
+## FacetTerm  esprit3com  COMMON description file 08/15/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: esprit3com.FC,v 70.1 92/03/09 16:54:45 ssa Exp $
+##--- MARGINS ---##
+auto_left_margin
+## real_eat_newline_glitch
+##--- CLEAR ---##
+write_protect_on=\E&
+write_protect_off=\E'
+clear_screen--=^Z
+clear_screen--=\E;
+clear_screen--=\E+
+clear_screen_unprotected-PgA-=\E:
+clear_screen--P=\E*
+clr_fld_unprotected-PgA=\Et
+clr_fld_unprotected-PgA=\ET
+clr_eos_split_screen_with_refresh
+clr_eos_unprotected-PgA=\Ey
+clr_eos_unprotected-PgA=\EY
+##--- CURSOR ---##
+cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+cursor_home=^^
+cursor_up=^K
+cursor_down=^V
+cursor_right=^L
+##--- SCROLL ---##
+scroll_could_be_cursor_only
+scroll_reverse=\Ej
+##--- INS/DEL ---##
+insert_line=\EE
+insdel_line_move_col0
+delete_line=\ER
+insert_character=\EQ
+enter_insert_mode=\Eq
+exit_insert_mode=\Er
+delete_character=\EW
+##--- ATTRIBUTES URBDOIPA ---##
+attribute-P=\E)
+attribute--P=\E(
+attribute-A=\E$
+attribute--A=\E%
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##--- MAGIC COOKIE ATTRIBUTES ---##
+nomagic-Green.....=\EG0
+magic-Cyan......=\EG1
+magic-Yellow....=\EG2
+magic-White.....=\EG3
+magic-Green..R..=\EG4
+magic-Cyan...R..=\EG5
+magic-Yellow.R..=\EG6
+magic-White..R..=\EG7
+magic-Black.....=\EG8
+magic-Blue......=\EG9
+magic-Red.......=\EG:
+magic-Magenta...=\EG;
+magic-Black..R..=\EG<
+magic-Blue...R..=\EG=
+magic-Red....R..=\EG>
+magic-MagentaR..=\EG?
+##--- CHARACTER SET ATTRIBUTES ---##
+##--- LINE ATTRIBUTES ---##
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+cursor_on=\E.1
+cursor_off=\E.0
+cursor_type-block_steady=\E.2
+cursor_type-under_blink=\E.3
+cursor_type-under_steady=\E.4
+cursor_type-block_blink=\E.5
+cursor_type_turns_cursor_on
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+##--- TABS ---##
+back_tab=\EI
+clear_all_tabs=\E3
+set_tab=\E1
+##--- FUNCTION KEYS ---##
+## NOT_IN_COMMON use=tvi900keys.fc
+##--- CURSOR KEYS ---##
+key_home=^^
+key_up=^K
+key_down=^V
+key_right=^L
+##--- PRINTER ---##
+transparent_print_off=\Ea
+transparent_print_on=\E`
+pass=\EA
+pass=^T
+##--- STATUS LINE ---##
+status_line=\Ef%s1\r
+## Removed status on and off, because they do not work in PCVision.
+## status_on=\Eg
+## status_off=\Eh
+##--- MISC ---##
+## TBD new_line=^_
+##--- MULTIPAGE ---##
+pass=\Ew
+ignore=\E\\1
+ignore=\E\\2
+ignore=\E\\3
+ignore=\E-07\040
+ignore=\E-06\040
+ignore=\E-17\040
+ignore=\E-16\040
+##--- INIT ---##
+## I removed the "reverse video" feature, because pcvision uses \Ed to
+##	change personalities!
+## mode-00000000-00000002=\Ed$<20/>
+## mode-00000002-00000000=\Eb$<20/>
+ignore-change_personality=\Ed
+ignore=\Eb
+ignore=\E#
+pass=\E"
+pass=\EDF
+pass=\EC
+pass=\EO
+pass=\EX
+pass=\Eu
+pass=\El
+ignore=\Ek
+pass=\E016
+pass=\E004
+pass=\Ex0
+pass=\Ex1
+pass=\Ex2
+pass=\Ex3
+pass=\Ex4\r
+pass=\Ee\040
+pass=\E!2
+pass=\E>
+pass=\E<
+pass=\E8
+pass=\E9
+pass=^O

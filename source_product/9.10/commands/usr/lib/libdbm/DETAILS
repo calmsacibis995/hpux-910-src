@@ -1,0 +1,298 @@
+The following useful mail arrived in response to my query for help on ndbm.
+It was so informative that I decided to include it in the libdbm directory.
+
+Rob Robason
+################################################################################
+From allyn@hp-sdd Wed Jun 14 14:12 MDT 1989
+Received: from hpfclj.HP.COM by hpfcls.HP.COM; Wed, 14 Jun 89 14:12:25 mdt
+Received: from hpfcdc.HP.COM by hpfclj.HP.COM; Wed, 14 Jun 89 14:12:50 mdt
+Received: from hp-sdd.sdd.hp.com by hpfcdc.HP.COM; Wed, 14 Jun 89 14:14:00 mdt
+Received: by hp-sdd.sdd.hp.com; Wed, 14 Jun 89 13:12:03 pdt
+Date: Wed, 14 Jun 89 13:12:03 pdt
+From: Allyn Fratkin <allyn@hp-sdd>
+Message-Id: <8906142012.AA16694@hp-sdd.sdd.hp.com>
+To: rer@hpfclj
+Subject: Re: HELP: need ndbm(3X) guru
+Newsgroups: hp-factory.unix
+In-Reply-To: article <2691370@hpfcdc.HP.COM> of Wed, 14 Jun 1989 16:47:31 GMT
+
+you may find this useful the following article useful.
+
+allyn fratkin, engineering productivity group, san diego division
+---------------------------------------------------
+>From hp-sdd!hplabs!ucbvax!tut.cis.ohio-state.edu!rutgers!apple!vsi1!icldata!altos86!dtynan  Mon Apr 17 15:13:18 1989
+Path: hp-sdd!hplabs!ucbvax!tut.cis.ohio-state.edu!rutgers!apple!vsi1!icldata!altos86!dtynan
+From: chris@mimsy.UUCP (Chris Torek)
+Newsgroups: comp.unix
+Subject: Re: dbm.a and ndbm.a archives
+Message-ID: <1049@altos86.UUCP>
+Date: 17 Apr 89 02:49:26 GMT
+References: <976@altos86.UUCP>
+Sender: dtynan@altos86.UUCP
+Organization: U of Maryland, Dept. of Computer Science, Coll. Pk., MD 20742
+Lines: 260
+Approved: dtynan@zorba.Tynan.COM
+
+[Moderators Note:-  Another 'long' reply.  Although, this one probably
+  has justification in the subject matter.  Save this everone!  - Der]
+
+In article <976@altos86.UUCP> grego@unocss.unl.edu (Greg Ostravich) writes:
+>I am looking to find out the format that 'dbm' and 'ndbm' use.
+
+dbm and ndbm use the same format; dbm is implemented as a compatibility
+layer on top of ndbm.  One description suffices for both.  The key idea
+behind dbm is a variant of a database technique known as `extensible
+hashing'.  In dbm, it works like this:
+
+For each object that you wish to find again later (call this a `key'),
+compute a 32 bit hash number.  Make the hash function depend on the
+bits in the key, but sufficiently `random-looking' that two nearly-
+identical keys give radically different hashes.  DES encryption, for
+instance, would give a fairly well-spread-out bit spectrum.
+
+For each key, the 32 bit hash number tells us in which `block' that key
+can be found.  (A database can thus consist of up to 4 billion blocks.)
+But, since we do not want to scatter eight keys across an entire file
+system, we modify it thus:  Instead of using all 32 bits, we use only
+as many bits as needed to make all the keys fit in their blocks.
+
+Initially, we use no bits, and all keys fit in block zero: (hash & 0)
+is always 0.  Every store goes to block 0.
+
+Eventually, block 0 gets full.  We then declare that, for everything
+that was in block 0, we will now use another bit.  Now some keys fit in
+block 0, and some in block 1: (hash & 1) is either 0 or 1.  Move all
+the keys that were in block 0, but should now be in block 1, to block
+1.  (This is called a `split'.)
+
+Now either block 0 or block 1 can get full.  If block 0 fills, we
+declare that, for everything that (was in block 0 for 0 bits) and (was
+in block 0 for 1 bit) should have two bits treated.  Change the mask
+from 1 to 3, and instead of (hash&1)==0, we will have (hash&3) which
+will be either 0 or 2.  (It cannot be 3 since (hash&1)==0.)  Move
+the appropriate keys to block 2.
+
+If block 1 fills instead, we do the same, but for block 1 rather
+than zero; some of these keys move to block 3.  If both blocks fill,
+we wind up doing this for both.
+
+Now blocks 0, 1, 2, or 3 could fill.  If any one does, we declare that,
+for everything that (was in block 0 for 0 bits) and (was in block 0/1
+for 1 bit) and (was in block 0/1/2/3 for 2 bits) should have three bits
+treated, and we change the mask from 3 to 7.  If all goes well, about
+half the keys move to another block (from 0 to 4, 1 to 5, 2 to 6, or 3
+to 7).  We repeat this process as often as necessary.
+
+To find a key, we find its block number.  First, compute the 32 bit
+hash value for that key.  Next, see if we declared that (block 0 for 0
+bits) split.  If so, see if we declared that (block (hash&1) for 1 bit)
+split; if so, see if (block (hash&3) for 2 bits) split; and so on,
+until we finally reach a block that has not split.  The key is
+either in this block, or not in the database at all.
+
+The way we tell whether (block B for K bits) has split is to keep a bit
+array (`.dir' file) with zeroes where blocks have not split and ones
+where they have.  (Block B for K bits) is denoted by bit number (B +
+(1<<K)-1).  EOF on the `.dir' file implies an infinite sea of zero
+bits (so that only the 1 bits need be stored).
+
+The search loop can be represented quite simply algorithmically:
+
+	hash = calculate_hash(key);
+	mask = 0;
+	while (bit_is_set((hash & mask) + mask))
+		mask = (mask << 1) | 1;
+	block = hash & mask;
+
+or more concretely (with the obvious optimisations)
+
+	hash = calchash(key);
+	for (hmask = 0;; hmask = (hmask << 1) | 1) {
+		bit = (hash & hmask) + hmask;
+		if (bit < max_possible_bit) {
+			figure out which .dir `block' holds the bit;
+			read it in, if not already in core;
+			if (the bit is not set)
+				break;
+		}
+	}
+	block = hash & hmask;
+	read that block, if not already in core;
+
+The `max possible bit' value can be computed initially from the size
+(in bytes) of the .dir file times the number of bits in a byte, and
+updated in the `split' code whenever it sets a bit.
+
+The above algorithm is the real heart of this extensible hash.  Once
+you understand how and why it works, you can write a dbm: the rest is
+just support structure.
+
+The split algorithm is the next tricky part.  In pseudo-code:
+
+	if (key will never fit in a single block)
+		return (too big);	/* prevents looping below */
+    store:
+	hash = calchash(key);
+	find the block as above;
+	if (key is already here) {
+		if (we are to overwrite it)
+			delete it;
+		else
+			return (already there);
+	}
+	if (it fits) {
+		jam it in;
+		return (ok);
+	}
+    split:
+	if (oldmask == ~0)
+		database got full; /* how did this happen? */
+	newbit = oldmask + 1;
+	for (each object in the block) {
+		hash = calchash(object);
+		if (hash & newbit) {
+			move object from this block to
+				this block + newbit;
+		} else {
+			it stays here;
+		}
+	}
+	goto store;	/* try again; should make it eventually */
+
+It is, of course, not this simple.  If all you want to do is find keys,
+this algorithm is fine; but dbm stores (key, content) pairs, so that
+you can associate an unknown (such as a mail alias) with a known (the
+name of the alias).  To do this, it stores these quite literally as
+*pairs*: each `.pag' file block consists of a sequence of (key,
+content; key, content; key, content) groupings.  Every even numbered
+`item' is a key and every odd `item' is a content.  When searching a
+block for a key, dbm looks only at the even items.  Upon finding it,
+dbm returns the next item, which is that key's content.
+
+Each item, whether key or content, is stored in a `.pag' block of
+1024 bytes.  Each .pag block is treated as the union of:
+
+	an array of shorts (size 1024/sizeof(short) or 512)
+	an array of bytes (size 1024)
+
+The bytes are used starting at the end, and the shorts starting at the
+beginning.  The first short counts the total number of items (not
+pairs, so it always winds up even) in the block.  The next tells where
+the first item (item number zero) *begins*.  Item zero *ends* at byte
+1024, non-inclusive.  The third short tells where the second item
+begins; that item ends where the first item begins.  Items are thus
+allocated from both ends, working towards the middle.  That is:
+
+	int i, n;
+	short *sp;
+	char *endp, *startp;
+	char blkbuf[BLKSIZE];
+
+	sp = (short *)blkbuf;
+	endp = blkbuf + BLKSIZE;
+	n = *sp++;	/* sp now points to first item index */
+	for (i = 0; i < n; i++) {
+		startp = blkbuf + sp[i];
+		/* item i is at bytes [startp..endp) */
+		if (endp - startp == key.length &&
+		    memcmp(startp, key.data, key.length) == 0)
+			found it;
+		endp = startp;
+	}
+
+except that we only want to look at even-numbered items (keys,
+not contents).
+
+The last task is iterating through the database.  To do this we make a
+tricky observation: (imagine italics here)  The highest possible
+numbered block in the database can be found by walking a tree formed of
+the bits set during split operations.
+
+Huh?
+
+Put it this way: if (block 0 for 0 bits was split) and (block 0 for 1
+bit was split) and (block 0 for two bits was split) and (block zero for
+3 bits was split), but (block 0 for 4 bits was NOT split), then there
+may be stuff in blocks 1 (for 1 bit), or 3 or 2 (for 2 bits), or 7 or 6
+or 5 or 4 (for 3 bits), but definitely not in 8.  From (block 1 for 1
+bit) we might split several times and get (9 for 4 bits), or from 2 or
+3 or ... or 7 we might split to other blocks, but never to 8.  So we
+use block 0 as a starting point.  After going over everything in block
+0, we see how far we can go with block-zero-splits, by taking the mask
+computed by that first loop when given a `hash' of 0.  If it was split
+3 times, this will get us to block 4.  Here is how (as I slip into
+TeXese):
+
+Given a starting point hash value $h$ and the mask $m$ needed to
+determine that keys with hash $h$ are in block $h & m$, set $h$ to
+$h & m$ and set $b$ to $\log_2 (m + 1)$.  Then loop, decrementing
+$b$, until either $b = -1$ or bit $b$ of $h$ is {\it not} set; clear
+bit $b$ of $h$ and repeat.  If $b = -1$, you are done (there are
+no more blocks); otherwise, the value $h | 2^b$ is the next block to
+look at.  In C code:
+
+	compute mask needed for hash, as before;
+	hash &= mask;
+	bit = mask + 1;		/* `bit' is 2^b */
+	for (;;) {
+		if ((bit >>= 1) == 0) {
+			/* ran out of bits */
+			return 0;	/* no more blocks */
+		}
+		if ((hash & bit) == 0)
+			return (hash | bit);	/* do this block next */
+		hash &= ~bit;
+	}
+
+I am not sure how to explain this intuitively, but it really does
+hit all the blocks that have been used (and each only once).  This
+`walks the tree' of hash-zero values (0, 4, 2, 1 in the example
+above), inserting between each walk any blocks due to splits from
+4, 2, or 1.  It does occasionally try a block that is empty, but
+this is not a problem.
+
+Within a block, the order is up to the person implementing firstkey()
+and nextkey(); dbm produces them sorted, with the sort being based on
+shortest first, then strcmp()-like order within same-length keys:
+
+	if (key1.size < key2.size)
+		return (-1);	/* less */
+	if (key1.size > key2.size)
+		return (1);	/* greater */
+	return (compare(key1.dptr, key2.dptr, key1.dsize));
+	/* where compare() is like strcmp() but does not treat \0 specially */
+
+This has the advantage of needing no state across calls.
+
+Last-minute details: the .pag block size is 1024 bytes; the
+.dir file does not really have a block size, but 4.3BSD uses
+4096 bytes (which is 32768 bits, and so covers up to about 32 MB
+directly).  The external functions are
+
+	#define dbm_dirfno(db)	((db)->dbm_dirf)
+	#define dbm_pagfno(db)	((db)->dbm_pagf)
+
+	typedef struct {
+		char	*dptr;
+		int	dsize;
+	} datum;
+
+	/*
+	 * flags to dbm_store()
+	 */
+	#define DBM_INSERT	0
+	#define DBM_REPLACE	1
+
+	DBM	*dbm_open(char *name, int flags, int mode);
+	void	dbm_close(DBM *db);
+	datum	dbm_fetch(DBM *db, datum key);
+	datum	dbm_firstkey(DBM *db);
+	datum	dbm_nextkey(DBM *db, datum prevkey);
+	int	dbm_delete(DBM *db, datum key);
+	int	dbm_store(DBM *db, datum key, datum content, int flags);
+-- 
+In-Real-Life: Chris Torek, Univ of MD Comp Sci Dept (+1 301 454 7163)
+Domain:	chris@mimsy.umd.edu	Path:	uunet!mimsy!chris
+
+
+

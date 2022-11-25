@@ -1,0 +1,35 @@
+
+# @(#)checked_out	$Revision: 1.15.109.1 $	$Date: 91/11/19 13:53:55 $
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+
+# Initialize
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH
+umask 022
+
+# Put out a header if we are interactive
+if [ -t ] ; then
+    echo "Files in $nfs/checkout:"
+fi
+
+# Search checkout, if it exists
+if [ -d $nfs/checkout -a -s $nfs/checkout ] ; then
+    cd $nfs/checkout
+    if [ $# -eq 0 ] ; then
+	# fix for the 300, which does not have 0 length directories
+	# NOTE: changed ls to /bin/ls to avoid alias problems.
+	if [ -n "`/bin/ls`" ]
+	then
+	    set `/bin/ls`
+	fi
+    fi
+    for i
+    do
+	if [ -d $i -a -s $i ] ; then
+	    find $i -type f -print
+	elif [ -f $i ] ; then
+	    echo $i
+	fi
+    done
+fi

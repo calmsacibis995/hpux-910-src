@@ -1,0 +1,180 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+#
+exitval=0
+fileset=CMDS-MIN
+script=/system/$fileset/decustomize
+
+#
+# This fileset may be removed
+#
+[ "$2" = "check" ] && exit 0
+
+PATH=/bin:/usr/bin:/etc
+
+#
+# killcron -- This function will kill /etc/cron, if its running.
+#             Remove the FIFO file to indicate that the kill has been
+#             performed.
+#
+function killcron
+{
+    patt=' cron
+ /etc/cron'
+
+    pid="`ps -e | fgrep "$patt" | awk '{print $1}'`"
+    if [ -n "$pid" ]; then
+	kill -15 $pid >/dev/null 2>&1
+	sleep 3
+	kill -9 $pid >/dev/null 2>&1
+	rm -f /usr/lib/cron/FIFO
+    fi
+}
+
+#
+# If we have been asked to do a remote kill, we simply call killcron
+# to kill /etc/cron and then exit.  We only kill cron if we are on
+# the same architecture of "$1"
+#
+if [ "$2" = "remote_kill" ]; then
+    case "`getcontext`" in
+    *HP-PA*)
+	[ "$1" = HP-PA ] && killcron
+	;;
+    *HP-MC68020*)
+	[ "$1" = HP-MC68020 ] && killcron
+	;;
+    esac
+    exit 0
+fi
+
+#
+# If we are on a diskless cluster, kill /etc/cron on all cnodes of
+# the architecture that we are removing
+#
+if [ -s /etc/clusterconf -a -x /bin/cnodes ]; then
+    cnodes=`cnodes -x`
+    for i in $cnodes; do
+	remsh $i $script "$1" remote_kill >/dev/null 2>&1
+    done
+fi
+
+#
+# remove_libcron -- Remove files from a /usr/lib/cron directory
+#
+function remove_libcron
+{
+    cfgs="at.allow cron.allow at.deny cron.deny queuedefs .proto"
+    cfgs="$cfgs OLDlog log FIFO"
+
+    #
+    # Do nothing if passed a non-existant directory
+    #
+    [ -d $1 ] || return 0
+
+    #
+    # Remove the configuration files
+    #
+    cd $1
+    rm -f $cfgs
+
+    #
+    # Now remove the directory
+    #
+    cd /
+    rmdir $1 >/dev/null 2>&1
+
+    if [ -d $1 ]; then
+	echo "WARNING: The directory $1 contains additional files"
+        echo "         and was not removed."
+	return 1
+    fi
+    return 0
+}
+
+#
+# remove_spoolcron -- Remove files from a /usr/spool/cron directory
+#
+function remove_spoolcron
+{
+    cfgs="atjobs crontabs .ataids .cronaids"
+
+    #
+    # Do nothing if passed a non-existant directory
+    #
+    [ -d $1 ] || return 0
+
+    #
+    # Remove the spool files
+    #
+    cd $1
+    rm -rf $cfgs
+
+    #
+    # Now remove the directory
+    #
+    cd /
+    rmdir $1 >/dev/null 2>&1
+
+    if [ -d $1 ]; then
+	echo "WARNING: The directory $1 contains additional files"
+        echo "         and was not removed."
+	return 1
+    fi
+    return 0
+}
+
+#
+# If we are on a mixed cluster, we only remove the cron configuration
+# files if we are removing the last instance of cron
+#
+remove_cron=yes
+[ -H /etc/cron+ ] && [ 0"`ls /etc/cron+ | wc -l`" -gt 1 ] && \
+    remove_cron=no
+
+#
+# Remove the configuration files for cron, if we are removing the last
+#
+if [ "$remove_cron" = yes ]; then
+    if [ -H /usr/lib/cron+ ]; then
+	nuke_lib=yes
+	nuke_spool=yes
+	cd /usr/lib/cron+
+	for cnode in *; do
+	    remove_libcron   /usr/lib/cron+/$cnode   || nuke_lib=no
+	    remove_spoolcron /usr/spool/cron+/$cnode || nuke_spool=no
+	done
+
+	cd /
+	if [ "$nuke_lib" = yes ]; then
+	    rmdir /usr/lib/cron+ >/dev/null 2>&1
+	    if [ -d /usr/lib/cron+ ]; then
+		echo "ERROR:   The directory /usr/lib/cron+ could not be removed" >&2
+		exitval=1
+	    fi
+	fi
+	if [ "$nuke_spool" = yes ]; then
+	    rmdir /usr/lib/spool+ >/dev/null 2>&1
+	    if [ -d /usr/lib/spool+ ]; then
+		echo "ERROR:   The directory /usr/lib/spool+ could not be removed" >&2
+		exitval=1
+	    fi
+	fi
+    else
+	remove_libcron /usr/lib/cron
+	if [ -d /usr/lib/cron ]; then
+	    echo "ERROR:   The directory /usr/lib/cron could not be removed" >&2
+	    exitval=1
+	fi
+
+	remove_spoolcron /usr/spool/cron
+	if [ -d /usr/spool/cron ]; then
+	    echo "ERROR:   The directory /usr/spool/cron could not be removed" >&2
+	    exitval=1
+	fi
+    fi
+fi
+
+/bin/rm -f /etc/csh.login /etc/d.cshrc /etc/d.login
+
+exit $exitval

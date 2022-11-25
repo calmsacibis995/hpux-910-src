@@ -1,0 +1,10 @@
+$set 1
+1 broadcast message from %s!%s:  
+2 Message too long\n
+3 %s is unknown host\n
+4 Couldn't contact %s: 
+5 \n
+6 Usage: rwall host .... [-n netgroup ....] [-h host ...]\n
+7 %s is unknown netgroup\n
+8 rwall: can't reach %1$s at address %2$s\n
+9 rwall: now trying %s\n

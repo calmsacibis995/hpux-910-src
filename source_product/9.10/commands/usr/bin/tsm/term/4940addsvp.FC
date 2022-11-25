@@ -1,0 +1,357 @@
+## FacetTerm  4940addsvp (ADDS Viewpoint mode)  description file 06/12/91
+##    common file
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 4940addsvp.FC,v 70.1 92/03/09 15:50:58 ssa Exp $
+### NOT_IN_COMMON xon_xoff
+### NOT_IN_COMMON columns=80
+### NOT_IN_COMMON columns_wide=132
+### NOT_IN_COMMON columns_wide_on=\E`;
+### NOT_IN_COMMON columns_wide_off=\E`:
+### NOT_IN_COMMON NO columns_wide_clears_screen
+### NOT_IN_COMMON NO parm_mode_val-COLSWIDE-00000000=?3
+### NOT_IN_COMMON lines=24
+### NO graphics_8_bit
+### ?? graphics_escape_control
+### ?? input_8_bit
+##--- MARGINS ---##
+auto_left_margin
+### ASSUMED auto_right_margin
+### NO eat_newline_glitch
+### NO auto_wrap_on=
+### NO auto_wrap_off=
+auto_wrap_mode_bit-04000000
+### ?? parm_mode_val-AUTOWRAP-00000000=?7
+##--- CLEAR ---##
+### no protect off - clear to null
+clear_screen=^L
+### protect off - clear to space
+clear_screen--P=\E+
+### NO clear_all=^L
+clr_eol=\Et
+### out_clr_eol=\Et
+clr_eol_w_attr=\EK
+### clr_eol_chars=\EK
+### set_attr_eol=\EK
+clr_eos=\Ey
+### out_clr_eos=\Ey
+clr_eos_w_attr=\Ek
+### clr_eos_chars=\Ek
+### set_attr_eos=\Ek
+##--- CURSOR ---##
+### cursor_address=
+cursor_address=\EY%p1%' '%+%c%p2%' '%+%c
+cursor_address_wide_starts=80
+cursor_address_wide=\Ea%i R C
+cursor_address_wide=\Ea%i%p1%dR C
+cursor_address_wide=\Ea%i R%p2%dC
+cursor_address_wide=\Ea%i%p1%dR%p2%dC
+### row_address=
+row_address_addsvp=^K%p1%c
+### column_address=
+column_address_addsvp=^P%p1%c
+### NO cursor_home=^A or =\E} may go to lower left
+cursor_up=^Z
+cursor_up_at_home_wraps_ll
+### NO parm_up_cursor=
+### SAME_AS_NEWLINE cursor_down=\n
+### NO parm_down_cursor=
+### cursor_right wraps to next line - scroll at bottom right
+cursor_right=^F
+### NO parm_right_cursor=
+### cursor_left wraps to previous line - to bottom right from home
+cursor_left=^U
+### NO parm_left_cursor=
+### NO ## NOT_IMP cursor_mem_address=
+### NO ## NOT_IMP cursor_to_ll=
+##--- SCROLL ---##
+### NO change_scroll_region=
+### SAME_AS_NEWLINE scroll_forward=\n
+scroll_could_be_cursor_only
+### NO ## NOT_IMP parm_index=
+scroll_reverse=\Ej
+### NO ## NOT_IMP parm_rindex=
+### NO save_cursor=
+### NO restore_cursor=
+##--- INS/DEL ---##
+insert_line=\EM
+insdel_line_move_col0
+### NO parm_insert_line=
+delete_line=\El
+### NO parm_delete_line=
+insert_character=\EQ
+### NO insert_padding=
+### NO ## NOT_IMP parm_ich=
+enter_insert_mode=\Eq
+exit_insert_mode=\Er
+insert_mode_on_mode_bit-02000000
+### ?? parm_mode_val-INSERTON-00000000=4
+delete_character=\EW
+### NO parm_delete_character=
+### NO ## NOT_IMP erase_chars=
+### NO ## NOT_IMP enter_delete_mode=
+### NO ## NOT_IMP exit_delete_mode=
+### NO ## NOT_IMP repeat_char=
+##--- ATTRIBUTES URBDOIPA ---##
+### NO ## NOT_IMP set_attributes=
+### NOTE magic_cookie_glitch=0 for protect and graphics 
+### USE_PROTECT attribute-?=\E0P^N
+### USE_PROTECT attribute--?=^O
+### NO attribute-U=
+### NO attribute--U=
+### NO attribute-R=
+### NO attribute-B=
+### NO attribute-D-O=
+### NO attribute-O-D=
+### NO attribute-I=
+attribute-P=^N
+attribute--P=^O
+attribute-A=\EH^B
+attribute--A=\EH^C
+attribute_next-A-=\EH
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                              ---##
+### ?? parm_attribute=\E[%7MMm
+### ?? parm_attribute--URBDOIPA=\E[;%7MMm
+### ?? parm_attribute_out=\E[%s1m
+### ?? parm_attribute_out=\E[%s1;%s2m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### ?? parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### ?? parm_attribute_val--URBDOIPA=0
+### ?? parm_attribute_val-U-=4
+### ?? parm_attribute_val-R-=7
+### ?? parm_attribute_val-B-=5
+### ?? parm_attribute_val-D-O=2
+### ?? parm_attribute_val-O-D=1
+### ?? parm_attribute_val-I-=8
+### ?? parm_attribute_val-P-=number
+### ?? parm_attribute_val-A-=number
+### NO exit_attribute_mode--URBDOIPA=
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### USE_ATTR magic-standout=\E0P^N
+magic-underline=\EG8
+magic-reverse=\EG4
+magic-blink=\EG2
+magic-dim=\EGp
+### NO ## USE_ATTR magic-bold=
+### NO ## USE_ATTR magic-secure=
+### NO ## USE_ATTR magic-protected=
+### USE_ATTR magic-alt_charset=\EH^B
+magic-reverse_blink=\EG6
+magic-dim_reverse=\EGt
+magic-dim_blink=\EGr
+magic-dim_reverse_blink=\EGv
+nomagic-exit_attribute_mode=\EG0
+### USE_ATTR nomagic-exit_standout_mode=^O
+### USE_ATTR nomagic-exit_underline_mode=
+### USE_ATTR nomagic-exit_alt_charset_mode=\EH^C
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+### ?? lock_shift_0=
+### ?? select_character_set_0--=
+### ?? select_character_set_0--=
+### ?? lock_shift_1=
+### ?? select_character_set_1--=
+### ?? select_character_set_1--=
+### ?? single_shift_2=
+### ?? select_character_set_2--=
+### ?? single_shift_3=
+### ?? select_character_set_3--=
+##--- LINE ATTRIBUTES ---##
+### ?? line_attribute_off=
+### ?? line_attribute=
+### ?? line_attribute=
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+cursor_on=\E`1
+cursor_on=^X
+cursor_off=\E`0
+cursor_off=^W
+cursor_on_mode_bit-00800000
+### ?? parm_mode_val-CURSORON-00000000=?25
+cursor_type=\E`3
+cursor_type=\E`2
+cursor_type=\E`4
+cursor_type=\E`5
+### NO cursor_type_turns_cursor_on
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+### NO enter_appl_keypad_mode=
+### NO exit_appl_keypad_mode=
+appl_keypad_mode_on_mode_bit-00400000
+### ?? parm_mode_val-APPKEYON-00000000=?4
+### NO enter_cursor_key_mode=
+### NO exit_cursor_key_mode=
+cursor_key_mode_on_mode_bit-00200000
+### ?? parm_mode_val-CURKEYON-00000000=?4
+##--- TABS ---##
+back_tab=\EI
+### NO clear_all_tabs=
+pass-clear_tab=\E2
+set_tab=\E1
+##--- FUNCTION KEYS ---##
+use=4940adkeys.fc
+### function_key_clear=
+### function_key_clear_mode_yes=number
+### function_key_clear_mode_no=number
+### parm_pkey_key=
+### parm_pkey_key=
+### pkey_key=
+### function_key_string_is_hex
+### function_key-id-delim=
+### function_key-id-delim=
+### shift_function_key
+### function_key-id-delim=
+### function_key-id-delim=
+##--- CURSOR KEYS ---##
+key_home=^A
+key_up=^Z
+### key_down=
+key_right=^F
+key_left=^U
+### key_backspace=
+##--- PRINTER ---##
+### TBD print_screen=\EP
+### transparent print
+### TBD prtr_off=\E4
+### TBD prtr_on=\E3
+### non transparent print on=^R  off=^T
+##--- STATUS LINE ---##
+### TBD has_status_line
+### ?? ## TBD status_line_esc_ok
+### NO status_off_clears_status_type
+### status_off_clears_status_line
+status_type_turns_status_on
+status_type=\EA10
+status_type=\EA12
+status_type=\EA14
+status_type=\EA18
+status_type=\EA1p
+status_type=\EA11
+### NO status_type_ruins_status_line
+### COMBINE to_status_line=\Ef
+### COMBINE from_status_line=\r
+status_line=\Ef%s1\r
+status_line_turns_status_on
+##--- MISC ---##
+### ASSUMED bell=^G
+### ONLY IF PADDING carriage_return=\r
+### NO ## ONLY IF REAL new_line=
+### NO ## NOT_IMP form_feed=
+### NO ## OK_IF_MAGIC transparent_underline
+### NO ## NOT_IMP ceol_standout_glitch
+### NO ## NOT_IMP erase_overstrike
+### NO ## NOT_IMP generic_type
+### NO ## NOT_IMP hard_copy
+### NO ## NOT_IMP has_meta_key
+### NO ## NOT_IMP insert_null_glitch
+### NO ## NOT_IMP memory_above
+### NO ## NOT_IMP memory_below
+### NO ## NOT_IMP move_insert_mode
+### NO ## NOT_IMP move_standout_mode
+### NO ## NOT_IMP over_strike
+### NO ## NOT_IMP tilde_glitch
+### NO ## NOT_IMP lines_of_memory=number
+### NO ## NOT_IMP padding_baud_rate=number
+### NO ## NOT_IMP virtual_terminal=number
+### NO ## NOT_IMP command_character=
+### NO ## NOT_IMP down_half_line=
+### NO ## NOT_IMP meta_off=
+### NO ## NOT_IMP meta_on=
+### NO ## NOT_IMP pad_char=
+### NO ## NOT_IMP set_window=
+### NO ## NOT_IMP underline_char=
+### NO ## NOT_IMP up_half_line=
+### NO ## NOT_USED key_a1=
+### NO ## NOT_USED key_a3=
+### NO ## NOT_USED key_b2=
+### NO ## NOT_USED key_c1=
+### NO ## NOT_USED key_c3=
+### NO ## NOT_USED key_catab=
+### NO ## NOT_USED key_clear=
+### NO ## NOT_USED key_ctab=
+### NO ## NOT_USED key_dc=
+### NO ## NOT_USED key_dl=
+### NO ## NOT_USED key_eic=
+### NO ## NOT_USED key_eol=
+### NO ## NOT_USED key_eos=
+### NO ## NOT_USED key_ic=
+### NO ## NOT_USED key_il=
+### NO ## NOT_USED key_ll=
+### NO ## NOT_USED key_npage=
+### NO ## NOT_USED key_ppage=
+### NO ## NOT_USED key_sf=
+### NO ## NOT_USED key_sr=
+### NO ## NOT_USED key_stab=
+### NO ## NOT_USED lab_f0=
+### NO ## NOT_USED lab_f1=
+### NO ## NOT_USED lab_f2=
+### NO ## NOT_USED lab_f3=
+### NO ## NOT_USED lab_f4=
+### NO ## NOT_USED lab_f5=
+### NO ## NOT_USED lab_f6=
+### NO ## NOT_USED lab_f7=
+### NO ## NOT_USED lab_f8=
+### NO ## NOT_USED lab_f9=
+### NO ## NOT_USED lab_f10=
+##--- MULTIPAGE ---##
+### ?? pages=number
+### ?? display_page_number=
+### ?? parm_display_page_next=
+### ?? parm_display_page_prev=
+### ?? display_page_next=
+### ?? display_page_prev=
+##--- INIT ---##
+enter_ca_mode=\E0P
+### NO exit_ca_mode=
+### NO ## SPLITUP init_1string=
+### NO ## SPLITUP init_2string=
+### NO ## SPLITUP init_3string=
+### NO ## SPLITUP init_file=
+### NO ## SPLITUP init_prog=
+### NO ## SPLITUP reset_1string=
+### NO ## SPLITUP reset_2string=
+### NO ## SPLITUP reset_3string=
+### NO ## SPLITUP reset_file=
+##--- MODE ---##
+### NO ## SPLITUP flash_screen=
+### ?? mode-00000000-00000000=
+### ?? ignore=
+### ?? pass=
+##--- PARM_MODE ---##
+### ?? parm_mode_on=\E[M?h
+### ?? parm_mode_off=\E[M?l
+### ?? parm_mode_private_propogates
+ignore_mode_bit-80000000
+### ?? parm_mode_val-80000000-IGNORE..=?99
+pass_mode_bit-40000000
+### ?? parm_mode_val-40000000-PASS....=?99
+notimp_mode_bit-20000000
+### ?? parm_mode_val-20000000-NOTIMP..=?99
+## protect_char reverse=\E0P dim=\E0A normal=\E0@
+multi_mode-0000000C-00000000=\E0P
+multi_mode-0000000C-00000000=\E`6
+multi_mode-0000000C-00000004=\E0A
+multi_mode-0000000C-00000004=\E`7
+multi_mode-0000000C-00000008=\E0@
+multi_mode-0000000C-0000000C=\E0Q
+### local message field blank
+pass=\EA21
+### host message field
+pass=\EF%s1\r
+### keyboard unlock=\E" lock=\E#
+ignore=\E#
+pass=\E"
+ignore-keyboard_lock=^D
+pass-keyboard_unlock=^B
+### mode conversational=\EC     block=\EB
+pass=\EC
+### duplex full=\EDF half=\EDH
+pass=\EDF
+### monitor off=\Eu off=\EX on=\EU
+pass=\Eu
+pass=\EX
+### no scroll  off=\EO  on=\EN
+pass=\EO
+magic-stx_on_screen=\E8
+pass-padding=^?

@@ -1,0 +1,31 @@
+#!/bin/ksh
+# @(#) $Revision: 66.4 $
+#
+fileset=MAILERS
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolete fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they do not already exist.
+# or were not customized.
+#======
+cksum_cp $newconfig/mailx.rc /usr/lib/mailx/mailx.rc "4398 1"
+
+#======
+# Reset /usr/lib/mail directory permissions
+#======
+if [ -d /usr/lib/mail ]; then
+    /bin/chmod 755 /usr/lib/mail
+fi
+
+exit $exitval

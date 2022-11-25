@@ -1,0 +1,457 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+#
+# NOTE:
+#   The utilities in this file are for use *only* by Hewlett-Packard
+#   supported products.  They are subject to change or removal without
+#   prior notice.  No support of these utilities is expressed or
+#   implied, other than when used by and for the installation and
+#   update of Hewlett-Packard supplied products.
+#
+#   Copyright 1989 Hewlett-Packard Company, All Rights Reserved.
+#
+
+#
+# Explicitly set the PATH, so that we know where commands are coming
+# from.  This is just a safety measure, in case commands are accidently
+# invoked without a specific path name.
+#
+export PATH=/bin:/usr/bin:/etc
+
+#
+# owner_group -- get the owner and group of a file (in numeric form)
+#
+function owner_group
+{
+    set -- `/bin/ls -ln "$1"`
+
+    echo "$3" "$4"
+}
+
+#
+# chmog --
+#     change mode, owner and group on the specified files
+#     If mode is 0, the mode is left unchanged
+#     if any value is the null string, that value is not changed.
+#
+function chmog
+{
+    if [ $# -lt 4 ]; then
+	echo "Usage: chmog mode owner group files..." >&2
+	exitval=1
+	return
+    fi
+
+    typeset mode="$1"
+    typeset owner="$2"
+    typeset group="$3"
+    shift 3
+
+    if [ -n "$group" ]; then
+	/bin/chgrp $group $* || exitval=1
+    fi
+
+    if [ -n "$owner" ]; then
+	/bin/chown $owner $* || exitval=1
+    fi
+
+    if [ -n "$mode" -a "$mode" != 0 ]; then
+	/bin/chmod $mode  $* || exitval=1
+    fi
+}
+
+#
+# cp_retain --
+#    copy $1 to $2.  The mode, owner and group of the source are
+#    retained.
+#
+#    Sets the variable "exitval" to 1 if an error ocurrs.
+#
+function cp_retain
+{
+    if [ $# -ne 2 ]; then
+	echo "Usage: cp_retain source target" >&2
+	exitval=1
+	return 1
+    fi
+
+    /bin/cp -p $1 $2
+    ownership=`owner_group $1`
+    chmog 0 $ownership "$2"
+}
+
+#
+# cond_cp --
+#    copy $1 to $2 iff $2 doesn't exist.  The mode, owner and group of
+#    the source are retained.
+#
+#    Sets the variable "exitval" to 1 if an error ocurrs.
+#
+function cond_cp
+{
+    if [ $# -ne 2 ]; then
+	echo "Usage: cond_cp source target" >&2
+	exitval=1
+	return 1
+    fi
+
+    if [ ! -f "$2" ]; then
+	cp_retain $1 $2
+    fi
+}
+
+#
+# cp_set --
+#    copy $4 to $5 and set the permissions to $1, owner to $2, group $3
+#
+#    Sets the variable "exitval" to 1 if an error ocurrs.
+#
+function cp_set
+{
+    if [ $# -ne 5 ]; then
+	echo "Usage: cp_set mode owner group source target" >&2
+	exitval=1
+	return 1
+    fi
+
+    /bin/cp $4 $5 || exitval=1
+    chmog "$1" "$2" "$3" "$5"
+}
+
+#
+# cond_cpset --
+#    copy $4 to $5 iff $5 doesn't exist.  Make sure the permissions are
+#    $1, owner $2, group $3
+#
+#    Sets the variable "exitval" to 1 if an error ocurrs.
+#
+function cond_cpset
+{
+    if [ $# -ne 5 ]; then
+	echo "Usage: cond_cpset mode owner group source target" >&2
+	exitval=1
+	return 1
+    fi
+
+    if [ ! -f "$5" ]; then
+	cp_set $*
+    fi
+}
+
+#
+# getCDF -- return a "+/$1" if $1 is not a valid context on the machine
+#           that we are running on
+#
+function getCDF
+{
+    export _bits_68k=FALSE
+    export _bits_pa_risc=FALSE
+    export _bits_wsio=FALSE
+    export _bits_sio=FALSE
+
+    if [ -z "$1" ]; then
+	if hp9000s300; then
+	    _bits_68k=TRUE
+	    _bits_wsio=TRUE
+	else
+	    _bits_pa_risc=TRUE
+	    if hp9000s700; then
+		_bits_wsio=TRUE
+	    else
+		_bits_sio=TRUE
+	    fi
+	fi
+	return
+    fi
+
+    case "$1" in
+    HP-MC68*)
+	_bits_68k=TRUE
+	_bits_wsio=TRUE
+	if hp9000s300; then
+	    return
+	else
+	    echo "+/$1"
+	fi
+	;;
+    HP-PA)
+	_bits_pa_risc=TRUE
+	if hp9000s700; then
+	    _bits_wsio=TRUE
+	elif hp9000s800; then
+	    _bits_sio=TRUE
+	else
+	    echo "+/$1"
+	fi
+	;;
+    *)
+	echo "+/$1"
+	;;
+    esac
+}
+
+#
+# s300 -- return TRUE if we are customizing s300 bits
+#
+function s300
+{
+    if [ "${_bits_68k}" = TRUE -a "${_bits_wsio}" = TRUE ]; then
+	return 0
+    else
+	return 255
+    fi
+}
+
+#
+# s700 -- return TRUE if we are customizing s700 bits
+#
+function s700
+{
+    if [ "${_bits_pa_risc}" = TRUE -a "${_bits_wsio}" = TRUE ]; then
+	return 0
+    else
+	return 255
+    fi
+}
+
+#
+# s800 -- return TRUE if we are customizing s800 bits
+#
+function s800
+{
+    if [ "${_bits_pa_risc}" = TRUE -a "${_bits_sio}" = TRUE ]; then
+	return 0
+    else
+	return 255
+    fi
+}
+
+#
+# wsio -- return TRUE if we are customizing bits on a "wsio" system
+#
+function wsio
+{
+    if [ "${_bits_wsio}" = TRUE ]; then
+	return 0
+    else
+	return 255
+    fi
+}
+
+#
+# sio -- return TRUE if we are customizing bits on a "sio" system
+#
+function sio
+{
+    if [ "${_bits_sio}" = TRUE ]; then
+	return 0
+    else
+	return 255
+    fi
+}
+
+#
+# old_fileset -- return the previous name(s) of a fileset, if any
+#
+function old_fileset
+{
+    name="$1"
+
+# NEW NAME  OLD NAME(s)
+#
+set -- \
+C		C_MIN				\
+USRCONTRB	KTOOL				\
+C-TOOLS		C_SUPL				\
+CMDS-AUX	KERN_SUPL			\
+CMDS-MIN	CMDS_MIN			\
+CORE-SHLIBS	SHLIBS				\
+DOS-UTILS	DOS_UTILS			\
+ECC-TOOLS	PECC				\
+LP-SPOOL	PRLP				\
+NLS-CORE	'NLS_CORE N_COMPUTE N-COMPUTE'	\
+PORTUGUES	PRTUGESE			\
+PROG-AUX	PROG_SUPL			\
+PROG-MIN	PROG_MIN			\
+SRC-CNTL	SRC_CNTL			\
+TEXT-FMT	'TEXT_FMT TEXT_READ TEXT_SUPL'	\
+UX-CORE		'UX_CORE ABCMD ACMD CORE'
+
+    while [ $# -gt 0 ]; do
+	if [ "$1" = "$name" ]; then
+	    echo "$2"
+	    return 0
+	fi
+	shift 2
+    done
+
+    #
+    # Wasn't in the table, so the name didn't change, just return
+    # what we wanted to look up.
+    echo "$name"
+    return 0
+}
+
+#
+# custom_setup -- initialize stuff for "s300", "s700", "s800",
+#                 "wsio" and "sio" macros
+#
+function custom_setup
+{
+    export _bits_68k=FALSE
+    export _bits_pa_risc=FALSE
+    export _bits_wsio=FALSE
+    export _bits_sio=FALSE
+
+    case "$1" in
+    HP-MC68*)
+	_bits_68k=TRUE
+	_bits_wsio=TRUE
+	;;
+    HP-PA)
+	_bits_pa_risc=TRUE
+	if hp9000s700; then
+	    _bits_wsio=TRUE
+	else
+	    _bits_sio=TRUE
+	fi
+	;;
+    esac
+
+    #=======
+    # /etc/passwd, /etc/group --
+    #    Install puts a special password and group file in place, if
+    #    the special files are there, delete them.
+    #
+    # NOTE:  If this is an install, we touch the file
+    #        /usr/adm/shutdownlog so that /etc/reboot will write to
+    #        this file.  We don't touch the file on an update, in case
+    #        the customer has removed it intentionally.
+    #
+    # NOTE:  This is done in custom_setup() so that we are sure to have
+    #        good password and group files.
+    #=======
+    magic="delete:this_line:777:777:or_usr:config_files:will_be_overwritten"
+    if [ -f /etc/passwd ]; then
+	read line </etc/passwd
+	if [ "$line" = "$magic" ]; then
+	    /bin/rm -f /etc/passwd
+	    [ -d /usr/adm ] && /bin/touch /usr/adm/shutdownlog
+	fi
+    fi
+    magic="delete:this_line:777:or,usr,config,files,will,be,overwritten"
+    if [ -f /etc/group ]; then
+	read line </etc/group
+	if [ "$line" = "$magic" ]; then
+	    /bin/rm -f /etc/group
+	fi
+    fi
+
+    typeset newconfig=/etc/newconfig`getCDF $1`
+    cond_cp $newconfig/passwd /etc/passwd
+    cond_cp $newconfig/group  /etc/group
+    [ -f /usr/adm/shutdownlog ] && chmog 644 bin bin /usr/adm/shutdownlog
+
+    return 0
+}
+
+#
+# fileset_obsolete -- remove any fileset related information for
+#                     filesets that were obsoleted by "$1"
+#
+function fileset_obsolete
+{
+    old_name=`old_fileset $fileset`
+    if [ -n "$old_name" ]; then
+	for i in $old_name; do
+	    if [ "$i" != "$fileset" ]; then
+		/bin/rm -rf /system$CDF/$i /etc/filesets$CDF/$i
+		/bin/rm -rf /system/$i /etc/filesets/$i
+	    fi
+	done
+    fi
+    return 0
+}
+
+#
+# major_rev() -- get the major revision number of a file by parsing
+#                the RCS "$Revision: 70.1 $" string
+#
+function major_rev
+{
+    if [ -z "$1" ]; then
+	echo "Usage: major_rev file"
+	return 1
+    fi
+
+    if [ ! -f "$1" -o ! -r $1 ]; then
+	echo "major_rev: can't open $1"
+	return 1
+    fi
+
+    /usr/bin/what < $1 |
+       /bin/sed -n 's/.*Revision:[ 	]*\([0-9]*\).*/\1/p'
+}
+
+#
+# minor_rev() -- get the minor revision number of a file
+#
+function minor_rev
+{
+    if [ -z "$1" ]; then
+	echo "Usage: minor_rev file"
+	return 1
+    fi
+
+    if [ ! -f "$1" -o ! -r $1 ]; then
+	echo "minor_rev: can't open $1"
+	return 1
+    fi
+
+    /usr/bin/what < $1 |
+       /bin/sed -n 's/.*Revision:[ 	]*[0-9]*\.\([0-9]*\).*/\1/p'
+}
+
+#
+# cksum_cp() -- used to automatically copy configurable files
+#               (from /etc/newconfig) to their final destination
+#		if the existing version has a given checksum.
+# $1    -- source
+# $2    -- target
+# $3... -- "sum" value of previous release file (can be more than 1)
+#
+# Returns 0 if file updated, 1 if not copied
+#
+function cksum_cp
+{
+    if [ ! -f $2 ] || cmp -s $1 $2; then
+	cp_retain $1 $2
+	return 0
+    fi
+
+    #
+    # Get the checksum of the existing file, if it matches $3
+    # we copy the new file into place.  Otherwise, we print a
+    # reminder to tell the sys-admin to manually merge any
+    # changes
+    #
+    typeset src=$1
+    typeset dest=$2
+    typeset sum="`/bin/sum <$dest`"
+    typeset old_sum
+    shift 2
+
+    for old_sum; do
+	if [ "$sum" = "$old_sum" ]; then
+	    cp_retain $src $dest
+	    return 0
+	fi
+    done
+
+    cat <<EOF
+NOTE:    Remember to merge your local changes to $dest with
+	 the new version, $src.  Then copy the
+	 merged version to $dest.
+EOF
+    return 1
+}

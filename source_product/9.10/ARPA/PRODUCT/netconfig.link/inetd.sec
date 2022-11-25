@@ -1,0 +1,28 @@
+# @(#)$Header: inetd.sec,v 1.8.109.2 92/03/09 10:24:37 thchen Exp $
+#
+#
+# The lines in the file contain a service name, permission field and
+# the Internet addresses or names of the hosts and/or networks 
+# allowed to use that service in the local machine.
+# The form for each entry in this file is:
+#
+# <service name>   <allow/deny>  <host/network addresses, host/network names>
+#
+# For example:
+# 
+# login		allow 	10.3-5 192.34.56.5 ahost anetwork
+#
+# The above entry allows the following hosts to attempt to access your system 
+# using rlogin: 
+# 		hosts in subnets 3 through 5 in network 10, 
+#		the host with Internet Address of 192.34.56.5,
+#		the host by the name of "ahost",
+#		all the hosts in the network "anetwork"
+#
+# mountd      deny    192.23.4.3
+#
+# The mountd entry  denies host  192.23.4.3  access to the NFS  rpc.mountd
+# server.
+#
+# Hosts and network names must be official names, not aliases.
+# See the inetd.sec(4) manual page for more information.

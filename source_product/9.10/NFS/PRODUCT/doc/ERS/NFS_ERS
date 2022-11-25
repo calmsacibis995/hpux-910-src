@@ -1,0 +1,5203 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'External Reference Specifications Document"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'External Reference Specifications Document''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+EXTERNAL REFERENCE SPECIFICATIONS DOCUMENT
+S300/S800 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:26:15 $
+$Revision: 1.46.109.1 $
+.sp 3
+.ce 2
+Project Manager: Dave Matthews
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+The NFS project is responsible for providing Sun's Network File
+System  (NFS) on the HP 9000  Series  300/800  HP-UX  systems.  NFS
+provides a means of transparently sharing  files among heterogeneous
+systems on a common network.  Remote  file  access remains invisible
+to users.
+For further information on NFS refer to the overview in Sun
+Microsystems's Network Services Guide.  This document and other overview 
+articles are available on request.
+.sp 1
+This document does not list all the external specifications for NFS.
+When the behavior of NFS is the same as Sun's NFS it will not be listed. 
+Rather, this document compiles the interactions between NFS and other parts 
+of HP-UX and HP networking.  It also lists the issues that have surfaced
+during the project and their resolutions.
+.sp 1
+For further information on the objectives of the NFS project please
+refer to the Product Requirements Document (PRD).  Also, refer to the 
+appendices of the PRD for a list of commands and libraries that are 
+specifically part of NFS and that are part of HP-UX but are affected 
+by NFS.  The reference manual pages are available in the notes group 
+hp.unix.tech or on request.
+.sp 1
+All technical decisions, interactions and comments herein refer
+to both the series 300 and series 800.  
+Any topics that refer to one system or another will marked as such
+on their title.
+.na
+.H 1 "TECHNICAL DECISIONS FOR s300 6.0 and s800 2.0 (NFS 3.0)
+.H 2 "NFS effect on HP-UX commands and libraries (Cristina Mahon and Eric Wilford)"
+.sp
+.ad
+Two main issues belong under this section.  They are the location of the
+YP/RPC/XDR/socket libraries required by certain HP-UX library routines
+modified to support NFS and whether more than one version of the commands
+would be shipped depending on whether or not NFS is present on the system.
+.na
+.sp 3
+.H 3 "Location of YP/RPC/XDR/socket libraries"
+.sp
+.ad
+When  studying  the  problem  of  where  new  library   routines
+introduced  by NFS  should  reside  we  found  out that  certain
+library  routines  that  reside  in libc and  libbsdipc  and are
+changed by NFS will require  Yellow Pages (YP) and RPC  routines
+for them to link successfully.
+.sp
+The libc  routines  affected by this  problem are  getpwent  and
+getgrent.  The  libbsdipc  routines are  gethostent,  getnetent,
+getprotoent, getservent and related routines.
+.sp
+An  example  of the  problem  is as  follows.  A user  writes  a
+program that calls getpwent.  With the current system he is able
+to compile his program without  requiring any further  libraries
+since  getpwent  resides  in libc  and  which  is  automatically
+linked.  With  the   introduction  of  NFS  related  changes  to
+getpwent  that user will be  required  to link  extra YP and RPC
+routines with his program since  getpwent calls YP routines that
+call RPC routines.
+.sp
+Sun  solves  that  problem  by  having  the YP and RPC  routines
+required by the modified libc and libbsdipc  routines  reside in
+libc.  
+.sp 
+On  the   series  300  that  would   mean   approximately
+increasing  the size of libc.a from  201 Kbytes to 330 Kbytes and
+increasing  the total size of all the commands that use getpwent
+and getgrent by 1.25 megabytes, for a total increase on the size
+of the product of 1.4 Megabytes.  
+.sp 
+On the series 800 "ball-park" numbers show libc.a increasing 
+from 613652 Bytes to 958920 Bytes, that is an 56% increase.  
+We don't have yet an accurate count of the number of core programs 
+which will be affected by the changes to getpwent and getgrent 
+on the s800. However, based on the increase in size on the s300 
+we can expect the core product on the s800 to increase by 3 
+to 1-1/2 Megabytes.  Using a rough estimate of 35 Mbytes for the 
+current HP-UX product this amounts to about a 10% overall increase 
+in the shipped product.  The biggest impact seen by the customer 
+will seem to be in the extra disc space needed to hold the entire product.  
+.sp
+The  changes  to all the  routines  are  related  to YP and  the
+capability to keep a distributed  database of certain key files,
+like /etc/passwd  (getpwent) and /etc/group  (getgrent), so that
+the UID's and GID's of different  NFS users do not  conflict, or
+like  /etc/hosts  so  that  only  a  single  copy  needs  to  be
+maintained for all NFS machines.
+.sp
+The alternatives available are:
+.AL
+.LI
+Always include the extra YP and RPC libraries in libc.a:
+.DL
+.LI
+Programs compiled before would need to be recompiled
+in order to use Yellow Pages.
+.LE
+.LI
+Include the extra YP and RPC  libraries  in libc.a  only when
+the customer buys NFS:
+.DL
+.LI
+Programs  compiled  before would need to be recompiled
+in order to use Yellow Pages (similar to the situation
+of readdir and access to remote files).
+.LE
+.LI
+Include the extra YP and RPC libraries in separate library(s):
+.AL a
+.LI
+Ship getpwent and all routines modified to use YP with the
+core product:
+.DL 5 1
+.LI
+Anyone using any of those  routines  will need to link
+in the separate libraries.
+.LI
+The separate  libraries  would have to be shipped with
+core product.
+.LI
+Makefiles will need to be modified.
+.LE
+.LI
+Ship modified routines only with NFS:
+.DL 5 1
+.LI
+Anyone using any of those  routines  when the NFS product
+is installed will need to link in the separate libraries.
+.LI
+The separate libraries will be shipped only with NFS.
+.LI
+Makefiles will need to be modified.
+.LE
+.LE
+.LE
+.sp
+The preferred  alternative is alternative 1.  This has the advantage
+of not requiring the users of an HP-UX routine to link with any other
+libraries, or for that matter having to even know about any other
+routines that are NFS related.  It preserves the same view of the system
+for HP-UX routines that the user already had.  As a side advantage it allows
+us to have the same structure for NFS routines to which an NFS user
+is already familiar with.  The  investigations
+is  continuing  in that area to  integrate  the YP,  RPC/XDR and
+socket libraries into libc.a.  This alternative implies that the
+networking  library for the  ARPA/Berkeley  product  libbsdipc.a
+will  become an empty  library,  left in the  product  to ensure
+backward compatibility and not break existing scripts.
+.na
+.fi
+.sp 3
+.H 3 "HP-UX commands"
+.sp
+.ad
+By resolving the previous library routines issue it is easier now
+to ship only one version of the HP-UX commands.  That is the decision
+to which both the SSO and the ISO commands group have arrived.
+The commands affected by NFS will be modified so that they behave
+correctly whether NFS is present or not.  This is specially important
+for the commands modified to support Yellow Pages, since Yellow Pages
+can be present or not independently of NFS being configured in.
+.na
+.bp
+.H 2 "NFS effect on on the s800 kernel size and performance (Eric Wilford)"
+.ad
+.sp
+In order to support the concept of a remote file system, considerable
+changes have been made to the current file system. The major changes
+are to add a new layer called v-nodes which allows for the existence
+of multiple type of file systems on a single host, and to add a new
+file system type for remote file systems. The v-node layer will now be
+included in all HP-UX systems shipped, whether or not they contain NFS.
+Since this change required major changes to the file system, it does not
+appear reasonable to attempt to maintain two file systems, one with
+v-nodes and one without.
+.sp
+The inclusion of v-nodes in the core product may be expected to 
+impact both kernel size as well as performance. The following size
+figures were collected with the help of Herve' Da Costa at ISO:
+.sp 2
+.nf
+
+V-node kernel1  (base + ns + v-nodes - nfs) = 1083392 bytes
+A.B1.04         (base + ns - v-nodes - nfs) = 1015808 bytes 
+size change                                 =   67584 bytes  
+---------------------------------------------------------------
+percent change                              = 6.7% gain for v-nodes
+
+V-node kernel2	(base + ns + v-nodes - nfs) = 1068000 bytes 
+A.B1.04		(base + ns - v-nodes - nfs) = 1015808 bytes
+size change				    =   52192 bytes 
+---------------------------------------------------------------
+percent change				    = 5.13% gain for v-nodes
+
+.fi
+.sp 2
+The first v-node kernel was build in April 1987, while the second
+one was build in March of 1986. The exact nature of the differences
+is not clear but the figures are close enough to give us a ball-
+park estimate of the general impact of v-nodes on kernel size.
+.sp
+Preliminary performance measurements for a kernel using the new file
+system are not conclusive, but it appears that the new v-nodes will
+have minimal, if any, impact on overall performance. One possible
+explanation for this "lack of impact" is the fact that, while some
+overhead is added by the extra code traversed, there is some
+savings realized from a new pathname caching scheme. A more detailed
+performance report is available from ISO (1).
+.na
+.bp
+.H 2 "NFS effect on the NS-ARPA product (Cristina Mahon)"
+.sp
+.ad
+The two areas of the NS-ARPA product affected by NFS are the inetd and
+ARPA/Berkeley libraries and  RFA.
+.na
+.sp
+.H 3 "Effect of NFS on inetd and ARPA/Berkeley libraries"
+.sp
+.ad
+The inetd is required as a front end to the NFS mount daemon, and 
+therefore it should be available with the NFS product.  We have also
+found out that other products might be interested in using the inetd.
+So, it was decided that the inetd would be shipped with the core HP-UX
+product.
+The inetd configuration file, inetd.conf, will be shipped with the core
+HP-UX product and will have the NFS related entries commented out.
+When the customer buys the NFS product those entries will be uncommented.
+.sp
+The ARPA/Berkeley libraries are also affected by NFS.  They need to be modified
+to understand Yellow Pages databases, since some of the files like /etc/hosts
+that they parse might not longer be available on the local system, but could
+be stored on a global Yellow Pages database file.
+.sp
+The socket libraries socket, connect, bind, getsockname, sendto and
+recvfrom, that used to be part of libbsdipc.a are now needed
+by the HP-UX routines getpwent and getgrent.
+Therefore those routines, and with them the routines that were part of 
+libbsdipc.a will be now part of libc.a.  The documentation for the socket
+routines will still be shipped with the ARPA/Berkeley product. 
+.na
+.sp 2
+.H 3 "Effect of NFS on RFA (Mike Shipley)"
+.sp
+.ad
+There were three main changes that were needed to get RFA and
+NFS to function together.  There was change in the requester,
+the server and a library routine to access directories.
+.sp
+The requester needed a change in the getdirentries() routine.
+This is a kernel routine added for NFS.  Since directories can have
+different formats, NFS requires that it knows when a directory
+is being read so it can format it into a standard format.
+In the case of the directory format on the HP3XX and HP8XX, the
+native format of the directory matches that of the standard format.
+Therefore for a getdirectories done on a local directory, the kernel
+simply does a read of the directory file.  If a request is made, through
+RFA, to do a getdirectories on a remote directory, it will not
+work as there was no code
+to handle that case.  The change was to recognize that the file
+given to getdirectories was an RFA file and then to call a rfa_read
+instead of a read for local files.  This allows getdirectories to
+work for RFA files now which lets a Diskless/NFS kernel to act as a
+RFA requester.
+.sp
+The next change involved the RFA server.  This code executes as a
+user process and therefore is able to access an NFS mount point.
+There was a problem involving reading a directory through
+an NFS mount point.  This was because the RFA server used the
+read() system call to get the contents of a directory file.
+When this happens to an NFS server, the request is rejected with the
+error of EISDIR.  Therefore the RFA server had to be altered to
+use the readdir library routine, which uses getdirentries(), to
+read a directory.  This causes a READDIR request to be given to the
+NFS server which can then service the request properly.
+.sp
+The entries returned by readdir() can now be of variable size
+and can contain file names longer that the current maximum of
+14 characters(this could happen if RFA is used through a gateway
+to access a Sun machine).  This brought up a problem as the
+server was written to handle a maximum file name length of 14.
+The decision was made to truncate
+long file names to 14 characters with the RFA server.  This was
+done because the packet that RFA uses to access any named file
+contains an array that is 14 characters wide to hold a path
+name.  It would not be possible to alter this and maintain
+compatibility with the HP500 RFA.  So since RFA requester could not be used to
+access a file with a long name, it did not seem to be much of a loss
+to have the RFA server not able to return any more than 14 characters
+of a file's name.
+.sp
+The last code to be changed was the readdir library routine.
+There were several small changes in that function.  First was the
+substitution of getdirentries() in place of read() to obtain
+the contents of a directory.  Next since these directory entries
+can be of variable size (HP-UX entries are always 32 bytes long,
+but this is not true of other machines),
+there was a change to find the beginning of the next entries by
+using the size of the current entry.  Finally there was some
+changes made to pass long file names up to the user instead of
+truncating them to be a maximum of 14 characters.
+.na
+.bp
+.H 4 "New calls for NFS"
+.sp
+.ad
+There have been several new system calls added to support NFS
+on the HP3XX and HP8XX.  They are statfs(), fstatfs(), rename(), 
+getdirentries(), symlink(), readlink() and lstat().
+In addition there will be a change in the kernel to not truncate file
+names to 14 characters.
+.na
+.sp 2
+.H 4 "statfs and fstatfs"
+.sp
+.ad
+The statfs call returns information about a mounted file system.
+The information consists of things like the number of blocks
+and inodes in the system or the number of free blocks and inodes
+in the system.  The fstatfs call has the same function as statfs
+except that it operates with an previously opened file.  These
+calls will not be supported by RFA.  They are mostly used for system
+administration and were put in to help the df command.
+.na
+.sp 2
+.H 4 "rename"
+.sp
+.ad
+This call performs what the mv command does.  It changes a file's
+name, but it does it in one "atomic" call as compared to doing
+a link and then an unlink as the mv command currently does.
+This call will be supported by RFA.
+.na
+.sp 2
+.H 4 "getdirentries"
+.sp
+.ad
+Getdirentries returns a buffer that contains directory entries.
+These entries should be in a standard form regardless of the
+type of machine the directory is located on.  This is of great
+importance when trying to do remote file access among heterogeneous
+machines.  This call will be supported by RFA.
+.na
+.sp 2
+.H 4 "symlink"
+.sp
+.ad
+This call creates a symbolic link to another file.  This will
+make a special file that contains the name of the file that
+the link is made to.  Then future references to the new
+special file will cause the actions to be done to the file
+whose name is contained in the special file.  This function is
+not absolutely required for NFS operations, but the NFS standard contains
+the symlink function, so to be a complete NFS server, we should have it.
+We don't want HP to look only "NFS like" in the marketplace with other
+vendor flouting complete NFS implementations.
+This call will be supported by RFA.
+.na
+.sp 2
+.H 4 "readlink"
+.sp
+.ad
+Readlink will list the name of the file that is written in the
+special symbolic link file.  It is not required for NFS operation, but
+it makes HP good NFS citizens.
+This call will be supported by RFA.
+.na
+.sp 2
+.H 4 "lstat"
+.sp
+.ad
+The lstat call will return file statistics about the special symbolic
+link file.  It differs from the normal stat function which would go
+through the symbolic link file and return file statistics about the
+file whose name is written in the link file.  Again, lstat is not
+required for NFS, but HP will be incomplete without it.
+This call will be supported by RFA.
+.na
+.sp 2
+.H 4 "long path names"
+.sp
+.ad
+Since other machines that support NFS can have files with names of up
+to 255 characters in length, it would be very useful to be able to 
+access such a file.  Therefore the kernel will not try to truncate
+the length of a file name to 14 characters if it is an NFS file.
+This will allow an HP machine to access a file on another vendor's
+machine which has a long file name.  This will cause some problems as
+some commands, such as ls, truncate file names to 14 characters regardless
+of the size of the file name that was returned by readdir().  Such commands
+will need some alteration to take this into consideration.
+HP-UX now supports long filenames both on the s800 as of release 2.0 and
+on the s300 as of release 6.2.  We will still have problems if the
+user is using a short filename filsystem.
+.bp
+.H 2 "NFS installation (John Dilley)"
+.ad
+.sp
+The NFS product depends on the NS-ARPA services product on the s300.
+For the s800 the NFS product depends on the link product.  
+.sp
+The NFS installation procedure consists of the following steps:
+.sp
+.AL
+.LI
+Get the bits from tape to disk with the "update" utility;
+this is the standard process for software updates, and is
+documented in the user's guide (with the rest of the process).
+This should be the same on the s300 and s800, except for differences
+with "update" on those systems.
+.LI
+Edit the appropriate configuration files;
+this is required to set up the individual system to be an NFS
+client or server, along with setting up the Yellow Pages
+to be either a YP client or a YP server.
+.sp
+For an NFS Server:
+.AL a 5 1
+.LI
+edit /etc/exports -- for server to export file systems; the file systems
+named are the only ones which can be imported by NFS clients.  If
+desired, file system importing can be restricted to certain systems.  If
+a line in /etc/exports contains only the file system name, then any host
+on the network may import that file system.  If the line contains a list
+of host or netgroup names, the only the indicated hosts may import that
+file system.
+See exports(FILE) and netgroup(FILE) for more information.
+.LI
+edit /etc/netgroup -- to export only to specific network groups; this
+allows a server to export certain file systems to a select group of
+hosts.  As new hosts get added to the network, you may need to modify
+this file to allow them to access these file systems.
+See exports(FILE) and netgroup(FILE) for more information.
+.LI
+edit /etc/inetd.conf -- make sure mountd is available for rpc;
+since we are shipping the inetd.conf file with HP-UX, the rpc entries
+will be present but commented out.  To allow remote mount requests, the
+comment marks (#) must be removed from the beginning of this line in
+inetd.conf.  It is also nice to enable the other RPC services (such as
+ruserd, sprayd, etc) so that other systems can connect to
+these services.  They have no effect upon NFS file access, however.
+See inetd(ADMIN) and inetd.conf(FILE) for more information.
+.LI
+edit /etc/netnfsrc -- turn on the NFS_SERVER variable; this variable is used
+only by the netnfsrc script.  It is used to control whether or not to
+start up the nfsd -- if NFS_SERVER is non-zero, the nfsd will be started,
+and clients will be able to use NFS to access files on the server.
+We will be shipping netnfsrc with NFS_SERVER non-zero.
+See nfsd(ADMIN) for more information.
+.LE
+.sp
+For an NFS Client:
+.AL a 5 1
+.LI
+backup files -- just for safety; we recommend that all files on the
+server are backed up.  This will prevent accidental loss in later steps
+of this procedure.
+Refer to the manual for backup and recover procedures.
+.LI
+determine server and file systems to import; there must be servers on
+your network if you wish to be a client.  Find them, and ensure that you
+are allowed to import file systems from them (see exports, above).
+.LI
+edit /etc/checklist -- add the names of the remote hosts and file
+systems; this will ensure that
+the NFS file systems are mounted automatically at boot-time.
+See checklist(FILE) for more information.
+.LI
+edit /etc/inetd.conf -- uncomment necessary rpc servers; this is only
+necessary if you wish to allow other systems to access RPC services
+through your inetd.  It is recommended that the common services be
+uncommented (ruserd, sprayd, etc) so that other systems can connect to
+these services.
+They have no effect upon NFS file access, however.
+See inetd(ADMIN) and inetd.conf(FILE) for more information.
+.LI
+edit /etc/netnfsrc -- turn on the CLIENT variable; this variable is used
+only by the netnfsrc script.  It is used to control whether or not to
+start up the biod -- if NFS_CLIENT is non-zero, the biod will be started.
+We will be shipping netnfsrc with NFS_CLIENT non-zero.
+See biod(ADMIN) for more information.
+.LE
+.sp
+.LI
+By default the Yellow Pages will not be started up.  Following is the
+procedure to do so.  Before bringing up the Yellow Pages, however, there
+are a number of issues which must be addressed.  First, before a system
+can be a YP client, there must be a YP server in the domain, so if the
+system is not already a YP server, one must be found.  In order to be a
+YP server, the correct data structures must be set up; this is done in
+the same way as with Sun, so it will not be described further here.  One
+final note: there can only be one YP password daemon in any domain
+(there may be many servers for other databases in the domain, however).
+This more stringent requirement is enforced in the netnfsrc file by using
+comments around the code to start the YP password daemon.  In general,
+the code in netnfsrc tests for variables being set to certain values (zero
+or non-zero), and the presence of files.  But since the YP password
+daemon is more sensitive, the decision was made to comment it out and
+make the systems administrator uncomment it only when s/he is sure that
+this is valid.
+.sp
+For a YP Server:
+.AL a 5 1
+.LI
+create the appropriate data files -- refer to the Sun-equivalent HP
+documentation for the procedure.  There has been a minor change to the
+user interface to fix a logical error in the Sun design; this need not
+be further documented here, however.
+.LI
+edit /etc/netnfsrc -- set the value of YP_MASTER_SERVER or YP_SLAVE_SERVER 
+to a non-zero value.
+This will cause the YP domain server, ypserv, to be started at boot time
+(or whenever /etc/rc is sourced, typically when entering init state 2).
+See ypserv(ADMIN) for more information.
+.LE
+.sp
+For a YP Client:
+.AL a 5 1
+.LI
+find a YP server in your domain -- this must be done before starting the
+ypbind program.  If there is no server in your domain, do not start
+ypbind.
+See ypbind(ADMIN) for more information.
+.LI
+edit /etc/netnfsrc -- set the value of YP_CLIENT to a non-zero value.
+This will cause the ypbind program to be started at boot time.
+Note that if a YP host is a server, then it is also a client for itself.
+For this reason, ypbind will be started even if YP_SERVER is set but
+YP_CLIENT is not.  Thus, YP_CLIENT is effectively a client-only flag.
+See ypbind(ADMIN) for more information.
+.LE
+.LI
+Reboot the systems to bring up NFS;
+the reboot is actually not necessary -- the user can source the
+/etc/netnfsrc file and it should have the same effect, but coming
+up from a clean boot is the recommended way to do this.
+Refer to the manual for rebooting procedures.
+.LE
+.sp 
+Note that the YP related configuration files which are shipped with HP-UX
+(eg.  /etc/passwd) will not be set up to use the Yellow Pages facility.
+If the systems administrator wishes to use YP, he must edit these files
+himself (eg. put a '+' on a line by itself at the end of /etc/passwd).
+In addition, he must follow the instructions in step 3 to
+start up Yellow Pages when the system boots (or enters state 2).
+.bp
+.H 2 "300/800 NFS kernel configurability (Herve' Da Costa and George Feinberg)"
+.ad
+.sp 1
+For the implementation of an NFS configurable kernel, most of the source 
+code for the vnode layer will be kept in the core and the
+code providing access to the network will be put in the 
+configuration module: XDR subroutines,
+NFS server and RPC routines since they are used only when an NFS type of
+access is wanted. The new system calls used by this service will be
+"activated" or "deactivated" at boot time by an initialization routine.
+By default, the NFS services are not provided.
+.na
+.H 3 "System calls handling"
+.ad
+.sp
+The new system calls introduced by NFS are:
+.sp 1
+.IP
+vfsmount(), statfs(), fstatfs(), getdirentries(), rename() and
+getdomainname() are to be kept
+in the kernel code even if no networking service is needed. 
+.sp 1
+.IP
+nfs_svc() nfs_getfh() async_daemon() and setdomainname() will be
+activated by an initialization procedure when NFS is configured in.
+.LP
+.sp
+vfsmount() needs to be available since it will be a general purpose mount 
+operation for DUX, NFS or any new filesystem type.
+The system calls 
+(statfs() fstatfs() getdirentries() rename()) 
+need to be kept because of the new mechanism introduced by the vnode layer for
+file or file system operations.  Getdomainname() and setdomainname() are
+trivial and are currently in the file, kern_xxx.c.  Getdomainname() is required
+by certain HP-UX library routines.
+.na
+.H 3 "Data structures dependencies"
+.ad
+.sp
+Several NFS data structures will be modified for the configuration. The file 
+system switch array and
+the data structure holding the system call entries (new implementation).
+The default values will be set for a non NFS kernel and will be overwritten by 
+new pointer values if NFS is configured in. 
+.sp 1
+The NFS functionality switch table (nfs/vfs_conf.c) is :
+.sp 1
+.nf
+struct vfsops *vfssw[] = {
+     &ufs_vfsops,  /* could be (struct vfsops *)0 for no local access */
+     &nfs_vfsops,  /* (struct vfsops *)0  will be the default value */
+     &pcfs_vfsops, /* (struct vfsops *)0 will be the default value */
+}
+.fi
+.na
+.H 3 "NFS/Diskless configuration interactions"
+.ad
+.sp
+There are several NFS-specific functions that need to be called by portions
+of the kernel pertaining to discless clusters (DUX).  Since it is possible
+to have DUX without NFS, these calls need to be indirect, and in a data
+structure available to the DUX code.  An array of functions has been added
+to the file, funcentry.c; it is called "nfsops", and its entries are 
+defaulted to an innocuous function (nop).  The functions in the array are called
+indirectly via constants defined in "dm.h" through a macro in the same
+header file called "NFSCALL".  Its structure is the following:
+.nf
+
+int (*nfsproc[])() =
+{
+	nop,	/* rfind (NFS_RFIND) */
+	nop,	/* makenfsnode (NFS_MAKENFSNODE) */
+	nop,	/* find_mntinfo (NFS_FIND_MNT) */
+	nop,	/* enter_mntinfo (NFS_ENTER_MNT) */
+	nop	/* delete_mntinfo (NFS_DELETE_MNT) */
+
+};
+
+.fi
+There is actually no danger that these functions will be called when NFS is
+not configured, because all of the indirect calls are in conditional
+statements that cannot be true unless NFS is in the kernel.
+.sp 1
+In addition to the nfsops data structure, there is an array of functions
+used by DUX called dm_functions, which is also in the file, funcentry.c.
+There are also several NFS-specific entries in that array which reference
+the functions nfs_umount_serve and nfs_umount_commit.  They are used
+only from NFS code, however.  They are defaulted to the
+function, funcent_error, which will print an error message and release DUX
+resources if necessary in the event of them being called on a mismatched
+kernel (this should NEVER happen).  These functions are initialized to
+their proper values at boot 
+time if NFS is configured.  The constants used for calling these functions are
+DM_NFS_UMOUNT (nfs_umount_serve), DM_COMMIT_NFS_UMOUNT (nfs_umount_commit), 
+and DM_ABORT_NFS_UMOUNT (nfs_umount_commit).  
+.sp 1
+All of the above DUX interactions are a result of the complexities
+encountered when combining the features of discless clusters and NFS.
+.na
+.H 3 "Series 800 Initialization routine and kernel building"
+.ad
+.sp
+This initialization will be performed at boot time. The reference to the
+initialization routine will be generated by \fIuxgen\fR from the configuration
+file \fIgen/INDIGO\fR.
+Let us name this routine \fInfs_init()\fR for the purpose of this memo.
+It will be part of the nfs library and will be configured in when 
+\fIuxgen\fR will be executed if the following line 
+is present in \fIgen/INDIGO\fR:
+.sp 1
+.ti 3
+\fIfilesystem nfs lib libnfs.a libns.a\fR
+.sp 1
+this states the dependencies of the NFS networking: the library libnfs.a and 
+libns.a need to present. The file \fIconf/files\fR will also be modified to
+follow the new rules for \fIconfig\fR. The files for the NFS module will have
+the following format:
+.sp 1
+.ti 3
+\fInfs/nfs_subr.c	optional nfs lib nfs
+.ti 3
+rpc/rpc_prot.c	optional nfs lib nfs
+.ti 3
+rpc/xdr_mbuf.c	optional nfs lib nfs\fR
+.sp 1
+The presence of nfs_init() at kernel building time will cause the loading 
+of all the nfs subroutines.
+.sp 1
+.nf
+\fInfs_init() {
+
+	/* enabling the remote service routines */
+	vfssw[2] = &nfs_vfsops;
+
+	/* initializing the system calls similarly to the following */
+	syscall[190] = nfs_svc;		/* currently  entry 190 */
+	syscall[191] = nfs_getfh;	/* currently  entry 191 */
+	syscall[192] = getdomainname;	/* currently  entry 192 */
+	syscall[193] = setdomainname;	/* currently  entry 193 */
+	syscall[194] = async_daemon;	/* currently  entry 194 */
+	return;
+}\fR
+.fi
+.ce
+\fRSchematic of the initialization routine:\fR
+.sp1
+The default value for the system call table entries can be "nfs_off" where 
+nfs_off is the following procedure:
+.sp 1
+.nf
+\fInfs_off() {
+	return (ENOPROTOOPT);	/* protocol not available */
+}\fR
+.fi
+.na
+.H 4 "Contents and location of the library"
+.ad
+.sp
+The contents of the library will be the current rpc library librpc.a
+and the   nfs/nfs_server.o nfs/nfs_xdr.o nfs/nfs_vfsops.o nfs/nfs_vnops.o 
+object files.
+.sp
+The contents of the libnfs.a library are:
+.TS
+tab(#);
+l l l l.
+nfs/nfs_server.o#nfs/nfs_xdr.o#nfs/nfs_vfsops.o#nfs/nfs_vnops.o 
+rpc/auth_kern.c#rpc/auth_none.c#rpc/auth_unix.c#rpc/authux_pro.c
+rpc/clnt_kudp.c#rpc/kudp_fsend.c#rpc/pmap_prot.c#rpc/rpc_prot.c
+rpc/subr_kudp.c#rpc/svc.c#rpc/svc_auth.c#rpc/svc_authux.c
+rpc/svc_kudp.c#rpc/xdr.c#rpc/xdr_array.c#rpc/xdr_float.c
+rpc/xdr_mbuf.c#rpc/xdr_mem.c#rpc/xdr_refer.c
+.TE
+.na
+.H 3 "Series 300 Initialization routine and kernel building"
+.ad
+.sp
+Initialization of NFS entry points will be performed at boot time when NFS
+is configured into the kernel.  The reference to the NFS link function,
+nfsc_link, is generated in the configuration file, conf.c.  This file is
+created by the command, config(1m).  There will be a line in the
+/etc/master file that refers to NFS.  This line will cause a reference to
+be created in conf.c if the line, "nfs", is included in the "dfile" used
+by the config(1m) command.  The above configuration discussion is the usual
+method of configuring optional drivers into the series 300 kernel.
+The function, nfsc_link is the following:
+.sp 1
+.nf
+#define NFS_ASYNC_DAEMON	229
+#define NFS_GETFH		233
+#define NFS_SVC			235
+int
+nfsc_link()
+{
+	/*
+	 * set up the vfssw so the file system knows about NFS
+	 */
+	vfssw[MOUNT_NFS] = &nfs_vfsops;
+	/*
+	 * replace defaults with real system call entry points for
+	 * services.
+	 */
+	sysent[NFS_ASYNC_DAEMON].sy_call = async_daemon;
+	sysent[NFS_GETFH].sy_call = nfs_getfh;
+	sysent[NFS_SVC].sy_call = nfs_svc;
+#ifdef DUX
+	/*
+	 * put entry points for unmounting in DUX table (called from
+	 * send_nfs_unmount in nfs_vfsops.c).
+	 */
+	dm_functions[DM_NFS_UMOUNT].dm_callfunc = nfs_umount_serve;
+	dm_functions[DM_COMMIT_NFS_UMOUNT].dm_callfunc = nfs_umount_commit;
+	dm_functions[DM_ABORT_NFS_UMOUNT].dm_callfunc = nfs_umount_commit;
+
+	/*
+	 * nfsproc table initialization for indirect calls from DUX
+	 * (calls from dux_mount.c and dux_lookup.c).
+	 */
+	nfsproc[NFS_RFIND] = (pfi) rfind;
+	nfsproc[NFS_MAKENFSNODE] = (pfi) makenfsnode;
+	nfsproc[NFS_FIND_MNT] = (pfi) find_mntinfo;
+	nfsproc[NFS_ENTER_MNT] = enter_mntinfo;
+	nfsproc[NFS_DELETE_MNT] = delete_mntinfo;
+#endif DUX
+}
+.fi
+.sp 1
+The default function in the system call entry table, sysent, for the NFS
+functions is nfs_nosys(), which is the following:
+.sp 1
+.nf
+nfs_nosys()
+{
+	u.u_error = ENOPROTOOPT;
+}
+.fi
+.sp1
+The default function in the nfsops table is nop(), which does nothing, and
+the default in the dm_functions table is up to the DUX developers.
+.na
+.H 4 "Contents and location of the library"
+.ad
+.sp
+The Series 300 NFS object library will reside in the "normal" location for
+kernel libraries, the directory /etc/conf.  Its name is "libnfs.a".
+The library contains kernel files only.  The contents are as the
+following:
+.TS
+tab(#);
+l l l l.
+nfs_server.o#nfs_subr.o#nfs_vfsops.o#nfs_vnops.o
+nfs_xdr.o#auth_kern.o#authux_pro.o#clnt_kudp.o
+kudp_fsend.o#rpc_prot.o#svc.o#svc_auth.o
+svc_authux.o#svc_kudp.o#xdr.o#xdr_mbuf.o
+xdr_array.o#xdr_mem.o#subr_kudp.o
+.TE
+.na
+.bp
+.H 2 "LAN configurations"
+.sp
+.ad
+NFS should work over any network that supports the UDP protocol.
+There was some doubt whether Yellow Pages could work over a gateway
+since a YP client's default mode is to use a link level broadcast to find a 
+YP server to which it can bind.  However, it is possible to cause a YP client
+to bind to a specific YP server by supplying the server's IP address.
+By doing this, a link level broadcast is not required, and the
+Yellow Pages should work over a gateway.
+The only network configuration testing we will be performing for NFS 
+is LAN to LAN using a gateway.
+.ad
+.bp
+.H 2 "New directories required (Dave Erickson)" 
+.ad
+.sp
+This section discusses the need for creating new directories in which to
+place NFS and Yellow  Pages (YP)  bits.  The need  arises  since Sun has
+chosen  to place  some of its  NFS/YP  commands,  daemons  and  files in
+directories which are not HP-UX "standard issue."
+.sp
+If we choose to store them elsewhere, we suffer by being  different from
+Sun.  A system  administrator  (customer)  who is  familiar  with  Sun's
+hierarchy  would have to learn HP's layout.  Rob Robason has agreed that
+creating the directories /usr/etc and /usr/etc/yp would be beneficial.
+.sp
+Following  lists  the  files to be kept  in those  directories:  a "*"
+suffix means the file is  executable;  "/" means it is a  directory;  no
+suffix means it is an ASCII file.
+.sp
+These commands and daemons are contained in /usr/etc:
+.sp
+.nf
+	nfsstat*
+	rpc.mountd*
+	rpc.rstatd*
+	rpc.rusersd*
+	rpc.rwalld*
+	rpc.sprayd*
+	rpc.yppasswdd*
+	rpcinfo*
+	rwall*
+	showmount*
+	spray*
+	ypserv*
+.fi
+.sp
+These commands, directories and files are contained in /usr/etc/yp:
+.nf
+.sp
+	Makefile
+	makedbm*
+	revnetgroup*
+	stdhosts*
+	ypinit*
+	ypmake*
+	yppoll*
+	yppush*
+	ypset*
+	ypxfr*
+	ypxfr_1perday
+	ypxfr_1perhour
+	ypxfr_2perday
+	<domain_name>/
+		(contains YP maps for "domain_name")
+	<domain_name>/<mapname>.time
+		(used by ypmake(ADMIN))
+.sp
+.fi
+If we create these  directories,  the hier(MISC) page should be changed.
+Since  hier(MISC) is part of the HP-UX standard, and since such standard
+pages are not  permitted  to  reference  non-standard  texts, we have an
+issue to be resolved.  
+Also, the system administrator's (and maybe other users') default "PATH"
+variables will need to change, plus commands such as
+"whereis" will need to search those paths.
+.sp
+See the ERS for VHE for the new directory created for the VHE commands:
+/usr/etc/vhe.
+.bp
+.H 2 "Object and code compatibility (Cristina Mahon)"
+.sp
+.ad
+.AL
+.LI
+The _dirdesc  structure  had to be changed so that the routines that
+manipulate  directories will be able to handle variable block sizes.
+A remote system from which we might have mounted a file system might
+have a  different  directory  block  size.  Programs  compiled  with
+previous  versions  of readdir,  opendir,  etc. will have no problem
+accessing local directories since the directory  structure itself is
+the same.  They won't be able to access remote  directories  mounted
+through NFS since the old directory routines use a "read" instead of
+a  "getdirentries"  to access  those  directories.  The "read"  will
+return an EISDIR  error.  This error does not seem to be  propagated
+by the  library  routines.  A  possible  problem  with the change to
+_dirdesc  is that if the user  deals  with  directories  other  than
+through the directory  routines (readdir,  opendir,  closedir, etc.)
+then he might be relying on that structure.
+.LI
+Programs  compiled  with  the  old  ARPA/Berkeley  libraries  get*ent
+(gethostent, getnetent, getservent, getprotoent and related routines)
+will not have access to the YP pages  database  where  certain  files
+like /etc/hosts can be stored.  If the system  administrator  totally
+removes  /etc/hosts from his system, as it is possible to do, the old
+programs  will be unable to  obtain  the  information  they  require.
+However, if the system  administrator does not remove those files the
+previously compiled programs should work fine.
+.sp
+Also, if the YP and RPC/XDR  routines, which the new get*ent  library
+routines depend on to successfully  link, are not included as part of
+libc.a, the user will have to change his makefile to link his program
+with new  libraries  that include the YP and RPC/XDR  routines.  This
+was not previously required.
+.LI
+Programs  compiled with the old getpwent,  getgrent routines will not
+have access to any  information  (passwords or groups)  stored in the
+global YP password  database (that includes the command login).  They
+will be able to access all the  information  in the  /etc/passwd  and
+/etc/group   files,  but  when  they  find  for   example  a  "+"  in
+/etc/passwd,  which means read the rest of the  password  information
+from the YP database, they won't be able to access that information.
+.sp
+Also, if the YP, RPC/XDR and socket  routines, which the new getgrent
+and getpwent library routines depend on to successfully link, are not
+included as part of libc.a, the user will have to change his makefile
+to link his program with new  libraries  that include the YP, RPC/XDR
+and socket routines.  This was not previously required.
+.LI
+Related  to the two  previous  problems,  if YP,  RPC/XDR  and  socket
+routines  are added to libc.a this will be  something  different.  The
+main concern  there would be the socket  routines  that already have a
+library of their own (libbsdipc.a) and that the user gets when he buys
+the ARPA/Berkeley product.
+.LI
+New error numbers are being added to errno.h.  The size of the list of
+error numbers should not change, so that shouldn't affect any programs
+already compiled.
+.LI
+The mount command has had new options added.
+.LI
+The umount command has had its options modified so that you can now
+either umount a device or a directory (for NFS).
+.LI
+The format for the files checklist and mnttab changes from release 
+5.2 to release 6.0.  Commands that look at those tables, like fsck and
+fsclean for example, are being modified to understand the new format
+of the files.
+.LE
+.bp
+.H 2 "Long file name support for s300/s800 (Mike Shipley)"
+.sp
+.ad
+If there is a a file with a long name (greater than 14 characters) on a 
+directory mounted through NFS, the kernel will pass that information through 
+using getdirentries.  It will not reduce the file name to 14 characters.  
+.sp
+Long filenames are supported on a per filesystem basis as of release 2.0
+for the s800 and release 6.2 for the s300.  The system administrator
+can decide whether he will use long or short (14 characters) filesystems.
+.na
+.sp 3
+.H 2 "Yellow Pages and 14-character file names (Dave Erickson)"
+.sp
+.ad
+This section covers the impact of the s300/s800 HP-UX 14-character filename
+length restriction on the HP implementation of the Yellow Pages (YP) for
+short filename file systems.
+.sp
+As Sun has devised things, YP servers use the YP domain name as the name of a
+subdirectory of /usr/etc/yp under which the YP maps (databases) are stored.
+HP-UX systems can have filesystems that support only 14-character filenames,
+though YP domain names can be as long as 64 characters.
+For an HP system with short filename file systems to act correctly as a 
+YP server, care should be taken to make the first 14 characters of all YP 
+domains on a network unique.
+.sp
+The general form of a map name on a YP server is mapname.{dir|pag}.  
+The .dir and .pag  suffixes are added by makedbm(ADMIN), the command used to create
+YP databases.  (No change will be made to makedbm(ADMIN) on HP machines to
+alter the spelling of these suffixes.)  Among YP servers, a "standard"
+set of databases are circulated.  For some of these maps, Sun's naming
+convention exceeds 14 characters.  For example,
+"protocols.bynumber" and "networks.byname" are longer, even without the
+four-character makedbm(ADMIN) filename extensions.  All of these standard names
+are consistent and predictable.
+.sp
+The lengths of names of YP maps stored on HP systems that support only short
+filename file systems and are YP servers must be restricted to 14 characters, 
+so most of the standard maps are stored using names which are
+different from the names on a Sun YP server.  Any
+requests of an HP server for standard maps by name are translated to the
+shorter local names.  If any non-standard maps are to be served by HP
+machines, their names cannot exceed ten characters.
+This constraint is important only when an HP machine is to be a YP server,
+either master or slave.
+.sp
+The limitation on domain and map name lengths does not apply to
+HP systems that are using long filename filesystems.
+.sp
+Temporary filenames created by ypxfr and makedbm have been restricted to 
+14 characters in length.
+.na
+.bp
+.H 2 "Console error messages (Mike Shipley)"
+.sp
+.ad
+The NFS code, including the kernel code, sends different messages to the
+console in case of error.  When windows are active at the console,
+those error messages can mess up the window display. 
+.sp
+For that reason, all error messages, including those from the kernel,
+should go to the device file that is serving as the system console, even if
+it is a window pseudo-device.  Otherwise, the display will disturbed.
+.sp
+Mike Shipley spoke with Paul Van Farowe and got the following information.
+It is possible to use two commands: netlogstart and netlogstop.
+.sp
+Netlogstart:
+      netlogstart -c DEWRPC -m DEWRPC -f <filename>
+.sp
+This will start logging to the console (-c) or to a 
+file (-m in conjunction with -f).  These are not mutually
+exclusive options.  You can have console and file logging.
+The letters after the options set the various levels of
+logging D)isaster E)rror W)arning R)esource usage P)rotocol.
+The C is to clear logging.
+.sp
+Netlogstop is used to stop the logging
+.sp
+Inside the kernel, there is a call to logging_event() that is
+made to print out the desired message.
+We have replaced the printf calls in the kernel with this call.
+.sp
+Paul Van Farowe sent logging to /dev/screen/wconsole.
+This sent the output to the wconsole window which seems to be what
+we want.
+.sp
+In the diagnostics manual, we need to tell people that the file
+/dev/screen/wconsole is the default name assigned in /usr/bin/wmstart
+and that if a user alters that name, that they also need to log to
+that altered name.  Or, if we don't mention this in the diagnostics
+manual, it needs to be mentioned wherever netlogstart is described.
+.sp
+In addition to the error messages that are handled by the above mentioned
+error logging facility, the NFS kernel code will print out two messages
+to the user's terminal device file.  The first message tells that the NFS server
+is not responding and the second message tells that the 
+server is responding again.  The same messages will also be given to the
+error logging system.  The reason that these two messages were treated
+specially is that they can occur frequently if a server is slow and the
+user should know that the server is running slow if he is waiting for
+a response to a NFS request.  They do not necessarily indicate a deadly
+error (although the server could be down and not just running slow), but
+the information needs to be made available not only to the standard error
+logging mechanism, but to the user.  Since the messages are printed to the
+user's terminal device, they will not disturb a window display.
+.na
+.sp 3
+.H 2 "Native Language Support (Cristina Mahon)"
+.sp
+.ad
+According to the MUST objective described in the PRD we will support
+the HP-15 Standard.  
+.sp
+The following features of Native Language Support (NLS) will be supported:
+.ML o
+.LI
+Filename support:
+.DL 
+.LI
+We will support 8-bit filenames
+.LI
+We will not support 16 bit filenames, since they are not fully
+supported by the HP-UX kernel.  However, some 16 bit filenames may
+work, depending on the characters making up the filename.
+Refer to the design limitations item for a more detailed explanation.
+.LE
+.LI
+Support for message catalogues:
+.sp
+All NFS user level commands will be changed to support
+message catalogs.  
+.LI
+Support for local customs:
+.sp
+We will modify any messages to support local customs
+like formats for numbers, dates, times, yes/no prompts,
+etc.
+.LI
+Support for language dependent features:
+.sp
+Modify the user level commands so that any type 
+analysis, shifting, or sorting of characters is done
+according to the conventions of the native language.
+There probably will be no effort involved with this item.
+.LI
+Support eight and sixteen bit characters:
+.sp
+NFS will be able to send across the network
+eight and sixteen bit characters. 
+.LI
+HP-15 Standard design limitations:
+.sp
+.DL 
+.LI
+A  design  flaw  exists  in  the  current  HP-15  
+Standard.  The Standard  restricts  computer  systems  
+on the same  network  to support the same 16-bit  
+character  set.  The existing  uucp and LAN products 
+are in violation of this restriction.  There will be no
+attempt in this project to rectify the problem.
+.LI
+Full support for 16-bit filenames is not incorporated in the HP-UX
+kernel, but many 16-bit filenames will be correctly interpreted. 
+Problems occur if one of the 16-bit characters in the filename happens to have
+as a second byte the byte value equal to "/". In that case the HP-UX kernel 
+will not correctly interpret the 16-bit character because it will see the "/".
+Taiwanese is the only 2-byte language for the moment that defines "/" as the
+second of a 2-byte character.
+.LE
+.LE
+.na
+.bp 
+.H 1 "TECHNICAL DECISIONS FOR s300 6.2 and s800 3.0 (VHE)"
+.H 2 "Virtual Home Environment (VHE) (Mike Shipley)
+.ad
+The Virtual Home Environment (VHE)
+is a means of configuring a cluster of
+workstations running the Network File System*
+.FS *
+NFS is a product created and developed by Sun Microsystems, Inc.
+.FE
+(NFS) such that a user
+can sit down at any node in the cluster, login and be put into the
+customized work environment associated with the login
+of his/her home node.
+.sp
+VHE was created as a result of customer inquiries for
+an environment where
+users could migrate among workstations and utilize the comfort of
+their own login environment without having to know how to do any
+special system administration.  The acceptance of
+NFS among computer vendors and universities as a common means of
+sharing files lends itself to answering this need.
+.sp
+For more information, please read the VHE ERS.
+.na
+.bp
+.H 1 "TECHNICAL DECISIONS FOR s300 6.5 and s800 7.0 (NFS 3.2)
+.sp
+.ad
+All the features described here apply to the s300 6.5 release and 
+the s800 7.0 release.  The only exception is the "Enhancements to Nettrfmt"
+section.  See that section for more details.
+.sp
+.na
+.H 2 "Lock Manager (NFS 3.2) (Jeff Elison)"
+.sp
+.H 3 "Overview"
+.sp 
+.ad
+Sun's Lock Manager provides System V compatible file locking via lockf
+and fcntl for both NFS AND the local file system.  The syntax of these
+calls does not change to support remote file locking.  Sun implements
+lockf(2) with the Lock Manager (rpc.lockd) and the Status Monitor
+(rpc.statd).
+.sp
+There are several cases where the HP-UX implementation must differ.
+The first is the fact that Sun has never provided lockf before the
+Lock Manager and they do not support it unless the Lock Manager is
+running.  Since lockf(2) is part of HP-UX 6.0 we must continue to
+support it without making the customer use NFS and the Lock Manager.
+In addition, HP-UX already has more sophisticated support of local
+file locking (including deadlock detection) in the kernel.  Therefore,
+we cannot simply remove our file locking from the kernel and port Sun's
+Lock Manager.  Another difference is the fact that Sun's locking is
+advisory only.  They state that they are SVID compatible, but they do
+not provide enforcement mode locks.  HP-UX 6.0 does support enforcement
+mode locks and must continue to do so.  This also requires that part
+of our locking mechanism be in the kernel in addition to other changes
+necessary in our port of Sun's Lock Manager.
+.sp
+Sun will probably be coming out with a new version of the lock manager
+sometime in the future.  We expect a large amount of changes and possibly
+support for enforcement mode locks.  For this reason and to minimize
+time investment and impact to our kernel we have tried to minimize
+changes to the kernel and Sun's lock manager.  This is the rational for
+many of the following choices.
+.na
+.sp 2
+.H 3 "NFS and Enforcement Mode Locking"
+.sp
+.ad	
+Currently, an NFS client write can be blocked by an enforcement
+mode file lock (local).  This causes the NFS daemons to sleep
+(all of them will eventually sleep, due to biod retries) and
+will result in the server becoming inaccessible via NFS.
+Additionally, an NFS client read will violate an enforcement
+mode lock, as the NFS read does a direct call to bread.
+.sp
+These problems will be fixed by having the NFS server do a
+locked() call for both NFS reads and writes.  The server will
+set O_NDELAY for these calls to ensure that it does not sleep.
+If locked() returns EAGAIN, then the NFS server will drop the
+packet forcing the biod to retry until the lock is freed.  That
+way we don't rely on the client knowing to retry when it gets
+the EAGAIN (which some clients, for example PCs, won't know how
+to handle).  If we just drop the packet they will retransmit.
+.sp
+This problem exists in HP-UX 6.0, so this issue is important
+regardless of the lock manager.
+.sp 2
+.na
+.H 3 "Modify fcntl() or add a hidden system call"
+.sp
+.ad
+The lock manager will need to hand off a file handle to the
+kernel when it does a fcntl() lock call.  Since the fcntl
+currently expects to be passed the file descriptor of an open
+file, we need to add a hidden system call which acts as a new
+front end to fcntl and which expects a file handle instead of a
+file descriptor.
+.sp
+This hidden system call will be configured as part of NFS, so it
+will only be present in the kernel when NFS is also configured.
+We chose to do this with a hidden system call because of the
+possible security implications of having a normal user use this
+feature.
+.sp
+In addition, the hidden system call allows us to get around the
+problem of having a limit on the maximum number of open files 
+allowed for the lock manager process.  The lock manager will be
+passing a file handle and will not need to have an open file
+descriptor.  The hidden system call also helps us to handle
+problems with blocking lock requests which will be discussed
+later.
+.sp 2
+.na
+.H 3 "Unique PIDs and client IDs"
+.sp
+.ad
+Overlapping locks are allowed from the same process.  Processes
+are identified in s300 HP-UX by their site ID and their PID
+combined (although within an HP-UX cluster PIDs are unique and
+should be sufficient identification alone).
+.sp
+NFS nodes do not, of course, provide unique PIDs across the 
+network.  Additionally, NFS nodes can only be uniquely 
+identified by their network addresses.  There is currently
+no way to pass this information into the kernel, and the
+internet address will not fit in the site_t data structure.
+.sp
+If no action is taken, all locks requested via the lock manager
+will be allowed to overlap, as they will appear, to the kernel,
+to have all been requested from a single process.
+.sp
+Therefore, the lock manager must keep track of PIDs and hostnames
+for successful NFS client locks and disallow overlapping locks from
+different processes.  Note, this is already done by the Sun code.
+.sp 2
+.na
+.H 3 "Blocked Locks -- How to handle them with the Lock Manager"
+.sp
+.ad
+If a lock request from the lock manager is blocked, the kernel
+will return an error to the lock manager.  When the blocking
+lock is released, the kernel will notify the lock manager of the
+event and the lock manager will retry the lock.  This means that
+the lock manager must keep track of all blocked locks and the
+kernel must be modified to know when to notify the lock manager
+of a released lock.
+.sp
+The mechanism to keep track of blocked locks in the lock manager
+is already part of SUN's lock manager implementation.
+.sp
+The kernel will require the following changes to notify the lock
+manager of the release of a blocking lock:
+.sp
+.AL
+.LI
+Lock requests coming from the lock manager must be
+identifiable in the kernel (using the hidden system call as
+a front end allows us to do this).
+.LI
+When locked() receives a lock request (from the lock
+manager) which is blocked by an existing lock, it will set
+a lock pending flag in a new field in the lock structure of
+the blocking lock and return an error to the lock manager.
+.LI
+When a lock is released, the new lock pending flag in the 
+lock structure will be checked.  If a lock is pending, 
+then an rpc call will be made to notify the lock manager
+that a lock has been released.
+.LE
+.sp 2
+.na
+.H 3 "NFS Enforcement Mode Locks"
+.sp
+.ad
+We cannot allow an NFS client to lock a file with enforcement
+mode.  This is because the client would be unable to access the
+locked file (except to modify or remove the lock) due to the
+fact that the NFS protocol does not provide a PID which would
+be required to identify the accessing process for an enforcement
+mode lock.
+.sp
+Two possible solutions are:
+.sp
+.AL
+.LI
+Accept locks from the lock manager even though enforcement
+mode is set on a file, but set a flag indicating that 
+the lock should NOT be enforced (reduce to advisory).
+.sp
+advantage:
+.ML +
+.LI
+Applications won't die due to inability to lock the file.
+.LE
+.sp
+disadvantage:
+.ML -
+.LI
+Since the lock succeeds, applications won't be aware that locks 
+won't be enforced and may function incorrectly with no indication 
+of the problem.
+.LE
+.LI
+Always reject a lock request from the lock manager if
+enforcement mode is set on a file.  (Return an error.  
+EDEADLOCK?  However, the lock manager can only return a
+status of denied to the client lock manager.)
+.sp
+advantage:
+.ML +
+.LI
+Applications relying on enforcement mode will fail
+with a warning, so the user shouldn't see unexpected
+results in the application due to unenforced locks.
+.LE
+.sp
+disadvantage:
+.ML -
+.LI
+Any application which attempts to lock a file with
+enforcement mode across NFS will fail, regardless of
+whether or not that application actually requires
+enforcement mode, so some applications which used
+to work locally will not work with NFS.
+.LE
+.LE
+.sp
+At present, we will return an error.
+.sp 2
+.na
+.H 3 "Status Monitor"
+.sp
+.ad
+The status monitor tells the lock manager to clean up all locks
+belonging to a given node when that node is detected as powering
+up (i.e., it must have failed).  The lock manager must keep
+track of all locks it has requested for clients so that it can
+remove all those locks if the node fails.
+.sp
+Note also that locks held by a failed NFS client are not cleaned
+up until after the failed client has rebooted.
+.sp
+This is the way Sun's current implementation works.  It's not
+pretty, but changing this while maintaining compatibility would
+require a large amount of time.  In addition, we can do nothing
+about non-HP nodes.
+.sp 2
+.na
+.H 3 "New Signal: SIGLOST"
+.sp
+.ad
+As part of the status monitor implementation, the initialization
+of the status monitor involves notifying its clients that it has
+been re-booted.  The lock manager will then wait for a "grace
+period", currently 45 seconds, for the clients to reclaim their
+locks on this node.  If a client lock manager attempts to reclaim
+a lock and fails (receives DENIED, BLOCKED, or NOLOCKS) it notifies
+the process holding the lock by sending SIGLOST.
+We do not intend to change Sun's implementation in this case, so
+we will need to add this new signal.
+.na
+.sp 2
+.H 3 "Where should the Lock Manager be run"
+.sp
+.ad
+The lock manager must be run on all systems running NFS, including
+diskless nodes.
+.na
+.bp
+.H 2 "NFS and ACLs (Cristina Mahon)"
+.ad
+In this section we describe the interactions between Network File System (NFS) 
+and Access Control Lists (ACLs) as they are currently being implemented.
+.sp
+ACLs are a mechanism  to provide greater access control to files by adding
+greater granularity to the individual user/group mechanism.  ACLs can be
+permissive or restrictive, for example, a specific user can be
+granted or denied access to a file beyond the file's base mode bits.
+.sp
+ACLs are being added to HP-UX as the preferred method of supporting 
+Discretionary Access Control (DAC).  While some form of DAC is required 
+by the NCSC Trusted Computer System Evaluation Criteria (TCSEC) at
+Class C1, ACLs or equivalent capability are not required until Class B3.
+The current UNIX DAC already suffices for Class C1 and with some extra 
+documentation could probably reach Class C2.  For more details on the issues 
+and alternatives considered for the design of ACLs, please refer to the paper 
+"Adding Access Control Lists to Unix" by Alan Silverstein, Bill McMahon and 
+Greg Nuss.
+.sp
+Since the design of ACLs calls for specific changes to the HP-UX file system,
+into which NFS and other networking applications are closely intertwined, ACLs
+have the potential of greatly affecting those networking applications.
+.na
+.H 3 "NFS protocol and ACLs"
+.sp
+.ad
+An NFS connection occurs between a server and a client system.  It is a 
+stateless connection by nature, in the sense that the server system does
+not keep track of what the client system is doing.  This helps in the 
+recovery of the client system if a server crashes.
+.sp
+The current NFS protocol (version 2) performs access checking by having
+the server send access information to the client (when the client
+performs an operation like open() or access() for example).  The client then 
+checks to see whether access is allowed.  For operations like read() and 
+write() the server checks whether the client can perform the operation.
+.sp
+The interaction between NFS and ACLs arises because the NFS
+protocol only allows for nine access mode bits to be passed back between the 
+server and the client for access checking.  In the UNIX implementation of NFS, 
+those nine bits are the base mode bits for the file being accessed.  
+.sp
+With the introduction of ACLs, the base mode bits of a file are no longer
+enough to determine whether a user can access that file.  With NFS,
+since access checking is performed on the client based on the bits returned
+by the server, while the checking for all other operations is performed on
+the server, situations like the following can arise.
+.BL
+.LI
+A user can be allowed to access a file based only on the base mode bits 
+returned by the server, but then have a read or write denied because of
+an ACL restriction.  
+.LI
+A user can be disallowed access to a file, based on the base mode bits,
+that he could otherwise have had access to on the local system because of ACLs.
+.LE
+.sp
+Both of these situations produce results that are confusing and
+might not be easily tracked down to their cause (the combination of
+base mode bits and ACLs).
+.sp 
+The current implementation of ACLs addresses and resolves the above problems
+for NFS.  The HP-UX kernel returns the effective mode bits in calls like
+stat().  The effective mode bits are a "summary" of the permissions a
+user has for a certain object.  With that solution ACLs become transparent
+to NFS.
+.na
+.sp 2
+.H 3 "New system calls and commands related to ACLs"
+.ad
+.sp
+New system calls, library routines, commands and header files have been 
+introduced into HP-UX to deal with ACLs.  The full list of header files and 
+man pages for the above follows:
+.sp
+.nf
+acl.h		include file for setacl(2) and getacl(2)
+setacl.2	set access control list (ACL) information
+getacl.2	get access control list (ACL) information
+getaccess.h	include file for getaccess(2)
+getaccess.2	get a user's effective access rights to a file
+glossary.9	added or revised excerpts from the complete glossary
+
+acllib.h	header file for new library calls
+acl.3		summary of ACL library calls and symbolic forms
+acltostr.3	convert access control list (ACL) structure to string 
+		form
+strtoacl.3	convert string form to access control list (ACL) 
+		structure
+settuple.3	add, modify, or delete one tuple in file's ACL
+
+chacl.1		change access control list (ACL) on file(s)
+lsacl.1		list access control lists (ACLs) on file(s)
+getaccess.1	list access rights to file(s)
+.fi
+.sp 2
+We support getaccess(1) and getaccess(2) over NFS since the new system call 
+getaccess() uses the VOP_GETATTR call to get the information it will  return 
+and getaccess(1) uses getaccess(2).  The library calls acltostr(3) and 
+strtoacl(3) don't look at any files and therefore are not affected by NFS.
+.sp
+The following chacl(1) option will be supported over NFS for the following
+reason as described by Alan Silverstein:
+.sp
+.nf
+-F  Fold optional tuples into base mode bits.  Easy, just stat(), 
+    then chmod (file, statbuf.st_mode).
+.fi
+.sp
+This option relies on the side-effect of chmod(), deleting all optional 
+tuples.  The other options of chacl(1) are not supported over NFS.
+.sp 
+The other system calls (setacl() and getacl()), library routine (settuple)
+and commands (other options of chacls and lsacls) are not supported over
+NFS.  The system calls return the error EOPNOTSUPP.
+.na
+.bp
+.H 2 "NFS and POSIX (Cristina Mahon)
+.ad
+HP-UX will be POSIX compliant starting at releases 6.5 on the s300 and
+7.0 on the s800.  Part of the work to make HP-UX POSIX conpliant was
+to introduce two new system calls that deal with the file system, 
+\fIpathconf\fR and \fIfpathconf\fR.  
+.sp
+The current version of the NFS protocol (version 2) is not able to handle
+some of the information requested by the above system calls.  The variables
+passed to the system calls that are not supported over NFS are _PC_LINK_MAX,
+_PC_NAME_MAX, _PC_PATH_MAX, _PC_CHOWN_RESTRICTED and PC_NO_TRUNC.  
+When the system calls are invoked with those variables, NFS will return with 
+an EOPNOTSUPP errno.   For the other variables, _PC_MAX_CANON, _PC_MAX_INPUT
+and _PC_VDISABLE, that are not file system specific, we will return the local 
+information.  We will support the variable _PC_PIPE_BUF over NFS with
+the introduction of NFS 3.2 (releases s300 6.5 and s800 7.0).  
+.sp
+The list below describes the areas for which NFS is not POSIX compliant and
+when those deficiencies might be corrected.
+.sp
+.AL
+.LI
+File locking:
+.sp
+POSIX requires advisory file locking.  This feature is available 
+with NFS 3.2 through the lock manager and the status monitor
+described in a previous section.
+.LI
+Device file access (FIFOs):
+.sp
+NFS 3.2 provides local device file access via NFS as opposed to true
+remote device access.
+.LI
+Root access over NFS:
+.sp
+This feature is available with NFS 4.0 on an exported directory basis
+(specified in the /etc/exports file).  
+.LI
+Pathconf/fpathconf system call support:
+.sp
+There are no provisions on the current NFS protocol (version 2) or
+on the next protocol under revision (version 3) to support pathconf
+and fpathconf.  These functions provide a method for the application
+to determine the current value of a configurable limit or option that
+is associated with a file or directory.  To implement these functions
+over NFS at this time would require an HP to HP only solution which
+defeats one of the purposes of NFS.  The current solution for
+the s300 6.5 release is to return a EOPNOTSUPP when these routines are
+invoked on the client.
+.LI
+O_APPEND problem:
+.sp
+When two NFS clients attempt to append to the end of the same file
+at the same time there is a potential for the data being overwritten
+since both clients do a seek to an offset they had from the last write
+on the file.  To solve this problem it would be possible to add a
+flag to the write request so that the write would do an append to
+the file and ignore the offset that has been requested.  This
+problem is not addressed in the current or the next versions of
+the NFS protocol (version 2 and 3 respectively).
+.LI
+Exclusive create:
+.sp
+This will be supported with the new version of the NFS protocol (version
+3).  An exclusive flag has been added to the create, remove, rename, mkdir,
+rmdir, link and symlink calls to allow creation of a name that already 
+exists in the server's filesystem.  This also handles the case of 
+attempting an operation on a file that has been replaced by another 
+one for non-exclusive operation since it requires that the file handle
+be passed along as a checking mechanism.
+.LI
+Open file removal:
+.sp
+Since NFS is stateless it has no way of knowing if some process has
+a file open when it receives a request to unlink the file.  So what
+NFS does is rename the file so it appears as the file is gone.  When
+the process terminates the client will then unlink the renamed file.
+This is a problem when more than one client is accessing the same file.
+.LE
+.na
+.bp
+.H 2 "REX (Mark Kean)"
+.H 3 "Introduction"
+.ad
+.sp 2
+This chapter describes a remote execution facility know as REX, which
+allows a user to execute commands on a remote host. This chapter 
+assumes the user has a working knowledge of UNIX, NFS, general
+networking concepts and terminology. 
+.sp
+REX consists of two parts, the
+.ft B
+on(1)
+.ft
+command and 
+.ft B
+rexd(1M)
+.ft
+(remote execution
+daemon). The
+.ft B
+on 
+.ft
+command provides the user interface on the client. 
+.ft B
+On 
+.ft
+also communicates with
+.ft B
+rexd
+.ft 
+in order to execute a command remotely.
+.ft B
+Rexd
+.ft 
+executes on the server and facilitates the execution of the remote command.
+.sp
+The functionality of REX is similar to that of
+.ft B
+remsh(1)
+.ft
+with two
+important differences. First, REX will execute the command in an environment
+similar to that of the invoking user. The user's environment is 
+simulated by:
+.AL
+.LI 
+Copying all of the user's environment variables to the remote machine
+.LI
+Mounting the file system containing the user's current working
+directory on the remote machine, via NFS (if it is not already mounted
+on the remote machine)
+.LE
+.sp
+The command is then executed on the remote machine
+in the
+remote version of the user's current working directory,
+using the invoking user's environment variables. Second, 
+REX allows the user to execute interactive commands such as \fBvi(1)\fR.
+.sp
+The remainder of this chapter is divided into five major sections.
+First the functionality of the
+.ft B
+on
+.ft 
+command is discussed in detail.  The
+second section discusses configuring
+.ft B
+rexd
+.ft
+on a server. The third
+section discusses security issues related to rex. The fourth
+section discusses differences between HP's implementation of REX and
+Sun's implementation of rex.
+Finally, the fifth section contains information for CPE and support.
+.sp
+.na
+.H 3 "The on Command"
+.sp
+.H 4 "Functionality"
+.ad
+.sp
+This section describes the
+.ft B
+on(1)
+.ft
+command. The
+.ft B
+on 
+.ft
+command provides the
+user interface for remote execution of a command. In general, the user
+specifies a host to run a command on, the command to run and the
+arguments for the command.
+.ft B
+On
+.ft 
+then simulates the user's current
+environment on the server by passing the user's environment
+variables to the remote machine and information about the user's 
+current working directory. The rexd on the server mount's the 
+file system which contain's the user's current working directory
+if it is not already mounted on the server.
+Once the environment is simulated,
+the command executes in the simulated  environment on the remote machine.
+.sp
+As you may have guessed by now, since the user's environment is
+simulated on the remote machine and not completely recreated,
+execution of a given 
+command on a remote machine will not always produce the same results as
+the execution of the command on a local machine.  The simulated
+environment and it's limitations are discussed below in "Environment
+Simulation".
+.sp
+The syntax of the on command is given below. 
+.sp
+     on [-i | -n] [-d] 
+.I host [ 
+.I command 
+[ 
+.I argument 
+] ] ...
+.sp
+.I Host 
+specifies the name of the host on which to execute 
+.I command.
+There must be an entry for 
+.I host 
+in the local machine's "/etc/hosts"
+file.  
+.I Command 
+specifies the command to execute on 
+.I host. 
+If
+.I command 
+is not specified, 
+.ft B 
+on 
+.ft 
+will start a shell on
+.I host.
+.sp
+Three options may be specified by the user. The first two options must
+be used (aren't really options, but a way of passing information to 
+.ft B
+on
+.ft 
+) under certain circumstances and should not be specified under other
+circumstances.
+.sp
+The 
+.ft B
+-i 
+.ft 
+option specifies interactive mode. This option must be
+specified for all interactive commands (commands which expect to be
+talking to a terminal). Examples of interactive commands are 
+.ft B 
+vi(1)
+.ft
+,
+.ft B
+csh(1)
+.ft 
+and
+.ft B
+more(1).
+.ft 
+If this option is specified with a non-interactive
+command such as 
+.ft B 
+sort(1)
+.ft 
+it will be executed as an interactive command, but there
+may be no difference in behavior.
+.sp
+The 
+.ft B
+-n 
+.ft 
+option causes the remote program to get end-of-file when it
+reads from standard input instead of connecting the standard input of
+the 
+.ft B
+on 
+.ft 
+command to the standard input of the remote command.  The
+.ft B
+-n
+.ft 
+option is necessary when running commands in the background with
+job control.
+.sp
+The 
+.ft B
+-d 
+.ft 
+option allows the user to receive diagnostic messages during
+the start up of the 
+.ft B
+on 
+.ft 
+command. The messages  may be useful in detecting
+configuration problems if the 
+.ft B
+on
+.ft 
+command is failing to a given host.
+.sp
+In order for a user to execute the 
+.ft B
+on 
+.ft
+command from node A to node B 
+the following configuration requirements must exist.
+.AL
+.LI
+The user must be logged onto a user account (other than
+root) on node A .
+.LI
+The user must have an account on node B and the uids for the accounts
+on node A and B must be the same. If this is not the case, one of 
+two things will happen. If the uid associated with the user on node A
+is not associated with any user on node B, the 
+.ft B
+on
+.ft
+command will fail with the error, "on 
+.I hostname
+: 
+.ft B
+rexd
+.ft
+: User id 
+.I xxxx
+is not valid". 
+If the user's uid on node A is 
+associated with another user on node B, then the command will be executed on 
+node B as the user associated with the uid. The second case
+is a major security hole. More details are given under "Security 
+Issues".
+.LI
+The file system which contains the user's current working directory
+must be exported in a manner that allows machine B to mount it.
+Note, that the current working directory may be a directory on 
+another remote machine, C, which is being accessed via NFS. If the 
+user's current working directory is being accessed via RFA,
+the on command will fail with the following error message:
+.nf
+
+on: current directory (PATHNAME) is remote via RFA
+    RFA directories not supported by on.
+
+where: PATHNAME is the path name of the user's current
+       working directory.
+
+.fi
+.LI
+Node B must have rexd configured to execute. See "Configuring rexd".
+.LE
+.sp
+.na
+.H 4 "Environment Simulation"
+.sp
+.ad
+As mentioned above, the user's environment is simulated on the remote
+machine not mirrored. Therefore, certain limitations exist which may
+cause the execution of a given command to produce different results
+when executed on the local machine and a remote machine via
+.ft B
+on.
+.ft
+These
+limitations are discussed in detail below.
+.sp
+The file system containing the user's current working directory is
+mounted on the remote machine in a subdirectory of /usr/spool/rexd, if the
+file system is not already mounted on the remote machine.  If the file
+system is already mounted on the remote machine, the mount point is
+the current mount point for the file system.  Therefore, the use of
+absolute path names can cause problems.
+.sp
+For example, consider the following case. User mjk on node A is in his
+home directory (/users/nerfs/mjk) and executes the 
+.ft B
+on
+.ft 
+command to start
+a shell on a remote system. When the shell is started the current
+directory will be "/usr/spool/rexd/rexdAXXXX/users/nerfs/mjk" (where A
+is an letter and XXXX
+is a 4 digit number). If mjk now
+types the command "cd", one of two events will occur, depending on the
+configuration of the file system on the remote machine. If the  path
+"/users/nerfs/mjk" exists on the node, the current directory will be
+"/users/nerfs/mjk" on the remote system, which is not equivalent to
+"/users/nerfs/mjk" on the local system. If the path "/users/nerfs/mjk" 
+does not
+exist on the remote system then executing "cd" will return an error.
+.sp
+The above behavior could cause a script which does a "cd" or uses
+absolute file names to produce different results when executed
+remotely. Another example where the use of absolute path names may
+occur, without being obvious, is the use of $PATH. Implicit use of $PATH
+may cause a
+different version  of a command (or a different command) to be executed
+in the remote case.
+.sp
+Relative path names will work if they are within the same file system as
+the user's current working directory. If a relative path name crosses
+a file system boundary it will encounter problems similar to those
+presented by use of absolute path names.
+.sp
+Finally, the \fBon\fR command will fail if the user's current working
+directory is being accessed via RFA. This occurs because REX is unable
+to simulate the user's environment in this case. In this case the user
+will receive the following error message.
+.sp
+.nf
+
+on: current directory (PATHNAME) is remote via RFA
+    RFA directories not supported by on.
+
+where: PATHNAME is the path name of the user's current
+       working directory.
+
+.fi
+.H 3 "Configuring rexd"
+.ad
+.sp
+Configuring 
+.ft B 
+rexd 
+.ft 
+on a system allows the system to act as a server,
+executing commands for clients which execute an 
+.ft B
+on
+.ft
+command. Before
+configuring rexd to run on a system, one should read the "Security Issues" 
+section below 
+and consider the consequences of running 
+.ft B
+rexd.
+.ft
+.sp
+.ft B
+Rexd 
+.ft 
+is started by 
+.ft B 
+inetd(1M) 
+.ft
+when a request for remote execution
+is made by a client. The 
+.ft B 
+inetd
+.ft
+obtains the information it needs to start
+.ft B
+rexd 
+.ft 
+from the file "/etc/inetd.conf". The following entry must be in the file
+"/etc/inetd.conf" in order for
+.ft B
+inetd
+.ft 
+to start 
+.ft B
+rexd.
+.ft 
+.sp
+rpc stream tcp nowait root 
+.I path 
+100017 1 rpc.rexd
+[
+.I options
+]
+.sp
+.I path 
+is the  path name of the 
+.ft B
+rexd
+.ft 
+executable
+in the file system. The 
+.ft B
+rexd
+.ft
+shipped with the HP-UX product is located
+in "/usr/etc/rpc.rexd".
+.sp
+.I options
+is a list of options which change the behavior of \fBrexd\fR. Each
+of the possible options is described below.
+.sp
+.na
+.H 4 "The -l option"
+.ad
+.sp
+The user can log any errors reported by
+.ft B
+rexd
+.ft
+to a file. This is done by adding -l 
+.I log_file
+at the end of the configuration entry in "/etc/inetd.conf", where 
+.I log_file
+is the name of the file where errors are logged.
+If 
+.I log_file
+exists,\fBrexd(M)\fR appends messages to the file. If 
+.I log_file
+doesn't exist, \fBrexd(M)\fR creates it. Messages are not logged if 
+the -l option is not specified.
+.sp
+The information logged to the file includes the date and time of the
+error, the host name, process id and name of the function generating
+the error, and the error message.  Note that different services can
+share a single log file since enough information is included to
+uniquely identify each error.
+.sp
+Thus, the entry in "/etc/inetd.conf" to log errors to the file 
+"/usr/adm/rexd.log"
+is:
+.sp
+rpc stream tcp nowait root 
+.I path 
+100017 1 rpc.rexd -l /usr/adm/rexd.log
+.sp
+.na
+.H 4 "The -m option"
+.ad
+.sp
+Specifying -m 
+.I mountpoint
+changes the default directory which contains mount points used for 
+mounting client file systems.
+The following entry in /etc/inetd.conf causes client file systems to
+be mounted as /clients/mnt/rexdAXXXX instead of /usr/spool/rexd/rexdAXXXX
+(where A
+is an letter and XXXX
+is a 4 digit number).
+.sp
+rpc stream tcp nowait root 
+.I path 
+100017 1 rpc.rexd -m /client/mnt
+.sp
+The owner, group and all other user's must have read and execute permission
+for 
+.I mountpoint
+or an on command may fail for a user that does not have the proper permission
+to 
+.I mountpoint.
+.na
+.H 4 "The -r option"
+.ad
+.sp
+The -r option causes the rexd to use stronger security checking than
+it uses by default (see "Security Issues"). When started with the -r
+option the rexd denies access to a client unless one of the following
+conditions is met:
+.nf
+
+1) The name of the client is in the /etc/hosts.equiv file on 
+   server.
+
+2) The user on the server, associated with the uid sent by the
+   client, has an entry in $HOME/.rhosts which specifies the 
+   client name followed by white space and an end of line or
+   the client name followed by the user's name and end of line.
+
+   For example, if client, NODE1 attempts to start an on command
+   with uid 7, which is associated with user mjk on the server
+   then mjk must have one of the following entries in $HOME/.rhosts.
+
+   NODE1 
+    or
+   NODE1 mjk
+
+.fi
+.na
+.H 3 "Security Issues"
+.ad
+.sp
+The design and implementation of REX contains several security holes
+which will be discussed in detail below.
+.sp
+REX restricts access to a system by use of uids. That is, the client
+.ft B
+(on)
+.ft 
+passes the invoking user's uid to the server
+.ft B
+(rexd)
+.ft 
+to determine if the invoking user is a valid user. 
+This creates a number of security holes.
+.AL
+.LI
+If the client and the server do not have the same mapping of users to 
+uids a user on the client may be able to access the server as some other
+user. 
+.LI 
+A malicious client can simply set the desired uid in outgoing 
+packets and access the server as any of the server's valid users other
+than root. Someone with their own workstation can simply set up a user
+account with the desired uid.
+.LE
+.sp
+The consequences of the above security hole can be reduced by use of
+the file "/usr/adm/inetd.sec". The entries in this file are used 
+to specify a set of networks and hosts which are allowed or denied access
+a service which is started by
+.ft B
+inetd.
+.ft
+For more details on the use of "/usr/adm/inetd.sec" see 
+.ft B
+inetd.sec(4)
+.ft
+.sp
+The consequences of the above security hole can also be reduced by 
+use of the -r option when starting rexd. See the section "Configuring
+rexd" above for more details on the -r option.
+.sp
+Under normal NFS use, only root is allowed to mount remote file systems.
+However, when 
+.ft B
+rexd 
+.ft 
+is in use the user can mount a file system on the server by using the 
+following steps.
+.AL
+.LI
+cd to a directory in the file system you wish to mount
+.LI 
+execute an on command to start a shell on the machine you wish to 
+mount the file system on
+.LI
+from another window, shell layer or system, log into the server and cd to
+a directory in the file system that 
+.ft B
+rexd 
+.ft 
+mounted
+.LI 
+switch back to the previous window, shell layer or system and exit the 
+shell created by 
+.ft B
+on
+.ft
+.LE
+.sp
+Since someone is busy in the mounted file system 
+.ft B
+rexd
+.ft 
+will be unable to unmount the file system. Hence the user has mounted the 
+file system. 
+.sp
+These security holes and the potential consequences should be considered 
+before configuring 
+.ft B
+rexd
+.ft
+on a system.
+.sp
+.na
+.H 3 "Deviations form Sun's implementation"
+.ad
+.sp
+Below is a list of differences in Sun's implementation of REX and any
+associated consequences.
+.AL
+.LI
+Sun's
+.ft B
+rexd
+.ft 
+creates mount points for  the file system containing the user's current 
+working directory
+under "/tmp" instead of "/usr/spool/rexd". It is common for machines to
+have cron jobs running which periodically remove files in "/tmp" that
+have not been accessed in a specified amount of time. If a file system
+is mounted under "/tmp", files in that file system may get removed by
+the cron job. Therefore HP chose to create mount points for the file systems
+under 
+"/usr/spool/rexd". HP system's also allow the directory which contains mount
+points to be changed by using the -m option when starting rexd. This 
+allows the system administrator to control what directory is used for
+mounting client file systems.
+.LI
+On a Sun
+.ft B
+rexd
+.ft 
+is configured by putting an entry in "/etc/servers" instead of 
+"/etc/inetd.conf". See the Sun man page for details on the entry.
+This deviation  is the result of differences between HP's and Sun's
+inetd.
+.LI 
+HP's 
+.ft B
+rexd
+.ft
+allows error messages to be logged to a file in order to keep a log of
+errors encountered by rexd. This error logging mechanism is provided
+with all of HP's rpc servers.
+.LI 
+Sun does not support the -l -m and -r rexd options. HP added these options
+to allow greater usability and security.
+.LE
+The following is a list of differences found/created during development of
+REX.
+.na
+.H 3 "Notes/Issues for CPE"
+.ad
+.sp
+The following is a list of support and CPU issues which was generated for 
+a visit from Art Harkin of the Network Marketing Center (NMC). This list
+may be useful to CPE engineers.
+.nf
+
+1) Corner Cases: What problems are likely (could be) to be hit that are 
+   not documented.
+
+   a) If the clients current working directory is an NFS file system
+      which was mounted on a symbolic link then the on command sends
+      incorrect information to the server about which node physically
+      has the file system. Hence, rexd will mount the wrong file system
+      and not be able to find the current working directory.    
+
+      Don't mount NFS file systems on a symbolic link. Mount it on the 
+      path that the link points to.
+
+   b) Rexd may not umount a file system which it mounted.
+
+      on node1 prog1 &      /*  (PID = 1) */
+      on node2 prog2 &      /*  (PID = 2) */
+
+    If process 1 completes before process 2 rexd will be unable to umount
+    the file system which it mounted. HP rexd will try for 30 seconds to 
+    umount the file system. Sun 3.5 will not wait. Sun 4.0 will try for 
+    several minutes.
+
+   c) Some Cisco gateway boxes can not handle 8K packets. This will cause
+      the on command to hang if rexd did a mount through the gateway. 
+      Rexd does not have a method of specifying the mount options to
+      use.
+
+      Can avoid this by making sure file systems are mounted by the 
+      system admin. in advance with the proper mount options.
+
+   d) Some Sun hardware has the same problem has the same problem as
+      the Cisco gateway. For example our Sun 2/160 can not handle 8k 
+      packets.
+
+   e) Use of some terminal modes may cause problems. Terminal modes must 
+      be converted to old BSD terminal modes for the protocol and must 
+      be converted back from the BSD modes on the sever. It is not a 
+      one to one mapping so strange results may occur in some corner 
+      cases.
+
+   f) If the client tells the HP server that it's terminal size is 0x0
+      or -1x-1 HP's more command will behave in a strange way. This 
+      is a bug and I am submitting a defect report.
+
+2) What's tested what is untested? Configurations, corner cases, etc.
+
+   a) N users using on the a common server at the same time, where N 
+      is large.
+
+   b) All possible combinations of terminal mode settings. Most likely
+      cases are tested. Works with vi and emacs.
+
+3) Differences between HP and Sun. Problems between HP and Sun.
+
+   a) Sun 3.5 rexd servers will lose data. May or may not see it
+      (timing problem).
+
+   b) Sun 3.5 rexd servers will hang if a client doing an interactive
+      on command sends the job control suspend character.
+
+	The command that rexd has started on the remote system will
+        become suspended thus the on command is hung. The only way to
+        restart the on command is to log into the server and send 
+        the command process a SIGCONT.
+
+      Sun 4.0 systems try to suspend the on command and the associated
+      remote command and allow you to restart the command as you would
+      any other command from the shell. However, there are timing bugs
+      in the solution and it may hang.
+
+      HP's rexd currently effectively ignore's the suspend character.
+      ---> you can not suspend and interactive on command.
+
+   c) On a Sun 3.5  the command 
+
+      on -i -n hostname cmd 
+
+      will hang. Must kill the on command or login to the server and 
+      kill the rexd.
+
+      On Sun 4.0 and HP the -i and -n options are mutually exclusive.
+
+   d) The Sun rexd server will start the process associated with an 
+      interactive on command and set the terminal size associated with 
+      the command when it arrives from the client. If the client is a 
+      changes in the clients window size are propagated to the server
+      as they occur.
+
+      The HP rexd server will wait until the client sends the terminal 
+      size for the client before starting the command. The terminal size
+      for the process associated with an interactive on command is set 
+      once and only once. Changes in window size can not be propagated to
+      the server.
+
+   e) Sun's rexd writes all warnings and errors to the console.
+
+      HP's rexd does not write any error or warning messages by default.
+      Use of the -l option (logging) allows error and warning to be 
+      written to a file. Using -l /dev/console will write error and 
+      warning messages to the console.
+
+   f) Sun 3.5 rexd servers mount client file systems in a subdirectory
+      of /tmp. Sun 4.0 rexd servers mount client file systems in a 
+      subdirectory of /tmp_rexd. There is no option to change the 
+      location.
+
+      HP rexd servers mount client file systems in a subdirectory of 
+      /usr/spool/rexd. This can be changed to any directory by 
+      use of the -m option.
+
+
+4) What do you think the most common problems will be (similar to 1)
+
+   a) Security, see the documentation.
+
+   b) In order for a change in rexd options to take effect the super-user
+      must do an inetd -c command.
+
+  c) Absolute path names may not do what the user expects. In some cases
+     the use of absolute path names will do what the user intended and 
+     in other cases it will not.
+
+  d) The rexd's -r option does not use the .rhost file in the exact same
+     way that the Arpa Berkeley commands (remsh, rlogin) do. Rexd is not
+     as secure.
+
+  e) The path name of the current working directory on the remote machine
+     can not be determined without knowing the state of the remote machines
+     file systems.
+
+  f) The client's environment variables are used on the server. This can
+     lead to confusion. 
+
+
+        ex Hp to Sun 
+
+       PATH will most likely not contain /usr/ucb 
+
+       Therefore man(1) and more(1) and many other commands are not found.
+.fi
+.na
+.bp
+.H 2 "RPCGEN Compiler (Mike Shipley)"
+.H 3 "Preface"
+.sp
+.ad
+RPCGEN is a program that takes input describing an application
+program and produces code that eases the transformation of the
+program from operating on one machine to operating on two
+machines over a network.
+
+Since Sun Microsystems has provided a user manual on RPCGEN, this
+ERS will not rehash the ideas presented there.
+The manual describes what RPCGEN is and how it can be used to 
+create network applications more easily.  The user manual
+gives several examples on how to take applications and split them
+into client and server portions connected by a network.  It also
+presents the specific BNF for the language that is given as
+input to RPCGEN.
+
+The user manual
+does leave out details such as error messages and a concise display of the
+files that need to be provided and the files that are produced by RPCGEN.
+This delta ERS will cover these areas.  In addition, it will cover changes
+that have been made to allow code produced by RPCGEN to better function
+with HP-UX.
+
+It will be assumed that a reader of this document is either very familiar
+with RPCGEN or has read the RPCGEN Users Manual.
+
+.na
+.H 3 "Objectives"
+.sp
+.ad
+These are the objectives we want to meet with the rpcgen project.
+.\  The following is how to make a indented list with
+.\  "bullets" in front of each item. 
+.BL
+.LI
+Provide as a minimum, the same rpcgen functionality as is provided by 
+Sun Microsystems.
+.LI
+Provide "value added" features where it is possible.
+.LI
+Update the current rpc library so it can handle the new demands
+required by files created by rpcgen.
+.LI
+Provide HP quality user documentation on RPCGEN.
+.LE
+.sp
+.na
+.H 3 "The files Involved"
+.sp
+.ad
+As mentioned, RPCGEN takes input describing an application
+program and produces code to
+aid in the transformation of executing the program on one machine to 
+executing the program from a client machine to a server machine over the
+network.  The input is written in a C-like language and is stored in
+a file that is suffixed with ".x".  When the .x file is given to RPCGEN,
+it produces four files.  The first is a ".h" file which contains const's,
+typedef's and struct's that are used to communicate data structures between
+all of the portions of the application program.  The next file is
+a "clnt.c" file which is a collection of function stubs used on the
+client side.  The third file is a "svc.c" file.  This file is the main C
+program for the server process.  The fourth file is the "xdr.c" file
+which contains xdr routines used to translate the arguments and results
+between the client and server processes.  
+.\
+.\ FOR NOW I HAVE TAKEN OUT REFERENCES TO AN OPTION THAT WOULD PRODUCE
+.\ A MAKEFILE FOR THE FILES PRODUCED BY RPCGEN TO CREATE THE SERVER/CLIENT 
+.\ The last file is ".mk".
+.\ It is a skeleton makefile to aid in compiling the files produced by
+.\ RPCGEN and the files supplied by the user.
+
+All of these files are prefixed with the main portion of the name
+of the .x file.  For example, if you have a .x file named remsh.x, the
+RPCGEN program will produce the following files: remsh.h,
+remsh_clnt.c, remsh_svc.c and remsh_xdr.c.
+.\ remsh_clnt.c, remsh_svc.c, remsh_xdr.c and remsh.mk.
+
+The following shows the files that are produced by rpcgen acting
+on a file named "rls.x".  Also shown will be the two ".c" files that
+need to be provided by the user.
+.nf
+                                                                        
+                                                                        
+                                                                        
+                         rls.h                                            
+                         rls_clnt.c                                       
+     rpcgen  rls.x  ===> rls_svc.c                                         
+                         rls_xdr.c                                        
+.\			 rls.mk
+                                                                        
+                               
+     rls.c        /* The client side program */
+     rls_proc.c   /* The server side functions */
+                                                                        
+                                                                        
+                                                                        
+.fi
+.sp
+.na
+.H 4 "rls.x"
+.sp
+.ad
+The following shows the contents of the five files mentioned above
+plus two more files that the user must supply to do the actual
+application.  The first
+file is the "rls.x" file which describes the necessary data structures involved
+in doing a remote directory listing.
+
+This file is provided by the user.
+.nf
+
+
+
+   /*
+    * rls.x: Remote directory listing protocol
+    */
+   const MAXNAMELEN = 255   /* maximum length of a directory entry */
+   
+	
+	/* This definition is specific to RPCGEN.  It is     */
+	/* different from C syntax.  It defines a variable   */
+	/* length string.                                    */
+   typedef string nametype<MAXNAMELEN>;	/* a directory entry */
+
+
+   typedef struct namenode *namelist;	/* a link in the listing */
+
+   /*
+    * A node in the directory listing
+    */
+   struct namenode {
+	   nametype name;		/* name of directory entry */
+	   namelist next;		/* next entry */
+   };
+
+   /*
+    * The result of a READDIR operation.
+    */
+    union readdir_res switch (int errno) {
+      case 0:
+	   namelist list;  /* no error: return directory listing */
+      default:
+	   void;	   /* error occurred: nothing else to return */
+   };
+
+   /*
+    * The directory program definition
+    */
+
+   /* This definition is specific to RPCGEN.  It is      */
+   /* different from C syntax.  It defines what a remote */
+   /* program consists of.                               */
+   program RLSPROG {
+	   version RLSVERS {
+		   readdir_res
+		   READDIR(nametype) = 1;
+	   } = 1;
+   } = 76;
+
+
+.fi
+.sp
+.na
+.H 4 "rls.h"
+.sp
+.ad
+The next file is the "rls.h" file.  It is used to tie all of the other
+files together.  It is basicly just a C-language version of the things
+found in the "rls.x" file.  
+
+This file is created by rpcgen.
+.nf
+
+   #define MAXNAMELEN 255
+
+   typedef char *nametype;
+   bool_t xdr_nametype();
+
+
+   typedef struct namenode *namelist;
+   bool_t xdr_namelist();
+
+
+   struct namenode {
+	nametype name;
+	namelist next;
+   };
+   typedef struct namenode namenode;
+   bool_t xdr_namenode();
+
+
+   struct readdir_res {
+	int errno;
+	union {
+		namelist list;
+	} readdir_res_u;
+   };
+   typedef struct readdir_res readdir_res;
+   bool_t xdr_readdir_res();
+
+
+   #define RLSPROG ((u_long)76)
+   #define RLSVERS ((u_long)1)
+   #define READDIR ((u_long)1)
+   extern readdir_res *readdir_1();
+
+
+.fi
+.sp
+.na
+.H 4 "rls.c"
+.sp
+.ad
+The following file is the actual client side program that the user provides.
+This program has code to do the user interface, create the connection
+to the server machine, make the call to the server to read a directory
+on the server machine and code to decode and print the results.
+
+This file is provided by the user.
+.nf
+
+
+   /*
+    * rls.c: Remote directory listing client
+    */
+   #include <stdio.h>
+   #include <rpc/rpc.h>		/* always need this */
+   #include "rls.h"		/* need this too: 
+				   will be generated by rpcgen*/
+
+   extern int errno;
+   
+   main(argc, argv)
+	int argc;
+	char *argv[];
+   {
+	CLIENT *cl, *clnt_create();
+	char *server;
+	char *dir;
+	readdir_res *result;
+	namelist nl;
+	
+
+	if (argc != 3) {
+		fprintf(stderr, "usage: %s host directory\\n", argv[0]);
+		exit(1);
+	}
+
+	/*
+	 * Remember what our command line arguments refer to
+	 */
+	server = argv[1];
+	dir = argv[2];
+
+	/*
+	 * Create client "handle" used for calling MESSAGEPROG on the
+	 * server designated on the command line. We tell the rpc package
+	 * to use the "tcp" protocol when contacting the server.
+	 */
+	cl = clnt_create(server, RLSPROG, RLSVERS, "tcp");
+	if (cl == NULL) {
+		/*
+		 * Couldn't establish connection with server.
+		 * Print error message and die.
+		 */
+		clnt_pcreateerror(server);
+		exit(1);
+	}
+	
+	/*
+	 * Call the remote procedure "readdir" on the server
+	 */
+	result = readdir_1(&dir, cl);
+	if (result == NULL) {
+		/*
+		 * An error occurred while calling the server. 
+	 	 * Print error message and die.
+		 */
+		clnt_perror(cl, server);
+		exit(1);
+	}
+
+	/*
+	 * Okay, we successfully called the remote procedure.
+	 */
+	if (result->errno != 0) {
+		/*
+		 * A remote system error occurred.
+		 * Print error message and die.
+		 */
+		errno = result->errno;
+		perror(dir);
+		exit(1);
+	}
+
+	/*
+	 * Successfully got a directory listing.
+	 * Print it out.
+	 */
+	for (nl = result->readdir_res_u.list; nl != NULL; nl = nl->next) {
+		printf("%s\\n", nl->name);
+	}
+   }
+
+.fi
+.sp
+.na
+.H 4 "rls_clnt.c"
+.sp
+.ad
+The next file is the "rls_clnt.c" file.  It
+contains the client side stubs that are called 
+by rls.c to do the transmission of
+the arguments and reception of the results.  In this case there is
+only one routine, readdir_1(), that is defined in this file.
+This is because of the program definition in the "rls.x" file
+only contained one procedure.
+
+This file is created by rpcgen.
+.nf
+
+   #include <rpc/rpc.h>
+   #include <sys/time.h>
+   #include "rls.h"
+   
+   #ifdef hpux
+
+   #ifndef NULL
+   #define NULL  0
+   #endif  NULL
+
+   #endif hpux
+
+   static struct timeval TIMEOUT = { 25, 0 };
+
+   readdir_res *
+   readdir_1(argp, clnt)
+	nametype *argp;
+	CLIENT *clnt;
+   {
+	static readdir_res res;
+
+   #ifdef hpux
+	memset(&res, 0, sizeof(res));
+   #else  hpux
+	memset(&res, sizeof(res));
+   #endif hpux
+	if (clnt_call(clnt, READDIR, xdr_nametype, argp, 
+		   xdr_readdir_res, &res, TIMEOUT) != RPC_SUCCESS) {
+		return (NULL);
+	}
+	return (&res);
+   }
+
+
+.fi
+.sp
+.na
+.H 4 "rls_svc.c"
+.sp
+.ad
+On the server side of things there are two files to be considered.
+The following file, named "rls_svc.c",
+contains the main program for the server side.  
+It registers the
+rlsprog_1() routine with the server machine and then waits 
+for an incoming request
+by calling svc_run().
+Notice that by default, rpcgen will provide code to handle
+both "tcp" and "udp" protocols.  The user can specify
+which protocol the server code will use by invoking the
+"-s" option on the rpcgen invocation.
+When svc_run receives a request, it calls rlsprog_1() that connects to the
+function supplied by the user in the "rls_proc.c" file which does the
+actual work.  The result of that call is then shipped back to the 
+requestor.
+
+This file is created by the rpcgen program.
+.nf
+
+   #include <stdio.h>
+   #include <rpc/rpc.h>
+   #include "rls.h"
+
+   static void rlsprog_1();
+
+   main()
+   {
+	SVCXPRT *transp;
+
+	pmap_unset(RLSPROG, RLSVERS);
+
+	transp = svcudp_create(RPC_ANYSOCK);
+	if (transp == NULL) {
+		fprintf(stderr, "cannot create udp service.\\n");
+		exit(1);
+	}
+	if (!svc_register(transp, RLSPROG, RLSVERS, rlsprog_1, 
+			  IPPROTO_UDP)) {
+		fprintf(stderr, 
+		   "unable to register (RLSPROG, RLSVERS, udp).\\n");
+		exit(1);
+	}
+
+	transp = svctcp_create(RPC_ANYSOCK, 0, 0);
+	if (transp == NULL) {
+		fprintf(stderr, "cannot create tcp service.\\n");
+		exit(1);
+	}
+	if (!svc_register(transp, RLSPROG, RLSVERS, rlsprog_1, 
+			  IPPROTO_TCP)) {
+		fprintf(stderr, 
+		   "unable to register (RLSPROG, RLSVERS, tcp).\\n");
+		exit(1);
+	}
+	svc_run();
+	fprintf(stderr, "svc_run returned\\n");
+	exit(1);
+   }
+
+   static void
+   rlsprog_1(rqstp, transp)
+	struct svc_req *rqstp;
+	SVCXPRT *transp;
+   {
+	union {
+		nametype readdir_1_arg;
+	} argument;
+	char *result;
+	bool_t (*xdr_argument)(), (*xdr_result)();
+	char *(*local)();
+
+	switch (rqstp->rq_proc) {
+	case NULLPROC:
+		svc_sendreply(transp, xdr_void, NULL);
+		return;
+
+	case READDIR:
+		xdr_argument = xdr_nametype;
+		xdr_result = xdr_readdir_res;
+		local = (char *(*)()) readdir_1;
+		break;
+
+	default:
+		svcerr_noproc(transp);
+		return;
+	}
+   #ifdef hpux
+	memset(&argument, 0, sizeof(argument));
+   #else  hpux
+	memset(&argument, sizeof(argument));
+   #endif hpux
+	if (!svc_getargs(transp, xdr_argument, &argument)) {
+		svcerr_decode(transp);
+		return;
+	}
+	result = (*local)(&argument, rqstp);
+	if (result != NULL && !svc_sendreply(transp, xdr_result, 
+					     result)) {
+		svcerr_systemerr(transp);
+	}
+	if (!svc_freeargs(transp, xdr_argument, &argument)) {
+		fprintf(stderr, "unable to free arguments\\n");
+		exit(1);
+	}
+   }
+
+
+.fi
+.sp
+.na
+.H 4 "rls_proc.c"
+.sp
+.ad
+The "rls_proc.c" file contains the code
+to do the actual server portion of the application.  In this example
+the code opens a directory, reads it and then packs up the results
+into the result struct that was defined back in the rls.x file.
+
+This file is written by the user.
+.nf
+
+   /*
+    * rls_proc.c: remote readdir implementation
+    */
+   #include <rpc/rpc.h>
+   #include <sys/dir.h>
+   #include <stdio.h>    
+   #include "rls.h"
+
+   extern int errno;
+   extern char *malloc();
+   extern char *strcpy();
+
+   readdir_res *
+   readdir_1(dirname)
+	nametype *dirname;
+   {
+	DIR *dirp;
+	struct direct *d;
+	namelist nl;
+	namelist *nlp;
+	static readdir_res res; /* must be static! */
+	
+	/*
+	 * Free previous result
+	 */
+	xdr_free(xdr_readdir_res, &res);
+
+	/*
+	 * Open directory
+	 */
+	dirp = opendir(*dirname);
+	if (dirp == NULL) {
+		res.errno = errno;
+		return (&res);
+	}
+
+	/*
+	 * Collect directory entries
+	 */
+	nlp = &res.readdir_res_u.list;
+	while (d = readdir(dirp)) {
+		nl = *nlp = (namenode *) malloc(sizeof(namenode));
+		nl->name = malloc(strlen(d->d_name)+1);
+		strcpy(nl->name, d->d_name);
+		nlp = &nl->next;
+	}
+	*nlp = NULL;
+
+	/*
+	 * Return the result
+	 */
+	res.errno = 0;
+	closedir(dirp);
+	return (&res);
+   }
+
+.fi
+.sp
+.na
+.H 4 "rls_xdr.c"
+.sp
+.ad
+Finally to handle the messy details of the XDR translation of requests
+and results, there is the "rls_xdr.c" file.  This file uses the 
+definitions of the data
+structures in the ".x" to produce functions to
+do the proper XDR translations.  If there are data types that are not
+defined by the user in the ".x" file, the xdr routines for those data
+types will not be found in this file.  Rpcgen will not object to
+having undefined data types,
+but the translation functions for these data types
+must then be produced by the user.
+
+This file is created by the rpcgen program.
+.nf
+
+   #include <rpc/rpc.h>
+   #include "rls.h"
+
+
+   bool_t
+   xdr_nametype(xdrs, objp)
+	XDR *xdrs;
+	nametype *objp;
+   {
+	if (!xdr_string(xdrs, objp, MAXNAMELEN)) {
+		return (FALSE);
+	}
+	return (TRUE);
+   }
+
+   bool_t
+   xdr_namelist(xdrs, objp)
+	XDR *xdrs;
+	namelist *objp;
+   {
+	if (!xdr_pointer(xdrs, (char **)objp, sizeof(struct namenode),
+			 xdr_namenode)) {
+		return (FALSE);
+	}
+	return (TRUE);
+   }
+
+   bool_t
+   xdr_namenode(xdrs, objp)
+	XDR *xdrs;
+	namenode *objp;
+   {
+	if (!xdr_nametype(xdrs, &objp->name)) {
+		return (FALSE);
+	}
+	if (!xdr_namelist(xdrs, &objp->next)) {
+		return (FALSE);
+	}
+	return (TRUE);
+   }
+
+   bool_t
+   xdr_readdir_res(xdrs, objp)
+	XDR *xdrs;
+	readdir_res *objp;
+   {
+	if (!xdr_int(xdrs, &objp->errno)) {
+		return (FALSE);
+	}
+	switch (objp->errno) {
+	case 0:
+		if (!xdr_namelist(xdrs, &objp->readdir_res_u.list)) {
+			return (FALSE);
+		}
+		break;
+	}
+	return (TRUE);
+   }
+
+
+.fi
+.sp
+.na
+.H 4 "Compilation"
+.sp
+.ad
+The following shows what needs to be done to get everything compiled
+and linked to form the requestor and server programs that comprise
+the remote directory read application.
+.nf
+
+     rpcgen  rls.x
+     cc -c rls_proc.c    
+     cc -c rls_svc.c     # The rls_svc.c file is created by rpcgen
+     cc -c rls_xdr.c     # The rls_xdr.c file is created by rpcgen
+     cc -c rls.c
+     cc -c rls_clnt.c    # The rls_clnt.c file is created by rpcgen
+     cc -o rls  rls.o rls_clnt.o rls_xdr.o
+     cc -o rls_svc  rls_proc.o rls_svc.o rls_xdr.o
+
+.fi
+.sp
+.na
+.\ .H 4 "rls.mk"
+.\ .sp
+.\ .ad
+.\ To aid in the compilation, rpcgen will produce a skeleton makefile.
+.\ This file must be edited by the user to define the variables
+.\ CLIENT_PROG, CLIENT_C, CLIENT_O, SERVER_C, SERVER_O.  The makefile
+.\ is not complete as it can have no knowledge of the dependencies
+.\ of the files that are provided by the user.  It is there to
+.\ act as a guide.
+.\ .nf
+.\
+.\#
+.\#
+.\
+.\# Define  CLIENT_PROG  to be the name of the client side program which is 
+.\# supplied by the user.
+.\CLIENT_PROG = 
+.\
+.\# Define  CLIENT_C  to be the names of the .c code files supplied by
+.\# the user that CLIENT_PROG is to be compiled from.
+.\CLIENT_C = 
+.\
+.\# Define  CLIENT_O  to be the .o versions of the .c files defined
+.\# for CLIENT_C.  
+.\# For example if CLIENT_C = remote_ls.c, then CLIENT_O = remote_ls.o
+.\CLIENT_O = 
+.\
+.\# Define  SERVER_C  to be the names of the .c code files supplied by 
+.\# the user that contain the actual functions to be performed by the
+.\# server program.
+.\SERVER_C =
+.\
+.\# Define  SERVER_O  to be the .o versions of the .c files defined
+.\# for SERVER_C.  
+.\# For example if SERVER_C = remote_ls_svc.c, then SERVER_O = remote_ls_svc.o
+.\SERVER_O =
+.\
+.\BIN = rls_svc $(CLIENT_PROG) 
+.\GEN = rls_clnt.c rls_svc.c rls_xdr.c rls.h
+.\LIB =  
+.\RPCCOM = rpcgen
+.\
+.\all: $(BIN)
+.\
+.\$(GEN): rls.x
+.\$(RPCCOM) rls.x
+.\
+.\rls_svc: $(SERVER_O) rls_svc.o rls_xdr.o
+.\	$(CC) -o $@ $(SERVER_O) rls_svc.o rls_xdr.o $(LIB)
+.\
+.\$(CLIENT_PROG): $(CLIENT_O) rls_clnt.o rls_xdr.o
+.\	$(CC) -o $@ $(CLIENT_O) rls_clnt.o rls_xdr.o $(LIB)
+.\
+.\$(CLIENT_O): $(CLIENT_C) rls.h
+.\
+.\$(SERVER_O): $(SERVER_C) rls.h
+.\
+.\rls_svc.o: rls_svc.c rls.h
+.\rls_clnt.o: rls_clnt.c rls.h
+.\rls_xdr.o: rls_xdr.c rls.h
+.\
+.\clean cleanup:
+.\	rm -f $(GEN) *.o $(BIN)
+.fi
+
+.sp
+.na
+.H 3 "Changes for HP-UX"
+.sp
+.ad
+Rpcgen has been changed in several ways from the functionality 
+supplied by Sun.  The first two changes are done to allow
+the files produced by rpcgen to compile properly on an HP-UX system.
+The first change is to alter the memset() function that
+is written in the "clnt.c" and "svc.c" files.  For Sun, memset() takes
+two arguments with the function zeroing out a specified number of
+bytes starting at a supplied address.  On HP-UX, memset() takes three
+arguments with the extra argument being the value that the memory
+should be set to.  Therefore, HP's rpcgen will output a call to memset()
+in a conditional compilation form with the condition being determined
+by definition of "hpux".  For example, the following is taken from
+the rls_clnt.c file:
+.nf
+
+   #ifdef hpux
+	memset(&res, 0, sizeof(res));
+   #else  hpux
+	memset(&res, sizeof(res));
+   #endif hpux
+
+.fi
+
+The next area of change was to add to the "clnt.c" file a way of defining
+the constant "NULL" if it was not already defined.  NULL is used in
+the "clnt.c" file and will cause a compilation error without the
+definition.  The following shows how this is done:
+.nf
+
+   #ifdef hpux
+
+   #ifndef NULL
+   #define NULL  0
+   #endif  NULL
+
+   #endif hpux
+
+.fi
+.sp
+.na
+.H 4 "-u option"
+.sp
+.ad
+When a server program receives a signal, it will die and leave the program
+resigtered with the portmapper.  So we have added the -u option which will
+add code to the *svc.c file to allow the server program to trap signals
+and jump to a signal handler routine.  It will unmap the program numbers and
+then exit.  It will catch four signals (SIGINT, SIGQUIT, SIGHUP and SIGTERM)
+.sp
+.na
+.\ .H 4 "Makefile"
+.\ .sp
+.\ .ad
+.\ In order to ease the compilation of the files produced by rpcgen, there
+.\ will be an option provided that produces an template of a makefile.
+.\ Since rpcgen will not be able to know the names of the files supplied
+.\ by the user, it can only be a template, but it will use makefile
+.\ variables to allow easy customizing.  If no options are specified for
+.\ rpcgen, then the makefile will be produced by default.  
+.\ If the
+.\ file supplied to rpcgen has a name of the form "abc.x", then the
+.\ makefile will have a name of "abc.mk".
+.\ If the file "abc.mk" already exists, rpcgen will not overwrite
+.\ the existing file. 
+.\ If the user
+.\ wants to use an option to produce just one of the files available from
+.\ rpcgen, then the "-M" option will produce the makefile.  It will write
+.\ the makefile to standard out or to the file specified by the "-o"
+.\ option.
+.\ .sp
+.\ .na
+.H 3 "Error Messages"
+.sp
+.ad
+This chapter is dedicated to listing error messages produced by
+rpcgen and what they mean.  Some of the errors will have very
+specific meaning.  Others will have meaning only by the context
+of the line of input they are associated with.  
+An attempt will be made to provide the best
+meaning for such messages.
+
+This compiler is not very sophisticated and will stop parsing the
+input as soon as the first error message is printed.
+
+To make sure to highlight changes that exist between rpcgen for HP-UX
+and Sun's version, 
+.nf
+
+DIFFERENT FROM SUN
+
+.fi
+will be printed where we are different.  This will disappear when the changes
+are folded into the HP-UX version.
+.sp
+.na
+.H 4 "Command line"
+.sp
+.ad
+.nf
+
+     usage: rpcgen infile
+     rpcgen [-c | -h | -l | -m] [-o outfile] [infile]
+     rpcgen [-s udp|tcp]* [-o outfile] [infile]
+
+.fi
+This message is given if the wrong number of arguments or the wrong
+arguments or options are given when executing rpcgen.
+.sp
+.na
+.H 4 "Rpcgen Execution"
+.sp
+.ad
+The next set of messages are printed during the execution of the rpcgen
+program itself.
+.nf
+
+     rpcgen: output would overwrite <input_file>
+
+.fi
+If the name of the input file and the name specified for the output
+file is the same, rpcgen will print this message and quit.  The
+name of the input file will be substituted for <input_file>
+in the message.
+.nf
+
+     rpcgen: unable to open <output_file>: <The perror message>
+
+.fi
+If rpcgen is unable to open the output file, the message listed
+above will be
+given.  It could be for many reasons such as the user does not have
+write permission to the parent directory.  This is why the perror
+message will be printed.  It will give a text message for the errno
+that resulted during the attempt to open the file.
+The name of the output file
+will be substituted for <output_file> in the message.
+
+Rpcgen will try to execute the C preprocessor.  If it cannot succeed
+in doing this, it will print a perror() message stating what
+the problem was.  The text message is based on the value of errno.
+Such an error might look like this:
+.nf
+
+     rpcgen:  No more processes
+
+.fi
+Finally if rpcgen opens too many files at once, this error message
+will be printed.  This error message a bit hard to get since rpcgen
+only has a few files open at any one time.  About the only way it
+could be printed is if rpcgen is executed from a process that 
+had about the maximum number of files already open.
+.nf
+
+DIFFERENT FROM SUN
+
+     rpcgen:  Rpcgen has too many files open.
+
+.fi
+.sp
+.na
+.H 4 "Parsing Errors"
+.sp
+.ad
+The next group of error messages are produced because of an error
+detected in the contents of the ".x" file.  They are similar to having
+compilation errors in a C program and as such are very context dependent.
+The general rule of thumb is either rpcgen could not recognize any of
+the input it is given, or it was able to start parsing a legal construction,
+but ran into a symbol that did not match what it expected.
+Because some of the messages are rather long, some have been placed on two
+lines in order to fit within the margins.
+In reality, they will be printed on one line.
+In addition to an error message, the line that contains the error is 
+printed with the part of the line that caused the
+problem underscored with "^^^" characters.
+.nf
+     <bad_part> <rest_of_the_line> 
+     ^^^^^^^^^^
+
+     <input_file>, line <line_number>: <error message>
+
+.fi
+For an example, if this line was in a ".x" file:
+.nf
+
+     const ducks   "mallard"
+
+.fi
+This is what the error message would be:
+.nf
+
+     const ducks "mallard"
+     ^^^^^^^^^^^^^^^^^^^^^
+     err.x, line 5: expected '='
+
+.fi
+The line with the underscored portion will not be shown in the
+rest of the error examples in this document for space saving purposes.
+.sp
+.na
+.H 5 "Expecting a keywork"
+.sp
+.ad
+If rpcgen is expecting the start of a legal construction such as
+a struct declaration and it encounters a token from the input file 
+that does not match one of the legal keywords ("struct", "union", "typedef",
+"enum", "program", or "const"), it will give the following message:
+.nf
+
+     <input_file>, line <line_number>: definition keyword expected
+
+.fi
+.sp
+.na
+.H 5 "Array of pointers"
+.sp
+.na
+The next example shows how arrays of pointers can be declared.
+If you need to refer to an array of pointers, you need to do
+so using a typedef as in the GOOD LINE. 
+.nf
+
+
+     typedef struct z *zptr;
+
+     struct z {
+        int a;
+        zptr t[2];         /* GOOD LINE */
+        struct z *y[2];    /* BAD LINE #1 */
+        struct z *y<2>;    /* BAD LINE #2 */
+     };
+
+.fi
+If you try to declare an array
+of pointers as in the BAD LINE's, you will get the message shown below.
+.nf
+
+     <input_file>, line <line_number>: 
+     no array-of-pointer declarations -- use typedef
+     
+.fi
+.sp
+.na
+.H 5 "Opaque declaration"
+.sp
+.ad
+If you want to declare a data object as being opaque, it 
+is declared just as
+an array.  The following shows a correct and incorrect version
+of using the opaque declaration with the error message produced if
+the declaration is not done properly:
+.nf
+
+     opaque group_of_bytes[777];    /* CORRECT   */
+     opaque bad_declaration;        /* INCORRECT */
+    
+
+     <input_file>, line <line_number>: array declaration expected
+
+.fi
+.sp
+.na
+.H 5 "String declaration"
+.sp
+.ad
+A string must be declared using left and right angle braces ("<" and ">").
+The following shows the correct and incorrect ways of declaring a 
+string.
+.nf
+
+     string first_name<32>;    	    /* CORRECT   */
+     string last_name<>;    	    /* CORRECT   */
+     string wrong_name;    	    /* INCORRECT */
+
+.fi
+If a string is not declared this way, the following message will be
+printed:
+.nf
+
+     <input_file>, line <line_number>: 
+     variable-length array declaration expected
+
+.fi
+.sp
+.na
+.H 5 "Void declaration"
+.sp
+.na
+The input language for rpcgen has the concept of "void" declaration.
+This can be used only as a declaration for a variant in a union or
+as the argument or result of a remote procedure.  If it is used
+in any other situation, the following message will be printed:
+.nf
+
+     <input_file>, line <line_number>: 
+     voids allowed only inside union and program definitions
+
+.fi
+.sp
+.na
+.H 5 "Unknown type"
+.sp
+.ad
+If an attempt is made to declare a variable to be 
+something that rpcgen does not understand,
+this message is printed:
+.nf
+
+     <input_file>, line <line_number>: expected type specifier  
+
+.fi
+In the following example, the line with the comment of "OK" will not
+produce the "expected type specifier" message.  This is because even
+though "hoser" is not a normally defined type specifier, it is simply
+legal identifier and is the name of an unknown data type.
+Rpcgen assumes
+that the user knows what he is doing and that he will provide the
+appropiate definition and xdr routines for "hoser" data type in other files
+that will make up the client and server programs.  The line with the
+comment of "NOT OK" will produce the "expected type specifier" message.
+This is because the "=" is not a legal value for a type specifier
+to be.
+.nf
+
+     struct namenode {
+          hoser id;       /* OK */
+          = wont_werk;    /* NOT OK */
+     };
+
+.fi
+.sp
+.na
+.H 5 "Illegal character"
+.sp
+.ad
+If an illegal character, such as a "?", is encountered in
+the input file, this message is given:
+.nf
+
+     <input_file>, line <line_number>: illegal character in file:
+
+.fi
+.sp
+.na
+.H 5 "Missing quotes"
+.sp
+.ad
+If a string constant is missing the terminating double quote, this
+message is printed:
+.nf
+
+     <input_file>, line <line_number>: unterminated string constant
+
+.fi
+.sp 
+.na
+.H 5 "Array as the switching variable"
+.sp
+.ad
+If an array is used to control the switch portion of an union
+definition this message is given:
+.nf
+
+     <input_file>, line <line_number>: only simple declaration allowed in switch
+
+This is an example of such an erroneous definition:
+	union xxx switch (int the_array[2]) {
+	case 0:
+         	int a;
+	default:
+         	void;
+	}
+.fi
+.sp
+.na
+.H 5 "C preprocessor"
+.sp
+.ad
+Since the input file for rpcgen is passed through the C preprocessor,
+it is possible to have "#include" directives in the ".x" file.  The
+C preprocessor, when it encounters an include directive, will put 
+a line in the output file that looks
+like this:
+.nf
+
+     #  <number>   "<string>"    /* CORRECT   */
+
+.fi
+This is used by rpcgen to know what source file it is looking at
+so if an error is found in an included file,
+rpcgen can give the name of that file in an error message.  If such
+a line does not have the proper syntax, the following message will
+be printed:
+.nf
+
+     <input_file>, line <line_number>: preprocessor error
+
+.fi
+This is not something that should be of concern for the user since
+the HP-UX C preprocessor produces lines with the proper syntax.
+It is mentioned here because the Sun code has this message in it
+and we will not be removing it.
+.sp
+.na
+.H 5 "General syntax errors"
+.sp
+.ad
+The rest of the error messages that can be produced by rpcgen
+come from parsing errors that are context dependent.  That is
+depending on what construct is being parsed, rpcgen is expecting
+a certain type of token and does not get it.  See the following
+incorrect program declaration:
+.nf
+
+     program   {
+	version PROGVERS {
+		void PROC(int) = 1;
+	} = 1;
+     } = 17;
+
+.fi
+Rpcgen will produce an error message stating that it was expecting
+an identifier.  It will also print 
+with the line containing "program" to indicate
+which line was not legal.
+.nf
+
+     <input_file>, line <line_number>: expected 'identifier'
+
+.fi
+Since these error messages are dependent on the
+type of construct that is being parsed, this paper will not try to list
+all of the messages and give examples of what can cause them.
+There are places where more than one token could be the correct
+response.  In this case the error messages could look like this:
+.nf
+
+     <input_file>, line <line_number>: 
+     expected '<expected_token>' or '<expected_token>'
+
+     <input_file>, line <line_number>: 
+     expected '<expected_token>', '<expected_token>' or
+	'<expected_token>'
+
+.fi
+.bp
+.H 2 "Enhancements to Nettrfmt"
+.H 3 "Introduction"
+.sp
+.ad
+The enhancements to nettrfmt will be available only at the 7.0 release for
+both s300 and s800.
+This is the External Reference Specification (ERS) 
+for enhancements to nettrfmt, a network trace data formatter.  Nettrfmt
+currently formats headers for many network protocols.  Enhancements
+to be added include capabilities to format RPC, NFS and MOUNTD services and
+filters for the RPC protocol layer.
+.sp 2
+.na
+.H 4 "Objective"
+.sp
+.ad
+To provide a user with a tool that translates link level trace packets into
+a human readable format showing RPC, NFS and MOUNTD headers.  
+.sp
+These enhancements will be provided in order to aid in implementing and 
+debugging code relating to RPC, NFS and MOUNTD services.
+.sp 2
+.na
+.H 4 "Description"
+.sp
+.ad
+Nettrfmt is a means by which one may view information contained in packets
+passing over an \fBEthernet\fR or \fBIEEE 802.3\fR 
+link.  Input to nettrfmt is in the form of binary trace data generated and 
+made available by the \fBnettrstart, nettrstop\fR and \fBnettrdump\fR
+commands.  Protocols that are currently translated include 
+\fBIEEE 802.3/Ethernet, IP, ICMP, TCP, PXP, UDP, ARP\fR and \fBPROBE\fR
+The enhancements to be completed will add the functionality to translate
+\fBRPC, NFS\fR and \fBMOUNTD\fR headers when UDP is used as the transport.
+.sp
+Nettrfmt contains several features that may modify the types of display output 
+to be generated.  Few new features are added in the enhanced version.
+Most of the enhancements involve new output due to the new headers being 
+translated.  This
+document will not discuss all features in detail.  It will discuss 
+the enhancements and how the output of nettrfmt may change due to the 
+enhancements.
+For more information about the pre-enhancement nettrfmt, see the ARPA SERVICES 
+NODE MANAGERS GUIDE. 
+.sp 2
+.na
+.H 3 "Display Options"
+.sp
+.ad
+Nettrfmt accepts options to specify the format in which translated headers
+are to be displayed.  The three available formats are:
+the default format, terse format (-1 option) and nice format (-N option).
+The following sections will describe the different display formats and
+how they are changed due to the enhancements.
+.sp 2
+.na
+.H 4 "Default Display Format"
+.ad
+.sp
+The default format (fig. 1) displays simple link level information
+followed by the hex and ASCII representation of the packet data.  The
+new enhancements to nettrfmt do not change output generated in this format. 
+.sp
+.DS
+Transmitted 54 bytes via \fBEthernet\fR  Tue Jun 07 10:25:24:00153
+      pid=[ICS]  interface=[lan0]
+      \fBDest:\fR 08-00-09-01-f6-77  \fBSource:\fR	    HPCNDK \fBType:\fR 08-00
+  14: 45 00 00 28 70 2b 00 00 3c 06 0f b7 0f 02 70 60   E..(p+..<.....p`
+  30: 0f 02 70 8a 02 01 03 ff 02 85 1f 76 02 a8 c0 a1   ..p........v....
+  46: 50 10 10 00 b5 a1 00 00 -- -- -- -- -- -- -- --   P...............
+.DE
+.sp
+.ce
+fig. 1  (Single default formatted link packet)
+.sp 2
+.na
+.H 4 "Terse Display Format (-1)"
+.ad
+.sp
+The terse format (fig. 2) tries to display as much header information as 
+nettrfmt can translate in one line per packet format.  The new enhancements
+to nettrfmt may change the output generated in terse format.  If RPC translation
+of a packet 
+is unsuccessful, the output generated is the same as the pre-enhancement
+version.  If RPC translation is successful and NFS/MOUNTD translation is
+unsuccessful, information regarding the RPC translation is appended to 
+the end of the pre-enhancement udp output line.  The appended information 
+includes the words "rpc call" or "rpc reply", the word "accepted" in the 
+case and an accepted reply, the word "rejected" in the case of a rejected
+reply, and the RPC program number, version number and procedure number.  
+If NFS or MOUNTD
+translation is successful, information regarding the translation is appended
+to the end of the pre-enhancement udp line.  This information includes the
+protocol name (nfs or mntd), the version number in the case of a call or the 
+word "reply" in the case of a reply, followed by the name of the procedure 
+invoked in the call.  
+.sp
+.DS
+8i hpcndk.1022 > 15.2.112.50.nfs: udp 64 nfs (ver 2) getattr
+Ei 15.2.112.50.nfs > hpcndk.1022: udp 60 nfs reply getattr
+8i hpcndk.1022 > 15.2.112.50.nfs: udp 64 rpc call 100001.1.2
+Ei 15.2.112.50.nfs > hpcndk.1022: udp 30 rpc reply accepted 100001.1.2
+8i hpcndk.1022 > 15.2.112.50.nfs: udp 6c mntd (ver 1) dump
+Ei 15.2.112.50.nfs > hpcndk.1022: udp 80 mntd reply dump 
+8i hpcndk.1022 > 15.2.112.50.nfs: udp 90 nfs (ver 2) mkdir
+Ei 15.2.112.50.nfs > hpcndk.1022: udp 80 nfs reply mkdir
+.DE
+.sp
+.ce
+fig. 2  (Eight tersely formatted packets)
+.sp 2
+.na
+.H 4 "Nice Display Format (-N)"
+.ad
+.sp 
+The nice format displays, in an expanded form, the information found
+in each header that nettrfmt was able to translate.  Each protocol header
+is displayed in its own individual header block in an inverted stack fashion
+with the link headers at the highest level of the stack (on the page) and the 
+services on the lowest level of the stack.
+Then, any data that cannot be translated by nettrfmt is displayed 
+in its own block in hex and ASCII format.  
+.sp
+The new enhancements may change the output generated in nice format.  If RPC
+translation is unsuccessful, the output is the same as it would be in the
+pre-enhancement version of nettrfmt.  If RPC translation is successful,
+a new RPC header block replaces the block that displayed hex and ASCII
+representation of UDP data which immediately followed the UDP header block
+in the pre-enhancement version.
+.sp
+There are three formats of RPC header blocks
+that may appear in this portion of the nice output.  The first format 
+appears in the case of an RPC call (fig. 3).  This format includes information 
+representing
+a transaction id (in hex), an RPC protocol version number, an RPC program 
+number, program version number and procedure number to be called, the
+authentication type, the authentication data length, the verification
+type and verification data length.  The second format appears in the case of an 
+accepted RPC reply (fig 4).  This format includes information representing a
+transaction id (in hex), the word "Accepted", the verification type
+and the verification length.  The third format appears in the case of a rejected
+RPC reply (fig 5).  This format include information representing a transaction
+id (in hex), the word "Rejected" and a hint as to why the call was rejected.
+.sp
+If NFS/MOUNTD translation is unsuccessful and the RPC data length is greater 
+than zero, a data block is added that
+displays hex and ASCII representations of the RPC data.
+.sp
+.DS
+================================ \fBETHER\fR ==================================
+Source :            HPCNDW [I] [HP       ] TYPE: DOD IP
+Dest   :            HPCNDK [I} [HP       ] 
+============================ \fBIP Header\fR (outbound -- [ICS]) ==============
+\fBSource:\fR  hpcndk      \fBDest:\fR  hpcndw          on  Tue Jun 07 10:25:08:68215
+       len:  84    ttl: 15    proto: 17   cksum:  0x3d87      id: 0x6f7c
+     flags:  NONE  tos: 0x0  hdrlen: 20  offset:  0x0   optlen: 0   
+----------------------------- \fBUDP Header\fR --------------------------------
+\fBsport:\fR   49833   -->   \fBdport:\fR  portmap    data len: 56   chksum: 0xd9a0 
+----------------------------- \fBRPC Call\fR ----------------------------------
+trans id: 0x22a73416  rpc version: 2   prog: 100000  version: 2   proc: 3
+auth: type 0     auth length: 0    verif type: 0   verif length: 0
+----------------------------- \fBUser Data\fR ---------------------------------
+   0:  00 01 86 a5 00 00 00 01 00 00 00 11 00 00 00 00  ................
+.DE
+.sp
+.ce
+fig. 3  (nicely formatted RPC call)
+.sp 2
+.DS
+================================ \fBETHER\fR ==================================
+Source :            HPCNDW [I] [HP       ] TYPE: DOD IP
+Dest   :            HPCNDK [I} [HP       ] 
+============================ \fBIP Header\fR (inbound -- [ICS]) ===============
+\fBSource:\fR  hpcndw      \fBDest:\fR  hpcndk          on  Tue Jun 07 10:25:08:78577
+       len:  88    ttl: 15    proto: 17   cksum:  0x66b3      id: 0x464c
+     flags:  NONE  tos: 0x0  hdrlen: 20  offset:  0x0     optlen: 0   
+----------------------------- \fBUDP Header\fR --------------------------------
+\fBsport:\fR  1055   -->   \fBdport:\fR 1017     data len: 60    chksum: 0xaaca 
+----------------------------- \fBRPC Reply\fR ---------------------------------
+trans id: 0x22a723ae      \fBAccepted\fR     verif type: 0     verif length: 0 
+----------------------------- \fBUser Data\fR --------------------------------- 
+   0:  00 0f 00 00 00 00 00 00 00 00 00 08 00 00 07 80  ................  
+  16:  00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00  ................  
+.DE
+.sp
+.ce
+fig. 4  (nicely formatted RPC accepted reply)
+.sp 2
+.DS
+================================ \fBETHER\fR ==================================
+Source :            HPCNDW [I] [HP       ] TYPE: DOD IP
+Dest   :            HPCNDK [I} [HP       ] 
+============================ \fBIP Header\fR (inbound -- [ICS]) ===============
+\fBSource:\fR  hpcndw      \fBDest:\fR  hpcndk          on  Tue Jun 07 10:25:09:88974
+       len:  88    ttl: 15    proto: 17   cksum:  0x66b8      id: 0x694c
+     flags:  NONE  tos: 0x0  hdrlen: 20  offset:  0x0     optlen: 0   
+----------------------------- \fBUDP Header\fR --------------------------------
+\fBsport:\fR  1055   -->   \fBdport:\fR 1017     data len: 40    chksum: 0x3aba 
+----------------------------- \fBRPC Reply\fR ---------------------------------
+trans id: 0x4182a23e        \fBRejected\fR         status: 1
+.DE
+.sp
+.ce
+fig. 5 (nicely formatted RPC rejected reply)
+.sp 2
+If NFS/MOUNTD translation is successful a header block replaces the data
+block of the above examples.  This block contains information regarding
+the particular procedure call (or reply) that it refers to.  If NFS/MOUNTD
+data exists, it is displayed in a data block immediately following the 
+NFS/MOUNTD block.  The data block contains hex and ASCII representations of
+the NFS/MOUNTD data.  Version 2 of NFS accepts 16 different procedure calls 
+(and 16 corresponding replies).
+Version 1 of MOUNTD accepts 5 different procedure calls (and 5 corresponding
+replies).  Fig. 6 shows an example of an nicely formatted NFS call packet.
+For examples of all nicely formatted NFS and MOUNTD header
+blocks, see Appendix A.
+.sp
+.DS
+=============================== \fB802.3\fR ===================================
+Source :           HPCNDK [I] [HP        ]   SSAP: DOD IP      LENGTH: 83
+Dest   :           HPCNDW [I] [HP        ]   SSAP: DOD IP
+============================ \fBIP Header\fR (outbound -- [ICS]) ==============
+\fBSource:\fR  hpcndk       \fBDest:\fR  hpcndw        on  Fri May 27 14:38:24:17254
+       len:  136    ttl: 255   proto: 17   cksum:  0x1886     id: 0xa448
+     flags:  NONE   tos: 0x0  hdrlen: 20  offset:  0x0    optlen: 0   
+------------------------------ \fBUDP Header\fR -------------------------------
+\fBsport:\fR   1022   -->   \fBdport:\fR  nfsd     data len: 108   chksum: 0x0    
+------------------------------ \fBRPC Call\fR ---------------------------------
+trans id: 0x9967a  rpc version: 2    prog: 100003   version: 2   proc: 16
+auth type: UNIX    auth length: 28   verif type: 0  verif length: 0
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: READDIR   fsid: f0000    file#: 0      gen: 8        opts: async on
+offset: 0       length: 8192
+.DE
+.sp
+.ce
+fig. 6  (nicely formatted NFS packet)
+.sp 2
+.na
+.H 3 "Filter Configuration Option (-c configfile)"
+.ad
+.sp
+The -c \fIconfigfile\fR name/filter option allows the user to specify 
+machine name to
+address mappings and also allows the user to select which
+packets that are to be formatted and which packets are to be discarded.  
+The \fIconfigfile\fR 
+specifies a configuration file that is to contain information regarding 
+names and filters that are to be used.  
+.sp 2
+.na
+.H 4 "The Filtering Process"
+.ad
+.sp
+Each line in the option file, \fIconfigfile\fR, is divided into three fields.
+The first field describes the type of entry, the second field specifies the
+"name" of the entry, and the third field gives the "value" for the entry.  
+.sp
+A filter is compared against values in input packets.  If a packet matches
+a filter, then the packet is formatted.  Otherwise, the packet is discarded.
+A filter can also be "negative" by specifying "!" before the filter value in
+the configuration file.  If a packet matches a negative filter the packet is 
+discarded.  A filter can also be a "wild-card" (matching) any value) by 
+specifying an asterisk "*" before the filter value in the configuration file.
+"Wild card" filters will pass all packets of the specified protocol layer.
+.sp
+Filtering occurs at five layers.  If a packet matches any filter
+within a layer, it is passed up to the next layer.  The packet must pass
+every layer to pass through the entire filter.  Filtering starts
+with Layer 1 and ends with Layer 5.  If no filter is specified for a particular
+layer, then that layer is "open" and all packets pass through.  For a packet to
+make it through a filter layer which has a filter specified, it must match the
+filter.
+.sp 2
+.na
+.H 4 "New Filters"
+.ad
+.sp
+The first filter contained in the enhanced nettrfmt is labeled 
+\fBrpcprogram\fR.  
+The rpcprogram filter keys on the program field in the RPC header.  This field 
+describes which program RPC is to look in for the desired procedure.  For
+example, if one wishes to only look at packets that contain MOUNTD headers, the
+filter could be specified as follows:
+.sp
+.ce
+\fBfilter rpcprogram 100005\fR
+.sp
+The second new filter, labeled \fBrpcdirection\fR specifies which RPC 
+transaction
+direction should or should not be formatted and displayed.  Legal values for
+this filter are "Call" and "Reply".  An example case would be the following. 
+Suppose that a user wishes to see what type of RPC traffic is on the network,
+but she has no interest in whether replies come back accepted or rejected.  The
+filter that she would specify in the configfile would be the following:
+.sp
+.ce
+\fBfilter rpcdirection Call\fR
+.sp
+The third and final new filter which is labeled \fBrpcprocedure\fR specifies
+which RPC procedures should or should not be formatted and displayed.  This
+filter would be most likely used in conjunction with the rpcprogram filter.
+For example, perhaps a user would like to view a dump of NFS transactions
+and silence the annoying LOOKUP transactions.  The filters that would specify
+in the configfile would be as follows:
+.sp
+.ce 2
+\fBfilter rpcprogram 100003\fR
+\fBfilter rpcprocedure 4   \fR
+.sp
+.na
+.bp
+.H 2 "FIFOS AND DEVICE FILES"
+.ad
+.sp
+One of the features that Sun added with the Sun OS 3.2 release was support of
+Named Pipes and Device Files with NFS.  This section describes in more detail
+what is meant by this, some of the interactions with the rest of the system,
+and some open issues.  While we will go to great detail to describe exactly
+what is meant by these features, we assume that the reader is familiar with
+the concept of FIFOS (a.k.a. Named Pipes) and device files in UNIX.  As
+such, this section opens with only a minimal discussion of FIFOs and
+device files before getting into more technical matters.
+.sp
+.na
+.H 3 "Introduction to FIFOs and device files"
+.sp
+.ad
+A FIFO, or Named Pipe, is a special type of "object" in the UNIX file
+system.  A FIFO is one of the many ways in Unix that unrelated processes
+can communicate.  In this case, FIFOs are operated on via normal file
+system operations, e.g open(), close(), read(), write(). Typically, one
+process will open the FIFO for reading and the another for writing.
+.sp
+Device files are another type of object in the file system, and are used
+to access physical (or conceptual) devices attached to the system.  Like
+FIFOs, device files are operated on through normal file system operation.
+For example, to write to the system console, I might write to the file
+"/dev/console".
+.sp
+Currently, HP's version of NFS is based on Sun's 3.0 release (also referred
+to here as just "NFS 3.0").  This release does not support access to FIFO's
+or device files over NFS.  That is, the protocol recognizes them as valid
+objects, so that we can stat() and perform other operations involving only
+the file system.  However, the system does not allow opens, reads, writes,
+etc., as these would involve the "special" nature of FIFOs and device files.
+That is, to stat a FIFO, the system doesn't really care that it is a FIFO,
+only that it is some object in the file system.  However, to write to a
+FIFO would require performing an operation different from writing to a normal
+file.
+.sp
+With the NFS 3.2 release, Sun has added support for FIFOs and 
+device files. What this means exactly will be discussed later.  Thus,
+if HP is going to claim to be NFS 3.2 compatible, we 
+will need to support these features.  Also, the main reason Sun added these
+features is because they are a precursor to discless NFS, which was just
+introduced with NFS 4.0.
+.sp
+.na
+.H 3 "Basic operation and functionality."
+.sp
+.H 4 "Device Files"
+.ad
+The term "device file access" is used to refer to being able to operate on
+a device file as described above.  The question then, is what does 
+"NFS device file access" mean?  In this case it means recognizing when an
+attempted access of an NFS file would be to a device file, and instead 
+of going over NFS accessing a device ON THE LOCAL SYSTEM.  That is, when
+an attempt is made to access a device file over NFS, the major and minor
+number of the device are interpreted as representing a local device, with
+the remote system not being involved.  This
+might more properly be termed "local device access via NFS".  In contrast
+to this, "remote device access" would refer to actually accessing a device
+ON THE SERVER.  This is what many people mean when they ask for device
+file access with NFS, but is NOT what is meant here.
+.sp
+To illustrate further what we mean, let us consider an example.  Suppose that
+system C is an NFS client of system S, the server, and has mounted the root
+of S's file system on it's directly /mnt.  That is, root on system C
+gave the command "mount S:/ /mnt".  If a process on C tries to write to
+/mnt/dev/console, a
+device file representing the system console, the output will go to the
+system console ON SYSTEM C, NOT the one on system S.  If a process on
+system S tries to write /dev/console, which is the same "file" that C
+wrote to, it goes to the console on SYSTEM S.  Thus, NFS device files ALWAYS
+refer to a device attached to the local system as far as NFS is involved,
+and can generally be used where a local device file would be used.
+.sp
+.na
+.H 4 "Fifos"
+.sp
+.ad
+Just as device files are also interpreted to mean a local device, FIFOs
+are acted on relative to the client system.  What this means is that only
+processes executing on the same client system will be able to communicate
+using the named pipe.  To continue the example above, suppose we had two
+processes, process C1 and process C2, executing on system C.  Then if
+C1 opens /mnt/FIFO for reading and C2 opens /mnt/FIFO for writing, C2 would
+be able to read what C1 wrote to the fifo.  Now suppose a third process
+was running on another client D which also has / from S mounted on 
+/mnt (on system D), call the process D3,
+and it opened /mnt/FIFO for reading.  Would it be able to read what
+C1 wrote?  The answer is no.  This is because no actual NFS activity
+occurs between the NFS client and the NFS server for the reads and writes.
+Instead, then are handled entirely by the client.  Note, however, that
+in certain cases there WILL still be NFS activity.  For example, if you
+do a chown(2) on the fifo, a request will go to the server to change
+the owner.
+.sp
+.na
+.H 4 "Mknod()"
+.sp
+.ad
+Finally, both fifos and device files are created through the use of
+mknod().  As with open(), mknod() was not supported with NFS 3.0 for fifos
+and device files, but mknod()
+is supported FOR FIFOS AND DEVICE FILES ONLY with NFS 3.2.  Mknod() will
+fail with NFS if you attempt to make a directory or a network
+special file and will return with errno set to EINVAL.  
+.sp
+Actually, saying that mknod() will be supported is somewhat misleading.
+Mknod() requires super-user privileges to create device files.  Sun's 
+implementation does not check on the server side to verify that the user
+is the super-user, which in most case he won't be since uid 0 gets mapped
+to -2.  On the one hand, this allows mknod() to work with NFS, but on the
+other hand this seems like a severe security violation.  Therefore, HP's
+implementation will check that the user has super-user privileges (different
+from Sun).  This implies the value of the kernel variable "nobody" must be
+set to 0, if mknod() is to work for device files over NFS.  By default,
+mknod() will only work with named pipes.
+.sp
+.na
+.H 4 "NFS mounts with device files"
+.sp
+.ad
+Since NFS device files can represent severe security holes, an option
+will be provided to allow the system administrator to turn off support
+of device file access on a per-NFS mount basis.  This will be done via
+the "-o nodevs" option to the mount(1m) command:
+.nf
+
+mount -o nodevs nfsserver:/servermountpoint /clientmountpoint
+
+.fi
+Mount(1m) will in turn call vfsmount(2) with the NFS flags field including
+the NFSMNT_NODEVS bit set.  This informs the kernel that no special
+processing should be performed with this mount.  For consistency with other
+mount options, the option "devs" will also be supported to represent the
+default of allowing device file access.
+.sp
+.na
+.H 3 "Interactions with Other Sub-systems"
+.sp
+.H 4 "Mounting FROM NFS device files"
+.sp
+.ad
+Once device files are supported with the NFS 3.2 features, it will
+be possible to mount a local disc that is represented by an NFS device
+file, e.g. "mount /mnt/nfs/dev/dsk/0s0 /localmntpt".  Access to the newly
+mounted file system proceeds just as if the disk had been mounted from
+a local device file.  Note that even if the NFS file system gets unmounted,
+this does not affect access to the local disk's file system.  Normally
+when unmounting a file system you can give either the name of the device
+file or the name of the mount point.  If however, the NFS server is down
+or the NFS file system is down, it will be necessary to give the mount
+point to unmount the local disk, i.e. "umount /localmntpt" instead of
+"umount /mnt/nfs/dev/dsk/0s0".  Note that the latter case will not fail
+if the NFS server is down, it simply hangs waiting for the server to come
+back up like all other NFS access.
+.sp
+A special case occurs with the Diskless code, depending on whether local
+disks are supported.  With the current situation, where local disks are not
+supported, the mount(1m) command can be issued on the Diskless client to
+mount a device on the Diskless server.  In this situation, mounting from
+an NFS device file on a Diskless client will represent mounting a disk
+attached to the Diskless server.  With local disks, such a command
+on a Diskless client will represent a local device to be mounted for the
+cluster.
+.sp
+.na
+.H 4 "HP Diskless and NFS Fifos"
+.sp
+.ad
+Unlike access to named pipes with NFS, access to pipes with the HP diskless
+product operates cluster wide.  That is, a process on one member of a 
+cluster can write to a named pipe, and another can read that data FROM
+ANOTHER MACHINE IN THE CLUSTER.  Thus, named pipes can be used to
+communicate between machines in a HP diskless cluster.
+.sp
+This becomes more complicated when both NFS and HP Diskless are used
+together, since the two behave in such opposite ways.  Ideally, NFS named
+pipes would operate exactly like "local" named pipes.  In this case,
+"local" would refer to the entire Diskless cluster, which would seem
+to indicate that NFS pipes should work on a cluster basis.  The problem
+comes in implementing this strategy.  Diskless uses inodes as a means
+of identifying which named pipe different Diskless clients are accessing.
+Since we do not have inodes associated with NFS files, making the NFS
+name pipes behave in the desired manner would mean either modifying the
+Diskless code to work with NFS also, or modifying the NFS code to create
+an inode just for the named pipe being accessed.  Both of these possibilities,
+while feasible, are currently deemed too expensive and risky for the
+benefit gained.  Thus, current plans are for NFS fifos, even in a 
+Diskless cluster, to only work on a per machine basis.
+.sp
+.na
+.H 4 "RFA, network special files, and NFS"
+.sp
+.ad
+Like Diskless, RFA has it's own special set of problems in relating to
+the NFS code.  To begin, RFA access is established via network special
+files.  Network special files are similar to device files, but are used
+only for the purpose of establishing the RFA connection.  Like device
+files, network special files are created with mknod().  In implementing
+the device file "hack", Sun modified the parameters to the rfs_create()
+call in the NFS protocol.  This was done in a way that would not break with
+older implementations of the protocol.  By accident, it turns out that there
+is an empty space where we could fit in the flags for RFA.  However, to
+make this work would also require changes in certain other parts of the
+NFS code to allow writing to network special files.  Further, the changes
+for RFA would be HP only, but we currently have no way of knowing
+if we are talking to an HP machine.  Thus, while we COULD make mknod()
+work for network special files, it does not seem like we SHOULD.
+.sp
+Even if we disallow mknod() from making network special files, the question
+remains about what to do when a process attempts to USE a network special
+file to make a connection to a remote system.  As it turns out, network
+special files happen to be correctly recognized over NFS.  However, the
+RFA code to establish and use the connections assumes that it is
+operating on a local file represented by an inode.  Like Diskless fifos,
+to make RFA work would require either allocating an inode or changing the
+existing code to also work with NFS.  One point to consider is that if we
+were to do NFS discless 4.0 from Sun, we would have to provide this 
+capability to support RFA.  Currently, however, there does not seem to be
+justification for doing this.  Thus, RFA using a network special file
+on an NFS file system will not be supported.
+.sp
+.na
+.H 4 "Device file Major/Minor numbers"
+.sp
+.na
+When accessing a device file, the major and minor numbers of the device
+file are used by the system to determine exactly what device to access
+and how to do it.  The major number is simply an index into a table 
+that determines which "driver" the kernel should use in accessing the
+device, and the minor number determines where (i.e what select code,
+bus address, etc) the device is physically attached.  The major and minor
+numbers are part of the information passed over from the NFS server to
+the NFS client when an NFS device file is accessed.  The problem is that
+the format and usage of major and minor numbers differs, not only between
+HP and other vendors, but even between the Series 300 and the Series 800.
+Since we have no way of knowing what type of system we are talking to
+on either the NFS server or client, we have no choice but for the NFS
+server to pass over the major/minor numbers as it sees them, and for the
+client to try to interpret them.  Thus, device file access will only work
+correctly if the device file was set up for the same type of machine.
+.sp
+.na
+.H 4 "UNIX domain sockets"
+.sp
+.ad
+As of the 6.2 release on the Series 300, HP has code supporting UNIX
+domain sockets in the networking code.   However, this code is not
+officially supported, and thus we can not officially support UNIX
+domain sockets with NFS.  Even if UNIX domain sockets were supported
+on the local file systems, Sun does not seem to support them over NFS
+file systems, even though the NFS code has the necessary hooks to do so.
+Therefore, HP WILL support UNIX domain sockets over NFS at such time
+as they are supported locally and we support the NFS 3.2 features.
+.na
+.sp
+.H 3 "Differences between HP and Sun."
+.sp
+.ad
+.BR NOTE :
+Many of the differences discussed here are listed elsewhere in this
+document.  However, they are listed again here so that differences can
+be consolidated into one section.
+.sp
+.na
+.H 4 "Fifo buffer size."
+.sp
+.ad
+There is a limit on how much data a process can write to a named pipe
+and be guaranteed that it is delivered in an atomic manner to a process
+reading the pipe.  On HP systems, that limit is 8k, while on Sun that limit
+is 4k.  This limit is defined in an include file for users, so it seems
+desirable to have the NFS implementation behave like the local system
+in this case.
+.sp
+.na
+.H 4 "Major and minor numbers"
+.sp
+.ad
+As noted above, the major and minor numbers used with device files are
+different between various systems.  There is nothing we can do about this.
+.sp
+.na
+.H 4 "Mknod() and super-user"
+.sp
+.ad
+As discussed above, Sun's implementation allows root on any client to
+perform mknods of device files.  On HP only those servers which have had
+the value of "nobody" changed to 0 will be able to perform mknods of
+device files.
+.sp
+.na
+.H 4 "New \"devs\" and \"nodevs\" mount options"
+.sp
+.ad
+HP's mount command will have an option with NFS mounts, called "nodevs"
+to turn off device file support for security reasons.  For consistency,
+there will also be a "devs" option to represent the default of devices
+supported.  Note that the "nodevs" option does NOT turn off support of
+named pipes.
+.sp
+.na
+.H 3 "Differences between NFS and local file systems"
+.sp
+.ad
+.BR NOTE :
+Many of the differences discussed here are listed elsewhere in this
+document.  However, they are listed again here so that differences can
+be consolidated into one section.
+.sp
+.na
+.H 4 "Mknod with network special files and empty directories"
+.sp
+.ad
+Mknod() can not be used with NFS to make network special files or
+directories without "." and "..".  See the various sections above.
+.sp
+.na
+.H 4 "RFA"
+.sp
+.ad
+RFA using a network special file on an NFS file system is not supported.
+See the "RFA and NFS" section above.
+.sp
+.na
+.H 4 "Fifos and Discless Clusters"
+.sp
+.ad
+NFS fifos cannot be used to communicate between machines in the same
+diskless cluster.  See the "Diskless and Fifos" section above.
+.sp
+.na
+.H 3 "Implementation Choices and Consequences"
+.sp
+.ad
+In implementing the NFS 3.2 fifo and device file support, there are several
+possible implementation choices.  These will be described BRIEFLY here
+and the impact of the choice on feature set will be noted.  While an obvious
+usability goal is to have fifo and device file support act as much like local
+access as possible, there are other potentially conflicting goals, such as
+minimizing both engineer investment and risk to local file system, that
+may override a particular choice.  In the following paragraphs the choices
+will be specified and then the preferred choice will be noted.
+.sp
+.na
+.H 4 "Complete Sun Implementation"
+.sp
+.ad
+The first and obvious choice is to follow Sun's implementation.  In this case,
+Sun created a new set of vnodeops for both fifos and device files (fifos are 
+initially treated as device files before branching to separate vnode functions).
+This is done by having the file system lookup up routines recognize that
+the object in question is a fifo or device file, and replace the vnodeops
+structure (which points to the various functions) with a new one that points
+to the new vnodeops structure.  The important point to note is that this is
+done in BOTH the NFS and UFS code, allowing the same implementation for
+both the local and remote file systems.
+.sp
+The main advantages of this method lie in the advantages gained from
+having both the NFS and UFS code work in the same manner.  We get increased
+maintainability in the long run, along with a stronger likelyhood that the
+two file systems will behave in the same way.  The main disadvantage here
+lies in the changes that would be necessary in the local code.  Both the
+UFS and discless code check for and handle fifos and device files at
+much lower levels.  The discless fifo code in particular, is fairly heavily
+tied into the use of the inode, which is not used in the Sun implementation.
+While this could potentially be worked around, the amount of work involved
+is non-trivial.  Finally, by going completely with the Sun code, we could
+inadvertently change something in the local file system behavior that
+should remain compatible.  That is, there is a fairly high risk of
+introducing defects into the local file system behavior.
+.sp
+.na
+.H 4 "Sun Implementation only for NFS"
+.sp
+.ad
+Since the fifo and device file code from Sun is a fairly distinct piece of
+code, an alternative to the previous choice is to use the Sun code only
+for NFS, and leave the local file system code alone.  The main advantage
+here lies in the ease of use of the NFS code, with little or no risk to
+the local code.  Disadvantages lie in the fact that the local code and
+the NFS code are separate.  Since we would have two bodies of code providing
+similar functionality, there is the potential of unknown differences in
+behavior existing between the two.
+.sp
+This choice also has at least one direct impact on functionality.  Unless
+extra is put in to make the NFS code work with discless, fifos will work
+only on a per client basis, and will not work intra-cluster as discless
+fifos do.  However, there is the option of providing the intra-cluster
+capability with a new set of discless calls, to be used only with access
+to NFS fifos, that largely use the NFS
+code.  The feasibility and cost of this choice is unknown, but the cost
+would be expected to be fairly high due to the need to design new code.  
+.sp
+.na
+.H 4 "Make NFS code use existing file system code"
+.sp
+.ad
+The concept here is less well defined, but the idea would be to somehow
+make the NFS code use the local code for fifos and device files.  This
+would be possible since the changes to the protocol to RECOGNIZE fifos
+are distinct from the changes to SUPPORT ACCESS TO fifos and device
+files.  Thus, the basic idea would be to recognize the fifo at lookup time,
+as Sun does, and then provide a new vnodeops in a manner similar to Sun.
+However, to make this work, at some point an inode would have to be allocated
+(at least for fifos), and the normal local file system code would then
+be called to handle the necessary requests.
+.sp
+The main advantage here is that we can share code between the local code and
+the NFS code.  However, we would be coding a fairly major portion of
+new code, and interfacing it correctly to the local file system code could
+easily be a very large task.  Also, there is a high risk of breaking either
+the local or NFS code in some manner.  Finally, there is a high risk of
+behaving differently from Sun in some undesirable manner, causing a loss
+of connectivity.
+.sp
+.na
+.H 4 "Recommendation"
+.sp
+.ad
+Because of the risks involved, both to the current schedules and to the
+local file system code, the current recommendation is to pursue the 
+second choice above.  This option provides the least risk to current and
+future projects, while providing the necessary functionality.  
+While it would be nice to provide the intra-cluster fifo capability, this
+is not deemed to be a must or high want at this point in time, since for
+most purposes the local access is sufficient.
+.bp
+.H 1 "INTERACTIONS"
+.H 2 "Remote File Systems Interactions (Mike Shipley)"
+.ad
+This section will summarize the interactions between the three remote
+file access methods that will be available on the HP3XX.
+They are Diskless (formerly DUX, Distributed HP-UX),
+NFS (Network File System) and RFA (Remote File Access).
+The NFS versus RFA interactions apply to both the HP3XX and the HP8XX.
+.sp
+This section, as mentioned above, will deal with interactions between
+the three remote file access methods.  It does not intend to be 
+an analysis of the relative goodness or badness of the three methods.
+Nor will it try to do into implementation details of the three methods.
+.sp
+It is assumed that the readers of this are previously knowledgeable
+about Diskless, NFS and RFA.
+.na
+.bp
+.H 3 "s300 Diskless vs. NFS"
+.sp
+.ad
+As DUX was originally proposed, there would be little use to use NFS between
+members of a DUX cluster.  DUX gave at least the same file transparency as
+NFS with the addition of remote device files.  NFS would be allowed
+between cluster members, but it would make little sense.
+.sp
+Now with DUX being revised to produce a quick diskless solution for
+workstations, there is still little reason to use NFS within a cluster.
+This is because each diskless site will have no file systems of their
+own(this is for the HP3XXX), so having one diskless mount another
+diskless node buys
+you nothing.  Again using NFS to and from other machines outside the
+cluster will be the areas of major interest.
+.sp
+The information about Diskless and NFS was obtained from a paper written
+by Joel Tesler at ISO.  For a more complete view, I would refer
+readers to it.
+.na
+.sp 2
+.H 4 "Diskless Cluster as a Client"
+.sp
+.ad
+This situation involves a member of a Diskless cluster doing a mount of
+another machine outside the cluster.  With diskless nodes, normal
+mounts of device files are prohibited, but NFS mounts to a remote
+system are allowed.
+.sp
+This brings up the problem of how to get NFS requests to the NFS
+server.  After one diskless node does a mount, all members of the
+Diskless cluster will have access to the NFS mount.  To get a request from
+any node in the cluster to the NFS server, there
+are two models that have been proposed.  They are the CGM (Client Gateway
+Model) and the CIAM (Client Independent Access Model).  Briefly the
+CGM would have one or more nodes designated as gateways and all
+requests from the cluster members would go through these gateways
+to reach an NFS server.  The CIAM would have each member of the cluster
+able to send their requests directly to the NFS server.
+.sp
+The CIAM has been recommended
+as the way that Diskless as a client will work with NFS because of greater
+simplicity and improved performance.  
+For more details on reasons for this recommendation, see Joel's paper.
+.sp
+The use of the CIAM will require
+all cluster members to see the NFS mount in their
+mount table since each member will be talking directly to a
+NFS server.  Joel's paper discusses the implementation of having all
+members' mount tables updated.  Something that is not covered is the
+effect of having these NFS mounts propagated to every mount table and
+using up most of the available slots in the mount table.  This was
+a problem reported on the net, but with mount table entries being dynamic,
+this should not be a problem for HP-UX kernels.
+.na
+.sp 2
+.H 4 "Diskless Cluster as a Server"
+.sp
+.ad
+This is a scenario involving a node doing an NFS mount to a member of
+a Diskless cluster.  There are two models proposed for granting this manner
+of access.  They are the Server Direct Access Model (SDAM) and the
+Server Gateway Model (SGM).
+.sp
+The SDAM would have a client go directly to a server to access its
+disk.  This should only have an effect when the mount is done.  The 
+client must know which site in the Diskless cluster has the file system.
+This causes a violation of the one system view of Diskless, but it 
+happens only at mount time.  For subsequent accesses of the remote file system
+through NFS, the use of the mount point will suffice and the request
+will automatically go to the site specified in the mount.
+.sp
+The SGM would have a request able to be made to any site.  The site
+would then forward the request to the appropriate site.  This model
+would fully preserve Diskless semantics, but this is only evident during 
+a mount.
+.sp
+The SDAM has been recommended as the means by which an NFS client
+will access a Diskless cluster.  This is because of the easier
+implementation and better performance offered by SDAM.  For more 
+details, see Joel's paper.
+.na
+.bp
+.H 3 "s300 Diskless vs. RFA"
+.sp
+.ad
+The relationship between Diskless and RFA is more straightforward.  There
+are two situations to discuss.  They are a Diskless member acting as a
+RFA requester and a Diskless cluster member acting as a RFA server.
+.sp
+The situation of a Diskless node acting as a RFA requester can be set up
+with the following commands:
+.sp
+.DS
+         NODE A  (Diskless member)             NODE X                         
+                                                                  
+         netunam /net/x                                           
+
+         ls /net/x/users                                          
+           <lists the users                                       
+            directory of NODE X>                                  
+
+.DE
+When the "/" is parsed from the ls command, the rest of the path will be
+sent to the root server.  When the network special file ("x") is seen, the path
+will then be given back to NODE A.  NODE A's RFA requester code will then
+make RFA requests to the RFA server on NODE X and things will proceed
+normally.
+.sp
+The second situation has a node making RFA requests to a Diskless cluster member.
+This will cause a RFA server to be executed in user space on the 
+Diskless member.  From then, a file name given to the RFA server by the RFA
+requester will be processed in a normal fashion for the Diskless kernel and the
+correct operations will be done.
+.sp
+Diskless and RFA should operate together with little problem.
+.na
+.bp
+.H 3 "NFS vs. RFA"
+.sp
+.ad
+Between HP 9000 Series machines, there should be little advantage
+of NFS over RFA.  Both give a similar level of access transparency
+(although there is something to be said that prefixing a remote file with a
+mount point directory (in the case of NFS) is more "transparent"
+then prefixing a network special file to a remote file (in the case of
+RFA) ).
+Neither method supports device files.  Probably the method that the
+user is most comfortable with will be the method of choice.
+.na
+.sp 2
+.H 4 "RFA to a Client"
+.sp
+.ad
+In order to set up the proper frame of mind for the reader, I will
+give this diagram of the situation of RFA to an NFS client.
+.sp
+.DS
+    NODE A              NODE B              NODE C                  
+                                                                    
+                        mount C:/  /mnt                             
+    netunam /net/B                                                  
+
+    ls /net/B/mnt                                                   
+     <gives ls of C's                                               
+      root>                                                         
+                                                                    
+.DE
+
+Node B does an NFS mount to Node C.  Node A then does an netunam
+to Node B.  When an "ls /net/B/mnt" is done, it will list the
+contents of the root directory on Node C.
+.sp
+This situation has been tested and after some alterations of the
+RFA server, this is what now happens.  The other RFA functions are
+also operational through an NFS gateway.
+.na
+.sp 2
+.H 4 "RFA through a Server"
+.sp
+.ad
+The circumstances of trying to do RFA through an NFS serving node
+are a bit more unusual.  It involves the inheritance of a netunam
+by an NFS daemon process.  For this to be done, the process that
+starts the NFS daemon processes must first do a netunam before
+initiating the daemons.  The following diagram will show the
+necessary events:
+
+.DS
+                                                                 
+    NODE A              NODE B              NODE C                  
+                                                                 
+                        netunam /net/C                  
+
+                        nfsd                            
+
+
+    mount B:/  /mnt                                              
+
+    ls /mnt/net/C                                                
+                                                                 
+.DE
+In this case, NODE A is trying to go through NODE B to reach
+NODE C by using NFS to get to the NFS daemon process and
+use the inherited netunam to access NODE C using RFA.  The
+only problem is that pathnames are parsed by different means
+when they are given to NFS as compared to a path coming from
+a normal user process and therefore the path is not passed to
+the RFA requester.  This prevents the connection to NODE C.
+.na
+.bp
+.H 2 "s300 NFS/HP-UX Diskless Cacheing"
+.sp
+.ad
+This section is based in a paper written by Dan Simula called "NFS/HP-UX
+Diskless Interactions and Test Scenarios" and applies to the s300 only.
+.sp
+File system cacheing introduces a number of problems that will need to
+be addressed.  The following points summarize the primary cacheing 
+activities that occur in a diskless-NFS environment.  For a detailed
+summary of NFS/diskless file cacheing refer to (Cacheing white-paper,
+dated 2/1x).
+.na
+.sp
+.H 3 "NFS cacheing"
+.sp 1
+.H 3 "NFS server cacheing"
+.ad
+.sp 2
+.ML o
+.LI
+The NFS server does NOT provide file cacheing explicitly.
+.LI
+Since the file blocks associated with client write 
+requests constitute client state information, NFS 
+writes on the server are done synchronously (exception, see 
+"NFS asynchronous writes" below).
+.LI
+All cacheing on the NFS server-side is accomplished 
+by the local VFS (i.e., the UFS).  This cacheing 
+includes the normal read-ahead and write-behind 
+activities.
+.LI
+Dirty cache blocks written to disk, as the result 
+of NFS writes, remain active in the cache and are 
+freed only if free cache blocks are requested.
+.LE
+.sp 1
+.H 3 "NFS asynchronous writes"
+.ad
+.sp 2
+.ML o
+.LI
+By default all writes on the server side are done synchronously.
+This is due to the statelessness of NFS to avoid data loss.
+.LI
+A new option has been added to the /etc/exports file, called "-async".
+This option tells the server that ALL writes for a given file system
+can be done asynchronously.  This gives a tremendous performance boost
+by allowing the server a greater degree of overlap in write requests.
+.LI
+There is the potential for data loss, should the server crash AFTER 
+responding to the client, but BEFORE actually getting the data to disc.
+.LI
+This option works on any HP server (after 6.2 on the Series 300 and after
+3.0 on the Series 800), and works with ANY client, requiring no protocol
+changes on the part of the client.
+.LE
+.na
+.sp 1
+.fi
+.H 4 "NFS client cacheing"
+.ad
+.sp 2
+.ML o
+.LI
+The NFS client provides read-ahead and write-behind 
+cacheing.
+.LI
+A kernel-level write on the client causes a synchronous 
+write of the NFS data on the server (whether the write 
+is synchronous or not - see async_daemon() and biod(1m)).
+.LI
+A user-level write to an NFS file on the client may be 
+accomplished asynchronously by using the biod() daemon.
+The biod() simply queues up NFS requests to allow 
+asynchronous completion of I/O.
+.LE
+.na
+.sp 2
+.H 3 "HP-UX diskless cacheing"
+.sp 2
+.ad
+.ML o
+.LI
+File cacheing in a diskless cluster is done by both 
+the diskless nodes and by the UFS on the diskless 
+server (i.e., normal file system cacheing).  
+.LI
+If a node opens a file for writing and if another site 
+has the same file opened, then all nodes in the diskless 
+cluster must revert to a synchronous file access mode for 
+that specific file.
+.LI
+When a file is closed and is no longer opened for writing 
+by any other node in the cluster, all nodes in the cluster 
+return to an asynchronous file access mode for that specific 
+file.
+.LI
+Determining whether or not to be in synchronous or 
+asynchronous mode is done at file open/close time.  For 
+this reason, problems associated with NFS writes from a 
+remote system are introduced.  Specifically, since NFS writes 
+(or reads) do not require an open() to be performed on the 
+server side, the file contents may be inconsistent with a 
+diskless node's view of the file.  To solve this problem, 
+HP-UX diskless and HP-DUX systems will consider an NFS read 
+or write to involve an implicit open and close of the file.
+.LE
+.na
+.sp 2
+.fi
+.H 3 "Testing Areas"
+.sp
+.ad
+Since NFS does not guarantee any consistency between distinct NFS
+clients, the typical configuration of one NFS server and multiple 
+NFS clients becomes a trivial test case.  However, when the distinct 
+NFS clients are members of a common diskless cluster,  the single
+system semantics of the diskless cluster require that file consistency
+be guaranteed.   In order to guarantee file consistency, an internal
+mechanism must inform all nodes within the cluster that file activity
+has taken place.
+.sp
+The test case of an NFS server with multiple, distinct, NFS clients 
+is fully addressed by the connectivity section of the NFS system test 
+plan.
+.sp
+Throughout this section, items preceded by a '+' are assumed to be 
+well understood and should function with little difficulty.  
+For the most part, '+' items relate to main-line functionality.
+Items preceded by a '-' are items that rely on functionality that 
+may not be well-defined or that are highly suspect in respect to 
+exhibiting problems.
+.sp 2
+.na
+.H 4 "Diskless cluster acting as an NFS client (scenarios #2 and #4)"
+.ad
+.sp 2
+.ML +
+.LI
+File consistency is not guaranteed since the NFS server 
+is stateless and has no way of communicating write 
+information to the appropriate clients.
+.LE
+.na
+.sp 2
+.H 4 "Diskless server acting as an NFS server to remote NFS client (scenario #1)"
+.sp 2
+.ad
+.ML +
+.LI
+Do writes from a diskless node become immediately visible 
+to a remote NFS client?
+.LE
+.ML -
+.LI
+Do NFS_writes from the remote NFS client become immediately 
+visible to the cluster's view of the file system. 
+.LI
+Do cache blocks on the diskless nodes become invalidated 
+prior to the completion of an NFS_writes from the remote 
+NFS client?
+.LE
+.na
+.sp 2
+.H 4 "Diskless server acting as an NFS server to local NFS client (scenario #6)"
+.sp 2
+.ad
+.ML +
+.LI
+Do writes from a diskless node become immediately visible 
+to a cluster-local NFS client?
+.LE
+.ML -
+.LI
+Do NFS_writes from the cluster-local NFS client become 
+immediately visible to the cluster's view of the file system. 
+.LI
+Do cache blocks on the diskless nodes become invalidated 
+prior to the completion of an NFS_writes from the cluster-
+local NFS client?
+.LE
+.na
+.sp 2
+.na
+.bp
+.H 2 "Arpa/Berkeley Services, NFS and Yellow Pages Interactions with Diskless (Dave Erickson and Cristina Mahon)"
+.sp
+.ad
+On 7 January  1987,  Cristina  Mahon and Dave  Erickson  spoke with Dave
+Gutierrez of SSO.  The talk  revolved  around the DUX project  which has
+been trimmed back to provide a diskless  product.  (For lack of an official
+label, this section will refer to the diskless product as HPD.)  Following
+is a description of part of the discussion.
+.sp
+Unlike DUX, HPD does not have a distributed filesystem.  HPD comprises a
+single host (call it the root server) with attached disk and a number of
+diskless  workstations  which boot, store and  retrieve  files from that
+disk.  A network  among the machines  permits  this.  The network may or
+may not be isolated from other HPD and non-HPD systems.
+.sp
+NFS (including  the
+Yellow  Pages or YP)  will be able to run on a HPD system.  NFS/YP  relies on
+daemons to coordinate  communications between processes on the local and
+remote  machines.  The  particular  daemons are inetd, the internet
+daemon, and the NFS/YP  daemons nfsd, biod, ypserv and ypbind.  Of these
+daemons,  only  ypbind  behaves as a "client  daemon."  In other  words,
+ypbind is the only daemon which exists on a  requester's  behalf, on one
+machine needing the services of another machine.
+All other daemons are "server daemons," providing
+services  required  by a client.  Server  daemons  need  exist only on a
+machine which makes such services available.
+.sp
+When NFS/YP is joined  with HPD, a  question  arises:  on which
+machine(s)  of an HPD cluster will client and server  daemons run?  This
+is of interest since from one external view, an HPD cluster is seen as a
+single  machine  with a  single  filesystem.  From  another  view,  each
+machine in an HPD cluster is an independent  processor which can respond
+to requests from remote clients and originate requests on its own.
+.sp
+Users of each machine of a cluster are capable of making requests for YP
+services.  It is  expected  that each HPD  machine  would  then have the
+ypbind daemon running on it.
+.sp
+Since the filesystem of an HPD cluster is attached to only the root server, it
+is best that any daemons which provide file access services be run only
+on that root server.  nfsd, biod and ypserv are such daemons.  These daemons
+could be run on any of the diskless workstations,
+but (1) file access time
+would be shorter if each daemon runs on the root server and (2) the
+root server is
+likely to be faster and have more memory (so can support  more  daemons)
+than the other HPD machines in its cluster.
+.sp
+The inetd  daemon would need to be run on any  machine  furnishing  the
+services found in  /etc/inetd.conf.  Such services are ftp, remsh, rexec
+rlogin and telnet.
+.sp
+Finally, if there is a cluster  formed by a server and several  diskless
+nodes,  an NFS  filesystem  mounted  by any of  these  machines  will be
+visible to the rest of the systems in the cluster.
+.na
+.bp
+.H 1 "KNOWN DIFFERENCES"
+.sp
+.ad
+This chapter contains a log of known differences between HP's and Sun's
+NFS implementations as well as differences between HP-UX behavior and
+HP NFS behavior.
+.na
+.sp 3
+.so hpux_nfs_sun
+.bp
+.H 2 "Differences between HP NFS on the s300 and on the s800"
+.sp
+.ad
+This section described the known differences between the 300 and the s800
+implementations of NFS for the 6.2 and 3.0 releases respectively. 
+It was our intention to have NFS on the s300 and s800 be as similar as
+possible in that time frame.  The only differences that currently exist
+are caused by differences in HP-UX between the two systems.
+.AL
+.LI
+Single/multiple filesystems per disk:
+.sp
+The HP 9000 s300 supports only one filesystem per disk, while
+the HP 9000 s800 and Sun systems support more than one filesystem
+per disk.  NFS version 3.0 allows you to export only filesystems,
+which means that if on an s300 system you have a single disk you
+will be forced to export the whole contents of that disk since
+they are all part of a single filesystem.
+.LE
+.na
+.sp
+.aH "Appendix 1: Native Language Support for User Level Commands"
+.sp 2
+.ad
+This appendix describes the limitations to NLS support for certain 
+NFS user level commands.  NFS commands not listed will support
+8 and 16-bit characters, message catalogs, local customs, 8-bit
+filenames as needed.  16-bit filenames are supported to the extent
+that the underlying HP-UX kernel supports them.
+A description of the NLS capabilities is available under the International
+Support section of the brick pages for each NFS command affected by NFS.
+.na
+.sp
+.nf
+Commands            Limitations
+.sp
+domainname      |  Domainname is limited on its choice of 16-bit domain
+                |  names by which 16-bit file names HP-UX can support.  
+                |  The reason behind this is that the domain name gets 
+                |  translated into a directory name used by YP to store
+                |  the YP database maps.
+                |
+yppasswd        |  Non-ascii characters are not allowed in /etc/passwd.
+                |  So even if yppasswd does not have any inherent 
+                |  problems with 8 or 16-bit characters, they cannot be
+                |  used for the password map.
+                |
+rpc.ypasswdd    |  Same comment as yppasswd.
+                |
+ypmake          |  This is a shell script, so it does not support 
+                |  message catalogs.  Right now there is no way defined
+                |  to provide the same sort of message catalog support 
+                |  for shell scripts.  Currently the shell scripts would
+                |  have to be modified by the end user or be different 
+                |  for different languages.
+                |
+ypxfr_2perda    |  Same comment as ypmake.
+ypxfr_1perda    |  Same comment as ypmake.
+ypxfr_1perh     |  Same comment as ypmake.
+                |
+pcnfsd          |  Pcnfsd does not support 8 or 16-bit characters.  It 
+                |  modifies the high 8th bit of some of the information
+                |  it receives for encryption purposes.  However, since 
+                |  PC-NFS is not an HP-UX product and we have no control 
+                |  over how 8 and 16-bit characters are sent to us from a 
+                |  PC, this is not considered to be a major problem.
+.sp
+.fi
+Other general concerns about the implementation of NLS for NFS are: 
+.sp
+.na
+.AL
+.LI
+Perror might not be modified to handle NLS.  That might cause messages
+to appear half in English and half in whatever the user's language is.
+.LI
+The network error logging facility for the kernel does not have native 
+language support built in.  That might result on messages from the 
+kernel to come out in English.
+.LI
+Strtok will not have been modified to handle 16-bit characters before
+NFS is released.  This will force inetd not to support 16-bit 
+characters in files like inetd.conf or inetd.sec since the second byte 
+of a 16-bit character might be mistaken to be a character delimeter 
+used in those files.  This concerns NFS because NFS uses inetd, even 
+though inetd is really part of the ARPA/Berkeley product.
+.LE
+.sp 2
+.aH "Appendix 2: Nettrfmt NFS and MOUNTD header blocks"
+.sp 2
+The following pages show examples of each NFS and MOUNTD, call and reply
+header blocks in the nice (-N) format.  Please note that these are only
+NFS and MOUNTD header blocks.  They would be found at the bottom of the
+inverted header block stacks generated using the nice format
+.sp 2
+.DS
+.ce 
+          \fBNFS Statfs Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: STATFS    fsid: f0000    file#: 0       gen: 8      opts: async off
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: STATFS       status: 0          trans size: 8192   block size: 1024
+tot blocks: 41143  free blocks: 5356  avail blocks: 1241
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Readdir Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: READDIR   fsid: f0000     file#: 0       gen: 8      opts: async on
+directory offset: 0             directory bytes: 8192
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: READDIR            status: 0
+		file #: 12481     name: .
+		file #: 1920      name: ..
+		file #: 12490     name: test1b
+		file #: 12490     name: test1a
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Rmdir Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: RMDIR    fsid: f0000     file#: 0       gen: 8      opts: async off
+name: dumbdir
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: RMDIR         status: 0           
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Mkdir Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: MKDIR     fsid: f0000    file#: 0      gen: 8       opts: async off
+name: dumbdir   prot: 755      uid: -1         gid: -1       size: -1
+accessed: -1                           modified: -1
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: MKDIR         status: 0           fsid: f0000         file#: 0
+gen: 8              opts: async on      file type: 2        mode: 755
+hard links: -1      uid: 65535          gid: 65535          size: -1
+block size: -1      spec dev #: -1      disk kbytes: -1     fsid: -1            inode #: -1                             accessed: -1
+modified: -1                            changed:  -1
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Symlink Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: SYMLINK   fsid: f0000     file#: 0      gen: 8      opts: async off
+old name: dumbdir2                      new name: /mnt/dlr/dumbdir
+prot: 755           uid: -1             gid: -1             size: -1
+accessed: -1                            modified: -1
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: SYMLINK       status: 0           
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Link Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: LINK          old fsid: f0000      old file#: 0        old gen: 8
+old opts: async on  new fsid: f0000      new file#: 0        new gen: 8
+new opts: async on  new name: newtest1a
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: LINK          status: 0           
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Rename Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: RENAME        old fsid: f0000      old file#: 0        old gen: 8
+old opts: async on  old name: test1      new fsid: f0000     new file#: 0
+new gen: 8          new opts: async on   new name: test1a
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: RENAME            status: 0           
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Remove Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: REMOVE    fsid: f0000      file#: 0      gen: 8      opts: async on
+name: test1dumb
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: REMOVE        status: 0           
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Create Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: CREATE    fsid: f0000     file#: 0      gen: 8       opts: async on
+name: test1     prot: 644       uid: -1       gid: -1      size: 0
+accessed: -1                           modified: -1
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: CREATE        status: 0         fsid: f0000         file#: 0
+gen: 8              opts: async off   file type: 1        mode: 100644
+hard links: 1       uid: 65534        gid: 0              size: 0
+block size: 8192    spec dev #: 0     disk kbytes: 0      fsid: f0000
+inode #: 12490                        accessed: Tue Jun 07 10:22:50:98000
+modified: €Tue Jun 07 10:22:50:98000   changed:  Tue Jun 07 10:22:50:98000
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Write Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: WRITE     fsid: f0000     file#: 0      gen: 8      opts: async off
+beg offset: 0      cur offset: 0      tot count: 111    write size: 111 
+----------------------------- \fBWrite Data\fR --------------------------------
+   0:  65 63 68 6f 20 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d   echo -----------
+  16:  2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d   ----------------
+  32:  2d 2d 2d 2d 2d 20 6e 65 74 74 72 73 74 61 72 74   ----- nettrstart
+  48:  20 2d 62 31 30 30 30 30 30 0a 21 20 6e 65 74 74    -b100000.! nett
+  64:  72 73 74 61 72 74 20 2d 62 31 30 30 30 30 30 0a   rstart -b100000.
+  80:  65 63 68 6f 20 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d   echo -----------
+  96:  2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d 2d   ----------------
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: WRITE        status: 0          file type: 1        mode: 100644
+hard links: 1      uid: 65534         gid: 0              size: 2777
+block size: 8192   spec dev #: 35413  disk kbytes: 3      fsid: f0000
+inode #: 12490                        accessed: Tue Jun 07 10:22:50:98000
+modified: Tue Jun 07 10:22:51:52000   changed:  Tue Jun 07 10:22:51:52000
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Read Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: READ     fsid: f0000     file#: 0       gen: 8      opts: async off
+offset: 0      count: 8192     tot count: 8192
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: READ         status: 0          file type: 1        mode: 100644
+hard links: 1      uid: 65534         gid: 0              size: 16
+block size: 8192   spec dev #: 0      disk kbytes: 0      fsid: f0000
+inode #: 12490                        accessed: Tue Jun 07 10:22:50:98000
+modified: Tue Jun 07 10:22:50:98000   changed:  Tue Jun 07 10:22:50:98000
+----------------------------- \fBRead Data\fR ---------------------------------
+ 0:  20 2d 62 31 30 30 30 30 30 0a 21 20 6e 65 74 74      -b100000.! nett
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Readlink Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: READLINK   fsid: f0000     file#: 0      gen: 8      opts: async on
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: READLINK       status: 0           link: /mnt/dlr/dumbdir
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Lookup Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: LOOKUP    fsid: f0000     file#: 0      gen: 8      opts: async off
+name: .
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: LOOKUP        status: 0         fsid: f0000          file#: 0
+gen: 8              opts: async off   file type: 2         mode: 40777
+hard links: 3       uid: 0            gid: 1               size: 2048
+block size: 8192    spec dev #: 8485  disk kbytes: 2       inode #: 1920
+accessed: Fri Jun 03 16:40:04:14000   modified: €Tue Jun 07 07:54:02:14000
+changed:  Tue Jun 07 07:54:02:14000
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Setattr Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: SETATTR  fsid: f0000     file#: 0       gen: 8      opts: async off
+prot: 744      uid: -1         gid: -1        size: -1
+accessed: -1                           modified: -1
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: SETATTR      status: 0          file type: 1        mode: 100744
+hard links: 1      uid: 65534         gid: 0              size: 2777
+block size: 8192   spec dev #: 35413  disk kbytes: 3      fsid: f0000
+inode #: 12490                        accessed: Tue Jun 07 10:22:50:98000
+modified: Tue Jun 07 10:22:51:52000   changed:  Tue Jun 07 10:22:51:66000
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Getattr Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: GETATTR   fsid: f0000     file#: 0      gen: 8      opts: async off
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: GETATTR       status: 0         file type: 2        mode: 40777
+hard links: 3       uid: 0            gid: 1              size: 2048
+block size: 8192    spec dev #: 8485  disk kbytes: 2      fsid: f0000
+inode #: 1920                         accessed: Fri Jun 03 16:40:04:14000
+modified: Tue Jun 07 07:54:02:14000   changed:  Tue Jun 07 07:54:02:14000
+.DE
+.sp 2
+.DS
+.ce
+          \fBNFS Null Headers\fR
+
+------------------------------ \fBNFS Call\fR ---------------------------------
+proc: NULL         
+
+
+----------------------------- \fBNFS Reply\fR ---------------------------------
+proc: NULL          
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Export Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: EXPORT
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: EXPORT      direct: /users/nerfs   
+                  group: hpcndfm hpcndv hpcndk hpcnor hpsun2 hpsun4 
+                         hpcndjad hpcndm hpcnddcm hpcndbc hpcnddlr
+
+                  direct: /              
+                  group: hpcndv hpcndw hpcnor hpcndfm hpsun4 hpcndk 
+                         hpsun2 hpcndn hpcndax hpcndy hpcndjad hpcnddcm 
+                         hpcndmjk
+
+                  direct: /nfs           
+                  group: hpcndu hpcndv hpcndw hpcnor hpcndfm hpsun4 
+                         hpcndk hpcndn hpsun2 drum2 hpcndax hpcndr 
+                         hpcndjad hpcndmjk hpcnddcm hpcndm hpcnddlr
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Dump Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: DUMP
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: DUMP         host: hpcndk      direct: /users/nerfs
+                   host: hpcndm      direct: /usr/games
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Unmount All Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: UNMOUNT ALL    
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: UNMOUNT ALL 
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Unmount Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: UNMOUNT   directory: /tmp
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: UNMOUNT   
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Mount Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: MOUNT    directory: /tmp
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: MOUNT     fsid: f0000     file#: 0      gen: 8      opts: async off
+.DE
+.sp 2
+.DS
+.ce
+          \fBMOUNTD Null Headers\fR
+
+----------------------------- \fBMOUNTD Call\fR -------------------------------
+proc: NULL          
+
+
+----------------------------- \fBMOUNTD Reply\fR ------------------------------
+proc: NULL        
+.DE
+.sp 2
+.TC 2 2 4 0 "EXTERNAL REQUIREMENTS SPECIFICATIONS DOCUMENT" "TABLE OF CONTENTS"

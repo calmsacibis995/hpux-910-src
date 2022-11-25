@@ -1,0 +1,27 @@
+## FacetTerm Menu Capabilities for ncr7930 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: ncr7930.FM,v 70.1 92/03/09 16:45:27 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\EY%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=^L
+##-menu-cap-clr_eol=\EK
+## ##-menu-cap-ena_acs=
+## ##-menu-cap-enter_alt_charset_mode=
+## ##-menu-cap-exit_alt_charset_mode=
+## ##-menu-cap-acs_chars=``aaffggjjkkllmmnnooppqqrrssttuuvvwwxxyyzz{{||}}~~
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=^O
+##-menu-cap-shadow_attr=^O
+##-menu-cap-item_attr=^O
+##-menu-cap-box_attr=\E0P^N
+##-menu-cap-title_attr=\E0P^N
+##-menu-cap-highlight_attr=\E0P^N
+##-menu-cap-highlight_blink_attr=\E0R^N
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^Z
+##-menu-cap-key_down=^J
+##-menu-cap-key_right=^F
+##-menu-cap-key_left=^U
+##-menu-cap-key_home=^A
+## ##-menu-cap-key_ignore=

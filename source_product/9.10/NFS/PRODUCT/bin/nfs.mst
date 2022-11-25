@@ -1,0 +1,199 @@
+#_begin nfs_man $ST_BNFS_MAN
+d9C $ST_BNFS_MAN/usr/man root other 0755
+d9C $ST_BNFS_MAN/usr/man/man1 root other 0755
+d9C $ST_BNFS_MAN/usr/man/man1.Z root other 0755
+d9C $ST_BNFS_MAN/usr/man/man1m root other 0755
+d9C $ST_BNFS_MAN/usr/man/man1m.Z root other 0755
+d9C $ST_BNFS_MAN/usr/man/man2 root other 0755
+d9C $ST_BNFS_MAN/usr/man/man2.Z root other 0755
+d9C $ST_BNFS_MAN/usr/man/man3 root other 0755
+d9C $ST_BNFS_MAN/usr/man/man3.Z root other 0755
+d9C $ST_BNFS_MAN/usr/man/man4 root other 0755
+d9C $ST_BNFS_MAN/usr/man/man4.Z root other 0755
+d9C $ST_BNFS_MAN/usr/man/man7 root other 0755
+d9C $ST_BNFS_MAN/usr/man/man7.Z root other 0755
+
+f9C $ST_BNFS_MAN/usr/man/man1.Z/domainname.1 root other 0444 $ST_NFS/man/man1.Z/domainname.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/rup.1 root other 0444 $ST_NFS/man/man1.Z/rup.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/rusers.1 root other 0444 $ST_NFS/man/man1.Z/rusers.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/ypcat.1 root other 0444 $ST_NFS/man/man1.Z/ypcat.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/ypmatch.1 root other 0444 $ST_NFS/man/man1.Z/ypmatch.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/yppasswd.1 root other 0444 $ST_NFS/man/man1.Z/yppasswd.1
+f9C $ST_BNFS_MAN/usr/man/man1.Z/ypwhich.1 root other 0444 $ST_NFS/man/man1.Z/ypwhich.1
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/fsirand.1m root other 0444 $ST_NFS/man/man1m.Z/fsirand.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/makedbm.1m root other 0444 $ST_NFS/man/man1m.Z/makedbm.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/mountd.1m root other 0444 $ST_NFS/man/man1m.Z/mountd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/nfsd.1m root other 0444 $ST_NFS/man/man1m.Z/nfsd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/nfsstat.1m root other 0444 $ST_NFS/man/man1m.Z/nfsstat.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/pcnfsd.1m root other 0444 $ST_NFS/man/man1m.Z/pcnfsd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/portmap.1m root other 0444 $ST_NFS/man/man1m.Z/portmap.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/rpcinfo.1m root other 0444 $ST_NFS/man/man1m.Z/rpcinfo.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/rstatd.1m root other 0444 $ST_NFS/man/man1m.Z/rstatd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/rusersd.1m root other 0444 $ST_NFS/man/man1m.Z/rusersd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/rwall.1m root other 0444 $ST_NFS/man/man1m.Z/rwall.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/rwalld.1m root other 0444 $ST_NFS/man/man1m.Z/rwalld.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/showmount.1m root other 0444 $ST_NFS/man/man1m.Z/showmount.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/spray.1m root other 0444 $ST_NFS/man/man1m.Z/spray.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/sprayd.1m root other 0444 $ST_NFS/man/man1m.Z/sprayd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/vhe_altlog.1m root other 0444 $ST_NFS/man/man1m.Z/vhe_altlg.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/vhe_mounter.1m root other 0444 $ST_NFS/man/man1m.Z/vhe_mnter.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/vhe_u_mnt.1m root other 0444 $ST_NFS/man/man1m.Z/vhe_u_mnt.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/ypinit.1m root other 0444 $ST_NFS/man/man1m.Z/ypinit.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/ypmake.1m root other 0444 $ST_NFS/man/man1m.Z/ypmake.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/yppasswdd.1m root other 0444 $ST_NFS/man/man1m.Z/yppasswdd.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/yppoll.1m root other 0444 $ST_NFS/man/man1m.Z/yppoll.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/yppush.1m root other 0444 $ST_NFS/man/man1m.Z/yppush.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/ypserv.1m root other 0444 $ST_NFS/man/man1m.Z/ypserv.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/ypset.1m root other 0444 $ST_NFS/man/man1m.Z/ypset.1m
+f9C $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr.1m root other 0444 $ST_NFS/man/man1m.Z/ypxfr.1m
+f9C $ST_BNFS_MAN/usr/man/man2.Z/getdomainna.2 root other 0444 $ST_NFS/man/man2.Z/getdmname.2
+f9C $ST_BNFS_MAN/usr/man/man2.Z/getfh.2 root other 0444 $ST_NFS/man/man2.Z/getfh.2
+f9C $ST_BNFS_MAN/usr/man/man2.Z/nfssvc.2 root other 0444 $ST_NFS/man/man2.Z/nfssvc.2
+f9C $ST_BNFS_MAN/usr/man/man3.Z/getnetgrent.3c root other 0444 $ST_NFS/man/man3.Z/gnetgrent.3c
+f9C $ST_BNFS_MAN/usr/man/man3.Z/getrpcent.3c root other 0444 $ST_NFS/man/man3.Z/getrpcent.3c
+f9C $ST_BNFS_MAN/usr/man/man3.Z/getrpcport.3n root other 0444 $ST_NFS/man/man3.Z/grpcport.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/mount.3n root other 0444 $ST_NFS/man/man3.Z/mount.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/rnusers.3n root other 0444 $ST_NFS/man/man3.Z/rnusers.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/rpc.3c root other 0444 $ST_NFS/man/man3.Z/rpc.3c
+f9C $ST_BNFS_MAN/usr/man/man3.Z/rstat.3n root other 0444 $ST_NFS/man/man3.Z/rstat.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/rwall.3n root other 0444 $ST_NFS/man/man3.Z/rwall.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/spray.3n root other 0444 $ST_NFS/man/man3.Z/spray.3n
+f9C $ST_BNFS_MAN/usr/man/man3.Z/xdr.3c root other 0444 $ST_NFS/man/man3.Z/xdr.3c
+f9C $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c root other 0444 $ST_NFS/man/man3.Z/ypclnt.3c
+f9C $ST_BNFS_MAN/usr/man/man3.Z/yppasswd.3n root other 0444 $ST_NFS/man/man3.Z/yppasswd.3n
+f9C $ST_BNFS_MAN/usr/man/man4.Z/exports.4 root other 0444 $ST_NFS/man/man4.Z/exports.4
+f9C $ST_BNFS_MAN/usr/man/man4.Z/netgroup.4 root other 0444 $ST_NFS/man/man4.Z/netgroup.4
+f9C $ST_BNFS_MAN/usr/man/man4.Z/rmtab.4 root other 0444 $ST_NFS/man/man4.Z/rmtab.4
+f9C $ST_BNFS_MAN/usr/man/man4.Z/rpc.4 root other 0444 $ST_NFS/man/man4.Z/rpc.4
+f9C $ST_BNFS_MAN/usr/man/man4.Z/vhe_list.4 root other 0444 $ST_NFS/man/man4.Z/vhe_list.4
+f9C $ST_BNFS_MAN/usr/man/man4.Z/ypfiles.4 root other 0444 $ST_NFS/man/man4.Z/ypfiles.4
+f9C $ST_BNFS_MAN/usr/man/man7.Z/nfs.7 root other 0444 $ST_NFS/man/man7.Z/nfs.7
+
+l9C $ST_BNFS_MAN/usr/man/man1m.Z/biod.1m root other 0444 $ST_BNFS_MAN/usr/man/man1m.Z/nfsd.1m
+l9C $ST_BNFS_MAN/usr/man/man1m.Z/ypbind.1m root other 0444 $ST_BNFS_MAN/usr/man/man1m.Z/ypserv.1m
+l9C $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr_1perd.1m root other 0444 $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr.1m
+l9C $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr_1perh.1m root other 0444 $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr.1m
+l9C $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr_2perd.1m root other 0444 $ST_BNFS_MAN/usr/man/man1m.Z/ypxfr.1m
+l9C $ST_BNFS_MAN/usr/man/man2.Z/async_daemo.2 root other 0444 $ST_BNFS_MAN/usr/man/man2.Z/nfssvc.2
+l9C $ST_BNFS_MAN/usr/man/man3.Z/endnetgrent.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/getnetgrent.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/getrpcbynam.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/getrpcent.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/getrpcbynum.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/getrpcent.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/innetgr.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/getnetgrent.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/rusers.3n root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/rnusers.3n
+l9C $ST_BNFS_MAN/usr/man/man3.Z/setnetgrent.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/getnetgrent.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_all.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_bind.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_first.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_getdefa.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_master.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_match.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_next.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_order.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yp_unbind.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/yperr_strin.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+l9C $ST_BNFS_MAN/usr/man/man3.Z/ypprot_err.3c root other 0444 $ST_BNFS_MAN/usr/man/man3.Z/ypclnt.3c
+#_end nfs_man
+
+#*************************  NFS_RUN FILESET  ***************************
+# Bucket 9D
+#
+#_begin nfs_run $ST_BNFS_RUN
+d9D $ST_BNFS_RUN root other 0755
+d9D $ST_BNFS_RUN/bin root other 0755
+d9D $ST_BNFS_RUN/etc root other 0755
+d9D $ST_BNFS_RUN/etc/conf root other 0755
+d9D $ST_BNFS_RUN/etc/conf/lib root other 0755
+d9D $ST_BNFS_RUN/etc/newconfig root other 0775
+d9D $ST_BNFS_RUN/system root other 0755
+d9D $ST_BNFS_RUN/system/NFS root other 0755
+d9D $ST_BNFS_RUN/usr root other 0755
+d9D $ST_BNFS_RUN/usr/bin root other 0755
+d9D $ST_BNFS_RUN/usr/etc root other 0755
+d9D $ST_BNFS_RUN/usr/etc/vhe root other 0755
+d9D $ST_BNFS_RUN/usr/etc/yp root other 0755
+d9D $ST_BNFS_RUN/usr/include root other 0755
+d9D $ST_BNFS_RUN/usr/include/nfs root other 0755
+d9D $ST_BNFS_RUN/usr/include/rpc root other 0755
+d9D $ST_BNFS_RUN/usr/include/rpcsvc root other 0755
+d9D $ST_BNFS_RUN/usr/lib root other 0755
+
+f9D $ST_BNFS_RUN/bin/domainname root other 0555 $ST_NFS/cmds/bin/800/domainname
+f9D $ST_BNFS_RUN/etc/biod root other 0544 $ST_NFS/cmds/etc/800/biod
+f9D $ST_BNFS_RUN/etc/conf/lib/libnfs.a root other 0444 $ST_SYS/lib/libnfs.a
+f9D $ST_BNFS_RUN/etc/fsirand root other 0544 $ST_NFS/cmds/etc/800/fsirand
+f9D $ST_BNFS_RUN/etc/newconfig/netgroup root other 0644 $ST_NFS/cmds/etc/netgroup
+f9D $ST_BNFS_RUN/etc/newconfig/netnfsrc root other 0544 $ST_NFS/cmds/etc/netnfsrc
+f9D $ST_BNFS_RUN/etc/newconfig/rpc root other 0644 $ST_NFS/cmds/etc/rpc
+f9D $ST_BNFS_RUN/etc/newconfig/vhe_list root other 0444 $ST_NFS/cmds/etc/vhe_list
+f9D $ST_BNFS_RUN/etc/newconfig/yp_Makefile root other 0400 $ST_NFS/cmds/usr.etc/yp/make.script
+f9D $ST_BNFS_RUN/etc/newconfig/ypinit root other 0500 $ST_NFS/cmds/usr.etc/yp/ypinit
+f9D $ST_BNFS_RUN/etc/newconfig/ypmake root other 0500 $ST_NFS/cmds/usr.etc/yp/ypmake
+f9D $ST_BNFS_RUN/etc/newconfig/ypxfr_1perday root other 0500 $ST_NFS/cmds/usr.etc/yp/ypxfr_1perda
+f9D $ST_BNFS_RUN/etc/newconfig/ypxfr_1perhour root other 0500 $ST_NFS/cmds/usr.etc/yp/ypxfr_1perhr
+f9D $ST_BNFS_RUN/etc/newconfig/ypxfr_2perday root other 0500 $ST_NFS/cmds/usr.etc/yp/ypxfr_2perda
+f9D $ST_BNFS_RUN/etc/nfsd root other 0544 $ST_NFS/cmds/etc/800/nfsd
+f9D $ST_BNFS_RUN/etc/pcnfsd root other 0544 $ST_NFS/cmds/etc/800/pcnfsd
+f9D $ST_BNFS_RUN/etc/portmap root other 0544 $ST_NFS/cmds/etc/800/portmap
+f9D $ST_BNFS_RUN/etc/ypbind root other 0544 $ST_NFS/cmds/etc/800/ypbind
+f9D $ST_BNFS_RUN/system/NFS/copyright root other 0444 $ST_NFS/system/NFS/copyright
+f9D $ST_BNFS_RUN/system/NFS/customize root other 0755 $ST_NFS/system/NFS/customize
+f9D $ST_BNFS_RUN/system/NFS/pif root other 0444 $ST_NFS/system/NFS/pif
+f9D $ST_BNFS_RUN/system/NFS/revlist root other 0444 $ST_NFS/system/NFS/revlist
+f9D $ST_BNFS_RUN/usr/bin/rup root other 4555 $ST_NFS/cmds/ucb/800/rup
+f9D $ST_BNFS_RUN/usr/bin/rusers root other 4555 $ST_NFS/cmds/ucb/800/rusers
+f9D $ST_BNFS_RUN/usr/bin/ypcat root other 0555 $ST_NFS/cmds/usr.bin/800/ypcat
+f9D $ST_BNFS_RUN/usr/bin/ypmatch root other 0555 $ST_NFS/cmds/usr.bin/800/ypmatch
+f9D $ST_BNFS_RUN/usr/bin/yppasswd root other 0555 $ST_NFS/cmds/usr.bin/800/yppasswd
+f9D $ST_BNFS_RUN/usr/bin/ypwhich root other 0555 $ST_NFS/cmds/usr.bin/800/ypwhich
+f9D $ST_BNFS_RUN/usr/etc/nfsstat root other 4555 $ST_NFS/cmds/usr.etc/800/nfsstat
+f9D $ST_BNFS_RUN/usr/etc/rpc.mountd root other 0544 $ST_NFS/cmds/usr.etc/800/rpc.mountd
+f9D $ST_BNFS_RUN/usr/etc/rpc.rstatd root other 0544 $ST_NFS/cmds/usr.etc/800/rpc.rstatd
+f9D $ST_BNFS_RUN/usr/etc/rpc.rusersd root other 0544 $ST_NFS/cmds/usr.etc/800/rpc.rusersd
+f9D $ST_BNFS_RUN/usr/etc/rpc.rwalld root other 0544 $ST_NFS/cmds/usr.etc/800/rpc.rwalld
+f9D $ST_BNFS_RUN/usr/etc/rpc.sprayd root other 0544 $ST_NFS/cmds/usr.etc/800/rpc.sprayd
+f9D $ST_BNFS_RUN/usr/etc/rpc.yppasswdd root other 0500 $ST_NFS/cmds/usr.etc/800/rpc.ypassd
+f9D $ST_BNFS_RUN/usr/etc/rpcinfo root other 0555 $ST_NFS/cmds/usr.etc/800/rpcinfo
+f9D $ST_BNFS_RUN/usr/etc/rwall root other 0555 $ST_NFS/cmds/usr.etc/800/rwall
+f9D $ST_BNFS_RUN/usr/etc/showmount root other 0555 $ST_NFS/cmds/usr.etc/800/showmount
+f9D $ST_BNFS_RUN/usr/etc/spray root other 0555 $ST_NFS/cmds/usr.etc/800/spray
+f9D $ST_BNFS_RUN/usr/etc/vhe/vhe_altlog root other 0555 $ST_NFS/cmds/usr.etc/vhe/vhe_altlog
+f9D $ST_BNFS_RUN/usr/etc/vhe/vhe_getlist root other 0500 $ST_NFS/cmds/usr.etc/vhe/vhe_getlist
+f9D $ST_BNFS_RUN/usr/etc/vhe/vhe_u_mnt root other 4511 $ST_NFS/cmds/usr.etc/vhe/vhe_u_mnt
+f9D $ST_BNFS_RUN/etc/newconfig/vhe_mounter root other 0500 $ST_NFS/cmds/usr.etc/vhe/vhe_mounter
+f9D $ST_BNFS_RUN/etc/newconfig/vhe_script root other 0500 $ST_NFS/cmds/usr.etc/vhe/vhe_script
+f9D $ST_BNFS_RUN/usr/etc/yp/longfiles root other 0500 $ST_NFS/cmds/usr.etc/ypserv/800/longfiles
+f9D $ST_BNFS_RUN/usr/etc/yp/makedbm root other 0500 $ST_NFS/cmds/usr.etc/yp/800/makedbm
+f9D $ST_BNFS_RUN/usr/etc/yp/revnetgroup root other 0500 $ST_NFS/cmds/usr.etc/yp/revnetgroup/800/revnetgroup
+f9D $ST_BNFS_RUN/usr/etc/yp/stdhosts root other 0500 $ST_NFS/cmds/usr.etc/yp/800/stdhosts
+f9D $ST_BNFS_RUN/usr/etc/yp/yppoll root other 0555 $ST_NFS/cmds/usr.etc/yp/800/yppoll
+f9D $ST_BNFS_RUN/usr/etc/yp/yppush root other 0500 $ST_NFS/cmds/usr.etc/yp/800/yppush
+f9D $ST_BNFS_RUN/usr/etc/yp/ypset root other 0500 $ST_NFS/cmds/usr.etc/yp/800/ypset
+f9D $ST_BNFS_RUN/usr/etc/yp/ypxfr root other 0500 $ST_NFS/cmds/usr.etc/yp/800/ypxfr
+f9D $ST_BNFS_RUN/usr/etc/ypserv root other 0500 $ST_NFS/cmds/usr.etc/ypserv/800/ypserv
+f9D $ST_BNFS_RUN/usr/include/nfs/nfs.h root other 0444 $ST_CMDS/usr/include/nfs/nfs.h
+f9D $ST_BNFS_RUN/usr/include/nfs/nfs_clnt.h root other 0444 $ST_CMDS/usr/include/nfs/nfs_clnt.h
+f9D $ST_BNFS_RUN/usr/include/nfs/rnode.h root other 0444 $ST_CMDS/usr/include/nfs/rnode.h
+f9D $ST_BNFS_RUN/usr/include/rpc/auth.h root other 0444 $ST_CMDS/usr/include/rpc/auth.h
+f9D $ST_BNFS_RUN/usr/include/rpc/auth_unix.h root other 0444 $ST_CMDS/usr/include/rpc/auth_unix.h
+f9D $ST_BNFS_RUN/usr/include/rpc/clnt.h root other 0444 $ST_CMDS/usr/include/rpc/clnt.h
+f9D $ST_BNFS_RUN/usr/include/rpc/pmap_clnt.h root other 0444 $ST_CMDS/usr/include/rpc/pmap_clnt.h
+f9D $ST_BNFS_RUN/usr/include/rpc/pmap_prot.h root other 0444 $ST_CMDS/usr/include/rpc/pmap_prot.h
+f9D $ST_BNFS_RUN/usr/include/rpc/rpc.h root other 0444 $ST_CMDS/usr/include/rpc/rpc.h
+f9D $ST_BNFS_RUN/usr/include/rpc/rpc_msg.h root other 0444 $ST_CMDS/usr/include/rpc/rpc_msg.h
+f9D $ST_BNFS_RUN/usr/include/rpc/svc.h root other 0444 $ST_CMDS/usr/include/rpc/svc.h
+f9D $ST_BNFS_RUN/usr/include/rpc/svc_auth.h root other 0444 $ST_CMDS/usr/include/rpc/svc_auth.h
+f9D $ST_BNFS_RUN/usr/include/rpc/types.h root other 0444 $ST_CMDS/usr/include/rpc/types.h
+f9D $ST_BNFS_RUN/usr/include/rpc/xdr.h root other 0444 $ST_CMDS/usr/include/rpc/xdr.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/mount.h root other 0444 $ST_CMDS/usr/include/rpcsvc/mount.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/rstat.h root other 0444 $ST_CMDS/usr/include/rpcsvc/rstat.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/rusers.h root other 0444 $ST_CMDS/usr/include/rpcsvc/rusers.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/rwall.h root other 0444 $ST_CMDS/usr/include/rpcsvc/rwall.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/spray.h root other 0444 $ST_CMDS/usr/include/rpcsvc/spray.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/yp_prot.h root other 0444 $ST_CMDS/usr/include/rpcsvc/yp_prot.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/ypclnt.h root other 0444 $ST_CMDS/usr/include/rpcsvc/ypclnt.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/yppasswd.h root other 0444 $ST_CMDS/usr/include/rpcsvc/yppasswd.h
+f9D $ST_BNFS_RUN/usr/include/rpcsvc/ypv1_prot.h root other 0444 $ST_CMDS/usr/include/rpcsvc/ypv1_prot.h
+f9D $ST_BNFS_RUN/usr/lib/librpcsvc.a root other 0444 $ST_NFS/cmds/usr.lib/librpcsvc/800/librpcsvc800.a
+#_end nfs_run
+
+

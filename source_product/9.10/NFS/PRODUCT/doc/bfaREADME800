@@ -1,0 +1,57 @@
+Following is a list of steps to go through to install bfa commands on two 
+machines and to install the scaffold. This document was created on the 
+fly and not intended as a complete guide. Also, if you change the process
+please update this document.
+
+1) run $nfs/bin/bfatrans800 to transfer commands and kernel to machines
+ex.	! $nfs/bin/bfatrans800 machine1 -bfa >& errs &
+ex.     ! $nfs/bin/bfatrans800 machine2 -bfa >& errs &
+
+2) Merge the BFAed version of libc.a and libbfa.a. All files needed to
+   do this are created on the bfa machines by bfatrans800. Log onto each
+   of the remote machines and do the following.
+
+   a) cd /tmp
+   b) chmod +x bfalibmerg
+   c) bfalibmerg
+   d) rm bfalibmerg
+   e) rm libbfa.a
+
+3) copy scaffold from hpcndm to scaffold directory.  
+ex.	rcp -r /scaf/ADMIN hostname:/users/scaf
+	rcp -r /scaf/nfs hostname:/users/scaf
+
+4) Make sure bfa is installed on the machines.
+   a) check to see if the following files exist on the machine:
+       /usr/local/bin/bfa
+       /usr/local/bin/bfacc 
+       /usr/lib/libbfa.a
+    b) if they do not exist copy them to the machine:
+        rcp /usr/local/bin/bfa hostname:/usr/local/bin/bfa
+        rcp /usr/local/bin/bfacc hostname:/usr/local/bin/bfacc
+        rcp /usr/local/lib/libbfa.a hostname:/usr/local/lib/libbfa.a
+
+5) go to machine with scaffold on it, log in as root (csh)
+	setenv SCAFFOLD /users/scaf   		-these values can be found
+	setenv ROOTDIR /users/rootdir		-in .profile in nfsbb's 
+	setenv SCAFOWN scafadm			-account 
+	cd /users/scaf/ADMIN/TOOLS.SRC
+	make all >& errs &
+	cd .. 
+	build_skel -o scafadm >& errs &
+	mkdir /users/scaf/GOOD /users/scaf/BAD 
+		/users/scaf/RESULTS /users/scaf/DOC
+	install_mod -xbfa nfs >& errs &
+
+6) run tests.  run yp tests with one machine as client and 
+	another machine as server.
+
+9) run $nfs/bin/bfamerge800 to merge databases from both machines.  
+ex.	$nfs/bin/bfamerge800 machine1 machine2 
+
+7) run $nfs/bin/bfasum800 to create report
+ex.    $nfs/bin/bfasum800
+
+8) look at results
+	cat bfaout
+	cat list_byBFA

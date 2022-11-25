@@ -1,0 +1,71 @@
+## FacetTerm  altos5keys   description file  08/15/89
+## function key identifiers for vt220 compatible programming
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: altos5keys.FC,v 70.1 92/03/09 15:56:36 ssa Exp $
+function_key-38=^A@\r
+function_key-39=^AA\r
+function_key-40=^AB\r
+function_key-41=^AC\r
+function_key-43=^AD\r
+function_key-44=^AE\r
+function_key-45=^AF\r
+function_key-46=^AG\r
+function_key-48=^AH\r
+function_key-49=^AI\r
+function_key-51=^AJ\r
+function_key-52=^AK\r
+function_key-53=^AL\r
+function_key-54=^AM\r
+function_key-55=^AN\r
+function_key-56=^AO\r
+shift_function_key
+function_key-17=^A`\r
+function_key-18=^Aa\r
+function_key-19=^Ab\r
+function_key-20=^Ac\r
+function_key-21=^Ad\r
+function_key-23=^Ae\r
+function_key-24=^Af\r
+function_key-25=^Ag\r
+function_key-26=^Ah\r
+function_key-28=^Ai\r
+function_key-29=^Aj\r
+function_key-31=^Ak\r
+function_key-32=^Al\r
+function_key-33=^Am\r
+function_key-34=^An\r
+function_key-37=^Ao\r
+#############################
+### NOTE key_f0=^A@\r
+### NOTE key_f1=^AA\r
+### NOTE key_f2=^AB\r
+### NOTE key_f3=^AC\r
+### NOTE key_f4=^AD\r
+### NOTE key_f5=^AE\r
+### NOTE key_f6=^AF\r
+### NOTE key_f7=^AG\r
+### NOTE key_f8=^AH\r
+### NOTE key_f9=^AI\r
+### NOTE key_f10=^AJ\r
+### NOTE key_f11=^AK\r
+### NOTE key_f12=^AL\r
+### NOTE key_f13=^AM\r
+### NOTE key_f14=^AN\r
+### NOTE key_f15=^AO\r
+### shift_function_key
+### NOTE key_f16=^A`\r
+### NOTE key_f17=^Aa\r
+### NOTE key_f18=^Ab\r
+### NOTE key_f19=^Ac\r
+### NOTE key_f20=^Ad\r
+### NOTE key_f21=^Ae\r
+### NOTE key_f22=^Af\r
+### NOTE key_f23=^Ag\r
+### NOTE key_f24=^Ah\r
+### NOTE key_f25=^Ai\r
+### NOTE key_f26=^Aj\r
+### NOTE key_f27=^Ak\r
+### NOTE key_f28=^Al\r
+### NOTE key_f29=^Am\r
+### NOTE key_f30=^An\r
+### NOTE key_f31=^Ao\r

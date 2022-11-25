@@ -1,0 +1,542 @@
+#!/bin/ksh
+# NFS-RUN
+set +m
+
+#	@(#)NFS-RUN customize script:	$Revision: 1.18.109.8 $	$Date: 93/12/01 16:23:24 $
+
+#=============================================================================
+#
+#  This is the customize script for the NFS-RUN fileset of the NFS Services 
+#  product on the series 300 and 800.
+#
+#  This script checks specific files which have been placed in etc/newconfig.
+#  Each file is moved to its "final resting place" if a file by that name
+#  does not already exist there.  If a file by that name DOES already exist,
+#  the file in etc/newconfig is left for the system administrator to contend
+#  with; he/she should refer to /etc/newconfig/README to determine the best
+#  way to handle such a file.  The two exceptions to this rule for HP-UX 8.0
+#  are the /etc/netnfsrc and /etc/netnfsrc2 files.  These files have gone 
+#  through major changes in 8.0 and the previous version could potentially 
+#  cause problems in cluster environments.  Therefore, the old versions will 
+#  be saved in the files /etc/netnfsrc.OLD and /etc/netnfsrc2.OLD before the 
+#  new versions are put in place.  Standard values will be taken from the OLD 
+#  versions and placed in the new versions.
+#
+#  The old fileset, NFS_RUN, is removed
+#
+#  On the 800, a flag is dropped in /etc/conf/gen/.regenrc to tell regen that 
+#  nfs has been loaded.  On the 300, a similar flag is dropped into the
+#  /etc/conf/dfile file.
+#
+# notes: 4/8/91
+#   supported for invocation in the following contexts only:
+#     standalone
+#     localroot
+#     HP-PA
+#     HP-MC68020
+#
+#   supported mixed cluster configurations:
+#      800 server; clients: 300, 800
+#      300 server; clients: 300
+#      700 server; clients: 300, 700
+#   
+#   TOOL/kern_util returns:
+#      HP-MC68020 for 300
+#      HP-PA-700  for 700
+#      HP-PA      for 800
+#=============================================================================
+
+#
+# getCDF -- return a "+/$1" if $1 is not a valid context on the machine
+#           that we are running on
+#
+getCDF()
+{
+    [ -z "$1" ] && return
+
+    case "$1" in
+    HP-MC68*)
+	if [ -x /bin/hp9000s300 ] && /bin/hp9000s300; then
+	    return
+	else
+	    echo "+/$1"
+	fi
+	;;
+    HP-PA)
+	if [ -x /bin/hp9000s700 ] && /bin/hp9000s700; then
+	    return
+	elif [ -x /bin/hp9000s800 ] && /bin/hp9000s800; then
+	    return
+	else
+	    echo "+/$1"
+	fi
+	;;
+    *)
+	echo "+/$1"
+	;;
+    esac
+}
+
+
+#fix_backslash:
+# replace all "/" with a "\/" so sed 
+# will work on this string
+# arguments:
+#  1 = string
+#  output is the new string
+fix_backslash ()
+{
+ echo "$1" | sed "s/\//\\\\\//g"
+}
+
+# Since the customize script may manipulate
+# cdfs, we explicitly use the arch specific path of each of the files.
+# The Umedia parmeter is passed by the update utility to the customize
+# script.  This parameter indicates cpu arch to which the update
+# tapes correspond to.
+
+
+PATH=/bin:/usr/bin:/etc
+ARCH=$1
+Umedia=$ARCH
+M_Umedia=`getCDF $ARCH`
+shift
+
+EXIT_CODE=0
+
+if [ -d /etc/filesets+ ] ; then
+	FILESETS_DIR=/etc/filesets+/$ARCH
+else
+	FILESETS_DIR=/etc/filesets
+fi
+
+if [ -d /system+ ] ; then
+	SYSTEM_DIR=/system+/$ARCH
+else
+	SYSTEM_DIR=/system
+fi
+
+if [ -d /etc/newconfig+ ] ; then
+	NEWCONFIG_DIR=/etc/newconfig+/$ARCH
+else
+	NEWCONFIG_DIR=/etc/newconfig
+fi
+
+if [ -d /etc/conf+ ] ; then
+	CONF_DIR=/etc/conf+/$ARCH
+else
+	CONF_DIR=/etc/conf
+fi
+
+if [ -f /bin/getcontext ] ; then
+	/bin/getcontext | grep localroot > /dev/null
+	if [ $? -eq 0 ] ; then
+		/bin/getcontext | grep standalone > /dev/null
+		if [ $? -eq 0 ] ; then
+			CONTEXT="standalone"
+		else
+			CONTEXT="localroot"
+		fi
+	else
+		CONTEXT="remoteroot"
+	fi
+else
+	CONTEXT="standalone"
+fi
+export PATH ARCH FILESETS_DIR SYSTEM_DIR NEWCONFIG_DIR CONF_DIR CONTEXT
+
+###				      					###
+#   Move netnfsrc2 to netnfsrc2.OLD					  #
+#     Only if we're updating from pre-8.0.  You can tell because it	  #
+#     won't have automount in the old netnfsrc2.			  #
+###								        ###
+if [ $CONTEXT = "localroot" -o $CONTEXT = "standalone" ] ; then
+	if [ -f /etc/netnfsrc2 ] ; then
+		grep -Fq "automount" /etc/netnfsrc2
+		if [ $? -ne 0 ] ; then
+			/bin/mv /etc/netnfsrc2 /etc/netnfsrc2.OLD
+		fi
+	fi
+fi
+
+set --   etc/newconfig/netgroup		etc/netgroup			\
+	 etc/newconfig/netnfsrc		etc/netnfsrc			\
+	 etc/newconfig/netnfsrc2	etc/netnfsrc2			\
+	 etc/newconfig/rpc		etc/rpc				\
+	 etc/newconfig/vhe_list		etc/vhe_list			\
+	 etc/newconfig/vhe_mounter	usr/etc/vhe/vhe_mounter		\
+	 etc/newconfig/vhe_script	usr/etc/vhe/vhe_script		\
+	 etc/newconfig/ypinit		usr/etc/yp/ypinit		\
+	 etc/newconfig/yp_Makefile	usr/etc/yp/Makefile		\
+	 etc/newconfig/ypmake		usr/etc/yp/ypmake		\
+	 etc/newconfig/ypxfr_1perday	usr/etc/yp/ypxfr_1perday	\
+	 etc/newconfig/ypxfr_1perhour	usr/etc/yp/ypxfr_1perhour	\
+	 etc/newconfig/ypxfr_2perday	usr/etc/yp/ypxfr_2perday
+
+#==========
+#  Copy a default configurable file into place if it doesn't exist on the
+#  user's file system.
+#==========
+
+while [ $# -gt 0 ]; do
+	if [ ! -f $2 ]; then
+		cp $1 $2
+		if [ $? != 0 ]; then
+			echo "ERROR:   cannot cp $1 to $2" 1>&2
+			echo "         Perform this copy manually." 1>&2
+			echo 1>&2
+			EXIT_CODE=1
+		fi
+	fi
+	shift; shift
+done
+
+###
+#   Check for necessary files and/or CDFs.  If these do not 
+#   exist, either create them or flag the error and exit.
+###
+
+if [ ! -f /etc/netnfsrc ] ; then
+	echo "ERROR:   /etc/netnfsrc does not exist.  This file" 1>&2
+	echo "         should be in place.  Please review your" 1>&2
+	echo "         install/update procedures." 1>&2
+	echo 1>&2
+	EXIT_CODE=1
+fi
+
+if [ $CONTEXT != "standalone" ] ; then
+	if [ ! -H /etc/netnfsrc ] ; then
+		makecdf -c localroot /etc/netnfsrc
+	fi
+	if [ ! -H /etc/netnfsrc.OLD ] ; then
+		makecdf -c localroot /etc/netnfsrc.OLD
+	fi
+	if [ ! -H /etc/exports ] ; then
+		makecdf -c localroot /etc/exports
+	fi
+	if [ ! -H /etc/xtab ] ; then
+		makecdf -c localroot /etc/xtab
+	fi
+fi
+
+if [ $EXIT_CODE -eq 1 ] ; then		
+	exit ${EXIT_CODE:-0}
+fi
+
+###				    ###
+#   Move netnfsrc to netnfsrc.OLD     #
+###				    ###
+if [ $CONTEXT = "localroot" ] ; then
+	if [ -f /etc/netnfsrc ] ; then
+		/bin/mv /etc/netnfsrc /etc/netnfsrc.OLD
+	fi
+	if [ -f /etc/netnfsrc+/remoteroot ] ; then
+		/bin/mv /etc/netnfsrc+/remoteroot /etc/netnfsrc.OLD+/remoteroot
+	fi
+fi
+if [ $CONTEXT = "standalone" ] ; then
+	if [ -f /etc/netnfsrc ] ; then
+		/bin/mv /etc/netnfsrc /etc/netnfsrc.OLD
+	fi
+fi
+
+
+#=======
+#   Modify newconfig version of netnfsrc to match old   
+#   versions of netnfsrc and put in place	        
+#=======
+if [ -f /etc/netnfsrc.OLD ] ; then
+	NFS_CLT=`eval /bin/grep -e "\^NFS_CLIENT\=" /etc/netnfsrc.OLD`
+	NFS_SVR=`eval /bin/grep -e "\^NFS_SERVER\=" /etc/netnfsrc.OLD` 
+	START_MOUNTD=`eval /bin/grep -e "\^START_MOUNTD\=" /etc/netnfsrc.OLD` 
+	NIS_MS=`eval /bin/grep -e "\^YP_MASTER_SERVER\=" /etc/netnfsrc.OLD`
+	if [ -z "$NIS_MS" ] ; then
+	    NIS_MS=`eval /bin/grep -e "\^NIS_MASTER_SERVER\=" /etc/netnfsrc.OLD`
+	else 
+	    NIS_MS=`echo $NIS_MS | /bin/sed 's/YP/NIS/1'`
+	fi
+	NIS_SS=`eval /bin/grep -e "\^YP_SLAVE_SERVER\=" /etc/netnfsrc.OLD`
+	if [ -z "$NIS_SS" ] ; then
+	    NIS_SS=`eval /bin/grep -e "\^NIS_SLAVE_SERVER\=" /etc/netnfsrc.OLD`
+	else 
+	    NIS_SS=`echo $NIS_SS | /bin/sed 's/YP/NIS/1'`
+	fi
+	NIS_CLT=`eval /bin/grep -e "\^YP_CLIENT\=" /etc/netnfsrc.OLD`
+	if [ -z "$NIS_CLT" ] ; then
+	    NIS_CLT=`eval /bin/grep -e "\^NIS_CLIENT\=" /etc/netnfsrc.OLD`
+	else 
+	    NIS_CLT=`echo $NIS_CLT | /bin/sed 's/YP/NIS/1'`
+	fi
+	NISDOMAIN=`eval /bin/grep -e "\^YPDOMAIN\=" /etc/netnfsrc.OLD`
+	if [ -z "$NISDOMAIN" ] ; then
+	    NISDOMAIN=`eval /bin/grep -e "\^NISDOMAIN\=" /etc/netnfsrc.OLD`
+	else 
+	    NISDOMAIN=`echo $NISDOMAIN | /bin/sed 's/YP/NIS/1'`
+	fi
+	PCNFS_SVR=`eval /bin/grep -e "\^PCNFS_SERVER\=" /etc/netnfsrc.OLD`
+else
+	NFS_CLT="NFS_CLIENT=0"
+	NFS_SVR="NFS_SERVER=0"
+	START_MOUNTD="START_MOUNTD=0"
+	NIS_MS="NIS_MASTER_SERVER=0"
+	NIS_SS="NIS_SLAVE_SERVER=0"
+	NIS_CLT="NIS_CLIENT=0"
+	NISDOMAIN="NISDOMAIN="
+	PCNFS_SVR="PCNFS_SERVER=0"
+fi
+
+# make sure START_MOUNTD is set
+if [ X$START_MOUNTD = "X" ] ; then
+   START_MOUNTD="START_MOUNTD=0"
+fi
+
+NISDOMAIN=$(fix_backslash "$NISDOMAIN")
+    
+if [ $CONTEXT != "remoteroot" ] ; then
+	/bin/cat /etc/newconfig/netnfsrc | /bin/sed " 
+		s/^NFS_CLIENT=0/$NFS_CLT/ 
+		s/^NFS_SERVER=0/$NFS_SVR/ 
+		s/^START_MOUNTD=0/$START_MOUNTD/ 
+		s/^NIS_MASTER_SERVER=0/$NIS_MS/ 
+		s/^NIS_SLAVE_SERVER=0/$NIS_SS/ 
+		s/^NIS_CLIENT=0/$NIS_CLT/ 
+		s/^NISDOMAIN=/$NISDOMAIN/ 
+		s/^PCNFS_SERVER=0/$PCNFS_SVR/ 
+	" > /etc/newconfig/netnfsrc.NEW
+	/bin/chmod 544 /etc/newconfig/netnfsrc.NEW
+	/bin/chown 2 /etc/newconfig/netnfsrc.NEW
+	/bin/chgrp 2 /etc/newconfig/netnfsrc.NEW
+	
+	if [ $CONTEXT = "localroot" ] ; then 
+		/bin/mv /etc/newconfig/netnfsrc.NEW /etc/netnfsrc
+		/bin/cat /etc/newconfig/netnfsrc | /bin/sed "
+                       	s/^NFS_CLIENT=0/$NFS_CLT/
+                       	s/^NFS_SERVER=0/$NFS_SVR/
+			s/^START_MOUNTD=0/$START_MOUNTD/ 
+                      	s/^NIS_CLIENT=0/$NIS_CLT/
+                       	s/^NISDOMAIN=/$NISDOMAIN/
+                       	s/^PCNFS_SERVER=0/$PCNFS_SVR/
+               	" > /etc/netnfsrc+/remoteroot
+		/bin/chmod 544 /etc/netnfsrc+/remoteroot
+		/bin/chown 2 /etc/netnfsrc+/remoteroot
+		/bin/chgrp 2 /etc/netnfsrc+/remoteroot
+	fi
+	if [ $CONTEXT = "standalone" ] ; then 
+		/bin/mv /etc/newconfig/netnfsrc.NEW /etc/netnfsrc
+	fi
+
+#======
+#   Move cnode specific CDF members of netnfsrc to OLD  
+#   and move remoteroot version of netnfsrc cnode        
+#   specific versions of netnfsrc.  Then modify the      
+#   new cnode specific versions of netnfsrc to match    
+#   OLD cnode specific versions of netnfsrc.	         
+#======
+	if [ -f /etc/clusterconf ] ; then
+		set -- `/bin/grep ":c:" /etc/clusterconf | \
+			/bin/sed 's/:/ /g' | \
+			/usr/bin/awk '{ print $3 }'`
+	fi
+
+	while [ $# -gt 0 ]; do
+	    if [ -f /etc/netnfsrc+/$1 ] ; then
+		/bin/mv /etc/netnfsrc+/$1 /etc/netnfsrc.OLD+/$1
+
+		NFS_CLT=`eval /bin/grep -e \
+			"\^NFS_CLIENT\=" /etc/netnfsrc.OLD+/$1`
+		NFS_SVR=`eval /bin/grep -e \
+			"\^NFS_SERVER\=" /etc/netnfsrc.OLD+/$1`
+		START_MOUNTD=`eval /bin/grep -e \
+			"\^START_MOUNTD\=" /etc/netnfsrc.OLD+/$1`
+		NIS_MS=`eval /bin/grep -e \
+			"\^YP_MASTER_SERVER\=" /etc/netnfsrc.OLD+/$1`
+		if [ -z "$NIS_MS" ] ; then
+		    NIS_MS=`eval /bin/grep -e \
+			"\^NIS_MASTER_SERVER\=" /etc/netnfsrc.OLD+/$1`
+		else 
+	    	    NIS_MS=`echo $NIS_MS | /bin/sed 's/YP/NIS/1'`
+		fi
+		NIS_SS=`eval /bin/grep -e \
+			"\^YP_SLAVE_SERVER\=" /etc/netnfsrc.OLD+/$1`
+		if [ -z "$NIS_SS" ] ; then
+		    NIS_SS=`eval /bin/grep -e \
+			"\^NIS_SLAVE_SERVER\=" /etc/netnfsrc.OLD+/$1`
+		else 
+	    	    NIS_SS=`echo $NIS_SS | /bin/sed 's/YP/NIS/1'`
+		fi
+		NIS_CLT=`eval /bin/grep -e \
+			"\^YP_CLIENT\=" /etc/netnfsrc.OLD+/$1`
+		if [ -z "$NIS_CLT" ] ; then
+		    NIS_CLT=`eval /bin/grep -e \
+			"\^NIS_CLIENT\=" /etc/netnfsrc.OLD+/$1`
+		else 
+	    	    NIS_CLT=`echo $NIS_CLT | /bin/sed 's/YP/NIS/1'`
+		fi
+		NISDOMAIN=`eval /bin/grep -e \
+			"\^YPDOMAIN\=" /etc/netnfsrc.OLD+/$1`
+		if [ -z "$NISDOMAIN" ] ; then
+		    NISDOMAIN=`eval /bin/grep -e \
+			"\^NISDOMAIN\=" /etc/netnfsrc.OLD+/$1`
+		else 
+	    	    NISDOMAIN=`echo $NISDOMAIN | /bin/sed 's/YP/NIS/1'`
+		fi
+		PCNFS_SVR=`eval /bin/grep -e \
+			"\^PCNFS_SERVER\=" /etc/netnfsrc.OLD+/$1`
+
+		# make sure START_MOUNTD is set
+		if [ X$START_MOUNTD = "X" ] ; then
+		   START_MOUNTD="START_MOUNTD=0"
+		fi
+
+		NISDOMAIN=$(fix_backslash "$NISDOMAIN")
+
+		/bin/cat /etc/newconfig/netnfsrc | /bin/sed "
+			s/^NFS_CLIENT=0/$NFS_CLT/
+			s/^NFS_SERVER=0/$NFS_SVR/
+			s/^START_MOUNTD=0/$START_MOUNTD/ 
+			s/^NIS_MASTER_SERVER=0/$NIS_MS/
+			s/^NIS_SLAVE_SERVER=0/$NIS_SS/
+			s/^NIS_CLIENT=0/$NIS_CLT/
+			s/^NISDOMAIN=/$NISDOMAIN/
+			s/^PCNFS_SERVER=0/$PCNFS_SVR/
+		" > /etc/netnfsrc+/$1
+	    else
+		/bin/cp /etc/netnfsrc+/remoteroot /etc/netnfsrc+/$1
+	    fi
+	    /bin/chmod 544 /etc/netnfsrc+/$1
+	    /bin/chown 2 /etc/netnfsrc+/$1
+	    /bin/chgrp 2 /etc/netnfsrc+/$1
+	    shift
+	done
+fi
+			
+#==========
+#  Remove outdated filesets.
+#==========
+
+if [ -f $FILESETS_DIR/NFS_RUN ] ; then
+	rm -rf $FILESETS_DIR/NFS_RUN
+	rm -rf $SYSTEM_DIR/NFS_RUN
+fi
+
+# update S800 /etc/conf/gen/.regenrc
+# arguments:
+#    1 = path name for .regenrc
+
+mod_regenrc()
+{
+   regenrc=$1    # path to .regenrc
+   subsys=NFS
+   if /bin/grep -- "-Z[ 	]*$subsys[ 	]*\$" $regenrc >/dev/null 2>&1
+      then
+      :       # already present
+   else
+      /bin/echo "-F" >> $regenrc
+      fi
+}
+
+
+# update S300 and S700 /etc/conf/dfile
+# arguments:
+#    1 = path name for mod_dfile script
+#    2 = path name for dfile
+#    3 = kern_util archtype of node being updated
+
+mod_dfile()
+{
+   mod_dfile=$1                  # path to TOOL/mod_dfile
+   dfile=$2                      # path to dfile
+   updarch=$3                    # archtype to update
+
+   $mod_dfile $dfile add nfs
+}
+
+
+# update /etc/conf/dfile for S300 or S700 clients
+# arguments:
+#    1 = kern_util archtype of cnodes to be updated
+
+mod_cnodes()
+{
+   updarch=$1                                # archtype to update
+   if [ -f /etc/clusterconf -a -d /hp-ux+ ]
+      then
+      cnodelist=`/bin/sed -n 's/^[^#:]*:[^:]*:\([^:]*\):c:[^:]*:[^:]*$/\1/p' \
+         < /etc/clusterconf`
+
+      for cnodename in $cnodelist
+         do
+         # if there is no kernel by this name, clusterconf is odd
+         if [ ! -f /hp-ux+/$cnodename ]
+            then
+            continue
+            fi
+
+         # if mixed cluster, bypass undersirable cnode clients
+         if [ -x /system/TOOL/kern_util ]
+            then
+            archtype=`/system/TOOL/kern_util -t /hp-ux+/$cnodename`
+            if [ "$archtype" != "$updarch" ]
+               then
+               continue
+               fi
+            fi
+
+         mod_dfile /system/TOOL/mod_dfile \
+            /etc/conf${M_Umedia}/dfile+/${cnodename} $updarch
+         done
+      fi
+}
+
+
+# update current node (standalone or server).
+#
+# also update S300 and S700 client cnodes.  must use correct media in 
+# mixed cluster.
+
+case "$Umedia" in
+
+   HP-PA)
+      if [ -x /bin/hp9000s700 ] && /bin/hp9000s700
+         then
+         mod_dfile /system/TOOL/mod_dfile /etc/conf/dfile HP-PA-700
+
+      elif [ -x /bin/hp9000s800 ] && /bin/hp9000s800
+         then
+         mod_regenrc /etc/conf${M_Umedia}/gen/.regenrc
+         fi
+
+      # HP-PA media used to update S700 client cnodes from S300, S700 or
+      # S800 server
+
+      mod_cnodes HP-PA-700
+      ;;
+
+   HP-MC68*)	
+      if [ -x /bin/hp9000s300 ] && /bin/hp9000s300
+         then
+         mod_dfile /system/TOOL/mod_dfile /etc/conf/dfile HP-MC68020
+         fi
+
+      # HP-MC68020 media used to update S300 client cnodes from S300, S700
+      # or S800 server
+
+      mod_cnodes HP-MC68020
+      ;;
+
+   *) 
+      /bin/echo "ERROR: Unexpected update media type $Umedia"
+      ;;
+esac
+
+cat <<-EOF
+NOTE:    The rpc.mountd should now be started from /etc/netnfsrc.
+         Please:
+          1. Compare your /etc/inetd.conf with the version in /etc/newconfig.
+             Make any updates necessary and make sure the rpc.mountd entry
+             is removed.
+          2. Update the /etc/netnfsrc file by setting the START_MOUNTD
+             variable to 1.
+EOF
+
+exit ${EXIT_CODE:-0}

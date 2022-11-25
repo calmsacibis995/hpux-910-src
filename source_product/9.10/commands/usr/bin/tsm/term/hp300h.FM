@@ -1,0 +1,4 @@
+## FacetTerm menu Capabilities for the HP 300h  06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: hp300h.FM,v 70.1 92/03/09 16:01:07 ssa Exp $
+use=hpnoline.fm

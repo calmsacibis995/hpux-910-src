@@ -1,0 +1,16 @@
+#!/bin/sh
+##	@(#)Make_all	$Revision: 1.14.109.1 $	$Date: 91/11/19 13:52:08 $
+#	Make_all	--	Make the kernel and commands
+# Written by Karl G. Jensen
+# Modified for NFS project by Cristina Mahon
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# In the overnight script that runs Make_all nfs has been set to $Nfs
+cd $nfs
+Make_kernel
+Make_cmd
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

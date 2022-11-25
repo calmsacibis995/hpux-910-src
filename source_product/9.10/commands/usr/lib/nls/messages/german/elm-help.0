@@ -1,0 +1,43 @@
+
+        Befehl                       Beschreibung
+
+           |            Aktuelle Nachricht per Pipe an ...
+	   $		Erzwingt Synchronisierung der aktuellen Mailbox.
+           !            Shell-Escape
+           ?            Diese Hilfe anzeigen
+           +            NÌchste Kopfseite
+           -            Vorherige Kopfseite
+           =            Setzt aktuelle Nachricht auf 1
+           *            WÌhlt letzte Nachricht als aktuelle Nachricht
+           <n>          WÌhlt n als aktuelle Nachricht
+           /            Sucht Von/Betreff nach Muster ab
+           //           Sucht gesamten Nachrichteninhalt nach Muster ab
+           <            Sucht aktuelle Nachricht nach KalendereintrÌgen ab
+
+           a            Alias, Wechsel in 'Alias'-Modus 
+           b            Weiterleiten der akt. Nachricht mit orig. Verteilerliste
+           c            Wechselt die aktuelle Mailbox
+           d            LÎscht die aktuelle Nachricht
+          ^D            LÎscht Nachrichten mit angegebenem Muster
+           f            Leitet Nachricht an angegebene Benutzer weiter
+           g            Gruppenantwort (alle EmpfÌnger) auf Nachricht
+           h            Nachricht wird mit vollem Kopf angezeigt
+           j            Weiter zur nÌchsten Nachricht
+           k            ZurÏck zur vorherigen Nachricht
+           l            SchrÌnkt Nachrichten durch angegebene Kriterien ein
+           m            Senden an beliebige Benutzer
+           n            NÌchste Nachricht lesen
+           o            Øndern der Elm-Optionen
+           p            Drucken der Nachricht
+           q            Beenden - Post lÎschen, in mbox sichern od. stehenlassen
+           r            Antwort auf aktuelle Nachricht
+           s            Speichert Nachricht in angegebener Datei
+           t            Markiert/lÎscht Markierung fÏr weitere Bearbeitung
+          ^T            Markiert Nachrichten mit angegebenem Muster
+           u            Stellt aktuelle Nachricht wieder her
+          ^U            Stellt Nachricht mit angegebenem Muster wieder her
+           x            Beenden, Lesen nicht registriert, nicht sichern...
+
+          ^L            Baut Bildschirminhalt neu auf
+          RÏcklauftaste Lesen der aktuellen Nachricht
+          ^Q, DEL       Beenden, Lesen nicht registriert, nicht sichern...

@@ -1,0 +1,21 @@
+kc softkey add mailx with_label Mail
+kc softkey add cd with_label Change_dir
+kc softkey add ls with_label List_files
+kc softkey add vi with_label Edit_file
+kc softkey add more with_label Display_files
+kc softkey add Print_files
+kc softkey add grep with_label Search_lines
+kc softkey add sort with_label Sort_lines
+kc softkey add find with_label Find_files
+kc softkey add cp with_label Copy_files
+kc softkey add mv with_label Move_files
+kc softkey add Set_file_attribs
+kc softkey add rm with_label Remove_files
+kc softkey add rmdir with_label Remove_dirs
+kc softkey add mkdir with_label Create_dirs
+kc softkey add shar with_label Shell_archive
+kc softkey add lpstat with_label Print_status
+kc softkey add cancel with_label Cancel_print
+kc softkey add ps with_label Process_info
+kc softkey add kill with_label Kill_process
+kc softkey add man with_label Manual_page

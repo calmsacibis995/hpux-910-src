@@ -1,0 +1,36 @@
+: HPUX_ID: @(#) $Revision: 66.1 $ 
+: This is the shell script for building the shell
+: It only uses features common to early version of the shell
+Install=${Install-install}
+interactive=n
+case "$1" in
+-i)
+	shift
+	interactive=y;;
+esac
+if	test $interactive = y
+then	echo "Please type y to answer yes, and n to answer no to any questions"
+	ans=n
+fi
+config=include/sh_config.h
+if	test -f include/sh_config.h -a $interactive = y
+then	echo "Do you wish to use the previous configuration? "
+	while	read ans
+	do	case $ans in
+		y|yes)  ans=y;break;;
+		n|no)	ans=n;break;;
+		*)	echo 'Please answer yes or no' ;;
+		esac
+	done
+fi
+case $ans in
+y)	break;;
+*)	: generate the configuration header file
+	echo "Please wait for a little while"
+	$Install/config $Install > $config
+	$Install/gen_rdonly 2> /dev/null
+	rm -f *.o
+	;;
+esac
+echo compilation begins
+$Install/compile 

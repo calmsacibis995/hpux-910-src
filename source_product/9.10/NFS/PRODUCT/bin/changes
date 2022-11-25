@@ -1,0 +1,41 @@
+#!/bin/sh 
+# @(#)$Revision: 1.13.109.1 $	$Date: 91/11/19 13:53:50 $
+# Written by Cristina Mahon
+#
+# This script checks which SCCS files have been changed in the previous
+# day and prints the differences between the latest two SCCS versions
+# for each file.  Those differences are then mailed.
+
+cd $Nfs/sccs
+
+# List files modified in the last day.  This script is designed to run
+# every night.
+#
+# NOTE: changed sccsdiff to Sccsdiff, which knows about the remote
+# files used in the kernel build process.  dds , 2/2/87
+# Also changed "prs" to "Prs"
+
+DATE=`date "+%y.%m.%d"`
+MOD=`awk ' ($1 == "'$DATE'") { print $4 } ' < $Nfs/log/update`
+
+echo "FILES CHANGED DURING: $DATE\n" > $Nfs/log/changes
+for FILE in $MOD
+do
+   DIR=`dirname $FILE`
+   BASE=`basename $FILE`
+   echo "\n********************************************" >> $Nfs/log/changes
+   echo "*  $FILE" >> $Nfs/log/changes
+   echo "********************************************\n" >> $Nfs/log/changes
+
+   Prs -d":R: :L:" $Nfs/sccs/$DIR/s.$BASE | 
+   { 
+      read REL LEVEL 
+      if [ $LEVEL != "1" ]
+      then
+         Sccsdiff -r$REL.$LEVEL -r$REL.`expr $LEVEL - 1` $Nfs/sccs/$DIR/s.$BASE >> $Nfs/log/changes
+      fi
+   }
+done
+
+#if [ $MOD != ""]
+#	mailx -s "CND changes" 

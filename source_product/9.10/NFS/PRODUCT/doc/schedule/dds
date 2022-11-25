@@ -1,0 +1,274 @@
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	. building nightly/weekly development systems for group distributions
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. coordinate with partners since it is mainly based on interrupts
+#	. time spent doing schedule estimates
+
+# NOTE: Tasks completed since the last update have been listed first.  Next
+# revision they will be moved to the bottom.  The task left are listed in
+# somewhat a priority order. Time spent is time since 1/19
+
+NAME: Darren Smith
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+# Tasks completed through October 2, 1987.
+# Overhead includes normal stuff.
+2	0	0	Doc		RPC Programmer's Guide review
+9	0.0	19.5	Test		Test and debug RPC/XDR (kernel code)
+					o Misc. bug tracking/fixing.
+					o Fixed only one nfsd problem (finally)
+					o Fixed a few nfs bugs also.
+0	0	5	Test		Final Code Reviews
+					o Areas identified by BFA
+2	0	6	Test		Code Review High risk code.
+					o Sub-sec of port/test RPC/XDR
+					o Code reviewed xdr_rec.c for JAD.
+					o Code revieded some code as changes
+					were made for bug fixes.
+					o Some code review done driven by BFA
+
+# Tasks to be worked on, priority order.
+
+6	2	7	Test		70 % BFA coverage.
+					o Created RPC test/debug tool.
+					o Need to get to 70% and then automate
+Checkpoint	BITREL	10/7/87
+
+0	5	10	Test		85 % BFA coverage. (Goal)
+					o At least need to get 70% automated.
+0	2	2	Test		Final installation testing.
+0	0.1	0	Sup		Release Celebration planned.
+0	5	0	Doc		Post-mortem complete or planned.
+0	1	0	Sup		All tools, etc. archived.
+2	2	4	FTO		Vacation
+Checkpoint	MR	12/02/87
+
+
+# No time estimated for following tasks:
+0	0	0	Dev		Provide optional kernel configurability
+0	0	0	SSIT		SSIT activities
+0	0	0	Test		Multi-vendor connectivity testing
+0	0	0	Test		Reliability testing
+0	0	0 	Test		Test opt. conf. capabilities of kernel 
+0	0	0 	Test		Test operational interac. of NFS and DUX
+0	0	0	Test		Release final bits to SSIT    
+0	0	0	Train		Courses	
+
+# COMPLETED TASKS
+0.5	0	0.5	Doc		modify brick pages and provide examples
+					o Completed for first pass at manuals.
+2.0	0	0	Mkt		participation at Uniforum
+					o 350->840 problem resolution(Completed)
+1	0	2  	Test		Shared/Common scaffold work.
+					o Completed?  Provided reviews/feedback
+					 about proposal.  Will remain contact
+					 for group, but remainder of time
+					 should be small and interrupt driven.
+0.25	0	1	Tool		Learning tools
+					o Learned how to use BFA from Mikey
+					 and read up on new cscope.  Don't
+					 anticpate many other tools to learn.
+0.5	0	10	Sup		Administrate test systems and equipment
+    					(Two days a month for 5 months)
+					o Completed (for me), since respons.
+					 has been passed to JAD and GMF.
+2	0	2       Test		Initial BFA numbers/setup for kernel
+					o While Mikey did the initial invest.,
+					 I worked on a script to automate the
+					 process.  Still need to get initial
+					 numbers from tests to drive testplan.
+
+0.25	0	2	Iss	     	Follow-up efforts on long file names
+					o passed to Mikey
+
+4.5	0	5	Test		Test and debug RPC/XDR (kernel code)
+					o Time broken out for testplan inputs
+						for transformers.
+
+0.25	0.0	1	Doc		provide technical info to documentation
+					o Provide Annette info about SUN vs. HP
+					  differeneces, anomalies, etc.
+					o Taken care of largely by chm's ERS.
+
+5.5	0	3	Tool		Dev. env. support/maintenance
+					o May be misc. support tasks left
+					but these are interrupt driven and
+					covered by overhead.
+# Completed tasks from 2/24 to 3/13
+# NOTE: Overhead tasks worked on in this time frame include looking at commands
+# that are not working with ISO and that are needed by Transformers (includes
+# getting find and tar working so that we can mount the scaffold remotely.) Also
+# created a script that tells up what has changed between one version of the
+# kernel and the next (requested by Jim Hunter).  I have also been helping
+# SSO some when they have had problems with connectivity. Finally, I have been
+# working with Mikey and George on various kernel problems.
+2	0	0	FTO		Vacation
+					o Vacation time before Code Complete
+# Tasks completed from 3/31 through 4/9
+4	0	1	Doc		first documentation review
+					o Note extra time because responsible
+					for review of entire manual.
+
+# Tasks completed through 4/28
+
+5	0	3	Dev		IRS for RPC/NFS interactions 
+					o I just made a bad original
+					 estimate about the amount of time
+					 it would take.
+
+15	0	10	Dev		Port RPC/XDR (kernel code)
+					o Fixed timeout/interrupt bug.
+					o Helped Mikey with interrupt stuff.
+					o Helped ISO track down ESTALE
+					  problem.
+					o Helped Dave track down RPC/XDR
+					  user-level killer BUG while JAD was
+					  on FTO.  Dave descibed as showstopper.
+					o Helped Mikey with various problems.
+					o Everything left should be bug fixes.
+
+
+# NOTE: Overhead since last update includes 1) Proving security hole
+# exists that allows a normal user on one system using only the socket
+# interface to access files via NFS that do not belong to him, 2) Helping
+# John and Marie figure out a problem with NFS/RPC that turns out to be yet
+# another version of the "no transaction ID for non-idempotent requests" bug,
+# and 3) normal other misc. overhead, like handling the hardware crash of DU.,
+# tracking down the latest version of the ".." problem, etc.
+
+0	0	4 	Test		add debug and trace code
+					o Picked up from gmf.
+					o NOTE: 5/6/87 Time set to zero since
+					  looks unneccessary at present time
+
+# Tasks completed through 6/05/87
+
+# Overhead during last period includes trouble shooting various problems
+# with EB1 and the LAB meetings, etc. that we had.
+# Also spent time helping the Transformers with various problems, only
+# some of which were related to NFS.  Also spent time on administering
+# hpcndu/hpcndk to a certain extent, though not much.  Also made
+# changes to the kernel build process for exchaning archives with the
+# other groups and cleaned up the build process a little.
+
+5	0	0	Sup		Help with self-host hpcndu/hpcndk
+					o Includes time spent with actual
+					  self-hosting, problems with the LAN
+					  switch-over, and trouble shooting
+					  problems noticed because of 
+					  update to EB1, and working on
+					  mail/lp.
+0	0	3	Test		50 % BFA coverage.
+					o No time spent because first pass
+					at BFA reached 56%.
+# Tasks completed through June 19, 1987:
+# Major tasks worked on during previous period include Documentation reviews
+# and Kernel Swat team on the Discless/NFS nsp panic.  Also spent time
+# attending NFS/800 teleconferences to talk about code sharing, and working
+# on NFS/RPC problems/bugs.
+5	0	1	Doc		second documentation review
+					o Extra time added because of over-
+					all review responsibility and increased
+					(better) coverage of PI.
+
+# Tasks complete through June 29, 1987
+# Overhead in this period includes yearly evaluation.  Also worked on
+# discless panics, and the NFS kernel code sharing proposal.
+
+# Tasks complete through July 15, 1987
+# Tasks worked on in this time period include trouble-shooting the problem
+# the LISP group was having (bad card) and a symbolic link problem Jason
+# was seeing with Discless/NFS (SSO BUG), finalized code sharing agreement,
+# began looking at code sharing implementation, plus working on various bugs.
+
+10     0       0        New		Port RPC/XDR (+ kernel SWAT TEAM)
+					o July 9, tracked down symbolic
+					  link bug with NFS/Discless.
+					o June 20-29, more Discless/NFS
+					  problems, but found quicker.
+					o June 9-19, worked on Discless/NFS
+					  nsp panic problem.  (NASTY!!!!)
+# Tasks worked on through August 3, 1987.
+# Fixed several bugs in NFS/RPC.  Also looked at two panics in transformers
+# systems (both RPC problems).  Manual review of RPC Programmer's Guide.
+# Talked with Mikey sync problem.  Updated du/dk to EB2.  Helped mak update
+# the rest of the test machines to EB2.  Consulted with Frederic on some
+# of the problems he was having with testing.  Talked some with Carole about
+# the configuration information.  Misc. other interruptions.
+1	0	0	FTO		Vacation on July 20, 1987
+2	0	0	New		RPC Programming Guide Reviews
+					o Didn't plan for it in this time period
+					o Took more time than discussed.
+
+# Tasks completed thru Aug. 19, 1987
+# Overhead in this time period includes:
+# Lab meeting, New pay scale meeting, consultation with Ruth Lutes about
+# NFS discless vs. our discless, helped Mark Kepke figure out kernel
+# profiling, consult with Charlie Solomon about RPC standards, and of
+# course, all the normal various interrupts and overhead.
+0.5	0	1	Tech		SE class review/edit 7/24/87
+0.5     0       0       Dev		Define/document revision number info.
+25      0       0       Dev		Port RPC/XDR (+ kernel SWAT TEAM)
+					o Fixed various bugs in DTS (two 
+					  panics).  Tracked down corrupted
+					  data problem.  Helped Mikey with
+					  sync and logging.
+					o Looked at LISP team's corrupted
+					  data problem -- BAD CARD
+					o Merged with NFS code from Stacy M.,
+					  tracked down various problems
+					  including going through a gateway.
+					o Picked up from gmf.
+					o Looked at various problems, 
+					  including rpc.mountd problem and
+					  the nfs_svc problem when given
+					  a TCP socket instead of UDP.
+					o Tracked down latest version of ".."
+					  bug (/bin/sh problem..)
+					o June 1-3.  Tracked down cr_get()
+					  panic which was holding up Gobots
+0.5     0       0       Tech            Document Configuration considerations
+					  for NFS for Carole and Annette.
+					o Location of commands issues.
+2       0       0       Doc             Document/define NFS memory and
+					 configurablility requirements
+					o document # network connections
+
+
+# Tasks completed through September 17, 1987
+2	0	0	FTO		Vacation Aug. 20-21, 1987.
+2	0	0	FTO		Sick Sept. 1-2.
+1       0       0       Dev             Long File name recommendations
+					o Talked to Annette
+					o Carole, Andy know situation
+1.25    0	0	Train		Monkey videos, Aug. 24-29.
+9	0	0	New		Work out code sharing plans for kernel
+					o Have Implemented checkin/out routines
+					  using rmtrcs.  
+					o NOTE: Problems with Internet!
+					o Still need to write overnight scripts
+					o Coordinate with jad, ISO, IND
+					o Reached agreement on 7/1
+					o Made rmtrcs work for us.
+					o Need to implement planned mechanism
+					o Interrupt driven now.
+2	0	1	Doc		third documentation review
+					o Extra time added because of over-
+					all review responsibility and increased
+					(better) coverage of PI.
+0	0	2	A/B		support of Alpha/Beta and B.O. sites
+					o DAE is handling this.
+1	0	3	Coord		Track kernel modifications 
+					o Bug fixes mostly from now on.
+Checkpoint	EB3	8/17/87
+
+
+# Have to be through by now:
+Checkpoint 	END	12/31/87

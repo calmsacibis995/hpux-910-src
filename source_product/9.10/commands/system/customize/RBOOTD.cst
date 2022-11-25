@@ -1,0 +1,72 @@
+#!/bin/ksh
+# @(#) $Revision: 70.5 $
+#
+fileset=RBOOTD
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolete fileset
+#======
+fileset_obsolete $1
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they do not already exist
+# or were not customized.
+#======
+cksum_cp $newconfig/boottab /etc/boottab \
+	"12556 1" "11081 1" "19638 1" "27139 1"
+
+grep -q /etc/boottab /etc/filesets$CDF/$fileset ||
+    echo /etc/boottab >> /etc/filesets$CDF/$fileset
+
+#
+# Update the boot stuff in /usr/boot
+#
+if [ ! -d /usr/boot ]; then
+    /bin/mkdir /usr/boot
+    chmog 555 bin bin /usr/boot
+fi
+
+cd /usr/boot
+
+#======
+# Copy /etc/boot to the new place
+#======
+if s300; then
+    if [ -f /etc/boot ]; then
+	rm -f SYSHPUX SYSBCKUP SYSDEBUG SYSTEST
+	cp_set 444 root other /etc/boot SYSHPUX
+    else
+	if [ -f /etc/boot$CDF ]; then
+	    rm -f SYSHPUX SYSBCKUP SYSDEBUG SYSTEST
+	    cp_set 444 root other /etc/boot$CDF SYSHPUX
+	else
+	    echo "ERROR:   No /etc/boot to copy to /usr/boot/SYSHPUX"
+	    exitval=1
+	fi
+
+    fi
+    if [ -f SYSHPUX ]; then
+	rm -f SYSBCKUP SYSDEBUG SYSTEST
+	ln SYSHPUX SYSBCKUP
+	ln SYSHPUX SYSDEBUG
+	ln SYSHPUX SYSTEST
+    fi
+
+    #
+    # Add the new files to the /etc/filesets file for this fileset (so
+    # that they will be removed if the fileset is removed).
+    #
+    for i in SYSHPUX SYSBCKUP SYSDEBUG SYSTEST; do
+	grep -q /usr/boot/$i /etc/filesets$CDF/$fileset ||
+	    echo /usr/boot/$i >> /etc/filesets$CDF/$fileset
+    done
+fi
+
+exit $exitval

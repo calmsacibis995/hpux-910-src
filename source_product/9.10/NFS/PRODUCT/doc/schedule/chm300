@@ -1,0 +1,309 @@
+# Under overhead (which does not need to be tracked) are listed:
+# 	. technical consulting for Tech. support and Marketing
+#	. TWG involvement based on reading notes, posting replies and 
+#	  keeping track of proposals that affect us
+#	. project documents maintenance
+#	. building nightly/weekly development systems for group distributions
+#	. group and program team meetings
+#	. monthly project and objectives, weekly objectives
+#	. Coordinate with partners since it is mainly based on interrupts
+#
+# 0.1 = 48 min
+# 0.2 = 1h 36 min
+# 0.3 = 2h 24 min
+# 0.4 = 3h 12 min
+# 0.5 = 4h
+# 0.6 = 4h 48 min
+# 0.7 = 5h 36 min
+# 0.8 = 6h 24 min
+# 0.9 = 7h 12 min
+
+NAME: Cristina Mahon
+
+Time   Time    Orig.    Category	Task Description
+spent  left    Est.
+
+
+0.8	0	0	Test		NLS testing
+					(to be leveraged by the 800 also)
+					. explained some more things to Mark.
+					. put the tests in the scaffold (I had
+					  to change them to match the scaffold
+					  directives).  Tested them on the
+					  scaffold environment.
+
+2.9	0	0	Tool		Document dev. env. and build process
+					for new hires and to pass it on to John.
+					. Wrote and mailed cover letter for
+					  the development environment.
+
+0.1	0	0	Dev		Helped Mark look at problems fsirand
+					had compiling.
+
+1.2	0	0	Dev		Provide local customs support
+					. Update ERS to contain most up to date
+					  exceptions on NLS support for NFS.
+					. Review and talk to Jim Willits about
+					  NLS slide.
+					. Add positional parameters to 
+					  print statements and local
+					  custom support to programs that were
+					  missing them.
+
+1	0	0	Tool		Dev. env. support/maintenance (ongoing)
+					. Unfreeze: move directories, change
+					  header files, talk to partners.
+
+0.1	0	0	Dev		Explain fsirand and nfsstat to Mark.
+
+0.3	0	0	Doc		Review man pages (language edits), talk
+					to Annette about them.
+
+0.2	0	0	Tool		Learn about SSIT submittal tools to
+					fill in for Dave while he was on
+					vacation
+
+==============================================================================
+Checkpoint	Beta	06/22/87	300 Beta Release
+==============================================================================
+
+0	0	1	Doc		third documentation review
+					(moved to chm800 schedule)
+
+0	0	2	Tech		SE class review/edit
+					(moved to chm800 schedule)
+
+0	0	2	A/B		support of Alpha/Beta and B.O. sites
+
+==============================================================================
+Checkpoint	EB3	07/15/87	300 Early Bird 3 Delivery
+==============================================================================
+
+0	0	1	Test		Release final bits to SSIT  
+
+==============================================================================
+Checkpoint	BitRel 09/23/87		300 Complete QA / Release Bits!
+==============================================================================
+
+==============================================================================
+Checkpoint	MR	11/04/87	300 Manufacturing Release
+==============================================================================
+
+==============================================================================
+# Checkpoint		CKP		300 I-L: Design Complete (02/24/87)
+==============================================================================
+ALREADY DONE BEFORE I TO L
+1.8	0	0	Iss		Put together ERS document
+					 . almost finished, need final review
+					   and after it is sent out need to
+					   fold comments back in.
+1.7	0	0	Tool		Dev. env. support/maintenance (before
+					I-L)
+1.1	0	2	Tool		Learning tools (BFA, RCS, awk)
+0.3	0	0	Doc		provide technical info for documentation
+1	0	3.5	Doc		modify brick pages and provide examples
+					(depending on TWG response)
+3	0	3	FTO		Vacation
+0.3	0	0.5	Iss    		object code compatibility
+0.1	0	0.5	Iss		system calls
+2.5	0	3	Test		Testplans
+					 . wrote all testplans except for
+					   fsirand and nfsstat which 
+					   don't need to be done before IL
+0.4	0	0	Dev		Port module III code (investigation)
+					(related to writing the testplans)
+					 . also changed inetd to support 
+					   same inetd.conf format as Mt. Xinu.
+1.3	0	0	Test		Review system testplan
+					 . finished with main review, there
+					   are still some pieces missing
+					 . folded required changes into it.
+0.6	0	0.5	Iss		libyp and librpc interaction with libc
+					 . need to agree on where and how
+					   the commands will be integrated
+					   on SSO's build.
+					   This can be done after IL.
+0.1	0	0.5	Iss    		NFS without A/B	
+0.3	0	4	Iss    		other issues
+					o clock skew
+					o inetd in link product
+					  . there are still some details related
+					    to the brick pages that need to
+					    be solved.
+					o inetd configuration file
+0.3	0	2	Metr		QA metrics - definition and implement.
+3.7	0	4	Sup		Schedule estimates setup
+
+==============================================================================
+# Checkpoint		CKP		300 Code Complete (04/08/87)
+==============================================================================
+ALREADY DONE BETWEEN I/L AND CC
+
+4.6	0	1	Dev		Provide NLS message catalogs and
+					8-bit/16-bit support investigation.
+
+0.1	0	0	Test		NLS Testplan
+
+0.7	0	0	Iss		ERS
+					. All changes in for code complete.
+					. Mailed to all interested.
+
+2.5	0	0	Tool		Dev. env. support/maintenance (ongoing)
+					. Fixed tcio problem temporarily (full
+					  backup)
+					. Put procedure in place to get include
+					  files from SSO.  Still have problem
+					  with libc.a.
+
+0.2	0	0	Iss		Helped Rob Robason solve problems with
+					libc.a.  Coordination with ISO commands.
+
+1.8	0	2	Doc		first documentation review
+					. Documentation review meeting.
+					. Reviewed documentation.
+
+0.3	0	0	Iss		Gather information about ownership,
+					code size and state of porting for 
+					modules
+					. Added testing status.
+
+2	0	0	Train		. Develop International Software class
+					  (help with NLS work).
+
+0.6	0	0	Sup 		. Setup temporary process to get 
+					  commands from ISO until build works
+					  at level 56.
+					  We have the most up to date commands
+					  from ISO.
+
+0.3	0	0	Test		Testplans (fsirand and nfsstat)
+
+0.5	0	0	Doc		Make changes to brick pages 
+					. Added diagnostics to all man pages
+					  that needed them.
+
+0.3	0	0	Iss		List overlap areas between HP-UX and NFS
+					for Glen Foster to use as reference 
+					(TWG and documentation).
+
+0.9	0	0	Iss		Issues:
+					. Met with several people when people
+					  from ISO were here Friday 03/27 and
+					  decided where and how DIRSIZ was 
+					  going to be defined.
+
+1	0	1	FTO		Vacation
+
+6.6	0	8	Dev		Port module III code
+					. Worked on inetd (review changes
+					  with David)
+
+
+==============================================================================
+#Checkpoint	EB1	05/05/87	300 Early Bird 1 Complete
+==============================================================================
+ALREADY DONE BETWEEN CC AND EB1
+
+1.7	0	12	Tool		Dev. env. support/maintenance (ongoing)
+					. Got build process in place with new
+					  libc.a and SSO include files.
+
+0.2 	0	0	Dev		Fsirand code reading with Debbie 
+					Bartlett and changes to inetd.sec
+					file to reflect NFS.
+
+0.1	0	0	Metr		On-going gathering of information
+					about different modules and status
+					(metrics)
+
+0.1	0	3	Doc		Provide technical info for documentation
+
+0.3	0	0	Iss		Man pages:  who provides which man 
+					pages, how are they referenced from
+					one product to the other, 300/800
+					differences for s800 1.1 release.
+
+0.7	0	0	Iss		Problems with commands from ISO and
+					getting commands from SSO for testing
+					before EB1.
+
+1.2	0	0	Sup		SSIT issues that are more global than
+					just NFS:
+					. sh problem (turned out to be a 
+					  problem of two different sh with same
+					  revision number)
+					. other commands questions
+
+0.9	0	0	Metr		BFA numbers and problems
+
+1.4	0	22	Test		Module test and debug module III code
+					(including NLS testing)
+					. Bug fixing
+
+0.5	0	0	Train		Satisfying HP customers	
+
+0.1	0	0.2	Iss		Agree with doc. where brick pages
+					for inetd and inetd conf. files will go.
+
+0	0	0	Tech	   	Connectivity tool development
+
+0	0	0	Coord 		Track kernel modifications
+
+0.9 	0	0	Doc		Folded changes suggested by NSG
+					into man pages.	
+
+0.1	0	0	Iss		Who delivers what to SSIT from the 
+					pieces CND owns that need to be 
+					shipped with HPUX.
+
+0.3	0	0	Dev		NLS message catalogs for nfsstat and
+					yppush
+
+1	0	0	FTO		Vacation
+
+==============================================================================
+# Checkpoint	EB2	06/01/87	300 Early Bird 2 Complete
+==============================================================================
+ALREADY DONE BETWEEN EB1 AND EB2
+
+0.1	0	0	Sup		Briefly explain development environment
+					and project to Mark Kepke while Mikey
+					was at the documentation review.
+
+0.7	0	0	Sup		Track problems with commands.
+					. Spent two hours fixing problem 
+					  caused by not having the RPC/YP
+					  up to date on libc at freeze time.
+
+0.7	0	0	Sup		Build and/or rebuild commands due
+					to EB2 (changes or normal process)
+					. the normal process for EB2 
+					  (incrementing sccs levels, rebuilding)
+					  took about an hour, including writing
+					  a script to automate the whole process
+					. the rest of the time was spent because
+					  of problems with libc and checking
+					  sitemap.h for possible problems.
+
+0.6	0	0	Sup		Document process that command groups
+					use to build and update commands and
+					how it affects our needs.
+					
+0.1 	0	0	Metr		Fixed some information on DTS defects
+					I originally resolved.  I had some
+					fields in a format that didn't work
+					for the metrics tool.
+
+2.2	0	0	Metr		Get preliminary BFA numbers for commands
+					and kernel.  Tracked down reasons why
+					some commands didn't give any results.
+
+1.2	0	0	Tool		Dev. env. support/maintenance (ongoing)
+
+2	0	2	Doc		second documentation review
+
+0.5	0	0	Sup		EB1 TQC
+
+==============================================================================
+Checkpoint	END	11/04/87	300 The End of everything, all work
+==============================================================================

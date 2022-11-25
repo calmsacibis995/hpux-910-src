@@ -1,0 +1,26 @@
+## FacetTerm Menu Capabilities - hazeltine 1500 07/23/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: h1500.FM,v 70.1 92/03/09 16:54:02 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=~^Q%p2%c%p1%c
+##-menu-cap-clear_screen=~^\
+##-menu-cap-clr_eol=~^O
+## ##-menu-cap-ena_acs=
+## ##-menu-cap-enter_alt_charset_mode=
+## ##-menu-cap-exit_alt_charset_mode=
+## ##-menu-cap-acs_chars=
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=~^Y
+##-menu-cap-shadow_attr=~^Y
+##-menu-cap-item_attr=~^Y
+##-menu-cap-box_attr=~^_
+##-menu-cap-title_attr=~^_
+##-menu-cap-highlight_attr=~^_
+##-menu-cap-highlight_blink_attr=~^_
+## ##-menu-cap-magic_cookie=1
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=~^L
+##-menu-cap-key_down=~^K
+##-menu-cap-key_right=^P
+## ##-menu-cap-key_left=
+## ##-menu-cap-key_ignore=

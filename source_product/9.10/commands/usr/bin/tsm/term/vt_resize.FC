@@ -1,0 +1,5 @@
+## FacetTerm  vt_resize COMMOM description file 04/04/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: vt_resize.FC,v 70.1 92/03/09 16:08:38 ssa Exp $
+answer-..cursor_address=\E[%i%p1%d;%p2%dR
+question-cursor_address=\E[6n

@@ -1,0 +1,439 @@
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  1 von 19
+
+INHALT:                            
+                                     
+                Einfœhrung .............................  2  
+                Menœschnittstelle ......................  3  
+                Befehlsschnittstelle ...................  4  
+                Session-Befehle ........................  5  
+                Allgemeine Befehle .....................  6  
+                Ausschneiden & Einfœgen ................  7
+                Schneide-Optionen ......................  8  
+                Einfœgen ...............................  9  
+                Drucken und Bildschirmabschaltung ...... 10
+                Funktionstasten ........................ 11  
+                Tastenbelegung ......................... 12  
+                Sessions durchlaufen ................... 13  
+                Signale und Steuerzeichen .............. 14  
+                Eingabeprotokollierung ................. 15  
+                Spezielle Terminalmodi ................. 16  
+                Session-Benachrichtigung ............... 17  
+                Session-€berwachung .................... 18  
+                Umgebung und Pfad ...................... 19  
+                                     
+--------------------- Terminal Session Manager Hilfe ---------- Seite  2 von 19
+
+EINF€HRUNG:
+
+  TSM ist ein System, das Ihr Terminal als bis zu 10 "Terminals" erscheinen
+  lÃﬁt. Jedes dieser Terminals, auch "Sessions" genannt, kann ein eigenes
+  Programm ausfœhren und eigene Funktionstasten haben.
+
+  TSM wird auf folgende Weisen bedient:
+
+        1. Mit Funktionstasten (sofern vorhanden).
+        2. Mit [KTRL]+[T] zum Zugriff auf die TSM-Menœschnittstelle.
+        3. Mit [KTRL]+[W] zum Zugriff auf die TSM-Befehlsschnittstelle.
+
+  Wenn Sie mit TSM ein Programm ausfœhren, das [KTRL]+[W] oder [KTRL]+[T]
+  erfordert, drœcken Sie die Taste ZWEIMAL, um das betreffende Zeichen
+  an das Programm zu œbergeben.
+
+  Um ein Element oder einen Wert zu WÿHLEN, drœcken Sie [Return].
+
+  Um einen Befehl oder eine Menœwahl zu ABZUBRECHEN, drœcken Sie
+  [ESC] (oder die Leertaste).
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  3 von 19
+
+MEN€SCHNITTSTELLE:
+
+  Mit [KTRL]+[T] rufen Sie die Menœschnittstelle auf.
+
+  Mit den nach OBEN und nach UNTEN gerichteten Pfeiltasten kŒnnen Sie ein
+  Menœ aufrufen und den Cursor zur Hervorhebung eines Elements verschieben.
+  Drœcken Sie dann [Return], um das Element zu wÃhlen, oder die
+  Leertaste, um den Vorgang abzubrechen.
+
+  +--------------------- TSM-Menœ    Session 1: SHELL 1 ---------------------+
+  |  WÃhlen  Ausfœhren  einFœgen  Drucken  Sonstiges  Ende  Hilfe            |
+  +--------------------------------------------------------------------------+
+     |  1 SHELL 1   ^W1  |
+     |  2 SHELL 2   ^W2  |
+     |  3 SHELL 3   ^W3  |
+     +-------------------+
+
+  Mit den nach LINKS und nach RECHTS gerichteten Pfeiltasten
+  kŒnnen Sie zu einem anderen Menœ wechseln.
+  Um die Menœschnittstelle zu verlassen, drœcken Sie die Leertaste.
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  4 von 19
+
+BEFEHLSSCHNITTSTELLE:
+
+  Mit [KTRL]+[W] rufen Sie die Befehlsschnittstelle auf.
+
+    >>> TSM Session  1   '?' fœr Hilfe <<<
+
+  In der Befehlsschnittstelle kŒnnen Sie verschiedene Aktionen ausfœhren.
+
+  Beispiel:  Taste [1] entspricht Session 1, 
+                   [2] entspricht Session 2,
+                   [3] entspricht Session 3, ...
+
+             oder drœcken Sie
+                   die Leertaste, um abzubrechen und zur Session zurœckzukehren
+             oder drœcken Sie
+                   [Return], um die Bildschirmanzeige zu erneuern und zur
+			     Session zurœckzukehren
+             oder drœcken Sie
+                   [Q], um TSM zu verlassen (mit [Y] bestÃtigen, mit
+                   [N] abbrechen). 
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  5 von 19
+
+SESSION-BEFEHLE:
+
+  Nach dem Aufruf der Befehlsschnittstelle mit [KTRL]+[W] kŒnnen Sie
+  folgende Tasten drœcken:
+
+            [Return]  erneuert die Anzeige
+            Leertaste zum Verlassen der Befehlsschnittstelle
+
+            [-]  zur vorigen Session (oder Pfeil nach LINKS oder [Rœcktaste])
+            [+]  zur nÃchsten Session (oder Pfeil nach RECHTS oder [=] )
+
+            [L]  zurœck zur LETZTEN Session
+
+            [O]  gibt aktuellen Bildschirminhalt auf dem Drucker aus (OUTPUT)
+
+ [R] <Name> [Return]  fœhrt ein Programm in einer passiven Session aus
+
+                 [S]  startet eine SHELL in einer passiven Session
+
+ ["] <Titel> [Return] versieht Session mit Titel (oder ['])
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  6 von 19
+
+ALLGEMEINE BEFEHLE:
+
+    Nach dem Aufruf der Befehlsschnittstelle mit [KTRL]+[W] kŒnnen Sie
+    folgende Tasten drœcken:
+
+            [?]  ruft diese Hilfetextdatei auf (oder [h] oder [/] )
+
+            [C]  schneidet Text aus (CUT)
+            [P]  fœgt Text ein (PASTE)
+
+            [G]  lÃdt Funktionstasten (global)
+            [K]  lÃdt Funktionstasten (aktuelle Session)
+
+            [O]  gibt aktuellen Bildschirminhalt auf dem Drucker aus (OUTPUT)
+
+            [X]  erweiterte Befehle
+
+
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  7 von 19
+
+AUSSCHNEIDEN & EINF€GEN:  (Fortsetzung auf der nÃchsten Seite)
+
+  In TSM kŒnnen Sie Text aus einer Session entnehmen (CUT) und in eine andere
+  Session einfœgen (PASTE).
+  CUT: Nach Eingabe des Befehls Cursor an den Textanfang setzen, [Return]
+       drœcken, Cursor an das Textende setzen, [Return] drœcken.
+
+  CUT-Befehl:  [KTRL]-[W]  [C]  <Position-1> [Return] <Position-2> [Return] 
+       wobei <Position-1> und <Position-2> mit den Pfeiltasten oder mit
+       folgenden Eingaben bestimmt werden:
+
+   u (up cursor)    - eine Zeile nach oben    |  U -- in oberste Zeile
+   d (down cursor)  - eine Zeile nach unten   |  D -- in unterste Zeile
+   l (left-cursor)  - eine Spalte nach links  |  L -- links bis erste Spalte
+   r (right-cursor) - eine Spalte nach rechts |  R -- rechts bis letzte Spalte
+
+                a  (all)     -- Pos1 ist oben links, Pos2 unten rechts
+                e  (end)     -- Pos1 am Cursor, Pos2 in letzter Spalte
+                c  (corner)  -- zur anderen positionierten Ecke
+                o  (outline) -- auszuschneidenden Bereich hervorheben
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  8 von 19
+
+SCHNEIDE-OPTIONEN:      (Fortsetzung auf der nÃchsten Seite)
+
+  Befehl CUT mit Schneide-OPTION:
+
+   [KTRL]+[W]  [C]  <Option> <Position-1> [Return] <Position-2> [Return]
+
+  Fœr <Option> bestehen folgende MŒglichkeiten:
+
+     [B] Block  - schneidet einen Textblock aus (Einfœgen von Zeilenumbrœchen)
+                  [KTRL]+[W] [C] [B] <Pos-1> [Return] <Pos-2> [Return]
+                        
+     [T] Text   - schneidet Textzeilen aus (einschl. Zeilenumbrœche)
+                  [KTRL]+[W] [C] [T] <Pos-1> [Return] <Pos-2> [Return]
+
+     [S] String - schneidet Textzeilen aus (ohne Zeilenumbrœche)
+                  [KTRL]-[W] [C] [S] <Pos-1> [Return] <Pos-2> [Return]
+
+  CUT  speichert die zuletzt angegebene Schneideoption und benutzt sie
+  wieder.
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite  9 von 19
+
+EINF€GEN:
+
+  In TSM kŒnnen Sie Text aus einer Session entnehmen (CUT) und in eine andere
+  Session einfœgen (PASTE).
+
+  Befehl PASTE:    [KTRL]+[W] [P]
+
+  Mit PASTE wird der Text am Cursor wie eine normale Texteingabe in die
+  aktuelle Session eingefœgt. Stellen Sie dabei sicher, daﬁ die Anwendung,
+  in die Text eingefœgt werden soll, auf Texteingabe geschaltet ist.
+  Der vi-Editor muﬁ beispielsweise auf "insert mode" geschaltet sein.
+
+  Weitere PASTE-Befehle: [KTRL]+[W] und
+
+    [>] [P]                      Ausdrucken (mit .tsmprint)
+    [>] [F] <Dateiname> [Return] Einfœgen in <Dateiname> (darf nicht existieren)
+    [>] [A] <Dateiname> [Return] Einfœgen in <Dateiname> (Anfœgen)
+    [>] [O] <Dateiname> [Return] Einfœgen in <Dateiname> (€berschreiben)
+
+  TSM meldet Fehler beim Einfœgen durch ein Tonsignal.
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 10 von 19
+
+DRUCKEN:
+
+  TSM kann mit dem HP-UX-Befehl lp drucken. TSM unterstœtzt auch einen
+  lokal am Terminal angeschlossenen Drucker lp. Der Anschluﬁ eines lokalen
+  Druckers ist im TSM Benutzerhandbuch ausfœhrlich beschrieben.
+
+  Drucken der aktuellen Session-Anzeige:
+
+    [KTRL]+[W] [O]  gibt den aktuellen Bildschirminhalt auf den Drucker
+		    aus (OUTPUT)
+
+
+BILDSCHIRMABSCHALTUNG:
+
+  Wenn keine Eingabe erfolgt, schaltet TSM den Bildschirm ab:
+
+    [X] [S] [Y]          Bildschirmabschaltung starten
+    [X] [S] [N]          Bildschirmabschaltung abschalten
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 11 von 19
+
+FUNKTIONSTASTEN:
+
+  In TSM kŒnnen Funktionstasten fœr eine oder fœr alle Sessions geladen werden.
+
+
+  ALLE SESSIONS (GLOBAL):   [KTRL]+[W] und
+
+  [G] <Datei>  [Return] lÃdt Funktionstasten mit Werten aus <Datei> 
+  [G] DEFAULT  [Return] lÃdt Funktionstasten mit Standards fœr Terminal
+  [G]    [+]   [Return] lÃdt Funktionstasten neu mit Werten aus <Datei>
+  [G]    [-]   [Return] lÃdt Funktionstasten neu mit Standards fœr Terminal
+                                                  (entspricht "DEFAULT")
+
+  AKTUELLE SESSION:  [KTRL]+[W] und
+
+  [K] <Datei>  [Return] lÃdt Funktionstasten mit Werten aus <Datei>
+  [K] DEFAULT  [Return] lÃdt Funktionstasten mit Standards fœr Terminal
+  [K]    [+]   [Return] lÃdt Funktionstasten neu mit Werten aus <Datei>
+  [K]    [-]   [Return] lÃdt Funktionstasten neu mit Standards fœr Terminal
+                                                  (entspricht "DEFAULT")
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 12 von 19
+
+TASTENBELEGUNG:
+
+  In TSM kann eine beliebige Zeichenfolge auf eine Taste gelegt werden.
+
+  Drœcken Sie [KTRL]+[W] und entweder [:] oder [;] 
+
+  [:] [H] <Taste> <Zeichenfolge> [Return] belegt <Taste> in allen Sessions
+                                          mit <Zeichenfolge> 
+
+  [:] [U] <Taste> [Return]               macht Belegung von <Taste> rœckgÃngig
+
+  [:] [M] <Taste> <Zeichenfolge> [Return] belegt <Taste> in aktueller Session
+                                          wieder mit <Zeichenfolge>
+
+  Beispiel: [KTRL]-[W] [:] [h] [1] Ursula [Return]
+  zeigt das Wort "Ursula" an, wenn Taste [1] gedrœckt wird.
+
+
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 13 von 19
+
+SESSIONS DURCHLAUFEN:
+
+  Mit folgenden Befehlen kŒnnen Sie die aktiven Sessions durchlaufen:
+
+    [KTRL]-[W] und:
+
+           [-]  vorherige Session (oder Pfeil nach LINKS oder [Rœcktaste] )
+           [+]  nÃchste Session   (oder Pfeil nach RECHTS oder [=] )
+
+  Sessions kŒnnen von der Suche ausgeschlossen werden:
+
+    [KTRL]-[W] und:
+
+           [X] [I] [Y]        schlieﬁt aktuelle Session vom Durchlaufen aus
+           [X] [I] <Nr> [Y]   schlieﬁt Session <Nr> vom Durchlaufen aus
+           [X] [I] [N]        schlieﬁt aktuelle Session in Durchlaufen ein
+           [X] [I] <Nr> [N]   schlieﬁt Session <Nr> in Durchlaufen ein
+
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 14 von 19
+
+SIGNALE UND STEUERZEICHEN
+
+  Sie kŒnnen Signale/Steuerzeichen an eine Session senden (siehe Hilfeseite
+  signals(5)).
+  
+  STEUERZEICHEN:  [KTRL]-[W] und
+       [.]  [Q]       sendet [KTRL]+[Q] (XON) an Session
+       [.]  [S]       sendet [KTRL]+[S] (XOFF) an Session
+       [.]  [@]       sendet [KTRL]+[@] an Session
+       [.]  [B]       sendet Break an Session
+        nichts        sendet Break an Session, sofern weder PARMRK noch die 
+                      Option send_break_to_window verwendet wird.
+       [Break]        sendet Break an Session, sofern die Option
+                      send_break_to_window nicht verwendet wird.
+
+  SIGNALE:  [KTRL]-[W] und:
+
+      [X] [H] [Y]    sendet SIGHUP an aktuelle Session
+      [X] [H] [A]    sendet SIGHUP an alle Sessions
+      [X] [H] [K]    sendet SIGKILL an aktuelle Session
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 15 von 19
+
+EINGABEPROTOKOLLIERUNG:
+
+  TSM ermŒglicht die Protokollierung und Wiederholung von Tasteneingaben.
+
+
+
+  EINGABESPEICHERUNG - [KTRL]-[W] und:
+
+    [X] [K] [Y] <Datei> [Return] beginnt die Eingabespeicherung in <Datei>.key
+    [X] [K] [N]                  beendet die Eingabespeicherung
+
+
+
+  EINGABEWIEDERHOLUNG - [KTRL]-[W] und:
+
+    [X] [R] <Datei> [Return] - wiederholt die in <Datei>.key gespeicherten
+                               Tasteneingaben
+
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 16 von 19
+
+SPEZIELLE TERMINALMODI:
+
+  Wenn Sie eine Terminal-Beschreibungdatei verwenden, mit der Anwendungen
+  zwischen einzelnen Terminalmodi umschalten kŒnnen, ermŒglicht TSM
+  die Modusumschaltung œber die Tastatur.
+
+    [KTRL]-[W] und:
+
+     [M] <Taste> [Return]  - wobei <Taste> folgendes sein kann:
+
+              u oder Pfeil nach oben          - vorheriger Modusname
+              d oder Pfeil nach unten         - nÃchster Modusname
+              n oder r oder Pfeil nach rechts - nÃchste Einstellung
+              p oder l oder Pfeil nach links  - vorherige Einstellung
+              Rœcktaste                       - vorherige Einstellung
+
+
+
+
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 17 von 19
+
+SESSION-BENACHRICHTIGUNG:   
+
+  Sofern aktiv, kann TSM ein in der aktuellen Session laufendes Programm
+  benachrichtigen, indem es ein CONTROL-Y an die Session schickt.
+
+  [KTRL]-[W] und:
+
+    [X] [N] [Y]        aktuelle Session benachrichtigen, wenn aktuell
+    [X] [N] <Nr> [Y]   Session <Nr> benachrichtigen, wenn aktuell
+    [X] [N] [N]        aktuelle Session NICHT benachrichtigen, wenn aktuell
+    [X] [N] <Nr> [N]   Session <Nr> NICHT benachrichtigen, wenn aktuell
+
+ GEBLOCKTER AUSGABEMODUS  - [KTRL]-[W] und:
+
+    [X] [B] [Y]        aktuelle Session blocken, wenn nicht aktuell
+    [X] [B] <Nr> [Y]   Session <Nr> blocken, wenn nicht aktuell
+    [X] [B] [N]        aktuelle Session NICHT blocken, wenn nicht aktuell
+    [X] [B] <Nr> [N]   Session <Nr> NICHT blocken, wenn nicht aktuell
+       
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 18 von 19
+
+SESSION-€BERWACHUNG:  HINWEIS: Diese Befehle dienen der Fehlerbehebung.
+
+€BERWACHUNGS-MODUS:
+
+  TSM zeigt Steuercodes an, aber reagiert nicht auf sie. [KTRL]-[W] und:
+
+    [X] [M] [Y]        setzt €berwachungs-Modus fœr aktuelle Session
+    [X] [M] <Nr> [Y]   setzt €berwachungs-Modus fœr Session <Nr>
+    [X] [M] [N]        schaltet €berwachungs-Modus fœr aktuelle Session aus
+    [X] [M] <Nr> [N]   schaltet €berwachungs-Modus fœr Session <Nr> aus
+
+TRANSPARENT-MODUS:
+
+  Im Transparentmodus gibt TSM die Bildschirmsteuerung an das Programm frei.
+
+    [X] [T] [Y]        setzt Transparent-Modus fœr aktuelle Session
+    [X] [T] <Nr> [Y]   setzt Transparent-Modus fœr Session <Nr>
+    [X] [T] [N]        schaltet Transparent-Modus fœr aktuelle Session aus
+    [X] [T] <Nr> [N]   schaltet Transparent-Modus fœr Session <Nr> aus
+
+
+--------------------- Terminal Session Manager Hilfe ---------- Seite 19 von 19
+
+UMGEBUNGSVARIABLEN:
+
+     HINWEIS: Umgebungsvariablen mœssen vor dem TSM-Start gesetzt werden.
+
+        TSMHOTKEY -- standardmÃﬁig "^W"
+        TSMLP     -- Name des Druckers
+        TSMTERM   -- Name des Terminal-Typs
+
+UMGEBUNGS-DATEIEN:
+
+        .tsm      -- TSM-Konfigurationsdatei
+        .tsmprint -- Drucker-Konfigurationsdatei
+        .tsmkeys  -- Softkey-Konfigurationsdatei
+
+SUCHPFAD: TSM sucht in folgenden Verzeichnissen nach Konfigurationsdateien:
+
+          1.) Das aktuelle Verzeichnis -- "."
+          2.) Ihr Home-Verzeichnis -- "$HOME"
+          3.) Das TSM Home-Verzeichnis -- "/usr/tsm"
+
+
+--------------------- Terminal Session Manager Hilfe --------- TEXTENDE

@@ -1,0 +1,461 @@
+
+.\" nroff -mm -rB3 -rW68 -rN2 NFS.testplan
+.\"
+.nr Ej 1
+.nr P 1
+.nr Cl 3   \" At least for now
+.ds HF 3 3 3 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'NFS System Test Plan'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'NFS System Test Plan' 'Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+SYSTEM TEST PLAN
+NETWORK FILE SYSTEM (NFS)
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 1
+First Edition - January 1987
+.ps 10
+.vs 12
+.sp 3
+.ce 3
+Author
+Steve Booth, CND
+Fort Collins  CO
+.sp 2
+.ce 3
+Current Maintenance
+Toni Atkinson, CND
+Fort Collins  CO
+.sp 1
+.ce 2
+HPUX mail: toni@hpcndm
+Telnet 229-4641
+.sp 6     \" Abstract
+
+.SA 1
+.ad
+The Transformers project at CND was responsible for insuring the quality of
+Hewlett Packard's port of SUN Microsystem's Network File System (NFS) to its
+Model 9000 computers. Since January 1988 CND's Team Arsenal has assumed
+responsibility for regression testing of NFS.
+.sp 1
+This document defines the tests which are necessary to meet HP's quality goals
+for the NFS product.
+.na
+
+.PH " 'NFS System Test Plan' 'History' "
+.H 1 "Revision History"
+.nf
+First Version.....................................January, 1987
+Second Version.......................................June, 1987
+    Generalizations for use by the 800 NFS project
+Third Version....................................February, 1988
+    Addition of information specific to 800 NFS 
+Fourth Version.......................................June, 1988
+    Additions for Series 300 - Release HP-UX 6.2
+    Additions for Series 800 - Release HP-UX 3.0
+
+.fi
+
+.PH " 'NFS System Test Plan' 'Preface' "
+.H 1 "Preface"
+
+.I
+Network File System
+.R
+(NFS) refers to the HP implementation of SUN
+Corporation's NFS, and is a mechanism for sharing file systems (ultimately
+files) in a heterogeneous environment.
+
+For a detailed description of HP's NFS offering on its Model 9000
+machines, including MUST, WANT, and NON- objectives, see the
+.I
+PRODUCT REQUIREMENTS DOCUMENT, S300/S800 NFS PROJECT
+.R
+[1].
+
+The tests described in this document derive largely from the
+Product Requirements Document (PRD), and from the official NFS testplan
+for ALL HP Model 9000 computers.
+
+.PH " 'NFS System Test Plan' 'Objectives' "
+.H 1 "Objectives"
+
+While the main objective of any testing effort is to isolate as many defects
+as possible prior to product shipment, there are nevertheless those
+.I key
+items that distinguish themselves enough to warrant explicit mention. For
+this project, those items are:
+.nf
+
+.BL
+.LI
+there will be at least one test case for each MUST objective in the PRD
+.LI
+testing will be completed in time to meet the customer shipment schedule
+outlined in the PRD
+.LI
+NFS scaffold tests should easily port to the IND scaffold; good
+documentation should be provided to insure this
+.LE
+
+.fi
+
+.H 2 "Non-Objectives and Known Risks"
+
+This test plan will specifically exclude testing in the areas discussed
+under the 'Non-Objectives' section of the PRD, 
+except as necessary to meet other goals. 
+
+Certification of HP-NFS through a VAX4.x gateway is not an objective.
+
+The quality of HP's NFS code will be at least as good as SUN's.  It is
+not an objective to meet the traditional FURPS quality goals.
+
+.PH " 'NFS System Test Plan' 'Assumptions' "
+.H 1 "Assumptions"
+
+The following are assumed for the NFS testing environment:
+.nf
+.BL
+.LI
+Kernel networking support: UDP, IP, Ethernet/IEEE 802.3 drivers
+.LI
+Yellow Pages commands and libraries in APPENDIX 1 of the PRD
+.LI
+NFS user commands in APPENDIX 3 of the PRD
+.LI
+NFS libraries and system calls listed in APPENDIX 4 of the PRD
+.LI
+modified HP-UX/networking commands as in APPENDICES 5 and 6 of the PRD
+.LI
+a version of the HP scaffold, tailored for HP-UX and similar
+operating systems [2]
+.LE
+.fi
+
+For the environment in which the NFS product is targeted, most of the gateway
+machines (currently) are SUN workstations.  Testing will therefore be skewed
+in that direction for the first S300 and S800 releases.  Subsequent releases
+will use SUN, S300, and S800 gateway machines.
+
+The entire NFS test suite will be compilable/runnable from
+both HP Series 3xx, Series 8xx, and SUN Microsystems workstations 
+with the exception of special tests such as performance tests which
+are not relevant to multi-vendor connectivity.
+
+Certification of the Vectra and VAX NFS offerings may require testing
+environments other than the scaffold.
+
+
+.PH " 'NFS System Test Plan' 'Strategy Overview' "
+.H 1 "Strategy Overview"
+
+.H 2 "NFS Test Environment"
+
+The test suite will exist in a self-contained subdirectory
+under a version of the HP test scaffold. The scaffold structure
+to be used is described in [2], and derives from inputs by lab
+engineers having experience with earlier scaffolds.
+
+Tests will in general be designed to run concurrently.
+
+'nfs' will be the major subdirectory name for the NFS project.
+
+.H 2 "One Program - Many Tests"
+
+For programs and/or scripts which contain many subtests, it is assumed that
+a passed/failed statement is generated (sent to stdout) for each
+.I subtest.
+For consistency (in isolating errors), the keywords
+.I passed
+and
+.I failed
+will be used.
+
+.H 2 "Machine Dependent Code"
+
+The following #ifdef statements may be used,
+.B IFF
+necessary, to isolate machine dependent code:
+
+.nf
+
+        #ifdef hpux         /* HP UNIX */
+        #ifdef hp9000s200   /* HP Series 200/300 */
+        #ifdef hp9000s800   /* HP Series 800 */
+        #ifdef sun          /* Sun Microsystems workstations */
+        #ifdef BSD4_2       /* UNIX 4.2bsd running on VAX */
+        #ifdef BSD4_3       /* UNIX 4.3bsd running on VAX */
+                            /* NOTE: BSD4_3 is defined in the */
+                            /* include file <sys/param.h> */
+
+        WARNING: #ifdef hp9000s300 DOES NOT WORK
+
+.fi
+
+
+.H 2 "Graphic Notation"
+
+Graphically depicted testing scenarios will use the following shorthand
+notations:
+
+.nf
+                Mnt     --  mount
+                Exp     --  export
+                Rcv     --  recv data
+                Snd     --  send data
+                Rcv/Ver --  receive and verify data
+
+                Opn     --  open system call
+                Clo     --  close system call
+                Rd      --  read system call 
+                Wri     --  write system call
+                Ioc     --  ioctl system call
+                Sel     --  Select system call
+                other system calls may be added
+
+.fi
+
+The use of low-resolution graphics to describe
+difficult test configurations is encouraged.
+
+.H 2 "Test Numbering Convention"
+
+Wherever possible the chapter/sub-chapter ID string generated 
+by this nroff source for the table of contents (TOC) will be the 
+unique identifier for each test scenario.
+For instance, if Chapter 5
+describes NFS functional testing, and its first subchapter describes
+symbolic link tests, then the nroff entry
+.I
+.nf
+
+        .H 2 "Symbolic Link Tests"
+
+.fi
+.R
+will generate the TOC-entry ID of \fB5.1\fR.
+Subchapters under "Symbolic Link Tests" will use the nroff
+directive
+.nf
+
+        .H 3 "test description"
+
+.fi
+and each subchapter will describe one symbolic link
+test. The TOC-entry IDs for these subchapters will be
+in the format \fB5.1.[1..n]\fR.
+
+The level of subchapters (e.g. the depth of subchapters)
+will not be limited to three (as in the above example), but will
+be dictated by need and determined by the engineer(s) responsible
+for the test chapters.
+
+.H 2 "Mapping Test Numbers into the NFS Subtree"
+
+The current scaffold guideline discourages the use of numbers as
+directory names.  A subdirectory tree named
+.B nfs/5/1
+(from the example in the previous paragraph) will therefore not be used,
+but will be mapped to an alphabetic equivalent (e.g.\fB nfs/func/symln\fR)
+to fulfill the spirit of the guidelines.
+
+The level and structure of subchapters (in a test chapter) will map into an
+equivalent level and structure of subdirectories under the nfs subdirectory.
+
+Tests in the lowest-level directories will share a common, meaningful
+name prefix; the test number (last number in the TOC string) will be the
+name suffix.  This will assure unique test names as well as provide an index
+into the testplan document.  Using the symbolic
+link example, and assuming there are 5 symbolic link tests, a graph of the
+symbolic link subtree might be:
+.DS
+
+            nfs
+             |
+        -----------
+        |
+      func
+       |
+     ---------   
+           |
+         symln
+           |
+ -----------------------------
+ |      |       |        |||||
+prog prog.fu prog.st symln.{01-05}
+
+.DE
+
+
+.H 2 "Test Packages"
+
+With the consolidation, in January 1988, of all network services 
+regression testing into a single CND test team it became 
+possible and necessary
+to document all aspects of network
+testing. This document,
+.I
+HPUX Network Services Regression Test Packages
+.R
+[7]
+, describes test suites, testing configurations, quality 
+requirements, hardware resources,
+and engineer time required for complete testing of NFS and the other
+network services, ARPA/Berkeley, RFA, and NFT, for any HP-UX release.
+Thus, it is an important supplement to this test plan and should be 
+consulted when such details are needed.
+
+.PH " 'NFS System Test Plan' 'Commands (NFS)' "
+.H 1 "NFS Commands Functionality (NerFS)"
+.\ There were too many ".so" macros for the formatter. Files are combined.
+.so cmds_one
+.\ rpcxdr_ktest \"Darren Smith
+.\ rpclib_tests \"John Dilley
+.so cmds_two
+.\ biod_tests \"Cristina Mahon
+.\ nfsd_tests \"Cristina Mahon
+.\ mountd_tests \" John Dilley
+.\ inetd_tests \"Cristina Mahon
+.so cmds_three
+.\ portmap_test \"Cristina Mahon
+.\ nfsstat_test \"Cristina Mahon
+.\ fsirand_test \"Cristina Mahon
+.so cmds_four
+.\ gtrpcent_tes \"Cristina Mahon
+.\ gtntgrent_ts \"Cristina Mahon
+.\ gtrpcport_ts \"Cristina Mahon
+.so cmds_five
+.\ innetgr_test \"Cristina Mahon
+.\ ruserok_test  \"Cristina Mahon
+.PH " 'NFS System Test Plan' 'Connectivity' "
+.so conn_tests \" Dan Simula
+.PH " 'NFS System Test Plan' 'Cross-Services ' "
+.so xserv_tests \" Jim Hunter
+.H 2 "NFS-NFT Tests"
+See [7] for testing details.
+.H 2 "NFS-NFT&RFA Tests"
+See [7] for testing details.
+.H 2 "NFS-ARPA/Berkeley Tests"
+See [7] for testing details.
+.so nfs_dux_test \"Jason Zions
+.PH " 'NFS System Test Plan' 'Functionality' "
+.so func_tests \" Jeff Elison, Jim Hunter
+.PH " 'NFS System Test Plan' 'Gateway' "
+.so gateway_test \" Steve Booth
+.PH " 'NFS System Test Plan' 'Getdirentries' "
+.so getdirent_ts \" Mike Shipley
+.PH " 'NFS System Test Plan' 'Hardware Configuration' "
+.so hardware_tes  \" Steve Booth
+.PH " 'NFS System Test Plan' 'Long Filenames' "
+.so longname_tes \" Steve Booth
+.PH " 'NFS System Test Plan' 'Memory Configuration Tests' "
+.so memory_tests \" Thomas Bartz
+.PH " 'NFS System Test Plan' 'Native Language Support' "
+.so nls_tests \" Cristina Mahon
+.PH " 'NFS System Test Plan' 'PC NFS deamon (pcnfsd)' "
+.so pcnfsd_tests \" John Dilley
+.PH " 'NFS System Test Plan' 'Performance' "
+.so perf_tests \" George Feinberg
+.PH " 'NFS System Test Plan' 'Quick Regression' "
+.so qr_tests \" Jeff Elison
+.PH " 'NFS System Test Plan' 'Recoverability' "
+.so recover_test \" Jim Hunter
+.PH " 'NFS System Test Plan' 'Reliability' "
+.so rel_tests \" Jeff Elison
+.PH " 'NFS System Test Plan' 'Rename' "
+.so rename_tests \" Mike Shipley
+.PH " 'NFS System Test Plan' 'RPC Commands' "
+.H 1 "RPC commands (John Dilley)"  \" DO NOT REMOVE - scb
+.so rpcinfo_test \" John Dilley
+.so rup_tests \" John Dilley
+.so rusers_tests \" John Dilley
+.so rwall_tests \" John Dilley
+.so showmount_ts \" John Dilley
+.so spray_tests \" John Dilley
+.PH " 'NFS System Test Plan' 'Security' "
+.so security_tes  \" Dan Simula
+.PH " 'NFS System Test Plan' 'Specific System Tests' "
+.so specific_tes \" Mike Shipley
+.PH " 'NFS System Test Plan' 'Virtual Home Environment' "
+.so vhe_tests \" Mike Shipley
+.PH " 'NFS System Test Plan' 'Asynchronous Writes' "
+.so async_tests \" Mark J. Kean
+.PH " 'NFS System Test Plan' 'UDP Checksumming' "
+.so udp_cksum \" Mike Shipley
+.PH " 'NFS System Test Plan' 'Stress' "
+.so stress_tests \" Jim Hunter
+.PH " 'NFS System Test Plan' 'Symbolic Links' "
+.so symlnk_tests \" Mike Shipley
+.PH " 'NFS System Test Plan' 'Yellow Pages' "
+.so yp_tests \"Jason Zions
+.PH " 'NFS System Test Plan' 'YP Destructive Testing' "
+.so destruct_tes \"Jason Zions
+.PH " 'NFS System Test Plan' 'References' "
+.H 1 "References"
+
+.nf
+1. Simula, Dan (dvs@hpcnd),
+.I
+   PRODUCT REQUIREMENTS DOCUMENT S300/S800 NFS PROJECT,
+.R
+   HP Internal Document, 11 Jan 1987
+
+2. Bartz, Thomas G. (t_bartz@hpcnd),
+.I
+   CND Section 1 Scaffold guidelines and Requirements,
+.R
+   HP Internal Document, 6 Jan 1986
+
+3. Freidel, Dennis (d_freidel@hpcnd),
+.I
+   RFA Black Box Test Plan,
+.R
+   HP Internal Document, 8 June 1985
+
+4. McCrigler, L. L. and Uppal, S.
+.I
+   File Access Performance Across the Network File System,
+.R
+   HP Internal Document, 19 January 1988
+
+5. Mowson, Bill (b_mowson@hpcnd),
+.I
+   NFS Series 3x0 Project Life Cycle,
+.R
+   HP Internal Document, February 1987
+
+6. Simula, Dan (dvs@hpcnd)
+.I
+   NFS - HP-UX Diskless : Interactions and Testing Scenarios,
+.R
+   HP Internal Document, 4 February 1987
+
+7. Arsenal Testing Team (dvs@hpcnd),
+.I 
+   HPUX Network Serivces Regression Test Packages
+.R
+   HP Internal Document, 1 June 1988
+.fi
+
+.\aH  for appendix, if any
+
+.TC 2 2 3 0 "NFS SYSTEM TEST PLAN" "TABLE OF CONTENTS"	\" table of contents

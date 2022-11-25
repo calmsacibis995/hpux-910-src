@@ -1,0 +1,109 @@
+#!/bin/sh
+#	@(#)$Revision: 1.8.109.1 $	$Date: 91/11/19 13:55:32 $
+#	headtrans	--	transfer header files to a system
+##
+#	input:	name of system to transfer header files
+#
+if [ $# -lt 1 -o $# -gt 1 ] ; then
+    echo usage: `basename $0` hostname 
+    exit 1
+else
+    HOST=$1
+    ROOT=root
+    MACH=${HOST}.${ROOT}
+fi
+
+echo `date "+%y.%m.%d %T"` $0 started
+
+if remsh ${HOST} -l ${ROOT} /bin/echo Proceeding with transfer ; then
+    echo transfering to ${HOST} as ${ROOT}
+else
+    echo ERROR: cannot transfer to ${HOST} as ${ROOT}
+    exit 1
+fi
+
+set -x
+rcp $nfs/include/bsdterm.h 	${MACH}:/usr/include
+rcp $nfs/include/bsdtty.h 	${MACH}:/usr/include
+rcp $nfs/include/checklist.h 	${MACH}:/usr/include
+rcp $nfs/include/ctype.h	${MACH}:/usr/include
+rcp $nfs/include/dbm.h		${MACH}:/usr/include
+rcp $nfs/include/errno.h	${MACH}:/usr/include
+rcp $nfs/include/fcntl.h	${MACH}:/usr/include
+rcp $nfs/include/memory.h	${MACH}:/usr/include
+rcp $nfs/include/mntent.h	${MACH}:/usr/include
+rcp $nfs/include/mnttab.h	${MACH}:/usr/include
+rcp $nfs/include/ndir.h		${MACH}:/usr/include
+rcp $nfs/include/netdb.h	${MACH}:/usr/include
+rcp $nfs/include/nl_ctype.h	${MACH}:/usr/include
+rcp $nfs/include/nl_types.h	${MACH}:/usr/include
+rcp $nfs/include/nlist.h	${MACH}:/usr/include
+rcp $nfs/include/pwd.h		${MACH}:/usr/include
+rcp $nfs/include/setjmp.h	${MACH}:/usr/include
+rcp $nfs/include/signal.h	${MACH}:/usr/include
+rcp $nfs/include/stdio.h	${MACH}:/usr/include
+rcp $nfs/include/string.h	${MACH}:/usr/include
+rcp $nfs/include/time.h		${MACH}:/usr/include
+rcp $nfs/include/unistd.h	${MACH}:/usr/include
+rcp $nfs/include/utmp.h		${MACH}:/usr/include
+rcp $nfs/include/vnode.h	${MACH}:/usr/include
+rcp $nfs/include/arpa/trace.h	${MACH}:/usr/include/arpa
+rcp $nfs/include/machine/param.h	${MACH}:/usr/include/machine
+rcp $nfs/include/net/if.h	${MACH}:/usr/include/net
+rcp $nfs/include/netinet/in.h	${MACH}:/usr/include/netinet
+rcp $nfs/include/nfs/nfs.h	${MACH}:/usr/include/nfs
+rcp $nfs/include/nfs/nfs_clnt.h	${MACH}:/usr/include/nfs
+rcp $nfs/include/nfs/rnode.h	${MACH}:/usr/include/nfs
+rcp $nfs/include/rpc/auth.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/auth_unix.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/clnt.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/pmap_clnt.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/pmap_prot.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/rpc.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/rpc_msg.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/svc.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/svc_auth.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/types.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpc/xdr.h	${MACH}:/usr/include/rpc
+rcp $nfs/include/rpcsvc/klm_prot.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/mount.h		${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/nlm_prot.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/rex.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/rstat.h		${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/rusers.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/rwall.h		${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/sm_inter.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/spray.h		${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/yp_prot.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/ypclnt.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/yppasswd.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/rpcsvc/ypv1_prot.h	${MACH}:/usr/include/rpcsvc
+rcp $nfs/include/sio/nsdiag0,h		${MACH}:/usr/include/sio
+rcp $nfs/include/sys/acl.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/bsdtty.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/dir.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/dir.hold		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/dk.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/errno.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/file.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/fs.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/getaccess.h	${MACH}:/usr/include/sys
+rcp $nfs/include/sys/ino.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/inode.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/ioctl.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/ipc.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/ns_diag.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/param.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/sem.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/signal.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/sitemap.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/socket.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/stat.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/sysmacros.h	${MACH}:/usr/include/sys
+rcp $nfs/include/sys/termio.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/types.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/user.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/vmmeter.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/vnode.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/wait.h		${MACH}:/usr/include/sys
+rcp $nfs/include/sys/x25_diag.h		${MACH}:/usr/include/sys

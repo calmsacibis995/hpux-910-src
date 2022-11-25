@@ -1,0 +1,92 @@
+/*    SCCS    REV(64.1);       DATE(92/04/03        14:22:10) */
+/* KLEENIX_ID @(#)mac2defs	64.1 91/08/28 */
+
+
+/*	68000 Registers */
+
+	/* registers */
+# define D0 0
+# define D1 1
+# define D2 2
+# define D3 3
+# define D4 4
+# define D5 5
+# define D6 6
+# define D7 7
+# define A0 8
+# define A1 9
+# define A2 10
+# define A3 11
+# define A4 12
+# define A5 13
+# define A6 14
+# define SP 15
+# define F0 16
+# define F1 17
+# define F2 18
+# define F3 19
+# define F4 20
+# define F5 21
+# define F6 22
+# define F7 23
+
+# define FP0	24
+# define FP1	25
+# define FP2	26
+# define FP3	27
+# define FP4	28
+# define FP5	29
+# define FP6	30
+# define FP7	31
+# define FP8	32
+# define FP9	33
+# define FP10	34
+# define FP11	35
+# define FP12	36
+# define FP13	37
+# define FP14	38
+# define FP15	39
+
+# define BYTEOFF(x) ((x)&01)
+# define BITOOR(x) ((x)>>3)  /* bit offset to oreg offset */
+
+
+
+# define REGSZ 40
+
+# define TMPREG A6
+
+
+
+# define genfcall(a,b) gencall(a,b)
+
+
+#ifdef FASTMATCH
+# define SCCON 0200000	/* constants bwtn -128 and 127, reqs 32 bit int */
+# define SICON 0400000	/* constants bwtn -32768 and 32767, reqs 32 bit int */
+# define S8CON 01000000	/* constants bwtn 1 and 8, reqs 32 bit int */
+# define SZERO SPECIAL  /* constant 0, reqs 32 bit int */
+# define SONE  02000000	/* constant 1, reqs 32 bit int */
+# define SMONE 04000000	/* constant -1, reqs 32 bit int */
+#else 
+# define SCCON (SPECIAL|0200000)	/* requires 32 bit int */
+# define SICON (SPECIAL|0400000)	/* requires 32 bit int */
+# define S8CON (SPECIAL|01000000)	/* requires 32 bit int */
+# define SZERO SPECIAL			/* requires 32 bit int */
+# define SONE  (SPECIAL|02000000)	/* requires 32 bit int */
+# define SMONE (SPECIAL|04000000)	/* requires 32 bit int */
+#endif /* FASTMATCH */
+
+# define MYREADER(p) myreader(p)
+
+/* calls can be nested on the 68000 */
+# define NESTCALLS
+
+#	define REWFLD() 1
+#	define CALLREG(p) D0
+#	define INSPUT(p) cerror( "insput" )
+#	define LASTCHANCE(a,b) 0
+#	define GENSCALL(p) genscall(p)
+
+# 	define adrcon(val) prntf( CONFMT2, (val) )
+# 	define rcount() if(++nrecur>maxrecur) cerror("expression causes compiler loop: try simplifying")

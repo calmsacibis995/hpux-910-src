@@ -1,0 +1,77 @@
+#!/bin/ksh
+# @(#) $Revision: 66.3 $
+#
+fileset=UUCP
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# /usr/lib/dialit is supposed to be a CDF, but wasn't at 7.0
+#======
+if [ -H /bin -a ! -H /usr/lib/dialit ]; then
+    if [ -f /usr/lib/dialit ]; then
+	/usr/bin/makecdf -c HP-PA /usr/lib/dialit
+    else
+	#
+	# Create an empty CDF
+	#
+	/bin/mkdir /usr/lib/dialit
+	/bin/chmod 4555 /usr/lib/dialit
+    fi
+fi
+
+#======
+# Configuration (customizable) files.
+# Copy them from the uucp newconfig directory if they dont already
+# exist.
+#======
+#
+#           FROM                                   TO
+set -- \
+  /usr/lib/uucp/newconfig/Devices         /usr/lib/uucp/Devices        \
+  /usr/lib/uucp/newconfig/Dialcodes       /usr/lib/uucp/Dialcodes      \
+  /usr/lib/uucp/newconfig/Dialers         /usr/lib/uucp/Dialers        \
+  /usr/lib/uucp/newconfig/Maxuuscheds     /usr/lib/uucp/Maxuuscheds    \
+  /usr/lib/uucp/newconfig/Maxuuxqts       /usr/lib/uucp/Maxuuxqts      \
+  /usr/lib/uucp/newconfig/Permissions     /usr/lib/uucp/Permissions    \
+  /usr/lib/uucp/newconfig/Poll            /usr/lib/uucp/Poll           \
+  /usr/lib/uucp/newconfig/Systems         /usr/lib/uucp/Systems        \
+  /usr/lib/uucp/newconfig/dialit$CDF      /usr/lib/dialit$CDF          \
+  /usr/lib/uucp/newconfig/dialit.c        /usr/lib/dialit.c            \
+  /usr/lib/uucp/newconfig/remote.unknown  /usr/lib/uucp/remote.unknown \
+  /usr/lib/uucp/newconfig/uudemon.poll    /usr/lib/uucp/uudemon.poll   \
+  /usr/lib/uucp/newconfig/uudemon.hour    /usr/lib/uucp/uudemon.hour   \
+  /usr/lib/uucp/newconfig/uudemon.admin   /usr/lib/uucp/uudemon.admin  \
+  /usr/lib/uucp/newconfig/uudemon.cleanu  /usr/lib/uucp/uudemon.cleanu
+
+while [ $# -gt 0 ]; do
+    cond_cp $1 $2
+    shift 2
+done
+
+#======
+# Fix up permissions and ownership of /usr/lib/uucp/Systems so that
+# it is not readable by those who shouldn't read it.
+# Also ensure that the permissions on /usr/spool/uucppublic are
+# correct.
+#======
+chmog 440 uucp daemon /usr/lib/uucp/Systems
+chmog 777 bin bin /usr/spool/uucppublic
+
+#======
+# create the L_sub file if necessary
+#======
+if [ ! -f /usr/lib/uucp/L_sub ]; then
+    touch /usr/lib/uucp/L_sub
+    chmog 644 uucp daemon /usr/lib/uucp/L_sub
+fi
+
+exit $exitval

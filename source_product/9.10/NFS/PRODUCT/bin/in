@@ -1,0 +1,41 @@
+#!/bin/sh
+##	@(#)$Revision: 1.14.109.1 $	$Date: 91/11/19 13:55:37 $
+#	front end for checkin/checkout/uncheckout
+##
+#	determines the current working directory relative to the
+#	development environment /nfs/develop/USERNAME, and prepends that
+#	onto the names of the files to check in or out.
+#	added "uncheckout" functionality under name "unout"
+##
+NAME=`basename $0`
+
+if [ $# -eq 0 ] ; then
+	echo	"Usage: $NAME file [files...]" ; exit 1
+fi
+
+DEVELOP="$Nfs/develop/[^/]*"
+CWD=`pwd|sed -e "s,$DEVELOP/,,"`
+FILES=`ls $* | sed -e "s,^,$CWD/,"`
+
+case $NAME in
+    "in" )
+	echo checkin $FILES
+	exec checkin $FILES
+	;;
+    "cin" )
+	echo checkin $FILES
+	exec checkin $FILES
+	;;
+    "out" )
+	echo checkout $FILES
+	exec checkout $FILES
+	;;
+    "unout" )
+	echo uncheckout $FILES
+	exec uncheckout $FILES
+	;;
+    *)
+	echo $NAME -- unknown invocation name
+	exit 1
+	;;
+esac

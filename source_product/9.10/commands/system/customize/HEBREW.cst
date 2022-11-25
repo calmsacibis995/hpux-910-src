@@ -1,0 +1,16 @@
+#!/bin/ksh
+# @(#) $Revision: 66.1 $
+
+#======
+# Normally, we would remove any fileset related information for an
+# obsolted fileset.
+#
+# This isn't necessary for this release, since the fileset name hasn't
+# changed.  Normally, we would use the fileset_obsolete function to
+# do this work, but HEBREW is not in the table used by that function
+# (because of support and distribution issues within Arabic countries).
+#
+# Thus, this script simply exits with a 0 status.
+#======
+
+exit 0

@@ -1,0 +1,1052 @@
+Mon Apr 16 15:07:48 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	Updated Copyright.
+
+	Check in as 1.50.
+
+	Indented again.
+
+	Check in as 1.51.
+	
+	Check in as 2.0 (R2Beta).
+
+Sun Apr  8 17:14:14 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	Task_send_packet() to do all send()s and sendto()s in one place.
+
+	Use #defines to rename *printf to gd_*printf.  Some systems don't
+	like redefinition of library calls.
+
+	Lotsa linting.
+
+	Remove nmi.[ch], dead protocol.  An interface to ISODE SMUX is in
+	the future.
+
+Sat Apr  7 21:08:20 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	All ioctl's and fcntl's done by protocols are now done by calling
+	task_set_options.  If.c and krt.c still use ioctl's directly.
+
+	All protocols set SO_DONTROUTE, BGP and EGP only if the peer is on
+	the same net.  Routing protocols shouldn't depend on the routing
+	table.
+
+Fri Apr  6 21:08:33 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	Remove rt_entry free list, it shouldn't buy anything over using
+	free and calloc().
+
+	Add default generation to BGP.  Rewrite default generation so each
+	time a peer tries to install default a reference count is
+	incremented.  When this this count goes back to zero, default is
+	deleted.  Peers should delete it when they leave the active state.
+
+Tue Apr  3 09:06:51 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	Indent and beautify.
+
+	Add check for HELLO and RIP to only collapse route if the subnet or
+	network it is being collapsed into has a non-infinity metric and is
+	valid for announcement out this interface.
+
+	For RIP and HELLO, do not flash unreachable routes of the same
+	protocol back to the same interface from which they were learned.
+
+	RIP, HELLO and BGP were not checking revision numbers correctly and
+	would flash once more than necessary.
+	
+	Parse_adv_append() was not increasing the reference count of every
+	element of the adv list.  The caused adv_free_list() to free
+	elements that were in use.
+
+	BGP considered net/host unreachable/down as fatal errors.
+		
+Mon Apr  2 02:11:52 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	BGP was storing AS direction in wrong place causing a bogus path to
+	be generated.  BGP and EGP were freeing gw_entry but not clearing
+	parse_gwp which caused dumps on a re-init (might cause them if two
+	'gateway' options were specified).  Reset install flag before
+	re-init.  Need code to reset interface flags (PASSIVE, NORIP*,
+	NOHELLO*, METRICSET) .
+
+	Fixes from HP.  Fix a few bugs with lexer.l; a few lines were
+	inside the #ifdef FLEX_SCANNER that should not have been.  Needed a
+	'static' for an initialized structure in nmi_trap_linkUpDown().
+
+	Define typedef sockaddr_un which is a union of all needed sockaddr
+	types.  All support routines should use this type to be protocol
+	specific.  Defined sockclear_in() to init an inet socket.  Changed
+	all references to sizeof (struct sockaddr) to socksize(&sockaddr)
+	conditionally compiled for BSD 4.4 to use sa_len.
+	
+	Vsprintf %A format now takes the address of a sockaddr_un and
+	prints the correct format for the protocol type.  For AF_INET,
+	specifying alternate format (#) will cause the port number to be
+	printed if it is non-zero.  Changed all uses of %A to point to a
+	sockaddr_un instead of pass a struct in_addr.
+
+	Add RTS_DELETE flag, deleted routes are deleted from the kernel,
+	but keep around for the holddown interval.  (Maybe all routes
+	should go into delete mode after a holddown to insure they are
+	flooded?)  Rt_alloc() trashes any deleted routes when a new one is
+	added with the same protocol and gateway.  Rt_gwunreach() now calls
+	rt_delete so external routes will be removed from kernel during
+	termination.
+
+	Generalize AS paths and HELLO window information into protocol
+	specific data pointed to by rtd_data in rt_data structure pointed
+	to by rt_data.  Routines rtd_alloc(), rtd_insert(), rtd_locate()
+	and rtd_unlink() manipulate this data.  Rt_trash() calls
+	rtd_unlink() to automagically free data.  Rt_dump calls (void)
+	(*rtd_dump()) to print this data on a routing table dump.
+
+	Added mask to rt_add call.  If pointer is null the mask is
+	calculated.  Destinations have to be unique, can't have two with
+	different masks.  Damn, I wish I had the Patricia code!  P2P and
+	LOOPBACK interfaces will now have a subnetmask of all ones and a
+	subnet of the host address (should that be local or remote?).
+	Combined host routes and network routes into one routing table.
+
+	Prototyped inet() routines, still need to prototype trace routines.
+	Turned on -Wwrite-strings and added alot of const declarations.
+	Const is defined as null if not using __STDC__.
+
+	Changed int_net, int_netmask, int_subnet and int_subnetmask into
+	sockaddr_un structions.  Rearranged and did a bit of cleanup in
+	init_if and if_check.  Really need to re-write this to support
+	dynamic interfaces.
+
+	Added task_ifchange which is called when an interface status
+	changes.  Modified NMI and SNMP to take advantage of this.
+
+	Added config.h and moved all the system specific defines their from
+	defs.h.  Moved less commonly used includes from includes.h to files
+	that use them.
+
+	Renamed icmp_redirect() to rt_redirect() and changed the parser to
+	support 'redirect on { ... }' instead of "icmp on { ... }".  Added
+	support for tracing ICMP packets.
+
+	Support for BSD 4.4 route socket with a queue of requests.  Needs
+	some testing and optimization, but the interface is not fixed yet.
+	Memory for control block structures should be allocated in groups
+	to reduce the number off calloc() calls.  Need some stats, such as
+	how many transactions processed, the high-water mark, number of
+	timed-out requests, possibly even min, max and average transaction
+	time.
+
+	Prototype trace.c and str.c routines.  Varargs routines are not
+	prototyped if __HIGHC__ or ibm032 defined as ANSI varargs does not
+	work with gcc on the RT.
+
+	Moved nlist() call to krt_init and generalized to avoid so many
+	defines for systems that don't need the leading '_'.  Krt_init()
+	calls krt_rtread() with kmem fd.  Nlist entries are referenced by
+	global (to krt) pointers.
+
+	Added task_dump to task structure.  This simplifies installation of
+	new protocols by eliminating modifications to trace.c for the dump
+	routine.
+
+	Untested port to AIX/PS2.  Had to define ${RANLIB} in
+	Makefile.config as AIX/PS2 does an automatic ranlib.  Fixed bugs
+	with nlist code.  Non-flex lexical analyizer was not correctly
+	opening first file.  Partly ported to AIX/6000, still does not
+	compile. 
+
+	Update recv_msg.c with changes from HP.  
+
+	SNMP interface to PSI snmpd tested and debugged.  EGP tested and
+	debugged on VAX-11/750 running BSD 4.3, Sun-3/260 running SunOS
+	4.0.3.  BGP debugged and tested on IBM-PC/RT running IBM/4.3.
+
+	Check in as 1.49.
+	
+Fri Feb  2 17:19:09 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.c, bgp.h, bgp_init.c bgp_rt.c, defs.h, egp.c, egp.h,
+	* egp_init.c, egp_param.h, egp_rt.c, ext.c, hello.c, icmp.c, if.c,
+	* if.h, if_rt.c, include.h, krt.c, lexer.l, main.c, nmi.c, parse.c,
+	* parse.h, parser.y, rip.c, rt_control.c, rt_control.h, rt_table.c,
+	* rt_table.h, snmp.c, task.c, task.h
+
+	Protoize most function definitions.  Vararg functions still need to
+	be protoized.
+
+	Remove RTS_STATIC, static routes have a protocol of RTPROTO_STATIC.
+	RTF_UP is only updated when updating the kernel, IFS_UP is used
+	instead.  Krt_change now calls krt_add and krt_delete instead of
+	doing the work itself.
+
+	Dynamic reconfiguration implemented, but not well tested.  Still
+	need to clean up BGP and EGP peers if protocols not enabled.  May
+	be able to make BGP and EGP code a bit smarter about keeping a peer
+	up.  Should expand adv_entry structure to have a list of AS's,
+	dest_masks, interfaces, or gateways.  Have code to compress into
+	one adv_entry after list has been parsed.  Adv_alloc show be given
+	a size to allocate.  Debugging code for adv_entry memory leaks has
+	not been removed.
+
+	Changed task and timer macros to properly deal with current entry
+	being removed.  Changed timer active queue to be in order of
+	priority.
+
+	Use MSG_DONTROUTE for P2P links.  Will this work in all cases?  It
+	should since we only refer to P2P links by their destination
+	address.
+
+	Should implement tracing based on task.  Each task has it's own
+	tracing flags and are passed to trace().  Need new definition of
+	levels, such as TR_FATAL, TR_PROTO, TR_RECVUPD, TR_SENDUPD, ...
+	Global flags should be defaults for all newly created tasks (what
+	about reparse?).
+
+	Check in as 1.48.
+
+
+Sun Jan 28 21:10:44 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* egp.c
+
+	Print int_addr.sin_addr, not int_addr.
+
+	Check in as 1.47
+
+Fri Jan 26 11:47:48 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* krt.c, parse.c, parser.y, rt_table.c, rt_table.h, str.c, rip.c,
+	* rt_control.c, rt_control.h
+
+	Fixes from limited testing on an 11/750: Krt_delete_krt was not.
+	checking test_flag and install.  Parser was not echoing commands
+	correctly.  Parser was not using correct gateway list for
+	propagation lists, now echo protocols as they are detected.
+	Correctly calculate the number of unique routes in the routing
+	table.  Print time correctly.  Byte order does not have to be
+	swapped with printing IP addresses.
+
+	Add GWF_ACCEPT,GWF_REJECT and GWF_QUERY flags to keep track of
+	what gateways send what RIP packets.  Need to expand other
+	protocols likewise.
+
+	Add conditional compilation so old kernel routing table reading
+	code is not included on BSD 4.4 systems.
+
+	Check in as 1.46.
+
+
+Wed Jan 24 00:37:38 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* nmi.c, nmi.h, snmp.c, task.c, Makefile.gated
+
+	SNMP: Make backward compatible with older versions of snmpd.
+	Return the correct mask for the default route.
+
+	NMI: Update to latest rev of spec, which adds attributes.  Return
+	the correct mask for the default route.  Was not correctly setting
+	egpNeighStateUps and egpNeighStateDowns.
+
+	Was using sprintf incorrectly in timer_name.  Minor tweak in
+	Makefile.gated syntax.
+
+	Check in as 1.45.
+
+	* defs.h
+
+	Automatically detect BSD versions greater than 4.3 Tahoe for
+	treating sprintf() as returning an int.
+
+	Check in as 1.44.
+
+	* bgp_init.c, egp.c, hello.c, hello.h, if.c, nmi.c, parse.c, rip.c,
+	* rt_table.c, str.c, inet.c, task.c
+
+	Make value passed to vsprintf()'s %A format consistently be a
+	struct in_addr.  This should be a sockaddr with vsprintf() printing
+	the correct address depending on type.
+
+	Bug in inet_ntoa() wouldn't print 0's in the middle position.
+	Coded address expansion inline in vsprintf(); call sprintf() from
+	inet_ntoa().  Changed %T format from a call to display_time() to
+	in-line code.
+
+	Check in as 1.43.
+
+Tue Jan 23 17:18:11 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* egp.c, egp.h, egp_init.c, main.c, nmi.c parse.c, parse.h,
+	* parser.y, rt_table.c, rt_table.h, snmp.c, snmp.h, task.c, trace.c 
+
+	Add support for MIB-2.  Restructure SNMP and MIB to provide
+	routines for groups instead of each variable.  Debug SNMP against
+	modified version of NYSERnet's SNMP daemon.  Remove sysDescr from
+	SNMP.  Remove SGMP support totally.
+
+	Make EGP consistent with use of error variable, always init to
+	NOERROR and send errors if != NOERROR.
+
+	Check in as 1.42.
+
+
+Mon Jan 22 11:28:17 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* krt.c, rt_table.c, defs.h, egp.c
+
+	Bug reports from Ross Veach.  Check for _rthashsize value being
+	zero and use RTHASHSIZ value if so.  Move GATEWAY definition to
+	rt_table.c so krt.c reflects compile-time option.  EGP was not
+	counting a Poll towards reachability.  EGP was not putting mode in
+	Confirm packet.
+
+	Check in as 1.41.
+
+	* make, Makefile.gated, Makefile.config
+
+	Use ${MAKE} in Makefile.gated and init to ./make -k in
+	Makefile.config.  Same with ${AWK} and /bin/awk. Rewrite ./make as
+	a /bin/sh script.
+
+	Check in as 1.40.
+
+Fri Jan 19 17:07:03 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* nmi.c, nmi.h
+
+	Cleanup and bug fixes.  Convert to object identifier element being
+	size long.
+
+	Check in as 1.39.
+
+	* if.c, if.h, if_rt.c
+
+	IFF_KEEPMASK needed parens, was setting flags incorrectly.  Typo in
+	test for IFS_METRICSET.  If_rtupdate() will call if_check() if it
+	receives a packet from an interface that is marked down.  Change
+	two calls to nmi_trap_linkUpDown to one.
+
+	Should write task_send which all routines call that calls if_check
+	on ENETDOWN.
+
+	Check in as 1.38.
+
+Thu Jan 18 13:50:03 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* Makefile.gated, compat/Makefile.gated, compat/h_errs.c,
+	* compat/h_errno.c, compat/strcasecmp.c 
+
+	SunOS 4.0 defines h_errno and HOST_NOT_FOUND in netdb.h but does
+	not provide h_errno, create compat/h_errno.c to emulate.
+
+	Fix rcsid's to be unique.
+
+	Make was not always visiting compat/
+
+	Check in as 1.37.
+
+	* defs.h, egp.c, egp.h, egp_init.c, if.c, main.c, nmi.c, nmi.h,
+	* parse.c, parser.y, rt_table.c, rt_table.h, trace.c, trace.h
+
+	Initial implementation of NMI interface to communicate with snmpd.
+	Not complete, don't use it.
+
+	Modifications necessary to selectively compile protocols.  Gateway
+	default generation needs some work in this area.
+
+	Check in as 1.36.
+
+Wed Jan 17 22:09:34 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* rip.c
+
+	Restore sin_port before replying to RIP RESPONSE and request
+	packets.  Thanks to Wendy Huntoon for finding this one.
+
+	* compat/herrs.c
+
+	Extracted h_errlst and h_nerr from /usr/src/lib/libc/net/herror.c
+	and inserted added to the compatibitily library as herrs.c for
+	systems with older versions of bind 4.8 resolver libraries and
+	earlier.
+
+	Check in as 1.35.
+
+Mon Jan 15 13:36:06 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp_init.c
+
+	Was not maintaining network byte order in sin_port.
+
+	* if.c
+
+	Changed defines that detect SunOS without ifr_broadcast to simplify
+	code by defining ifr_broadcast to be ifr_addr.
+
+	Check in as 1.34
+
+	* egp_rt.c
+
+	A missing continue statement caused routes that were rejected by
+	propagate() to be included in an update anyway.
+
+	* rt_table.c
+
+	If one route to a destination with a lower preference already
+	existed, a new route would be inserted in front of it instead of
+	behind it.  Rt_insert() just checked for a lower preference.
+	Changed the default insertion to insert behind the last element,
+	which also works for the first element being added.
+
+	Check in as 1.33.
+
+Mon Jan  1 15:31:40 1990  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* parser.y, parse.c, rt_table.c
+
+	Allow BGP and EGP to use peer and neighbor interchangably.  Print
+	"neighbor" when redisplaying input.  BGP or EGP messages still need
+	to be changed.
+
+	Add a comment to note that the mask for the default route should be
+	0.0.0.0. 
+
+	Check in as 1.32.
+	
+
+Tue Dec 19 00:17:41 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* parse.c, rt_table.c, rt_table.h, parser.y, egp_rt.c, bgp_rt.c
+
+	Print interpretation of h_errno on systems that support it.
+		
+	Remove restriction of one route per protocol, per AS, leave up to
+	protocol to determine.  For STATIC, ICMP, RIP and HELLO, this
+	should be one route per protocol.  For IGRP, OSPF, ODV? this should
+	be one route per protocol per AS.  For BGP and EGP this should be
+	one route per source gateway.  Delete rt_locate_as() and add
+	rt_locate_gw() which locates a route given the destination,
+	protocol and source gateway.  Modify EGP and BGP to use this
+	routine.  Modify parser to use rt_locate() instead of
+	rt_locate_as(), we are ready for inter-AS static routes.  Check in
+	as 1.31.
+
+	* rip.c, ripquery.c, version.awk
+
+	Ripquery used inet_makeaddr which returns a structure, not
+	compatible with GCC.  RIP response code did not save source port
+	and returned the response to RIP port.
+
+	Version.awk did not support modified version of rcsid, version was
+	only indicating version of header files.
+
+	Check in as 1.30.
+
+Mon Dec 18 21:27:48 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* rip.c, hello.c
+
+	Don't send whole net to it's subnets.  Correct code to send
+	subnets.  Use RIPHOPCNT_INFINITY instead of METRIC_INFINITY, it
+	works much better :-(.  Check in as 1.29.
+
+Sun Dec 17 21:57:31 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* parser.y, parse.c
+
+	Was incorrectly using the address of the local side of a
+	point-to-point link instead of checking and returning the
+	destination address.  Also, refer to the destination address of a
+	point-to-point link when printing an interface address.  Thanks to
+	Toerless Eckert.  Check in as 1.28.
+
+Sat Dec 16 12:32:37 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* defs.h
+
+	Detect signal type in latest AIX/370.  Check in as 1.27.
+
+	* if.c, if.h, parser.y
+
+	Fix off-by-one error reported by HP.  Add IFF_METRICSET to indicate
+	that metric was set in config file and should not be re-read from
+	the interface.  Check in as 1.26.
+
+Mon Dec 11 14:30:40 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.h, bgp_init.c, egp.h, egp_init.c, parser.y
+
+	Move display of EGP and BGP peers into parser, change format to
+	match input syntax.  Change format of static routes to match input
+	syntax.  Allow a quoted string as a hostname, allowing reserved
+	words as host and network names.  Check in as 1.25.
+
+
+Thu Dec  7 11:32:53 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* trace.c, trace.h, parser.y, parse.c, task.c, main.c, rip.c,
+	* hello.c, bgp_rt.c, bgp_init.c
+
+	Split TR_JOB into TR_TIMER and TR_TASK.  Check in as 1.24.
+
+	* defs.h, bgp.c, bgp.h, bgp_init.c, bgp_rt.c, rt_table.c
+
+	Check in as 1.23.
+
+
+Tue Dec  5 16:25:54 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* defs.h
+
+	Added hpux to the list of systems on which sprintf() returns
+	and int.
+
+	* bgp_rt.c, rt_table.c
+
+	Was not recording the AS numbers in the AS path.
+	
+
+Mon Dec  4 23:12:54 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.h, bgp.c, bgp_init.c
+
+	Changed bgp_connect_complete to call bgp_event_Open[Fail]
+	instead of bgp_state_..., system routines should only cause
+	events, not change state.
+
+	Removed dependency on SO_ERROR by use of getpeername().
+
+	Uncommented use of bind() for connecting socket.
+
+
+Sun Dec  3 12:18:16 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* defs.h, if.c, rt_table.c
+
+	Use INADDR_LOOPBACK (define it if it is not already) instead
+	of local definition.  Check in as 1.22.
+
+
+Tue Nov 21 13:13:33 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* parse.c, parse.h, parser.y, rt_table.c
+
+	YYDEBUG is defined as 0 by some (all) yacc's, needed to change
+	references to it.  Pcc does not like automatic aggregate
+	initialization, fix in rt_add().  Check in as 1.21.
+
+	* defs.h, main.c
+
+	Use LOG_DAEMON as a key to having 4.3 syslog.  Check in as
+	1.20.
+
+
+Mon Nov 20 20:51:42 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.h, defs.h, hello.c, hello.h, if.c, parse.c, rip.c, rt_control.c,
+	* rt_control.h, rt_table.c, rt_table.h
+
+	Checked in as revision 1.19
+
+	* defs.h
+
+	Use BSD4_3 instead of BSD43 as it is defined in
+	/usr/include/sys/param.h.  No longer need defines for RT43,
+	BSD43 or UTX32_2_X.  But what about BSD 4.3 Tahoe?
+
+	Use RTM_ADD as a clue for pre 4.4 BSD to at least get gated to
+	compile.  Still need something to detect Tahoe as it defines
+	sprintf as int.
+
+	* rt_table.c, rt_control.c, rt_control.h, if.c
+
+	Added is_martian and call in rt_add to check for martians.
+	The exception is 127.0.0.1 on a loopback interface.  Change
+	order of check for loopback interfaces to check if flag is set
+	before comparing the network.
+
+	* parse.c
+
+	Parse_eof was freeing file name, but first file name was not
+	malloc'd.  Changed parse_parse to pass malloc'd string to
+	parse_open.
+
+
+Fri Nov 17 16:48:11 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.h, defs.h, hello.c, hello.h, if.c, rip.c, rt_table.c,
+	* rt_table.h 
+
+	Add support for rth_parent, pointing to a route that could
+	subsume this one.  Use in RIP and HELLO route sending code.
+
+	Move rth_dest_mask generation to rth_locate.
+	
+	Rewrite HELLO packet reading and writing routines to be less
+	dependent on structures (which may not work right on some
+	architectures).  Heavy use of macros makes it easy.  Rename
+	m_hdr to msg_hdr to prevent a conflict on pre-4.4 BSD.
+	Hello_supply did not set host table for host routes.
+
+	
+Wed Nov 15 16:36:00 1989  Jeffrey C Honig  (jch at risci.tn.cornell.edu)
+
+	* bgp.c bgp.h bgp_init.c bgp_rt.c defs.he gp.c hello.c if.c
+	* krt.c lexer.l parse.c parser.y rip.c rt_table.c rt_table.h
+
+	Remove direction and add origin to AS path, fake in BGP.
+	Default BGP direction is horizontal or internal.  Fix socket
+	leak bug in bgp.  Add time type in parser and bgp holdtime.
+	Internal BGP links use protocol RTPROTO_IBGP, with routes
+	flagged as RTS_NOTINSTALL, RTS_NOADVISE.  Removed up and down
+	as choices for BGP directions.
+
+1.10:
+	New parser
+	BGP implementation
+	EGP 2 rewrite
+	Timing/packet reception/tasking
+	Tracing rewrite using vsprintf
+	local version of vsprintf
+	rt_timer_max and HOLDDOWN flag
+	SNMP enhancements and traps
+	rt_gwunreach does HOLDDOWN
+	Flash updates!
+	static interface routes
+	removed egpnets reachable, reconstmetric, fixedmetric
+	AS paths
+	AIX/370, AIX/PS2 support
+	
+1.9.1.2:
+	Have to htonl(LOOPBACKNET) or loopback route gets delete on
+	VAXen 
+
+1.9.1.1:
+	SNMP fixes
+
+1.9:
+	if_ifwithaddr compared whole socket, including port number!
+	linting
+
+1.8:
+	Convert to using strcasecmp and strncasecmp.
+	Create str.c with all string routines.
+	Set masks for all signals.
+
+1.7:
+	Add fixes for Multinet.
+	Fixes to external metric processing in EGP.
+	Log reasons for EGP errors, clean up EGP errors
+	Allow static routes with metric zero, but not RIP routes.
+	Stuart Levy's fixes for parsing bugs
+
+1.6:
+	Merge in SNMP code from Mark Fedor, merge SNMP and SGMP code.
+	Change rt_metric_egp to rt_metric_external.
+	Rt_add returns pointer to the route added.
+	Remove reconstitutemetric code.
+
+1.5:
+	Split NSS code from rt_table.c to rt_nss.c
+	Split icmp code from main.c and rt_table.c to icmp.c
+
+1.3.1.76:
+	Change message format of redirect message.
+	Add Jacob's mods
+	Clean up interface up/down and timeout code.
+
+1.3.1.75:
+	Add support for SNMP queries of _GW_pr_DODip_rt_gateway.
+
+1.3.1.74:
+	Remove Kirton from copyright heading.
+	Rt_delete used an rt_entry after it was freed.
+	Split horizon is no longer applied to RIPCMD_POLL.
+	Get and remember hostname for logs and SGMP queries.
+
+1.3.1.73:
+	Have to fix byte order of _GW_version_rev
+	Support for new RCS in version.awk
+
+1.3.1.72:
+	Clean up tracing.  Add TRACE_xUPD.
+	Format the result of parsing of rt_resinit.
+	Enhance S[GN]MP tracing.
+	Add S[GN]MP version variable to sgmpd interface.
+	Phil Woods fix for Sun SPARC compiler error
+
+1.3.1.71:
+	Prevent RIP from sending the whole net of on a subnetted
+	network.
+
+1.3.1.70:
+	Change to vax11c define for location of dump file.
+	Fix for net 192.9.0.0.  Ross Veach's "gateway" option to
+	"egpneighbor" clause.  Define sigmask if not defined.  Added the
+	AS parameter to the egpneighbor clause to set the AS of routes
+	learned from this neighbor.
+
+1.3.1.69:
+	Add support for Sun enhancements to RIP.  Allow RIP queries from
+	off net hosts.  RIP and HELLO tracing now only trace headers
+	unless update is specified.
+
+1.3.1.68:
+	If announcetoAS for EGP is specified, internal nets will only be
+	sent if the internal AS is specified.
+	Exit if no config file, one interface and a default route
+	exists.
+
+1.3.1.67:
+	Support for Ultrix 3.0 (as of 3.0FT1).  Clean up a few messages
+	modified in 1.3.1.64.
+
+1.3.1.66:
+	Change defaults to RIP yes, EGP no, HELLO no.  Clean up
+	processing and displaying of protocol selections.  If default
+	init file is missing, assume /dev/null.
+
+1.3.1.65:
+	Add a missing Multinet mod.
+	Add diagnostics to RIP input packet processing.  Process
+	Requests per RFC1058, except for off-net requests.
+
+1.3.1.64:
+	C. Philip Wood's SunOS 4.0 mods.
+
+1.3.1.63:
+	Kenneth Adelman's Multinet mods.
+
+1.3.1.62:
+	Listen restrictions should not apply to static and default
+	routes.
+
+1.3.1.61:
+	Fix a few log messages.  Don't let less attractive EGP route
+	override another EGP route until it is two updates old.  EGP and
+	IGP routes should not use defaultegpmetric.
+
+1.3.1.60:
+	Add Mark Fedor's latest SNMP code with support for querying EGP
+	neighbors. 
+
+1.3.1.59:
+	RIP and HELLO would not override PASSIVE routes, this should be
+	STATIC routes.  PASSIVE is for not timing the route out, STATIC
+	is for non-overrideable routes.
+
+1.3.1.58:
+	Internal interface flags were not saved during interface
+	transitions.  Subnet mask and address were not properly
+	calculated when an interface was restored.
+
+1.3.1.57:
+	close() should be fclose().  Forgot to update pointers to sendas
+	lists when rereading AS restrictions.
+
+1.3.1.56:
+	{no,}restrict option should apply to NSS code.  Fixes from Yakov.
+
+1.3.1.55:
+	rt_NRupdate() should set change flag when a route is marked as
+	unreachable.  Add 'restrict' flag to announcetoAS clause.
+
+1.3.1.54:
+	Don't init SGMP variables every minute, it causes sgmpd to use
+	too much memory.
+
+1.3.1.53:
+	NSS fixes from Yakov.
+	metricin was being treated as a byte instead of a full metric.
+
+1.3.1.52:
+	Fix bugs in execution of RIP/HELLO gateway.
+
+1.3.1.51:
+	Add NYSERnet's S[GN]MP interface.
+
+1.3.1.50:
+	On USR1, reread as routing information and do an if_check.
+
+	EGP code was not reseting rt_timer after the first time it heard
+	a route.
+
+1.3.1.49:
+	'rt_NRupdate: net %s not valid from AS' only send to syslog if
+	NSS, only send to tracefile if TRACE_PKT.  #ifdef notdef'd
+	announce messages.
+
+	Write /etc/gated.version file with pid, start time, version and
+	build time.
+
+	When validAS was used, EGP distance was not checked for
+	infinity.  Do not rt_change an EGP route if metric and gateway
+	are the same.
+
+	NSS mods from Yakov.
+
+1.3.1.48:
+	A few NSS mods from Yakov.  Make sure routes from non-immediate
+	EGP neighbors are properly ignored.  Make use of rt_locate in
+	egp code.
+
+1.3.1.47:
+	Change {donot,}sendAS to {no,}announcetoAS
+
+1.3.1.46:
+	Metric of RTPROTO_DIRECT routes set to interface metric, not
+	zero. 
+
+1.3.1.45:
+	Allow specification of an interface on an egpneighbor clause to
+	aid in peering with neighbors on different physical nets.  Also
+	allow specification of polled net.  Clean up code that checks
+	polled net.
+
+1.3.1.44:
+	Fix two bugs in NSS code.  Major linting.
+
+1.3.1.43:
+	RIP and DIRECT are the only protocols that allow a metric of
+	0 to point to the attached network.  Support for EGP 3 error
+	code 6.
+
+1.3.1.42:
+	rt_unreach() sets metric and time differently for interior and
+	exterior routes.  If the metric is less then infinity,
+	rt_unreach() is now called from rt_time_interior() and
+	rt_time_exterior().  rt_unreach() prints HOLDDOWN message. 
+	Defined 'HOLD_DOWN' which is FINAL_DELETE-EXPIRE_TIME.  Fix hold
+	down period so it is at least HOLD_DOWN.  Rt_timer needs to be
+	an absolute time at which the route expires, timing is not
+	accurate enough now.
+
+	Allow for more than 255 nets per distance in EGP updates by
+	generating another entry with the same distance.  Fixed EGP
+	incoming and outgoing distances will no longer override a
+	distance of infinity (255).
+
+1.3.1.41:
+	Recode route timeout code.  Recode mapmetric adding
+	EGP from and to HELLO.  HELLO(RIP_INFINITY-1) is used on all
+	INTERIOR routes.
+
+1.3.1.40:
+	E.J.Norman's mods:
+	Allow specification of subnetted class C networks in
+	gethostornetname.  Support timestamp in trace file.  Allow
+	"pointtopoint" as an alias for "pointopoint".  Only
+	RTPROTO_DIRECT networks are considered directly attached when
+	the metric is 0.
+
+1.3.1.39:
+	Fixes to 1.3.1.38.  Added metric to 'defaultgateway'
+	clause.  Rt_time() should reinstall 'defaultgateway'
+	when an existing default times out.
+
+1.3.1.38:
+	Modifications to support IBM NSFnet routers during
+	visit to IBM Yorktown.
+
+1.3.1.37:
+	Modifications to support IBM NSFnet routers and
+	Regional connections.
+
+1.3.1.36:
+	Needed a type cast in tracing code.
+	Direct interface must be on an annoucelist.
+	Add reason to syslog of Error packet
+	
+1.3.1.35:
+	Fix a typo from 1.3.1.33.
+	Fix an EGP problem with network byte order.
+	Fix the spelling of a couple of error messages.
+
+1.3.1.34:
+	Add AS# to routing table, set from EGP packet, set to
+	'autonomoussystem' specified AS# for interior protocols.  Print
+	in dump file if not the same as global AS#.
+
+1.3.1.33:
+	Define gd_error(errno) to print the current error.  Fix printing
+	of sendto() errors.  Remove calls to perror().
+
+1.3.1.32:
+	Detail reasons why a net is not included in an EGP update.  If
+	noannounce clause is used, all other nets should be announced
+	with defaultegpmetric (or 255).  Add defaultegpmetric to dump
+	file.
+
+1.3.1.31:
+	Maintain a counter of the number of nets for egp to use when
+	noannounce is used.
+
+1.3.1.30:
+	EGP code did not set the proper gateway when it was on a shared
+	net.  EGP code would also send information about the shared net.
+	Moral: Don't compare and int to a struct s_addr.
+
+1.3.1.29:
+	Set MSG_DONTROUTE for sendto calls that are not pointtopoint. 
+	Otherwise, when an interface route times out, the packets will
+	not go out the correct interface.
+
+1.3.1.28:
+	Enhance contents of gated_dump:
+		Print status and addresses of EGP neighbors
+		Print list of martian networks.
+		Hello window says 'updates' not 'minutes'
+	Add 'traceflags' clause to initfile.
+
+1.3.1.27:
+	Fix printing of message when interface times out.
+
+1.3.1.26:
+	Expand on martian net table defined in 1.3.1.22.  Basic table
+	defined in rt_control.h is now stored as strings.  Add
+	"martiannets" clause to init file.  Add martian net checking to
+	RIP, HELLO, KERNEL and ICMP redirect code.
+
+1.3.1.25:
+	Clean up timing out of interface routes.  Don't let the metric
+	increase if a couple of routing packets are missed.  EGP packets
+	should reset the timer.  Make sure rip_supplier and
+	hello_supplier are false if RIP and HELLO 'no' is used.  Print
+	messages when route is expired.
+
+1.3.1.24:
+	Fix calculation of n_remote_nets when more than one
+	egpnetsreachable clause is used.
+
+1.3.1.23:
+	If not BSD42 or UTX32_1_X use getdtablesize() when closing all
+	open files.
+
+1.3.1.22:
+	Fix EGP packet processing on systems with byte ordering
+	different from VAXen.  Enhance EGP packet tracing.  Add martian
+	filtering for invalid EGP nets.  Make sure that only Class A, B or
+	C networks are sent in EGP updates.  Added define
+	EGP_UPDATE_FORMAT to format EGP network upate packets.
+
+1.3.1.21:
+	Fix trace file processing.  Print messages to syslog and gated
+	log when tracing is started and stopped.  Explicitly open and
+	close stdout and stderr to same trace file.  
+
+1.3.1.20:
+	Set two high order bits in the HELLO date field and leave the
+	rest at zero.  This prevents the Fuzzballs from looking at this
+	field. 
+
+1.3.1.19:
+	Fix HELLO metric calculation.  Add the interface metric
+	converted to a HELLO time delay on input.  Add 100ms on output
+	as the time delay through this gateway.  Also add the interface
+	metric converted to a HELLO time delay on output.
+
+1.3.1.18:
+	Support for sending partial HELLO's.  Gated already knows how to
+	receive them.  Add more diagnostic messages, especially for
+	errors from sendto()
+
+1.3.1.17:
+	Support for IBM PC/RT, needs a seperate define because of a bug
+	in sscanf that is similar to UTX/32.  Also, to support HiC,
+	strict casting is required when dealing with null pointers.
+
+1.3.1.16:
+	Don't let fixed metrics override RIP and HELLO gateway default.
+
+1.3.1.15:
+	Fix interaction between TRACE defines and an if-else without
+	curly's.  Also fix complaints of indent for possible future
+	indentation. 
+
+1.3.1.14:
+	Add support for 'fixedmetric' clause in configuration file. 
+	Fixedmetric causes all outbound routes for the specified
+	protocol that are not infinity to be set to the specified
+	metric.  Fixed metrics will be displayed in the gated_dump file.
+
+1.3.1.13:
+	Fuzzball Hold-down rewrite.  Do not switch to a route that is in
+	fuzzball hold-down.  If using a route that is in fuzzball
+	hold-down, do not let the route time out during hold-down, even
+	if the incoming metric is infinity or greater.  If using a route
+	that is in fuzzball hold-down, print a LATCHED message.
+
+	If a route in use comes in as infinity or more, print an
+	UNREACHABLE message.
+
+1.3.1.12:
+	Version.awk will print a message indicating the version number.
+
+	Thomas Narten's mods to correct miniumum EGP timer calculation
+	and clean up some messages.
+
+1.3.1.11:
+	Don't restrict the internal addition of default for use with
+	RIP and HELLO gateway.  This route previously could have been
+	restricted by 'listen', preventing proper operation of RIP and
+	HELLO gateway.
+
+1.3.1.10:
+	Improve processing of routes in fuzzball hold-down (latched).
+	A latched route will be ignore unless it is the current route,
+	then the metric will be updated and a message printed.  HELLO
+	routes must be 25% better than the old route before being
+	selected.  Formerly gated used a HELLO route if it was 100ms
+	better.
+
+1.3.1.9:
+	Gated will detach from the terminal and go into the background
+	if trace options are specified AND a log file is specified. 
+	Gated will still remain in the foreground if trace options are
+	specified and no log file is specified.
+
+1.3.1.8:
+	HELLO gateway was not being checked along with RIP gateway in
+	serveral places where is should have been.  This might have lead
+	to incorrect processing of default when HELLO gateway was
+	configured and RIP gateway was not.
+
+1.3.1.7:
+	Another correction to calculation of HELLO link delay.  Do not
+	add the interface metric * 100 to the delay on output.
+
+1.3.1.6:
+	Thomas Narten's mods:
+		Significant timing improvements to EGP.
+		Respond to a RIP request from non-offical ports.
+		Fix for multiple subnetted nets with Sun OS.
+
+1.3.1.5:
+	Add LOG_FACILITY define to allow tailoring of facility used by
+	syslog. 
+
+1.3.1.4:
+	Correct calculation of HELLO link delay, suggested by Mike
+	Petry.  Do not add the interface metric * 100 to the delay on
+	input.  Always add 100ms to the link delay on input to copy the
+	Fuzzball's operation on an Ethernet.  Gated does not support
+	HELLO on a non Ethernet line.
+
+1.3.1.3:
+	Add rcsid variable to each source file to aid in identifing
+	gated versions.  Added global version variable that is generated 
+	from the version numbers of all the source and include files at
+	compile time. 
+
+1.3.1.2:
+	Incorporate latest RIP<->HELLO translation table recommended
+	by Dave Mills.
+
+1.3.1.1:
+	Recognize and remove the "latched" bit in a HELLO delay after
+	printing a informational message.
+
+
+;;Local variables:
+;;eval:	(setq fill-prefix "	")
+;;eval:	(setq fill-column 75)
+;end:

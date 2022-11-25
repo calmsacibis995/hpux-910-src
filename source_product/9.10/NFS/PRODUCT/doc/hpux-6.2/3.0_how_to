@@ -1,0 +1,292 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'How to Recreate the HP-UX 3.0 NFS release"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.nr Hu 1	\" define Appendix header and format
+.nr a 0
+.de aH
+.nr a +1
+.PH "'How to Recreate the HP-UX 3.0 NFS release''Appendix \\na'"
+.HU "\\$1"
+..
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+HOW TO RECREATE THE HP-UX 3.0 NFS RELEASE
+S800 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:31:47 $
+$Revision: 1.2.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Dave Matthews
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document describes how to restore the development environment,
+how to modify and rebuild the product and contains an index of what
+is included on the tape provided to manufacturing.
+.na
+.H 1 "How to restore the development environment"
+.ad
+.sp
+To restore the development environment the following steps are
+necessary (perform them as superuser):
+.sp
+.AL
+.LI
+Retrieve the contents of the tape into a directory.  We will
+call that directory from now on MAIN to simplify the examples.
+You can call that directory anything.
+The tape was created by using "cpio -o | compress | tcio -or <device>".
+So, to restore from the tape use:
+.sp
+tcio -ivr <device> | uncompress | cpio -idmvu 
+.sp
+.LI
+Set the environment variable Nfs to be MAIN/working.
+For example in Bourne shell:
+.sp
+.nf
+# Nfs=MAIN/working
+# export Nfs 
+.sp
+.fi
+Make sure that the variable Nfs is always defined.  That can be
+achieved by setting Nfs to MAIN/working in /etc/profile (for sh and ksh users) 
+and /etc/csh.login (for csh users).
+.LI
+Make a directory under MAIN/working/develop with your normal login name.
+Under that directory create a directory called log and touch a file
+called setup.  All those should be owned by the user whose login name
+we have used.
+.sp
+For example,
+.sp
+.nf
+# cd MAIN/working/develop (or cd $Nfs/develop)
+# mkdir chm (where chm is user on the system)
+# mkdir chm/log
+# touch chm/log/setup
+# chown chm chm chm/log chm/log/setup
+.fi
+.LI
+Login as the normal user and set the environment variable nfs to 
+MAIN/working/develop/"normal user".
+For example in Bourne shell,
+.sp
+.nf
+% nfs=MAIN/working/develop/chm
+% export nfs
+.sp
+.fi
+We strongly suggest that the variable nfs always be setup.  That can be
+achieved by setting the variable nfs to MAIN/working/develop/$LOGNAME in 
+/etc/profile (for ksh and sh users) and /etc/csh.login (for csh users).
+.LI
+Now execute $Nfs/bin/setup as that user.  This will setup a development
+environment with both user and kernel NFS code.  The setup basically links
+all the files and subdirectories in the main directory MAIN/working to your
+development environment.  You might want to add $nfs/bin or $Nfs/bin to
+your path to simplify executing development environment commands.
+.LI
+For more details about the development environment you can read the
+document DE.Detail.mm kept under $Nfs/doc.
+.LE
+.na
+.sp 2
+.H 1 "How to Remake the NFS commands"
+.sp
+.ad
+CND provides the NFS user level code for the s800.  Therefore this 
+document explains how to rebuild the user level code and not the
+kernel code for the s800 release 3.0 NFS product.
+.sp
+To simplify remaking the NFS commands setup your development environment
+as described in section 1 then follow these steps:
+.sp
+.AL
+.LI
+Change directory to your development environment (cd $nfs).
+.LI
+Execute the command setup_rel specifying the release you want to 
+retrieve and what portions of that release.  That command looks
+for the release tag file specified on the command line and retrieves
+the files based on the revision level listed on that file.
+To setup the NFS commands directory for HP-UX release 3.0, execute
+setup_rel as follows:
+.sp
+$nfs/bin/setup_rel HP-UX_3.0 cmds include
+.sp
+.LI
+If you want to rebuild all the NFS commands from the HP-UX 3.0 release,
+once setup_rel has terminated, remove the executables that are built on
+the main directory.  That is done by executing $nfs/bin/MAKE with the 
+clobber option at the top directory of the cmds tree on your development
+environment.
+.sp
+cd $nfs/cmds
+$nfs/bin/MAKE clobber
+.sp
+.LI
+Now, change the variable TOOL_DIR in $nfs/bin/MAKE so that variables like CC, 
+ST_CC, etc. contain the path to where those commands live, $Nfs/bin/s800/3.0.
+.LI
+At this point you are ready to rebuild all the commands.  To do that
+execute MAKE without any options at the top directory of the cmds tree on 
+your development environment.  MAKE will execute a make with the Makefile 
+on the current directory.  That is why you should be at the top of the 
+cmds tree, so that all the commands are rebuilt.  
+.sp
+cd $nfs/cmds
+$nfs/bin/MAKE.
+.sp
+You might want to redirect the output of this command to a file so that
+you can examine it later.  This command will remake all the NFS commands
+and libraries, including the NET, RPC and YP library routines that are part
+of libc.a, even though those are not shipped with NFS but with HP-UX.
+The NFS 800 user level commands will be under the 800 directories on the
+cmds tree.  Executing $nfs/bin/MAKE on any one of the 800 directories 
+will build the commands that need building on that directory.
+.LE
+.sp 2
+.na
+.H 1 "How to modify NFS commands"
+.sp
+.ad
+If you want to modify one of the NFS commands or library routines
+follow the steps 1 and 2 in section 2 (How to Remake the NFS commands).
+Then you will be ready to check out the file you need to work on.
+To do that follow these steps:
+.AL
+.LI
+cd to the directory where the file you want to change resides.
+For example, if I want to change domainname.c, I would do:
+.sp
+cd $nfs/bin
+.LI
+Look at the release file for 3.0 (HP-UX_3.0) and locate the file
+you want to change.  Check to see what revision level that file
+was at for the 3.0 release.  For example, the domainname.c file will have the
+following line in HP-UX_3.0 file:
+.sp
+10.4	/nfs/working/rcs/cmds/bin/domainname.c,v
+.sp
+or look at the RCS file $Nfs/rcs/cmds/bin/domainname.c,v to see what version
+was tagged with S800/3_0 tag:
+.sp
+head $Nfs/rcs/cmds/bin/domainname.c,v 
+.sp
+So what we do is:
+.sp
+co -l -r10.4 $Nfs/rcs/cmds/bin/domainname.c,v
+.sp
+This created a branch for that file.
+.LI
+You can now make the changes necessary to that file and check them back
+into RCS.
+.sp
+ci RCS-file
+.sp
+For example,
+.sp
+ci $Nfs/rcs/cmds/bin/domainname.c,v
+.LI
+You can now build the command or library routine by executing a $nfs/bin/MAKE
+in the directory where the file resides.
+.LE
+.na
+.sp 2
+.H 1 "Index of tape contents"
+.sp
+.ad
+The tape delivered to manufacturing for the NFS product released with 
+HP-UX 3.0 contains the following directories:
+.sp
+.BL
+.LI
+bin: 
+.sp
+Contains the tools used by the development environment and build
+process.  Under its subdirectory, s800/3.0, it contains the assembler,
+compiler, loader and other tools used to build this version of the 
+NFS product.
+.LI
+cmds:
+.sp
+Contains all the user level NFS commands and library routines. 
+Replace the libc.a library under $nfs/cmds/libc with the one under 
+$nfs/bin/s800/3.0 to rebuild the NFS commands so that you can be sure
+of using the one that was shipped with 3.0.
+.LI
+develop:
+.sp
+Contains the development environments of all the developers of NFS.
+The only thing that should be in those are the setup files and any 
+files they might have checked out.  
+.LI
+doc:
+.sp
+Contains the documents for the NFS project.  It contains the ERS, IRSs
+and other documents.  See the README file for more details.
+.LI
+include:
+.sp
+Contains the header files used to build the NFS user level code.  The
+files under the rpc, rpcsvc and nfs directories, as well as dbm.h, are
+part of the NFS product (dbm.h is not shipped though).  All the other
+files were obtained from the UDL shared source and are the files that
+were used to build the released product.  The header files for the s800
+build are under the 800 directory.
+.LI
+.LI
+log:
+.sp
+Contains the log files resulting from the build process.  Files of particular
+interest in this directory are the update* files.  Those files show what
+changes have been made to all the files that are part of the NFS product.
+It is a complete log since the beginning of the project.
+.LI
+man:
+.sp
+Contains the most up to date man pages for NFS product.  The RCS files
+for the man pages do not reside on our system.
+.LI
+releases:
+.sp
+Contains the tag files used for each release.
+.LI
+rcs:
+.sp
+Contains the RCS files for all the files in the previous directories.
+.LI
+system:
+.sp
+Contains the customize script for the NFS 800 product.
+.LI
+test:
+.sp
+Contains Sun's test suites for release 3.0 and 3.2.  It also contains 
+some performance tests for NFS.
+.LI
+all other directories contain information that can be disregarded for the
+s800 3.0 build.
+.LE
+.na
+.sp 2
+.TC 2 2 4 0 "EXTERNAL REQUIREMENTS SPECIFICATIONS DOCUMENT" "TABLE OF CONTENTS"

@@ -1,0 +1,92 @@
+@(#)NFS update_info file:	$Revision: 1.5.109.1 $	$Date: 91/11/19 14:47:03 $
+
+********************
+* NFS Services/300 *
+********************
+
+	The following information describes the major changes to the NFS
+	Services/300 product since the 6.2 release.
+
+NFS 3.2 features
+----------------
+
+	With HP-UX 6.5, the NFS 3.2 features are now supported.  The
+	major features in NFS 3.2 are remote file locking, rpcgen, rex,
+	and NFS support for named pipes and device files.  These are
+	discussed in more detail below.
+
+Remote File Locking
+-------------------
+
+	The Lock Manager (rpc.lockd) and Status Monitor (rpc.statd)
+	provide System V compatible file and record locking (fcntl(2)
+	and lockf(2) calls) for NFS files.  Only advisory locks are
+	supported for NFS files.
+
+	File locking requests go to the local node's rpc.lockd first.
+	It then checks with the local statd, and then calls the remote
+	lockd to service the request.  The local lock request will block
+	and cannot be killed until a response is received from the remote
+	rpc.lockd.
+
+RPCGEN
+------
+
+	RPCGEN is a tool that takes high level (C-like) descriptions of
+	server and client programs and produces skeleton programs.
+	These programs have the appropriate rpc calls inserted to allow
+	the two programs to exist on separate machines and use rpc to
+	communicate with each other.  The skeleton programs have stub
+	functions which call the user-supplied server and client
+	functions that do the actual processing.  RPCGEN was created to
+	take the tediousness out of remote procedure programming.
+
+REX - Remote Execution Service
+------------------------------
+
+	The Remote Execution Service, REX, is similar to remsh(1) in
+	that it allows execution of processes on remote machines.
+	However, it is based on RPC instead of just TCP.  Also, it adds
+	the following features beyond remsh(1):
+
+	a)  Capability   to  handle  interactive   processes,  including
+	    propagation  of  the  current  terminal/tty driver  settings,
+	    such as interrupt character, etc.
+	b)  Determination of the current  directory,  and the ability to
+	    NFS mount that  directory from the machine acting as the REX
+	    server.
+	c)  Passing  of  ALL environment  variables  from  the currently
+	    executing process.
+	d)  Propagation of the current window size.
+	e)  Propagation of the interrupt signal to the remote process.
+
+Named Pipes and Device Files
+----------------------------
+
+	Access to named pipes and device files is now supported with
+	NFS.  All access is relative to the client, so only processes on
+	the same NFS client will be able to communicate using a named
+	pipe with NFS, and device files are interpretted to mean a
+	device attached to the client system.
+
+RPC and XDR
+-----------
+
+	RPC is now updated to be compatible with the Sun 3.9 version.
+
+NFS Defect fixes
+----------------
+
+	The 6.5 release of NFS contains fixes for several defects,
+	including:
+
+	+  Fixes for "freeing free inode" panic that could occur after
+	   an fsck on reboot.
+
+	+  Fixes for a potential data corruption when using O_APPEND
+	   with NFS.
+
+	+  moved the umount/mount of nfs file systems to a new file
+	   called /etc/netnfsrc2 in order to be done after starting
+	   inetd.  This allows nfs loopback mounts from /etc/rc (at
+	   bootup).

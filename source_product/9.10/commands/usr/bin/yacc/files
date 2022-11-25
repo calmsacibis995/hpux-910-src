@@ -1,0 +1,41 @@
+/* @(#) $Revision: 70.3 $ */      
+	/* this file has the location of the parser, and the size of the progam desired */
+	/* It may also contain definitions to override various defaults: for example,
+	/* WORD32 tells yacc that there are at least 32 bits per int */
+#ifdef vax
+# define WORD32
+#endif
+#if u3b || u3b5
+# define WORD32
+#endif
+
+/* assume that all hpux machines are 32 bits, at least for now */
+#ifdef hpux
+#define WORD32
+#endif
+	/* on some systems, notably IBM, the names for the output files and tempfiles must
+	/* also be changed  */
+
+	/* For OSF, make the default table sizes nice and large */
+#ifdef OSF
+# define WORD32
+# define DOMAIN_OS
+#endif /* OSF */
+
+	/* (default) location of the parser text file */
+#ifdef OSF
+#ifdef PAXDEV
+# define PARSER "/paXdev/lib/yaccpar"
+#else
+# define PARSER "/usr/ccs/lib/yaccpar"
+#endif
+#else
+# define PARSER "/usr/lib/yaccpar"
+#endif /* OSF */
+
+	/* basic size of the Yacc implementation */
+#ifdef WORD32
+# define HUGE
+#else
+# define MEDIUM
+#endif

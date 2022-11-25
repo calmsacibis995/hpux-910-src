@@ -1,0 +1,22 @@
+#!/bin/sh
+# @(#) $Revision: 70.2 $    
+#
+# NOTE:    This script is not configurable!  Any changes made to this
+#          scipt will be overwritten when you upgrade to the next
+#          release of HP-UX.
+#
+# WARNING: Changing this script in any way may lead to a system that
+#          is unbootable.  Do not modify this script.
+
+
+#
+# Check the root file system.
+#
+if [ -c /dev/rroot ]; then
+    echo "    Checking root file system."
+    /etc/fsck -P -F /dev/rroot
+    echo "    Root check done, starting up init."
+else
+    echo "The device file /dev/rroot does not exist or is not correct."
+    echo "Automatic checks of the root file system not performed."
+fi

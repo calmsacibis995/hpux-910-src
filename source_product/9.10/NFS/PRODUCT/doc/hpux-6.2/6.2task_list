@@ -1,0 +1,103 @@
+
+
+
+NFS 300 6.2 release Task List 
+------------------------------
+
+Checkpoint: I -> L
+  Tasks:                                           Person Resp.  Date Due
+
+  1. Initial project documentation complete:		|mjk	| DONE	|
+  2. Decision on what will be included in the		|all	| DONE	|
+     6.2 release made.
+
+
+Checkpoint: Functional Complete Milestone Date: March 1, 1988
+
+  Tasks:                                           Person Resp.  Date Due
+  1. All code changes for additional functionality
+     completed.
+     VHE						|fm	| DONE	|
+     YP							|dae	| DONE 	|
+     UDP Checksum					|fm	| DONE 	|
+     Longfile names					|dds	| DONE 	|
+  2. New man pages and man page changes for new	
+     functionality completed.
+     VHE						|fm	| DONE 	|
+     /etc/exports (async-write)                         |mjk    | DONE  |
+  3. All input for manual changes required by new
+     functionality given to documentation.
+     VHE						|fm	| DONE 	|
+     UDP Checksum					|fm	| DONE 	|
+  4. Test plans complete.			
+     VHE						|fm	| DONE	|
+     UDP Checksum					|fm	| DONE 	|
+     YP          					|dae	| DONE 	|
+     Small directory reads				|fm 	| DONE 	|
+     async-writes                                       |mjk    | DONE  |
+  5. Measurement of current NFS performance		|mjk,dds| DONE 	|
+     350 to 350.
+  6. All changes needed to reach 75% of SUN3/260	|mjk,dds| DONE 	|
+     results defined.
+  7. Training and support plan in place for		|fm	| DONE*	|
+     VHE. (Tech Support).
+  8. Decide what metrics to use                         |jbl	| DONE	|
+  9. Shared source                                      |dds	| DONE  |
+ 10. Build process                                      |dds	| DONE  |
+ 
+* Done unless Chuck needs more information
+
+Checkpoint: Deliver to IC 1 Milestone Date: March 14, 1988
+
+  Tasks:                                           Person Resp.  Date Due
+  1. All code changes for performance			|mjk,dds| DONE  |
+     enhancements complete.
+  2. Code submitted for IC1 build.			|dae	| DONE  |
+  3. Measurement of current NFS performance		|mjk,dds| DONE  |
+     350 to 350. 
+  4. Tests complete and put into CND scaffold.	
+     VHE						|fm,chm	| DONE  |
+     UDP Checksum					|fm	| DONE  |
+     YP          					|dae	| DONE  |
+     Small directory reads				|fm 	| DONE  |
+  5. Metrics in place					|mjk	| DONE  |
+     Performance, defects, BFA for changes
+  6. Have NFS fileset determined                        |dae	| DONE  |
+  7. First review of NFS Install                        |mjk	| DONE  |
+  8. First review of VHE                                |fm	| DONE  |
+  9. First review of RFA/NFS                            |fm	| N/A   |
+ 10. Code freeze plan done for IC1                      |dds,chm| DONE  |
+
+
+Checkpoint: Deliver to IC 2 Milestone Date: March 28, 1988
+
+  Tasks:                                           Person Resp.  Date Due
+  1. All major defects (weight 5 and above		|fm,dae	| DONE  |
+     fixed).
+  2. Code submitted for IC2 build.			|dae	| DONE  |
+  3. Measurement of current NFS performance		|mjk,dds| DONE  |
+     350 to 350. 
+  5. Regression tests complete (arsenal)		|fm,dae	| DONE  |
+  6. Final review of NFS Install                        |dae    | DONE  |
+  7. Final review of VHE                                |fm	| DONE  |
+  8. Final review of RFA/NFS                            |fm	| N/A   |
+  9. Create MR Checklist                                |dae    | DONE  |
+ 10. BFA kernel made                                    |dds,fm | DONE  |
+ 11. BFA coverage up to 75% on new code                 |all    | DONE 	|
+ 12. Code freeze plan done for IC2                      |dds,chm| DONE  |
+
+
+Checkpoint: Deliver to Final SSIT Milestone Date: April 27, 1988
+
+  Tasks:                                           Person Resp.  Date Due
+  1. All major defects (weight 5 and 			|fm,dae	| DONE  |
+     above) fixed.
+  2. Code submitted for Final SSIT.			|dae	| DONE  |
+  3. Measurement of current NFS performance		|mjk,dds| DONE  |
+     350 to 350. 
+
+Checkpoint: MR Milestone Date: June 21, 1988
+  Tasks:                                           Person Resp.  Date Due
+  1. Metrics complete					|mjk	| June 7|
+  2. Post Mortem tasks					|fm 	| June 7|
+  3. MR Checklist complete				|dae	| June 7|

@@ -1,0 +1,268 @@
+/* @(#) $Revision: 70.1 $      */
+int yylineno =1;
+# define YYU(x) x
+# define NLSTATE yyprevious=YYNEWLINE
+ 
+#ifdef YYNLS16_WCHAR
+unsigned char yytextuc[YYLMAX * sizeof(wchar_t)];
+# ifdef YY_PCT_POINT /* for %pointer */
+wchar_t yytextarr[YYLMAX];
+wchar_t *yytext;
+# else               /* %array */
+wchar_t yytextarr[1];
+wchar_t yytext[YYLMAX];
+# endif
+#else
+unsigned char yytextuc;
+# ifdef YY_PCT_POINT /* for %pointer */
+unsigned char yytextarr[YYLMAX];
+unsigned char *yytext;
+# else               /* %array */
+unsigned char yytextarr[1];
+unsigned char yytext[YYLMAX];
+# endif
+#endif
+
+struct yysvf *yylstate [YYLMAX], **yylsp, **yyolsp;
+unsigned char yysbuf[YYLMAX];
+unsigned char *yysptr = yysbuf;
+int *yyfnd;
+extern struct yysvf *yyestate;
+int yyprevious = YYNEWLINE;
+yylook(){
+	register struct yysvf *yystate, **lsp;
+	register struct yywork *yyt;
+	struct yysvf *yyz;
+	int yych, yyfirst;
+	struct yywork *yyr;
+# ifdef LEXDEBUG
+	int debug;
+# endif
+/*	char *yylastch;
+ * ***** nls8 ***** */
+	unsigned char *yylastch, sec;
+	/* start off machines */
+# ifdef LEXDEBUG
+	debug = 0;
+# endif
+	yyfirst=1;
+	if (!yymorfg)
+#ifdef YYNLS16_WCHAR
+		yylastch = yytextuc;
+#else
+		yylastch = yytext;
+#endif
+	else {
+		yymorfg=0;
+#ifdef YYNLS16_WCHAR
+		yylastch = yytextuc+yylenguc;
+#else
+		yylastch = yytext+yyleng;
+#endif
+		}
+	for(;;){
+		lsp = yylstate;
+		yyestate = yystate = yybgin;
+		if (yyprevious==YYNEWLINE) yystate++;
+		for (;;){
+# ifdef LEXDEBUG
+			if(debug)fprintf(yyout,"state %d\n",yystate-yysvec-1);
+# endif
+			yyt = &yycrank[yystate->yystoff];
+			if(yyt == yycrank && !yyfirst){  /* may not be any transitions */
+				yyz = yystate->yyother;
+				if(yyz == 0)break;
+				if(yyz->yystoff == 0)break;
+				}
+			*yylastch++ = yych = input();
+			yyfirst=0;
+		tryagain:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(yyout,"char ");
+				allprint(yych);
+				putchar('\n');
+				}
+# endif
+			yyr = yyt;
+			if ( (int)yyt > (int)yycrank){
+				yyt = yyr + yych;
+				if (yyt <= yytop && yyt->verify+yysvec == yystate){
+					if(yyt->advance+yysvec == YYLERR)	/* error transitions */
+						{unput(*--yylastch);break;}
+					*lsp++ = yystate = yyt->advance+yysvec;
+					goto contin;
+					}
+				}
+# ifdef YYOPTIM
+			else if((int)yyt < (int)yycrank) {		/* r < yycrank */
+				yyt = yyr = yycrank+(yycrank-yyt);
+# ifdef LEXDEBUG
+				if(debug)fprintf(yyout,"compressed state\n");
+# endif
+				yyt = yyt + yych;
+				if(yyt <= yytop && yyt->verify+yysvec == yystate){
+					if(yyt->advance+yysvec == YYLERR)	/* error transitions */
+						{unput(*--yylastch);break;}
+					*lsp++ = yystate = yyt->advance+yysvec;
+					goto contin;
+					}
+				yyt = yyr + YYU(yymatch[yych]);
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(yyout,"try fall back character ");
+					allprint(YYU(yymatch[yych]));
+					putchar('\n');
+					}
+# endif
+				if(yyt <= yytop && yyt->verify+yysvec == yystate){
+					if(yyt->advance+yysvec == YYLERR)	/* error transition */
+						{unput(*--yylastch);break;}
+					*lsp++ = yystate = yyt->advance+yysvec;
+					goto contin;
+					}
+				}
+			if ((yystate = yystate->yyother) && (yyt = &yycrank[yystate->yystoff]) != yycrank){
+# ifdef LEXDEBUG
+				if(debug)fprintf(yyout,"fall back to state %d\n",yystate-yysvec-1);
+# endif
+				goto tryagain;
+				}
+# endif
+			else
+				{unput(*--yylastch);break;}
+		contin:
+# ifdef LEXDEBUG
+			if(debug){
+				fprintf(yyout,"state %d char ",yystate-yysvec-1);
+				allprint(yych);
+				putchar('\n');
+				}
+# endif
+			;
+			}
+# ifdef LEXDEBUG
+		if(debug){
+			fprintf(yyout,"stopped at %d with ",*(lsp-1)-yysvec-1);
+			allprint(yych);
+			putchar('\n');
+			}
+# endif
+		while (lsp-- > yylstate){
+			*yylastch-- = 0;
+			if (*lsp != 0 && (yyfnd= (*lsp)->yystops) && *yyfnd > 0){
+				yyolsp = lsp;
+				if(yyextra[*yyfnd]){		/* must backup */
+					while(yyback((*lsp)->yystops,-*yyfnd) != 1 && lsp > yylstate){
+						lsp--;
+						unput(*yylastch--);
+						}
+					}
+				yyprevious = YYU(*yylastch);
+				yylsp = lsp;
+#ifdef YYNLS16_WCHAR
+				yylenguc = yylastch-yytextuc+1;
+				yytextuc[yylenguc] = 0;
+#else
+				yyleng = yylastch-yytext+1;
+				yytext[yyleng] = 0;
+#endif
+# ifdef LEXDEBUG
+				if(debug){
+					fprintf(yyout,"\nmatch ");
+#ifdef YYNLS16_WCHAR
+					sprint(yytextuc);
+#else
+					sprint(yytext);
+#endif
+					fprintf(yyout," action %d\n",*yyfnd);
+					}
+# endif
+				return(*yyfnd++);
+				}
+			unput(*yylastch);
+			}
+#ifdef YYNLS16_WCHAR
+		if (yytextuc[0] == 0  /* && feof(yyin) */)
+#else
+		if (yytext[0] == 0  /* && feof(yyin) */)
+#endif
+			{
+			yysptr=yysbuf;
+			return(0);
+			}
+#ifdef YYNLS16_WCHAR
+		yyprevious = yytextuc[0] = input();
+#else
+		yyprevious = yytext[0] = input();
+#endif
+		if (yyprevious>0) {
+			output(yyprevious);
+#ifdef YYNLS16
+                        if (yynls16)
+#ifdef YYNLS16_WCHAR
+                        	if (FIRSTof2(yytextuc[0]))
+#else
+                        	if (FIRSTof2(yytext[0]))
+#endif
+     					if (SECof2(sec = input()))
+#ifdef YYNLS16_WCHAR
+ 						output(yyprevious=yytextuc[0]=sec);
+#else
+ 						output(yyprevious=yytext[0]=sec);
+#endif
+					else 
+						unput(sec);
+#endif
+                }
+#ifdef YYNLS16_WCHAR
+		yylastch=yytextuc;
+#else
+		yylastch=yytext;
+#endif
+# ifdef LEXDEBUG
+		if(debug)putchar('\n');
+# endif
+		}
+	}
+
+# ifdef __cplusplus
+yyback(int *p, int m)
+# else
+yyback(p, m)
+	int *p;
+# endif
+{
+if (p==0) return(0);
+while (*p)
+	{
+	if (*p++ == m)
+		return(1);
+	}
+return(0);
+}
+	/* the following are only used in the lex library */
+yyinput(){
+	return(input());
+	
+	}
+
+#ifdef __cplusplus
+void yyoutput(int c)
+#else
+yyoutput(c)
+  int c;
+# endif
+{
+	output(c);
+}
+
+#ifdef __cplusplus
+void yyunput(int c)
+#else
+yyunput(c)
+   int c;
+#endif
+{
+	unput(c);
+}

@@ -1,0 +1,786 @@
+.nr Cl 4
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Security Investigation for CND Networking Services"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ft 3
+.ce 2
+Investigation of Networked Systems Security 
+for CND Networking Services
+.sp 2
+.ce 1
+COLORADO NETWORKS DIVISION
+.ft 1
+.ce 2
+$Date: 91/11/19 14:33:45 $
+$Revision: 1.5.109.1 $
+.sp 3
+.ce 2
+Authors: Cristina Mahon 
+.br
+     Danny Cecil
+.ps 10
+.vs 12
+.sp 6
+.ad
+The purpose of this paper is to gain a consensus on the approach being
+taken to deal with the security of networked systems.  It will also communicate
+the impact of C2 security on some of CND's network services and any issues 
+that still remain unresolved.  The remaining open issues will need to be 
+resolved before we can exit Phase II for the 4.0/7.0 release.
+.sp
+This paper describes what type of TCB model best applies to a
+group of networked systems.  Once that model has been determined
+we attempt to list security related issues that affect the NS, ARPA, NFS and
+LMX networking services.  
+.sp
+There are two current models for dealing with the security of
+networked systems.  One considers all the networked
+systems as a single trusted computing base (TCB), and therefore deals with a 
+distributed TCB.  The other model considers that the TCB includes 
+only the trusted system itself and that, therefore, as much protection as 
+possible needs to be provided at the system level.  Both of these models are 
+examined and our proposals for both short and long term approaches for
+networked systems are defined.
+.na
+.bp
+.H 1 "Introduction"
+.sp
+.ad
+The intent of this paper is to discuss what trusted computing base (TCB) model
+would best apply to networked systems, and what that means for the current
+networking services.
+.sp
+The TCB is defined as the totality of protection mechanisms within a computer
+system responsible for enforcing a security policy.
+A simplified view of the world for security purposes involves three levels
+of systems:
+.sp
+.AL
+.LI
+Standalone systems
+.LI
+Distributed OS
+.LI
+Networked systems
+.LE
+.sp
+It is very important to distinguish between those three classes of systems.
+We will not be addressing trusted system security for standalone systems
+or distributed OS in this paper since that is not our area of expertise.
+We will address, though, trusted systems and trusted networks requirements for
+networked systems.  In order to make the distinction between distributed OS 
+and networked systems clearer a brief description of what each one entails 
+follows.
+.sp
+Distributed UX involves homogeneous systems within a single administrative 
+domain, like diskless HP-UX.  On the other hand, networked sysems, can involve 
+a group of homogeneous or heterogeneous systems.  
+When considering security issues for networked systems we need to consider 
+heterogeneous systems.  Otherwise,
+we could lock ourselves into a proprietary solution which not only is against
+the primary goal of ING to be a multi-vendor supplier, but on the long run 
+could be very damaging for HP's position of a company that supports standards.
+.na
+.bp
+.H 1 "Models for networked systems security"
+.sp
+.ad
+The two basic models for the TCB when we are dealing with networked systems
+are a distributed TCB and a non-distributed TCB.
+The non-distributed TCB includes only the system itself as part of the
+TCB.  In such a model the system needs to protect itself from the rest
+of the network since no other member of the network or the network itself
+can be trusted.  A distributed TCB on the other hand implies that the
+boundaries of the TCB include all members of a particular network and 
+the network hardware itself.
+.sp
+What we call a distributed TCB is a similar concept to the NTCB (network TCB) 
+described in the "Trusted Network Interpretation of The Trusted Computer 
+System Evaluation Criteria" (the "Red Book").  The Red Book suggests that a 
+whole network be judged as a single entity and that the overall network 
+security policy be enforced by the network as a whole.  Based on that 
+suggestion, a distributed TCB approach is the preferred long term solution for 
+addressing security of networked systems.
+.sp
+To extend the TCB over the network (distributed TCB) requires that:
+.sp
+.BL
+.LI
+all systems be part of a single administrative/authentication domain,
+.LI
+the links for the network be secure, and
+.LI
+authentication be done in a standard way.
+.LE
+.sp
+.sp
+As is evident from the list above, we cannot address any type of network
+at this time, but need to deal with a subset of existing networks.  The
+key criteria for choosing such a subset is that those networks consist of 
+systems that are part of a single administrative domain.
+To provide an enforceable distributed TCB for networked systems requires that
+we perform some kind of link level encryption and authentication of remote
+systems to protect the security and integrity of the data being transmitted
+over the network.  Note that by enforceable we mean software enforceable.
+.sp
+Unfortunately, there are currently no protocols to deal with link level 
+encryption or authentication of remote systems in a standard way.
+Furthermore, several security features currently being implemented do not 
+have defined standards yet.
+.sp
+So, for the short term (C2 security level), the best we can hope to accomplish
+is to fix any blatant security holes that we know exist with the current 
+networking services.  We will also have to define by administrative fiat that 
+the network link cannot be violated and that all systems in that network can 
+be trusted not to impersonate another system.  On the long term, though, we
+should be working at providing a standard solution to the remote
+system authentication and link level encryption problems.  Most of our
+customers have networks composed of heterogeneous systems and, if they
+require higher levels of security in the future, are likely to need a
+way of having all their heterogeneous systems communicate through a secure
+enforceable method.
+.sp
+When designing the new security features we should also keep in mind customers
+that might like to take advantage of those new features but do not require
+that their network be certified.  Potentially, there might be more customers 
+in that situation than customers that require their networks to be
+certified.  
+.sp
+For example, let us assume a customer that has a network composed 
+of heterogeneous systems under multiple administrative domains.  This customer
+does not wish to have his network certified, but would like to know which 
+users in remote systems have accessed certain files in his system.  In this
+case, if we can maintain all the auditing information about an object 
+(e.g. a file) on the system where the object resides, this customer can 
+benefit from the new security features and fixes to existing security problems
+while maintaining his network as it currently exists.  Basically, the
+new features added have blended well with the rest of the existing system 
+to the customer's advantage.  
+.sp
+The next section describes how different networking services are affected
+by the features being added to meet the trusted systems and trusted networks
+requirements.
+.na
+.bp
+.H 1 "Networking Services Issues"
+.sp 
+.ad
+Choosing a non-enforceable distributed TCB approach for the security of
+networked systems for C2 security allows us to work around problems that
+require a non-existent standard solution.  However, there still are
+other problems that need to be addressed.
+.sp
+This section will address C2 security issues related to trusted systems and 
+trusted networks for the NS, ARPA, NFS and LMX CND products.
+We will not deal with the OSI products since security of those products is 
+handled separately by ISO.  We will not address other networking products.
+.sp 2
+.na
+.H 2 "NFS issues"
+.sp 
+.ad
+This section describes how NFS is affected by trusted networks and trusted 
+systems requirements.
+Some of these areas still contain open issues that need to be investigated
+further.  Due to its heterogeneous nature and its design, NFS is very affected
+by security requirements.
+.sp 2
+.H 3 "Audit of Network Access"
+.sp
+.ad
+Network auditing will be done at the sockets and IPC layers.  Since NFS
+uses those layers it will not be affected by this trusted networks requirement.
+.sp
+ISSUE: CLOSED
+.na
+.sp 
+.H 3 "Object Reuse"
+.sp
+.ad
+Before an storage object can be reused all the previous user's data must be
+erased.  This is not likely to affect NFS since it relies on mbufs, file
+system buffers and kmem_alloc as storage objects and the mbuf and file
+system management routines should take care of cleaning up any previous 
+information.  
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Documentation"
+.sp
+.ad
+The lab and the documentation groups have to work together to describe
+user visible protection mechanisms for NFS.  This information might be 
+part of the Security Features User's Guide being developed by ISD.
+The effort required by the lab and the documentation group has not been scoped 
+out yet.  We need a better definition of what should be in that document.
+Jerry Day from CND's User Information Group is investigating this issue.
+.sp
+ISSUE: OPEN
+.sp
+.na
+.H 3 "How to act with access control lists (ACLs)"
+.sp
+.ad
+ACLs are a mechanism  to provide greater access control to files by adding
+greater granularity to the individual user/group mechanism.  ACLs can be
+permissive or restrictive, for example, a specific user can be
+granted or denied access to a file beyond the file's base mode bits.
+.sp
+The current NFS protocol (version 2) performs access checking by having
+the server send access information to the client (when the client
+performs an operation like open() or access() for example).  The client then 
+checks to see whether access is allowed.  For operations like read() and 
+write() the server checks whether the client can perform the operation.
+.sp
+The interaction between NFS and ACLs arises because the current NFS
+protocol only allows for nine access mode bits to be passed back between the 
+server and the client for access checking.  In the UNIX implementation of NFS, 
+those nine bits are the base mode bits for the file being accessed.  
+.sp
+With the introduction of ACLs, the base mode bits of a file are no longer
+enough to determine whether a user can access that file.  The solution
+to this problem was to have the kernel return the effective mode bits
+for a file.  The effective mode bits are a combination of the base mode
+bits and the ACLs that a file has for a given user.  This doesn't benefit
+only NFS, but it helps all existing applications that use the information
+returned by stat() to determine whether they can access a file.
+.sp
+Another decision made about NFS and ACLs was that, since the current NFS
+protocol (version 2) does not support the concept of ACLs, NFS will not
+support the setting and getting of specific ACL information.  If that
+is attempted we will return an error (EOPNOTSUPP).
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Environment protection"
+.sp
+.ad
+Attacks on the TCB can occur through poorly controlled environments.
+A controlled environment is specially important for setuid-to-root
+programs.  A new function has been created that will allow those 
+programs to control what portion of the environment they use.
+The NFS user level programs rup, rusers and nfsstat will be modified to
+use that function.  
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Self-auditing for servers"
+.sp
+.ad
+User level commands that allow a user access to a system in a way that is
+similar to a login should perform self-auditing.  The self-auditing 
+information will keep track of what user from what remote system was allowed
+to become what local user.  The servers rexd, which is part of the NFS 3.2
+product, and rpc.yppasswdd will need to do self-auditing.
+.sp
+ISSUE: CLOSED
+.na
+.sp
+.H 3 "Where to audit"
+.sp
+.na
+One of the requirements for C2 certification is to have auditing
+in the TCB.  The current design audits system calls
+that need to be audited at the syscall() routine level.  
+.sp
+The design of NFS makes it so that NFS bypasses the syscall() level
+on the server system where the object is being manipulated.  If the
+client NFS system is another HP system and it has auditing turned
+on, the system call that manipulates the remote object will be audited.
+However, it is possible for a malicious user to make a direct remote
+procedure call (RPC) (or even a direct call to the UDP layer with fake RPC 
+information) to manipulate a remote object.  If a user is to do that the 
+client side auditing will be bypassed.
+.sp
+A way to minimize this problem, is to turn on a currently non-documented flag
+on the NFS server's kernel that will check whether the client
+request came from a reserved port or not.  That way, since reserved
+ports can only be used by the superuser, if we can trust the 
+superuser of the client system we can be fairly sure that this method
+cannot succeed in breaking the server's security.
+.sp
+However, another mechanism that should be considered in addition
+to the previous one, is whether auditing should not occur on the
+server for NFS accesses.  This question is both a security and an
+usability question.  Should the auditing information that corresponds
+to an object reside on the same system as the object resides?  Would
+it be enough to provide a method for accessing that information, if the
+information does not reside on the object's system?  And, if so, can we 
+have a method that would work for heterogeneous systems?  
+.sp
+It has been decided that NFS will do server side auditing.  The NFS
+auditing cannot be complete, but it will allow the security officer on
+the server system a chance to track down any problems that might occur.
+This feature will be implemented after release 7.0.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Masquerading as another user"
+.sp
+.ad
+The trusted network interpretation requires that all users identify 
+themselves before beginning to perform any actions.  Once part of the
+NTCB has authenticated a user that user cannot be allowed to masquerade
+as another user and access other parts of the NTCB through that subterfuge.
+.sp
+A malicious user can make RPC calls that will contain the wrong
+user identification information and,in that way, he can masquerade as
+another user.  This problem requires more investigation.  We will
+investigate at least the secure RPC mechanism from Sun and the
+Kerberos design from MIT.
+.sp
+Also, if a user can become another user on a system, without having
+to go through authentication mechanisms, he can then access remote
+systems through NFS as that user.  If we assume that only the 
+superuser can do that and that the superuser is trusted for all
+systems that are part of the NTCB, or if we assume that no user can 
+do that, then this is not a problem.
+.sp
+The issues discussed above will be addressed in the same time frame 
+NFS 4.0 is implemented, since NFS 4.0 provides some solutions for these
+problems.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Shadow Passwd file"
+.sp
+.ad
+The purpose of the shadow passwd file is to prevent public read access
+to the encrypted passwords on the system.  A line of the shadow passwd file
+(/.secure/etc/passwd) contains a login name, an encrypted password, an
+audit id and an audit flag.
+.sp
+Within the distributed TCB, where we can assume that the physical 
+network is secure, we only need to make sure that only appropriately
+authorized users can access the encrypted password kept in the shadow
+passwd file.  
+.sp
+Yellow Pages (YP), a distributed database management service that is part of
+the NFS product, is used to maintain user information for the purposes
+of login into a system.  With the introduction of the shadow passwd file the
+normal passwd file (/etc/passwd) no longer contains the encrypted passwd.
+It only contains a "*" on the passwd field.
+.sp
+The problem with keeping the encrypted passwd on the YP database
+is that any user can have access to that information.  We cannot insure that 
+a user will not be able to gain access to the information in a YP database
+since he could always fake a UDP packet that looks like a YP request.
+.sp
+So, to provide a partial solution for someone that wants to use YP 
+and the shadow passwd file we propose that login be changed.  When YP is
+running, login obtains the passwd information from a YP database.  If the
+passwd it receives from YP is a "*" it should check the local shadow passwd
+file to see if it contains an encrypted passwd for that user and proceed
+from there.  This solution will also need to be carefully documented.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Fixing known security holes"
+.sp
+.ad
+NFS has several security holes, some of which have been briefly described 
+above.  It might be possible to correct some of them, though we still need to
+remain compatible with the other NFS implementations.  This area
+requires further study since the requirement of fixing known security 
+holes is very vague.  With the current version of the NFS protocol, NFS is not
+fully secure.  That being the case NFS should be excluded from the Trusted 
+Network product or given to users with warnings.  As changes are made to NFS 
+we will need to decide whether we should work with Sun to fix some of the 
+security problems.  Since most of the security problems cannot be fixed with
+the NFS 3.2 implementation we will wait until NFS 4.0 to attempt to fix 
+known security defects that can be fixed.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.sp 2
+.H 2 "NS issues"
+.sp
+.ad
+NS includes RFA and NFT.  RFA, like NFS, is a distributed file system 
+product.  
+However, since RFA is an HP proprietary product, it has different requirements 
+than NFS.  We will not describe again what each one of the security areas mean.
+Please refer to the "NFS issues" section for that information.
+.sp 2
+.na
+.H 3 "Audit of Network Access"
+.sp 
+.ad
+Auditing of network access is guaranteed for NS because that auditing
+occurs at layers on top of which NS runs.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Object Reuse"
+.ad
+NS products use mbufs for their memory management and therefore should
+not be affected by this requirement if mbufs prevent object reuse.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Documentation"
+.sp
+.ad
+The effort to document how to make the NS product secure has not been 
+scoped out by the lab and the documentation group.  More information
+on exactly what should be documented is still necessary.
+.sp
+The NS man pages must be examined in order to verify that the appropriate
+security measures are recommended.  This includes putting passwords in
+text files, and allowing logins with no password, also accounts with no 
+executable shell.
+.sp
+ISSUE: OPEN
+.sp
+.na
+.H 3 "How to act with access control lists (ACLs)"
+.sp
+.ad
+Setting and getting ACL information will not be supported over RFA.
+ACL information will not be transferred through dscopy either.
+Access Control Lists are completely unseen by NS.  It is assumed that the 
+normal interpretation of ACLs is dealt with at the lowers levels of the OS.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Environment protection"
+.sp
+.ad
+Dscopy must clear its environment with the \fIcleanenv\fR(3) library call. 
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Self-auditing for servers"
+.sp
+.ad
+The nftdaemon and the rfadaemon will need to perform self-auditing.
+NS will audit validation of remote users using a library call to be provided
+by the audit subsystem.
+.sp
+ISSUE: CLOSED
+.na
+.sp
+.H 3 "Where to audit"
+.sp
+.ad
+Currently, if the client RFA system is an HP system with auditing turned
+on, auditing information on events affecting files accessed through RFA 
+will be kept on both the client and the server system.  This is the solution
+we will use.  NFT auditing will occur on the server side.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Masquerading as another user"
+.ad
+The NS product always requires that a password be entered before a
+transaction can be started.  Because of that requirement a user 
+could only masquerade as another user if he already knows the password
+for that other user.
+.sp
+NS assumes a trusted network.  This means there is at best a minimal
+attempt to encrypt passwords, and anybody listening on the LAN would be
+able to glean dangerous information from the NS packets.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Shadow Passwd file"
+.sp
+.ad
+NS will validate remote users with a password sent by the peer system.  NS
+NS will have to use the getspwent(3) library routines (new for release 6.5) to 
+read the shadow password file.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Fixing known security holes"
+.sp
+NS has a few security holes.  Some of these are well documented, others are
+not.  There is currently not an active plan to close these holes for \fBany\fR
+release of HP-UX.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.sp 2
+.H 2 "ARPA issues"
+.sp 
+.ad
+This section lists areas where the ARPA/Berkeley services are
+affected by the security requirements of trusted systems and 
+trusted networks.  Since the ARPA services are all user level services,
+as opposed to NS and NFS, they are affected differently by the 
+security requirements.
+.sp
+.H 3 "Audit of Network Access"
+.sp
+This area does not affect the ARPA services since they use the
+lower socket and IPC layers and those layers perform the
+auditing required.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Object Reuse"
+.ad
+This requirement is not a problem for the ARPA services.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Documentation"
+.sp
+This area has not been scoped out by the lab and the documentation 
+group yet.  We need more information on what level of detail is 
+required for this documentation.
+.sp
+The ARPA man pages must be examined in order to verify that appropriate
+security measures are recommended, in particular for \fI/etc/hosts.equiv\fR,
+\fI.rhosts\fI and \fI.netrc\fR.
+.sp
+ISSUE: OPEN
+.sp
+.na
+.H 3 "How to act with access control lists (ACLs)"
+.sp
+.ad
+\fIsendmail\fR and \fIruserpass\fR will have to be modified to use the 
+library routine \fIgetaccess\fR(2) (new in 6.5) to examine permissions 
+on files.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Environment protection"
+.sp
+.ad
+Each setuid program (\fIrlogin\fR, \fIremsh\fR, \fIrcp\fR and \fIsendmail\fR)
+must clear its environment with the \fIcleanenv\fR(3) call or equivalent.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Self-auditing for servers"
+.sp
+\fIremshd\fR, \fIrexecd\fR and \fIftpd\fR will audit their validation of 
+remote users using a library call to be provided by the audit subsystem.  
+\fItelnetd\fR may have to interact with \fIlogin\fR(1) to perform this
+self-auditing.
+.sp
+ISSUE: CLOSED
+.na
+.sp
+.H 3 "Where to audit"
+.sp
+.ad
+This area does not affect the ARPA services since those services do
+not bypass the syscall() level, and therefore, any auditable system
+calls they make are automatically audited.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Masquerading as another user"
+.sp
+.ad
+The ARPA/Berkeley services rely on privileged ports and on user 
+and system names and passwords (in clear text) from their peers.  This implies
+that they trust root on remote systems, and that the network itself must be
+secure.  This cannot be changed without breaking connectivity to other 
+vendor's systems.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Shadow Passwd file"
+.sp
+.ad
+\fIrexecd\fR and \fIftpd\fR validate remote users with a password sent by the
+peer system.  These servers will have to use the \fIgetspwent\fR(3) library
+routines (new for release 6.5) to read the shadow password file.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Fixing known security holes"
+.sp
+.ad
+There is a minor security problem with \fIftpd\fR which we currently view as
+costing more effort to fix than it would be worth.
+.sp
+Security defects are reported and fixed as part of the CPE process.  There are
+not other security-related defects against ARPA at this time.
+.sp
+However, it is likely that there are many security holes in this product 
+which we do not know about.  We have allocated no manpower either to identify
+or to fix such holes.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 2 "LMX issues"
+This section describes how LMX is affected by trusted networks and trusted 
+systems requirements.  LMX is a new service on HP-UX beginning with the
+4.0/7.0 release.  LMX is a user space, service level program, and as such
+it is minimally affected by security requirements.
+.sp 2
+.H 3 "Audit of Network Access"
+.sp 
+.ad
+Auditing of network access is guaranteed for LMX because that auditing
+occurs at layers on top of which LMX runs.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Object Reuse"
+.sp
+.ad
+LMX does not utilize any kernel space buffers.  All buffers are malloc()'ed
+from the user's address space, and other users have no access to these buffers, 
+so object reuse is a non-issue.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Documentation"
+.sp
+.ad
+The effort to document how to make the LMX product secure has not been 
+scoped out by the lab and the documentation group.  More information
+on exactly what should be documented is still necessary.
+.sp
+ISSUE: OPEN
+.sp
+.na
+.H 3 "How to act with access control lists (ACLs)"
+.sp
+.ad
+Setting and getting ACL information will not be supported from LMX.  The
+LAN Manager protocol does include support for access control lists, but
+this feature will not be supported in the initial release of LMX. 
+However, since LMX only accesses the file system
+via standard file system calls, ACLs can by used by LMX users, but they
+will have to login to UNIX to get or set them.  ACL's may actually be quite
+useful to LMX in that they allow effective "resource level" security when
+running in "user level" security mode.  
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Environment protection"
+.sp
+.ad
+The LMX daemon (and possible the NetBIOS daemon) will need to use the new 
+function _cleanenv() to protect its environment from any attack.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Self-auditing for servers"
+.sp
+.ad
+The LMX server will need to perform self-auditing.  Based on current agreements,
+IND will provide us with a function call to do the auditing.  Audit calls will
+be made whenever a remote user is granted access to the system and whenever
+a remote user is granted access to a new resource.
+.sp
+ISSUE: CLOSED
+.na
+.sp
+.H 3 "Where to audit"
+.sp
+.ad
+All auditing for LMX will be done by the server, since OS|2 and DOS LM
+clients do not audit themselves.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Masquerading as another user"
+.sp
+.ad
+The LMX server always requires that a password be entered before a connection
+can be established.  Assuming a secure LAN, a user could only masquerade as
+another user if s/he knows the password for that user.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Shadow Passwd file"
+.sp
+.ad
+The LMX server will use the appropriate library routines for all access
+to the passwd file.  This should eliminate any problems with the shadow
+password file and provide an audit of all passwd file access.
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.H 3 "Fixing known security holes"
+.sp
+.ad
+Since LMX is a new product there are no "known" security holes (assuming a
+secure LAN).
+.sp
+ISSUE: CLOSED
+.sp
+.na
+.sp 2
+.bp
+.H 1 "Conclusion"
+.sp
+.ad
+A distributed TCB as described in the Red Book seems to be the best long 
+term solution to address security needs for networked systems.
+However, due to the current lack of standards for encryption of data and
+authentication of systems on a network, it seems that we can only
+document certain assumptions about the security of the network itself for 
+class C2 security and fix security problems with network services.
+On the long term, though, HP should monitor or propose standards for 
+those areas.
+.sp
+For the immediate future we need to consider the issues that are still open
+and investigate in more detail what technical changes are required for the
+current networking services to be able to meet C2 security requirements.
+The major issues that are currently open have to do with:
+.BL
+.LI
+auditing and where it should occur, 
+.LI
+the shadow passwd file and how it affects existing programs,
+.LI
+what level of documentation is required to meet the C2 security level,
+and finally,
+.LI
+exactly what is the meant by fixing known security holes,
+.LI
+the use of an authenticator for RPC.
+.LE
+.sp
+Finally, we believe that HP customers will benefit most from a trusted 
+systems design that is clearly extensible to trusted networks and from 
+a trusted networks design that is complementary to the trusted systems
+work.
+.na
+.sp 2
+.TC 2 2 4 0 "C2 Trusted Systems Impact" "TABLE OF CONTENTS"
+
+

@@ -1,0 +1,50 @@
+## FacetTerm Menu Capabilities for the HP 2397 (color)  06/13/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: 2397.FM,v 70.1 92/03/09 15:49:33 ssa Exp $
+## ##-menu-cap-init_string=
+### is2=\E&jB\E&w6f80X
+##-menu-cap-cursor_address=\E&a%p1%dy%p2%dC
+##-menu-cap-clear_screen=\EH\EJ
+##-menu-cap-clr_eol=\EK
+##-menu-cap-ena_acs=\E&v0m1a1b1c1z1i1a1b1c1x2i1b1c6I
+##-menu-cap-enter_alt_charset_mode=^N
+##-menu-cap-exit_alt_charset_mode=^O
+### T1R!U2S"W3O#V4P$t5u6w7v8:'9(LQKWlRkT5I3@2[MAJSmFjGdHQ;Y+Z*X:4>q\,x.n/
+##-menu-cap-acs_chars=jgktlrmfq,t5u6v8w7x.
+##-menu-cap-keypad_xmit=\E&s1A
+##-menu-cap-no_attr=\E&v0S\E&d@
+##-menu-cap-shadow_attr=\E&v0S\E&d@
+##-menu-cap-item_attr=\E&v6S\E&d@
+##-menu-cap-box_attr=\E&v1S\E&d@
+##-menu-cap-title_attr=\E&v2S\E&d@
+##-menu-cap-highlight_attr=\E&v1S\E&d@
+##-menu-cap-highlight_blink_attr=\E&v1S\E&dA
+## ##-menu-cap-magic_cookie=0
+##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=\EA
+##-menu-cap-key_down=\EB
+##-menu-cap-key_right=\EC
+##-menu-cap-key_left=\ED
+##-menu-cap-key_home=\Eh
+##-menu-cap-key_ignore=\Ei
+##-menu-cap-key_ignore=\EJ
+##-menu-cap-key_ignore=\EP
+##-menu-cap-key_ignore=\EM
+##-menu-cap-key_ignore=\ER
+##-menu-cap-key_ignore=\EK
+##-menu-cap-key_ignore=\EJ
+##-menu-cap-key_ignore=\Ep
+##-menu-cap-key_ignore=\Eq
+##-menu-cap-key_ignore=\Er
+##-menu-cap-key_ignore=\Es
+##-menu-cap-key_ignore=\Et
+##-menu-cap-key_ignore=\Eu
+##-menu-cap-key_ignore=\Ev
+##-menu-cap-key_ignore=\Ew
+##-menu-cap-key_ignore=\EQ
+##-menu-cap-key_ignore=\EL
+##-menu-cap-key_ignore=\EF
+##-menu-cap-key_ignore=\EU
+##-menu-cap-key_ignore=\EV
+##-menu-cap-key_ignore=\ET
+##-menu-cap-key_ignore=\ES

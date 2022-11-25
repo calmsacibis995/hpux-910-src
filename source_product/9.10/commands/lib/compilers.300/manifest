@@ -1,0 +1,574 @@
+/* file manifest */
+/* SCCS manifest    REV(64.2);       DATE(92/04/03        14:22:11) */
+/* KLEENIX_ID @(#)manifest	64.2 91/11/30 */
+
+/* NOCDB provides a hook for making a cdb-less compiler via
+ *	 cc -DNOCDB
+ * The default is to turn on the CDB-compile-flag.
+ */
+# ifndef NOCDB
+# 	define HPCDB
+# endif /* NOCDB */
+
+# include <stdio.h>
+# include "opcodes.h"
+
+/*	manifest constant file for the lex/yacc interface */
+
+#if (DEBUGGING || PROFILING)
+#	define LOCAL 
+#else
+#	define LOCAL static
+#endif /* DEBUGGING || PROFILING */
+
+/*	node types */
+# define LTYPE 02
+# define UTYPE 04
+# define BITYPE 010
+
+/*	type names, used in symbol table building */
+/*	mkunsigned() in cgram.y depends on this ordering */
+# define UNDEF 0
+# define FARG 1
+# define CHAR 2
+# define SHORT 3
+# define INT 4
+# define LONG 5
+# define FLOAT 6
+# define DOUBLE 7
+# define STRTY 8
+# define UNIONTY 9
+# define ENUMTY 10
+# define MOETY 11
+# define UCHAR 12
+# define USHORT 13
+# define UNSIGNED 14
+# define WIDECHAR UNSIGNED
+# define ULONG 15
+# define VOID 16
+# define FVOID (FTN | VOID)
+# define VOIDPTR (PTR | VOID)
+# define LONGDOUBLE 17
+# define SCHAR 18
+# define LABTY 19
+# define SIGNED 20
+# define CONST 21
+# define VOLATILE 22
+# define TNULL 23 /* flags null or empty symbol table entry */
+#ifdef APEX
+#define FTYCOMPLEX 24
+#define FTYDCOMPLEX 25
+#define FTYLOG2 26
+#define FTYLOG4 27
+#define FTYCHAR 28
+#define FTYLBYTE 29
+#define FTYIBYTE 30
+#endif
+
+/* type attributes used in type building */
+# define ATTR_CON	01		/* type is constant */
+# define ATTR_VOL	02		/* type is volatile */
+# define ATTR_REG	01		/* storage class bit */
+# define ATTR_WAS_ARRAY 010             /* an array before pconversion --
+	                                   like ATTR_REG, usually not inherited */
+# define ATTR_HAS_CON   020             /* structure/union contains const member */
+# define ATTR_WIDE      020             /* type == wchar_t  - used by the
+					   debugger
+					   (and is set only if cdbflag)  */
+# define ATTR_ENUM      040             /* type was ENUMTY (changed to INT) */
+#ifdef IRIF
+# define ATTR_NEXT_DIM  040             /* true iff next index operation
+					   ( PLUS, MINUS ) must be
+					   in the next dimension */
+#endif /* IRIF */
+
+
+# define ATTR_CLASS     014              /* storage class mask */
+# define ANY_VOL_MASK	0xaaaaaa82	/* are any volatile bits set? */
+# define ATTR_ICON    01
+                                      /* lint argument is an ICON - don't
+                                       * complain about short/int mismatch etc
+				       * The rest of ATTR basic type is
+                                       * shifted left 1 to make room for this
+                                       * bit in t.extra.
+                                       */
+
+#ifdef APEX
+/* flags that signal a type compatible with Fortran's complex types */
+# define ATTR_COMPLEX   010
+# define ATTR_DCOMPLEX  020
+# define ATTR_F77       040
+#endif
+
+# define ISVOL(x)	( (x) & ATTR_VOL)
+# define ISCON(x)	( (x) & ATTR_CON)
+#ifdef ANSI
+# define ISENUM(type,attr)   (( (type) == INT ) && ( (attr) & ATTR_ENUM ))
+#else /* ANSI */
+#ifdef SIZED_ENUMS
+# define ISENUM(type,attr)   (ISINTEGRAL(type) && ((attr) & ATTR_ENUM))
+#else /* SIZED_ENUMS */
+# define ISENUM(type,attr)   ((( (type) == INT ) || ( (type) == UNSIGNED) ) && ( (attr) & ATTR_ENUM ))
+#endif /* SIZED_ENUMS */
+#endif /* ANSI */
+# define ISWIDE(type,attr)   (( (type) == UNSIGNED ) && ( (attr) & ATTR_WIDE ))
+# define WAS_ARRAY(x)   ( (x) & ATTR_WAS_ARRAY )
+# define HAS_CON(type,attr)     ((( (type) == STRTY ) || ( (type) == UNIONTY) ) && ((attr) & ATTR_HAS_CON) )
+
+# define ATTR_CSHIFT    2               /* bits storage class is shifted */
+# define SCLASS(x)      ((x&ATTR_CLASS)>>ATTR_CSHIFT)
+
+/* type attributes for type pointers */
+# define PATTR_CON	0100
+# define PATTR_VOL	0200
+# define ISPVOL(x)	(x&PATTR_VOL)
+# define ISPCON(x)	(x&PATTR_CON)
+
+/*	various flags */
+# define NOLAB (-1)
+
+/* type modifiers */
+
+# define PTR  0100
+# define FTN  0200
+# define ARY  0300
+
+/* type packing constants */
+
+# define TMASK 0300
+# define TMASK1 01400
+# define TMASK2  01700
+# define BTMASK 077
+# define BTSHIFT 6
+# define TSHIFT 2
+
+/*	macros	*/
+
+# define MODTYPE(x,y) x = ((x&(~BTMASK))|y)  /* set basic type of x to y */
+# define BTYPE(x)  (x&BTMASK)   /* basic type of x */
+# define ISUNSIGNED(x) ((x)<=ULONG&&(x)>=UCHAR)
+#ifdef ANSI
+# define UNSIGNABLE(x) (((x)<=LONG&&(x)>=CHAR)||((x)==SCHAR))
+#else
+# define UNSIGNABLE(x) ((x)<=LONG&&(x)>=CHAR)
+#endif /*ANSI*/
+# define ENUNSIGN(x) ((x)+(UNSIGNED-INT))
+# define DEUNSIGN(x) ((x)+(INT-UNSIGNED))
+# define ISPTR(x) ((x&TMASK)==PTR)
+# define ISFTN(x)  ((x&TMASK)==FTN)  /* is x a function type */
+# define ISARY(x)   ((x&TMASK)==ARY)   /* is x an array type */
+# define ISFTP(t)	(((t)==DOUBLE) || ((t)==FLOAT) || ((t)==LONGDOUBLE))
+# define ISHWFTP(t)	(((t)==DOUBLE) || ((t)==FLOAT))
+# define ISINTEGRAL(t)  ( ((t)==INT) || ((t)==CHAR) || ((t)==UNSIGNED)  \
+	              ||  ((t)==LONG) || ((t)==SHORT) || ((t)==ULONG)   \
+	              ||  ((t)==USHORT) || ((t)==UCHAR) || ((t)==SCHAR) )
+# define ISARITH(t)     ( ISFTP(t) || ISINTEGRAL(t) )
+# define ISSCALAR(t)	( ISARITH(t) || ISPTR(t) )
+
+# define LTMASK 0xc0000000
+# define INCREF(x)  incref(x)	/* in common */
+# define INCRF( type, mod ) ((( type & ~BTMASK) << TSHIFT ) | mod | ( type & BTMASK ))
+
+# define DECREF(x) (((x>>TSHIFT)&~BTMASK)|(x&BTMASK))
+# define SETOFF(x,y)   if( x%y != 0 ) x = ( (x/y + 1) * y)
+	/* SETOFF: an expression of value = first arg rounded up to a 
+	   multiple of the second arg.
+	   Used for calculating byte or word offsets from bit offsets.
+	*/
+# define MAXTMOD 13  /* maximum number of type modifiers alowed */
+
+# define NOFIT(x,y,z)   ( (x%z + y) > z )
+		/* can y bits be added to x without overflowing z */
+
+
+/* pack and unpack field descriptors (size and offset) */
+#ifndef IRIF
+#       define PKFIELD(s,o) (((o)<<6)|s)
+#       define UPKFOFF(v) ((v) >> 6)
+#endif /* not IRIF */
+# define UPKFSZ(v)  ((v)&077)
+/*# define SETFFLD(p) ((p)->tn.onebit = 1)*/
+
+# define INDEXREG(p) ((p)->in.op==REG && (p)->tn.rval>=A0 &&(p)->tn.rval<=SP)
+
+/*	operator information */
+
+# define TYFLG 		016
+# define ASGFLG 	01
+# define LOGFLG 	020
+
+# define SIMPFLG 	040
+# define COMMFLG 	0100
+# define DIVFLG 	0200
+# define FLOFLG 	0400
+# define LTYFLG 	01000		/* bitwise logical ops */
+# define CALLFLG 	02000
+# define MULFLG 	04000
+# define SHFFLG 	010000
+# define ASGOPFLG 	020000
+# define SPFLG 		040000
+# define FHWFLG 	0100000		/* ops supported on flt pt. hardware */
+# define DALFLG		0200000		/* directly accessible leaf ops */
+# define NOTEMPLFLG	0400000		/* no templates for these ops,
+						without the ASG forms */
+
+/* Bit assignments for attribute word in C1OREG and C1NAME op codes */
+#define C1FARG 		0x40000000
+#define C1EQUIV 	0x20000000
+#define C1VOLATILE      0x10000000
+#define C1PTR 		0x04000000
+#define C1ARY 		0x02000000
+#define C1FUNC 		0x01000000
+#define C1REGISTER 	0x00400000
+#define C1EXTERN	0x00200000
+
+
+# define optype(o) 	(dope[o]&TYFLG)
+# define asgop(o) 	(dope[o]&ASGFLG)
+# define logop(o) 	(dope[o]&LOGFLG)
+# define callop(o) 	(dope[o]&CALLFLG)
+# define bilogop(o) 	(dope[o]&LTYFLG)
+# define fhwop(o)	(dope[o]&FHWFLG)
+# define daleafop(o)	(dope[o]&DALFLG)
+
+/*	table sizes	*/
+
+# define BCSZ 100 	/* size of the table to save break, continue labels */
+# define SYMTBLKSZ 200 	/* size of the symbol table blocks */
+# define SYMHASHSZ 200	/* size of the hash table */
+# define NSYMLEV 100	/* limit on the number of scopes */
+# define DIMTABSZ 1000 	/* size of the dimension/size table */
+# define PARAMSZ 150 	/* size of the parameter stack */
+# define SWITSZ 250 	/* size of switch table */
+# define NCHNAM 255  	/* max number of characters in a name */
+# define AVENCHNAM 10	/* max avg length of symbol for full symbol table */
+# define ASCIZSZ AVENCHNAM*1000
+# define HASHL 8	/* # chars significant to the hash in lookup */
+#ifdef APEX
+# define MAXUSEFULERRS 60 /* more errors than this are just junk */
+#else
+# define MAXUSEFULERRS 30 /* more errors than this are just junk */
+#endif
+
+/* 	value for null c1tag - will become NULL pointer in ANSI release */
+# define NULL_C1_TAG  0
+
+# ifdef FORT
+# 	define TREESZ 1000
+#	define NSTACKSZ 250
+# else	/* FORT */
+# 	define TREESZ 500 		/* space for building parse tree */
+# endif	/* FORT */
+
+# define NRECUR (10*TREESZ)
+
+extern maxrecur;
+extern nrecur;
+
+# define TASCIZSZ AVENCHNAM*TREESZ*4	/* size of treeasciz array */
+
+/*	common defined variables */
+
+typedef union ndu NODE;
+typedef unsigned char flag;
+typedef char signedflag;
+typedef unsigned int TWORD;
+typedef int *ptr;
+
+typedef union {
+	unsigned int u[4];
+	double d[2];
+} QUAD;
+
+/* In Domain Pascal TRUE seems to be all f's */
+#ifdef HAIL
+# define TRUE -1
+#else
+# define TRUE 1
+#endif
+# define FALSE 0
+
+
+#ifdef FORT1PASS
+	extern long lastlabno;
+#endif /* FORT1PASS */
+
+# ifdef FORT
+	extern unsigned int fstacksz;
+	extern NODE **fstack;
+# else
+#    ifndef LINT2
+	extern unsigned maxbcsz;
+	extern unsigned maxdimtabsz;
+	extern unsigned maxparamsz;
+	extern unsigned maxswitsz;
+#    endif
+
+# endif	/* FORT */
+
+#ifdef C1_C
+/* Used in code.c and cpass2.c for switch label pairs */
+#define SWWORD 1
+#define SWUNSIGN 2
+#define SWDEFL 4
+typedef struct { int sval, slab;} swpair;
+#endif /* C1_C */
+
+/* Not used in lint2 */
+#ifndef LINT2
+extern int minrvarb;	/* in common */
+extern flag oflag;	/* true for additional optimizations. */
+extern NODE *bcon(), *block();	/* now in common */
+extern int rm_paren();	/* common */
+extern short nerrors;  	/* number of errors seen so far */
+extern unsigned crslab;			/* common */
+extern flag singleflag;
+extern flag froundflag;
+extern unsigned maxnodesz;
+extern long dope[];  	/* a vector containing operator characteristics */
+extern char *opst[];  	/* a vector containing names for ops */
+extern unsigned int fzerolabel;	/* label for common ftp zero */
+extern flag flibflag;		/* in common */
+extern short fpaflag;		/* in common */
+extern int compatibility_mode_bitfields; /* in common */
+
+#ifdef FORTY
+extern short fortyflag;		/* in common */
+#endif /* FORTY */
+
+#ifndef FORT
+extern flag wflag;      /* true if warnings are turned off */
+#endif /* FORT */
+
+#endif /* LINT2 */
+
+
+
+
+# ifdef LINT
+# define CONSZ long
+# endif
+
+# define NIL (NODE *)0
+
+/* used to mark a constant with no name field */
+# define NONAME 040000
+
+#if defined(ONEPASS) || defined(C1_C) || defined(LINT)
+	/* in one-pass operation and split-C, define the tree nodes */
+
+union ndu {
+
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+#ifndef IRIF
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag flagfill:1;
+#else /* IRIF */
+		int fill;
+#endif /* IRIF */
+		char *name;
+		int nameunused;		/* spacer added to prevent left-stsize overlap */
+		NODE *left;
+		NODE *right;
+		}alloc; 		/* talloc filler */
+
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+#ifndef IRIF
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag tassign:1;		/* true iff subtree has "mustdo" temporary assignment */
+#ifdef C1_C
+		flag fixtag:1;		/* stop array/struct tag from rising */
+#endif /* C1_C */
+#else /* IRIF */
+		int fill;
+#endif /* IRIF */
+		char *name;
+		int nameunused;		/* spacer added to prevent left-stsize overlap */
+		NODE *left;
+		NODE *right;
+#ifdef C1_C
+		int junk1, junk2;       /* space to avoid qval/c1tag overlap */
+		struct symtab *c1tag;	/* symtab index for array/struct ref */
+#endif /* C1_C */
+#ifdef ANSI
+		flag not_lvalue:2;	/* true if not lvalue */
+#endif /*ANSI*/
+#ifdef LINT
+                flag cast_flg:1;        /* so lint can distinguish value
+                                         * preserving SCONV from explicit cast
+                                         */
+                flag promote_flg:1;     /* flags uchar-int and ushort-int */
+#endif /* LINT */
+		}in; 		/* interior node */
+	
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+#ifndef IRIF
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag tassign:1;		/* true iff subtree has "mustdo" temporary assignment */
+#else /* IRIF */
+		int fill;
+#endif /* IRIF */
+		char *name;
+		int nameunused;		/* spacer added to prevent left-stsize overlap */
+		CONSZ lval;
+		int rval;
+		}tn;		 /* terminal node */
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+#ifndef IRIF
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag tassign:1;		/* true iff subtree has "mustdo" temporary assignment */
+#else /* IRIF */
+		int fill;
+#endif /* IRIF */
+		struct symtab *sym;	/* pointer into symbol table,
+                                           overlaps "name" field.
+                                         */
+		}nn;		 /* name node */
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+#ifndef IRIF
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag tassign:1;		/* true iff subtree has "mustdo" temporary assignment */
+#endif /* not IRIF */
+		unsigned int label;	  	/* for use with branching */
+		}bn; 		/* branch node */
+
+#ifndef IRIF
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+		unsigned char su;
+		unsigned char fsu;	/* su for flt pt registers. */
+		flag fpaside:1;		/* true iff on side of tree for fpa */
+		flag tassign:1;		/* true iff subtree has "mustdo" temporary assignment */
+		int stsize;  		/* sizes of structure objects */
+		int stalign;  		/* alignment of structure objects */
+		}stn; 	/* structure node */
+
+	struct {
+		short op;
+		int rall;
+		TWORD type, tattrib;
+		unsigned short  su_total;
+		}rn; 	/* register counter node */
+
+#endif /* not IRIF */
+
+	struct {
+		short op;
+		int cdim;
+		TWORD type, tattrib;
+#ifndef IRIF
+#ifdef C1_C
+		char fill1,fill2,fill3;  /* avoid csiz/flags overlap */
+		int fill4;
+#endif /* C1_C */
+#endif /* not IRIF */
+		int csiz;
+		}fn; 		/* front node */
+	
+	struct {
+		/* this structure is used when a floating point constant
+		   is being computed */
+		short op;
+		int cdim;			/* also used to store dimoff */
+		TWORD type, tattrib;
+#ifndef IRIF
+#ifdef C1_C
+		char fill1,fill2,fill3;  /* avoid csiz/flags overlap */
+		int fill4;
+#endif /* C1_C */
+#endif /* not IRIF */
+		int csiz;
+		double dval;
+		}fpn; 	/* floating point node */
+
+# ifdef ANSI
+	struct {
+		/* this structure is used when a floating point constant
+		   is being computed */
+		short op;
+		int cdim;			/* also used to store dimoff */
+		TWORD type, tattrib;
+#ifndef IRIF
+#ifdef C1_C
+		char fill1,fill2,fill3;  /* avoid csiz/flags overlap */
+		int fill4;
+#endif /* C1_C */
+#endif /* not IRIF */
+		int csiz;
+		QUAD qval;
+		}qfpn; 	/* floating point node */
+# endif /* ANSI */
+
+# ifdef ANSI
+	struct {
+		/* this node type used as the header to a function
+		 * prototype parameter list of symtab structures.
+		 */
+		short op;
+		int cdim;	/* ??? */
+		TWORD type, tattrib;  /* ??? */
+		int  csiz;	/* ??? */
+#ifndef IRIF
+		short flags;
+#else /* IRIF */
+		int flags;
+#endif /* IRIF */
+		int nparam;
+		struct symtab * phead;
+		}ph;	/* parameter head node */
+# endif /* ANSI */
+	};
+# endif /* ONEPASS || C1_C */
+
+#ifndef HAIL
+# ifdef DEBUGGING
+#	define GETLAB()	getlab()	/* common */
+	extern getlab();
+# else	/* DEBUGGING */
+# 	ifdef FORT1PASS
+#		define GETLAB() (++lastlabno)
+#	else  /* FORT1PASS */
+#		define GETLAB() (crslab++)
+#	endif /* FORT1PASS */
+# endif	/* DEBUGGING */
+#else /* HAIL */
+#	define GETLAB() ((unsigned int) (ir_getlab()))
+#endif /* HAIL */
+
+/* length of ftnname buffer (for function name printing in where() ) */
+#define FTNNMLEN 64
+
+/*	buffersize between cpp & ccom (unmerged case)      */
+# define BUFFERSIZE  8192		/* should be max output from cpp.ansi */
+#if defined(ANSI) && !defined(LINT)
+	extern flag cpp_ccom_merge;     /* preprocessor/scanner merged if true */
+#endif
+
+

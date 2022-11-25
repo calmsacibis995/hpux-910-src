@@ -1,0 +1,46 @@
+#!/bin/ksh
+# @(#) $Revision: 70.1 $
+#
+fileset=LP-SPOOL
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup $1
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $fileset
+
+#======
+# /usr/bin/slp --
+#    slp is no longer a localroot/remoteroot CDF on a diskless cluster.
+#    We remove the old CDF structure and replace it with the new slp
+#    command.  We also remove the old remoteroot slp script from the
+#    /etc/newconfig directory.
+#======
+rm -f $newconfig/slpCDF
+if [ -H /usr/bin$CDF/slp+ ]; then
+    rm -f /usr/bin$CDF/slp.SAVE
+    mv /usr/bin$CDF/slp+/localroot /usr/bin$CDF/slp.SAVE
+    rm -rf /usr/bin$CDF/slp+
+    mv /usr/bin$CDF/slp.SAVE /usr/bin$CDF/slp
+fi
+
+#======
+#
+#======
+spooldir=/usr/spool/lp
+if [ ! -s $spooldir/pstatus ]; then
+	> $spooldir/pstatus
+	chmog 644 lp bin $spooldir/pstatus
+fi
+if [ ! -s $spooldir/qstatus ]; then
+	> $spooldir/qstatus
+	chmog 644 lp bin $spooldir/qstatus
+fi
+unset spooldir
+
+exit $exitval

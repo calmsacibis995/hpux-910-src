@@ -1,0 +1,77 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/yp/revnetgroup sources
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS) 
+
+CSOURCE = revnetgrp.c getgroup.c table.c util.c
+OBJECTS = revnetgrp.o getgroup.o table.o util.o
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif 
+
+SDIR = $(SRCDIR:/^$/./)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		USCORE="_" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"\
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/revnetgroup.B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"
+
+
+revnetgroup:	$(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o revnetgroup $(OBJECTS) $(LIBCA)
+
+revnetgrp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/revnetgrp.c
+
+getgroup.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/getgroup.c
+
+table.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/table.c
+
+util.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/util.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build
+

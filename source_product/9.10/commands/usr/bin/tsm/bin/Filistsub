@@ -1,0 +1,14 @@
+:
+# @(#) $Header: Filistsub,v 70.1 92/03/09 16:40:01 ssa Exp $
+if test $1x != x
+then
+	for file in $*
+	do
+		echo $file
+		if [ ! -f $file -a -n "$FACETINFO" ]; then
+			file=$FACETINFO/$file
+		fi
+		$0 `grep \^use\= $file | sed 's/.*use=//'`
+	done
+fi
+

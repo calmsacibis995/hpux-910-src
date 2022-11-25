@@ -1,0 +1,17 @@
+8.0        ARPA   arpa80    a   /dcia3/ARPA/gsi80   -
+8.0        NFS    nfs80     f   /dcia3/nfs/work80   /source/nfs/work80
+8.0        NS     ns80      n   /dcia3/NS/gsi80     -
+8.3        ARPA   arpa90    a   /dcia3/ARPA/gsi900  -
+8.3        NFS    nfs90     f   /dcia3/nfs/work900  /source/nfs/work900
+8.3        NS     ns90      n   /dcia3/NS/gsi900    -
+8.05       ARPA   arpa805   a   /dcia3/ARPA/gsi805  -
+8.05       NFS    nfs805    f   /dcia3/nfs/work805  /source/nfs/work805
+8.05       NS     ns805     n   /dcia3/NS/gsi805    -
+8.07       ARPA   arpa807   a   /dcia3/ARPA/gsi807  -
+8.07       NFS    nfs807    f   /dcia3/nfs/work807  /source/nfs/work807
+8.07       NS     ns807     n   /dcia3/NS/gsi807    -
+9.00       ARPA   arpa90    a   /dcia3/ARPA/gsi900  -
+9.00       NFS    nfs90     f   /dcia3/nfs/work900  /source/nfs/work900
+9.00       NS     ns90      n   /dcia3/NS/gsi900    -
+9.03       ARPA   arpa903   a   /dcia3/ARPA/gsi903  -
+9.03       NFS    nfs903    f   /dcia3/nfs/work903  /source/nfs/work903

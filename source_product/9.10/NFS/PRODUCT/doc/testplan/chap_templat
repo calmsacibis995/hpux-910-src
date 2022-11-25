@@ -1,0 +1,75 @@
+.PH " 'NFS System Test Plan' 'Chapter template' "
+.H 1 "Test Chapters"
+
+.B
+THIS CHAPTER WILL BE REMOVED FOR THE FINAL VERSION OF THE DOCUMENT.
+
+.R
+The following is a general template of how the test chapters are
+to be organized and written.  I'm not an nroff expert by any means,
+so feel free to help me out in that capacity.  I'm using the 'mm' macros,
+for those of you who already know how to use them.
+
+Each chapter is to exist as a separate file.  I will use the '.so' macro
+to include them into the testplan.  Please use meaningful file names.
+
+The chapter designations (following this chapter) are preliminary.  If
+anyone needs additional chapter designations, let me know.  I've provided
+a few samples of possible subchapter titles, just to get you thinking.
+
+The final chapters were taken from Mike Shipley's testplan template document,
+and are there to help generate testing ideas.  I hope they're useful.
+.B
+They'll be discarded later.
+.R
+
+.nf
+  position 0 of the line
+  |
+  v
+  .bp
+  .PH " 'HEADER' 'I will supply this' "
+  .H 1 "Chapter Title"
+
+  Write an overview of what you will be testing, how you'll go
+  about it, how your section fits into the scaffold/nfs structure,
+  what objectives apply to this chapter, etc.  Test Numbering
+  Conventions have been previously discussed.  Let me know if the
+  conventions are inadequate or wrong.  You might include a
+  discussion of what portion(s) of the PRD this chapter addresses.
+
+  .H 2  "test section 1"
+
+  An overview of the test section, if appropriate, goes here.  Things
+  that might be appropriate here include
+          RESPONSIBLE ENGINEER:
+          DEPENDENCIES:
+          ISSUES:
+
+  .sp 2
+  .H 3 "first test under test section 1"
+  .sp 1
+
+  Enter a description of the test.  Things that might be appropriate
+  include 
+           IMPLEMENT TIME:
+           PERFORM TIME:
+           TYPE OF TEST: stress, functional, interactive, etc
+           EXPECTED OUTPUT:
+
+  You'll want formatting off for graphical representations; surround
+  graphs/pictures/etc with the .nf and .fi (assumedly for "no format"
+  and "fill") macros as in the following example:
+
+  .nf
+   blank line
+           picture goes here
+   blank line
+  .fi
+      
+  .sp 2
+  .H 3  "nth test in test section 1"
+  .sp 1
+            
+  .H 2  "test section 2, etc"
+.fi

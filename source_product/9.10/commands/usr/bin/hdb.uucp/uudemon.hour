@@ -1,0 +1,5 @@
+#!/bin/sh
+# @(#) $Revision: 66.1 $
+#
+/usr/lib/uucp/uusched &
+/usr/lib/uucp/uuxqt &

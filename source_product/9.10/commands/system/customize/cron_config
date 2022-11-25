@@ -1,0 +1,94 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+#
+# cron_config -- Customization for the /usr/lib/cron or the
+#                /usr/spool/cron directories.
+#
+# For the /usr/lib/cron directory, the cron configuration files
+# in /usr/lib/cron are copied from one directory to another.
+#
+# This script is only invoked when adding a cnode to a diskless
+# cluster.
+#
+# For the /usr/spool/cron directory, the .ataids and .cronaids
+# directories are created if necessary (only for a trusted system).
+#
+
+#
+# Verify parameters
+#
+if [ $# -ne 2 ]; then
+    echo "ERROR:   Invalid invocation of $0" >&2
+    exit 1
+fi
+
+src=$1
+if [ ! -d $src ]; then
+    echo "ERROR:   Directory $src missing" >&2
+    exit 1
+fi
+
+dest=$2
+if [ ! -d $dest ]; then
+    echo "ERROR:   Directory $dest missing" >&2
+    exit 1
+fi
+
+#
+# Bring in some utilities.
+#
+exitval=0
+. /system/UX-CORE/custom_utils
+
+case "$src" in
+/usr/lib/cron*)
+    #
+    # Customization for the /usr/lib/cron directory
+    #
+    # Copy the *.deny and/or the *.allow files.  Don't copy the .allow
+    # file if there is a .deny file in the destination directory.
+    #
+    for type in at cron; do
+	if [ ! -f $dest/$type.deny -a -f $src/$type.allow ]; then
+	    cond_cp $src/$type.allow $dest/$type.allow
+	fi
+
+	if [ -f $src/$type.deny ]; then
+	    cond_cp $src/$type.deny $dest/$type.deny
+	fi
+    done
+
+    #
+    # Now copy the queuedefs and .proto files
+    #
+    cond_cp $src/queuedefs $dest/queuedefs
+    cond_cp $src/.proto $dest/.proto
+    ;;
+
+/usr/spool/cron*)
+    #
+    # Customization for the /usr/spool/cron directory
+    #
+    # In a trusted system, we must make the .ataids and
+    # .cronaids directories.
+    #
+    if [ -f /.secure/etc/passwd ]; then
+	for d in .ataids .cronaids; do
+	    #
+	    # Only make the directory if it doesn't exist, remove it
+	    # before in case there is a file there for some reason.
+	    #
+	    if [ ! -d $dest/$d ]; then
+		/bin/rm -rf $dest/$d
+		/bin/mkdir $dest/$d
+	    fi
+	    chmog 500 root other $dest/$d
+	done
+    fi
+    ;;
+
+*)
+    echo "ERROR:   config directory $src?" >&2
+esac
+
+exit $exitval

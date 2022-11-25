@@ -1,0 +1,255 @@
+
+
+
+#include <stdio.h>
+#include "nlinfo.h"
+#include <iconv.h> 	        /* for conversion header file */
+
+#define	GOOD		0	/* successful return value */
+#define	BAD		-1	/* unsuccessful return value */
+#define	DEF1		0xff	/* single-byte default character */
+#define	DEF2		0xffff	/* double-byte default character */
+#define	FATAL		1	/* fatal error message */
+
+#define ISO  		".iso8859"
+#define ISO_1		"iso8859_1"
+#define ISO_2		"iso8859_2"
+#define ISO_5		"iso8859_5"
+#define ISO_6		"iso8859_6"
+#define ISO_7		"iso8859_7"
+#define ISO_8		"iso8859_8"
+#define ISO_9		"iso8859_9"
+#define ROMAN8		"roman8"
+#define ARABIC8         "arabic8"
+#define GREEK8          "greek8"
+#define HEBREW8         "hebrew8"
+#define TURKISH8        "turkish8"
+#define KANA8           "kana8"
+#define JAPANESE15      "japanese15"
+#define KOREAN15        "korean15"
+#define ROC15           "roc15"
+#define SJIS		"sjis"
+#define UJIS		"ujis"
+#define BIG5            "big5"
+#define THAI8           "thai8"
+#define NONE            " "
+
+#define IN_CHAR_TRUNC	1
+#define BAD_IN_CHAR	2
+#define OUT_CHAR_TRUNC	3
+#define BAD_USAGE	1	/* usage error message */ 
+#define BAD_SIZE	2	/* iconvsize */
+#define BAD_CREATE	3	/* malloc */
+#define BAD_OPEN	4	/* iconvopen */
+#define BAD_CONVERSION	5	/* iconv */
+#define BAD_CLOSE	6	/* iconvclose */
+
+typedef unsigned char UCHAR;	/* prevent sign extention on char */
+typedef unsigned int UINT;	/* prevent sign extention on int */
+
+extern void *malloc();		/* allocate memory */
+extern void free();		/* free memory */
+
+/*  Language character sets:
+ *
+ *  0  NONE: Undefined (use language name)
+ *  1  Roman8
+ *  2  ISO 8851-1  (in language name)
+ *  3  ISO 8859-2
+ *  4  Arabic8
+ *  5  Greek8
+ *  6  Hebrew8
+ *  7  Kana8
+ *  8  Japanese15
+ *  9  Korean15
+ * 10  Roc15
+ * 11  SJIS
+ * 12  Turkish8
+ * 13   --
+ * 14  Japanese-EUC
+ * 15  ISO 8859-5
+ * 16  ISO 8859-7
+ * 17  ISO 8859-8
+ * 18  ISO 8859-9
+ * 19  BIG5
+ *
+ *  0  NONE: Undefined (use language name)
+ *
+ */
+
+static charset [] = {1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,   /*   0 */
+	             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,   /*  16 */
+	             0,0,0,0,0,0,0,0,0,7,0,0,0,0,0,0,   /*  32 */
+	             0,0,0,4,4,0,0,0,0,0,0,0,0,5,0,0,   /*  48 */
+	             0,0,0,0,0,0,0,6,0,0,0,0,0,0,0,0,   /*  64 */
+	             0,12,0,0,0,0,0,0,0,0,0,20,0,0,0,0, /*  80 */
+                     0,0,0,2,0,2,2,2,2,2,2,2,2,2,2,2,   /*  96 */
+	             2,2,2,0,0,0,0,0,0,0,0,0,0,0,0,0,   /* 112 */
+	             0,0,0,0,0,0,0,0,0,0,0,0,0,3,3,3,   /* 128 */
+	             3,3,3,3,3,0,0,0,0,0,0,0,0,0,0,0,   /* 144 */
+	             0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,   /* 160 */
+	             0,0,0,0,15,15,0,0,0,0,0,0,0,0,0,0, /* 176 */
+	             0,0,0,0,0,0,0,0,0,10,0,0,0,0,0,0,  /* 192 */
+	             0,0,0,10,19,0,0,0,0,0,0,0,0,8,14,0,/* 208 */
+	             0,0,0,0,0,0,0,9,0,0,0,0,0,0,0,0,   /* 224 */
+                     0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};  /* 240 */ 
+
+static char *charsetname [] = {NONE, ROMAN8, ISO_1, ISO_2, ARABIC8, 
+			       GREEK8, HEBREW8, KANA8, JAPANESE15, KOREAN15,
+			       ROC15, SJIS, TURKISH8, NONE, UJIS,
+			       ISO_5, ISO_7, ISO_8, ISO_9, BIG5,
+			       THAI8};
+
+char * langsrch (langid)
+short langid;
+{
+  char buff [128];
+  int cnt;
+
+  if (langid < 256) strcpy (buff,charsetname [charset[langid]]);
+  else switch (langid) {
+       case 301:  strcpy (buff,ISO_6); break;
+       case 321:  strcpy (buff,ISO_7); break;
+       case 341:  strcpy (buff,ISO_8); break;
+       case 361:  strcpy (buff,ISO_9); break;
+       default:   strcpy (buff,NONE); break;
+  }
+
+
+
+  if (*buff == " ") strcpy (buff,idtolang(langid));
+  return (buff);
+}
+
+
+
+nltranslate(code, instr, outstr, length, langid, err, table)
+char		*instr, *outstr;
+UCHAR 		*table;	        	/* ptr to translation table */
+short		code, length, langid;
+unsigned short	err[];
+{
+	UCHAR *pTable;
+	char *eOutstr;
+	struct l_info *getl_info(), *n;
+
+	char Tocode [128];
+	char Fromcode [128];
+	char buff [128];
+	char *found;
+
+	int size;
+	int d1;
+	int d2;
+
+        extern void *malloc();		/* allocate memory */
+        extern void free();		/* free memory */
+
+        iconvd cd;	        	/* conversion descriptor */
+        int iconvsize ();               /* conversion size */
+
+        int bytesread;	        	/* num bytes read into input buffer */
+        
+        int inbytesleft;		/* num bytes left in input buffer */
+        int outbytesleft;		/* num bytes left in output buffer */
+
+
+	err[0] = err[1] = 0 ;
+
+	if (length <= 0){
+		err[0] = (short) 4; /* Invalid length parameter */
+		return;
+	}
+
+	if (code != 1  &&  code != 2){
+		err[0] = E_INVALIDCODE;
+		return;
+	}
+
+	/*
+	 * if the user did not supply the table:
+	 * call iconv and/or return error:
+	 */
+
+	if ((pTable = table) == NULL){
+		if (langid==-1) {
+		     err [0] = 2; /* Invalid language */
+		     return;
+		}
+		if ((n = getl_info(langid))== NULL) {
+		     err [0] = 2; /* Invalid language */
+		     return;
+		}
+
+	/*  Table not provided: use iconv (3C) from HP-UX */
+
+	/* Identify Fromcode and Tocode */
+
+	if (code==1) {
+              strcpy (Fromcode,idtolang(langid));
+	      if (found=strstr(Fromcode,ISO)) *found = 0;
+	      strcat (Fromcode,"_e");
+	      strcpy (Tocode,langsrch(langid));
+        }
+	if (code==2) {
+	      strcpy (Fromcode,langsrch(langid));
+	      strcpy (Tocode,idtolang(langid));
+	      if (found=strstr(Tocode,ISO)) *found = 0;
+	      strcat (Tocode,"_e");
+        }
+
+
+	/* create conversion table */
+
+	if ((size = iconvsize(Tocode,Fromcode)) == BAD) {
+		err [0] = 1;
+		err [1] = BAD_SIZE;
+		return;
+	}
+	else if (size == 0) {
+	        table = (UCHAR *) 0;	
+	}
+	else if ((table = (UCHAR *) malloc ( (unsigned int) size)) == (UCHAR *) NULL) {
+		err [0] = 1;
+		err [1] = BAD_CREATE;
+		return;
+	}
+
+	/* start up a conversion */
+	if ((cd = iconvopen( Tocode, Fromcode, table, DEF1, DEF2)) == (iconvd) BAD) {
+		err [0] = 1;
+		err [1] = BAD_OPEN;
+		return;
+	}
+
+	/* translate the characters */
+	inbytesleft = 0;
+	outbytesleft = length;
+	ICONV( cd, instr, &inbytesleft, outstr, &outbytesleft);
+
+
+	/* end conversion & get rid of the conversion table */
+	if (iconvclose( cd) == BAD) {
+		err [0] = 1;
+		err [1] = BAD_CLOSE;
+		return;
+	}
+	if (size) {
+		free( (void *) table);
+	}
+
+	return;
+
+        }  /* End of the case when no table is provided */
+
+
+	
+
+	/*
+	 * simple substitution
+	 */
+	for (eOutstr = outstr + length ; outstr < eOutstr; instr++, outstr++)
+		*outstr = pTable[*instr];
+
+}
+

@@ -1,0 +1,967 @@
+.nr Cl 3
+.nr Ej 1
+.ds HF 3 3 2 2 2 2 2
+.ds HP 12 12 10 10 10 10 10
+.PH "'Project Plan and Life Cycle for NFS/800"
+\" .EF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+\" .OF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.PF "'HP Internal Use Only' - \\\\nP - ' \\\\n(mo/\\\\n(dy/\\\\n(yr'"
+.ps 18
+.vs 20
+.ft 3
+.ce 2
+PROJECT PLAN AND LIFE CYCLE 
+FOR S800 NFS PROJECT
+.sp 6
+.ps 14
+.vs 26
+.ce 1
+COLORADO NETWORKS DIVISION
+.ps 12
+.vs 14
+.ft 1
+.ce 2
+$Date: 91/11/19 14:30:54 $
+$Revision: 1.30.109.1 $
+.sp 3
+.ce 2
+Program Team Leader: Dan Simula
+Author: Cristina Mahon
+.ps 10
+.vs 12
+.sp 6
+.ad
+This document contains the NFS/800 program milestones and the
+corresponding deliverables and dependencies.  
+The target dates for the milestones are based on the HP-UX program 
+2.0 release integration cycles. 
+.sp
+The two major objectives of this document are to provide logical 
+checkpoints based on the individual CND project team schedules
+and to centralize a list of major dependencies which the involved project
+teams have on each other or on external entities.  
+.sp
+This document is a working document used by the CND NFS/800 groups.  
+The deliverables listed for each checkpoint are specified for 
+these groups, with other external projects covered under dependencies.
+.sp
+The deliverables are divided into 2.0 milestone deliverables 
+and internal deliverables.  The 2.0 milestone deliverables are the ones 
+of interest to the 2.0 program and are subject to the change control team 
+review process, while the internal deliverables are specific to CND and 
+are managed by the different projects involved on the NFS/800 at CND.
+.sp 
+ASSUMPTION:  The NFS 300 and NFS 800 products, including product structures,
+will be nearly identical.
+.sp
+If the above assumption does not hold, the documentation schedule
+will be seriously affected.
+.na
+.bp
+.H 1 "PROJECT OBJECTIVES"
+.sp 2
+.ad
+The s800 NFS project is responsible for providing Sun's Network File
+System  (NFS) on the HP 9000  Series  800  HP-UX  systems.  NFS
+provides a means of transparently sharing  files among heterogeneous
+systems on a common network.  Remote  file  access remains invisible
+to users.
+.sp
+The NFS  code  will be  ported  from  source  code  provided  by Sun
+Microsystems,   Inc.  in  accordance   with  Sun's  NFS   technology
+licensing  agreement.  To insure compatibility and connectivity in a
+multi-vendor network environment, the HP NFS product will conform to
+the  multi-vendor  industry standards   implemented  by  Sun.  These
+standards are defined by the NFS protocol specifications.
+.sp 
+For more detail on the NFS/800 project objectives please refer to the 
+Product Requirements Document.
+.na
+.bp
+.H 1 "RESOURCE REQUIREMENTS"
+.sp 
+.H 2 "Staff"
+.sp 2
+.ad
+To port NFS on the s800 the following projects have been put in place at CND:
+.nf
+.TS
+tab(#);
+l l l l.
+\fBProject Name\fR#\fBResponsibility\fR#\fBProgram Rep\fR#\fBStart Date\fR
+NFS_CND#NFS code port, fix#Jeff Lindberg/#05/01/87
+#and test#Dan Simula#
+SMELTER#NS/ARPA vs NFS testing#Chris Fugitt#
+DOC_CND#Technical Documentation#Annette Parsons#
+TECH#Technical Support#Carole Crall
+PROD#Product Marketing#Andy Drol
+QA#Quality Assurance#Chuck Morse
+.TE
+.fi
+.sp
+The estimated number of engineering-months to be spent by the NFS CND R&D
+lab projects is 50, with a peak staffing of 7 MTSs and approximately one 
+project manager.
+.na
+The projects that the NFS 800 at CND will have to interact with are:
+.sp
+.nf
+.TS
+tab(#);
+l l l l.
+\fBDivision\fR#\fBResponsibility\fR#\fBProject Manager\fR#\fBProject Name\fR
+ISO#V-noded kernel#Ching Fa Hwang#V-NODE
+ISO#NFS kernel#Steve Kusmer#AZURE
+ISO#HP-UX commands#Doug Hartman#SAPPHIRE
+ISO#Integration build#Don Bollinger#INT
+XTTC#Integration testing#Barbara Scott#XTTC
+IND#RPC/XDR kernel#Craig Wassenberg#NET_KERN
+.TE
+.fi
+This document uses the following abbreviations:
+.sp
+.nf
+IC = Integration Cycle
+FB = Final build of an Integration Cycle
+TC = Test Cycle
+.fi
+.bp
+.H 1 "GENERAL DEPENDENCIES"
+.ad
+.sp
+This section lists general dependencies the CND lab groups have on
+different partners.   Listed below are the dependencies, which
+groups have to meet those dependencies and a brief explanation of 
+what they consist of:
+.sp
+.AL
+.LI
+Participation on the SWAT team. 
+A member each of the v-node, azure, sapphire and net_kern groups should be
+part of the SWAT team.  The SWAT representative can be either always the same
+person or different people on a rotational schedule.
+The SWAT team is called when there is a major defect that is stopping any
+further testing.  The resolution of the defect that caused the SWAT team to
+be called becomes the main task of all members of the team until that defect
+is fixed.  Based on the "contract" that Steve Kusmer wrote in March 1987,
+upon a request for help an engineer will be assigned whose primary task
+is to solve the problem.
+.LI
+An available kernel once a week.
+The v-node, azure and net_kern groups will put together a kernel once a week.
+This kernel will be tested using ISO's and IND's regression suites.  The
+group responsible for doing the final tests before the kernel is made
+available to us will also run the CND quicky NFS tests.
+.LI
+Commands available before integration cycles.
+Sapphire will provide commands according to the internal ISO kernel
+integration milestones listed at the end of this section.
+.LI
+Internet available when needed.
+Most of the processes implemented between CND and ISO/IND rely on the Internet. 
+If the Internet is not up the turn-around for some of our deliverables will
+jump from an hour or two to a day or more.  This will become specially
+critical when the integration cycles begin.
+.LI
+Each group that develops NFS tests will write those tests so that they fit
+into the "ING" common tests scaffold.  They will also provide those tests
+to the CND testing group.  The testing group will merge them into the
+overall NFS scaffold test suite.
+.LE
+.sp
+The table below lists the ISO internal milestones.  Sapphire has agreed to
+provide an update of the following commands at each one of these milestones:
+.sp
+.nf   
+     MEA support
+     SAKE requirements
+     NLS date/time
+     16 bit filename support
+     NFS commands
+     symbolic link support
+     remote spooling
+     dbm routines
+     fast string routines
+     ksh
+.sp
+.TS
+tab(#);
+l l l.
+\fBDescription\fR#\fBPass Acceptance Test\fR#\fBPass All Tests\fR
+.sp
+IND 2.0/6.0 merger#6/15#6/18
+.sp
+SSO bug fixes, NFS/RPC/XDR,#6/25#6/30
+symbolic links##
+.sp
+1.1 merge, 128Mb#7/9#7/14
+memory support##
+.sp
+NFS config., LW sys calls#7/15#7/18
+.sp
+Long file names, > 10%#7/21#7/24 
+buffer cache##
+.TE
+.fi
+.na
+.bp
+.H 1 "RESPONSIBILITIES"
+.ad
+This section describes the general responsibilities of the different
+development and testing groups involved on the NFS 800 project.
+The information in here is based on the original "contract" between 
+different project groups written by Steve Kusmer in March 1987.
+.sp
+.ML o
+.LI
+NFS_DEV (development group at CND):
+.BL
+.LI
+NFS/YP/RPC/XDR user code responsibility.
+.LI
+Gather PFA numbers for user code.
+.LI
+Execute performance measurements.
+.LI
+Provide MR documentation for user level code.
+.LE
+.LI
+AZURE (NFS kernel group at ISO):
+.BL
+.LI
+NFS kernel layer code responsibility.
+.LI
+VM and PM code responsibility.
+.LI
+Track down defects found in the v-node layer with the V_NODE group.
+.LI
+Responsible for RT changes in the code for which they are responsible.
+.LI
+Gather ICA numbers for the NFS kernel layer and meet the ICA goals for that 
+area.
+.LI
+Make NFS configurable.
+.LI
+Provide MR documentation for the areas of kernel code for which they are
+responsible.
+.LI
+Perform any performance tuning necessary in the NFS kernel code.
+.LI
+Keep 300 and 800 NFS kernel code merged with the NFS 300 kernel group.
+.LI
+Run Busy system testing to meet CHO requirements.
+.LI
+Represent s800 kernel on TWG.
+.LI
+Respond to XTTC problems with help from the V-NODE, NET_KERN and NFS_DEV
+groups when necessary.
+.LE
+.LI
+V-NODE (kernel group at ISO responsible for the v-node layer):
+.BL
+.LI
+Work with AZURE in fixing defects found in the v-node layer.
+.LI
+File system code responsibilities.
+.LI
+Gather ICA numbers for the v-node layer and meet the ICA goals for that area.
+.LI
+Real time changes required for the v-node layer.
+.LI
+Provide MR documentation for the areas of kernel code for which they are
+responsible.
+.LI
+Run Busy system testing to meet CHO requirements.
+.LI
+Run CND's test scaffold to (re)generate any defects.
+.LI
+Respond to XTTC for defects found in their area of code responsibility.
+.LE
+.LI
+SAPPHIRE (commands group at ISO):
+.BL
+.LI
+Change HP-UX commands to work with NFS.
+.LI
+Respond to any problems with HP-UX commands and NFS.
+.LE
+.LI
+NET_KERN (RPC/XDR kernel group at IND):
+.BL
+.LI
+Responsible for the RPC/XDR kernel code.
+.LI
+Track down defects in the network architecture and transport that 
+affect NFS.
+.LI
+Gather ICA numbers for RPC/XDR kernel layer and meet the ICA goals.
+.LI
+Provide any MR documentation that might be needed for the networking kernel.
+.LI
+Perform any performance tuning necessary in the RPC/XDR and network kernel code
+for NFS.
+.LI
+Keep 300 and 800 RPC/XDR kernel code merged with the NFS 300 kernel group.
+.LE
+.LI
+NFS_TEST (NFS testing group at CND):
+.BL
+.LI
+Package NFS tests for other groups to use for ICA/PFA coverage.
+.LI
+Write acceptance test package for NFS.
+.LI
+Augment and maintain the NFS system test plan.
+.LI
+Maintain and distribute the NFS test scaffold.
+.LI
+Implement NFS/800-specific test cases.
+.LI
+Perform NFS subsystem reliability testing.
+.LI
+Perform NFS subsystem stress testing.
+.LI
+Perform NFS connectivity testing.
+.LI
+Perform topology, gateway and hardware configuration testing.
+.LI
+Perform isolated, error recovery and destructive testing.
+.LI
+Perform network cross-services testing (i.e., NFS x RFA, NFS x NFT, NFS x A/B).
+.LI
+Perform XTTC partner regression testing during each IC.
+.LE
+.LI
+INTEGRATION GROUP:
+.BL
+.LI
+Responsible for integrating and releasing the Release 2 s800 kernel
+(including integration cycles).
+.LE
+.LI
+XTTC:
+.BL
+.LI
+BSU reliability testing
+.LI
+CSU reliability testing
+.LI
+Inter-systems testing
+.LI
+Installation testing
+.LI
+Powerfail/Recovery testing
+.LI
+Documentation testing
+.LE
+.LE
+.na
+.bp
+.H 1 "LIFE CYCLE"
+.ad
+.H 2 "Checkpoint: I->L"
+.sp 
+\fBMilestone Date\fR: May 28, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+First pass of project documents finished: ERS, PDS, PRD and 
+Project Plan and Life Cycle.
+.br
+DONE: May 15
+.LI
+User level NFS commands build in place.
+.br
+DONE: May 08
+.sp
+\fITECH\fR
+.LI
+Preliminary NFS 800 support plan submitted to PrSD (done 1/29/87)
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. s800 equipment#LAB#NFS/800#May 01#June 07
+   (2 systems)
+.sp
+.TE
+.fi
+.bp
+.H 2 "Checkpoint: Initial Integration"
+.sp 
+\fBMilestone Date\fR: June 15, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Initial port of NFS commands done.
+.br
+DONE: June 05
+.LI
+Source code sharing plan in place for both kernel and user level code.
+We should have a document describing the process.
+.br
+DONE: June 30
+.LI
+CND scaffold agreement with ISO, IND and XTTC in place.
+.br
+DONE: June 12
+.LI
+NFS section of the scaffold available to interested partners.
+.br
+DONE: June 12
+.LI
+All groups agreed with SWAT team strategy and the team is in place.
+.br
+DONE: June 12
+.LI
+System test plan: first draft available
+.br
+DONE: June 18
+.sp
+\fIDOC_CND\fR
+.LI
+Second draft of s300 manuals available, except for programmatic
+interfaces information.  If the 6.0 schedule slips this date might 
+not be met.
+.br
+DONE: May 29
+.LE
+.sp
+\fBInternal Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+DTS process for sharing 300/800 defects submitted in place by July 2.
+.LI
+Distribution process for kernel and HP-UX commands in place by June 22.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Stable v-noded kernel containing#V_NODE#NFS_CND#June 15#______
+   networking changes from#AZURE
+   convergence program and#NET_KERN
+   NFS/RPC/XDR/SSO s300 changes.
+.sp
+2. 800 sys include files.#AZURE#NFS_CND#June 10#May 28
+#V_NODE
+.sp
+3. Version of libc.a built with#SAPPHIRE#NFS_CND#June 10#June 18
+   most up to date routines.
+.sp
+4. First set of HP-UX s800#SAPPHIRE#NFS_CND#June 10#June 18
+   commands with NFS changes.
+.sp
+5. Support agreement with#NFS_CND#XTTC##June 01 
+   XTTC for CHO's tests.
+.TE
+.fi
+.bp
+.H 2 "Checkpoint: Functional Complete"
+.sp 
+\fBMilestone Date\fR: August 17, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Process to deliver NFS commands to Don Bollinger's group in place by July 24.
+.br
+DONE:  July 31
+.LI
+All NLS changes required for 2.0 release done.
+.br
+DONE: June
+.LI
+Process to integrate NFS routines with libc.a in place and working.
+.br
+DONE:  July 31
+.LI
+Process to share kernel code in place and working, including s300/s800 code
+freeze agreement.
+.br
+DONE: August 03
+.LI
+Processes to gather metrics information in place and working.
+The metrics that need to be gathered are DTS defects (low, medium, high, still
+outstanding), PFA coverage, performance data.
+.br
+DONE: August 19
+.LI
+NFS commands submitted for IC1 base build by August 3.
+.br
+DONE: August 19.  IC1 base build was canceled and there was only an IC1 final
+build.
+.LI
+First pass at performance characterization.
+.br
+DONE: July 09
+.LI
+System test plan complete.
+.br
+DONE: June 15
+.LI
+All incremental test cases complete.
+.br
+DONE: not needed
+.LI
+All test suites complete and in place.
+.br
+DONE:
+.sp
+\fIDOC_CND\fR
+.LI
+Third draft of s300 "Using and Administering NFS" available August 17.
+This will be the basis for the first draft of the s800 manual later on.
+If the 6.0 schedule slips this date might not be met.
+.br
+DONE: August 17
+.LI
+Third draft of s300 programmatic interfaces chapter available August 24.
+This will be the basis for the first draft of the s800 manual later on.  
+If the 6.0 schedule slips this date might not be met.  
+(Should be OK since it needs to be available for TC1, but not necessarily IC1 
+build).
+.br
+DONE: July 15
+.sp
+\fITECH\fR
+.LI
+Complete draft of CE/SE training for 300 and 800 NFS.
+.br
+DONE:
+.LI
+Final support plan submitted to PrSD by August 15.
+.br
+DONE:
+.LE
+.sp
+\fBInternal Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Stable system as defined by Criteria 1.
+.sp
+\fISMELTER\fR
+.LI
+Test plan for NS/ARPA versus NFS testing in place.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Libc with recent NLS changes#SAPPHIRE#NFS_CND#August 3#
+   incorporated
+.sp
+2. Information on metric tools#STMP#NFS_CND#July 31#
+   required
+.sp
+3. Information on integration#INT#NFS_CND#July 15#July 24
+   process
+.sp
+4. HP Corporate Internet##NFS_CND#continuous#
+   supported
+.sp
+5. Networking kernel support#NET_KERN#NFS_CND#continuous#
+   and timely defect repairs
+.sp
+6. V-node and NFS kernel#V_NODE#NFS_CND#continuous#
+   support#AZURE
+.sp
+7. 300/800 differences if#ALL#DOC_CND#July 06 
+   300/800 NFS manuals###
+   combined###
+.sp
+8. 300/800 differences if#ALL#DOC_CND#August 28
+   300/800 NFS manuals###
+   not combined###
+.sp
+9. All HP-UX commands#SAPPHIRE#NFS_CND#August 10#July 15
+   affected by NFS###
+.sp
+10. Output of IC2#INT#NFS_CND#on schedule
+.sp
+11. Timely completion of ISO#ISO#NFS_CND#on schedule
+Internal milestones as listed#
+under general dependencies
+.sp
+12. Five s800 systems#CND#NFS_CND#August 01#Done
+    Four as of July 13.
+.TE
+.bp
+.H 2 "Checkpoint: Level A"
+.sp 
+\fBMilestone Date\fR: September 21, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+NFS commands submitted for IC2 base build by
+.br
+September 08.
+.br
+DONE: September 08
+.LI
+Reach 100% internal breadth coverage, 50% parameter breadth coverage 
+and 40% PFC by FB2 (September 21).
+.br
+DONE: beginning of July
+.LI
+Defect density of 0/1/5 (critical, serious and medium/low) by FB2 
+(September 21).
+.br
+DONE: September 18
+.LI
+Pass CND's 24 hours reliability (CHO) test by FB2 (September
+21).
+.br
+DONE: September 21
+.sp
+\fIPROD\fR
+.LI
+Introduction or Merchandising Plan.
+.LE
+.sp 
+\fBInternal Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Stable system as defined by Criteria 2.
+DONE
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Stable kernel at level A#V_NODE#NFS_CND#September 4#September 4
+#AZURE##
+#NET_KERN##
+.sp
+2. Stable NFS commands#AZURE#NFS_CND#September 4#September 4
+##NET_KERN#
+.sp
+3. Output of IC2#INT#NFS_CND#on schedule
+.sp
+4. Timely bug fixes#SAPPHIRE#NFS_CND#continuous
+   for HP-UX commands###
+   affected by NFS###
+.TE
+.bp
+.H 2 "Checkpoint: Level B"
+.sp 
+\fBMilestone Date\fR: October 26, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+NFS commands submitted for IC3 base build.
+DONE: 10/15.
+.LI
+Maintain 100% internal breadth coverage.
+DONE.
+.LI
+Reach 70% parameter breadth coverage and 60% PFC by FB3 
+(October 26).
+DONE: Was at 100% parameter breadth coverage.  Reached
+61.5% by FB3 (November 05).
+.LI
+Defect density of 0/0.5/4 (critical, serious and medium/low) by FB3
+(October 26).  DONE:  We reached 0/0/0.
+.LI
+Pass CND's 48 hours reliability (CHO) test by FB3 (October 26).
+DONE.
+.sp
+\fIDOC_CND\fR
+.LI
+First draft of s800 documentation available November 01 (entry TC3).
+If the 6.0 schedule slips this date might not be met.
+DONE: November 20.
+.LE
+.sp
+\fBInternal Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Reach 96 hour reliability.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Output of IC3#INT#NFS_CND#on schedule
+.sp
+2. Stable kernel at level B#V_NODE#NFS_CND#October 12
+#AZURE##
+#NET_KERN##
+.sp
+3. Stable NFS commands#NFS_CND#AZURE#October 12
+##NET_KERN#
+.sp
+4. Timely bug fixes#SAPPHIRE#NFS_CND#continuous
+   for HP-UX commands###
+.TE
+.bp
+.H 2 "Checkpoint: IC 4"
+.sp 
+\fBMilestone Date\fR: December 11, 1987
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+NFS commands submitted for IC4 base build by 
+.br
+November 23.
+DONE: 11/19.
+.LI
+Maintain 100% internal breadth coverage.
+DONE.
+.LI
+Re-measure and report KNCSS at the entry to TC4.
+DONE.
+.sp
+\fITECH\fR
+.LI
+Training for 800 NFS Beta Sites on the week of November 9.
+.LI
+Training released to PrSD on November 25.
+DONE: November 24.
+.LE
+.sp
+\fBInternal Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+Stable system as defined by Criteria 3.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Output of IC4#INT#NFS_CND#on schedule
+.TE
+.bp
+.H 2 "Checkpoint: Level C"
+.sp 
+\fBMilestone Date\fR: January 04, 1988
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+NFS commands submitted for IC5 base build by 
+.br
+December 28.
+DONE.
+.LI
+Maintain 100% internal breadth coverage.
+DONE.
+.LI
+Reach 100% parameter breadth coverage and 75% PFC by FB5 
+(January 11).
+DONE.
+.LI
+Defect density of 0/0/2 (critical, serious and medium/low) by FB5
+(January 11).
+DONE.
+.LI
+825 performance at 55% of Sun 3/260 performance.
+DONE.
+.LI
+Pass CND's 120 hours reliability (CHO) test by FB5 (January 04).
+DONE.
+.LI
+Re-measure and report KNCSS at the entry to TC5.
+DONE.
+.sp
+\fIDOC_CND\fR
+.LI
+Final draft of s800 documentation available January 05 (entry TC5).
+If the 6.0 schedule slips this date might not be met.
+DONE.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Stable kernel at level C#V_NODE#NFS_CND#December 21
+#AZURE##
+#NET_KERN##
+.sp
+2. Stable NFS commands#NFS_CND#AZURE#December 21
+##NET_KERN#
+.sp
+3. Output of IC5#INT#NFS_CND#on schedule
+.sp
+4. Timely bug fixes#SAPPHIRE#NFS_CND#continuous
+   for HP-UX commands###
+   affected by NFS###
+.TE
+.bp
+.H 2 "Checkpoint: IC 6"
+.sp 
+\fBMilestone Date\fR: February 16, 1988
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+All critical and serious defects will be fixed, pending CRT approval.
+Medium and low defects discovered after FB5 will not be fixed.
+.br
+DONE.
+.LI
+Pass CND's 120 hours reliability (CHO) test.
+.LI
+Re-measure and report KNCSS at the start of final build for MR.
+.br
+DONE.
+.sp
+\fIPROD\fR
+.LI
+Release to Introduction Meeting on January 18.
+.br
+DONE.
+.LI
+CPL on February 01.
+.br
+DONE.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Output of IC6#INT#NFS_CND#on schedule
+.TE
+.bp
+.H 2 "Checkpoint: Manufacturing Release"
+.sp 
+\fBMilestone Date\fR: February 22, 1988
+.sp 
+\fB2.0 Milestone Deliverables\fR:
+.sp
+.AL
+\fINFS_CND\fR
+.LI
+No major defects in 120 hour testing.
+.br
+DONE.
+.LI
+Maintain 100% breadth coverage, 75% depth coverage and 0/0/2 defect density.
+.br
+DONE.
+.LI
+120 hour system reliability at combined networking stress.
+.br
+DONE.
+.LI
+All connectivity testing complete.
+.br
+DONE.
+.LI
+Quality statement prepared for manufacturing release.
+.br
+DONE.
+.LI
+Release celebration planned.
+.LI
+Corporate metrics complete.
+.br
+DONE.
+.LI
+Project post mortem complete.
+.br
+DONE.
+.LI
+All NFS user code archived.
+.br
+DONE.
+.LI
+NFS retest of final bits.
+.br
+DONE.
+.LI
+All NFS tests archived.
+.br
+DONE
+.sp
+\fIDOC_CND\fR
+.LI
+Documentation camera-ready by February 10.
+.br
+DONE
+.sp
+\fITECH\fR
+.LI
+Articles submitted to field publications by 
+.br
+February 08.
+.br
+DONE.
+.LE
+.sp
+.nf
+.TS
+tab(#);
+l l l l l.
+\fBDependencies\fR#\fBOn Whom\fR#\fBBy Whom\fR#\fBBy When\fR#\fBActual\fR
+.sp
+1. Output from final build#INT#ALL#February 8
+.sp
+2. Final 120 hour reliability#SMELTER#NFS_CND#February 22
+   tests of NS/ARPA vs. NFS
+.sp
+3. 120 hour reliability in NFS#NFS_CND#SMELTER#
+.sp
+4. Verification tools complete#NFS_CND#TECH#
+   for s800 NFS###
+.sp
+5. SE distribution#TECH#DOC_CND#
+   of manuals###
+.TE
+.TC 2 2 3 0 "TABLE OF CONTENTS"	\" Define format for table of contents

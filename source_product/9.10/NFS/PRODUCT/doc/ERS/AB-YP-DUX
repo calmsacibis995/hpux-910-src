@@ -1,0 +1,53 @@
+	        HP's Diskless Product:  Interaction With
+	      Arpa/Berkeley Services, NFS and Yellow Pages
+
+
+On 7 January  1987,  Cristina  Mahon and Dave  Erickson  spoke with Dave
+Gutierrez of SSO.  The talk  revolved  around the DUX project  which has
+been trimmed back to provide a diskless  product.  (For lack of a proper
+label, this paper will refer to the diskless product as HPD.)  Following
+is a description of part of the discussion.
+
+Unlike DUX, HPD does not have a distributed filesystem.  HPD comprises a
+single  host  (call it the  pivot)  with  attached  disk and a number of
+diskless  workstations  which boot, store and  retrieve  files from that
+disk.  A network  among the machines  permits  this.  The network may or
+may not be isolated from other HPD and non-HPD systems.
+
+HPD will have the  ARPA/Berkeley  services (ABS) and NFS (including  the
+Yellow  Pages or YP)  integrated  with it.  Both ABS and NFS/YP  rely on
+daemons to coordinate  communications between processes on the local and
+remote  machines.  The  particular  daemons are inetd, the ABS  internet
+daemon, and the NFS/YP  daemons nfsd, biod, ypserv and ypbind.  Of these
+daemons,  only  ypbind  behaves as a "client  daemon."  In other  words,
+ypbind is the only daemon which exists on a  requestor's  behalf, on the
+requestor's  machine.  All other daemons are "server daemons," providing
+services  required  by a client.  Server  daemons  need  exist only on a
+machine which makes such services available.
+
+When ABS and NFS/YP are joined  with HPD, a  question  arises:  on which
+machine(s)  of an HPD cluster will client and server  daemons run?  This
+is of interest since from one external view, an HPD cluster is seen as a
+single  machine  with a  single  filesystem.  From  another  view,  each
+machine in an HPD cluster is an independent  processor which can respond
+to requests from remote clients and originate requests on its own.
+
+Users of each machine of a cluster are capable of making requests for YP
+services.  It is  expected  that each HPD  machine  would  then have the
+ypbind daemon running on it.
+
+Since the filesystem of an HPD cluster is attached to only the pivot, it
+is best that any daemons which provide file access  services be run only
+on the  pivot.  nfsd, biod and ypserv are such  daemons.  These  daemons
+could be run on any of the non-pivot  machines,  but 1) file access time
+would be  shorter  if the  daemon  runs on the pivot and 2) the pivot is
+likely to be faster and have more memory (so can support  more  daemons)
+than the other HPD machines in its cluster.
+
+Last,  ABS' inetd  would need to be run on any  machine  furnishing  the
+services found in  /etc/inetd.conf.  Such services are ftp, remsh, rexec
+rlogin and telnet.
+
+Finally, if there is a cluster  formed by a server and several  discless
+nodes,  an NFS  filesystem  mounted  by any of  these  machines  will be
+visible to the rest of the systems in the cluster.

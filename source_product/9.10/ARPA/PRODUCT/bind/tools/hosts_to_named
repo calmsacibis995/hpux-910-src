@@ -1,0 +1,2099 @@
+#!/bin/sh
+#
+# $Header: hosts_to_named,v 1.70.109.3 92/07/02 17:38:50 ash Exp $
+#
+# Create database files for named from /etc/hosts.
+#
+
+set -h
+
+#
+# These are the temporary files used.  The first two
+# must not exceed 10 chars since, at times, .tmp is appended
+# during filtering operations and the names must be unique
+# on 14 char filename systems.
+#
+
+tmphostfile=/tmp/HH$$hst
+tmpworkingfile=/tmp/HH$$wrk
+tmpcname=/tmp/HH$$cnm
+tmpptrfile=/tmp/HH$$subdom
+tmpmulti=/tmp/HH$$multi
+tmpmxfile=/tmp/HH$$mx
+tmpreject=/tmp/HH$$reject
+tmprejectl=/tmp/HH$$rejectl
+tmpsoafile=/tmp/HH$$soa
+
+#
+# Remove all files upon exit.
+#
+
+trap "rm -f /tmp/HH$$*; exit 0" 0 1 2 3 15
+
+#
+# Initialize all shell variables.
+#
+
+ADDR=""
+ALIASES=1
+APPEND="no"
+BOOT="named.boot"
+BOOTSEC="boot.sec"
+BOOTCACHE="boot.cacheonly"
+COMMENT_FILE=""
+DELEGATE=""
+DEFAULT_DOMAIN=""
+DOMAINS=""
+DOTS=1
+EXCLUDE=""
+FORCE="no"
+HOST=""
+HOSTNAME=""
+INCREMENTEDSOA="no"
+MAILHUB=""
+MASTERS_NOSAVE=""
+MASTERS_SAVE=""
+MX=1
+MYNAME=`basename $0`
+NET=""
+NETMASK=""
+PTR_ONLY=""
+QUIET="no"
+ROOTSERVER="no"
+SERVER=""
+SOA_VALUES=""
+TXT=0
+WKS=0
+USER=""
+
+#
+# Add IN-ADDR.ARPA entries to $BOOT
+#
+
+add_nets()
+{
+        for i in $NET
+        do
+	    # check for mention of file in boot file
+    	    if check_in_boot_file $i
+    	    then
+		: # name is in boot file
+	    else
+	        INV=`echo $i | awk '{n=split($1,net,".")
+			     for(;n>0;n--) printf "%s.",net[n]
+			     printf "IN-ADDR.ARPA\n"}'`
+	        echo "primary\\t\\t$INV\\tdb.$i" >> $BOOT
+	        if test "$NEWBOOT" = "no" -a "$QUIET" = "no" 
+	        then
+		    echo "WARNING: adding db.$i to $BOOT" 
+	        fi
+    	    fi
+        done
+}
+
+#
+# Print message and exit.
+#
+
+bad_option() 
+{
+	echo "\\n\\t$MYNAME: $1\\n" 1>&2
+	exit 1
+}
+
+#
+# Build the named.boot file if it doesn't exist.
+# Update boot file if it does exist.
+#
+# Build the secondary boot files from the primary
+# boot file if the secondary files don't exist at all
+# and the user used -z or -Z.  Update secondary file 
+# if it does exist.
+#
+
+buildboot() 
+{
+	
+	NEWBOOT="no"
+	if test ! -f $BOOT 
+	then
+	    NEWBOOT="yes"
+	    if test "$QUIET" = "no" 
+	    then
+		echo Building default named.boot file ...
+	    fi
+	    echo ";\\n; type\\t\\tdomain\\t\\t\\tsource file\\n;\\n\\n" \
+								> $BOOT
+	    echo "directory\\t"`pwd`\\t"; running directory for named\\n" \
+								>> $BOOT
+	    echo "primary\\t\\t0.0.127.IN-ADDR.ARPA\\tdb.127.0.0" >> $BOOT
+	fi
+
+	for DOM in $DEFAULT_DOMAIN $DOMAINS
+	do
+	    SUBDOM=`subdomain $DOM`
+	    if check_in_boot_file "$SUBDOM"
+	    then
+		:
+	    else
+		if test "$NEWBOOT" = "no" -a "$QUIET" = "no" 
+		then
+		    echo "WARNING: adding db.$SUBDOM to $BOOT" 
+		fi
+		echo "primary\\t\\t$DOM\\t\\tdb.$SUBDOM" >> $BOOT
+	    fi
+	done
+
+	if test "$APPEND" = "yes" 
+	then
+		# check for mention of file in boot file
+    		if check_in_boot_file "$INADDR"
+    		then
+		    : # name is in boot file
+		else
+		    echo "primary\\t\\tIN-ADDR.ARPA\\t\\tdb.$INADDR" >> $BOOT
+		    if test "$NEWBOOT" = "no" -a "$QUIET" = "no" 
+		    then
+			echo "WARNING: adding db.$INADDR to $BOOT" 
+		    fi
+    		fi
+
+		#
+		# Build normal boot file for later translation
+		# to secondary boot files.  Start with the boot
+		# file, strip out the IN-ADDR.ARPA entry and
+		# quietly build a normal boot file.
+		#
+		if test "$MASTERS_SAVE" != "" -o "$MASTERS_NOSAVE" != ""
+		then
+			QUIETSAVE="$QUIET"
+			QUIET="yes"
+
+			fgrep -v db.$INADDR < $BOOT > .named.boot.
+			BOOTSAVE="$BOOT"
+			BOOT=".named.boot."
+
+			add_nets
+
+			BOOT="$BOOTSAVE"
+			QUIET="$QUIETSAVE"
+		fi
+
+	else
+		add_nets 
+	fi
+
+	if test "$NEWBOOT" = "yes" 
+	then
+	    if test "$ROOTSERVER" = "no" 
+	    then
+	    	if test ! -f db.cache 
+	    	then
+	            if test "$QUIET" = "no" 
+	            then
+		          echo Building default db.cache file ...
+	            fi
+		    echo ";" > db.cache
+		    echo "; FILL IN THE NAMES AND ADDRESSES OF THE ROOT SERVERS" >> db.cache
+		    echo ";" >> db.cache
+		    echo "; .\\t\\t99999999\\tIN\\tNS\\troot.server." >>db.cache
+		    echo "; root.server.\\t99999999\\tIN\\tA\\t??.??.??.??"  >> db.cache
+		    echo ";" >> db.cache
+		    echo "\\nWARNING: db.cache must be filled in with"
+		    echo "         the name(s) and address(es) of the"
+		    echo "         rootserver(s)\\n"
+		fi
+	    	echo "cache\\t\\t.\\t\\t\\tdb.cache" >> $BOOT
+	    else
+	            if test "$QUIET" = "no" 
+	            then
+		          echo Building default db.root file ...
+	            fi
+
+	            echo "primary\\t\\t.\\t\\t\\tdb.root" >> $BOOT
+		    buildsoa "root" "no"
+
+		    SHORT=`echo $ORIGINATOR | sed -e 's/\..*//'`
+		    awk '{
+			 if ($1 == "'$SHORT'" && $3 == "A") 
+			    printf "%s\t%s\t%s\t%s\n","'$ORIGINATOR'",$2,$3,$4
+			} ' <db.$DEFAULT_SUBDOMAIN >> db.root
+	    fi
+	fi
+
+	#
+	# Build secondary boot files from primary boot file each time.
+	#
+	if test "$MASTERS_SAVE" != "" 
+	then
+	    if test "$QUIET" = "no" 
+	    then
+		echo Building default $BOOTSEC.save for secondary servers ...
+	    fi
+	    if test "$APPEND" = "yes" 
+	    then
+		BOOTSAVE="$BOOT"
+		BOOT=".named.boot."
+	    fi
+	    awk '
+		/db\.root/	{printf "cache\t\t.\t\t\tdb.cache\n"; continue}
+		/db\.127/	{print $0; continue}
+		/^primary/      {if (length($2) < 16)
+				    printf "secondary\t%s\t\t'"$MASTERS_SAVE"' %s\n",$2,$3
+				 else
+				    printf "secondary\t%s\t'"$MASTERS_SAVE"' %s\n",$2,$3
+				 continue}
+				{print $0}
+	    ' < $BOOT > $BOOTSEC.save
+	    if test "$APPEND" = "yes" 
+	    then
+		BOOT="$BOOTSAVE"
+	    fi
+	fi
+	if test "$MASTERS_NOSAVE" != "" 
+	then
+	    if test "$QUIET" = "no" 
+	    then
+		echo Building default $BOOTSEC for secondary servers ...
+	    fi
+	    if test "$APPEND" = "yes" 
+	    then
+		BOOTSAVE="$BOOT"
+		BOOT=".named.boot."
+	    fi
+	    awk '
+		/db\.root/	{printf "cache\t\t.\t\t\tdb.cache\n"; continue}
+		/db\.127/	{print $0; continue}
+		/^primary/      {if (length($2) < 16)
+				    printf "secondary\t%s\t\t'"$MASTERS_NOSAVE"'\n",$2
+				 else
+				    printf "secondary\t%s\t'"$MASTERS_NOSAVE"'\n",$2
+				 continue}
+				{print $0}
+	    ' < $BOOT > $BOOTSEC
+	    if test "$APPEND" = "yes" 
+	    then
+		BOOT="$BOOTSAVE"
+		rm -f ".named.boot."
+	    fi
+	fi
+	if test ! -f "$BOOTCACHE"
+	then
+	    if test "$QUIET" = "no" 
+	    then
+		echo Building default $BOOTCACHE for caching only servers ...
+	    fi
+	    echo ";\\n; type\\t\\tdomain\\t\\t\\tsource file\\n;\\n\\n" \
+								> $BOOTCACHE
+	    echo "directory\\t"`pwd`\\t"; running directory for named\\n" \
+								>> $BOOTCACHE
+	    echo "primary\\t\\t0.0.127.IN-ADDR.ARPA\\tdb.127.0.0" >> $BOOTCACHE
+	    echo "cache\\t\\t.\\t\\t\\tdb.cache" >> $BOOTCACHE
+	fi
+}
+
+#
+# Create the MX data.  Add in the mail hub data
+# if there are any.
+#
+
+buildmx()
+{
+	# Sort by name and eliminate 
+	# duplicates.
+	
+	if test "$MX" = "1" 
+	then
+		if test "$QUIET" = "no" 
+		then
+			echo "Creating \"MX\" (mail exchanger) data ..."
+		fi
+		for DOM in $DOMAINS $DEFAULT_DOMAIN
+		do
+		   SUBDOM=`subdomain $DOM`
+		   sort -u $tmpmxfile$SUBDOM | awk '
+			BEGIN 	{ hubs=split("'"$MAILHUB"'",mailhub," ") }
+				{
+				  if ($3 == "MX" ){
+				    print $0
+				    for(i = 1; i < hubs; i += 2)
+			  	      printf("%-15s\tIN\tMX\t%d\t%s\n", "", mailhub[i], mailhub[i+1]) 
+				  } else if ($3 == "NOMX") {
+				      host=$1
+				      for(i = 1; i < hubs; i += 2){
+			  	        printf("%-15s\tIN\tMX\t%d\t%s\n", host, mailhub[i], mailhub[i+1]) 
+					host=""
+				      }
+				  } else              # WKS data
+					print $0
+				}
+			' >> db.$SUBDOM
+		done
+	fi
+	rm -f $tmpmxfile$SUBDOM
+	
+}
+
+#
+# Create the pointer data.  Put the right number of address
+# bytes in the master file.  If net is "1", then put 3 bytes.
+# If net is "1.1" then put in 2 bytes.  If net is "1.1.1" then
+# put in 1 byte.  Deal with octal and hex addresses.  Map the
+# octal and hex into the proper name by converting to decimal.
+# Thus, you can look up the name and get the address and then
+# look up the address and get the name back.
+#
+
+buildptr()
+{
+	NET_NUM=$1
+
+	if test "$QUIET" = "no" 
+	then
+		echo "Creating \"PTR\" data (address to name mapping) for net $NET_NUM ..."
+	fi
+
+	if test "$APPEND" = "yes" 
+	then
+		ptrfile="$INADDR"
+		buildsoa "$INADDR" "yes" "$NET_NUM"
+	else
+	    if test "$FORCE" = "yes"
+	    then
+		buildsoa $NET_NUM "no"
+		ptrfile="$NET_NUM"
+	    else
+		buildsoa $NET_NUM "maybe"
+		ptrfile=".$NET_NUM"
+	    fi
+	fi
+
+	# Build the PTR records.  We keep track of how
+	# many labels were specified in the net address so
+	# that we can handle class A, B, and C addresses.
+
+	SUBNET_LABELS=`echo $NET_NUM | awk '{n=split($1,xxx,"."); print n}'`
+	awk 'BEGIN { labels='$SUBNET_LABELS' }
+	     {    split($1,xxx,".")
+		  addr=""
+		  for(n=4; n > labels; n--){
+
+		    number=xxx[n]
+
+		    # Convert octal and hex numbers for PTR records since 
+		    # these are interpretted as names.
+
+		    if(index(number,"0") == 1){
+			newnumber=0
+			base=8
+			position=1
+			number=substr(number,2)
+                        if((index(number,"X") == 1)||(index(number,"x") == 1)){
+			    base=16
+			    number=substr(number,2)
+			}
+			size=length(number)
+			while(size > 0){
+			    character=substr(number,size,1)
+			    if(base == 16){
+			      if(character == "a") character=10
+			      else if(character == "b") character=11
+			      else if(character == "c") character=12
+			      else if(character == "d") character=13
+			      else if(character == "e") character=14
+			      else if(character == "f") character=15
+			    }
+			    newnumber=newnumber + (position * character)
+			    number=substr(number,1,size-1)
+			    size--
+			    position=position * base
+			}
+			number=newnumber
+		    }
+
+		    if (addr == "")
+			addr=number
+		    else
+			addr=addr "." number
+
+		  }
+		  printf("%s\tIN\tPTR\t%s.\n", addr, $2)
+	    }' $tmpptrfile >> db.$ptrfile
+
+	if test -f spcl.$NET_NUM -a "$ptrfile" = "$NET_NUM" 
+	then
+		echo '$INCLUDE\tspcl.'$NET_NUM >> db.$ptrfile
+	fi
+	if test -f spcl.$NET_NUM -a "$ptrfile" = ".$NET_NUM" 
+	then
+		echo '$INCLUDE\tspcl.'$NET_NUM >> db.$ptrfile
+	fi
+
+	# Check if the file has changed beyond the SOA
+	# and move into place if it has, but only if
+	# creating separate files for PTR records.
+
+	if test "$ptrfile" = ".$NET_NUM"
+	then
+	    if test -f db.$NET_NUM
+	    then
+		CHANGEDLINES=`diff -h db.$NET_NUM db.$ptrfile | wc -l`
+		if test $CHANGEDLINES -ne 4
+		then
+		    mv db.$ptrfile db.$NET_NUM
+		else
+	            if test "$QUIET" = "no" 
+	            then
+			echo "New \"PTR\" data is the same as the old.  Removing new version ..."
+		    fi
+		    rm db.$ptrfile
+		fi
+	    else
+		mv db.$ptrfile db.$NET_NUM
+	    fi
+	fi
+}
+
+#
+# Build the SOA record in the database file.
+# Use the current values if they exist.
+#
+
+buildsoa () 
+{
+
+    SERIAL="" REFRESH="" RETRY="" EXPIRE="" MINIMUM="" NS=""
+
+    if test -f db.$1 
+    then
+	#
+	# Grab the current SOA values out of the file.
+	# Only use the first SOA.
+	#
+	eval `head -30 db.$1 | awk '
+		   /SOA/ {if(seensoa == "yes")
+			       exit
+			  seensoa="yes"
+			  if($2 == "0"){
+			       print "ORIGINATOR="$5
+			       print "RESP_PERSON="$6}
+			  else {
+			       print "ORIGINATOR="$4
+			       print "RESP_PERSON="$5}
+			  }
+		   /Serial/ {print "SERIAL="$1}
+		   /Refresh/ {print "REFRESH="$1}
+		   /Retry/ {print "RETRY="$1}
+		   /Expire/ {print "EXPIRE="$1}
+		   /Minimum/ {print "MINIMUM="$1}
+		' `
+
+	for ns in `head -30 db.$1 | awk '/SOA/ {if(seensoa == "yes")
+			  			     exit
+			  			seensoa="yes"}
+					/NS/ {if($NF != "NS") print $NF}' `
+	do
+	    NS="$NS "$ns
+	done
+	#
+	# Increment the serial number if it exists
+	#
+	if expr $SERIAL : ".*\." >/dev/null 2>&1
+	then
+		echo "db.$1: Serial number is not an integer - not incremented"
+	else
+	    if test "$2" = "yes" -a "$INCREMENTEDSOA" = "yes" 
+	    then
+		: # we already incremented SOA for in-addr file
+	    else
+		test "$SERIAL"  && SERIAL=`expr $SERIAL + 1`
+	    fi
+	fi
+    fi
+
+    #
+    # Use the command line values
+    #
+    if test "$SOA_VALUES" != ""
+    then
+	eval `echo $SOA_VALUES | awk '
+		{n = split($0,xxx,":")
+		 if((n >= 1) && (xxx[1] != ""))
+			print "REFRESH="xxx[1]
+		 if((n >= 2) && (xxx[2] != ""))
+			print "RETRY="xxx[2]
+		 if((n >= 3) && (xxx[3] != ""))
+			print "EXPIRE="xxx[3]
+		 if((n >= 4) && (xxx[4] != ""))
+			print "MINIMUM="xxx[4]}
+	'`
+    fi
+    test "$ORIGINATOR"  || ORIGINATOR="$HOSTNAME."
+    test "$SERIAL"  || SERIAL=1
+    test "$REFRESH"  || REFRESH=10800
+    test "$RETRY"  || RETRY=3600
+    test "$EXPIRE"  || EXPIRE=604800
+    test "$MINIMUM"  || MINIMUM=86400
+
+    # command line can override ORIGINATOR in file
+    if test "$HOST" != "" 
+    then
+	# did the user specify a dotted host name?
+	if expr $HOST : ".*\." >/dev/null 2>&1
+	then
+            # does it end in '.' ?
+	    if expr $HOST : '.*\.$' >/dev/null 2>&1
+	    then
+	    	ORIGINATOR=${HOST}
+	    else
+	    	ORIGINATOR=${HOST}.
+	    fi
+	else
+	    ORIGINATOR=$HOST.$DEFAULT_DOMAIN.
+	fi
+	test "$NS"  || NS=$ORIGINATOR
+    fi
+
+    #
+    # Default the server to the local host
+    # if there is no list of servers in an existing file.
+    #
+    if test "$NS" = "" -a "$SERVER" = ""
+    then
+	    SERVER="$HOSTNAME."
+    fi
+
+    # Add per domain NS records 
+    
+    EXTRA_NS=""
+    if test "$2" = "yes"
+    then
+    	LASTDOMAIN="_`echo $3 | sed -e "s/\\./_/g"`"
+    else
+    	LASTDOMAIN="_`echo $1 | sed -e "s/\\./_/g"`"
+    fi
+    eval EXTRA_NS=\"\${$LASTDOMAIN}\"
+
+    # Over-ride what is in the file if -S is
+    # used without -s.
+
+    if test "$SERVER" = "" -a "$EXTRA_NS" != ""
+    then
+	    SERVER="$HOSTNAME."
+    fi
+
+    if test "$SERVER" != "" 
+    then
+	NS=""
+
+	for ns in $SERVER $EXTRA_NS
+	do
+	    # did the user specify a dotted host name ?
+	    if expr "$ns" : ".*\." >/dev/null 2>&1
+	    then
+		# does it end in '.'?
+	        if expr "$ns" : '.*\.$' >/dev/null 2>&1
+	        then
+	    	    NS="$NS $ns"
+	        else
+		    NS="$NS ${ns}."
+	        fi
+	    else
+		NS="$NS $ns.$DEFAULT_DOMAIN."
+	    fi
+	done
+    fi
+
+    # User will either be set from the command line, an old file or be null.
+
+    # Did the user include the host in the specification of USER?
+    if expr "$USER" : ".*\." >/dev/null 2>&1
+    then
+        # does it end in '.' ?
+	if expr "$USER" : '.*\.$' >/dev/null 2>&1
+	then
+	    RESP_PERSON=${USER}
+	else
+	    RESP_PERSON=${USER}.
+	fi
+
+    # Check for an @ sign and no dots
+
+    elif expr "$USER" : ".*\@" >/dev/null 2>&1
+    then
+
+        # Since there were no dots but there was an @ sign, the host
+        # was specified, but the domain must be missing.
+        # The @ sign will be removed down below.
+
+        RESP_PERSON="$USER.$DEFAULT_DOMAIN."
+
+    else
+	if test "$USER" = "" 
+	then
+	    if test "$RESP_PERSON" = "" 
+	    then
+
+	        # This is when USER was not specified from the
+	        # command line and RESP_PERSON was not set because
+	        # the file didn't exist.
+
+		RESP_PERSON="root.$ORIGINATOR"
+	    fi
+	else
+	    if test "$RESP_PERSON" = "" 
+	    then
+
+		# This is when USER was specified, but it
+		# doesn't have a host.  RESP_PERSON was
+		# not set because the file didn't exist.
+	    
+		RESP_PERSON=$USER.$ORIGINATOR
+	    else
+
+		# This is when USER was specified, but it
+		# doesn't have a host.  RESP_PERSON was
+		# set, so use the host that was specified
+		# previously.
+
+		USERHOST=`echo $RESP_PERSON | awk -F. '
+			{for(i=2; i<NF; i++) printf "%s.", $i}'`
+		RESP_PERSON=$USER.$USERHOST
+	    fi
+	fi
+    fi
+
+    #
+    # Change user@host to user.host to make it a domain
+    # style name if necessary.
+    #
+    RESP_PERSON=`echo $RESP_PERSON | sed -e "s/@/./"`
+
+
+    (
+    echo '@       'IN\\tSOA\\t$ORIGINATOR $RESP_PERSON '('
+    echo \\t\\t\\t\\t\\t$SERIAL\\t';' Serial
+    if test "$REFRESH" = "10800" 
+    then
+    	echo \\t\\t\\t\\t\\t$REFRESH\\t';' Refresh every 3 hours
+    else
+    	echo \\t\\t\\t\\t\\t$REFRESH\\t';' Refresh
+    fi
+    if test "$RETRY" = "3600" 
+    then
+    	echo \\t\\t\\t\\t\\t$RETRY\\t';' Retry every hour
+    else
+    	echo \\t\\t\\t\\t\\t$RETRY\\t';' Retry
+    fi
+    if test "$EXPIRE" = "604800" 
+    then
+    	echo \\t\\t\\t\\t\\t$EXPIRE\\t';' Expire after a week
+    else
+    	echo \\t\\t\\t\\t\\t$EXPIRE\\t';' Expire
+    fi
+    if test "$MINIMUM" = "86400" 
+    then
+    	echo \\t\\t\\t\\t\\t$MINIMUM ')'\\t';' Minimum ttl of 1 day
+    else
+    	echo \\t\\t\\t\\t\\t$MINIMUM ')'\\t';' Minimum
+    fi
+    for ns in $NS
+    do
+	echo \\tIN\\tNS\\t$ns
+    done
+    echo ""
+    ) > $tmpsoafile
+    
+    if test "$2" = "yes" 
+    then
+	if test "$INCREMENTEDSOA" != "yes" 
+	then
+		# zero out file
+		echo "" > db.$1
+        	INCREMENTEDSOA="yes"
+	else
+		# add a blank line separator
+		echo "" >> db.$1
+	fi
+	INV=`echo $3 | awk '{n=split($1,net,".")
+				     for(;n>0;n--) printf "%s.",net[n]
+				     printf "IN-ADDR.ARPA.\n"}'`
+	echo '$ORIGIN'\\t$INV >> db.$1
+    	cat $tmpsoafile >> db.$1
+    else
+	if test "$2" = "maybe"
+	then
+    	    cat $tmpsoafile > db..$1
+	else
+    	    cat $tmpsoafile > db.$1
+	fi
+    fi
+    rm -f $tmpsoafile
+
+}
+
+#
+# Print all the canonical names in the file.
+# This is used to build the list of multi-homed hosts.
+#
+
+canonical_name()
+{
+	DOM=$1
+	awk '{
+		comment=index($2,"#")
+
+		if(($2 == "") || (comment == 1))
+		     continue # there was no name - ignore
+		else if(comment > 1){
+		    split($2,xxx,"#")
+		    firstlabel=xxx[1]
+		} else
+		    firstlabel=$2
+
+		#  Strip off the domain of
+		#  fully qualified names.  Skip
+		#  if not part of this domain.
+
+		if(index(firstlabel,".") != 0){
+			start=index(firstlabel,"." domain)
+			if(start == 0){
+			    if( firstlabel == domain )
+				firstlabel="@"
+			    else 
+				continue
+			} else
+				firstlabel=substr(firstlabel,1,start-1)
+		}
+
+		if(firstlabel == "@")
+			print domain
+		else
+			print firstlabel "." domain
+	}' domain="$DOM" -
+}
+
+#
+# Check for the file ($1) being included
+# in the boot file.
+#
+
+check_in_boot_file() 
+{
+	sed -e "s/;.*$//" $BOOT | awk 'BEGIN {found = 1}
+	     /primary/ { if($NF == "db.'$1'") {found = 0; exit}} 
+	     END {exit found}'
+	return $?
+}
+
+#
+# Parse the command line arguments.
+#
+
+parse() 
+{
+    while test $# -gt 0 
+    do
+	case $1 in
+		-a) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  if expr "$1" : "[a-z]*" >/dev/null
+				    then
+					bad_option "$1 is not a network number"
+				    else
+				        ADDR="$ADDR $1"
+				    fi
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-b) BOOT=$2
+		    if test "$BOOT" = ""
+		    then
+			bad_option "-b: requires a file argument"
+		    fi
+		    shift; shift ;;
+		-c) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  DE=$1
+		    		    if expr $DE : ".*\.$" >/dev/null 2>&1
+		    		    then
+			   		    DE=`echo $DE | sed "s/\.$//"`
+		    		    fi
+				    DE=`echo $DE | tr [A-Z] [a-z]`
+				    DELEGATE="$DELEGATE $DE"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-d) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  # remove trailing dot if there is one
+				    if expr $1 : ".*\.$" >/dev/null 2>&1
+		    		    then
+			   		DOM=`echo $1 | sed "s/\.$//"`
+				    else
+					DOM=$1
+		    		    fi
+				    DOM=`echo $DOM | tr [A-Z] [a-z]`
+		                    if test "$DEFAULT_DOMAIN" = ""
+		                    then
+			                DEFAULT_DOMAIN=$DOM
+		                        DEFAULT_SUBDOMAIN=`subdomain $DEFAULT_DOMAIN`
+		                        INADDR="$DEFAULT_SUBDOMAIN.in-addr"
+				    else
+				        DOMAINS="$DOMAINS $DOM"
+				    fi
+				    LASTDOMAIN="_`subdomain $DOM`"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-e) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  EX=$1
+				    #
+				    # strip off trailing dot
+				    #
+		    		    if expr $EX : ".*\.$" >/dev/null 2>&1
+		    		    then
+			   		EX=`echo $EX | sed "s/\.$//"`
+		    		    fi
+				    EX=`echo $EX | tr [A-Z] [a-z]`
+				    EXCLUDE="$EXCLUDE $EX"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-f) 
+		    FILE=$2
+		    if test "$FILE" = "" 
+		    then
+			bad_option "-f: requires a file argument"
+		    fi
+		    shift; shift
+		    if test "$PROCESSING_FILE" != "1" 
+		    then
+		        PROCESSING_FILE="1"
+		        if test ! -f $FILE 
+		        then
+			    bad_option "-f: \"$FILE\" does not exist"
+		        fi
+			#
+			# Direct stdin to come from the file
+			# after saving the arguments left.
+			# The exec will wipe out the arguments
+			# left.
+			#
+			ARGS=$*
+			exec <$FILE
+		        #
+		        # Process each line in the file
+		        #
+		        while read LINE
+		        do
+			    parse $LINE
+		        done 
+		        PROCESSING_FILE="0"
+			#
+			# Finish parsing the command line
+			# arguments.
+			#
+			parse $ARGS
+		    else
+			echo "$MYNAME: -f ignored - not allowed in file"
+		    fi ;;
+		-h) HOST=$2
+		    if test "$HOST" = ""
+		    then
+			bad_option "-h: requires a file argument"
+		    fi
+		    shift; shift ;;
+		-m) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+			    -*) break ;;
+		    	     *) 
+				if expr $1 : ".*:.*" >/dev/null 2>&1
+				then
+					WT=`echo $1 | sed -e "s/:.*$//"`
+					HUB=`echo $1 | sed -e "s/^.*://"`
+					shift
+				else
+					WT=$1
+					HUB=$2
+					shift; shift
+				fi
+				if expr $WT : "[a-z]*" >/dev/null
+				then
+				    bad_option "-m: $WT is not a number"
+				fi
+
+				# did the user specify a dotted host name?
+				if expr $HUB : ".*\." >/dev/null 2>&1
+				then
+            			    # does it end in '.' ?
+	    			    if expr $HUB : '.*\.$' >/dev/null 2>&1
+	    			    then
+	    				MXHOST=$HUB
+	    			    else
+	    				MXHOST=$HUB.
+	    			    fi
+				else
+				    if test "$DEFAULT_DOMAIN" = "" 
+				    then
+					bad_option "-m: name must be fully qualified or -d must be specified first"
+				    fi
+	    			    MXHOST=$HUB.$DEFAULT_DOMAIN.
+				fi
+
+		    		MAILHUB="$MAILHUB $WT $MXHOST" ;;
+			esac
+		    done
+		    ;;
+		-n) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  if expr "$1" : "[a-z]*" >/dev/null
+				    then
+					bad_option "$1 is not a network number"
+				    else
+					if expr $1 : ".*:.*" >/dev/null 2>&1
+					then
+					  NETX=`echo $1 | sed -e "s/:.*$//"`
+					  MASK=`echo $1 | sed -e "s/^.*://"`
+					  NETY=`subnets "$NETX" "$MASK"`
+					  if test "$NETY" = "-1"
+					  then
+						exit 1
+					  fi
+					  NET="$NET $NETY"
+					else
+					  if test "$NETMASK" != ""
+					  then
+					    NETY=`subnets "$1" "$NETMASK"`
+					    if test "$NETY" = "-1"
+					    then
+						exit 1
+					    fi
+					    NET="$NET $NETY"
+					  else
+				            NET="$NET $1"
+					  fi
+					fi
+				    fi
+				    LASTDOMAIN="_`echo $1 | sed -e "s/\\./_/g"`"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-o) SOA_VALUES=$2
+		    if test "$SOA_VALUES" = ""
+		    then
+			bad_option "-o: requires an argument"
+		    fi
+		    shift; shift ;;
+		-p) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  PTR=$1
+		    		    if expr $PTR : ".*\.$" >/dev/null 2>&1
+		    		    then
+			   		    PTR=`echo $PTR | sed "s/\.$//"`
+		    		    fi
+				    PTR=`echo $PTR | tr [A-Z] [a-z]`
+				    PTR_ONLY="$PTR_ONLY $PTR"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-q) QUIET="yes"
+		    shift;;
+		-r) ROOTSERVER="yes"
+		    shift;;
+		-s) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  SERVER="$SERVER $1"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-t) TXT=1
+		    shift ;;
+		-u) USER=$2
+		    if test "$USER" = ""
+		    then
+			bad_option "-u: requires an argument"
+		    fi
+		    shift; shift ;;
+		-w) WKS=1
+		    shift ;;
+		-z) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  if expr "$1" : "[a-z]*" >/dev/null
+				    then
+					bad_option "$1 is not a network number"
+				    else
+					if test "$MASTERS_SAVE" = ""
+					then
+					    # for boot file formating ...
+					    MASTERS_SAVE="$1"
+					else
+				            MASTERS_SAVE="$MASTERS_SAVE $1"
+					fi
+				    fi
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-noaliases|-A) ALIASES=0
+		    shift;;
+		-C) COMMENT_FILE="$2"
+		    if test "$COMMENT_FILE" = ""
+		    then
+			bad_option "-C: requires a file argument"
+		    fi
+		    if test ! -r $COMMENT_FILE
+		    then
+			bad_option "-C: $COMMENT_FILE is not readable"
+		    fi
+		    shift; shift;;
+		-nodots|-D) DOTS=0
+		    shift;;
+		-F) FORCE="yes"
+		    shift;;
+		-H) HOST_FILE="$2"
+		    if test "$HOST_FILE" = ""
+		    then
+			bad_option "-H: requires a file argument"
+		    fi
+		    shift; shift;;
+		-nomx|-M) MX=0
+		    shift;;
+		-N) NETMASK="$2"
+		    if test "$NETMASK" = ""
+		    then
+			bad_option "-N: requires a network mask"
+		    fi
+		    if expr "$2" : "[a-z]*" >/dev/null
+		    then
+			bad_option "$2 is not a network mask"
+		    fi
+		    shift; shift ;;
+		-S) shift
+		    if test "$LASTDOMAIN" = ""
+		    then
+			bad_option "-S: requires a previous -d or -n option"
+		    fi
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  eval $LASTDOMAIN=\"\${$LASTDOMAIN} \$1\"
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-Z) shift
+		    while test $# -gt 0 
+		    do
+			case $1 in
+				-*) break ;;
+				*)  if expr "$1" : "[a-z]*" >/dev/null
+				    then
+					bad_option "$1 is not a network number"
+				    else
+					if test "$MASTERS_NOSAVE" = ""
+					then
+					    # for boot file formating ...
+					    MASTERS_NOSAVE="$1"
+					else
+				            MASTERS_NOSAVE="$MASTERS_NOSAVE $1"
+					fi
+				    fi
+				    shift ;;
+			esac
+		    done
+		    ;;
+		-1) bad_option "The $1 option has been obsoleted"
+		    # APPEND="yes"
+		    shift ;;
+		\#*) shift $# ;;	# read through comments
+		*)  bad_option "bad option $1"
+		    exit 1 ;;
+	esac
+    done
+}
+
+#
+# Print the usage message and exit.
+#
+
+printusage() 
+{
+echo usage: $MYNAME -d domain -n network-number
+echo "                        [-a network-number] [-b bootfile] [-c subdomain]"
+echo "                        [-e subdomain] [-f file] [-h host]"
+echo "                        [-m weight:mailhub] [-o refresh:retry:expire:min]"
+echo "                        [-p domain] [-q] [-r] [-s server] [-t] [-u user]"
+echo "                        [-w] [-z ip-address] [-z ip-addr]"
+echo "                        [-A] [-C mapping-file] [-D] "
+echo "                        [-F] [-H host-file] [-M] [-N netmask] [-S server]"
+echo "                        [-Z ip-address]"
+echo ""
+exit 1
+}
+
+process_host_table()
+{
+	SUBDOM=$1
+	LOWER_DOMAIN=$2
+	ONLY_PTR=$3
+	CHECKCNAMES=$4
+
+	touch $tmpmxfile$SUBDOM
+	rm -f $tmpreject $tmprejectl
+
+	    awk 'BEGIN  { domx='$MX' 
+			  dowks='$WKS'
+			  dotxt='$TXT'
+			  doaliases='$ALIASES' 
+			  domain="'$LOWER_DOMAIN'"
+			  dots='$DOTS'
+			  ptronly='$ONLY_PTR'
+			  multihomed="'$tmpmulti'"
+			  cnamehosts="'$tmpcname'"
+			  commentfile="'$COMMENT_FILE'"
+			  start=index(domain,".")
+			  subdomain=substr(domain,1,start-1)
+			  if(commentfile == "")
+				domatch="0"
+			  else
+				domatch="1"
+			}
+	     /^#/ {continue}
+	       {
+		# Build up list of multi-homed hosts
+
+		if(FILENAME == multihomed){
+			multi[$1]=1
+			continue
+		}
+
+		# Build up list of CNAME records already made
+
+		if(FILENAME == cnamehosts){
+			cname[$1]=1
+			continue
+		}
+
+		# Build up list of comment tokens to match
+
+		if((domatch == "1") && (FILENAME == commentfile)){
+			n=index($0,":")
+			tag=substr($0,1,n-1)
+			cmt_match[tag]=substr($0,n+1)
+			continue
+		}
+
+		comment=index($2,"#")
+
+		# Print the address record.  Deal with
+		# an invalid line, a name followed by a
+		# comment with no white space, and
+		# a normal name.
+
+		if(comment == 1)
+		     continue # there was no name - ignore
+		else if(comment > 1){
+		    split($2,xxx,"#")
+		    firstlabel=xxx[1]
+		} else
+		    firstlabel=$2
+
+		#  Strip off the domain of
+		#  fully qualified names.  Skip
+		#  if not part of this domain.
+
+		if(index(firstlabel,".") != 0){
+			if(dots == 0)
+				continue
+			start=index(firstlabel,"." domain)
+			if(start == 0){
+			    if( firstlabel == domain )
+				firstlabel="@"
+			    else {
+                                split($0, xxx, "#")
+				print "\t",xxx[1],"(first name not in",domain ")" >> "'$tmprejectl'"
+				continue
+			    }
+			} else
+				firstlabel=substr(firstlabel,1,start-1)
+		}
+
+		#
+		# Skip if alread CNAME record for that name
+		#
+		if(cname[firstlabel] == 1){
+                        split($0, xxx, "#")
+			print "\t",xxx[1],"(CNAME data already exists for",firstlabel ")" >> "'$tmprejectl'"
+			continue
+		}
+
+		# Remove names that start with $ since
+		# only $origin and $include are allowed
+		# in database files.  Any other name starting
+		# with $ is an error.
+
+		if(index(firstlabel,"$") == 1){
+                        split($0, xxx, "#")
+			print "\t",xxx[1],"(name starts with $)" >>"'$tmprejectl'"
+			continue
+		}
+
+		# Print record in tmpptrfile that will be later processed
+		# into the address to hostname database.  Only save
+		# the canonical name since we want addresses to map
+		# to the canonical name instead of aliases.
+
+		if( firstlabel == "@" )
+		    print $1,domain >> "'$tmpptrfile'"
+		else
+		    print $1,firstlabel "." domain >> "'$tmpptrfile'"
+
+		if(ptronly == 1)
+		    continue
+
+		printf("%-15s\tIN\tA\t%s\n", firstlabel, $1)
+
+		# Parse through the aliases if we
+		# have not hit a comment already.
+		
+		if(comment > 1)
+		  i=2  # this matters for the next loop.
+		else
+	          for(i=3; i<=NF ; i++){
+
+		     comment=index($i,"#")
+
+		     # The rest of the line is 
+		     # comment, so go on.
+
+		     if(comment == 1) 
+
+			break
+
+		     # If aliases are not to be dealt
+		     # with, skip over the name.  If
+		     # we have hit the comment, break
+		     # out.
+
+		     if(doaliases == 0){
+
+		       if(comment > 1)
+			 break
+		       else
+			 continue
+
+		     }
+
+                     # Must separate name from
+		     # comment if there is no
+		     # white space in between
+
+		     if(comment > 1) {
+
+                        split($i, xxx, "#")
+			alias = xxx[1]
+
+		     } else
+
+			alias = $i
+
+		    #  Strip off the domain of
+		    #  fully qualified names.  Skip
+		    #  if not part of this domain.
+
+		    if(index(alias,".") != 0){
+			if(dots == 0)
+				continue
+			start=index(alias,"." domain)
+			if(start == 0){
+			    if( alias == domain )
+				alias="@"
+			    else {
+				print "\t",alias,"(name not in",domain ")" >> "'$tmpreject'"
+				continue
+			    }
+			} else
+				alias=substr(alias,1,start-1)
+		    } else
+			if (alias == subdomain)
+			    alias="@"
+
+		    # Remove names that start with $ since
+		    # only $origin and $include are allowed
+		    # in database files.  Any other name starting
+		    # with $ is an error.
+
+		    if(index(alias,"$") == 1){
+			print "\t\t",alias,"(name starts with $)" >>"'$tmpreject'"
+			continue
+		    }
+
+		     # Strip out aliases that are only case
+		     # different than the canonical name.
+
+ 		     if(alias != firstlabel){
+
+			#
+			# Skip if alread CNAME record for that name
+			#
+			if(cname[alias] == 1){
+			    print "\t",alias,"(CNAME data already exits)" >> "'$tmpreject'"
+			    continue
+		        }
+
+		       # Create an A RR for aliases if multi-homed
+		       # instead of a CNAME.   Thus aliases can be
+		       # used for picking out 1 interface.
+		       #
+		       # If an alias is the same as the canonical
+		       # name of a multi-homed machine, create
+		       # an A record.  Otherwise we would have
+		       # CNAME and A data for the same name.
+		       #
+		       # If a CNAME is generated, add the name
+		       # to the list of known CNAME data.
+
+                       if (alias == "@" || firstlabel == "@" || multi[firstlabel "." domain] || multi[alias "." domain])
+	                 printf("%-15s\tIN\tA\t%s\n", alias, $1)
+		       else{
+	                 printf("%-15s\tIN\tCNAME\t%s\n", alias, firstlabel "." domain ".")
+			 cname[alias]=1
+		       }
+		    }
+
+		    if(comment > 1)
+
+		       break
+		}
+
+		# Search through comment for "[no smtp]".
+		# If "[no smtp]" doesnt exist, this
+		# is a mail receiving host.  
+		#
+		# Save the rest of the comment so that it
+		# can later be output as TXT data.
+
+		if((domx == "1") || (dotxt == "1") || (domatch == "1")){
+		    mx="MX"
+		    txt_data=""
+		    for( ; i<=NF ; i++){
+		        if(index($i,"[no") != 0){
+			    if((i<NF) && ($(i+1) == "smtp]")){
+			        mx="NOMX"
+				i++
+			    }
+			} else {
+		            comment=index($i,"#")
+		            if(comment == 0)
+				text=$i
+			     else {
+			        # strip off comment
+                                n=split($i, xxx, "#")
+				text=xxx[2]
+			     } 
+			     if(text != ""){
+			         if (dotxt == "1") 
+				    if(txt_data == "")
+					txt_data=text
+				    else
+				        txt_data= txt_data " " text
+				 if ((domatch == "1") &&(cmt_match[text] != ""))
+				     printf("%-15s\t%s\n", firstlabel, cmt_match[text])
+			    }
+			}
+		   }
+		}
+
+
+		# Save the MX records in a file so that
+		# we can eliminate duplicates at the end.
+
+		if (domx == "1"){
+		    if(firstlabel == "@"){
+		  	printf("%-15s\tIN\t%s\t10\t%s.\n", firstlabel, mx, domain) >> "'$tmpmxfile$SUBDOM'"
+			if ((dowks == "1") && (mx == "MX"))
+		  	  printf("%-15s\tIN\tWKS\t%s TCP SMTP\n", firstlabel, $1) >> "'$tmpmxfile$SUBDOM'"
+		    } else {
+		  	printf("%-15s\tIN\t%s\t10\t%s.%s.\n", firstlabel, mx, firstlabel, domain) >> "'$tmpmxfile$SUBDOM'"
+			if ((dowks == "1") && (mx == "MX"))
+		  	  printf("%-15s\tIN\tWKS\t%s TCP SMTP\n", firstlabel, $1) >> "'$tmpmxfile$SUBDOM'"
+		  }
+		}
+		if ((dotxt == "1") && (txt_data != ""))
+		  printf("%-15s\tIN\tTXT\t\"%s\"\n", firstlabel, txt_data) 
+
+	    }'  $tmpmulti $CHECKCNAMES $COMMENT_FILE - >> db.$SUBDOM
+
+	#
+	# Remove the file created if only doing PTR data.
+	#
+	if test "$ONLY_PTR" = "1"
+	then
+		rm db.$SUBDOM
+	fi
+
+	if test -s $tmpreject 
+	then
+	    if test "$QUIET" = "no" 
+	    then
+		echo "\\n    The following names were left out of the database:"
+		echo ""
+		cat $tmpreject
+		echo ""
+	    fi
+	    rm -f $tmpreject
+	fi
+	if test -s $tmprejectl
+	then
+	    if test "$QUIET" = "no" 
+	    then
+		echo "\\n    The following lines were left out of the database:"
+		echo ""
+		cat $tmprejectl
+		echo ""
+	    fi
+	    rm -f $tmprejectl
+	fi
+}
+
+#
+# Return the first part of the domain name.
+#
+
+subdomain()
+{
+	echo `echo $1 | sed -e "s/\..*//"`
+}
+
+#
+# Expand a network number and subnet mask to 
+# a list of subnets
+#
+
+subnets()
+{
+	if subnet_check "$1" "$2"
+	then
+	    echo $1 $2 | awk 'BEGIN {someoutput=0}
+		{
+		network=$1
+		split($1, net, ".")
+		split($2, mask, ".")
+		number = ""
+		#
+		# Only expand bytes 1, 2, or 3
+		# for DNS purposes
+		#
+		for(i=1; i<=3; i++)
+			if(mask[i] == 255){
+				number = number net[i] "."
+			} else if ((mask[i] == 0) || mask[i] == ""){
+				someoutput=1
+				print $1
+				break
+			} else {
+				#
+				# This should be done as a bit-wise or
+				# but awk does not have an or symbol
+				#
+				howmany = 255 - mask[i]
+				for(j=0;  j <= howmany; j++){
+				    someoutput=1
+				    if(net[i]+j <= 255)
+					printf " %s%d",number,net[i]+j
+				}
+				break
+			}
+		}
+    		END {if(someoutput == 0) print network}'
+	else
+		echo "-1"
+	fi
+}
+
+#
+# Check for network number, network mask
+# mis-match
+#
+
+subnet_check()
+{
+	if test "$1" = ""
+	then
+		echo "\\n\\t$MYNAME: empty network number\\n" 1>&2
+		return 1
+	fi
+		
+	if test "$2" = ""
+	then
+		echo "\\n\\t$MYNAME: empty network mask for network $1\\n" 1>&2
+		return 1
+	fi
+		
+	echo $1 $2 | awk 'BEGIN {returnval=0}
+		{
+		split($1, net, ".")
+		split($2, mask, ".")
+		#
+		# Only expand bytes 1, 2, or 3
+		# for DNS purposes
+		#
+		for(i=1; i<=3; i++)
+			if((mask[i] != "") && (mask[i] != 255) && (mask[i] != 0)){
+				#
+				# Check that the network nuber
+				# does not have any host number
+				# bits in it.  This would be
+				# easier if awk had on "or" operator.
+				#
+				oldmask=tmpmask=mask[i]
+				oldnet=tmpnet=net[i]
+				while (oldmask == tmpmask){
+					tmpmask /= 2
+					tmpmask *= 2
+					tmpnet /= 2;
+					tmpnet *= 2;
+					if(oldmask == tmpmask)
+					   if (oldnet != tmpnet){
+						returnval=1
+						break
+					   } else {
+						tmpmask /= 2
+						tmpnet /= 2
+						oldmask = tmpmask
+						oldnet = tmpnet
+					   }
+				} 
+			}
+		    }
+    		END {exit returnval}'
+
+	if test "$?" = "1"
+	then
+		echo "\\n\\t$MYNAME: bad network mask, $2, for $1\\n" 1>&2
+		return 1
+	fi
+	return 0
+		
+}
+
+#########################################################################
+
+if test "$#" = "0" 
+then
+	printusage
+fi
+
+parse $*
+
+if test "$DEFAULT_DOMAIN" = "" 
+then
+	echo $MYNAME: missing domain
+	printusage
+fi
+
+if test "$NET" = ""  -a "$ADDR" = ""
+then
+	echo $MYNAME: missing network
+	printusage
+fi
+
+#
+# Check that the db.[DOMAIN] files will
+# be unique
+#
+SUBS=""
+for i in $DEFAULT_DOMAIN $DOMAINS "cache"
+do
+	SUB=`subdomain $i`
+	for j in $SUBS
+	do
+		if test "$SUB" = "$j"
+		then
+			echo "\\n\\t$MYNAME error - db.$SUB would be used for 2 different domains\\n" 1>&2
+			exit 1
+		fi
+	done
+	SUBS="$SUBS $SUB"
+done
+
+# Default MASTERS_SAVE and MASTERS_NOSAVE to
+# the other if only 1 is specified.
+
+if test "$MASTERS_SAVE" != "" -a "$MASTERS_NOSAVE" = ""
+then
+	MASTERS_NOSAVE="$MASTERS_SAVE"
+elif test "$MASTERS_NOSAVE" != "" -a "$MASTERS_SAVE" = ""
+then
+	MASTERS_SAVE="$MASTERS_NOSAVE"
+fi
+
+#
+# set HOST_FILE variable
+#
+
+if test "$HOST_FILE" = "" 
+then
+    HOST_FILE="/etc/hosts"
+fi
+ORIG_HOST_FILE=$HOST_FILE
+
+if test ! -r $HOST_FILE
+then
+	echo $MYNAME: $HOST_FILE is not readable 1>&2
+	exit 1
+fi
+
+#
+# Get the host name and make
+# sure it is a domain name.
+#
+
+HOSTNAME=`hostname`
+if expr $HOSTNAME : ".*\." >/dev/null 2>&1
+then
+	:
+else
+	HOSTNAME="$HOSTNAME.$DEFAULT_DOMAIN"
+fi
+
+rm -f $tmpmxfile*
+
+#
+# Make a lower case version
+#
+
+LOWER_DOMAIN=`echo $DEFAULT_DOMAIN | tr [A-Z] [a-z]`
+
+#
+# Cd to the directory with the database files
+# if specified.
+#
+
+if test "$DOMAINDIR" != "" 
+then
+	cd $DOMAINDIR
+fi
+
+#
+# Delete comment lines from the host table and make it lower case.
+#
+
+if test "$QUIET" = "no" 
+then
+	echo Translating $HOST_FILE to lower case ...
+fi
+grep -v "^#" $HOST_FILE | tr '[A-Z]' '[a-z]' > $tmphostfile
+HOST_FILE=$tmphostfile
+
+#
+# Start building the database
+#
+
+for DOM in $DEFAULT_DOMAIN $DOMAINS
+do
+	SUBDOM=`subdomain $DOM`
+	buildsoa $SUBDOM "no"
+	echo "localhost\tIN\tA\t127.0.0.1" >> db.$SUBDOM
+done
+
+if test ! -f db.127.0.0 
+then
+	buildsoa "127.0.0" "no"
+	echo "1\tIN\tPTR\tlocalhost." >> db.127.0.0
+fi
+
+#
+# Eliminate data for domains that we
+# don't need to support.
+#
+
+for i in $EXCLUDE
+do
+		#
+		# Does the name have dots?
+		#
+		if expr $i : ".*\." >/dev/null 2>&1
+		then
+			EXCLUDEDOM=$i
+		else
+			EXCLUDEDOM=$i.$DEFAULT_DOMAIN
+		fi
+		if test "$QUIET" = "no" 
+		then
+			echo "Excluding data for the $EXCLUDEDOM domain ..."
+		fi
+
+		#
+		# Strip delegated data out of host file
+		#
+		fgrep -v ".$EXCLUDEDOM" $HOST_FILE > $HOST_FILE.tmp
+		mv $HOST_FILE.tmp $HOST_FILE
+done
+
+#
+# Put in CNAME records for all the hosts
+# that are delegated and strip those names
+# out of the host table.
+#
+# Save all of the names in a file so that
+# other data is not generated for those names.
+#
+
+rm -f $tmpcname
+echo "localhost" > $tmpcname
+
+if test "$DELEGATE" != "" 
+then
+	rm -f $tmpreject
+	for i in $DELEGATE
+	do
+		#
+		# Does the name have dots?
+		#
+		if expr $i : ".*\." >/dev/null 2>&1
+		then
+			DELEGATEDOM=$i
+		else
+			DELEGATEDOM=$i.$DEFAULT_DOMAIN
+		fi
+		if test "$QUIET" = "no" 
+		then
+			echo "Creating \"CNAME\" data for the $DELEGATEDOM domain ..."
+		fi
+
+
+		# Process delegated domain
+		fgrep ".$DELEGATEDOM" $HOST_FILE | \
+		  awk '
+		  BEGIN { domain="'$DELEGATEDOM'" 
+			  start=index(domain,".")
+			  subdomain=substr(domain,1,start-1)
+			  doaliases='$ALIASES'
+			  cnamehosts="'$tmpcname'"
+			}
+			{
+
+			# Build up list of CNAME records already made
+
+			if(FILENAME == cnamehosts){
+				cname[$1]=1
+				continue
+			}
+
+			comment=0
+			for (name=2; (name <= NF) && (comment == 0); name++){
+
+			    if((doaliases != 1) && (name > 2))
+				break
+
+			    comment=index($name,"#")
+
+			    if(comment == 1)
+		     		continue # go onto next record
+			    else if(comment > 1){
+		    		split($name,xxx,"#")
+		    		firstlabel=xxx[1]
+			    } else
+		    		firstlabel=$name
+
+			    #  Strip off the domain of
+			    #  fully qualified names.  Skip
+			    #  if not part of this domain.
+
+			    if(index(firstlabel,".") != 0){
+				start=index(firstlabel,"." domain)
+				if(start == 0){
+				    if( firstlabel == domain )
+					#
+					# We will already have delegation
+					# data for this case
+					#
+					continue 
+				    else {
+					print "\t",firstlabel,"(name not in",domain ")" >> "'$tmpreject'"
+					continue
+				    }
+				} else
+					firstlabel=substr(firstlabel,1,start-1)
+			    }
+
+			    #
+			    # Skip if alread CNAME record for that name
+			    #
+			    if(cname[firstlabel] == 1){
+                        	    split($0, xxx, "#")
+				    print "\t",xxx[1],"(CNAME data already exists for",$name ")" >> "'$tmpreject'"
+				    continue
+			    }
+
+			    #
+                            # do not create CNAME for name that is
+			    # the same as the subdomain
+			    #
+			    if(firstlabel != subdomain)
+			        printf("%-15s\tIN\tCNAME\t%s.%s.\n", firstlabel, firstlabel, domain)
+			    print firstlabel >> "'$tmpcname'"
+			}
+
+	    	}'  $tmpcname - | sort -u  >> db.$DEFAULT_SUBDOMAIN
+
+		if test -s $tmpreject 
+		then
+	    	    if test "$QUIET" = "no" 
+	    	    then
+		        echo "\\n    The following names were left out of the database:"
+		        echo ""
+		        cat $tmpreject
+		        echo ""
+	    	    fi
+	    	    rm -f $tmpreject
+		fi
+
+		#
+		# Strip delegated data out of host file
+		#
+		fgrep -v ".$DELEGATEDOM" $HOST_FILE > $HOST_FILE.tmp
+		mv $HOST_FILE.tmp $HOST_FILE
+	done
+fi
+
+if test "$ALIASES" = "1" -o "$ADDR" != "" 
+then
+	if test "$QUIET" = "no" 
+	then
+		echo "Collecting network data ..."
+	fi
+
+	rm -f $HOST_FILE.tmp
+	#
+	# Collect add the data for -n networks
+	#
+	for net in $NET 
+	do
+		if test "$QUIET" = "no" 
+		then
+			echo "\\t$net"
+		fi
+
+		GREPNET=`echo $net | sed -e "s/\./\\\\\./g"`
+		grep "^$GREPNET\." $HOST_FILE >> $HOST_FILE.tmp
+	done
+	#
+	# Collect only the data for domains we are interested
+	# in for -a networks.  If we use all of the data here,
+	# the computation of which hosts are multi-homed is
+	# incorrect.  There could be a host on a -a network with
+	# the same name as a host on a -n network, but the host
+	# on the -a network would not be used since it is not
+	# in one of the domains we are interested in.
+	#
+	for net in $ADDR
+	do
+		if test "$QUIET" = "no" 
+		then
+			echo "\\t$net"
+		fi
+
+		GREPNET=`echo $net | sed -e "s/\./\\\\\./g"`
+		for DOM in $DOMAINS $DEFAULT_DOMAIN
+		do
+			grep "^$GREPNET\." $HOST_FILE | \
+				fgrep ".$DOM" $WORKING_FILE >> $HOST_FILE.tmp
+		done
+	done
+	mv $HOST_FILE.tmp $HOST_FILE
+fi
+
+touch $tmpmulti
+if test "$ALIASES" = "1" 
+then
+	if test "$QUIET" = "no" 
+	then
+		echo "Creating list of multi-homed hosts ..."
+	fi
+
+	if test "$DOMAINS" = ""
+	then
+		WORKING_FILE=$HOST_FILE
+	else
+		WORKING_FILE=$tmpworkingfile
+		cp $HOST_FILE $WORKING_FILE
+	fi
+	for DOM in $DOMAINS $DEFAULT_DOMAIN
+	do
+		if test "$DOM" = "$DEFAULT_DOMAIN"
+		then
+		    #
+		    # Use all the data that is left.
+		    #
+		    cat $WORKING_FILE | canonical_name $DOM 
+		else
+		    #
+		    # Use only the data for this domain and then
+		    # remove that data.
+		    #
+		    fgrep ".$DOM" $WORKING_FILE | canonical_name $DOM 
+		    fgrep -v ".$DOM" $WORKING_FILE > $WORKING_FILE.tmp
+		    mv $WORKING_FILE.tmp $WORKING_FILE
+		fi
+	done | sort | uniq -d > $tmpmulti
+fi
+
+#
+# For each net, fill in the address, aliases and MX records
+# for each host.  Build an address to name database.
+#
+
+
+for net in $NET
+do
+
+	if test "$QUIET" = "no" 
+	then
+		echo "Creating \"A\" data (name to address mapping) for net $net ..."
+	fi
+
+	#
+	# Clear out the $tmpptrfile in case
+	# there is no address data for that
+	# network number
+	#
+
+	rm -f $tmpptrfile
+	touch $tmpptrfile
+
+	#
+	# Grab only the information for this net.
+	# Thus, we can then filter out the data
+	# for each subdomain on this net.
+	#
+	WORKING_FILE=$tmpworkingfile
+	GREPNET=`echo $net | sed -e "s/\./\\\\\./g"`
+	grep "^$GREPNET\." $HOST_FILE > $WORKING_FILE
+
+	for DOM in $PTR_ONLY
+	do
+		SUBDOM=`subdomain $DOM`
+		fgrep ".$DOM" $WORKING_FILE | process_host_table $SUBDOM $DOM "1" ""
+		fgrep -v ".$DOM" $WORKING_FILE > $WORKING_FILE.tmp
+		mv $WORKING_FILE.tmp $WORKING_FILE
+	done
+
+	#
+	# The DEFAULT_DOMAIN must be last
+	# so that it gets all the data that
+	# is not specifically in DOMAINS
+	#
+	for DOM in $DOMAINS $DEFAULT_DOMAIN
+	do
+		SUBDOM=`subdomain $DOM`
+		if test "$DOM" = "$DEFAULT_DOMAIN"
+		then
+		    #
+		    # Use all the data that is left.
+		    #
+		    cat $WORKING_FILE | process_host_table $SUBDOM $DOM "0" "$tmpcname"
+		else
+		    #
+		    # Use only the data for this domain and then
+		    # remove that data.
+		    #
+		    fgrep ".$DOM" $WORKING_FILE | process_host_table $SUBDOM $DOM "0" ""
+		    fgrep -v ".$DOM" $WORKING_FILE > $WORKING_FILE.tmp
+		    mv $WORKING_FILE.tmp $WORKING_FILE
+		fi
+	done
+
+	buildptr $net
+
+done
+
+if test "$ADDR" != ""
+then
+	if test "$QUIET" = "no" 
+	then
+		echo "Adding additional information from net(s) $ADDR"
+	fi
+	
+	rm -f $WORKING_FILE
+	for net in $ADDR
+	do
+		GREPNET=`echo $net | sed -e "s/\./\\\\\./g"`
+		grep "^$GREPNET\." $HOST_FILE >> $WORKING_FILE
+	done
+	
+	for DOM in $DOMAINS $DEFAULT_DOMAIN
+	do
+		SUBDOM=`subdomain $DOM`
+		if test "$DOM" = "$DEFAULT_DOMAIN"
+		then
+	 	    fgrep ".$DOM" $WORKING_FILE | process_host_table $SUBDOM $DOM "0" "$tmpcname"
+		else
+	 	    fgrep ".$DOM" $WORKING_FILE | process_host_table $SUBDOM $DOM "0" ""
+		fi
+	done
+fi
+
+buildmx
+
+if test -f spcl.$INADDR -a "$APPEND" = "yes" 
+then
+	echo '$INCLUDE\tspcl.'$INADDR >> db.$INADDR
+fi
+
+for DOM in $DOMAINS $DEFAULT_DOMAIN
+do
+	SUBDOM=`subdomain $DOM`
+	if test -f spcl.$SUBDOM
+	then
+		echo '$INCLUDE\tspcl.'$SUBDOM >> db.$SUBDOM
+	fi
+done
+	
+#
+# Give a default boot file
+# if there is none.
+#
+buildboot
+
+if test "$QUIET" = "no" 
+then
+	echo done
+fi

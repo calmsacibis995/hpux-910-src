@@ -1,0 +1,186 @@
+/*
+###
+#	NMakefile - nmake makefile for NFS usr.etc/rpc.lockd sources
+#
+#	Created By:	Dominic Ruffatto
+#	Date:		1/8/90
+###
+*/
+
+.OPTIONS:	-u
+
+.SOURCE:	$(SRCDIR:/^$/./)
+
+.SOURCE.h:	$(IDIRS)
+
+SOURCE = prot_main.c prot_lock.c prot_pklm.c prot_pnlm.c prot_msg.c\
+	prot_proc.c prot_alloc.c prot_priv.c prot_free.c prot_share.c pmap.c\
+	tcp.c udp.c xdr_nlm.c xdr_klm.c xdr_sm.c sem.c sm_monitor.c\
+	svc_udp.c hash.c prot_libr.c nfs_fcntl.s\
+	/source/NFS/$(USER)/cmds/usr.etc/logging.c \
+	/source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+
+OBJECTS = prot_main.o prot_lock.o prot_pklm.o prot_pnlm.o prot_msg.o\
+	prot_proc.o prot_alloc.o prot_priv.o prot_free.o prot_share.o\
+	pmap$(USCORE).o tcp$(USCORE).o udp$(USCORE).o xdr_nlm.o xdr_klm.o\
+	xdr_sm.o sem.o sm_monitor.o svc_udp.o hash.o prot_libr.o nfs_fcntl.o \
+	logging$(USCORE).o
+
+TARGETS = rpc.lockd
+HDRS=   prot_lock.h prot_time.h sm_res.h priv_prot.h prot_sec.h
+
+OCFLAGS	= -O $(CFLAGS)
+OLFLAGS = $(LDFLAGS)
+#ifdef Trace
+TCFLAGS="-DTRACEON"
+#else
+TCFLAGS=
+#endif
+TLFLAGS	= 
+DCFLAGS = -g -DDEBUG
+DLFLAGS	= -g 
+
+#ifdef Debug
+NMCFLAGS = $(DCFLAGS) $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+LDFLAGS = $(DLFLAGS)
+#else
+NMCFLAGS = $(CCFLAGS) $(CFLAGS) $(TCFLAGS)
+#endif
+
+SDIR = $(SRCDIR:/^$/./)
+
+rpc.lockd:	$(OBJECTS)
+	$(CC) $(NMCFLAGS) $(LDFLAGS) -o rpc.lockd $(OBJECTS) $(RPCSVC_LIB) $(LIBCA) $(LIBSEC) $(SECFLAGS)
+
+bfa :
+	$(MAKE) -e -f $(MAKEFILE) $(-) build \
+		NORMCCFLAGS="$(NMCFLAGS) -DBFA" USCORE="_"\
+		CCFLAGS="$(CCFLAGS) -DBFA \
+		-B-d/bfa/NFS/$(USER)/databases/$(TARGET).B"\
+		CC="$(BFACC)" LIBCA="$(BLIBC)" LDFLAGS="$(BLFLAGS)"\
+		RPCSVC_LIB="/bfa/NFS/$(USER)/cmds/usr.lib/librpcsvc/librpcsvc.a"\
+		USER="$(USER)" SRCDIR="$(SRCDIR)" IDIRS="$(IDIRS)"
+
+prot_main.o: $(PRIV_LIB)
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_main.c
+
+prot_lock.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_lock.c
+
+prot_pklm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_pklm.c
+
+prot_pnlm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_pnlm.c
+
+prot_msg.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_msg.c
+
+prot_proc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_proc.c
+
+prot_alloc.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_alloc.c
+
+prot_priv.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_priv.c
+
+prot_free.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_free.c
+
+prot_share.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_share.c
+
+pmap.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/pmap.c
+
+pmap_.o:	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/pmap.B $(LDFLAGS) -o pmap_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/pmap.c
+
+tcp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/tcp.c
+
+tcp_.o:	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/tcp.B $(LDFLAGS) -o tcp_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/tcp.c
+
+udp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/udp.c
+
+udp_.o:	/source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/udp.B $(LDFLAGS) -o udp_.o -c /source/NFS/$(USER)/cmds/usr.etc/rpc.lockd/udp.c
+
+xdr_nlm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_nlm.c
+
+xdr_klm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_klm.c
+
+xdr_sm.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/xdr_sm.c
+
+sem.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sem.c
+
+sm_monitor.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/sm_monitor.c
+
+svc_udp.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/svc_udp.c
+
+hash.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/hash.c
+
+prot_libr.o:
+	$(CC) $(NMCFLAGS) -c $(SDIR)/prot_libr.c
+
+logging.o:      $(SDIR)/../logging.c
+	$(CC) $(NMCFLAGS) -c $(SDIR)/../logging.c $(RPCSVC_LIB)
+
+logging_.o:	/source/NFS/$(USER)/cmds/usr.etc/logging.c
+        $(CC) $(NORMCCFLAGS) -B-d/bfa/NFS/$(USER)/databases/logging.B $(LDFLAGS) -o logging_.o -c /source/NFS/$(USER)/cmds/usr.etc/logging.c
+
+build:		$$(TARGET)
+
+install:;	$(INSTALL) $$(TARGET)
+
+rinstall:	install ; $(RINSTALL) $$(TARGET)
+
+lint:;		lint -bnx $(NMCFLAGS) -I$(SRCDIR) \
+	-I/source/NFS/$(USER)/include -I/usr/include $(SRCDIR)/$$(TARGET)
+
+clean:;		$(RM) $(RMFLAGS) $$(TARGET)
+
+clobber:	clean
+	$(RM) $(RMFLAGS) $(MAKEFILE:B).mo $(MAKEFILE:B).ms $(OBJECTS) make?a*
+
+debug:		build
+
+priv_lib.o: /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+	$(CC) $(NMCFLAGS)  -c /source/NFS/$(USER)/cmds/usr.etc/priv_lib.c
+
+
+#ifdef hp9000s800
+
+/*
+* NOTE: The following defines and target are used to produce the system
+* call stub for calling nfs_fcntl on the 800.  This may just go away on the
+* 800 if nfs_fcntl.o goes into libc.  At any rate, the SYS.h in this
+* directory should really be the real one they are currently using.  However,
+* we don't have the ability to pull that at the moment, so just do this
+* for now.  This code was copied from the 800 stub makefile.  Darren Smith
+*/
+
+CPPFLAGS="-P -DAS -DLOCORE $(NMCFLAGS)"
+PREFIX=/lib/pcc_prefix.s
+SED=/bin/sed
+SEDFLAGS= -e '/^[ 	]*$$/d' -e 's/^\./	\./' -e 's/; _/;/' -e 'y/; /\n	/' -e 's/ /	/'
+
+nfs_fcntl.o: 
+	/lib/cpp $(CPPFLAGS) $(SDIR)/nfs_fcntl.c | $(SED) $(SEDFLAGS) | cat $(PREFIX) - | $(AS) $(ASMFLAGS) -o nfs_fcntl.o
+
+#else
+
+nfs_fcntl.o:
+	$(AS) -o nfs_fcntl.o $(SDIR)/nfs_fcntl.s
+
+#endif

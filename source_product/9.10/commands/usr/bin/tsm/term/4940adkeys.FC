@@ -1,0 +1,59 @@
+## FacetTerm  4940adkeys COMMON  description file 10/18/89
+## Adds Viewpoint style function key programming for NCR 4940
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 4940adkeys.FC,v 70.1 92/03/09 15:51:10 ssa Exp $
+##--- FUNCTION KEYS ---##
+### function_key_clear=
+### function_key_clear_mode_yes=number
+### function_key_clear_mode_no=number
+### parm_pkey_key=
+### parm_pkey_key=
+### pkey_key=
+### FIXED THIS not_imp-cannot_output_imbedded_null=\E%%\0001n%256s1^Y
+pkey_key=\E%%%p1%c1n%256s1^Y
+### out_pkey_key=
+### function_key_string_is_hex
+### function_key_string_is_ansi
+### function_key_string_is_escaped-chars=
+### function_key_includes_label
+### function_key_len_0_label_only
+### function_key-id-delim=
+### FIXED THIS ## function_key_id for F1 is 0 - use 0x80 translated 0 at output
+### FIXED THIS function_key-128=^B1\r
+function_key-00=^B1\r
+function_key-01=^B2\r
+function_key-02=^B3\r
+function_key-03=^B4\r
+function_key-04=^B5\r
+function_key-05=^B6\r
+function_key-06=^B7\r
+function_key-07=^B8\r
+function_key-08=^B9\r
+function_key-09=^B:\r
+function_key-10=^B;\r
+function_key-11=^B<\r
+function_key-12=^B=\r
+function_key-13=^B>\r
+function_key-14=^B?\r
+function_key-15=^B0\r
+### function_key-id-delim=
+### shift_function_key
+shift_function_key
+### function_key-id-delim=
+function_key-16=^B!\r
+function_key-17=^B"\r
+function_key-18=^B#\r
+function_key-19=^B$\r
+function_key-20=^B%\r
+function_key-21=^B&\r
+function_key-22=^B'\r
+function_key-23=^B(\r
+function_key-24=^B)\r
+function_key-25=^B*\r
+function_key-26=^B+\r
+function_key-27=^B,\r
+function_key-28=^B-\r
+function_key-29=^B.\r
+function_key-30=^B/\r
+function_key-31=^B \r
+### function_key-id-delim=

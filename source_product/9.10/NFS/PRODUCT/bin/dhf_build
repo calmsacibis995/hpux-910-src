@@ -1,0 +1,85 @@
+#!/bin/sh
+# This script will be used to checkout, build and install in the
+# distribution directory all the NFS commands. It should be 
+# executed on the central build machine.  It uses the MAKE
+# front-end to make to build the commands.
+
+echo `date "+%y.%m.%d %T"` $0 $1 begin
+
+NEWFS=/source/newfs
+NFS_RCS=/source/NFS/rcs
+NFS=/source/NFS
+CO=/usr/bin/co
+NFS_BIN=/source/NFS/bin
+SUSH=/source/NET/bin/sush
+PROD="cmds cmds/usr.lib/libdbm cmds/usr.lib/librpcsvc cmds/bin cmds/etc \
+      cmds/etc/rpc.statd cmds/etc/rpc.lockd cmds/ucb cmds/usr.bin \
+      cmds/usr.bin/rpcgen cmds/usr.etc cmds/usr.etc/yp \
+      cmds/usr.etc/yp/revnetgroup cmds/usr.etc/ypserv cmds/usr.etc/rexd \
+      include/rpc include/rpcsvc include/nfs include/arpa"
+
+# Checkout all rcs files for cmds and our own include files plus the
+# files in bin we need to use
+
+cd $NFS_RCS
+for DIR in $PROD
+do
+	echo
+	echo "cd $NFS/$DIR"
+	cd $NFS/$DIR
+	echo "$CO $NFS_RCS/$DIR/*,v"
+	$CO $NFS_RCS/$DIR/*,v
+done
+
+echo
+echo "cd $NFS/include"
+cd $NFS/include
+echo "$CO $NFS_RCS/include/dbm.h,v"
+$CO $NFS_RCS/include/dbm.h,v
+echo
+echo "$CO $NFS_RCS/include/bsdterm.h,v"
+$CO $NFS_RCS/include/bsdterm.h,v
+echo
+echo "cd $NFS_BIN"
+cd $NFS_BIN
+echo "$CO $NFS_RCS/bin/MAKE,v"
+$CO $NFS_RCS/bin/MAKE,v
+chmod 555 $NFS_BIN/MAKE
+echo
+
+
+# Install our own include files in the directory where the final commands
+# are put
+
+cd $NFS
+echo "Install header files"
+for HEAD_DIR in include/rpc include/rpcsvc include/nfs
+do
+	echo
+	echo "Directory: $HEAD_DIR"
+	cd $HEAD_DIR
+	$SUSH rm -f $NEWFS/usr/$HEAD_DIR/*
+	$SUSH cp *.h $NEWFS/usr/$HEAD_DIR
+	$SUSH chmod 444 $NEWFS/usr/$HEAD_DIR/*
+	$SUSH chgrp other $NEWFS/usr/$HEAD_DIR/*
+	$SUSH chown root $NEWFS/usr/$HEAD_DIR/*
+	cd $NFS
+done
+
+# Build all the NFS commands
+
+cd $NFS/cmds
+echo
+echo "$NFS_BIN/MAKE clobber"
+$NFS_BIN/MAKE clobber
+echo
+echo "$NFS_BIN/MAKE"
+$NFS_BIN/MAKE
+
+# Install all the NFS commands on their final directory
+
+echo
+echo "$NFS_BIN/MAKE linstall"
+$SUSH $NFS_BIN/MAKE linstall
+
+echo `date "+%y.%m.%d %T"` $0 $1 end

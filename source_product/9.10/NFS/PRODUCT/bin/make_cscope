@@ -1,0 +1,124 @@
+#!/bin/sh
+##	@(#)make_cscope	$Revision: 1.20.109.1 $	$Date: 91/11/19 13:56:26 $
+#	make_cscope	--	make the cscope.out file
+# Written by Darren D. Smith for NFS project
+# Modified by John A. Dilley for user-space.
+##
+PATH=$Nfs/bin:/bin:/usr/bin
+export PATH
+echo `date "+%y.%m.%d %T"` $0 $nfs begin
+
+# make_cscope is a script to build a cscope cross-reference for any
+# source files under the current directory.  It also creates a list
+# of the files it used.  If an argument is given, then it is interpretted
+# as a directory to "cd" to, otherwise the current directory is used.
+# We also recognise several special cscope arguments to do our own
+# interpretations of.  Several are also ignored.
+# NOTE: $nfs has been set to $Nfs in the overnight script.
+
+# FILELIST is where the list of files should end up.
+FILELIST="cscope.files"
+
+# ARGS to pass on to cscope
+ARGS=""
+
+# Did we detect an error in cscope argument parsing?
+ERRORFLAG="no"
+
+# What directory to perform cscope on?
+DIR=""
+
+
+# Process cscope arguments:
+while [ $# -gt 0 ]
+do
+    case $1 in
+	-i ) # Special case, where to put the list of files.
+	     if [ $# -lt 2 ]
+	     then
+		/bin/echo "ERROR: -i option needs a filename"
+		ERRORFLAG="yes"
+	        shift
+	     else
+		FILELIST=$2
+		shift 2
+	     fi ;;
+
+	-f | -g | -I) # options recognised that have a second part.
+	     if [ $# -lt 2 ]
+	     then
+		/bin/echo "ERROR: option $1 needs filename or directory"
+		ERRORFLAG="yes"
+		shift
+	     else
+		ARGS="$ARGS $1 $2"
+		shift 2
+	     fi ;;
+
+	-I*)	# include directory tacked on to option ...
+	     ARG=`echo $1 | sed -e 's/-I//'`
+	     ARGS="$ARGS -I $ARG"
+	     shift
+	     ;;
+	-s )   # options recognised that have only one part.
+	     ARGS="$ARGS $1"
+	     shift;;
+	-d | -w | -k | -b | -a | -V ) # cscope options not to be used here.
+	     /bin/echo "ERROR: option $1 is not supported by this script"
+	     ERRORFLAG="yes"
+	     shift;;
+
+	-*)	#unrecognised option
+	     /bin/echo "ERROR: unknown option $1"
+	     ERRORFLAG="yes"
+	     shift;;
+	*)	# This should be the directory name.  If more args, error.
+	     if [ $# -ne 1 ]
+	     then
+		 /bin/echo "ERROR: the directory name $1 should be last arg."
+		 ERRORFLAG="yes"
+		 break
+	     else
+		DIR=$1
+		shift
+	     fi;;
+
+	esac
+
+done	# end of while $# > 0
+
+if [ "$ERRORFLAG" = "yes" ]
+then
+	/bin/echo "ABORTING BECAUSE OF ERROR"
+else
+
+	# Go to the indicated DIR
+	if [ "$DIR" != "" ]
+	then
+		cd $DIR
+	fi
+
+	# Find ALL source files under this directory.
+	# Delete ones named _*.c (these are BFA files)
+	echo `date "+%y.%m.%d %T"` $0 list of files in `pwd` ">" $FILELIST
+	find * -name '*.[chlyCGHL]' -print | sort | sed '/\/_.*c$/d' >$FILELIST
+
+	# Remove cscope.out to insure that we always rebuild the cscope
+	# database
+	rm -f cscope.out
+	rm -f scan.out
+	
+	# set TERM because cscope will barf if not set
+	TERM=${TERM:-hp}
+	export TERM
+
+	# Call cscope, always add where to find the files.
+	#NOTE: send stdout to /dev/null so that we don't get the screen cleared.
+	# list of files built and version info comes out on stderr.
+	ARGS="$ARGS -i $FILELIST"
+	echo `date "+%y.%m.%d %T"` $0 cscope $ARGS
+	/usr/local/bin/cscope $ARGS  </dev/null >/dev/null
+	/usr/local/bin/scanfiles `cat $FILELIST` <dev/null  >/dev/null
+fi
+
+echo `date "+%y.%m.%d %T"` $0 $nfs end

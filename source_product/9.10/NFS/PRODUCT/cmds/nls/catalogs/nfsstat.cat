@@ -1,0 +1,41 @@
+$set 1
+1 nfsstat: Must be root for z flag\n
+2 nfsstat: can't seek in kmem\n
+3 nfsstat: can't read rcstat from kmem\n
+4 nfsstat: can't seek in kmem\n
+5 nfsstat: can't read clstat from kmem\n
+6 nfsstat: can't seek in kmem\n
+7 nfsstat: can't read rsstat from kmem\n
+8 nfsstat: can't seek in kmem\n
+9 nfsstat: can't read svstat from kmem\n
+10 nfsstat: can't seek in kmem\n
+11 nfsstat: can't write rcstat to kmem\n
+12 nfsstat: can't seek in kmem\n
+13 nfsstat: can't write clstat to kmem\n
+14 nfsstat: can't seek in kmem\n
+15 nfsstat: can't write rsstat to kmem\n
+16 nfsstat: can't seek in kmem\n
+17 nfsstat: can't write svstat to kmem\n
+18 nfsstat: Variables missing from namelist\n
+19 \nClient rpc:\n
+20 calls      badcalls   retrans    badxid     timeout    wait       newcred\n
+21 %-11d%-11d%-11d%-11d%-11d%-11d%-11d\n
+22 \nServer rpc:\n
+23 calls      badcalls   nullrecv   badlen     xdrcall\n
+24 %-11d%-11d%-11d%-11d%-11d\n
+43 \nClient nfs:\n
+44 calls      badcalls   nclget     nclsleep\n
+45 %-11d%-11d%-11d%-11d\n
+46 \nServer nfs:\n
+47 calls      badcalls\n
+48 %-11d%-11d\n
+49 %-11s
+50 \n
+51 %d %2d%% 
+52 %d 0%% 
+53 %-11s
+54 \n
+55 nfsstat [-cnrsz] [namelist]\n
+56 nfsstat: nlist
+57 nfsstat: this command must have the SEC_ALLOWDACACCESS potential privilege\n
+58 nfsstat: Not authorized for network subsystem:  use of -z flag denied\n

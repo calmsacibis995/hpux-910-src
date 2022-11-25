@@ -1,0 +1,18 @@
+all: Devices Dialcodes Permissions Systems
+
+Devices: L-devices
+	- mv Devices Devices.old
+	awk -f awkdevices L-devices > Devices
+
+Dialcodes: L-dialcodes
+	- mv Dialcodes Dialcodes.old
+	cp L-dialcodes Dialcodes
+
+Permissions: L.cmds USERFILE
+	- mv Permissions Permissions.ol
+	awk -f awkperm L.cmds USERFILE > Permissions
+
+Systems: L.sys
+	- mv Systems Systems.old
+	awk -f awksystems L.sys > Systems
+

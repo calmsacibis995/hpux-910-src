@@ -1,0 +1,8 @@
+## FacetTerm  uvt1224dnl COMMON   description file  12/05/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: uvt1224dnl.FC,v 70.1 92/03/09 16:48:57 ssa Exp $
+## Word Perfect 5.0
+##--- DOWNLOAD CHARACTER SETS ---##
+perwindow-3000-P---------=\EP1;%p2%d;%p3%dw
+perwindow_special=\E\\
+### decode_type- =\EP cannot use with special above

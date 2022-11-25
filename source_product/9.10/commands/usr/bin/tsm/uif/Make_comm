@@ -1,0 +1,65 @@
+# Makefile for	uif  Facet User Interface - COMMON
+# @(#) $Header: Make_comm,v 70.2 92/03/09 16:14:59 ssa Exp $
+
+USR_FACETTERM_DIR=	/usr/facetterm
+FACET_UI_PROG=		fct_ui
+FACET_UI_DIR=		$(USR_FACETTERM_DIR)/bin
+
+CFLAGS=	\
+		$(MACH_CFLAGS) \
+		$(MACH_MODEL) -I../include
+
+FTINSTDIR=	../$(MACH)/FTINST$(MACH_FILES_TOP_DIR)
+
+PROG=		$(FACET_UI_PROG)
+
+FACET_UI_OBJS=	\
+		dialog.o \
+		dprint.o \
+		fmenu.o \
+		fmenu_term.o \
+		foreign.o \
+		menu_bar.o \
+		pull_down.o \
+		send_to_fpc.o \
+		send_to_ft.o \
+		strings.o \
+		commonopt.o \
+		text.o \
+		commonread.o \
+		fct_ioctl.o
+
+all:	$(PROG) done
+
+$(FACET_UI_PROG):	$(FACET_UI_OBJS)
+	cc -o $(FACET_UI_PROG) $(MACH_MODEL) $(FACET_UI_OBJS) $(MACH_LIBS)
+	@echo make $(FACET_UI_PROG) for $(MACH) done
+
+install:	installtext installprog installown
+	@echo install $(FACET_UI_PROG) for $(MACH) done
+
+installtext:
+	@echo installtext $(FACET_UI_PROG) for $(MACH) done - nothing to do
+
+installtextcommon:
+	@echo installtextcommon $(FACET_UI_PROG) for $(MACH) done -nothing to do
+
+installprog:
+	$(STRIPERR)strip                             $(FACET_UI_PROG)
+	Cpioinstall $(FTINSTDIR)$(FACET_UI_DIR)    - $(FACET_UI_PROG)
+	@echo installprog $(FACET_UI_PROG) for $(MACH) done
+
+installown:
+	cd     $(FTINSTDIR)$(FACET_UI_DIR); \
+#		chown root $(FACET_UI_PROG); \
+#		chgrp    0 $(FACET_UI_PROG); \
+#		chmod 555  $(FACET_UI_PROG); \
+		ls -l      $(FACET_UI_PROG)
+	@echo installown $(FACET_UI_PROG) for $(MACH) done
+
+clean:
+	rm -f $(PROG) *.o
+	@echo clean $(FACET_UI_PROG) for $(MACH) done
+
+done:
+	@echo make $(FACET_UI_PROG) for $(MACH) done

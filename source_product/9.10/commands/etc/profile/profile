@@ -1,0 +1,132 @@
+
+# @(#) $Revision: 70.1.1.1 $    
+
+# Default (example of) system-wide profile file (/bin/sh initialization).
+# This should be kept to the bare minimum every user needs.
+
+# For 9.x 10.x interoperability determine which major revision
+# of the operating system we are running on.
+
+    rev=`uname -r | cut -d. -f2`
+    rev=`expr $rev + 0`
+
+
+
+    trap "" 1 2 3		# ignore HUP, INT, QUIT now.
+
+    # OS revision dependent operations
+    if [ $rev -ge 10 ]
+    then
+        ##
+        ## OS revisions 10.0 and beyond
+        ##
+
+        # default execution search path
+        PATH=/usr/bin:/usr/ccs/bin:/usr/contrib/bin:/usr/local/bin
+        
+        # default search path for man pages
+        MANPATH=/usr/share/man:/usr/contrib/man:/usr/local/man
+        
+        if [ -r /etc/TIMEZONE ]
+        then
+            . /etc/TIMEZONE	# set the timezone
+        else
+            TZ=MST7MDT          # change this for local time.
+            export TZ
+        fi
+
+	# set term if it's not set
+
+        if [ "$TERM" = "" ]
+        then
+	    case $- in
+	    *i*) eval `ttytype -s -thp`;;
+	    *) eval `ttytype -s`;;
+	    esac
+        fi
+    else
+        ##
+        ## OS revisions prior to 10.0
+        ##
+
+        # default execution search path
+        PATH=/bin/posix:/bin:/usr/bin:/usr/contrib/bin:/usr/local/bin
+
+        # default search path for man pages
+        MANPATH=/usr/man:/usr/contrib/man:/usr/local/man
+        
+        if [ -r /etc/src.sh ]
+        then
+            . /etc/src.sh	# set the timezone
+            unset SYSTEM_NAME
+        else
+            TZ=MST7MDT          # change this for local time.  
+            export TZ
+        fi
+
+	if [ "$TERM" = "" ]	# if term is not set,
+	then			# 
+	    TERM=hp		# default the terminal type
+	fi
+    fi
+
+    export PATH MANPATH TERM
+
+    # set erase to ^H
+    stty erase 
+
+
+    # Set up shell environment:
+    trap "echo logout" 0
+
+
+    # This is to meet legal requirements...
+
+    cat /etc/copyright
+
+    if [ -r /etc/motd ]
+    then
+	cat /etc/motd		# message of the day.
+    fi
+
+    # OS revision dependent operations
+    if [ $rev -ge 10 ]
+    then
+        ##
+        ## OS revisions 10.0 and beyond
+        ##
+
+        if [ -f /usr/bin/mail ]
+        then
+	    if mail -e          # notify if mail.
+	    then    
+		echo "You have mail."
+	    fi
+        fi
+    else
+        ##
+        ## OS revisions prior to 10.0
+        ##
+
+        if [ -f /bin/mail ]
+        then
+	    if mail -e		# notify if mail.
+	    then	
+                echo "You have mail."
+	    fi
+        fi
+    fi
+
+    if [ -f /usr/bin/news ]
+    then 
+	news -n			# notify if new news.
+    fi
+
+    if [ -r /tmp/changetape ]	# might wish to delete this:
+    then	
+	echo "\007\nYou are the first to log in since backup:"
+	echo "Please change the backup tape.\n"
+	rm -f /tmp/changetape
+    fi
+
+    trap 1 2 3			# leave defaults in user environment.

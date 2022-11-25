@@ -1,0 +1,45 @@
+#! /bin/sh
+#  @(#)$Revision: 1.9.109.1 $	$Date: 91/11/19 13:57:27 $
+
+# Written by Darren D. Smith has a hack to work-around the HP-CI problems.
+
+# Usage: rmtci filename
+#
+# Assumptions:  filename is an existing file in the current directory.
+# 	The file "RMTRCS" exists in the current directory.
+#	Stdin will contain the comment for the rmtrcs ci.
+
+if [ $# -ne 1 ] ; then
+	echo "Usage: $0 filename" >&2
+	exit 1 
+fi
+
+if [ ! -f RMTRCS ] ; then
+	echo "ERROR: $0: \'RMTRCS\' must exist for remote checkin!" >&2
+	exit 1
+fi
+
+# Initialize
+PATH="$Nfs/bin:/bin:/usr/bin"
+export PATH
+umask 022
+
+# Create a remote temporary directory to copy files to....
+
+REMDIR=/tmp/rmtci.$$
+remsh hpisoa1 -l cmahon mkdir $REMDIR </dev/null
+
+# Copy the file to the remote directory
+rcp $1 RMTRCS hpisoa1.cmahon:$REMDIR
+status=$?
+
+# If no errors, try the remote checkin, otherwise abort
+if [ $status -eq 0 ] ; then
+    remsh hpisoa1 -l cmahon cd $REMDIR \; rmtrcs ci -f $1 \; cd \; rm -rf $REMDIR
+    mv $1 $1~1	# Simulate rmtrcs
+else
+    echo "ERROR: $0: rcp failed, cleaning up..."
+    remsh hpisoa1 -l cmahon rm -rf $REMDIR
+fi
+
+exit $status

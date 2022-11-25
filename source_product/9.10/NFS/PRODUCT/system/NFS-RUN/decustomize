@@ -1,0 +1,244 @@
+#!/bin/ksh
+fileset=NFS-RUN
+script=/system/$fileset/decustomize
+arch=$1
+op=$2
+arg=$3
+exitval=0
+
+PATH=/bin:/usr/bin:/etc
+
+#
+# Set shell variables for daemons included in the NFS product.
+#
+all_daemons="nfsd pcnfsd biod rpc.mountd portmap ypbind ypserv rpc.yppasswdd\
+	rpc.rexd rpc.lockd rpc.statd rpc.rstatd rpc.rusersd rpc.rwalld\
+	rpc.sprayd automount"
+
+
+#
+# killdaemon - Kill of daemon specified in the $daemons shell variable if they 
+# are running.  Make sure to kill them in reverse order of invocation in case 
+# one is a parent of another.
+#
+function killdaemon
+{
+    pid="`ps -e | /bin/fgrep "$daemon" | sort -r | awk '{print $1}'`"
+    if [ -n "$pid" ]; then
+	kill -15 $pid >/dev/null 2>&1
+	sleep 3
+	kill -9 $pid >/dev/null 2>&1
+    fi
+}
+
+#
+# cluster_daemon - check to see if $daemon is running on any cnodes of the
+# $arch architecture.  On completion, $daemon_list contains the names of cnodes 
+# on which the daemon is running.
+#
+
+function cluster_daemon
+{
+    daemon_list=""
+    if [ -s /etc/clusterconf -a -x /bin/cnodes ]; then
+	cnodes=`cnodes`
+	for i in $cnodes; do
+	    remsh $i "$script $arch remote_ps" | /bin/fgrep "$daemon" > /dev/null2>&1
+	    if [ $? -eq 0 ] ; then
+		daemon_list="$daemon_list $i"
+	    fi
+	done
+    else
+	/bin/ps -e | /bin/fgrep "$daemon" > /dev/null 2>&1
+    	if [ $? -eq 0 ] ; then
+            daemon_list="$daemon_list `eval hostname`"
+	fi
+    fi
+}
+
+#
+# This fileset may be removed if no other machine has this machine 
+# mounted via NFS.  Or if NIS is not being used.  The nfs client case
+# is not a problem because the system would have to be rebooted to remove
+# NFS client capabilities.  If the system is rebooted, all NFS mounts are
+# lost anyway.
+#
+if [ "$op" = "check" ]; then
+   daemon="nfsd"
+   cluster_daemon
+   if [ "$daemon_list" -a -f /etc/rmtab ] ; then
+	grep / /etc/rmtab > /dev/null
+	if [ $? -eq 0 ] ; then
+	    echo "ERROR:   NFS clients may have local file systems mounted">&2
+	    echo "         via NFS.  See /etc/rmtab for possible clients.">&2
+	    echo "         Please complete the following steps prior to">&2
+	    echo "         attempting to remove the $fileset fileset">&2
+	    echo " ">&2
+	    echo "         1)  Manually check to see if nfs clients have">&2
+	    echo "             this nfs server mounted.  (See /etc/rmtab)">&2
+	    echo "         2)  On the nfs clients, unmount any file systems">&2
+	    echo "             mounted from the nfs server.">&2
+	    echo "         3)  execute /bin/cat /dev/null > /etc/rmtab">&2
+	    echo "         4)  Retry frm.">&2
+	    echo " ">&2
+	    exitval=1
+	fi
+   fi
+
+   daemon="rpc.yppasswdd"
+   cluster_daemon
+   if [ "$daemon_list" ] ; then
+	echo "ERROR:   The nodes: $daemon_list "
+	echo "         are configured as NIS master servers.  The $fileset">&2
+	echo "         fileset cannont be removed until these nodes are no">&2 
+	echo "         longer NIS master servers.">&2
+	echo " ">&2
+	exitval=1
+   else
+	daemon="ypserv"
+	cluster_daemon
+	if [ "$daemon_list" ] ; then
+	    echo "ERROR:   The nodes: $daemon_list "
+	    echo "         are configured as NIS slave servers.  The $fileset">&2
+	    echo "         fileset cannont be removed until these nodes are">&2
+	    echo "         no longer a NIS slave servers.">&2
+	    echo " ">&2
+	    exitval=1
+	fi
+   fi
+   daemon="ypbind"
+   cluster_daemon
+   if [ "$daemon_list" ] ; then
+	echo "ERROR:   The nodes: $daemon_list"
+	echo "         are configured as a NIS clients.  If the $fileset">&2
+	echo "         is removed, these nodes may be without complete">&2
+	echo "         system databases such as passwd and hosts.  Please">&2
+	echo "         insure that system databases are complete and kill">&2
+	echo "         ypbind on each system before attempting to remove">&2
+	echo "         the $fileset file set">&2
+	echo " ">&2
+	exitval=1
+   fi	
+   exit $exitval
+fi
+
+#
+# If this script has been called to do a remote kill, set the daemon shell
+# variable and call killdaemon.  
+# 
+
+if [ "$op" = "remote_kill" ] ; then
+    case "`getcontext`" in
+    *$arch*)
+	daemon="$arg"
+	killdaemon
+	;;
+    *)
+	;;
+    esac
+    exit 0
+fi
+	
+#
+# In checklist, we look to see if the third field is "nfs"
+# In inetd.conf, we look to see if the first field is "rpc".  If inetd is 
+# 	running, we will have to do an inetd -c.
+#
+if [ "$op" = "config_files" ] ; then
+    case "`getcontext`" in
+    *$arch*)
+        if [ -f /etc/checklist ]; then
+	    awk '{ 
+		if ($3 == "nfs")
+		    printf "# %s\n",$0;
+		else
+		    printf "%s\n",$0;
+	    }' < /etc/checklist > /tmp/checklist.temp
+	    cp /tmp/checklist.temp /etc/checklist
+	    rm -f /tmp/checklist.temp
+        fi
+
+        if [ -f /etc/inetd.conf ]; then
+	    awk '{
+		if ($1 == "rpc")
+		   printf "# %s\n",$0;
+		else
+		   printf "%s\n",$0;
+	    }' < /etc/inetd.conf > /tmp/inetd.conf.tmp
+	    cp /tmp/inetd.conf.tmp /etc/inetd.conf
+	    rm -f /tmp/inetd.conf.tmp
+	    /etc/inetd -c
+        fi
+	;;
+    *)
+	;;
+    esac
+    exit 0
+fi
+
+if [ "$op" = "remote_ps" ] ; then
+    case "`getcontext`" in
+    *$arch*)
+	/bin/ps -e
+	;;
+    *)
+	/bin/echo
+	;;
+    esac
+    exit 0
+fi
+	
+#
+# Main 
+#
+
+#
+# Kill daemons and comment entries out of /etc/inetd.conf and /etc/checklist
+#
+
+if [ -s /etc/clusterconf -a -x /bin/cnodes ]; then
+    cnodes=`cnodes`
+    for i in $cnodes; do
+	for daemon in $all_daemons; do
+	    remsh $i "$script $arch remote_kill $daemon"
+	done
+	remsh $i "$script $arch config_files"
+    done
+else
+    for daemon in $all_daemons; do
+	killdaemon
+    done
+    $script $arch config_files
+fi
+
+#
+# Place all files created by customize and through regular use in 
+# /etc/filesets/$fileset
+#
+
+newfiles='/etc/netnfsrc.OLD
+/etc/netnfsrc
+/etc/newconfig/netnfsrc.NEW
+/etc/netgroup
+/etc/netnfsrc2
+/etc/rpc
+/etc/vhe_list
+/usr/etc/vhe/vhe_mounter
+/usr/etc/vhe/vhe_script
+/usr/etc/yp/ypinit
+/usr/etc/yp/Makefile
+/usr/etc/yp/ypmake
+/usr/etc/yp/ypxfr_1perday
+/usr/etc/yp/ypxfr_1perhour 
+/usr/etc/yp/ypxfr_2perday'
+
+case "`getcontext`" in
+    *standalone*)
+	echo "$newfiles" >> /etc/filesets/$fileset
+	;;
+    *)
+	echo "$newfiles" >> /etc/filesets+/$arch/$fileset
+	;;
+esac
+
+exit $exitval

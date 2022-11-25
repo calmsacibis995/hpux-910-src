@@ -1,0 +1,391 @@
+## FacetTerm  ptcommon  description file 09/06/89
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: ptcommon.FC,v 70.1 92/03/09 15:59:19 ssa Exp $
+columns=80
+### ?? columns_wide=number
+### ?? columns_wide_on=
+### ?? columns_wide_off=
+### ?? columns_wide_clears_screen
+columns_wide_mode_on_mode_bit-08000000
+### ?? parm_mode_val-COLSWIDE-00000000=?3
+### NOT_IN_COMMON lines=24
+### NOT_IN_COMMON graphics_8_bit
+### NOT_IN_COMMON graphics_escape_control
+### ?? input_8_bit
+### has to be xon_xoff - Control-s is preemptive - not sent in order
+xon_xoff
+##--- MARGINS ---##
+auto_left_margin
+### ASSUMED auto_right_margin
+### NO eat_newline_glitch
+### autowrap off ignores chars when at right - arrow key right always col1 next
+auto_wrap_on=\E[>9l
+auto_wrap_off=\E[>9h
+auto_wrap_mode_bit-04000000
+parm_mode_val-00000000-AUTOWRAP=>9
+##--- CLEAR ---##
+##
+### NOT_IN_COMMON see ptclearcom for all but pt250c-merge
+##
+##--- CURSOR ---##
+cursor_address=\E0%'!'%p1%+%c%'!'%p2%+%c
+cursor_address_wide=\E[%i;H
+cursor_address_wide=\E[%i%p1%d;H
+cursor_address_wide=\E[%i;%p2%dH
+cursor_address_wide=\E[%i%p1%d;%p2%df
+cursor_address_wide=\E[%i%p1%d;%p2%dH
+cursor_address_wide_starts=80
+row_address=\E[%i%p1%dd
+column_address=\E[%i%p1%dG
+decode_type-0123456789;>=\E[
+cursor_home=\E$B
+cursor_home=\E$A
+cursor_up=\E[A
+### ?? cursor_up_at_home_wraps_ll
+parm_up_cursor=\E[%p1%dA
+cursor_down=\E[B
+parm_down_cursor=\E[%p1%dB
+cursor_right=\E[C
+parm_right_cursor=\E[%p1%dC
+cursor_left=\E[D
+parm_left_cursor=\E[%p1%dD
+### NOT_IMP ?? column_address=\E[%i%p1%dG
+### NOT_IMP row_address=\E[%p1%{1}%+%dd
+### NO ## NOT_IMP cursor_mem_address=
+### NOT_IMP cursor_to_ll=\E08!
+##--- SCROLL ---##
+### NO change_scroll_region=
+### SAME_AS_NEWLINE scroll_forward=\n
+### ?? scroll_could_be_cursor_only
+### NO ## NOT_IMP parm_index=
+### PT250-MERGE scroll_reverse=\E29! p\E[M\E$A\E[m\E[L\E[2t
+### on scroll_reverse \E[Q should be \E$Q which is restore cursor
+### save_cursor position 23,0 delete_line home insert_line set_attr_eol restore
+### SPLITUP scroll_reverse=\E$O\E08!\E[M\E$B\E[L\E[t\E[Q
+### SPLITUP scroll_reverse=\E08!\E[M\E$A\E[L\E[t
+### NOT_IMP parm_rindex=\E[%{25}%p1%-%dd\E[%p1%dM\E[0%p1'!'%+%c!^H\E[1r\E$A
+### PT250-MERGE parm_rindex=\E0%{26}%p1%-%dd\E[%p1%dM\E[0%p1'!'%+%c!^H\E[1r\E$A
+save_cursor=\E$O
+restore_cursor=\E$Q
+##--- INS/DEL ---##
+#### save_cur pos_bot del_line restore_cur ins_line set_attr_to_end_of_line
+### NEW SPLIT_UP insert_line=\E$O\E08!\E[M\E$Q\E[L\E[t
+### PT250-MERGE  insert_line=\E$O\E29! p\E[K\E$Q\E[2m\E[L\E[2t
+insert_line=\E[L
+out_insert_line=\E[L\E[2t
+insert_line_needs_clear_glitch
+insert_line_sets_attributes
+### NO insdel_line_move_col0
+parm_insert_line=\E[%p1%dL
+### NO out_parm_insert_line
+delete_line=\E[M
+parm_delete_line=\E[%p1%dM
+insert_character=\E[@
+### NO insert_padding=
+### NO ## NOT_IMP parm_ich=
+### insert_mode assumes edit_extent is edit_in_line
+enter_insert_mode=\E[4h
+exit_insert_mode=\E[4l
+insert_mode_on_mode_bit-02000000
+parm_mode_val-INSERTON-00000000=4
+delete_character=\E[P
+parm_delete_character=\E[%p1%dP
+### NOT_IMP erase_chars=\E[%p1%dX
+### NO ## NOT_IMP enter_delete_mode=
+### NO ## NOT_IMP exit_delete_mode=
+### NOT_IMP repeat_char=%p1%c\E[%p2%{1}%-%db
+##--- ATTRIBUTES URBDOIPA ---##
+### NOT_IMP set_attributes=\E[0%?%p1%p5%|%t;2%;%?%p2%t;4%;%?%p4%t;5%;%?%p1%p3%|%t;7%;%?%p7%t;>2%;%?%p9%t;>4%;m
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                     4752 243 ---##
+parm_attribute--URBDIPA=\E[%8M>m
+parm_attribute_out--URBDIPA=\E[%s1m
+parm_attribute_out--URBDIPA=\E[%s1;%s2m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3;%s4m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3;%s4;%s5m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+parm_attribute_out--URBDIPA=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+parm_attribute_val--URBDIPA=0
+parm_attribute_val-U-=4
+parm_attribute_val-R-=7
+parm_attribute_val-B-=5
+parm_attribute_val-D-=2
+### NO parm_attribute_val-O-=
+parm_attribute_val-I-=>2
+##--- block drawing graphics
+parm_attribute_val-P-=>4
+parm_attribute_val-A-=>3
+### NO attribute_next-A-=
+exit_attribute_mode--URBDIPA=\E[0m
+exit_attribute_mode--URBDIPA=\E[m
+row_address_exit_attribute_set_attr_line--URBDIPA=\E2%'!'%p1%+%c! p
+##--- MAGIC COOKIE ATTRIBUTES ---##
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##---                              x    ---##
+lock_shift_0=^O
+### select_character_set_0--=
+select_character_set_0--=\E$0
+select_character_set_0-a-=\E$2
+### select_character_set_0--=
+lock_shift_1=^N
+### select_character_set_1--=
+select_character_set_1-b-=\E$3
+select_character_set_1-c-=\E$1
+### select_character_set_1--=
+### single_shift_2=
+### select_character_set_2--=
+### select_character_set_2--=
+### single_shift_3=
+### select_character_set_3--=
+### select_character_set_3--=
+##--- LINE ATTRIBUTES ---##
+### line_attribute_off=
+### line_attribute=
+### line_attribute=
+##--- CURSOR (cursor_normal cursor_invisible cursor_visible)
+cursor_on=\E$R
+cursor_off=\E$S
+cursor_on_mode_bit-00800000
+### ?? parm_mode_val-CURSORON-00000000=?25
+### SAME_AS_CURSOR_ON cursor_type=\E$R
+### ?? cursor_type_turns_cursor_on
+##--- KEYPAD (keypad_xmit keypad_local ) ---##
+### NOT_IN_COMMON enter_appl_keypad_mode=\E[>10l
+### NOT_IN_COMMON exit_appl_keypad_mode=\E[>10h
+### NOT_IN_COMMON ### num_lock  func=\E[>10h  num_lock=\E[>10l  default is func
+### NOT_IN_COMMON parm_mode_val-PASS....-NOTIMP..=>10
+### NOT_IN_COMMON parm_mode_val-00000000-APPKEYON=>10
+appl_keypad_mode_on_mode_bit-00400000
+### ?? parm_mode_val-APPKEYON-00000000=?4
+### NO enter_cursor_key_mode=
+### NO exit_cursor_key_mode=
+cursor_key_mode_on_mode_bit-00200000
+### ?? parm_mode_val-CURKEYON-00000000=?4
+##--- TABS ---##
+### back_tab=
+clear_all_tabs=\E[5W
+set_tab=\EH
+##--- FUNCTION KEYS ---##
+### ?? function_key_clear=
+### ?? function_key_clear_mode_yes=number
+### ?? function_key_clear_mode_no=number
+### ?? parm_pkey_key=
+### ?? parm_pkey_key=
+### NO pkey_key=
+### ?? function_key_string_is_hex
+### ?? function_key-id-delim=
+### ?? shift_function_key
+### ?? function_key-id-delim=
+### NO ## BY_HAND function_key-key_f0=
+### BY_HAND function_key-key_f1=\EO!
+### BY_HAND function_key-key_f2=\EO"
+### BY_HAND function_key-key_f3=\EO#
+### BY_HAND function_key-key_f4=\EO$
+### BY_HAND function_key-key_f5=\EO%
+### BY_HAND function_key-key_f6=\EO&
+### BY_HAND function_key-key_f7=\EO'
+### BY_HAND function_key-key_f8=\EO(
+### BY_HAND function_key-key_f9=\EOM
+### BY_HAND function_key-key_f10=\EON
+##--- CURSOR KEYS ---##
+key_home=\E$A
+key_up=\E[A
+key_down=\E[B
+key_left=\E[D
+key_right=\E[C
+### SAME_AS_BACKSPACE key_backspace=^H
+##--- PRINTER ---##
+### TBD print_screen=\E[i
+### NO ## TBD prtr_non=
+### TBD prtr_off=\E[4i
+### TBD prtr_on=\E[>3i
+##--- STATUS LINE ---##
+### TBD status_line_esc_ok
+### NOTE dis_status_line=\E$T
+status_off=\E$T
+### NO status_off_clears_status_type
+status_off_clears_status_line
+### NO status_type_turns_status_on
+### ?? status_type=
+### ?? status_type=
+### NO status_type_ruins_status_line
+### COMBINE to_status_line=\E$V
+### COMBINE from_status_line=\E$U
+status_line=\E$V%s1\E$U
+status_line_turns_status_on
+##--- MISC ---##
+### ASSUMED bell=^G
+### ONLY IF PADDING carriage_return=\r
+new_line=\EE
+### NO ## NOT_IMP form_feed=
+### NO ## OK_IF_MAGIC transparent_underline
+### NO ## NOT_IMP ceol_standout_glitch
+### NO ## NOT_IMP erase_overstrike
+### NO ## NOT_IMP generic_type
+### NO ## NOT_IMP hard_copy
+### NO ## NOT_IMP has_meta_key
+### NO ## NOT_IMP insert_null_glitch
+### NO ## NOT_IMP memory_above
+### NO ## NOT_IMP memory_below
+### NOT_IMP move_insert_mode
+### NO ## NOT_IMP move_standout_mode
+### NO ## NOT_IMP over_strike
+### NO ## NOT_IMP tilde_glitch
+### NO ## NOT_IMP lines_of_memory=number
+### NO ## NOT_IMP padding_baud_rate=number
+### NO ## NOT_IMP virtual_terminal=number
+### NO ## NOT_IMP command_character=
+### NO ## NOT_IMP down_half_line=
+### NO ## NOT_IMP meta_off=
+### NO ## NOT_IMP meta_on=
+### NO ## NOT_IMP pad_char=
+### NO ## NOT_IMP set_window=
+### NO ## NOT_IMP underline_char=
+### NO ## NOT_IMP up_half_line=
+### NO ## NOT_USED key_a1=
+### NO ## NOT_USED key_a3=
+### NO ## NOT_USED key_b2=
+### NO ## NOT_USED key_c1=
+### NO ## NOT_USED key_c3=
+### NO ## NOT_USED key_catab=
+### NOT_USED key_clear=\E?
+### NO ## NOT_USED key_ctab=
+### NOT_USED key_dc=\E[X
+### NOT_USED key_dl=\E[M
+### NOT_USED key_eic=\E[4l
+### NO ## NOT_USED key_eol=
+### NO ## NOT_USED key_eos=
+### NOT_USED key_ic=\E[4h
+### NO ## NOT_USED key_il=
+### NOT_USED key_npage=\E$b
+### NOT_USED key_ppage=\E$a
+### NOT_USED key_sf=\E[T
+### NOT_USED key_sr=\E[S
+### NO ## NOT_USED key_stab=
+### NO ## NOT_USED lab_f0=
+### NO ## NOT_USED lab_f1=
+### NO ## NOT_USED lab_f2=
+### NO ## NOT_USED lab_f3=
+### NO ## NOT_USED lab_f4=
+### NO ## NOT_USED lab_f5=
+### NO ## NOT_USED lab_f6=
+### NO ## NOT_USED lab_f7=
+### NO ## NOT_USED lab_f8=
+### NO ## NOT_USED lab_f9=
+### NO ## NOT_USED lab_f10=
+##--- MULTIPAGE ---##
+### ?? pages=number
+### ?? display_page_number=
+### ?? parm_display_page_next=
+### ?? parm_display_page_prev=
+### ?? display_page_next=
+### ?? display_page_prev=
+##--- INIT ---##
+#####################################################################
+### NOT_IN_COMMON enter_ca_mode=\E[1Q\E[1;24y\E[12;>7;>10;>13h\E[4;>1;>3;>8;>9;>12;>14;>15;>16;>18;>19l\E[1N$<10>
+### PT250-MERGE    enter_ca_mode=\E[>9;>10;>13;>25h\E[>18l\Eb$<10>
+###                enter_ca_mode=\E[>9;>10;>13h\E[>18l\Eb\E[1N$<10>
+### NO          exit_ca_mode=
+### PT250-MERGE exit_ca_mode=\E[>9l\E$T
+###             exit_ca_mode=\E[>9l\E$T
+### SPLITUP     init_1string=\E?
+### PT250-MERGE init_1string=\E[Q\E[1;25y
+### ## SPLITUP  init_1string=\E[Q\E[1;24y
+### SPLITUP     init_2string=\E[1Q\E[1;24y\E[12;>7;>10;>13h\E[4;>1;>3;>8;>12;>14;>15;>16;>18;>19l
+### PT250-MERGE init_2string=\E[12;>7;>10;>13h\E[4;>1;>3;>8;>12;>14;>15;>16;>18;>19l
+### ## SPLITUP  init_2string=\E[12;>7;>10;>13h\E[4;>1;>3;>8;>12;>14;>15;>16;>18;>19l
+### PT250-MERGE reset_2string=\E[>10;>13;>25h\Eb
+### ## SPLITUP  reset_2string=\E[>10;>13h\Eb\E[1N
+#####################################################################
+##--- MODE ---##
+### screen on(unblank)=\E$P   off(blank)=\E$E
+mode-00000000-00000001=\E$P$<20/>
+mode-00000001-00000000=\E$E$<20/>
+###   edit_extent(for ins/del char) display=/E[0Q(default) line=\E[1Q area=\E[3Q
+ignore=\E[Q
+ignore=\E[1Q
+###   unlock_lines
+ignore=\E[1;24y
+### unlock_keyboard  send_cursor_key  80X24
+### SPLITUP reset_2string=\Eb\E[>13h\E[1N
+### keyboard   lock=\E`   unlock=\Eb
+pass=\Eb
+### NO does_set_display_size_clear_screen \E[1N
+### set_display_size   80X24=\E[1N   80X48=\E[2N  3=132X27   4=160X24
+ignore=\E[1N$<10>
+ignore=\E[4N$<10>
+pass-not_in_manual=\E[{
+### ?? mode-00000000-00000000=
+### ?? ignore=
+### ?? pass=
+##--- PARM_MODE ---##
+parm_mode_on=\E[%10M>h
+parm_mode_off=\E[%10M>l
+### ?? parm_mode_private_propogates
+ignore_mode_bit-80000000
+### ?? parm_mode_val-80000000-IGNORE..=?99
+pass_mode_bit-40000000
+### ?? parm_mode_val-40000000-PASS....=?99
+notimp_mode_bit-20000000
+### ?? parm_mode_val-20000000-NOTIMP..=?99
+### send_tab   				set=\E[>17h   reset=\E[>17l
+### allow protected char erase   	yes=\E[6h   no=\E[6l  default is no
+parm_mode_val-PASS....-NOTIMP..=6
+### local_echo   			no=\E[12h   yes=\E[12l   default is no
+parm_mode_val-PASS....-NOTIMP..=12
+### selected area transfer   		\E[17h   \E[17l
+### 	def is linefeed			newline=\E[20h  linefeed=\E[20l
+parm_mode_val-NOTIMP..-PASS....=20
+### auto_line_feed_mode 		on=\E[>1h	off=\E[>1l
+parm_mode_val-NOTIMP..-PASS....=>1
+### block mode   def is off(char)	on=\E[>2h	off=\E[>2l
+parm_mode_val-NOTIMP..-PASS....=>2
+### logical attributes(fields)  def no	yes=\E[>3h	no=\E[>3l
+parm_mode_val-NOTIMP..-PASS....=>3
+### send mode   def is page		send_line=\E[>4h   send_page=\E[>4l
+### scroll   def is hard		soft=\E[>5h	hard=\E[>5l
+### block mode unpro/mod   		set=\E[>6h	reset=\E[>6l
+parm_mode_val-PASS....-PASS....=>6
+### pad char   def is space		space=\E[>7h	null=\E[>7l
+parm_mode_val-PASS....-NOTIMP..=>7
+### auto_page   def no			yes=\E[>8h	no=\E[>8l
+parm_mode_val-NOTIMP..-PASS....=>8
+### NOT_IN_COMMON ### num_lock  def func	func=\E[>10h	num_lock=\E[>10l
+### page boundary   def is 1 page	2page=\E[>11h   1page=\E[>11l 
+### vis_attr_lock   def is norm		keep_old=\E[>12h  normal=\E[>12l
+parm_mode_val-NOTIMP..-PASS....=>12
+### local cursor action - def is yes	no(send)=\E[>13h   yes(local)=\E[>13l
+parm_mode_val-PASS....-NOTIMP..=>13
+### selective data trap   		\E[>14h   	\E[14l
+parm_mode_val-NOTIMP..-PASS....=>14
+### tranparent data mode   		set=\E[>15h	reset=\E[>15l
+parm_mode_val-NOTIMP..-PASS....=>15
+### host_notification_mode   		set=\E[>16h	reset=\E[>16l
+parm_mode_val-NOTIMP..-PASS....=>16
+### function termination  		append_cr=\E[>18h  no=\E[>18l  def no
+parm_mode_val-NOTIMP..-PASS....=>18
+### soft_lock  				set=\E[>19h	reset=\E[>19l
+parm_mode_val-NOTIMP..-PASS....=>19
+### dsc mode  def off(norm) 		on=\E[>20h   	off=\E[>20l
+parm_mode_val-NOTIMP..-PASS....=>20
+### merge mode   def is off(norm)	on=\E[>25h	off=\E[>20l
+parm_mode_val-IGNORE..-IGNORE..=>25
+### SYSTEM DEPENDENT ###
+### VERSION3 ###
+### NOTE acs_chars=jhk0l2mbnrq"trupvbw2xx
+### NOTE key_btab=\E[Z
+### NOTE key_cancel=\ENU
+### NOTE key_end=\EV
+### NOTE key_enter=\r
+### NOTE key_help=\E_1\E\
+### NOTE key_scancel=\ENV
+### NOTE key_sdl=\E[M
+### NOTE key_send=\EU
+### NOTE key_shelp=\E_2\E\
+### NOTE key_shome=\E$B
+### NOTE key_sleft=\ENO
+### NOTE key_snext=\EN^
+### NOTE key_sprevious=\EN[
+### NOTE key_sright=\ENR

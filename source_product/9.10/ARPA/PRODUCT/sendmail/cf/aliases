@@ -1,0 +1,34 @@
+##
+#  Sendmail Alias File	
+#  @(#)$Header: aliases,v 1.6.109.2 94/08/30 14:26:17 mike Exp $
+#
+#  Mail to an alias in this file will be sent to the users, programs, or
+#  files designated following the colon.
+#  Aliases defined in this file will NOT be expanded in headers from
+#  mailx(1), but WILL be visible over networks and in headers from
+#  /bin/rmail(1).
+#
+#    >>>>>>>>>>	  The program "/usr/bin/newaliases" must be run after
+#    >> NOTE >>	  this file is updated, or else any changes will not be
+#    >>>>>>>>>>	  visible to sendmail.
+##
+
+# Alias for mailer daemon
+MAILER-DAEMON	: root
+
+# RFC 822 requires that every host have a mail address "postmaster" 
+postmaster	: root
+
+# Aliases to handle mail to msgs and news
+nobody		: /dev/null
+
+# System Admistration aliases
+operator	: root
+uucp		: root
+daemon		: root
+
+# Where to send feed-back; for urgent bug reports,
+# contact your HP representative.
+sendmail	: sendmail@hp.com
+
+# Local aliases

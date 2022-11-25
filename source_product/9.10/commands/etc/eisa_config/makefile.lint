@@ -1,0 +1,33 @@
+LINTFLAGS = -DLINT -D__lint -Zn8096 -I$(INC) -Nw2000 -Np30000
+
+#
+# source files needed to create the eisa_config program
+#
+SRCS = 			$(SRC)add.c		\
+			$(SRC)cf_util.c		\
+			$(SRC)cfgload.c		\
+			$(SRC)cl_utils.c	\
+			$(SRC)config.c		\
+			$(SRC)emitter.c		\
+			$(SRC)err.c		\
+			$(SRC)globals.c		\
+			$(SRC)help.c		\
+ 			$(SRC)init.c		\
+			$(SRC)lex.c		\
+			$(SRC)main.c		\
+			$(SRC)nvmload.c		\
+ 			$(SRC)nvmlowlevel.c	\
+			$(SRC)nvmsave.c		\
+			$(SRC)open_save.c	\
+			$(SRC)parser.c		\
+			$(SRC)pr.c		\
+			$(SRC)release.c		\
+			$(SRC)show.c		\
+			$(SRC)string.c		\
+			$(SRC)sw.c		\
+			$(SRC)util.c		\
+			$(SRC)yyparse.c
+
+
+lint: 		$(SRCS)
+	/usr/bin/lint $(LINTFLAGS) $(SRCS)

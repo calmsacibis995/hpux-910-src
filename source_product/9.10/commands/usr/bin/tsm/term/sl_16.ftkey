@@ -1,0 +1,25 @@
+# Function key file for terminals with status line and 16 function keys
+# Include the following in the .facet file: ( remove leading # and tab )
+
+#	function_keys=sl_16.ftkey
+
+## @(#) $Header: sl_16.ftkey,v 66.3 90/09/28 15:49:10 kb Exp $
+
+1	\h1
+2	\h2
+3	\h3
+4	\h4
+5	\h5
+6	\h6
+7	\h7
+8	\h8
+9	\h9
+10	\h0
+13	\hl
+14	\h+\040
+15	\h
+16	\m
+status_line_attr_reverse
+status_line_attr_dim_reverse
+* Win %d  F1-F10: Select  F13: Win-Last  F14: Win-Next  F15: Hot-key  F16: Menu
+labels_on

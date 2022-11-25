@@ -1,0 +1,23 @@
+-------------------- ~ ESCAPE-SEQUENZEN -------------------
+~~		Maskiert ein einzelnes Tilde-Zeichen
+~a,~A		Autograph (insert 'sign' variable)
+~b users	Fœgt Benutzer zur Bkopie-Liste hinzu
+~c users	Fœgt Benutzer zur Kopie-Liste hinzu
+~d		Liest die Datei dead.letter
+~e		Bearbeitet den Nachrichtenpuffer
+~m messages	Liest Nachrichten ein, nach rechts verschoben durch Tab
+~f messages	Liest Nachrichten ein, ohne Verschieben nach rechts
+~h		Eingabeaufforderung fœr An-Liste, Betreff und Kopie-Liste
+~p		Druckt den Nachrichtenpuffer
+~q,~Q		Beendet Programm, speichert Nachricht in $HOME/dead.letter 
+~x		Beendet Programm, ohne die Nachricht zu speichern
+~r file		Liest eine Datei in einen Nachrichtenpuffer ein
+~s subject	Definiert einen Betreff
+~t users	Fœgt Benutzer zur An-Liste hinzu
+~v		Ruft den Anzeige-Editors fœr die Nachricht auf
+~w file		Schreibt Nachricht in eine Datei
+~.		Beendet die Eingabe
+~!command	Fœhrt einen Shell-Befehl aus
+~|command	Gibt die Nachricht an einen Befehl weiter (Pipe)
+~:command	Fœhrt regulÃren mailx-Befehl aus
+-----------------------------------------------------------

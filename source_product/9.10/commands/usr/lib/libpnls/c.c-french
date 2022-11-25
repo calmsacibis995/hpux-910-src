@@ -1,0 +1,9 @@
+$set 1
+1 DDD, dd MMMM yyyy
+2 yyyy-mm-dd
+3 24h
+19 1
+26 3
+30 WWWWWWWW, Le dd OOOOOOOOO yyyy
+31 $CAN
+1003 DDD, MMM dd yyyy,

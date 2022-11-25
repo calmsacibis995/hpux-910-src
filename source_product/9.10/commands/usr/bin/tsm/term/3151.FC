@@ -1,0 +1,63 @@
+# FacetTerm   3151attr COMMON file 11/03/90
+#   IBM 3151 attributes
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 3151.FC,v 70.1 92/03/09 16:49:37 ssa Exp $
+##--- ATTRIBUTES URBOI ---##
+##blink=\E4$a,    bold=\E4(a,    invis=\E40a,    rev=\E4!a,
+##smso=\E4!a,     rmso=\E4@,     smul=\E4"a,     rmul=\E4=b,
+### attribute-U=
+attribute-U-RBOI=\E4B
+attribute-U-....=\E4"a
+### attribute--U=
+attribute--U....=\E4=b
+### attribute-R=
+attribute-R-UBOI=\E4A
+attribute-R-....=\E4!a
+### attribute-B=
+attribute-B-UROI=\E4D
+attribute-B-....=\E4$a
+### attribute-D
+### attribute-O=
+attribute-O-URBI=\E4H
+attribute-O-....=\E4(a
+### attribute-I=
+attribute-I-URBO=\E4P
+attribute-I-....=\E40a
+### attribute_next-A-=
+##--- MULTIPLE ATTRIBUTES URBDOIPA ---##
+##---                              ---##
+### 1=dim 2=bold 4=under 5=blink 7=rev 8=invis
+### parm_attribute=\E[%7MMm
+### parm_attribute--URBDOIPA=\E[;%7MMm
+### parm_attribute_out=\E[%s1m
+### parm_attribute_out=\E[%s1;%s2m
+### parm_attribute_out=\E[%s1;%s2;%s3m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7m
+### parm_attribute_out=\E[%s1;%s2;%s3;%s4;%s5;%s6;%s7;%s8m
+### parm_attribute_val--URBDOIPA=0
+### parm_attribute_val-U-=number
+### parm_attribute_val-R-=number
+### parm_attribute_val-B-=number
+### parm_attribute_val-D-O=number
+### parm_attribute_val-O-D=number
+### parm_attribute_val-I-=number
+### parm_attribute_val-P-=number
+### parm_attribute_val-A-=number
+### exit_attribute_mode--URBDOIPA=
+exit_attribute_mode--URBOI=\E4@
+##--- MAGIC COOKIE ATTRIBUTES ---##
+### magic-standout=
+### magic-underline=
+### magic-reverse=
+### magic-blink=
+### magic-dim=
+### magic-bold=
+### magic-secure=
+### magic-protected=
+### magic-alt_charset=
+### nomagic-exit_attribute_mode=
+##--- CHARACTER SET ATTRIBUTES URBDOIPA ---##
+##-- END --##

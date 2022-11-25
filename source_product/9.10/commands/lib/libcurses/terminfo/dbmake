@@ -1,0 +1,100 @@
+#!/bin/ksh
+# @(#) $Revision: 66.2 $
+
+#
+#      TIC output	Fileset		Build target
+#      -----------	----------	------------
+set -- HPTERM		UX-CORE		HP	\
+       NONHPTERM	NONHPTERM	NONHP
+
+while [ $# -gt 0 ]; do
+    targets=$1.targets
+    links=$1.links
+    fileset=$2
+    build=$3
+    TMP1=/tmp/termA$$
+    TMP2=/tmp/termB$$
+    /bin/rm -f $fileset.inst $TMP1 $TMP2
+    trap "/bin/rm -f $TMP1 $TMP2; exit 1" 1 2 3 5 15
+
+    #
+    # First, create the install entries
+    #
+    sed -e 's,\.\./lib/,/usr/lib/terminfo/,g' < $targets |
+    sort -u |
+    while read path; do
+	dirname=${path%/*}
+	basename=${path##*/}
+	typeset -L14 L14=$basename; shortname=`echo $L14`
+
+	if [ $basename != $shortname ]; then
+	    rule=RENM_CPSET
+	else
+	    rule=CPSET
+	fi
+
+	cat <<-EOF
+	#
+	install_target		 : $dirname/$shortname
+	fileset			 : $fileset
+	type			 : file
+	status			 : di----
+	processor		 : 38
+	mode			 : 0444
+	owner			 : bin
+	group			 : bin
+	link_source		 :
+	build_target		 : /usr/lib/terminfo/$build
+	install_rule_name	 : $rule
+	install_flags		 :
+	a_out_location		 : lib/${path#/usr/lib/terminfo/}
+	order			 : 4000
+	responsible_project	 : commands
+	EOF
+    done | tr '#\012' '\012#' > $TMP1
+    echo >> $TMP1
+
+    #
+    # Now, create the link entries
+    #
+    sed -e 's,\.\./lib/,/usr/lib/terminfo/,g' < $links |
+    sort -u +1 -2  |
+    while read linksrc path; do
+	dirname=${path%/*}
+	basename=${path##*/}
+	typeset -L14 L14=$basename
+	shortname=`echo $L14`
+
+	src_dirname=${linksrc%/*}
+	src_basename=${linksrc##*/}
+	L14=$src_basename; src_shortname=`echo $L14`
+
+	cat <<-EOF
+	#
+	install_target		 : $dirname/$shortname
+	fileset			 : $fileset
+	type			 : hard_link
+	status			 : di----
+	processor		 : 38
+	mode			 : 0444
+	owner			 : bin
+	group			 : bin
+	link_source		 : $src_dirname/$src_shortname
+	build_target		 : /usr/lib/terminfo/$build
+	install_rule_name	 : LINK
+	install_flags		 : ../${src_dirname#/usr/lib/terminfo/}/$src_shortname
+	a_out_location		 :
+	order			 : 5000
+	responsible_project	 : commands
+	EOF
+    done | tr '#\012' '\012#' > $TMP2
+    echo >> $TMP2
+
+    sort -z768 -m $TMP1 $TMP2			|
+    tr '#\012' '\012#'				|
+    sed -e 's,^##,,' -e 's,^#,,' -e 's,:$,: ,'	|
+    expand					> $fileset.inst
+
+    /bin/rm -f $TMP1 $TMP2
+    shift 3
+done

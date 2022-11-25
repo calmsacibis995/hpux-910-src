@@ -1,0 +1,32 @@
+## FacetTerm Menu Capabilities for a adds viewpoint 60 06/18/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: vwpt.FM,v 70.1 92/03/09 16:52:58 ssa Exp $
+## ##-menu-cap-init_string=
+##-menu-cap-cursor_address=\EY%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=^L
+##-menu-cap-clr_eol=\EK
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\E1
+##-menu-cap-exit_alt_charset_mode=\E2
+##-menu-cap-acs_chars=jMkElAmIqatYuUv]wQxeni
+## normal chars ##-menu-cap-acs_chars=jLkDl@mHq`tXuTv\wPxdnh
+## ##-menu-cap-keypad_xmit=
+## ##-menu-cap-no_attr=
+## ##-menu-cap-shadow_attr=
+## ##-menu-cap-item_attr=
+## ##-menu-cap-box_attr=
+## ##-menu-cap-title_attr=
+## ##-menu-cap-highlight_attr=
+## ##-menu-cap-highlight_blink_attr=
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^Z
+## ##-menu-cap-key_down=
+##-menu-cap-key_right=^F
+##-menu-cap-key_left=^U
+##-menu-cap-key_home=^A
+##-menu-cap-key_ignore=^B1
+##-menu-cap-key_ignore=^B2
+##-menu-cap-key_ignore=^B!
+##-menu-cap-key_ignore=^B"
+##-menu-cap-key_ignore=^B#

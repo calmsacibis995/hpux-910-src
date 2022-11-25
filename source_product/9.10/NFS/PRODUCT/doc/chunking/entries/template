@@ -1,0 +1,112 @@
+.\"
+.\"  marco for each item format, leaves $1 spaces and makes a hanging tag 
+.\"  with the label from $2, assumes not label is bigger than the indent
+.\"  (see the ".in X.Xi" line to adjust the indent)
+.de xx
+.sp \\$2                
+.ti -\w'\\$1: 'u
+\&\\$1: \c
+..
+.\" Print with - "mm -rN2 <file>"
+.\"
+.\" This indicates to use the mm macros, and don't print
+.\" a page number on the header page.
+.\" To use Tbl, add "-t"
+.\"
+.SP 1i
+.ce           \" put title on next line
+Sample Chunking Write-up
+.SP 0.75i
+.\" set up page indentation 
+.po 0i
+.in 1.65i
+.ll 7.0i
+.\" start items
+.\"
+.\" WHAT - 1-2 partial statements explaining what was done
+.\"
+.xx "WHAT" 1
+Developed a wiziwig to help us
+with testing; allows automatic updates of whatizs
+.\"
+.\" MOTIVATION - list of partial sentences about what prompted this
+.\"
+.xx "MOTIVATION" 2
+old method too slow
+.sp
+clearly a better way to do this
+.\"
+.\" EFFECT - list of partial sentences about the good this change did,
+.\"          high impact, low detail
+.\"
+.xx EFFECT 2
+avoid watching over things
+.sp
+get s complete summary of activities
+.sp
+really spiffy stuff
+.\"
+.\"  STATUS - date with short status statement, stack up so have a
+.\"           progress track
+.\"
+.xx STATUS 2     
+MM/DD/YY: current status of the project with date, also 
+leave old status reports to show line of progress
+.\"
+.\" go to next page
+.\"
+.bp
+.\"
+.\" use this page for more detail, more of the narration
+.\" of a presentation
+.\"
+.\"
+.\" IMPLEMENTATION - text/narration/lists explaining activity in more
+.\"                  detail, how done, enough info to answer general
+.\"                  questions about the project
+.xx IMPLEMENATION 0
+shell script that runs around every night and does this
+.sp
+checks to make sure every machine ok
+.sp
+tuck them in and kisses them good night
+.\"
+.\" EFFORT - line items with activity and effort to finish,
+.\"          can be one time or on-going maintenance
+.\"
+.xx EFFORT 2   
+Bobby Joe writing the program: 1 eng. day
+.sp
+engineers using process: 1 eng. day/mo. total
+.\"
+.\" SAVINGS - line items like above except with expected savings
+.\"
+.xx SAVINGS 2
+fewer machines used: 2 300s, 4 800s
+.sp
+less mental hassle: less wear and tear on the engineers
+.\"
+.\" LIMITATIONS - list of partial sentences about what this doesn't
+.\"               cover
+.\"
+.xx "LIMITATIONS" 2
+doesn't make coffee
+.sp
+doesn't play volleyball
+.\"
+.\" INSIGHTS - text explaining what we learned from this, what should be
+.\"            different
+.\"     
+.xx "INSIGHTS" 2
+This points out the need for more emphasis on this topic.  The design
+is flexible enough so that much more progress can be made.
+.\"
+.\" FUTURE WORK - list of partial sentences with where to go now
+.\"
+.xx "FUTURE WORK" 2
+enhance this process
+.sp
+follow up with other work in this area
+.sp
+get a gold star on the top of our paper
+

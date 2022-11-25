@@ -1,0 +1,16 @@
+#!/bin/sh
+# @(#) $Revision: 66.1 $    
+
+OPTIONS=
+FILES=
+for ARG
+do
+	case "$ARG" in
+	-*)	OPTIONS="$OPTIONS $ARG";;
+	*)	FILES="$FILES $ARG";;
+	esac
+done
+: ${FILES:=.}			# default to current directory
+set $FILES
+find $@ -type f -links 1 -size +0 -perm -400 ! -name '*.Z' \
+	-exec compress $OPTIONS {} \; >/dev/null

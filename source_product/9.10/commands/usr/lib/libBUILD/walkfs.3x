@@ -1,0 +1,449 @@
+.de BB
+.br
+.B \\$1 \\$2 \\$3 \\$4 \\$5 \\$6
+..
+.TH WALKFS LIBC "" "" HP-UX
+.SH NAME
+walkfs \- file tree walk
+.SH SYNOPSIS
+.BB #include <sys/types.h>
+.BB #include <sys/stat.h>
+.BB #include <walkfs.h>
+
+.BB int walkfs(path, fn, depth, control)
+.BB char \(**path;
+.BB int (\(**fn)();
+.BB int depth;
+.BB int control;
+
+The user function is defined as:
+
+.BB int fn(info, flag)
+.BB struct walkfs_info \(**info;
+.BB unsigned int flag;
+
+.SH DESCRIPTION
+.I Walkfs
+recursively descends the directory hierarchy rooted in
+path.
+For  each  object  in  the  hierarchy,
+.I walkfs
+calls a user defined function,
+passing it a pointer to a structure containing information about
+the object and an integer which indicates the type of the
+object and error information.
+.P
+.I Walkfs
+attempts to use one file descriptor for each  level  in  the  tree.
+The  argument
+.I depth
+limits the number of file descriptors so used.  If depth is zero or
+negative, the effect is the  same as  if it were 1.
+If 
+.I depth
+is greater than the number of file descriptors currently available
+for use,
+.I walkfs
+will use all available file descriptors.
+.I Walkfs
+will run more quickly if depth is at least as large as the number
+of levels in the directory tree, but this is not required.
+.P
+The
+.I control
+argument of
+.I walkfs
+is a bit flag and is used to customize its operation.
+The bits can be created by ORing together one or more of the
+following values (defined in
+.IR walkfs.h ):
+.ne 2
+.TP 13
+.SM WALKFS_LSTAT
+Use
+.IR lstat (OS)
+instead of
+.IR stat (OS)
+to stat the files.
+Symbolic links will then be visible to the user function.
+.ne 2
+.TP 13
+.SM WALKFS_DOCDF
+Make all hidden directories (context dependent files) visible.
+Normally,
+.I walkfs
+only shows the files that match the current context.
+See
+.IR cdf (FILE)
+and
+.IR context (MISC).
+.ne 2
+.TP 13
+.SM WALKFS_SHOWCDF
+Expand the path name of the start point to include
+hidden directories (context dependent files).  The
+.I fullpath
+will contain the expanded path name up to and including the
+start point.  If the
+.B WALKFS_DOCDF
+mode is disabled, context dependent files below the start
+point will not be expanded.
+.ne 2
+.TP 13
+.SM WALKFS_TELLPOPDIR
+Causes
+.I walkfs
+to call the user function with
+.I flag
+set to
+.B WALKFS_POPDIR
+each time that all of the entries in a directory have been
+processed.  The value of
+.I info
+will be the same as when the user function
+was called
+with
+.B WALKFS_DIR
+for the corresponding directory.
+The value returned by the user function
+is ignored in this case.
+.IP "" 13 
+This feature can be used to implement a depth first traversal of
+a directory hierarchy.  The user function may accomplish this by
+performing no action when passed
+.BR WALKFS_DIR ,
+and instead processing the directory when 
+.B WALKFS_POPDIR
+is passed (see the description of the
+.I flag
+parameter below).
+.ne 2
+.TP 13
+.SM WALKFS_LEAVEDOT
+Normally,
+.I walkfs
+will remove redundant leading
+.B ./
+strings from the beginning of the relative path names generated.
+.B WALKFS_LEAVEDOT
+disables this behavior.
+.ne 2
+.TP 13
+.SM WALKFS_SLOW
+By default,
+.I walkfs
+uses
+.IR chdir (OS)
+to move around in the directory tree, restoring the starting directory
+before finally returning.
+Setting
+.B WALKFS_SLOW
+inhibits this behavior.
+As its name implies, 
+.B WALKFS_SLOW
+is not as efficient as the default,
+but may be desired in certain applications where changing the current
+working directory is not acceptable.
+.P
+The parameter
+.I info
+passed to the user function
+points to a struct that contains information about each file
+or directory.
+This struct is defined in
+.IR walkfs.h .
+The fields in the struct have the following meanings:
+.P
+.ne 2
+.TP 13
+.SM parent
+A pointer to the info struct for the parent directory.  The
+.I parent
+field of the start point is set to the value
+.BR NULL .
+.ne 2
+.TP 13
+.SM relpath
+Pathname of the file relative to the value of
+.I path
+passed to
+.IR walkfs .
+.ne 2
+.TP 13
+.SM fullpath
+Absolute path name of current file.
+If the
+.B WALKFS_SHOWCDF
+mode is enabled, 
+the absolute path name up to and including the start point will be
+expanded to include any hidden directories (see
+.IR cdf (FILE))
+.ne 2
+.TP 13
+.SM shortpath
+A relative pathname that can be used to access the current file. 
+If the
+.B WALKFS_SLOW
+mode is enabled, this will be the same as
+.IR relpath .
+.ne 2
+.TP 13
+.SM basep
+Pointer to the basename of the current file.  The basename of a file
+is defined as the path with any prefix ending in
+.B /
+deleted.
+.ne 2
+.TP 13
+.SM endp
+For the current file, this points to the null character at the
+end of the path names.
+.br
+.sp
+For info entries accessed via
+.IR info->parent ,
+this points to where the end of the pathname should be for that
+directory.  No null character will be present.
+.ne 2
+.TP 13
+.SM st
+The
+.IR stat (OS)
+information.
+.ne 2
+.TP 13
+.SM ismountpoint
+Will be 1 if the directory is a mount point, zero otherwise. 
+.P
+In the normal case,
+the 
+.I flag
+value passed to the user function can be one of the following
+values as defined in
+.IR walkfs.h :
+.ne 2
+.TP 13
+.SM WALKFS_DIR
+.I Info
+refers to a directory.
+If
+.B WALKFS_SLOW
+was not specified, the current working directory is the directory
+referenced by info.
+.ne 2
+.TP 13
+.SM WALKFS_NONDIR
+.I Info
+refers to something that is not a directory.
+If
+.B WALKFS_SLOW
+was not specified, the current working directory is the directory
+that contains the current object.
+.ne 2
+.TP 13
+.SM WALKFS_POPDIR
+.I Walkfs
+finished processing a directory.
+If
+.B WALKFS_SLOW
+was not specified, the current working directory is the directory
+referenced by info.
+.P
+When
+.I walkfs
+detects an error,
+.I flag
+will not be set to any of the previously described values.
+Instead,
+.I flag
+is set to a combination of one or more of the following error bits:
+.ne 2
+.TP 13
+.SM WALKFS_NOSTAT
+.I Info
+refers to something for which the
+.IR stat (OS)
+or
+.IR lstat (OS)
+call failed.  The
+global variable
+.B errno
+will contain the reason for the failure.
+.ne 2
+.TP 13
+.SM WALKFS_NOREAD
+.I Info
+refers to a directory which cannot be read.  This bit may
+be set in conjunction with
+.BR WALKFS_NOSEARCH .
+.ne 2
+.TP 13
+.SM WALKFS_NOSEARCH
+.I Info
+refers to a directory which cannot be searched.  This bit may
+be set in conjunction with
+.BR WALKFS_NOREAD .
+.ne 2
+.TP 13
+.SM WALKFS_NOCHDIR
+.I Walkfs
+was unable to change back to the directory referred to by
+.IR info .
+This error may not be ignored, howerver,
+if the user function can change to the directory referred to by
+.IR info ,
+it may return
+.B WALKFS_RETRY
+which will cause
+.I walkfs
+to continue as if the error had never ocurred.
+If the current working directory is not what
+.I walkfs
+expects when
+.B WALKFS_RETRY
+is returned,
+.I walkfs
+will call the user function again with
+.BR WALKFS_NOCHDIR .
+Returning any value other than
+.BR WALKFS_RETRY
+will cause
+.I walkfs
+to abort the traversal and return
+.BR WALKFS_NOCHDIR .
+.IP
+Note that a 
+.B WALKFS_NOCHDIR
+error may only ocurr if the
+.B WALKFS_SLOW
+mode has not been enabled.
+.P
+As with the
+.B WALKFS_NOCHDIR
+error condition,
+the user function has the option of correcting any of the above
+errors and returning
+.BR WALKFS_RETRY .
+causing
+.I walkfs
+to attempt error recovery.
+Except when recovering from a
+.B WALKFS_NOCHDIR
+error, the user function will then be called with the results of
+the retry attempt and in addition,
+.I flag
+will have the
+.B WALKFS_RETRY
+bit set.
+.I Walkfs
+will continue to retry as long as the user function returns
+.B WALKFS_RETRY
+and an error condition still exists.
+In general, when a retry is not desired, the user function should return
+.BR WALKFS_OK .
+However, in the case of
+.B WALKFS_NOSEARCH
+errors, it might be preferable to return
+.B WALKFS_SKIP
+to avoid
+.B WALKFS_NOSTAT
+errors on all the elements of the directory that cannot be searched.
+.P
+.I Walkfs
+modifies processing depending on the value that the user
+function returns:
+.ne 2
+.TP 13
+.SM WALKFS_OK
+Continue normal processing
+.ne 2
+.TP 13
+.SM WALKFS_RETRY
+Attempt to recover from an error condition.  If no error condition
+existed, this value is equivalent to
+.B WALKFS_OK.
+.ne 2
+.TP 13
+.SM WALKFS_SKIP
+Skip the rest of the contents of the current directory.
+.ne 2
+.TP 13
+other
+Abort tree walk,
+.I walkfs
+will return the value that the user function returned.
+.SH EXAMPLE
+The following program prints an indented depth-first list
+of files starting at the current directory.
+.P
+.nf
+#include <stdio.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <walkfs.h>
+
+int print_name(info, flag)
+walkfs_info *info;
+unsigned int flag;
+{
+    static int depth = 0;
+    int i;
+
+    switch (flag)
+    {
+    case WALKFS_NOCHDIR:
+	 fprintf(stderr, "can't chdir back to %s\n", info->fullpath);
+	 exit(1);
+    case WALKFS_DIR:
+        depth++;
+        break;
+    case WALKFS_POPDIR:
+        depth--;
+        /* falls through */
+    case WALKFS_NONDIR:
+        for (i = 0; i < depth; i++)
+            putchar(' ');
+        puts(info->relpath);
+        break;
+    default:
+        perror(info->relpath);
+        if (flag & WALKFS_NOSEARCH)
+            return WALKFS_SKIP;
+    }
+    return WALKFS_OK;
+}
+
+main()
+{
+    walkfs(".", print_name, _NFILE-3,
+           WALKFS_DOCDF|WALKFS_TELLPOPDIR|WALKFS_LSTAT);
+    return 0;
+}
+.fi
+.SH WARNINGS
+Except when recovering from a
+.B WALKFS_NOCHDIR
+error, the user function should not return to
+.I walkfs
+with a different current working directory than when it was called.
+.SH NOTES
+.IR Ftw (LIBC)
+and
+.IR ftwh (LIBC)
+are implemented using special hooks provided by
+.I walkfs.
+.SH AUTHORS
+.I Walkfs
+was developed by HP.
+.SH SEE ALSO
+mount(ADMIN), chdir(OS), lstat(OS), stat(OS), ftw(LIBC), getcdf(LIBC),
+cdf(FILE), context(MISC).
+.SH INTERNATIONAL SUPPORT
+8 and 16-bit filenames.
+.SH MARKETING MODEL
+Level C
+.SH TECHNICAL MODEL
+Development
+.br
+HP 
+.PD

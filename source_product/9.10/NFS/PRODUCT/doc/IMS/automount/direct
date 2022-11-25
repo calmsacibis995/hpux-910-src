@@ -1,0 +1,86 @@
+# $Source: /source/hpux_source/networking/rcs/nfs90_800/doc/IMS/automount/RCS/direct,v $
+# $Revision: 1.2.109.1 $	$Author: gomathi $
+# $State: Exp $   	$Locker:  $
+# $Date: 92/04/13 16:45:35 $
+
+\" -*-Nroff-*-   \" set Nroff mode for emacs
+.H 1 "A Special Note on Direct Maps"
+.tl '   '\f3\l'6i\f1''   '
+
+.H 2 "Introduction"
+
+     The differences between direct and indirect maps are subtle and can
+be hard to understand.  The following should help explain them:
+
+.H 2 "Differences within Automount"
+
+.H 2 "Which to Choose?"
+
+There are two basic points to consider...
+
+1)  Direct maps always allow users to see the directories that automount
+    is serving.
+
+    Therefore:
+.nf
+      - Users don't have to "know" what directories automount is serving
+      - Commands like find will search automounted file systems even if
+	they are not yet mounted when find starts execution.
+.fi
+
+2)  Direct Maps "help" configuration in situations where using indirect
+    maps would cover up some local data.  (This is where the confusion
+    seems to arise).
+
+    The best example of this is probably within the /usr directory.  In
+    the seminar I used /usr/man as an example.  This was a valid example
+    however it could still be handled with indirect maps.  I will use
+    /usr/etc instead to make things more clear.
+
+.nf
+.ft CW
+              / (slash)  .
+                        /
+                       /
+                 usr  .
+
+               lib  etc man stuff...
+.ft
+.fi
+
+    OK, so obviously you can't use /usr as a mount point because you will
+    cover up everything below /usr --->  we want to access /usr/lib,
+    /usr/man and other stuff off the local disk.  So the next thing you 
+    would probably try would be to use /usr/etc as the mount point and
+    use indirect map entries for the contents of etc.  So then you cd into
+    /usr/etc and find absolutely nothing.  There should be FILES there!  
+    At best you may have configured entries in the corresponding
+    indirect map that would allow you to access FILES in the directory 
+    /usr/etc/SOME_DIRECTORY.  But what you really need is to access FILES 
+    in /usr/etc.  There is no way to get plain old files to show up one
+    level below the mount point when using indirect maps.  Indirect maps 
+    cause an extra level to be inserted in the file system as diagrammed 
+    below...
+		
+
+.nf
+.ft CW
+    For indirect maps you stick one of these into your file system...
+
+                    .     <-- point at which automount covers local files
+                    l
+                  l   l
+                 l     l
+                 +     +  <-- point where indirect map directories show up
+                 |     |                               -----------
+                 |     |
+                 @     @  <-- data contained in each of the directories
+
+    For direct maps you stick one of these into your file system...
+
+                    .     <-- point at which automount covers local files
+                    |
+                    |
+                    @     <-- data contained in direct map directory
+.ft
+.fi

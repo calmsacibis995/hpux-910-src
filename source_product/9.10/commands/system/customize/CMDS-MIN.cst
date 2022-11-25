@@ -1,0 +1,69 @@
+#!/bin/ksh
+# @(#) $Revision: 70.2 $
+#
+fileset=CMDS-MIN
+exitval=0
+
+. /system/UX-CORE/custom_utils
+custom_setup "$1"
+CDF=`getCDF $1`
+newconfig=/etc/newconfig$CDF
+
+#======
+# Remove any fileset related information for an obsolted fileset
+#======
+fileset_obsolete $1
+
+#======
+# The files in /usr/lib/adb are obsolete with this release.
+# Remove all the files and the directory if it is now empty.
+#======
+/bin/rm -f	/usr/lib/adb/dir	/usr/lib/adb/dir.nxt	\
+		/usr/lib/adb/dmap	/usr/lib/adb/iob	\
+		/usr/lib/adb/iob.nxt	/usr/lib/adb/pcb	\
+		/usr/lib/adb/proc	/usr/lib/adb/rusage	\
+		/usr/lib/adb/text	/usr/lib/adb/u		\
+		/usr/lib/adb/unw	/usr/lib/adb/unw.nxt >/dev/null 2>&1
+/bin/rmdir -f /usr/lib/adb+/HP-PA /usr/lib/adb </dev/null >/dev/null 2>&1
+
+#======
+# Configuration (customizable) files.
+# Copy them from $newconfig if they do not already exist
+# or were not customized.
+#======
+cksum_cp $newconfig/csh.login	/etc/csh.login	"26792 3"
+cksum_cp $newconfig/d.cshrc	/etc/d.cshrc	"65361 2"
+cksum_cp $newconfig/d.login	/etc/d.login	"30786 1"
+
+#======
+# Cron files
+#
+# Make sure there is the right combination of {at,cron}.allow and
+# {at,cron}.deny files.  Also, make sure that there is a queuedefs and
+# a .proto file.
+#======
+if [ -H /usr/lib/cron+ ]; then
+    cd /usr/lib/cron+
+    for cnode in *; do
+        if [ ! -f $cnode/at.allow -a ! -f $cnode/at.deny ]; then
+	    cp_retain $newconfig/at.allow $cnode/at.allow
+	fi
+        if [ ! -f $cnode/cron.allow -a ! -f $cnode/cron.deny ]; then
+	    cp_retain $newconfig/cron.allow $cnode/cron.allow
+	fi
+	cond_cp $newconfig/queuedefs $cnode/queuedefs
+	cond_cp $newconfig/.proto $cnode/.proto
+    done
+else
+    cd /usr/lib/cron
+    if [ ! -f at.allow -a ! -f at.deny ]; then
+	cp_retain $newconfig/at.allow at.allow
+    fi
+    if [ ! -f cron.allow -a ! -f cron.deny ]; then
+	cp_retain $newconfig/cron.allow cron.allow
+    fi
+    cond_cp $newconfig/queuedefs queuedefs
+    cond_cp $newconfig/.proto .proto
+fi
+
+exit $exitval

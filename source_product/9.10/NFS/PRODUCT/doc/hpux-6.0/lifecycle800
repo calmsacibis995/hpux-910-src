@@ -1,0 +1,939 @@
+
+.\"	   @(#)$Revision: 1.11.109.1 $	$Date: 91/11/19 14:31:12 $
+
+.\ Leave the first line of the file blank as the .TL and .AS
+.\ macros do not work otherwise.  Don't ask me why.
+.ce 2
+.sp 4
+.TL
+PROJECT LIFE CYCLE FOR THE NFS/800 PROGRAM
+
+
+
+
+
+
+.ce 4
+Mike Shipley
+COLORADO NETWORKS DIVISION
+1-229-2131 
+hpfcla!m_shipley
+
+
+
+
+.AS
+
+This paper started as the project lifecycle
+for the PROJECT NERFS.  It then expanded to 
+include the efforts by ISO and IND on the Series 800
+in addition to the work done by CND on the Series 300.
+This program is involved with
+putting SUN's Network File System product on the
+Series 300 and Series 800.
+Now the paper is being split into a part for the 300 and a
+part for the 800.  
+It will list what needs to
+be done and what will be the deliverables from each
+functional group at each phase of the program.
+In order to have a handle to apply to this program,
+the name NERFS will continue to be used.  It will refer to the
+NFS program as spanning across multiple divisions.
+The NERFS lifecycle will not follow the normal CND lifecycle
+as NERFS will be porting existing code from SUN.
+
+In addition to this lifecycle, there are more detailed
+lifecycles for the various areas such as technical 
+support.
+
+.AE
+
+
+
+
+
+
+
+
+.ce
+Last Modification 01/14/88
+.nr P 1
+.PH " 'Lifecycle for Program NERFS/800' 'Introduction' "
+.bp
+.SA 1
+.H 1 "Program Identification"
+.PF " 'HP Internal Use Only' ' \\\\n(H1-\\\\nP'  "
+
+
+.nf
+     Program Name    : NERFS
+.fi
+
+.H 2 "Personnel  (at CND)"
+.nf
+     Project Manager : Jeff Lindberg
+    
+     Project Engineers:
+         Dave Erickson
+         Cristina Mahon
+	 Mike Shipley
+	 Dan Simula
+	 Darren Smith
+
+    Technical Documentation : Annette Parsons
+
+    Product Marketing : Andy Drol
+
+    Technical Support : Carole Crall
+
+    Quality Assurance : Chuck Morse
+.fi
+
+.H 2 "Personnel  (at ISO)"
+.nf
+     Project Manager : Ching-Fa Hwang 
+    
+     Project Engineers:
+         Brian Byun
+         Herve DaCosta
+	 Vincent Hsieh
+	 Chyuan-Shiun Lin
+
+	 Mike Saboff (works in Doug Hartman's group)
+.fi
+
+.H 2 "Related Projects "
+.nf
+.ul 1
+    Project Name   Managers       Project Emphasis
+
+    PEKING         Dean Thompson  S/300 Network Convergence
+    DUX/300        Joe Cowan      Distributed HP-UX on S/300
+    HP-UX 800      Doug Hartman   HP-UX commands on S/800
+				  at ISO
+    HP-UX 300      Donn Terry     HP-UX commands on S/300
+
+    IND            IND is planned to take over the NFS effort 
+		   on S/800 for RPC and networking related
+		   aspects of NFS.  This transition will not
+		   be described in this document.
+.fi
+
+
+
+.PH " 'Lifecycle for Program NERFS/800' 'History' "
+.bp
+
+.nr P 1
+.H 1 "Revision History"
+.nf
+First Version.....................................September, 1986
+Marketing inputs..................................October, 1986
+Lab inputs........................................November, 1986
+ISO inputs........................................November, 1986
+Split into 300 and 800 versions...................January, 1987
+.fi
+
+
+
+There is an implied review of the documents that will be produced
+by this project.  Sometimes reviews will be explicitly mentioned
+in the lifecycle.  This was done for the more visible 
+documents or to highlight reviews that need to be done between
+departments.
+.PH " 'Lifecycle for Program NERFS/800' 'Requirements Complete' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Requirements Complete"
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Product Requirements Document
+.DL
+.LI
+description of the product
+.LI
+product objectives, including FURPS
+.LI
+project requirements
+.LI
+dependencies/assumptions
+.LE
+
+.LI
+List of Project issues and answers
+
+.LI
+Preliminary Project Data Sheet
+
+.LI
+Project Life Cycle
+
+.LI
+List of divisional responsibilities and commitments
+.DL
+.LI
+tasks identified and people matched with them
+.LE
+
+.LI
+Preliminary Schedules
+.DL
+.LI
+checkpoints
+.LI
+bug chart  
+.LE
+.LE
+
+.ul 1
+Product Marketing - CND
+.AL
+.LI
+Results of customer visits and survey on NFS/RFS
+
+.LI
+Preliminary Product Plan
+.LE
+
+.ul 1
+Documentation - CND
+.AL
+.LI
+Preliminary Documentation Plan
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+Unique support Requirements   
+.LE
+
+.ul 1
+Finance - CND
+.AL
+.LI
+Need Internal Rate of Return on NFS
+.LE
+
+.PH " 'Lifecycle for Program NERFS/800' 'Connect-a-thon' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Connect-a-thon"
+This section is a departure from the CND Lifecycle.  It was
+put in as a major checkpoint in our development.
+The connect-a-thon is chance to check the connectivity
+between the different
+NFS vendors in preparation for the UNIFORUM demo.
+
+
+.ul 1
+R&D - ISO
+.AL
+.LI
+Vnode based file system kernel code merged with DUX for the S/800
+.LI
+Pass the SUN Test Suite for NFS
+.DL
+.LI
+S/800 to SUN/3 machine
+.LI
+S/800 to S/800
+.LI
+S/300 to S/800 (working with CND)
+.LE
+.LI
+Obtain preliminary benchmark performance numbers
+.LE
+
+
+.PH " 'Lifecycle for Program NERFS/800' 'Definition Complete' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Definition Complete"
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Complete ERS for NERFS
+.DL
+.LI
+all definitional issues resolved including interactions
+with DUX and HP-UX
+.LI
+description of which functions of NFS, NERFS will provide.
+This will describe the additions made by 3.2 NFS.
+.LI
+the ERS will be the reviewed updated man pages from SUN on the portions 
+of NFS we are doing plus a document describing any differences
+we may have with SUN.  It will also describe any user-visible
+changed introduced into HP-UX due to NFS.
+This to be done by all of the R&D team.
+.LE
+
+.LI
+Identify performance benchmarks to be used officially in project
+for performance measurement     
+
+.LI
+Testing Documents
+.DL
+.LI
+preliminary NFS System test plan
+.LI
+preliminary NFS Functional test plan
+.LE
+
+.LI
+Identification of the additional effort it will take to put in
+3.2 NFS features into the product.  This will include areas of
+producing the functionality, testing the new functionality and
+documenting the additions.
+
+.LI
+Schedules
+.DL
+.LI
+PERT charts
+.LE
+
+.LI
+Test Equipment
+.DL
+.LI
+plans complete to obtain additional testing machines access.
+.LI
+estimates for NTC time/resources needed.
+.LE
+
+.LI
+Reviews
+.DL
+.LI
+preliminary Product Plan
+.LI
+preliminary Documentation Plan
+.LE
+
+.LI
+Actions with TWG   (With help from ISO and SSO)
+.DL
+.LI
+have all HP-UX man pages affected by NFS (this will include existing and new
+pages), updated and submitted for
+"Request for Comments".  This will be done by posting to hp.unix.tech.
+The pages that deal with HP-UX will be sent to the HP-UX TWG.  The pages
+that deal with networking will be sent to the Networking TWG(if established).
+.LE
+.LE
+
+.ul 1
+R&D - ISO
+.AL
+.LI
+Project plan for commands affected by NFS completed
+.LI
+Review ERS for NERFS
+.LI
+Review NFS test plans
+.LE
+
+.ul 1
+Product Marketing - CND
+.AL
+.LI
+Trade show plans for Jan 87 (UNIFORUM) complete
+.DL
+.LI
+this needs coordination with CND R&D and ISO R&D/Marketing
+.LI
+preliminary plans for NFS demo
+.LE
+.LE
+
+
+.PH " 'Lifecycle for Program NERFS/800' 'Design Complete' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Design Complete"
+
+
+.ul 1
+R&D - ISO
+.AL
+.LI
+Product Functionality
+.DL
+.LI
+partial(80%) NFS functionality for S/800(as defined in Project ERS)
+.LI
+have existing commands (mount, sh, etc.) that are affected by
+NFS functional
+.LI
+functional demo on S/800 for UNIFORUM
+.LI
+compatibility with DUX
+.LI
+compatibility with ARPA/Berkeley name server
+.LI
+functional demo on S/800 for UNIFORUM
+.LI
+compatibility with future RFS (AT&T Sys V) implementation
+.LI
+self-hosting on S/800 for NFS.
+.LI
+review of selected portions of the code
+.LE
+
+.LI
+Installation
+.DL
+.LI
+user installation procedures need to be defined for S/800.
+.LE
+
+.LI
+Complete IRS for NERFS on S/800
+.DL
+.LI
+design approved by NERFS team (ISO)  
+.LI
+description how NFS will function in HP-UX.  This will include
+interface specifications such as vnode<-->nfs, nfs<-->rpc
+and rpc<-->networking.
+.LI
+description of what files NERFS will add/change in HP-UX
+.LE
+.LE
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Product Functionality
+.DL
+.LI
+functional YP services
+.LI
+port of PCNFSD code from SUN for PC/NFS
+.LE
+
+.LI
+Identify what should be done for "mini design complete"
+checkpoint for the additions to NERFS because of 3.2 NFS.  We will 
+concentrate on the 3.0 NFS for the
+major design complete checkpoint.
+
+.LI
+Run official performance benchmarks
+
+.LI
+Testing Documents
+.DL
+.LI
+completed NFS and YP System test plan (this should include plans
+for testing connectivity to other vendors' versions of NFS
+and plans for DUX interactions)
+.LI
+completed NFS and YP Functional test plan; individual module test 
+plans
+.LE
+
+.LI
+Actions with TWG   (With help from ISO and SSO)
+.DL
+.LI
+have all man pages affected by NFS that need approval 
+submitted to TWG(with the appropriate pages going to the
+Networking and HP-UX TWG's).
+.LE
+
+.LI
+Build Process
+.DL
+.LI
+process in place for reporting problems and getting fixes with
+SSO and ISO
+.LI
+procedure in place to get current versions of SSO and ISO kernels
+.LI
+procedure in place of how we will build systems and distribute
+releases
+.LI
+preliminary validation process for new kernels in place for the
+S/800
+.LE
+
+.LI
+Identify metrics to be used for the remainder of the project
+for S/800.
+.DL
+.LI
+identify tools/processes needed to gather those metrics
+.LI
+change in design
+.LI
+change in code
+.LI
+outstanding defect count.
+.AL a
+.LI
+What defect reporting system to use?
+.LI
+decide on consistent definition of data for all fields in
+defect tracking system
+.LE
+.LI
+defect rate per testing hour
+.LI
+defect tracking for SUN defects
+.LI
+code coverage
+.AL a
+.LI
+PFA on Series 840
+.LI
+need to decide what code will be measured (XDR/RPC???)
+.LE
+.LE
+
+.LI
+Reviews
+.DL
+.LI
+IRS
+.LE
+.LE
+
+.ul 1
+Product Marketing - CND
+.AL
+.LI
+Final product plan
+.LI
+Identify who will get our early releases
+(Input from R&D and Technical Support)
+.DL
+.LI
+qualify ALPHA and BETA sites
+.LI
+installation and usage documentation for early releases
+.AL a
+.LI
+brick pages
+.LE
+.LI
+releases
+.AL a
+.LI
+ALPHA sites
+.LI
+BETA sites
+.LI
+known business opportunity sites
+.LE
+.LE
+
+.LE
+
+.ul 1
+Technical Documentation - CND
+.AL
+.LI
+Final documentation plans and schedule
+.DL
+.LI
+detailed outline of contents
+.LI
+manual review process defined
+.LE
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+Preliminary product support strategy and plan
+.DL
+.LI
+BETA site support
+.LI
+Reviewed by program team
+.LE
+.LI
+Preliminary training plan
+.DL
+.LI
+Reviewed by program team
+.LE
+.LE
+
+.ul 1
+All Departments
+.AL
+.LI
+detailed schedule for program PERT chart.
+.LE
+
+.PH " 'Lifecycle for Program NERFS/800' 'Code Complete' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Code Complete"
+
+.ul 1
+R&D - ISO
+.AL
+.LI
+Product Functionality
+.DL
+.LI
+Full NFS functionality on S/800 (as defined in ERS), this is
+for the kernel code
+.LI
+All NFS affected commands functional
+.LE
+
+.LI
+Quality Assurance Testing
+.DL
+.LI
+50% of NFS functional test plan executed (15% completed)
+for S/800
+.LI
+30% of NFS system test plan executed (10% completed)
+for S/800
+.LI
+50% of testing for NFS affected commands executed (15%
+completed) for S/800 
+.LI
+50% code coverage on S/800
+.LI
+defects from previous release 5 per module on S/800
+.LI
+no serious unresolved defects from previous release
+.LI
+completion of reviews for all the code that is to be reviewed on S/800
+.LI
+snapshot Design for Design Change metric on S/800.  To be performed
+at each build during project.
+.LE
+
+.LI
+Documentation
+.DL
+.LI
+update IRS
+.LE
+
+.LE
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Product Functionality
+.DL
+.LI
+full NFS functionality on S/800(as defined in ERS), this is for
+user code
+.LI
+code will be good enough for ALPHA sites and possible early
+releases for good business opportunities
+.LI
+have ALPHA releases
+.LI
+have 3.2 NFS functionality folded in
+.LE
+
+.LI
+Meet performance goals
+
+.LI
+Documentation
+.DL
+.LI
+update ERS
+.LE
+
+.LI
+Test Equipment
+.DL
+.LI
+all test machines and required software in place and operational
+.LE
+
+.LI
+All QA metrics/tools/processes in place
+
+.LI
+Plan for integration with ITG release cycles for S/800
+
+.LI
+Actions with TWG   (With help from ISO and SSO)
+.DL
+.LI
+have all man pages affected by NFS that need approval 
+approved by TWG(with the appropriate pages going to the
+Networking and HP-UX TWG's).
+.LE
+
+.LI
+Reviews
+.DL
+.LI
+preliminary Product Support Plan
+.LE
+
+.LE
+
+.ul 1
+Technical Documentation - CND
+.AL
+.LI
+First drafts complete
+.LI
+Start coordination of manual usability testing as defined in the
+documentation plan
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+Final training plan complete and approved by PRSD (Product
+Support Division)
+.LI
+Final product support plan written and approved by PRSD
+.LI
+Final trouble shooting guide written and approved by program team    
+.LE
+
+.PH " 'Lifecycle for Program NERFS/800' 'Midpoint in QA' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Midpoint in QA"
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Product Functionality
+.DL
+.LI
+BETA release of NFS on and S/800.  Quality to be determined
+by ??? number of major defects and ??? number of minor defects.
+.LI
+pass 24 hour reliability test and functional tests
+.LE
+
+.LI 
+Confirm maintenance of our performance goals
+
+.LI
+Release and integration procedures to SIC are established for S/800
+
+.LI
+Plan for re-testing NFS with future releases of HP-UX
+from ISO
+.LE
+
+.ul 1
+Technical Documentation - CND
+.AL
+.LI
+Second drafts complete
+.DL
+.LI
+distribute to BETA sites
+.LE
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+Get feedback from ALPHA and BETA sites in order that it can
+be incorporated into the product
+.LI
+Design of demo code
+.LE
+
+
+.PH " 'Lifecycle for Program NERFS/800' 'QA Complete' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "QA Complete"
+ - release to SIC (S/800 release group)
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Integration with release version of vnode kernel from ISO
+.LI 
+Confirm maintenance of our performance goals
+.LI
+Quality Assurance
+.DL
+.LI
+no major defects present in final release
+.LI
+run 120 hours without any crash or serious defect
+.LI
+all system and functional tests executed and completed.  This will
+include connectivity tests and performance characterizations.
+.LI
+80% code coverage
+.LI
+all documentation done for test suites
+.LE
+.LE
+
+.ul 1
+R&D - ISO/IND
+.AL
+.LI
+Release version of vnode kernel for HP-UX
+.LE
+
+.ul 1
+R&D - ISO
+.AL
+.LI
+All NFS affected commands are tested and released to 
+S/800 SIC cycles
+.LE
+
+.ul 1
+Product Marketing - CND
+.AL
+.LI
+Final reports from ALPHA and BETA sites
+.LI
+Payment to SUN for fully paid up perpetual license for NFS
+.LI
+Pricing approved
+.LI
+Introduction scheduled or in process
+.LE
+
+.ul 1
+Technical Documentation - CND
+.AL
+.LI
+Final drafts complete with enough lead time to be in stock by
+Manufacturing Release (2 months)
+.LI
+Complete coordination of manual usability testing
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+Initial version of demo code
+.LE
+
+.PH " 'Lifecycle for Program NERFS/800' 'Manufacturing Release ' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Manufacturing Release "
+
+.ul 1
+R&D - CND
+.AL
+.LI
+All code in place with zero unresolved defects
+.DL
+.LI
+there may be defects that due to NFS compatibility, will not be fixed
+.LE
+.LI
+Build of system from "raw" source and regression tests
+of that system
+.LI
+Receive complete system back from SIC
+.DL
+.LI
+test installibility of NFS
+.LI
+check for introduced interactions into HP-UX
+.LI
+run regression and 20 reliability tests
+.LE
+
+.LI
+Release Dinner Reservation
+.LI
+Post Mortem and final metrics
+.LE
+
+.ul 1
+Technical Documentation - CND
+.AL
+.LI
+Manuals in stock
+.LI
+Complete evaluation of documentation
+.LE
+
+.ul 1
+Technical Support - CND
+.AL
+.LI
+SE training
+.LI
+Final demo code
+.LI
+Installability test checkoff
+.LI
+Serviceability test checkoff
+.LE
+
+
+.PH " 'Lifecycle for Program NERFS/800' 'Active Product' "
+.bp
+.nr P 1
+.ul 1
+.H 1 "Active Product "
+
+.ul 1
+R&D - CND
+.AL
+.LI
+Identification of CPE staff
+.LI
+Investigation of NFS follow on
+.DL
+.LI
+update to new releases from SUN
+.LE
+.LE
+
+.ul 1
+Product Marketing - CND
+.AL
+.LI
+Distribute customer feedback of NFS
+.LE
+
+.ul 1
+Documentation
+.AL
+.LI
+Update and revise documentation as necessary.
+.LE
+
+.TC

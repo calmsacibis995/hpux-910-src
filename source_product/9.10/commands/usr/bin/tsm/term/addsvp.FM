@@ -1,0 +1,42 @@
+## FacetTerm Menu Capabilities for addsvp emulation modes 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: addsvp.FM,v 70.1 92/03/09 16:49:06 ssa Exp $
+##-menu-cap-init_string=\E0P
+##-menu-cap-cursor_address=\EY%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=^L
+##-menu-cap-clr_eol=\EK
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\EH^B
+##-menu-cap-exit_alt_charset_mode=\EH^C
+##-menu-cap-acs_chars=j5k3l2m1q:t4u9v=w0x6
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=^O
+##-menu-cap-shadow_attr=^O
+##-menu-cap-item_attr=^O
+##-menu-cap-box_attr=^N
+##-menu-cap-title_attr=^N
+##-menu-cap-highlight_attr=^N
+##-menu-cap-highlight_blink_attr=^N
+## ##-menu-cap-magic_cookie=0
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^Z
+##-menu-cap-key_down=^J
+##-menu-cap-key_right=^F
+##-menu-cap-key_left=^U
+##-menu-cap-key_home=^A
+##-menu-cap-key_ignore=^B1\r
+##-menu-cap-key_ignore=^B2\r
+##-menu-cap-key_ignore=^B3\r
+##-menu-cap-key_ignore=^B4\r
+##-menu-cap-key_ignore=^B5\r
+##-menu-cap-key_ignore=^B6\r
+##-menu-cap-key_ignore=^B7\r
+##-menu-cap-key_ignore=^B8\r
+##-menu-cap-key_ignore=^B9\r
+##-menu-cap-key_ignore=^B:\r
+##-menu-cap-key_ignore=^B;\r
+##-menu-cap-key_ignore=^B<\r
+##-menu-cap-key_ignore=^B=\r
+##-menu-cap-key_ignore=^B>\r
+##-menu-cap-key_ignore=^B?\r
+##-menu-cap-key_ignore=^B0\r

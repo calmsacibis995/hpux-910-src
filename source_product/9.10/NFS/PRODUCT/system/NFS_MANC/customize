@@ -1,0 +1,117 @@
+#!/bin/sh
+
+#	@(#)NFS_MANC customize script:	$Revision: 1.2.109.1 $	$Date: 91/11/19 14:46:50 $
+
+#=============================================================================
+#
+#  This is the customize script for the NFS_MANC fileset (cat-able manual
+#  pages) of the NFS Services product.  The NFS_MANC fileset is to be
+#  installed on an AXE system, only.
+#
+#  This script links manual pages, where appropriate.  It also adds the
+#  newly-linked files to the NFS_MANC fileset in /etc/filesets.
+#
+#  Author:	dae
+#
+#=============================================================================
+
+FILESET_NAME=/etc/filesets/NFS_MANC
+
+PATH=/bin:/usr/bin:/etc
+export PATH
+
+CWD=`pwd`
+if [ $CWD = / ]; then
+	CWD=
+fi
+
+rm -f usr/man/cat1m.Z/biod.1m
+ln usr/man/cat1m.Z/nfsd.1m usr/man/cat1m.Z/biod.1m
+echo "$CWD/usr/man/cat1m.Z/biod.1m" >> $FILESET_NAME
+
+rm -f usr/man/cat1m.Z/ypbind.1m
+ln usr/man/cat1m.Z/ypserv.1m usr/man/cat1m.Z/ypbind.1m
+echo "$CWD/usr/man/cat1m.Z/ypbind.1m" >> $FILESET_NAME
+
+rm -f usr/man/cat1m.Z/ypxfr_1perd.1m
+ln usr/man/cat1m.Z/ypxfr.1m usr/man/cat1m.Z/ypxfr_1perd.1m
+echo "$CWD/usr/man/cat1m.Z/ypxfr_1perd.1m" >> $FILESET_NAME
+rm -f usr/man/cat1m.Z/ypxfr_2perd.1m
+ln usr/man/cat1m.Z/ypxfr.1m usr/man/cat1m.Z/ypxfr_2perd.1m
+echo "$CWD/usr/man/cat1m.Z/ypxfr_2perd.1m" >> $FILESET_NAME
+rm -f usr/man/cat1m.Z/ypxfr_1perh.1m
+ln usr/man/cat1m.Z/ypxfr.1m usr/man/cat1m.Z/ypxfr_1perh.1m
+echo "$CWD/usr/man/cat1m.Z/ypxfr_1perh.1m" >> $FILESET_NAME
+
+rm -f usr/man/cat2.Z/async_daemo.2
+ln usr/man/cat2.Z/nfssvc.2 usr/man/cat2.Z/async_daemo.2
+echo "$CWD/usr/man/cat2.Z/async_daemo.2" >> $FILESET_NAME
+
+rm -f usr/man/cat2.Z/setdomainna.2
+ln usr/man/cat2.Z/getdomainna.2 usr/man/cat2.Z/setdomainna.2
+echo "$CWD/usr/man/cat2.Z/setdomainna.2" >> $FILESET_NAME
+
+rm -f usr/man/cat3.Z/getrpcbynam.3c
+ln usr/man/cat3.Z/getrpcent.3c usr/man/cat3.Z/getrpcbynam.3c
+echo "$CWD/usr/man/cat3.Z/getrpcbynam.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/getrpcbynum.3c
+ln usr/man/cat3.Z/getrpcent.3c usr/man/cat3.Z/getrpcbynum.3c
+echo "$CWD/usr/man/cat3.Z/getrpcbynum.3c" >> $FILESET_NAME
+
+rm -f usr/man/cat3.Z/setnetgrent.3c
+ln usr/man/cat3.Z/getnetgrent.3c usr/man/cat3.Z/setnetgrent.3c
+echo "$CWD/usr/man/cat3.Z/setnetgrent.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/endnetgrent.3c
+ln usr/man/cat3.Z/getnetgrent.3c usr/man/cat3.Z/endnetgrent.3c
+echo "$CWD/usr/man/cat3.Z/endnetgrent.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/innetgr.3c
+ln usr/man/cat3.Z/getnetgrent.3c usr/man/cat3.Z/innetgr.3c
+echo "$CWD/usr/man/cat3.Z/innetgr.3c" >> $FILESET_NAME
+
+rm -f usr/man/cat3.Z/rusers.3n
+ln usr/man/cat3.Z/rnusers.3n usr/man/cat3.Z/rusers.3n
+echo "$CWD/usr/man/cat3.Z/rusers.3n" >> $FILESET_NAME
+
+rm -f usr/man/cat3.Z/yp_bind.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_bind.3c
+echo "$CWD/usr/man/cat3.Z/yp_bind.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_unbind.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_unbind.3c
+echo "$CWD/usr/man/cat3.Z/yp_unbind.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_get_defa.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_get_defa.3c
+echo "$CWD/usr/man/cat3.Z/yp_get_defa.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_match.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_match.3c
+echo "$CWD/usr/man/cat3.Z/yp_match.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_first.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_first.3c
+echo "$CWD/usr/man/cat3.Z/yp_first.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_next.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_next.3c
+echo "$CWD/usr/man/cat3.Z/yp_next.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_all.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_all.3c
+echo "$CWD/usr/man/cat3.Z/yp_all.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_order.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_order.3c
+echo "$CWD/usr/man/cat3.Z/yp_order.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yp_master.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yp_master.3c
+echo "$CWD/usr/man/cat3.Z/yp_master.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/yperr_strin.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/yperr_strin.3c
+echo "$CWD/usr/man/cat3.Z/yperr_strin.3c" >> $FILESET_NAME
+rm -f usr/man/cat3.Z/ypprot_err.3c
+ln usr/man/cat3.Z/ypclnt.3c usr/man/cat3.Z/ypprot_err.3c
+echo "$CWD/usr/man/cat3.Z/ypprot_err.3c" >> $FILESET_NAME
+
+#==========
+#  Sort out duplicates in the fileset - this is not totally necessary, but
+#  it makes for a cleaner list.  Duplicates occur only if this customize
+#  script is run more than once.
+#==========
+
+sort -u $FILESET_NAME -o $FILESET_NAME
+
+exit 0

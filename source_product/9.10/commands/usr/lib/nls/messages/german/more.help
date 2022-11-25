@@ -1,0 +1,25 @@
+
+Vor den meisten Befehlen steht optional das Integer-Argument k.
+Standard in eckigen Klammern. Ein Stern (*) weist darauf hin, daŞ das 
+Argument neue Standardvorgabe wird.
+---------------------------------------------------------------------------------
+<leerzeichen>        Zeigt die nÌchsten k Zeilen des Textes [gÏlt. screen-GrÎŞe]
+z                    Zeigt die nÌchsten k Zeilen des Textes [gÏlt. screen-GrÎŞe]*
+<RÏcklauftaste>      Zeigt die nÌchsten k Zeilen des Textes [1]*
+d oder ctrl-D        Rollt k Zeilen vor [gÏltige Scroll-GrÎŞe, ursprÏnglich 11]*
+q od. Q od. <break>  Beendet more
+s                    Springt k Textzeilen vorwÌrts [1]
+f                    Springt k Bidschirmseiten vorwÌrts [1]
+'                    Springt zu der Stelle, an der die vorherige Suche startete
+=                    Zeigt gÏltige Zeilennummer an
+/<reg. Ausdruck>     Sucht nach k-tem Auftreten des regulÌren Ausdrucks [1]
+n                    Sucht nach k-tem Auftreten des letzten reg.Ausdrucks [1]
+!<cmd> oder :!<cmd>  FÏhrt <cmc> in einer Unter-Shell aus
+v                    Startet /usr/bin/vi an gÏltiger Zeile
+h                    Zeigt die Meldung an
+ctrl-L               Neuaufbau des Bildschirms
+:n                   Geht zur k-ten Nachfolge-Datei [1]
+:p                   Geht zur k-ten VorgÌnger-Datei [1]
+:f                   Zeigt derzeit gÏltigen Dateinamen und Zeilennummer an
+.                    Wiederholt vorherigen Befehl
+---------------------------------------------------------------------------------

@@ -1,0 +1,86 @@
+## FacetTerm  2392keys  COMMON  description file 10/22/90
+## Copyright (c) Structured Software Solutions, Inc. 1990.  All Rights Reserved.
+## @(#) $Header: 2392keys.FC,v 70.1 92/03/09 15:49:27 ssa Exp $
+##--- FUNCTION KEYS ---##
+### function_key_type_default=
+### function_key_clear=
+### function_key_clear_mode_yes=number
+### function_key_clear_mode_no=number
+### parm_pkey_key=
+### parm_pkey_key=
+### pkey_key=
+## clear function only
+###          1k 0d    -1L ### 1k    -1L    
+pkey_key_clear=\E&f%p1%ck0d-1L
+pkey_key_clear=\E&f%p1%ck-1L
+###          1k 2a 0d -1L ### 1k 2a -1L ### 2a 1k 0d -1L ### 2a 1k -1L
+pkey_key_clear=\E&f%p1%ck%1fBa0d-1L
+pkey_key_clear=\E&f%p1%ck%1fBa-1L
+pkey_key_clear=\E&f%1fBa%p1%ck0d-1L
+pkey_key_clear=\E&f%1fBa%p1%ck-1L
+## label and clear function
+###           1k 3d -1L ### 1k 2a 3d -1L ### 2a 1k 3d -1L
+pkey_key_clear=\E&f%p1%ck%lCd-1L%LC
+pkey_key_clear=\E&f%p1%ck%1fBa%lCd-1L%LC
+pkey_key_clear=\E&f%1fBa%p1%ck%lCd-1L%LC
+### out_pkey_key_clear=
+out_pkey_key_clear=\E&f%1fBa%p1%ck%lCd-1L%LC
+## label only
+pkey_key=\E&f%p1%ck%lCD%LC
+pkey_key=\E&f%p1%ck%lCd0L%LC
+pkey_key=\E&f%p1%ck%1fBa%lCD%LC
+pkey_key=\E&f%p1%ck%1fBa%lCd0L%LC
+pkey_key=\E&f%1fBa%p1%ck%lCD%LC
+pkey_key=\E&f%1fBa%p1%ck%lCd0L%LC
+## function key only
+pkey_key=\E&f%p1%ck%l1L%L1
+pkey_key=\E&f%p1%ck0d%l1L%L1
+pkey_key=\E&f%p1%ck%1fBa%l1L%L1
+pkey_key=\E&f%p1%ck%1fBa0d%l1L%L1
+pkey_key=\E&f%1fBa%p1%ck%l1L%L1
+pkey_key=\E&f%1fBa%p1%ck0d%l1L%L1
+## label and function key
+pkey_key=\E&f%p1%ck%lCd%l1L%LC%L1
+pkey_key=\E&f%p1%ck%1fBa%lCd%l1L%LC%L1
+pkey_key=\E&f%1fBa%p1%ck%lCd%l1L%LC%L1
+### out_pkey_key=
+out_pkey_key=\E&f%1fBa%p1%ck%lCd%l1L%LC%L1
+### function_key_string_is_hex
+### function_key_string_is_ansi
+### function_key_string_is_escaped-chars=
+### function_key_includes_label
+function_key_includes_label
+### function_key_label_max_len=
+function_key_label_max_len=16
+### function_key_len_0_label_only
+function_key_len_0_label_only
+### function_key_len_0_func_only
+function_key_len_0_func_only
+### function_key-id-delim=
+function_key-1-   f1=\Ep
+function_key-2-   f2=\Eq
+function_key-3-   f3=\Er
+function_key-4-   f4=\Es
+function_key-5-   f5=\Et
+function_key-6-   f6=\Eu
+function_key-7-   f7=\Ev
+function_key-8-   f8=\Ew
+### function_key-id-delim=
+### shift_function_key
+### function_key-id-delim=
+### function_key-id-delim=
+##				labels
+perwindow-4-CSQF----=\E&jB
+perwindow_also-...labels_off.....=\E&j@
+perwindow_also-...labels_modes...=\E&jA
+perwindow_default-labels_off.....=\E&j@
+set-labels_off-..................=\E&j@
+set-labels_modes-................=\E&jA
+set-labels_user-.................=\E&jB
+set-labels_on-...................=\E&jB
+##				Enable keys UserSystem and label "modes"
+perwindow-4-CLSQW----=\E&jR
+perwindow_also-...labels_switch_disable..=\E&jS
+perwindow_default-labels_switch_enable...=\E&jR
+set-labels_switch_disable-...............=\E&jS
+set-labels_switch_enable-................=\E&jR

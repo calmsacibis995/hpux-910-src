@@ -1,0 +1,57 @@
+## FacetTerm Menu Capabilities - WYSE 50 using magic cookie attributes 06/04/91
+## Copyright (c) Structured Software Solutions, Inc. 1991.  All Rights Reserved.
+## @(#) $Header: wy50magic.FM,v 70.1 92/03/09 16:09:33 ssa Exp $
+## ##-menu-cap-init_string=
+### init_1string=\E`:\E`9$<25>
+### init_2string=^N\E'\E(
+##-menu-cap-cursor_address=\E=%p1%' '%+%c%p2%' '%+%c
+##-menu-cap-clear_screen=\E*
+##-menu-cap-clr_eol=\Et
+## ##-menu-cap-ena_acs=
+##-menu-cap-enter_alt_charset_mode=\EH^B
+##-menu-cap-exit_alt_charset_mode=\EH^C
+##-menu-cap-acs_chars=j5k3l2m1q:t4u9v=w0x6n8
+## ##-menu-cap-keypad_xmit=
+##-menu-cap-no_attr=\EG0
+##-menu-cap-shadow_attr=\EG0
+##-menu-cap-item_attr=\EG0
+##-menu-cap-box_attr=\EG4
+##-menu-cap-title_attr=\EG4
+##-menu-cap-highlight_attr=\EG4
+##-menu-cap-highlight_blink_attr=\EG6
+##-menu-cap-magic_cookie=1
+## ##-menu-cap-ceol_standout_glitch
+##-menu-cap-key_up=^K
+## ##-menu-cap-key_down=
+##-menu-cap-key_right=^L
+## ##-menu-cap-key_left=
+##-menu-cap-key_ignore=\EI
+##-menu-cap-key_ignore=\EW
+##-menu-cap-key_ignore=\ER
+##-menu-cap-key_ignore=\E7
+##-menu-cap-key_ignore=\ET
+##-menu-cap-key_ignore=\EY
+##-menu-cap-key_ignore=^A@\r
+##-menu-cap-key_ignore=^AI\r
+##-menu-cap-key_ignore=^AJ\r
+##-menu-cap-key_ignore=^AK\r
+##-menu-cap-key_ignore=^AL\r
+##-menu-cap-key_ignore=^AM\r
+##-menu-cap-key_ignore=^AN\r
+##-menu-cap-key_ignore=^AO\r
+##-menu-cap-key_ignore=^AA\r
+##-menu-cap-key_ignore=^AB\r
+##-menu-cap-key_ignore=^AC\r
+##-menu-cap-key_ignore=^AD\r
+##-menu-cap-key_ignore=^AE\r
+##-menu-cap-key_ignore=^AF\r
+##-menu-cap-key_ignore=^AG\r
+##-menu-cap-key_ignore=^AH\r
+##-menu-cap-key_ignore=^^
+##-menu-cap-key_ignore=\EQ
+##-menu-cap-key_ignore=\EE
+##-menu-cap-key_ignore=\EK
+##-menu-cap-key_ignore=\EJ
+##-menu-cap-key_ignore=\EP
+##-menu-cap-key_ignore=\Er
+##-menu-cap-key_ignore=\E{

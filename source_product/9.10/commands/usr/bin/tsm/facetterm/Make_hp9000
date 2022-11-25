@@ -1,0 +1,31 @@
+# Makefile for facetterm for HP 9000/300
+# @(#) $Header: Make_hp9000,v 70.1 92/03/09 15:40:13 ssa Exp $
+MACH=	hp9000
+MACH_CFLAGS= \
+		-DHP9000 \
+		-DTSM \
+		-DHPREV="`expr \`uname -r\` : '\(.\)'`" \
+		-DPSEUDOTTY \
+		-DNO_SUID_ROOT \
+		-DHAS_LTCHARS \
+		-DSOFTPC \
+		-DNO_SPLIT_SCREEN \
+		-DNO_CHECK_SERIAL \
+		-O
+
+.SUFFIXES:
+MAKE=	              MACH=$(MACH) \
+	       MACH_CFLAGS="$(MACH_CFLAGS)" \
+	MACH_FILES_TOP_DIR="" \
+	         MACH_LIBS="" \
+	        MACH_MODEL="" \
+	      NO_SUID_ROOT="NO_SUID_ROOT" \
+	    FACETTERM_PROG="tsm" \
+	       FACETPREFIX="tsm." \
+	     USR_FACET_DIR="/usr/tsm" \
+	 USR_FACETTERM_DIR="/usr/tsm" \
+			make -e -f Make_comm
+.DEFAULT:
+		$(MAKE) $<
+all:
+		$(MAKE)

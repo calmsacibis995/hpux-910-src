@@ -1,0 +1,7 @@
+$set 1
+1 Cannot open database %s\n
+2 Items not in pairs\n
+3 Entry too big\n
+4 Split not paired\n
+5 Bad delitem\n
+6 Bad block\n
